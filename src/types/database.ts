@@ -151,6 +151,47 @@ export interface Database {
                     created_at?: string
                 }
             }
+            vip_applications: {
+                Row: {
+                    id: string
+                    user_id: string | null
+                    name: string
+                    contact_method: string
+                    contact_handle: string
+                    asset_tier: string
+                    trading_volume_monthly: string | null
+                    preferred_exchange: string | null
+                    notes: string | null
+                    status: string
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id?: string | null
+                    name: string
+                    contact_method: string
+                    contact_handle: string
+                    asset_tier: string
+                    trading_volume_monthly?: string | null
+                    preferred_exchange?: string | null
+                    notes?: string | null
+                    status?: string
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string | null
+                    name?: string
+                    contact_method?: string
+                    contact_handle?: string
+                    asset_tier?: string
+                    trading_volume_monthly?: string | null
+                    preferred_exchange?: string | null
+                    notes?: string | null
+                    status?: string
+                    created_at?: string
+                }
+            }
         }
     }
 }

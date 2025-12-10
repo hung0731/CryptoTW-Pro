@@ -149,3 +149,26 @@ INSERT INTO exchanges (slug, name, referral_link, sort_order) VALUES
 ('bingx', 'BingX', 'https://bingx.com/invite/YOUR_REF', 40),
 ('pionex', 'Pionex', 'https://www.pionex.com/signUp?r=YOUR_REF', 50);
 
+-- VIP Applications Table (Alpha Prime)
+CREATE TABLE vip_applications (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES users(id), -- Optional, can be applied before login
+    name TEXT NOT NULL,
+    contact_method TEXT NOT NULL, -- 'line', 'telegram', 'phone'
+    contact_handle TEXT NOT NULL,
+    asset_tier TEXT NOT NULL, -- '>50k', '>200k', '>1M'
+    trading_volume_monthly TEXT,
+    preferred_exchange TEXT,
+    notes TEXT,
+    status TEXT DEFAULT 'new', -- 'new', 'contacted', 'approved', 'rejected'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- RLS for VIP Applications
+ALTER TABLE vip_applications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert vip" ON vip_applications FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow admin all vip" ON vip_applications FOR ALL USING (
+    (SELECT membership_status FROM users WHERE id = auth.uid()) = 'admin' OR auth.role() = 'service_role'
+);
+
