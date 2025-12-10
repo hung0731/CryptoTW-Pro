@@ -95,9 +95,9 @@ function AnnouncementManager() {
             </div>
 
             <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground">Recent Announcements</h3>
+                <h3 className="font-semibold text-sm text-neutral-400">Recent Announcements</h3>
                 {currentAnnouncements.map((a: any) => (
-                    <div key={a.id} className={`p-4 rounded border flex items-center justify-between ${a.is_active ? 'bg-green-50 border-green-200' : 'bg-slate-50'}`}>
+                    <div key={a.id} className={`p-4 rounded border flex items-center justify-between ${a.is_active ? 'bg-green-950/30 border-green-900' : 'bg-neutral-950 border-white/5'}`}>
                         <div className="flex items-center gap-3">
                             {a.level === 'alert' && <AlertTriangle className="h-5 w-5 text-red-500" />}
                             {a.level === 'warning' && <AlertTriangle className="h-5 w-5 text-yellow-500" />}
@@ -171,47 +171,49 @@ export default function SettingsPage() {
     if (isLoading) return <div className="p-8"><Skeleton className="h-60 w-full" /></div>
 
     return (
-        <div className="min-h-screen bg-slate-100 p-4">
+        <div className="min-h-screen bg-black p-4 text-white">
             <div className="max-w-4xl mx-auto space-y-6">
                 <h1 className="text-2xl font-bold">Platform Settings</h1>
 
-                <Card className="mb-8">
+                <Card className="mb-8 bg-neutral-900 border-white/5">
                     <CardHeader>
-                        <CardTitle>System Announcement</CardTitle>
-                        <p className="text-sm text-muted-foreground">Broadcast a global message to all users (e.g. Maintenance, Urgent Alpha).</p>
+                        <CardTitle className="text-white">System Announcement</CardTitle>
+                        <p className="text-sm text-neutral-400">Broadcast a global message to all users (e.g. Maintenance, Urgent Alpha).</p>
                     </CardHeader>
                     <CardContent>
                         <AnnouncementManager />
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-neutral-900 border-white/5">
                     <CardHeader>
-                        <CardTitle>Exchange Referral Links</CardTitle>
-                        <p className="text-sm text-muted-foreground">Manage your dynamic referral links. Changes reflect instantly on the Register page.</p>
+                        <CardTitle className="text-white">Exchange Referral Links</CardTitle>
+                        <p className="text-sm text-neutral-400">Manage your dynamic referral links. Changes reflect instantly on the Register page.</p>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {exchanges.map((ex) => (
-                            <div key={ex.id} className="flex items-start gap-4 p-4 border rounded-lg bg-white">
+                            <div key={ex.id} className="flex items-start gap-4 p-4 border rounded-lg bg-neutral-950 border-white/5">
                                 <div className="grid gap-4 flex-1">
                                     <div className="flex items-center gap-4">
                                         <div className="grid gap-1.5 w-1/4">
-                                            <Label>Exchange Name</Label>
+                                            <Label className="text-neutral-400">Exchange Name</Label>
                                             <Input
                                                 value={ex.name}
                                                 onChange={e => handleChange(ex.id, 'name', e.target.value)}
+                                                className="bg-neutral-900 border-white/10"
                                             />
                                         </div>
                                         <div className="grid gap-1.5 w-1/4">
-                                            <Label>Slug (System ID)</Label>
-                                            <Input disabled value={ex.slug} className="bg-slate-50" />
+                                            <Label className="text-neutral-400">Slug (System ID)</Label>
+                                            <Input disabled value={ex.slug} className="bg-neutral-800 border-white/5 text-neutral-500" />
                                         </div>
                                         <div className="grid gap-1.5 w-1/4">
-                                            <Label>Sort Order</Label>
+                                            <Label className="text-neutral-400">Sort Order</Label>
                                             <Input
                                                 type="number"
                                                 value={ex.sort_order}
                                                 onChange={e => handleChange(ex.id, 'sort_order', parseInt(e.target.value))}
+                                                className="bg-neutral-900 border-white/10"
                                             />
                                         </div>
                                         <div className="flex items-center gap-2 pt-6">
@@ -219,24 +221,25 @@ export default function SettingsPage() {
                                                 checked={ex.is_active}
                                                 onCheckedChange={checked => handleChange(ex.id, 'is_active', checked)}
                                             />
-                                            <Label>Active</Label>
+                                            <Label className="text-neutral-400">Active</Label>
                                         </div>
                                     </div>
                                     <div className="grid gap-1.5">
-                                        <Label>Referral Link</Label>
+                                        <Label className="text-neutral-400">Referral Link</Label>
                                         <div className="flex gap-2">
                                             <Input
                                                 value={ex.referral_link}
                                                 onChange={e => handleChange(ex.id, 'referral_link', e.target.value)}
+                                                className="bg-neutral-900 border-white/10"
                                             />
                                             <a href={ex.referral_link} target="_blank" rel="noreferrer">
-                                                <Button variant="outline" size="icon"><ExternalLink className="h-4 w-4" /></Button>
+                                                <Button variant="outline" size="icon" className="bg-transparent border-white/10 hover:bg-white/10"><ExternalLink className="h-4 w-4" /></Button>
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                                 <Button
-                                    className="mt-6"
+                                    className="mt-6 bg-white text-black hover:bg-neutral-200"
                                     onClick={() => handleUpdate(ex)}
                                     disabled={savingId === ex.id}
                                 >

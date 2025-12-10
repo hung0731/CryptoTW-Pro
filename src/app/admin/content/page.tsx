@@ -126,39 +126,39 @@ export default function ContentAdminPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 p-4">
+        <div className="min-h-screen bg-black p-4 text-white">
             <div className="max-w-5xl mx-auto space-y-6">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Content CMS</h1>
                     <div className="flex gap-2">
-                        <Button variant="outline" size="icon" onClick={fetchArticles}>
+                        <Button variant="outline" size="icon" onClick={fetchArticles} className="border-white/20 bg-transparent text-white hover:bg-white/10">
                             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                         </Button>
-                        <Button onClick={handleCreate}><Plus className="h-4 w-4 mr-2" /> New Article</Button>
+                        <Button onClick={handleCreate} className="bg-white text-black hover:bg-neutral-200"><Plus className="h-4 w-4 mr-2" /> New Article</Button>
                     </div>
                 </div>
 
                 <div className="grid gap-4">
                     {articles.map(article => (
-                        <Card key={article.id}>
+                        <Card key={article.id} className="bg-neutral-900 border-white/5">
                             <CardContent className="p-4 flex items-center justify-between">
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <Badge variant={article.type === 'news' ? 'secondary' : 'default'}>{article.type}</Badge>
-                                        <h3 className="font-semibold text-lg">{article.title}</h3>
-                                        {article.access_level === 'pro' && <Badge variant="outline" className="text-yellow-600 border-yellow-600">PRO</Badge>}
-                                        {!article.is_published && <Badge variant="destructive">Draft</Badge>}
+                                        <Badge variant={article.type === 'news' ? 'secondary' : 'default'} className="bg-neutral-800 text-neutral-300 hover:bg-neutral-700">{article.type}</Badge>
+                                        <h3 className="font-semibold text-lg text-white">{article.title}</h3>
+                                        {article.access_level === 'pro' && <Badge variant="outline" className="text-amber-500 border-amber-500/50">PRO</Badge>}
+                                        {!article.is_published && <Badge variant="destructive" className="bg-red-900/50 text-red-400 border border-red-900">Draft</Badge>}
                                     </div>
-                                    <p className="text-sm text-muted-foreground line-clamp-1">{article.body}</p>
-                                    <div className="text-xs text-muted-foreground mt-2">
+                                    <p className="text-sm text-neutral-400 line-clamp-1">{article.body}</p>
+                                    <div className="text-xs text-neutral-500 mt-2">
                                         {new Date(article.created_at).toLocaleString()}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Button size="icon" variant="ghost" onClick={() => handleEdit(article)}>
+                                    <Button size="icon" variant="ghost" onClick={() => handleEdit(article)} className="text-neutral-400 hover:text-white hover:bg-white/10">
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(article.id)}>
+                                    <Button size="icon" variant="ghost" className="text-red-900 hover:text-red-500 hover:bg-red-950/30" onClick={() => handleDelete(article.id)}>
                                         <Trash className="h-4 w-4" />
                                     </Button>
                                 </div>

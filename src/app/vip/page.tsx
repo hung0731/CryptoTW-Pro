@@ -76,7 +76,7 @@ export default function VipPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-amber-500/30">
+        <div className="min-h-screen bg-black text-slate-100 selection:bg-amber-500/30">
             {/* Hero Section */}
             <div className="relative overflow-hidden border-b border-slate-800/50">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 opacity-80" />

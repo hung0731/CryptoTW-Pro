@@ -125,35 +125,35 @@ export default function ActivitiesAdminPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 p-4">
+        <div className="min-h-screen bg-black p-4 text-white">
             <div className="max-w-4xl mx-auto space-y-6">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Activity Manager</h1>
-                    <Button onClick={handleCreate}><Plus className="h-4 w-4 mr-2" /> New Activity</Button>
+                    <Button onClick={handleCreate} className="bg-white text-black hover:bg-neutral-200"><Plus className="h-4 w-4 mr-2" /> New Activity</Button>
                 </div>
 
                 <div className="grid gap-4">
                     {activities.map(item => (
-                        <Card key={item.id}>
+                        <Card key={item.id} className="bg-neutral-900 border-white/5">
                             <CardContent className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-slate-200`}>
-                                        <Activity className="h-5 w-5 text-slate-500" />
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-neutral-800`}>
+                                        <Activity className="h-5 w-5 text-neutral-400" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <Badge variant="outline">{item.exchange_name}</Badge>
-                                            <h3 className="font-semibold">{item.title}</h3>
-                                            {!item.is_active && <Badge variant="destructive">Inactive</Badge>}
+                                            <Badge variant="outline" className="border-white/20 text-neutral-300">{item.exchange_name}</Badge>
+                                            <h3 className="font-semibold text-white">{item.title}</h3>
+                                            {!item.is_active && <Badge variant="destructive" className="bg-red-900/50 text-red-400">Inactive</Badge>}
                                         </div>
-                                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                                        <p className="text-sm text-neutral-400">{item.description}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Button size="icon" variant="ghost" onClick={() => handleEdit(item)}>
+                                    <Button size="icon" variant="ghost" onClick={() => handleEdit(item)} className="text-neutral-400 hover:text-white hover:bg-white/10">
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(item.id)}>
+                                    <Button size="icon" variant="ghost" className="text-red-900 hover:text-red-500 hover:bg-red-950/30" onClick={() => handleDelete(item.id)}>
                                         <Trash className="h-4 w-4" />
                                     </Button>
                                 </div>

@@ -87,14 +87,14 @@ export default function ProfilePage() {
 
     if (!isLoggedIn) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/20 p-4 flex items-center justify-center">
-                <Card className="text-center p-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                    <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <User className="h-8 w-8 text-slate-400" />
+            <div className="min-h-screen bg-black p-4 flex items-center justify-center">
+                <Card className="text-center p-8 bg-neutral-900 border-white/5 border shadow-lg">
+                    <div className="bg-neutral-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <User className="h-8 w-8 text-neutral-400" />
                     </div>
-                    <p className="mb-6 text-slate-600 font-medium">請登入以查看個人檔案。</p>
+                    <p className="mb-6 text-neutral-400 font-medium">請登入以查看個人檔案。</p>
                     <Link href="/">
-                        <Button className="w-full rounded-xl">回到首頁</Button>
+                        <Button className="w-full rounded-full bg-white text-black hover:bg-neutral-200">回到首頁</Button>
                     </Link>
                 </Card>
             </div>
@@ -102,33 +102,33 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 p-4 pb-20">
+        <div className="min-h-screen bg-black p-4 pb-20 text-white">
             <div className="max-w-md mx-auto space-y-6">
                 {/* Header */}
                 <div className="flex items-center gap-2 mb-4">
                     <Link href="/">
-                        <Button variant="ghost" size="icon" className="hover:bg-white/50 rounded-full"><ArrowLeft className="h-5 w-5" /></Button>
+                        <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white rounded-full"><ArrowLeft className="h-5 w-5" /></Button>
                     </Link>
                     <h1 className="text-xl font-bold">個人檔案 👤</h1>
                 </div>
 
                 {/* Profile Card */}
                 <div className="relative">
-                    <Card className="relative bg-white border border-slate-200 shadow-sm overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-24 bg-slate-100/50" />
+                    <Card className="relative bg-neutral-900 border border-white/5 shadow-sm overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-24 bg-neutral-800/50" />
                         <CardContent className="pt-12 flex flex-col items-center relative z-10">
-                            <Avatar className="h-24 w-24 mb-4 ring-4 ring-white shadow-sm bg-white">
+                            <Avatar className="h-24 w-24 mb-4 ring-4 ring-black shadow-sm bg-neutral-800">
                                 <AvatarImage src={profile?.pictureUrl} />
-                                <AvatarFallback><User className="h-10 w-10 text-slate-300" /></AvatarFallback>
+                                <AvatarFallback><User className="h-10 w-10 text-neutral-500" /></AvatarFallback>
                             </Avatar>
-                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{profile?.displayName}</h2>
+                            <h2 className="text-2xl font-black text-white tracking-tight">{profile?.displayName}</h2>
                             <div className="mt-2 flex items-center gap-2">
                                 {dbUser?.membership_status === 'pro' ? (
-                                    <Badge className="bg-primary text-primary-foreground border-0 shadow-sm px-3 py-1 text-sm bg-primary hover:bg-primary/90">Alpha 指揮官 💎</Badge>
+                                    <Badge className="bg-white text-black border-0 shadow-sm px-3 py-1 text-sm hover:bg-neutral-200">Alpha 指揮官 💎</Badge>
                                 ) : dbUser?.membership_status === 'pending' ? (
-                                    <Badge variant="outline" className="text-slate-600 border-slate-300 bg-slate-50">審核中 ⏳</Badge>
+                                    <Badge variant="outline" className="text-neutral-400 border-neutral-700 bg-neutral-900">審核中 ⏳</Badge>
                                 ) : (
-                                    <Badge variant="secondary" className="bg-slate-100 text-slate-600">探索者 🌱</Badge>
+                                    <Badge variant="secondary" className="bg-neutral-800 text-neutral-400 hover:bg-neutral-700">探索者 🌱</Badge>
                                 )}
                             </div>
                         </CardContent>
@@ -138,69 +138,69 @@ export default function ProfilePage() {
                 {/* Bindings List */}
                 <div className="space-y-4 pt-4">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="font-bold text-lg flex items-center gap-2">綁定狀態 🔗</h3>
-                        <Button variant="ghost" size="sm" onClick={() => profile?.userId && fetchBindings(profile.userId)} className="hover:bg-white/50 rounded-full">
+                        <h3 className="font-bold text-lg flex items-center gap-2 text-white">綁定狀態 🔗</h3>
+                        <Button variant="ghost" size="sm" onClick={() => profile?.userId && fetchBindings(profile.userId)} className="hover:bg-white/10 text-white rounded-full">
                             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                     </div>
 
                     {loading ? (
                         <div className="space-y-3">
-                            <Skeleton className="h-20 w-full rounded-md" />
-                            <Skeleton className="h-20 w-full rounded-md" />
+                            <Skeleton className="h-20 w-full rounded-md bg-neutral-900" />
+                            <Skeleton className="h-20 w-full rounded-md bg-neutral-900" />
                         </div>
                     ) : bindings.length === 0 ? (
-                        <Card className="border-2 border-dashed bg-white border-slate-200 shadow-none">
-                            <CardContent className="py-10 text-center text-muted-foreground flex flex-col items-center gap-4">
-                                <div className="p-4 bg-slate-50 rounded-full">
-                                    <AlertCircle className="h-8 w-8 text-slate-300" />
+                        <Card className="border border-dashed bg-neutral-900/50 border-white/10 shadow-none">
+                            <CardContent className="py-10 text-center text-neutral-500 flex flex-col items-center gap-4">
+                                <div className="p-4 bg-neutral-900 rounded-full">
+                                    <AlertCircle className="h-8 w-8 text-neutral-600" />
                                 </div>
                                 <div>
-                                    <p className="text-slate-900 font-medium">尚未綁定任何交易所</p>
-                                    <p className="text-xs mt-1">綁定交易所即可解鎖 Alpha 權限</p>
+                                    <p className="text-white font-medium">尚未綁定任何交易所</p>
+                                    <p className="text-xs mt-1 text-neutral-500">綁定交易所即可解鎖 Alpha 權限</p>
                                 </div>
                                 <Link href="/register">
-                                    <Button size="sm" className="rounded-full px-6 bg-slate-900 text-white hover:bg-slate-800">立即綁定</Button>
+                                    <Button size="sm" className="rounded-full px-6 bg-white text-black hover:bg-neutral-200">立即綁定</Button>
                                 </Link>
                             </CardContent>
                         </Card>
                     ) : (
                         <div className="grid grid-cols-1 gap-5">
                             {bindings.map(b => (
-                                <Card key={b.id} className="flex flex-row w-full gap-0 rounded-md shadow-sm overflow-hidden py-0 border-slate-200">
-                                    <div className="flex w-16 shrink-0 items-center justify-center bg-slate-50 text-sm font-medium border-r border-slate-100 uppercase text-slate-500">
+                                <Card key={b.id} className="flex flex-row w-full gap-0 rounded-md shadow-sm overflow-hidden py-0 border-white/5 bg-neutral-900">
+                                    <div className="flex w-16 shrink-0 items-center justify-center bg-neutral-950 text-sm font-medium border-r border-white/5 uppercase text-neutral-500">
                                         {b.exchange_name.slice(0, 3)}
                                     </div>
-                                    <CardContent className="flex flex-1 items-center justify-between truncate p-0 bg-white">
+                                    <CardContent className="flex flex-1 items-center justify-between truncate p-0 bg-neutral-900">
                                         <div className="flex-1 truncate px-4 py-3">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-medium text-slate-900 text-base">{b.exchange_name}</span>
-                                                <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">UID: {b.exchange_uid}</span>
+                                                <span className="font-medium text-white text-base">{b.exchange_name}</span>
+                                                <span className="font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded text-neutral-400">UID: {b.exchange_uid}</span>
                                             </div>
                                             {b.status === 'rejected' ? (
-                                                <p className="text-xs text-red-500 truncate font-medium">
+                                                <p className="text-xs text-red-400 truncate font-medium">
                                                     驗證失敗: {b.rejection_reason || '請重新檢查'}
                                                 </p>
                                             ) : (
-                                                <p className="text-xs text-slate-500 truncate">
+                                                <p className="text-xs text-neutral-500 truncate">
                                                     提交於 {new Date(b.created_at).toLocaleDateString()}
                                                 </p>
                                             )}
                                         </div>
                                         <div className="shrink-0 pr-4">
                                             {b.status === 'verified' && (
-                                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
                                                     <CheckCircle className="h-5 w-5" />
                                                 </div>
                                             )}
                                             {b.status === 'pending' && (
-                                                <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 animate-pulse">
+                                                <div className="h-8 w-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 animate-pulse">
                                                     <RefreshCw className="h-4 w-4" />
                                                 </div>
                                             )}
                                             {b.status === 'rejected' && (
                                                 <Link href={`/register/${b.exchange_name}`}>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100">
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-red-950/30 text-red-500 hover:bg-red-900/50">
                                                         <ChevronRight className="h-5 w-5" />
                                                     </Button>
                                                 </Link>
@@ -215,7 +215,7 @@ export default function ProfilePage() {
                     {/* Add Exchange Button */}
                     {bindings.length > 0 && (
                         <Link href="/register">
-                            <Button variant="outline" className="w-full border-dashed border-2 py-6 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all">
+                            <Button variant="outline" className="w-full border-dashed border border-white/10 bg-transparent py-6 text-neutral-500 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all">
                                 + 綁定其他交易所
                             </Button>
                         </Link>
@@ -223,9 +223,9 @@ export default function ProfilePage() {
 
                     {/* Notification Settings */}
                     <div className="pt-6">
-                        <h3 className="font-bold text-lg flex items-center gap-2 mb-4">推播設定 🔔</h3>
-                        <Card className="border border-slate-200 shadow-sm bg-white">
-                            <CardContent className="p-0 divide-y divide-slate-100">
+                        <h3 className="font-bold text-lg flex items-center gap-2 mb-4 text-white">推播設定 🔔</h3>
+                        <Card className="border border-white/5 shadow-sm bg-neutral-900">
+                            <CardContent className="p-0 divide-y divide-white/5">
                                 <NotificationToggle
                                     label="關鍵交易信號"
                                     desc="接收高勝率買賣點位通知"
@@ -255,16 +255,16 @@ export default function ProfilePage() {
 
 function NotificationToggle({ label, desc, checked, onToggle }: { label: string, desc: string, checked: boolean, onToggle: () => void }) {
     return (
-        <div className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+        <div className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
             <div className="space-y-0.5">
-                <div className="font-medium text-slate-900">{label}</div>
-                <div className="text-xs text-slate-500">{desc}</div>
+                <div className="font-medium text-white">{label}</div>
+                <div className="text-xs text-neutral-500">{desc}</div>
             </div>
             <div
                 onClick={onToggle}
-                className={`w-11 h-6 rounded-full flex items-center transition-colors cursor-pointer px-0.5 ${checked ? 'bg-primary' : 'bg-slate-300'}`}
+                className={`w-11 h-6 rounded-full flex items-center transition-colors cursor-pointer px-0.5 ${checked ? 'bg-white' : 'bg-neutral-700'}`}
             >
-                <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-[20px]' : ''}`} />
+                <div className={`w-5 h-5 bg-black rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-[20px]' : ''}`} />
             </div>
         </div>
     )

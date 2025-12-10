@@ -67,50 +67,50 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 p-4">
+        <div className="min-h-screen bg-black p-4 text-white">
             <div className="max-w-4xl mx-auto space-y-6">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <h1 className="text-2xl font-bold">Admin Dashboard</h1>
                     <div className="flex gap-2">
                         <Link href="/admin/analytics">
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="border-white/20 bg-transparent text-white hover:bg-white/10">
                                 <BarChart className="h-4 w-4 mr-2" /> Analytics
                             </Button>
                         </Link>
                         <Link href="/admin/settings">
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="border-white/20 bg-transparent text-white hover:bg-white/10">
                                 <Settings className="h-4 w-4 mr-2" /> Settings
                             </Button>
                         </Link>
-                        <Button variant="outline" size="sm" onClick={handleExport}>
+                        <Button variant="outline" size="sm" onClick={handleExport} className="border-white/20 bg-transparent text-white hover:bg-white/10">
                             <Download className="h-4 w-4 mr-2" /> Export CSV
                         </Button>
-                        <Button variant="outline" size="icon" onClick={fetchBindings}>
+                        <Button variant="outline" size="icon" onClick={fetchBindings} className="border-white/20 bg-transparent text-white hover:bg-white/10">
                             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                     </div>
                 </div>
 
                 <div className="grid gap-4">
-                    {loading && <p>Loading requests...</p>}
+                    {loading && <p className="text-neutral-500">Loading requests...</p>}
                     {!loading && bindings.length === 0 && (
-                        <Card className="p-8 text-center text-muted-foreground">
+                        <Card className="p-8 text-center text-neutral-500 bg-neutral-900/50 border-white/5">
                             <p>No pending verifications.</p>
                         </Card>
                     )}
 
                     {bindings.map(binding => (
-                        <Card key={binding.id}>
+                        <Card key={binding.id} className="bg-neutral-900/50 border-white/5">
                             <CardContent className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 {/* User Info */}
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-10 w-10">
+                                    <Avatar className="h-10 w-10 ring-1 ring-white/10">
                                         <AvatarImage src={binding.user.picture_url} />
-                                        <AvatarFallback><User /></AvatarFallback>
+                                        <AvatarFallback className="bg-neutral-800 text-neutral-400"><User /></AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <div className="font-semibold">{binding.user.display_name || 'Unknown User'}</div>
-                                        <div className="text-xs text-muted-foreground font-mono">{binding.user.line_user_id}</div>
+                                        <div className="font-semibold text-white">{binding.user.display_name || 'Unknown User'}</div>
+                                        <div className="text-xs text-neutral-500 font-mono">{binding.user.line_user_id}</div>
                                     </div>
                                 </div>
 
@@ -118,10 +118,10 @@ export default function AdminPage() {
                                 <div className="flex-1 md:px-8">
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="uppercase">{binding.exchange_name}</Badge>
-                                            <span className="font-mono font-bold text-lg">{binding.exchange_uid}</span>
+                                            <Badge variant="outline" className="uppercase border-white/20 text-neutral-300">{binding.exchange_name}</Badge>
+                                            <span className="font-mono font-bold text-lg text-white">{binding.exchange_uid}</span>
                                         </div>
-                                        <div className="text-xs text-muted-foreground">
+                                        <div className="text-xs text-neutral-500">
                                             Submitted: {new Date(binding.created_at).toLocaleString()}
                                         </div>
                                     </div>
@@ -132,7 +132,7 @@ export default function AdminPage() {
                                     <Button
                                         variant="destructive"
                                         size="sm"
-                                        className="flex-1 md:flex-none"
+                                        className="flex-1 md:flex-none border border-red-900/50 bg-red-950/50 text-red-400 hover:bg-red-900"
                                         disabled={processingId === binding.id}
                                         onClick={() => handleAction(binding.id, 'reject')}
                                     >
@@ -141,7 +141,7 @@ export default function AdminPage() {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="bg-green-600 hover:bg-green-700 flex-1 md:flex-none"
+                                        className="bg-green-600 hover:bg-green-700 flex-1 md:flex-none text-white"
                                         disabled={processingId === binding.id}
                                         onClick={() => handleAction(binding.id, 'verify')}
                                     >

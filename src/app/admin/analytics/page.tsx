@@ -47,42 +47,42 @@ export default function AnalyticsPage() {
     const totalClicks = Object.values(stats).reduce((acc, curr) => acc + curr.clicks, 0)
 
     return (
-        <div className="min-h-screen bg-slate-100 p-4">
+        <div className="min-h-screen bg-black p-4 text-white">
             <div className="max-w-5xl mx-auto space-y-6">
                 <h1 className="text-2xl font-bold">Partner Analytics</h1>
 
                 {/* Overview Cards */}
                 <div className="grid grid-cols-3 gap-4">
-                    <Card>
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Bindings</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold">{totalBindings}</div></CardContent>
+                    <Card className="bg-neutral-900 border-white/5">
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Total Bindings</CardTitle></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-white">{totalBindings}</div></CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Verified</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-green-600">{totalVerified}</div></CardContent>
+                    <Card className="bg-neutral-900 border-white/5">
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Total Verified</CardTitle></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-green-500">{totalVerified}</div></CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Engagement</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-blue-600">{totalClicks}</div></CardContent>
+                    <Card className="bg-neutral-900 border-white/5">
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Total Engagement</CardTitle></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-blue-500">{totalClicks}</div></CardContent>
                     </Card>
                 </div>
 
-                <Card>
+                <Card className="bg-neutral-900 border-white/5">
                     <CardHeader>
-                        <CardTitle>Exchange Performance</CardTitle>
+                        <CardTitle className="text-white">Exchange Performance</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
-                            <Skeleton className="h-40 w-full" />
+                            <Skeleton className="h-40 w-full bg-neutral-800" />
                         ) : (
                             <Table>
                                 <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Exchange</TableHead>
-                                        <TableHead className="text-right">Bindings</TableHead>
-                                        <TableHead className="text-right">Verified Accounts</TableHead>
-                                        <TableHead className="text-right">Engagement (Clicks)</TableHead>
-                                        <TableHead className="text-right">Conversion Rate</TableHead>
+                                    <TableRow className="border-white/5 hover:bg-transparent">
+                                        <TableHead className="text-neutral-400">Exchange</TableHead>
+                                        <TableHead className="text-right text-neutral-400">Bindings</TableHead>
+                                        <TableHead className="text-right text-neutral-400">Verified Accounts</TableHead>
+                                        <TableHead className="text-right text-neutral-400">Engagement (Clicks)</TableHead>
+                                        <TableHead className="text-right text-neutral-400">Conversion Rate</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -92,16 +92,16 @@ export default function AnalyticsPage() {
                                             : 0
 
                                         return (
-                                            <TableRow key={name}>
+                                            <TableRow key={name} className="border-white/5 hover:bg-neutral-800/50">
                                                 <TableCell className="font-medium uppercase">
                                                     <div className="flex items-center gap-2">
-                                                        <Badge variant="outline">{name}</Badge>
+                                                        <Badge variant="outline" className="border-white/20 text-neutral-300">{name}</Badge>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="text-right font-mono">{stat.total_bindings}</TableCell>
-                                                <TableCell className="text-right font-mono text-green-600 font-bold">{stat.verified}</TableCell>
-                                                <TableCell className="text-right font-mono text-blue-600 font-bold">{stat.clicks}</TableCell>
-                                                <TableCell className="text-right font-mono text-muted-foreground">{conversion}%</TableCell>
+                                                <TableCell className="text-right font-mono text-neutral-300">{stat.total_bindings}</TableCell>
+                                                <TableCell className="text-right font-mono text-green-500 font-bold">{stat.verified}</TableCell>
+                                                <TableCell className="text-right font-mono text-blue-500 font-bold">{stat.clicks}</TableCell>
+                                                <TableCell className="text-right font-mono text-neutral-500">{conversion}%</TableCell>
                                             </TableRow>
                                         )
                                     })}

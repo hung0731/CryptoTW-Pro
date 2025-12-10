@@ -49,107 +49,169 @@ export default function AdminVipPage() {
         switch (method) {
             case 'line': return <div className="p-1 bg-[#06C755]/10 text-[#06C755] rounded"><MessageCircle size={16} /></div>
             case 'telegram': return <div className="p-1 bg-[#229ED9]/10 text-[#229ED9] rounded"><MessageCircle size={16} /></div>
-            default: return <div className="p-1 bg-slate-100 text-slate-500 rounded"><Phone size={16} /></div>
+            default: return <div className="p-1 bg-neutral-900 text-neutral-400 rounded"><Phone size={16} /></div>
         }
     }
 
+    // New function for handling actions
+    const handleAction = async (id: string, action: 'approve' | 'reject') => {
+        setProcessingId(id);
+        try {
+            const response = await fetch(`/api/admin/vip/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: action === 'approve' ? 'approved' : 'rejected' }),
+            });
+            if (response.ok) {
+                fetchApplications(); // Refresh the list
+            } else {
+                console.error('Failed to update application status');
+            }
+        } catch (error) {
+            console.error('Error updating application status:', error);
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
     return (
-        <div className="container py-10 px-4 max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                        <Crown className="text-amber-500" /> Alpha Prime Applications
-                    </h1>
-                    <p className="text-muted-foreground mt-1">High Net Worth Client Management (PWM)</p>
-                </div>
-                <Link href="/admin">
-                    <Button variant="outline">Back to Dashboard</Button>
-                </Link>
-            </div>
-
-            <div className="grid gap-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <Card>
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Total Pipeline</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold">{apps.length}</div></CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Pending Review</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-blue-600">{apps.filter(a => a.status === 'new').length}</div></CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Whales (&gt;1M)</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-amber-600">{apps.filter(a => a.asset_tier === '>1M').length}</div></CardContent>
-                    </Card>
+        <div className="min-h-screen bg-black p-4 text-white">
+            <div className="max-w-6xl mx-auto space-y-6">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold">VIP Applications</h1>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={fetchApplications} className="border-white/20 bg-transparent text-white hover:bg-white/10">
+                            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                    {loading ? (
-                        <div className="p-10 space-y-4">
-                            <Skeleton className="h-12 w-full" />
-                            <Skeleton className="h-12 w-full" />
-                            <Skeleton className="h-12 w-full" />
-                        </div>
-                    ) : apps.length === 0 ? (
-                        <div className="p-20 text-center text-slate-400">
-                            No applications yet.
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                                    <tr>
-                                        <th className="px-6 py-3">Client</th>
-                                        <th className="px-6 py-3">Contact</th>
-                                        <th className="px-6 py-3">Tier (AUM)</th>
-                                        <th className="px-6 py-3">Exchange</th>
-                                        <th className="px-6 py-3">Status</th>
-                                        <th className="px-6 py-3 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {apps.map((app) => (
-                                        <tr key={app.id} className="hover:bg-slate-50/50">
-                                            <td className="px-6 py-4 font-medium text-slate-900">
-                                                {app.name}
-                                                <div className="text-xs text-slate-400 font-mono mt-0.5">{new Date(app.created_at).toLocaleDateString()}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    {getContactIcon(app.contact_method)}
-                                                    <span className="font-mono text-slate-600">{app.contact_handle}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <Badge variant="outline" className={`
-                                                    ${app.asset_tier === '>1M' ? 'bg-amber-50 text-amber-600 border-amber-200' :
-                                                        app.asset_tier === '>200k' ? 'bg-slate-100 text-slate-700' : 'text-slate-500'}
-                                                `}>
-                                                    {app.asset_tier}
-                                                </Badge>
-                                                {app.trading_volume_monthly && (
-                                                    <div className="text-xs text-slate-400 mt-1">Vol: {app.trading_volume_monthly}</div>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600">
-                                                {app.preferred_exchange || '-'}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {getStatusBadge(app.status)}
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                                    <RefreshCw className="h-4 w-4 text-slate-400" />
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <Card className="bg-neutral-900 border-white/5">
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Total Applications</CardTitle></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-white">{stats.total}</div></CardContent>
+                    </Card>
+                    <Card className="bg-neutral-900 border-white/5">
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Pending Review</CardTitle></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-amber-500">{stats.pending}</div></CardContent>
+                    </Card>
+                    <Card className="bg-neutral-900 border-white/5">
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Approved (VIP)</CardTitle></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-green-500">{stats.approved}</div></CardContent>
+                    </Card>
+                    <Card className="bg-neutral-900 border-white/5">
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Whales (&gt;1M)</CardTitle></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-purple-500">{stats.whales}</div></CardContent>
+                    </Card>
+                </div>
+
+                <div className="grid gap-4">
+                    {loading && <p className="text-neutral-500">Loading applications...</p>}
+                    {!loading && apps.length === 0 && (
+                        <Card className="p-12 text-center text-neutral-500 bg-neutral-900/50 border-white/5 border-dashed">
+                            <div className="flex flex-col items-center gap-2">
+                                <Users className="h-12 w-12 opacity-20" />
+                                <p>No VIP applications found.</p>
+                            </div>
+                        </Card>
                     )}
+
+                    {apps.map(app => (
+                        <Card key={app.id} className="bg-neutral-900 border-white/5 overflow-hidden">
+                            <CardContent className="p-0">
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Left: User Info */}
+                                    <div className="p-6 flex-1 space-y-4">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-12 w-12 ring-2 ring-white/10">
+                                                    <AvatarImage src={app.user?.picture_url} />
+                                                    <AvatarFallback className="bg-neutral-800 text-neutral-400">VIP</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="font-bold text-lg text-white">{app.full_name}</div>
+                                                    <div className="text-sm text-neutral-400 flex items-center gap-2">
+                                                        <span className="font-mono">{app.phone}</span>
+                                                        <span>•</span>
+                                                        <span>{app.email}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Badge
+                                                variant={app.status === 'approved' ? 'default' : app.status === 'rejected' ? 'destructive' : 'secondary'}
+                                                className={`uppercase tracking-wider font-bold ${app.status === 'approved' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' :
+                                                        app.status === 'rejected' ? 'bg-red-950/50 text-red-500 hover:bg-red-900/50' :
+                                                            'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                                                    }`}
+                                            >
+                                                {app.status}
+                                            </Badge>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 bg-black/20 p-4 rounded-lg border border-white/5">
+                                            <div>
+                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Exchange</div>
+                                                <div className="font-medium text-white">{app.exchange_name || 'N/A'}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">UID</div>
+                                                <div className="font-mono font-medium text-white">{app.exchange_uid || 'N/A'}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Asset Volume</div>
+                                                <div className="font-medium text-white text-lg">{app.asset_volume}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Telegram</div>
+                                                <div className="font-medium text-blue-400">{app.telegram_id}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-sm text-neutral-400">
+                                            <span className="text-neutral-600 mr-2">Submitted:</span>
+                                            {new Date(app.created_at).toLocaleString()}
+                                        </div>
+                                    </div>
+
+                                    {/* Right: Actions */}
+                                    <div className="p-6 bg-neutral-950/50 flex flex-col justify-center gap-3 border-l border-white/5 min-w-[200px]">
+                                        <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-1 text-center">Admin Actions</div>
+
+                                        {app.status === 'new' && ( // Changed from 'pending' to 'new' to match existing status types
+                                            <>
+                                                <Button
+                                                    className="w-full bg-white text-black hover:bg-neutral-200 font-bold"
+                                                    disabled={processingId === app.id}
+                                                    onClick={() => handleAction(app.id, 'approve')}
+                                                >
+                                                    <Check className="h-4 w-4 mr-2" /> Approve VIP
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full border-red-900/30 text-red-500 hover:bg-red-950/30 hover:text-red-400"
+                                                    disabled={processingId === app.id}
+                                                    onClick={() => handleAction(app.id, 'reject')}
+                                                >
+                                                    <X className="h-4 w-4 mr-2" /> Reject
+                                                </Button>
+                                            </>
+                                        )}
+
+                                        {app.status !== 'new' && ( // Changed from 'pending' to 'new'
+                                            <div className="text-center text-sm text-neutral-500 py-2 italic">
+                                                processed
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
             </div>
         </div>
     )
 }
+```

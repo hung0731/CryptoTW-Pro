@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User, Crown, Zap, Activity, ChevronRight, TrendingUp, Sparkles, Send, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { FearAndGreedChart } from '@/components/FearAndGreedChart'
 
 export default function Home() {
   const { isLoggedIn, profile, dbUser, isLoading, liffObject } = useLiff()
@@ -105,21 +106,26 @@ export default function Home() {
             </div>
           </Link>
 
+          {/* Fear & Greed Index */}
+          <div className="col-span-2 md:col-span-2 row-span-1">
+            <FearAndGreedChart />
+          </div>
+
           {/* VIP Program */}
-          <Link href="/vip" className="col-span-1 row-span-2 group relative overflow-hidden rounded-2xl bg-neutral-900/50 border border-white/5 p-6 hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
-            <div className="relative h-full flex flex-col justify-between z-10 space-y-8">
+          <Link href="/vip" className="col-span-1 row-span-1 group relative overflow-hidden rounded-2xl bg-neutral-900/50 border border-white/5 p-6 hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
+            <div className="relative h-full flex flex-col justify-between z-10 space-y-4">
               <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-md">
                 <Crown className="h-4 w-4 text-white" />
               </div>
               <div>
                 <h3 className="text-base font-medium text-white mb-1">VIP 通道</h3>
-                <p className="text-neutral-400 text-xs">專屬經理與機構費率。</p>
+                <p className="text-neutral-400 text-xs">專屬經理與機構費率</p>
               </div>
             </div>
           </Link>
 
           {/* Exchange Offers */}
-          <Link href="/register" className="col-span-1 group rounded-2xl bg-neutral-900/50 border border-white/5 p-5 flex flex-col justify-between hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
+          <Link href="/register" className="col-span-1 row-span-1 group rounded-2xl bg-neutral-900/50 border border-white/5 p-5 flex flex-col justify-between hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
             <div className="flex justify-between items-start">
               <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center text-white">
                 <TrendingUp className="h-4 w-4" />
@@ -131,16 +137,20 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Community */}
-          <a href="https://line.me/ti/g2/YOUR_GROUP_LINK" target="_blank" className="col-span-1 group rounded-2xl bg-neutral-900/50 border border-white/5 p-5 flex flex-col justify-between hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
-            <div className="flex justify-between items-start">
+          {/* Community - Full Width Banner */}
+          <a href="https://line.me/ti/g2/YOUR_GROUP_LINK" target="_blank" className="col-span-2 md:col-span-4 group rounded-2xl bg-neutral-900/50 border border-white/5 p-4 flex items-center justify-between hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
+            <div className="flex items-center gap-4">
               <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center text-white">
                 <Send className="h-4 w-4" />
               </div>
-              <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-white transition-colors" />
+              <div>
+                <h3 className="font-medium text-white text-sm">加入社群討論</h3>
+                <p className="text-xs text-neutral-500 hidden md:block">與 5,000+ 交易者即時交流市場動態</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-medium text-white text-sm">社群討論</h3>
+            <div className="flex items-center gap-2 text-xs text-neutral-400 group-hover:text-white transition-colors">
+              <span>立即加入</span>
+              <ChevronRight className="h-3 w-3" />
             </div>
           </a>
         </div>
