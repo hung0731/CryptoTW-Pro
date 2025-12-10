@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('activities')
             .select('*')
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('activities')
             .insert({
@@ -53,6 +55,7 @@ export async function PUT(req: NextRequest) {
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
 
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('activities')
             .update({
@@ -61,7 +64,6 @@ export async function PUT(req: NextRequest) {
                 description,
                 url,
                 is_active,
-                // updated_at is not in schema but good practice, schema didn't define it for activities.
             })
             .eq('id', id)
             .select()
@@ -80,6 +82,7 @@ export async function DELETE(req: NextRequest) {
         const id = searchParams.get('id')
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
 
+        const supabase = createAdminClient()
         const { error } = await supabase.from('activities').delete().eq('id', id)
         if (error) throw error
         return NextResponse.json({ success: true })

@@ -14,7 +14,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Check, X, Search } from 'lucide-react'
+import { Check, X, Search, Trash2 } from 'lucide-react'
 
 interface VipApp {
     id: string
@@ -209,9 +209,9 @@ export default function AdminVipPage() {
                                                     {app.status}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-right">
-                                                {app.status === 'new' && (
-                                                    <div className="flex items-center justify-end gap-2">
+                                            <TableCell className="text-right flex items-center justify-end gap-2">
+                                                {app.status === 'new' ? (
+                                                    <>
                                                         <Button
                                                             size="icon"
                                                             variant="ghost"
@@ -230,11 +230,25 @@ export default function AdminVipPage() {
                                                         >
                                                             <X className="h-4 w-4" />
                                                         </Button>
-                                                    </div>
-                                                )}
-                                                {app.status !== 'new' && (
+                                                    </>
+                                                ) : (
                                                     <span className="text-xs text-neutral-600 italic">已處理</span>
                                                 )}
+
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-neutral-500 hover:text-red-500 hover:bg-red-500/10"
+                                                    onClick={async () => {
+                                                        if (!confirm('Are you sure you want to DELETE this application history?')) return
+                                                        try {
+                                                            const res = await fetch(`/api/admin/vip?id=${app.id}`, { method: 'DELETE' })
+                                                            if (res.ok) fetchApplications()
+                                                        } catch (e) { console.error(e) }
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))

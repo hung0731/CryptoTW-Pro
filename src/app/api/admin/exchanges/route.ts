@@ -1,11 +1,11 @@
-
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('exchanges')
             .select('*')
@@ -18,6 +18,30 @@ export async function GET(req: NextRequest) {
     }
 }
 
+export async function POST(req: NextRequest) {
+    try {
+        const body = await req.json()
+        const { name, referral_link, slug, sort_order } = body
+
+        if (!name || !referral_link || !slug) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        }
+
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('exchanges')
+            .insert({ name, referral_link, slug, sort_order: sort_order || 0, is_active: true })
+            .select()
+            .single()
+
+        if (error) throw error
+        return NextResponse.json({ exchange: data })
+    } catch (e: any) {
+        console.error(e)
+        return NextResponse.json({ error: e.message }, { status: 500 })
+    }
+}
+
 export async function PUT(req: NextRequest) {
     try {
         const body = await req.json()
@@ -25,6 +49,7 @@ export async function PUT(req: NextRequest) {
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
 
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('exchanges')
             .update({
@@ -32,7 +57,7 @@ export async function PUT(req: NextRequest) {
                 referral_link,
                 is_active,
                 sort_order,
-                slug // slug is usually immutable but we allow edits if needed
+                slug
             })
             .eq('id', id)
             .select()
@@ -42,6 +67,21 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ exchange: data })
     } catch (e) {
         console.error(e)
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url)
+        const id = searchParams.get('id')
+        if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
+
+        const supabase = createAdminClient()
+        const { error } = await supabase.from('exchanges').delete().eq('id', id)
+        if (error) throw error
+        return NextResponse.json({ success: true })
+    } catch (e) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

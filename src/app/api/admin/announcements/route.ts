@@ -1,14 +1,30 @@
-
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
+
+export async function GET(req: NextRequest) {
+    try {
+        const supabase = createAdminClient()
+        const { data } = await supabase
+            .from('system_announcements')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10)
+
+        return NextResponse.json({ announcements: data })
+    } catch (e) {
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    }
+}
 
 export async function POST(req: NextRequest) {
     try {
         const { message, level, is_active } = await req.json()
 
         if (!message) return NextResponse.json({ error: 'Message required' }, { status: 400 })
+
+        const supabase = createAdminClient()
 
         // If active, turn off others (optional logic, but single banner is cleaner)
         if (is_active) {
@@ -29,15 +45,26 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export async function GET(req: NextRequest) {
+export async function PUT(req: NextRequest) {
     try {
-        const { data } = await supabase
-            .from('system_announcements')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(10)
+        const { id, message, level, is_active } = await req.json()
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 })
 
-        return NextResponse.json({ announcements: data })
+        const supabase = createAdminClient()
+
+        if (is_active) {
+            await supabase.from('system_announcements').update({ is_active: false }).neq('id', id)
+        }
+
+        const { data, error } = await supabase
+            .from('system_announcements')
+            .update({ message, level, is_active })
+            .eq('id', id)
+            .select()
+            .single()
+
+        if (error) throw error
+        return NextResponse.json({ announcement: data })
     } catch (e) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
@@ -50,6 +77,7 @@ export async function DELETE(req: NextRequest) {
 
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 })
 
+        const supabase = createAdminClient()
         const { error } = await supabase
             .from('system_announcements')
             .delete()
