@@ -6,8 +6,26 @@ import { User, Zap, Send } from 'lucide-react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
+import { useSearchParams } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
+
 export default function Home() {
   const { isLoggedIn, profile } = useLiff()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('path')
+
+  // Performance Optimization: 
+  // If there is a redirect path, show a loader immediately instead of the landing page.
+  // This prevents the "Flash of Landing Page" during client-side redirects (RouteHandler).
+  // Ideally middleware handles this, but this is a fail-safe for perceived speed.
+  if (redirectPath) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
+        <p className="text-sm text-neutral-500 font-mono animate-pulse">Redirecting...</p>
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen font-sans bg-black text-white flex flex-col relative overflow-hidden">
@@ -53,7 +71,7 @@ export default function Home() {
         {/* Single CTA Button */}
         <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 w-full max-w-xs">
           <a
-            href="https://line.me/R/ti/p/@821mnwsw"
+            href="https://lin.ee/cQQ52w9"
             target="_blank"
             rel="noreferrer"
             className="block w-full"

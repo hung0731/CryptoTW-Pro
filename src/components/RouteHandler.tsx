@@ -12,7 +12,6 @@ export function RouteHandler() {
         if (path) {
             // Check if we are already on the correct path to avoid loops
             if (window.location.pathname !== path) {
-                console.log(`RouteHandler: Redirecting to ${path}`)
                 router.replace(path)
             }
         }

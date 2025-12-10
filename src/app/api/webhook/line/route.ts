@@ -121,7 +121,7 @@ const WELCOME_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "開始使用 (Start)",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/feed?path=/feed`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/feed`
                     },
                     color: "#000000"
                 },
@@ -132,7 +132,7 @@ const WELCOME_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "綁定交易所 (Register)",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/register?path=/register`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
                     },
                     color: "#F0F0F0"
                 },
