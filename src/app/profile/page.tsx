@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
-import { ArrowLeft, User, RefreshCw, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
+import { User, LogOut, ArrowLeft, RefreshCw, AlertCircle, CheckCircle, XCircle, ChevronRight } from 'lucide-react'
 
 interface Binding {
     id: string
