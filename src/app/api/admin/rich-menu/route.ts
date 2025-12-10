@@ -3,13 +3,13 @@ import fs from 'fs'
 import path from 'path'
 
 // Layout Definition (Template 4: Large, 1 Top + 3 Bottom)
-const richMenuObject = {
+const getRichMenuObject = (liffId: string) => ({
     size: {
         width: 2500,
         height: 1686
     },
     selected: true,
-    name: "CryptoTW Pro Menu",
+    name: "CryptoTW Pro Menu v2",
     chatBarText: "開啟選單",
     areas: [
         // A: Top Main (0,0) - 2500x843 - Action: Open LIFF Home
@@ -17,7 +17,7 @@ const richMenuObject = {
             bounds: { x: 0, y: 0, width: 2500, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}` // Direct to Home
+                uri: `https://liff.line.me/${liffId}/?path=/`
             }
         },
         // B: Bottom Left (0,843) - 833x843 - Action: Open VIP
@@ -25,10 +25,7 @@ const richMenuObject = {
             bounds: { x: 0, y: 843, width: 833, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/vip` // Direct to VIP (Assuming Client Router handles path or separate LIFF)
-                // Note: Standard LIFF ID usually ignores path unless configured. 
-                // Better strategy: Use query param ?path=/vip if client supports it (LiffProvider logic)
-                // Let's assume ?path=/vip for now to be safe if LiffProvider handles routing.
+                uri: `https://liff.line.me/${liffId}/vip?path=/vip`
             }
         },
         // C: Bottom Center (833,843) - 834x843 - Action: Open Register
@@ -36,7 +33,7 @@ const richMenuObject = {
             bounds: { x: 833, y: 843, width: 834, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/register`
+                uri: `https://liff.line.me/${liffId}/register?path=/register`
             }
         },
         // D: Bottom Right (1667,843) - 833x843 - Action: Open Profile
@@ -44,16 +41,19 @@ const richMenuObject = {
             bounds: { x: 1667, y: 843, width: 833, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/profile`
+                uri: `https://liff.line.me/${liffId}/profile?path=/profile`
             }
         }
     ]
-}
+})
 
 export async function POST(req: NextRequest) {
     try {
         const token = process.env.LINE_CHANNEL_ACCESS_TOKEN
+        const liffId = process.env.NEXT_PUBLIC_LIFF_ID
+
         if (!token) return NextResponse.json({ error: 'Missing LINE_CHANNEL_ACCESS_TOKEN' }, { status: 500 })
+        if (!liffId) return NextResponse.json({ error: 'Missing NEXT_PUBLIC_LIFF_ID' }, { status: 500 })
 
         // 1. Create Rich Menu
         const createRes = await fetch('https://api.line.me/v2/bot/richmenu', {
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(richMenuObject)
+            body: JSON.stringify(getRichMenuObject(liffId))
         })
 
         if (!createRes.ok) {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'image/png',
                 'Authorization': `Bearer ${token}`
             },
-            body: imageBuffer // Node-fetch supports buffer, verify Next.js native fetch support
+            body: imageBuffer
         })
 
         if (!uploadRes.ok) {
