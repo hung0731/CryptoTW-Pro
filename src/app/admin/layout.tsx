@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Separator orientation="vertical" className="mr-2 h-4" />
                     {/* Dynamic Breadcrumbs could be added here later */}
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">CryptoTW Pro Admin</span>
+                        <span className="font-semibold text-white">CryptoTW Pro 管理後台</span>
                     </div>
                 </header>
                 <div className="flex flex-1 flex-col gap-4 p-4 bg-black text-white">

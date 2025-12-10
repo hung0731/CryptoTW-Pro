@@ -10,6 +10,7 @@ import {
   Users,
   LineChart,
   Command,
+  Send,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -32,52 +33,57 @@ const data = {
   },
   navMain: [
     {
-      title: "Overview",
+      title: "總覽",
       url: "/admin",
       icon: LayoutDashboard,
       isActive: true, // Default open or matching path
     },
     {
-      title: "Management",
+      title: "管理中心",
       url: "#",
       icon: Users,
-      isActive: true,
+      isActive: true, // Expand by default
       items: [
         {
-          title: "VIP Applications",
+          title: "VIP 申請審核",
           url: "/admin/vip",
           icon: Crown,
         },
         {
-          title: "Analytics",
+          title: "數據分析",
           url: "/admin/analytics",
           icon: LineChart,
+        },
+        {
+          title: "推播訊息",
+          url: "/admin/push",
+          icon: Send,
         }
       ],
     },
     {
-      title: "Content & Events",
+      title: "內容與活動",
       url: "#",
       icon: FileText,
-      isActive: true,
+      isActive: true, // Expand by default
       items: [
         {
-          title: "Content CMS",
+          title: "內容管理 (CMS)",
           url: "/admin/content",
         },
         {
-          title: "Activities",
+          title: "活動管理",
           url: "/admin/activities",
         },
       ],
     },
     {
-      title: "System",
+      title: "系統設定",
       url: "#",
       icon: Settings,
       items: [
         {
-          title: "Settings",
+          title: "全站設定",
           url: "/admin/settings",
         },
       ],
@@ -98,7 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight text-white">
                   <span className="truncate font-bold">CryptoTW Pro</span>
-                  <span className="truncate text-xs text-neutral-400">Admin Console</span>
+                  <span className="truncate text-xs text-neutral-400">管理後台</span>
                 </div>
               </a>
             </SidebarMenuButton>

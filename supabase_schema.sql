@@ -172,3 +172,22 @@ CREATE POLICY "Allow admin all vip" ON vip_applications FOR ALL USING (
     (SELECT membership_status FROM users WHERE id = auth.uid()) = 'admin' OR auth.role() = 'service_role'
 );
 
+
+-- Push Messages History
+CREATE TABLE push_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    message_content TEXT NOT NULL,
+    target_audience TEXT NOT NULL, -- 'all', 'vip', 'pending_vip'
+    recipient_count INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'pending', -- 'sent', 'failed'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    sent_at TIMESTAMP WITH TIME ZONE
+);
+
+-- RLS for Push Messages
+ALTER TABLE push_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read push_messages" ON push_messages FOR SELECT USING (true);
+CREATE POLICY "Allow admin all push_messages" ON push_messages FOR ALL USING (
+    (SELECT membership_status FROM users WHERE id = auth.uid()) = 'admin' OR auth.role() = 'service_role'
+);

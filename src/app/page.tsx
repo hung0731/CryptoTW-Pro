@@ -10,213 +10,84 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 export default function Home() {
-  const { isLoggedIn, profile, dbUser, isLoading, liffObject } = useLiff()
-  const [content, setContent] = useState<any[]>([])
-  const [activities, setActivities] = useState<any[]>([])
-  const [loadingData, setLoadingData] = useState(true)
-
-  const handleLogin = () => {
-    if (!liffObject) return
-    liffObject.login()
-  }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [cx, ax] = await Promise.all([
-          fetch('/api/content').then(r => r.json()),
-          fetch('/api/activities').then(r => r.json())
-        ])
-        if (cx.content) setContent(cx.content)
-        if (ax.activities) setActivities(ax.activities)
-      } catch (e) {
-        console.error(e)
-      } finally {
-        setLoadingData(false)
-      }
-    }
-    fetchData()
-  }, [])
+  const { isLoggedIn, profile } = useLiff()
 
   return (
-    <main className="min-h-screen font-sans pb-20 bg-black text-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div className="container h-16 flex items-center justify-between px-6 max-w-5xl mx-auto">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg tracking-tight text-white">CryptoTW</span>
-          </div>
+    <main className="min-h-screen font-sans bg-black text-white flex flex-col relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-white/[0.02] blur-3xl rounded-full pointer-events-none" />
 
-          <div>
-            {isLoading ? (
-              <Skeleton className="h-8 w-8 rounded-full bg-neutral-800" />
-            ) : isLoggedIn && profile ? (
-              <Link href="/profile">
-                <Avatar className="h-8 w-8 cursor-pointer ring-1 ring-white/20">
-                  <AvatarImage src={profile.pictureUrl} />
-                  <AvatarFallback className="bg-neutral-800 text-neutral-400"><User className="h-4 w-4" /></AvatarFallback>
-                </Avatar>
-              </Link>
-            ) : (
-              <Button onClick={handleLogin} size="sm" className="rounded-full bg-white text-black hover:bg-neutral-200 px-4 font-medium h-8 text-xs transition-colors">
-                登入
-              </Button>
-            )}
-          </div>
+      {/* Header (Minimal) */}
+      <header className="absolute top-0 z-50 w-full p-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <span className="font-bold text-lg tracking-tight text-white">CryptoTW Pro</span>
+          {isLoggedIn && profile && (
+            <Link href="/profile">
+              <Avatar className="h-8 w-8 cursor-pointer ring-1 ring-white/20">
+                <AvatarImage src={profile.pictureUrl} />
+                <AvatarFallback className="bg-neutral-800 text-neutral-400"><User className="h-4 w-4" /></AvatarFallback>
+              </Avatar>
+            </Link>
+          )}
         </div>
       </header>
 
-      <div className="container px-6 py-12 max-w-5xl mx-auto space-y-16">
+      {/* Hero Content */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center z-10 relative">
+        <div className="space-y-8 max-w-xl mx-auto animate-in fade-in zoom-in duration-700">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-400 text-xs font-medium uppercase tracking-wider backdrop-blur-sm">
+            <Zap className="w-3 h-3 text-yellow-400" />
+            <span>The Alpha Community</span>
+          </div>
 
-        {/* Hero Section */}
-        <section className="space-y-6 text-center max-w-2xl mx-auto pt-8">
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-white leading-tight">
-            為高淨值交易者 <br />
-            <span className="text-neutral-500">打造的 Pro 級資訊平台</span>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white leading-[1.1]">
+            CryptoTW <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-neutral-200 to-neutral-500">
+              Pro Access
+            </span>
           </h1>
-          <p className="text-neutral-400 text-lg md:text-xl font-light leading-relaxed">
-            我們協助您過濾雜訊，鎖定真正具有價值的市場機會。
+
+          <p className="text-lg text-neutral-400 max-w-sm mx-auto leading-relaxed">
+            加入全台最高淨值加密貨幣社群。
+            <br />
+            解鎖機構級數據、私密觀點與頂級人脈。
           </p>
 
-          {!isLoggedIn && (
-            <div className="pt-4 flex justify-center">
-              <Button onClick={handleLogin} size="lg" className="rounded-full px-8 bg-white text-black hover:bg-neutral-200 h-12 text-sm font-medium shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all">
-                開始使用 (LINE)
+          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center pt-4">
+            {/* Button 1: Add LINE */}
+            <a
+              href="https://line.me/R/ti/p/@821mnwsw" // Replace with actual Line ID if needed or env
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <Button size="lg" className="w-full rounded-full bg-[#06C755] hover:bg-[#05b34c] text-white font-bold h-14 px-8 shadow-[0_0_20px_rgba(6,199,85,0.3)] transition-all hover:scale-105">
+                <Send className="mr-2 h-5 w-5" />
+                加入官方 LINE
               </Button>
-            </div>
-          )}
-        </section>
+            </a>
 
-        {/* Feature Cards (Bento Grid) - OpenAI Style */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Button 2: Join Pro */}
+            <Link href="/register" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full rounded-full border-white/20 bg-white/5 hover:bg-white/10 text-white h-14 px-8 backdrop-blur-sm transition-all hover:scale-105">
+                <Crown className="mr-2 h-5 w-5" />
+                加入 Pro 會員
+              </Button>
+            </Link>
+          </div>
 
-          {/* Alpha Content - Large Card */}
-          <Link href="#news" className="col-span-2 row-span-2 group relative overflow-hidden rounded-2xl bg-neutral-900/50 border border-white/5 p-6 md:p-8 hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
-            <div className="relative h-full flex flex-col justify-between z-10 space-y-8">
-              <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-md">
-                <Zap className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-medium text-white mb-2">Pro 核心圈</h3>
-                <p className="text-neutral-400 text-sm leading-relaxed">
-                  每日精選的加密貨幣洞察與鏈上數據分析，為您節省 90% 的研究時間。
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          {/* VIP Program (Expanded to fill row) */}
-          <Link href="/vip" className="col-span-2 md:col-span-2 row-span-1 group relative overflow-hidden rounded-2xl bg-neutral-900/50 border border-white/5 p-6 hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
-            <div className="relative h-full flex flex-col justify-between z-10 space-y-4">
-              <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-md">
-                <Crown className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <h3 className="text-base font-medium text-white mb-1">VIP 通道</h3>
-                <p className="text-neutral-400 text-xs">專屬經理與機構費率</p>
-              </div>
-            </div>
-          </Link>
-
-          {/* Exchange Offers (Expanded to fill row) */}
-          <Link href="/register" className="col-span-2 md:col-span-2 row-span-1 group rounded-2xl bg-neutral-900/50 border border-white/5 p-5 flex flex-col justify-between hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
-            <div className="flex justify-between items-start">
-              <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center text-white">
-                <TrendingUp className="h-4 w-4" />
-              </div>
-              <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-white transition-colors" />
-            </div>
-            <div>
-              <h3 className="font-medium text-white text-sm">交易所優惠</h3>
-            </div>
-          </Link>
-
-          {/* Community - Full Width Banner */}
-          <a href="https://line.me/ti/g2/YOUR_GROUP_LINK" target="_blank" className="col-span-2 md:col-span-4 group rounded-2xl bg-neutral-900/50 border border-white/5 p-4 flex items-center justify-between hover:bg-neutral-900 hover:border-white/10 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center text-white">
-                <Send className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="font-medium text-white text-sm">加入社群討論</h3>
-                <p className="text-xs text-neutral-500 hidden md:block">與 5,000+ 交易者即時交流市場動態</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-neutral-400 group-hover:text-white transition-colors">
-              <span>立即加入</span>
-              <ChevronRight className="h-3 w-3" />
-            </div>
-          </a>
-        </div>
-
-        {/* Dynamic Sections */}
-        <div className="grid lg:grid-cols-2 gap-12 pt-8 border-t border-white/5" id="news">
-
-          {/* Latest News */}
-          <section className="space-y-6">
-            <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-widest">
-              Latest Insights
-            </h2>
-
-            <div className="space-y-0 divide-y divide-white/5">
-              {loadingData ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-16 w-full rounded-none bg-neutral-900" />
-                  <Skeleton className="h-16 w-full rounded-none bg-neutral-900" />
-                </div>
-              ) : content.length === 0 ? (
-                <div className="text-neutral-600 text-sm py-8">暫無快訊</div>
-              ) : (
-                content.slice(0, 5).map((item: any) => (
-                  <div key={item.id} className="group py-4 hover:bg-white/5 transition-colors -mx-4 px-4 rounded-xl cursor-default">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] text-neutral-500 font-mono">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                      {item.type === 'alpha' && <span className="text-[10px] font-bold text-white bg-white/20 px-1.5 py-0.5 rounded">PRO</span>}
-                    </div>
-                    <h3 className="font-medium text-white group-hover:text-blue-400 transition-colors">{item.title}</h3>
-                    <p className="text-xs text-neutral-500 mt-1 line-clamp-1">{item.body}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
-          {/* Activities */}
-          <section className="space-y-6">
-            <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-widest">
-              Events
-            </h2>
-
-            <div className="space-y-3">
-              {loadingData ? (
-                <Skeleton className="h-24 w-full rounded-xl bg-neutral-900" />
-              ) : activities.length === 0 ? (
-                <div className="text-neutral-600 text-sm py-8">暫無活動</div>
-              ) : (
-                activities.map((act: any) => (
-                  <div key={act.id} className="bg-neutral-900/30 rounded-xl p-4 border border-white/5 flex items-center justify-between gap-4 hover:border-white/20 transition-all">
-                    <div className="flex items-center gap-4 overflow-hidden">
-                      <div className="h-8 w-8 shrink-0 bg-white/5 rounded-full flex items-center justify-center text-[10px] font-bold text-neutral-400 border border-white/5">
-                        {act.exchange_name.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="font-medium text-white truncate text-sm">{act.title}</h4>
-                        <p className="text-xs text-neutral-500 truncate">{act.description}</p>
-                      </div>
-                    </div>
-                    <a href={act.url} target="_blank" className="text-white hover:text-blue-400 transition-colors">
-                      <ArrowRight className="h-4 w-4" />
-                    </a>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
+          {/* Trust / Social Proof */}
+          <div className="pt-12 flex items-center justify-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+            {/* Placeholder logos or simple text */}
+            <div className="text-xs text-neutral-600 font-mono">TRUSTED BY 500+ PRO TRADERS</div>
+          </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="p-6 text-center text-[10px] text-neutral-600">
+        © 2024 CryptoTW Pro. All rights reserved.
+      </footer>
     </main>
   )
 }

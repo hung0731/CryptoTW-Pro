@@ -1,13 +1,20 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Loader2, Crown, CheckCircle, XCircle, MessageCircle, Phone, RefreshCw, Users, Check, X } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import Link from 'next/link'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import { Check, X, Search } from 'lucide-react'
 
 interface VipApp {
     id: string
@@ -35,7 +42,7 @@ export default function AdminVipPage() {
         total: 0,
         pending: 0,
         approved: 0,
-        whales: 0
+        rejected: 0
     })
 
     const fetchApplications = useCallback(() => {
@@ -52,7 +59,7 @@ export default function AdminVipPage() {
                         total: applications.length,
                         pending: applications.filter(a => a.status === 'new').length,
                         approved: applications.filter(a => a.status === 'approved').length,
-                        whales: applications.filter(a => a.asset_volume === '> 1,000,000 USD' || a.asset_volume === '> 100,000 USD').length // Rough estimate based on expected strings
+                        rejected: applications.filter(a => a.status === 'rejected').length
                     })
                 }
             })
@@ -64,8 +71,9 @@ export default function AdminVipPage() {
         fetchApplications()
     }, [fetchApplications])
 
-    // New function for handling actions
     const handleAction = async (id: string, action: 'approve' | 'reject') => {
+        if (!confirm(`Are you sure you want to ${action} this application?`)) return
+
         setProcessingId(id);
         try {
             const response = await fetch(`/api/admin/vip/${id}`, {
@@ -88,140 +96,154 @@ export default function AdminVipPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black p-4 text-white">
-            <div className="max-w-6xl mx-auto space-y-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">VIP Applications</h1>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={fetchApplications} className="border-white/20 bg-transparent text-white hover:bg-white/10">
-                            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card className="bg-neutral-900 border-white/5">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Total Applications</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-white">{stats.total}</div></CardContent>
-                    </Card>
-                    <Card className="bg-neutral-900 border-white/5">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Pending Review</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-amber-500">{stats.pending}</div></CardContent>
-                    </Card>
-                    <Card className="bg-neutral-900 border-white/5">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Approved (VIP)</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-green-500">{stats.approved}</div></CardContent>
-                    </Card>
-                    <Card className="bg-neutral-900 border-white/5">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Whales (&gt;100k)</CardTitle></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-purple-500">{stats.whales}</div></CardContent>
-                    </Card>
-                </div>
-
-                <div className="grid gap-4">
-                    {loading && <p className="text-neutral-500">Loading applications...</p>}
-                    {!loading && apps.length === 0 && (
-                        <Card className="p-12 text-center text-neutral-500 bg-neutral-900/50 border-white/5 border-dashed">
-                            <div className="flex flex-col items-center gap-2">
-                                <Users className="h-12 w-12 opacity-20" />
-                                <p>No VIP applications found.</p>
-                            </div>
-                        </Card>
-                    )}
-
-                    {apps.map(app => (
-                        <Card key={app.id} className="bg-neutral-900 border-white/5 overflow-hidden">
-                            <CardContent className="p-0">
-                                <div className="flex flex-col md:flex-row">
-                                    {/* Left: User Info */}
-                                    <div className="p-6 flex-1 space-y-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-12 w-12 ring-2 ring-white/10">
-                                                    <AvatarImage src={app.user?.picture_url} />
-                                                    <AvatarFallback className="bg-neutral-800 text-neutral-400">VIP</AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <div className="font-bold text-lg text-white">{app.full_name}</div>
-                                                    <div className="text-sm text-neutral-400 flex items-center gap-2">
-                                                        <span className="font-mono">{app.phone}</span>
-                                                        <span>•</span>
-                                                        <span>{app.email}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <Badge
-                                                variant={app.status === 'approved' ? 'default' : app.status === 'rejected' ? 'destructive' : 'secondary'}
-                                                className={`uppercase tracking-wider font-bold ${app.status === 'approved' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' :
-                                                    app.status === 'rejected' ? 'bg-red-950/50 text-red-500 hover:bg-red-900/50' :
-                                                        'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
-                                                    }`}
-                                            >
-                                                {app.status}
-                                            </Badge>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4 bg-black/20 p-4 rounded-lg border border-white/5">
-                                            <div>
-                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Exchange</div>
-                                                <div className="font-medium text-white">{app.exchange_name || 'N/A'}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">UID</div>
-                                                <div className="font-mono font-medium text-white">{app.exchange_uid || 'N/A'}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Asset Volume</div>
-                                                <div className="font-medium text-white text-lg">{app.asset_volume}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Telegram</div>
-                                                <div className="font-medium text-blue-400">{app.telegram_id}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="text-sm text-neutral-400">
-                                            <span className="text-neutral-600 mr-2">Submitted:</span>
-                                            {new Date(app.created_at).toLocaleString()}
-                                        </div>
-                                    </div>
-
-                                    {/* Right: Actions */}
-                                    <div className="p-6 bg-neutral-950/50 flex flex-col justify-center gap-3 border-l border-white/5 min-w-[200px]">
-                                        <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-1 text-center">Admin Actions</div>
-
-                                        {app.status === 'new' && ( // Changed from 'pending' to 'new' to match existing status types
-                                            <>
-                                                <Button
-                                                    className="w-full bg-white text-black hover:bg-neutral-200 font-bold"
-                                                    disabled={processingId === app.id}
-                                                    onClick={() => handleAction(app.id, 'approve')}
-                                                >
-                                                    <Check className="h-4 w-4 mr-2" /> Approve VIP
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    className="w-full border-red-900/30 text-red-500 hover:bg-red-950/30 hover:text-red-400"
-                                                    disabled={processingId === app.id}
-                                                    onClick={() => handleAction(app.id, 'reject')}
-                                                >
-                                                    <X className="h-4 w-4 mr-2" /> Reject
-                                                </Button>
-                                            </>
-                                        )}
-
-                                        {app.status !== 'new' && ( // Changed from 'pending' to 'new'
-                                            <div className="text-center text-sm text-neutral-500 py-2 italic">
-                                                processed
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-white">VIP 申請管理</h1>
+                    <p className="text-neutral-400 mt-2">管理與審核所有 VIP 資格申請。總計申請數: {stats.total}</p>
                 </div>
             </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-white">待審核</CardTitle>
+                        <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">{stats.pending}</div>
+                    </CardContent>
+                </Card>
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-white">已核准</CardTitle>
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">{stats.approved}</div>
+                    </CardContent>
+                </Card>
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-white">已拒絕</CardTitle>
+                        <div className="h-2 w-2 rounded-full bg-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">{stats.rejected}</div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <Card className="bg-neutral-900 border-white/5">
+                <CardHeader>
+                    <CardTitle className="text-white">申請列表</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="rounded-md border border-white/5">
+                        <Table>
+                            <TableHeader className="bg-neutral-900">
+                                <TableRow className="border-white/5 hover:bg-neutral-900">
+                                    <TableHead className="text-neutral-400">用戶</TableHead>
+                                    <TableHead className="text-neutral-400">交易所資訊</TableHead>
+                                    <TableHead className="text-neutral-400">資產規模</TableHead>
+                                    <TableHead className="text-neutral-400">聯絡方式</TableHead>
+                                    <TableHead className="text-neutral-400">狀態</TableHead>
+                                    <TableHead className="text-neutral-400 text-right">操作</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center h-24 text-neutral-500">
+                                            載入中 (Loading)...
+                                        </TableCell>
+                                    </TableRow>
+                                ) : apps.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center h-24 text-neutral-500">
+                                            目前沒有待審核的申請
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    apps.map((app) => (
+                                        <TableRow key={app.id} className="border-white/5 hover:bg-neutral-800/50">
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-8 w-8">
+                                                        <AvatarImage src={app.user?.picture_url} />
+                                                        <AvatarFallback className="bg-neutral-800 text-neutral-500">
+                                                            {app.full_name?.[0] || 'U'}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="grid gap-0.5">
+                                                        <span className="font-medium text-white">{app.full_name}</span>
+                                                        <span className="text-xs text-neutral-500">{app.user?.display_name}</span>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="grid gap-0.5">
+                                                    <span className="text-neutral-300">{app.exchange_name}</span>
+                                                    <span className="text-xs text-neutral-500 font-mono">UID: {app.exchange_uid}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="secondary" className="bg-neutral-800 text-neutral-300 hover:bg-neutral-700">
+                                                    {app.asset_volume}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="grid gap-0.5 text-sm">
+                                                    <span className="text-neutral-400">Line: pending</span>
+                                                    <span className="text-neutral-400">TG: {app.telegram_id}</span>
+                                                    <span className="text-neutral-500 text-xs">{app.email}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge className={`
+                                                    ${app.status === 'new' ? 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20' :
+                                                        app.status === 'approved' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' :
+                                                            app.status === 'rejected' ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' :
+                                                                'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'}
+                                                `}>
+                                                    {app.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {app.status === 'new' && (
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 text-green-500 hover:text-green-400 hover:bg-green-500/10"
+                                                            onClick={() => handleAction(app.id, 'approve')}
+                                                            disabled={processingId === app.id}
+                                                        >
+                                                            <Check className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                                                            onClick={() => handleAction(app.id, 'reject')}
+                                                            disabled={processingId === app.id}
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                {app.status !== 'new' && (
+                                                    <span className="text-xs text-neutral-600 italic">已處理</span>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     )
 }

@@ -180,9 +180,9 @@ interface Exchange {
     sort_order: number
 }
 
-export default function SettingsPage() {
+export function useExchanges() {
     const [exchanges, setExchanges] = useState<Exchange[]>([])
-    const [isLoading, setIsLoading] = useState(true)
+    const [loading, setLoading] = useState(true)
     const [savingId, setSavingId] = useState<string | null>(null)
 
     useEffect(() => {
@@ -194,7 +194,7 @@ export default function SettingsPage() {
             } catch (e) {
                 console.error(e)
             } finally {
-                setIsLoading(false)
+                setLoading(false)
             }
         }
         fetchExchanges()
@@ -219,17 +219,33 @@ export default function SettingsPage() {
         setExchanges(prev => prev.map(ex => ex.id === id ? { ...ex, [field]: value } : ex))
     }
 
-    if (isLoading) return <div className="p-8"><Skeleton className="h-60 w-full" /></div>
+    return {
+        exchanges,
+        loading,
+        savingId,
+        handleChange,
+        handleUpdate
+    }
+}
+
+export default function AdminSettings() {
+    const { exchanges, loading, savingId, handleChange, handleUpdate } = useExchanges()
+
+    if (loading) return <div className="p-8"><Skeleton className="h-60 w-full" /></div>
 
     return (
-        <div className="min-h-screen bg-black p-4 text-white">
-            <div className="max-w-4xl mx-auto space-y-6">
-                <h1 className="text-2xl font-bold">Platform Settings</h1>
+        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight text-white">設定 (Settings)</h1>
+                <p className="text-neutral-400 mt-2">管理推薦連結、系統公告與 LINE 選單。</p>
+            </div>
 
-                <Card className="mb-8 bg-neutral-900 border-white/5">
+            <div className="grid gap-8">
+
+                <Card className="bg-neutral-900 border-white/5">
                     <CardHeader>
-                        <CardTitle className="text-white">System Announcement</CardTitle>
-                        <p className="text-sm text-neutral-400">Broadcast a global message to all users (e.g. Maintenance, Urgent Pro Alert).</p>
+                        <CardTitle className="text-white">系統公告 (System Announcement)</CardTitle>
+                        <p className="text-sm text-neutral-400">發送全站廣播訊息 (例如：維護通知、Pro 緊急快訊)。</p>
                     </CardHeader>
                     <CardContent>
                         <AnnouncementManager />
@@ -238,28 +254,28 @@ export default function SettingsPage() {
 
                 <Card className="bg-neutral-900 border-white/5">
                     <CardHeader>
-                        <CardTitle className="text-white">Exchange Referral Links</CardTitle>
-                        <p className="text-sm text-neutral-400">Manage your dynamic referral links. Changes reflect instantly on the Register page.</p>
+                        <CardTitle className="text-white">交易所推薦連結 (Referrals)</CardTitle>
+                        <p className="text-sm text-neutral-400">管理動態推薦連結。變更將即時反映於註冊頁面。</p>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {exchanges.map((ex) => (
-                            <div key={ex.id} className="flex items-start gap-4 p-4 border rounded-lg bg-neutral-950 border-white/5">
-                                <div className="grid gap-4 flex-1">
-                                    <div className="flex items-center gap-4">
-                                        <div className="grid gap-1.5 w-1/4">
-                                            <Label className="text-neutral-400">Exchange Name</Label>
+                            <div key={ex.id} className="flex flex-col md:flex-row items-start gap-4 p-4 border rounded-lg bg-neutral-950 border-white/5">
+                                <div className="grid gap-4 flex-1 w-full">
+                                    <div className="flex flex-col md:flex-row items-center gap-4">
+                                        <div className="grid gap-1.5 w-full md:w-1/4">
+                                            <Label className="text-neutral-400">交易所名稱</Label>
                                             <Input
                                                 value={ex.name}
                                                 onChange={e => handleChange(ex.id, 'name', e.target.value)}
                                                 className="bg-neutral-900 border-white/10"
                                             />
                                         </div>
-                                        <div className="grid gap-1.5 w-1/4">
-                                            <Label className="text-neutral-400">Slug (System ID)</Label>
+                                        <div className="grid gap-1.5 w-full md:w-1/4">
+                                            <Label className="text-neutral-400">Slug (系統 ID)</Label>
                                             <Input disabled value={ex.slug} className="bg-neutral-800 border-white/5 text-neutral-500" />
                                         </div>
-                                        <div className="grid gap-1.5 w-1/4">
-                                            <Label className="text-neutral-400">Sort Order</Label>
+                                        <div className="grid gap-1.5 w-full md:w-1/4">
+                                            <Label className="text-neutral-400">排序 (Sort)</Label>
                                             <Input
                                                 type="number"
                                                 value={ex.sort_order}
@@ -267,16 +283,16 @@ export default function SettingsPage() {
                                                 className="bg-neutral-900 border-white/10"
                                             />
                                         </div>
-                                        <div className="flex items-center gap-2 pt-6">
+                                        <div className="flex items-center gap-2 pt-0 md:pt-6">
                                             <Switch
                                                 checked={ex.is_active}
                                                 onCheckedChange={checked => handleChange(ex.id, 'is_active', checked)}
                                             />
-                                            <Label className="text-neutral-400">Active</Label>
+                                            <Label className="text-neutral-400">啟用</Label>
                                         </div>
                                     </div>
                                     <div className="grid gap-1.5">
-                                        <Label className="text-neutral-400">Referral Link</Label>
+                                        <Label className="text-neutral-400">推薦連結 (Referral Link)</Label>
                                         <div className="flex gap-2">
                                             <Input
                                                 value={ex.referral_link}
@@ -290,11 +306,11 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                                 <Button
-                                    className="mt-6 bg-white text-black hover:bg-neutral-200"
+                                    className="mt-6 w-full md:w-auto bg-white text-black hover:bg-neutral-200"
                                     onClick={() => handleUpdate(ex)}
                                     disabled={savingId === ex.id}
                                 >
-                                    {savingId === ex.id ? 'Saving...' : <Save className="h-4 w-4" />}
+                                    {savingId === ex.id ? '儲存中...' : <Save className="h-4 w-4" />}
                                 </Button>
                             </div>
                         ))}
@@ -303,8 +319,8 @@ export default function SettingsPage() {
 
                 <Card className="bg-neutral-900 border-white/5">
                     <CardHeader>
-                        <CardTitle className="text-white">LINE Rich Menu</CardTitle>
-                        <p className="text-sm text-neutral-400">Deploy the <code>public/richmenu.png</code> as the default menu for all users.</p>
+                        <CardTitle className="text-white">LINE 圖文選單 (Rich Menu)</CardTitle>
+                        <p className="text-sm text-neutral-400">部署 <code>public/richmenu.png</code> 為所有用戶的預設選單。</p>
                     </CardHeader>
                     <CardContent>
                         <RichMenuManager />

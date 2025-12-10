@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,7 +12,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
+    DialogFooter,
 } from "@/components/ui/dialog"
 import {
     Select,
@@ -22,7 +22,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Badge } from '@/components/ui/badge'
-import { Edit, Plus, Trash, RefreshCw } from 'lucide-react'
+import { Edit, Plus, Trash2, FileText, RefreshCw } from 'lucide-react'
 
 // TODO: Move to shared types
 interface Article {
@@ -126,116 +126,139 @@ export default function ContentAdminPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black p-4 text-white">
-            <div className="max-w-5xl mx-auto space-y-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Content CMS</h1>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="icon" onClick={fetchArticles} className="border-white/20 bg-transparent text-white hover:bg-white/10">
-                            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                        </Button>
-                        <Button onClick={handleCreate} className="bg-white text-black hover:bg-neutral-200"><Plus className="h-4 w-4 mr-2" /> New Article</Button>
-                    </div>
+        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-white">內容管理 (CMS)</h1>
+                    <p className="text-neutral-400 mt-2">發布新聞、Pro 觀點與週報。</p>
                 </div>
+                <Button onClick={handleCreate} className="bg-white text-black hover:bg-neutral-200">
+                    <Plus className="h-4 w-4 mr-2" /> 新增內容
+                </Button>
+            </div>
 
-                <div className="grid gap-4">
-                    {articles.map(article => (
-                        <Card key={article.id} className="bg-neutral-900 border-white/5">
-                            <CardContent className="p-4 flex items-center justify-between">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Badge variant={article.type === 'news' ? 'secondary' : 'default'} className="bg-neutral-800 text-neutral-300 hover:bg-neutral-700">{article.type}</Badge>
-                                        <h3 className="font-semibold text-lg text-white">{article.title}</h3>
-                                        {article.access_level === 'pro' && <Badge variant="outline" className="text-amber-500 border-amber-500/50">PRO</Badge>}
-                                        {!article.is_published && <Badge variant="destructive" className="bg-red-900/50 text-red-400 border border-red-900">Draft</Badge>}
+            <div className="grid gap-4">
+                {isLoading ? (
+                    <div className="text-center py-12 text-neutral-500">載入中...</div>
+                ) : articles.length === 0 ? (
+                    <Card className="bg-neutral-900 border-white/5 border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center py-12 text-center text-neutral-500">
+                            <FileText className="h-12 w-12 mb-4 opacity-50" />
+                            <p>尚未建立任何內容</p>
+                            <Button variant="link" onClick={handleCreate} className="text-white mt-2">
+                                立即建立第一篇
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    articles.map((item) => (
+                        <Card key={item.id} className="bg-neutral-900 border-white/5 hover:border-white/10 transition-colors">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className={`
+                                            ${item.type === 'alpha' ? 'text-purple-400 border-purple-400/20 bg-purple-400/10' :
+                                                item.type === 'weekly' ? 'text-amber-400 border-amber-400/20 bg-amber-400/10' :
+                                                    'text-blue-400 border-blue-400/20 bg-blue-400/10'}
+                                        `}>
+                                            {item.type === 'alpha' ? 'Pro 觀點' : item.type === 'weekly' ? '週報' : '快訊'}
+                                        </Badge>
+                                        <CardTitle className="text-base font-medium text-white">{item.title}</CardTitle>
                                     </div>
-                                    <p className="text-sm text-neutral-400 line-clamp-1">{article.body}</p>
-                                    <div className="text-xs text-neutral-500 mt-2">
-                                        {new Date(article.created_at).toLocaleString()}
-                                    </div>
+                                    <CardDescription className="text-xs text-neutral-500">
+                                        發布於 {new Date(item.created_at).toLocaleDateString()}
+                                    </CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Button size="icon" variant="ghost" onClick={() => handleEdit(article)} className="text-neutral-400 hover:text-white hover:bg-white/10">
+                                    <Button variant="ghost" size="icon" className="hover:bg-white/10 text-neutral-400" onClick={() => handleEdit(item)}>
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button size="icon" variant="ghost" className="text-red-900 hover:text-red-500 hover:bg-red-950/30" onClick={() => handleDelete(article.id)}>
-                                        <Trash className="h-4 w-4" />
+                                    <Button variant="ghost" size="icon" className="hover:bg-red-900/20 text-red-500" onClick={() => handleDelete(item.id)}>
+                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-neutral-400 line-clamp-2">{item.body}</p>
                             </CardContent>
                         </Card>
-                    ))}
-                </div>
-
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                    <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle>{editingId ? 'Edit Article' : 'New Article'}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="grid gap-2">
-                                <Label>Title</Label>
-                                <Input
-                                    value={formData.title}
-                                    onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-2">
-                                    <Label>Type</Label>
-                                    <Select
-                                        value={formData.type}
-                                        onValueChange={(v: any) => setFormData({ ...formData, type: v })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="news">News (Brief)</SelectItem>
-                                            <SelectItem value="alpha">Pro (Deep Dive)</SelectItem>
-                                            <SelectItem value="weekly">Weekly Report</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label>Access Level</Label>
-                                    <Select
-                                        value={formData.access_level}
-                                        onValueChange={(v: any) => setFormData({ ...formData, access_level: v })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="free">Free</SelectItem>
-                                            <SelectItem value="pro">Pro Only</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label>Content</Label>
-                                <Textarea
-                                    className="min-h-[200px]"
-                                    value={formData.body}
-                                    onChange={e => setFormData({ ...formData, body: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Switch
-                                    checked={formData.is_published}
-                                    onCheckedChange={checked => setFormData({ ...formData, is_published: checked })}
-                                />
-                                <Label>Published</Label>
-                            </div>
-                            <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting}>
-                                {isSubmitting ? 'Saving...' : 'Save Article'}
-                            </Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
-
+                    ))
+                )}
             </div>
+
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="bg-neutral-900 border-white/10 text-white sm:max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>{editingId ? '編輯內容' : '新增內容'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label>標題 (Title)</Label>
+                            <Input
+                                value={formData.title}
+                                onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                className="bg-neutral-800 border-white/10"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label>類型 (Type)</Label>
+                                <Select
+                                    value={formData.type}
+                                    onValueChange={(v: any) => setFormData({ ...formData, type: v })}
+                                >
+                                    <SelectTrigger className="bg-neutral-800 border-white/10">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="news">快訊 (News)</SelectItem>
+                                        <SelectItem value="alpha">Pro 觀點 (Alpha)</SelectItem>
+                                        <SelectItem value="weekly">週報 (Weekly)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>權限 (Access)</Label>
+                                <Select
+                                    value={formData.access_level}
+                                    onValueChange={(v: any) => setFormData({ ...formData, access_level: v })}
+                                >
+                                    <SelectTrigger className="bg-neutral-800 border-white/10">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="free">免費 (Free)</SelectItem>
+                                        <SelectItem value="pro">Pro 會員 (VIP)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>內容 (Content)</Label>
+                            <Textarea
+                                className="min-h-[200px] bg-neutral-800 border-white/10"
+                                value={formData.body}
+                                onChange={e => setFormData({ ...formData, body: e.target.value })}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Switch
+                                checked={formData.is_published}
+                                onCheckedChange={c => setFormData({ ...formData, is_published: c })}
+                            />
+                            <Label>立即發布 (Publish Immediately)</Label>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsOpen(false)} className="border-white/10 hover:bg-white/10">
+                            取消
+                        </Button>
+                        <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-white text-black hover:bg-neutral-200">
+                            {isSubmitting ? '儲存中...' : '儲存'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
