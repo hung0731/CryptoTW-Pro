@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
                 await pushMessage(updatedUser.line_user_id, [
                     {
                         type: "flex",
-                        altText: "恭喜！您的 Alpha 會員資格已開通",
+                        altText: "恭喜！Alpha Pro 權限已開通 🚀",
                         contents: {
                             type: "bubble",
                             hero: {
@@ -63,10 +63,55 @@ export async function POST(req: NextRequest) {
                                 contents: [
                                     {
                                         type: "text",
-                                        text: "Verification Approved",
+                                        text: "身份驗證成功",
                                         weight: "bold",
                                         size: "xl",
                                         color: BRAND_COLOR
+                                    },
+                                    {
+                                        type: "text",
+                                        text: "歡迎加入 Alpha 核心圈",
+                                        weight: "bold",
+                                        size: "md",
+                                        color: "#111111",
+                                        margin: "md"
+                                    },
+                                    {
+                                        type: "text",
+                                        text: "您現在可以解鎖以下權限：",
+                                        size: "xs",
+                                        color: "#999999",
+                                        margin: "sm"
+                                    },
+                                    {
+                                        type: "box",
+                                        layout: "vertical",
+                                        margin: "md",
+                                        spacing: "sm",
+                                        contents: [
+                                            {
+                                                type: "text",
+                                                text: "✅ 關鍵交易信號",
+                                                size: "sm",
+                                                color: "#555555"
+                                            },
+                                            {
+                                                type: "text",
+                                                text: "✅ 精選空投機會",
+                                                size: "sm",
+                                                color: "#555555"
+                                            },
+                                            {
+                                                type: "text",
+                                                text: "✅ Pro 級別市場洞察",
+                                                size: "sm",
+                                                color: "#555555"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        type: "separator",
+                                        margin: "lg"
                                     },
                                     {
                                         type: "box",
@@ -81,17 +126,17 @@ export async function POST(req: NextRequest) {
                                                 contents: [
                                                     {
                                                         type: "text",
-                                                        text: "UID",
+                                                        text: "綁定 UID",
                                                         color: "#aaaaaa",
-                                                        size: "sm",
-                                                        flex: 1
+                                                        size: "xs",
+                                                        flex: 2
                                                     },
                                                     {
                                                         type: "text",
                                                         text: binding.exchange_uid,
                                                         wrap: true,
                                                         color: "#666666",
-                                                        size: "sm",
+                                                        size: "xs",
                                                         flex: 4
                                                     }
                                                 ]
@@ -103,17 +148,17 @@ export async function POST(req: NextRequest) {
                                                 contents: [
                                                     {
                                                         type: "text",
-                                                        text: "Tier",
+                                                        text: "會員等級",
                                                         color: "#aaaaaa",
-                                                        size: "sm",
-                                                        flex: 1
+                                                        size: "xs",
+                                                        flex: 2
                                                     },
                                                     {
                                                         type: "text",
-                                                        text: "ALPHA PRO",
+                                                        text: "Alpha Pro 💎",
                                                         wrap: true,
-                                                        color: "#666666",
-                                                        size: "sm",
+                                                        color: BRAND_COLOR,
+                                                        size: "xs",
                                                         flex: 4,
                                                         weight: "bold"
                                                     }
@@ -134,7 +179,7 @@ export async function POST(req: NextRequest) {
                                         height: "sm",
                                         action: {
                                             type: "uri",
-                                            label: "進入 Alpha 專區",
+                                            label: "🚀 立即進入 Alpha 核心圈",
                                             uri: "https://liff.line.me/" + process.env.NEXT_PUBLIC_LIFF_ID
                                         },
                                         color: BRAND_COLOR
