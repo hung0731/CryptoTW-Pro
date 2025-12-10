@@ -62,7 +62,7 @@ export default function VipPage() {
                         </div>
                         <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-200 to-yellow-500 bg-clip-text text-transparent">申請已提交</h2>
                         <p className="text-slate-400">
-                            感謝您的申請。我們的 VIP 專屬顧問將會在 24 小時內透過您指定的聯絡方式與您聯繫，為您開通 Alpha Prime 權限。
+                            感謝您的申請。我們的 VIP 專屬顧問將會在 24 小時內透過您指定的聯絡方式與您聯繫，為您開通 Pro Prime 權限。
                         </p>
                         <Link href="/">
                             <Button className="w-full mt-6 bg-slate-800 hover:bg-slate-700 text-white">
@@ -84,7 +84,7 @@ export default function VipPage() {
 
                 <div className="container relative py-20 px-4 text-center space-y-6">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/50 border border-amber-500/20 text-amber-500 text-xs font-medium uppercase tracking-wider mb-4 animate-fade-in-up">
-                        <Crown className="w-3 h-3" /> Alpha Prime
+                        <Crown className="w-3 h-3" /> Pro Prime
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white mb-4">
                         專為 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600">高淨值交易者</span> 打造
@@ -92,7 +92,7 @@ export default function VipPage() {
                     <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
                         解鎖機構級費率、專屬客戶經理與線下私密聚會。
                         <br className="hidden md:block" />
-                        加入 Alpha Prime，體驗真正的頂級服務。
+                        加入 Pro Prime，體驗真正的頂級服務。
                     </p>
                 </div>
             </div>
@@ -121,7 +121,7 @@ export default function VipPage() {
                                 },
                                 {
                                     icon: <Crown className="w-6 h-6 text-amber-400" />,
-                                    title: "Alpha Prime 私密聚會",
+                                    title: "Pro Prime 私密聚會",
                                     desc: "受邀參加僅限高淨值會員的線下晚宴、遊艇派對與行業交流會。"
                                 }
                             ].map((item, i) => (
@@ -161,7 +161,7 @@ export default function VipPage() {
                 <Card className="bg-slate-900 border-slate-800 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" />
                     <CardHeader>
-                        <CardTitle className="text-xl text-white">立即申請 Alpha Prime</CardTitle>
+                        <CardTitle className="text-xl text-white">立即申請 Pro Prime</CardTitle>
                         <CardDescription className="text-slate-400">
                             填寫以下資訊，我們將盡快評估您的資格。
                         </CardDescription>

@@ -73,7 +73,7 @@ export default function Home() {
         <section className="space-y-6 text-center max-w-2xl mx-auto pt-8">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-white leading-tight">
             為高淨值交易者 <br />
-            <span className="text-neutral-500">打造的 Alpha 資訊平台</span>
+            <span className="text-neutral-500">打造的 Pro 級資訊平台</span>
           </h1>
           <p className="text-neutral-400 text-lg md:text-xl font-light leading-relaxed">
             我們協助您過濾雜訊，鎖定真正具有價值的市場機會。
@@ -98,7 +98,7 @@ export default function Home() {
                 <Zap className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-medium text-white mb-2">Alpha 核心圈</h3>
+                <h3 className="text-xl font-medium text-white mb-2">Pro 核心圈</h3>
                 <p className="text-neutral-400 text-sm leading-relaxed">
                   每日精選的加密貨幣洞察與鏈上數據分析，為您節省 90% 的研究時間。
                 </p>

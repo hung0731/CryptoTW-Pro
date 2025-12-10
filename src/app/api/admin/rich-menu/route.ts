@@ -9,7 +9,7 @@ const richMenuObject = {
         height: 1686
     },
     selected: true,
-    name: "CryptoTW Alpha Menu",
+    name: "CryptoTW Pro Menu",
     chatBarText: "開啟選單",
     areas: [
         // A: Top Main (0,0) - 2500x843 - Action: Open LIFF Home

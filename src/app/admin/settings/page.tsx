@@ -229,7 +229,7 @@ export default function SettingsPage() {
                 <Card className="mb-8 bg-neutral-900 border-white/5">
                     <CardHeader>
                         <CardTitle className="text-white">System Announcement</CardTitle>
-                        <p className="text-sm text-neutral-400">Broadcast a global message to all users (e.g. Maintenance, Urgent Alpha).</p>
+                        <p className="text-sm text-neutral-400">Broadcast a global message to all users (e.g. Maintenance, Urgent Pro Alert).</p>
                     </CardHeader>
                     <CardContent>
                         <AnnouncementManager />

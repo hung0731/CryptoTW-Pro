@@ -124,7 +124,7 @@ export default function ProfilePage() {
                             <h2 className="text-2xl font-black text-white tracking-tight">{profile?.displayName}</h2>
                             <div className="mt-2 flex items-center gap-2">
                                 {dbUser?.membership_status === 'pro' ? (
-                                    <Badge className="bg-white text-black border-0 shadow-sm px-3 py-1 text-sm hover:bg-neutral-200">Alpha 指揮官 💎</Badge>
+                                    <Badge className="bg-white text-black border-0 shadow-sm px-3 py-1 text-sm hover:bg-neutral-200">Pro 指揮官 💎</Badge>
                                 ) : dbUser?.membership_status === 'pending' ? (
                                     <Badge variant="outline" className="text-neutral-400 border-neutral-700 bg-neutral-900">審核中 ⏳</Badge>
                                 ) : (
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div>
                                     <p className="text-white font-medium">尚未綁定任何交易所</p>
-                                    <p className="text-xs mt-1 text-neutral-500">綁定交易所即可解鎖 Alpha 權限</p>
+                                    <p className="text-xs mt-1 text-neutral-500">綁定交易所即可解鎖 Pro 權限</p>
                                 </div>
                                 <Link href="/register">
                                     <Button size="sm" className="rounded-full px-6 bg-white text-black hover:bg-neutral-200">立即綁定</Button>

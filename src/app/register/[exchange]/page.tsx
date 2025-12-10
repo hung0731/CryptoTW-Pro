@@ -120,7 +120,7 @@ export default function BindingPage() {
                     <CardHeader className="pb-3 bg-slate-50/50">
                         <Badge className="w-fit mb-2 bg-slate-900">步驟 1</Badge>
                         <CardTitle className="text-base">註冊帳號</CardTitle>
-                        <CardDescription>使用我們的連結註冊以符合 Alpha 資格。</CardDescription>
+                        <CardDescription>使用我們的連結註冊以符合 Pro 資格。</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-4">
                         <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-100 p-4 rounded-xl flex items-center justify-between">

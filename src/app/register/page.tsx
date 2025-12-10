@@ -49,7 +49,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="bg-neutral-900 border border-white/5 rounded-2xl p-6 shadow-sm">
-                    <h2 className="text-lg font-bold mb-2 text-white">解鎖 Alpha 會員資格 🔓</h2>
+                    <h2 className="text-lg font-bold mb-2 text-white">解鎖 Pro 會員資格 🔓</h2>
                     <p className="text-neutral-400 text-sm leading-relaxed">
                         為了獲取 Pro 級別的市場洞察與空投機會，請註冊我們合作的交易所並綁定 UID。
                         <br /><span className="font-semibold text-white mt-1 inline-block">通過後立即開通權限 🚀</span>

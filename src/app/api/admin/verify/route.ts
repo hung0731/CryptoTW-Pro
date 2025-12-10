@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
                 await pushMessage(updatedUser.line_user_id, [
                     {
                         type: "flex",
-                        altText: "恭喜！Alpha Pro 權限已開通 🚀",
+                        altText: "恭喜！CryptoTW Pro 權限已開通 🚀",
                         contents: {
                             type: "bubble",
                             hero: {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
                                 aspectMode: "cover",
                                 action: {
                                     type: "uri",
-                                    uri: "https://cryptotw-alpha.vercel.app/profile"
+                                    uri: "https://pro.cryptotw.io/profile"
                                 }
                             },
                             body: {
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
                                     },
                                     {
                                         type: "text",
-                                        text: "歡迎加入 Alpha 核心圈",
+                                        text: "歡迎加入 Pro 核心圈",
                                         weight: "bold",
                                         size: "md",
                                         color: "#111111",
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
                                                     },
                                                     {
                                                         type: "text",
-                                                        text: "Alpha Pro 💎",
+                                                        text: "CryptoTW Pro 💎",
                                                         wrap: true,
                                                         color: BRAND_COLOR,
                                                         size: "xs",
@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
                                         height: "sm",
                                         action: {
                                             type: "uri",
-                                            label: "🚀 立即進入 Alpha 核心圈",
+                                            label: "🚀 立即進入 Pro 核心圈",
                                             uri: "https://liff.line.me/" + process.env.NEXT_PUBLIC_LIFF_ID
                                         },
                                         color: BRAND_COLOR

@@ -192,7 +192,7 @@ export default function ContentAdminPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="news">News (Brief)</SelectItem>
-                                            <SelectItem value="alpha">Alpha (Deep Dive)</SelectItem>
+                                            <SelectItem value="alpha">Pro (Deep Dive)</SelectItem>
                                             <SelectItem value="weekly">Weekly Report</SelectItem>
                                         </SelectContent>
                                     </Select>

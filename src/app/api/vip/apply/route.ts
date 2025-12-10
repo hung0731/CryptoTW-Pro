@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         if (error) throw error
 
         // Send Admin Notification
-        await sendAdminNotification(`\n🐳 新增 Alpha Prime 申請:\n姓名: ${name}\n級別: ${asset_tier}\n聯絡: ${contact_method} (${contact_handle})\n備註: ${notes || '無'}`)
+        await sendAdminNotification(`\n🐳 新增 Pro Prime 申請:\n姓名: ${name}\n級別: ${asset_tier}\n聯絡: ${contact_method} (${contact_handle})\n備註: ${notes || '無'}`)
 
         return NextResponse.json({ success: true })
     } catch (error) {
