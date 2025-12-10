@@ -20,26 +20,26 @@ const WELCOME_FLEX_MESSAGE = {
         body: {
             type: "box",
             layout: "vertical",
-            backgroundColor: "#000000",
+            backgroundColor: "#FFFFFF",
             contents: [
                 {
                     type: "text",
                     text: "Welcome to CryptoTW",
                     weight: "bold",
                     size: "xl",
-                    color: "#ffffff"
+                    color: "#000000"
                 },
                 {
                     type: "text",
                     text: "全台最高淨值加密貨幣社群",
                     size: "xs",
-                    color: "#aaaaaa",
+                    color: "#666666",
                     wrap: true
                 },
                 {
                     type: "separator",
                     margin: "md",
-                    color: "#333333"
+                    color: "#EEEEEE"
                 },
                 {
                     type: "box",
@@ -59,9 +59,9 @@ const WELCOME_FLEX_MESSAGE = {
                                 },
                                 {
                                     type: "text",
-                                    text: "即時市場訊號與觀點",
+                                    text: "即時市場訊號與 Alpha",
                                     size: "sm",
-                                    color: "#dddddd",
+                                    color: "#333333",
                                     flex: 9
                                 }
                             ]
@@ -80,7 +80,7 @@ const WELCOME_FLEX_MESSAGE = {
                                     type: "text",
                                     text: "交易所綁定優惠",
                                     size: "sm",
-                                    color: "#dddddd",
+                                    color: "#333333",
                                     flex: 9
                                 }
                             ]
@@ -99,7 +99,7 @@ const WELCOME_FLEX_MESSAGE = {
                                     type: "text",
                                     text: "VIP 機構級服務",
                                     size: "sm",
-                                    color: "#dddddd",
+                                    color: "#333333",
                                     flex: 9
                                 }
                             ]
@@ -112,7 +112,7 @@ const WELCOME_FLEX_MESSAGE = {
             type: "box",
             layout: "vertical",
             spacing: "sm",
-            backgroundColor: "#000000",
+            backgroundColor: "#FFFFFF",
             contents: [
                 {
                     type: "button",
@@ -121,9 +121,9 @@ const WELCOME_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "開始使用 (Start)",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/?path=/`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/feed?path=/feed`
                     },
-                    color: "#7C3AED" // Violet-600
+                    color: "#000000"
                 },
                 {
                     type: "button",
@@ -134,13 +134,15 @@ const WELCOME_FLEX_MESSAGE = {
                         label: "綁定交易所 (Register)",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/register?path=/register`
                     },
-                    color: "#333333"
+                    color: "#F0F0F0"
                 },
                 {
-                    type: "box",
-                    layout: "vertical",
-                    contents: [],
-                    margin: "sm"
+                    type: "text",
+                    text: "前往註冊並綁定 UID 以解鎖 Pro 權限",
+                    size: "xxs",
+                    color: "#aaaaaa",
+                    align: "center",
+                    margin: "md"
                 }
             ]
         }
