@@ -29,7 +29,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center z-10 relative space-y-10">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center z-10 relative space-y-8">
 
         {/* Logo / Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-medium uppercase tracking-[0.2em] backdrop-blur-sm animate-in fade-in zoom-in duration-1000">
@@ -37,10 +37,15 @@ export default function Home() {
           ALPHA COMMUNITY
         </div>
 
-        {/* Hero Title */}
-        <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-white animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-100">
+        {/* Logo */}
+        <div className="animate-in fade-in zoom-in duration-1000">
+          <img src="/logo.svg" alt="CryptoTW" className="h-24 w-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]" />
+        </div>
+
+        {/* Hero Title (Optional, keeping purely visual logo might be cleaner, but user asked to PUT logo) */}
+        {/* <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-white animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-100">
           CryptoTW Pro
-        </h1>
+        </h1> */}
 
         {/* Single CTA Button */}
         <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 w-full max-w-xs">

@@ -105,11 +105,14 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-black p-4 pb-20 text-white">
             <div className="max-w-md mx-auto space-y-6">
                 {/* Header */}
-                <div className="flex items-center gap-2 mb-4">
-                    <Link href="/">
-                        <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white rounded-full"><ArrowLeft className="h-5 w-5" /></Button>
-                    </Link>
-                    <h1 className="text-xl font-bold">個人檔案 👤</h1>
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <Link href="/">
+                            <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white rounded-full"><ArrowLeft className="h-5 w-5" /></Button>
+                        </Link>
+                        <h1 className="text-xl font-bold">個人檔案 👤</h1>
+                    </div>
+                    <img src="/logo.svg" alt="Logo" className="h-6 w-auto opacity-80" />
                 </div>
 
                 {/* Profile Card */}

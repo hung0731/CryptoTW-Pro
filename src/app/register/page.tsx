@@ -37,15 +37,18 @@ export default function RegisterPage() {
         <div className="min-h-screen bg-black p-4 pb-20 text-white">
             <div className="max-w-md mx-auto space-y-8">
                 {/* Header */}
-                <div className="flex items-center gap-2 mb-2">
-                    <Link href="/">
-                        <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white rounded-full"><ArrowLeft className="h-5 w-5" /></Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-                            選擇交易所 ⚡️
-                        </h1>
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                        <Link href="/">
+                            <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white rounded-full"><ArrowLeft className="h-5 w-5" /></Button>
+                        </Link>
+                        <div>
+                            <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                                選擇交易所 ⚡️
+                            </h1>
+                        </div>
                     </div>
+                    <img src="/logo.svg" alt="Logo" className="h-6 w-auto opacity-80" />
                 </div>
 
                 <div className="bg-neutral-900 border border-white/5 rounded-2xl p-6 shadow-sm">
