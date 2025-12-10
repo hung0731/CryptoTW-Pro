@@ -1,57 +1,68 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Loader2, Crown, CheckCircle, XCircle, MessageCircle, Phone, RefreshCw } from 'lucide-react'
+import { Loader2, Crown, CheckCircle, XCircle, MessageCircle, Phone, RefreshCw, Users, Check, X } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 
 interface VipApp {
     id: string
-    name: string
-    contact_method: string
-    contact_handle: string
-    asset_tier: string
-    trading_volume_monthly: string | null
-    preferred_exchange: string | null
-    notes: string | null
+    user_id: string
+    full_name: string
+    phone: string
+    email: string
+    exchange_name: string
+    exchange_uid: string
+    asset_volume: string
+    telegram_id: string
     status: 'new' | 'contacted' | 'approved' | 'rejected'
     created_at: string
+    user?: {
+        picture_url: string
+        display_name: string
+    }
 }
 
 export default function AdminVipPage() {
     const [apps, setApps] = useState<VipApp[]>([])
     const [loading, setLoading] = useState(true)
+    const [processingId, setProcessingId] = useState<string | null>(null)
+    const [stats, setStats] = useState({
+        total: 0,
+        pending: 0,
+        approved: 0,
+        whales: 0
+    })
 
-    useEffect(() => {
+    const fetchApplications = useCallback(() => {
+        setLoading(true)
         fetch('/api/admin/vip')
             .then(res => res.json())
             .then(data => {
-                if (data.applications) setApps(data.applications)
+                if (data.applications) {
+                    const applications: VipApp[] = data.applications
+                    setApps(applications)
+
+                    // Calculate stats
+                    setStats({
+                        total: applications.length,
+                        pending: applications.filter(a => a.status === 'new').length,
+                        approved: applications.filter(a => a.status === 'approved').length,
+                        whales: applications.filter(a => a.asset_volume === '> 1,000,000 USD' || a.asset_volume === '> 100,000 USD').length // Rough estimate based on expected strings
+                    })
+                }
             })
             .catch(console.error)
             .finally(() => setLoading(false))
     }, [])
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'new': return <Badge className="bg-blue-500">New</Badge>
-            case 'contacted': return <Badge className="bg-yellow-500">Contacted</Badge>
-            case 'approved': return <Badge className="bg-green-500">Approved</Badge>
-            case 'rejected': return <Badge className="bg-red-500">Rejected</Badge>
-            default: return <Badge className="bg-slate-500">{status}</Badge>
-        }
-    }
-
-    const getContactIcon = (method: string) => {
-        switch (method) {
-            case 'line': return <div className="p-1 bg-[#06C755]/10 text-[#06C755] rounded"><MessageCircle size={16} /></div>
-            case 'telegram': return <div className="p-1 bg-[#229ED9]/10 text-[#229ED9] rounded"><MessageCircle size={16} /></div>
-            default: return <div className="p-1 bg-neutral-900 text-neutral-400 rounded"><Phone size={16} /></div>
-        }
-    }
+    useEffect(() => {
+        fetchApplications()
+    }, [fetchApplications])
 
     // New function for handling actions
     const handleAction = async (id: string, action: 'approve' | 'reject') => {
@@ -102,7 +113,7 @@ export default function AdminVipPage() {
                         <CardContent><div className="text-2xl font-bold text-green-500">{stats.approved}</div></CardContent>
                     </Card>
                     <Card className="bg-neutral-900 border-white/5">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Whales (&gt;1M)</CardTitle></CardHeader>
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-neutral-400">Whales (&gt;100k)</CardTitle></CardHeader>
                         <CardContent><div className="text-2xl font-bold text-purple-500">{stats.whales}</div></CardContent>
                     </Card>
                 </div>

@@ -14,7 +14,58 @@ import { Trash2, Megaphone, AlertTriangle, Info } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 
-// ... imports
+import { UploadCloud } from 'lucide-react'
+
+function RichMenuManager() {
+    const [loading, setLoading] = useState(false)
+    const [result, setResult] = useState<{ success?: boolean, error?: string } | null>(null)
+
+    const handleDeploy = async () => {
+        if (!confirm('This will overwrite the current active Rich Menu for ALL users. Continue?')) return
+        setLoading(true)
+        setResult(null)
+        try {
+            const res = await fetch('/api/admin/rich-menu', { method: 'POST' })
+            const data = await res.json()
+            if (res.ok) {
+                setResult({ success: true })
+                alert('Rich Menu deployed successfully!')
+            } else {
+                setResult({ error: data.error })
+                alert('Deployment failed: ' + data.error)
+            }
+        } catch (e: any) {
+            setResult({ error: e.message })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-neutral-950 border-white/5">
+            <div className="space-y-1">
+                <div className="font-medium text-white">Deploy Default Menu</div>
+                <div className="text-xs text-neutral-500">
+                    Reads <code>/public/richmenu.png</code> (2500x1686) and applies "App Launcher" layout.
+                </div>
+                {result?.error && <div className="text-xs text-red-500 pt-1">Error: {result.error}</div>}
+                {result?.success && <div className="text-xs text-green-500 pt-1">Deployed successfully.</div>}
+            </div>
+            <Button
+                onClick={handleDeploy}
+                disabled={loading}
+                className="bg-white text-black hover:bg-neutral-200 font-bold"
+            >
+                {loading ? (
+                    <UploadCloud className="h-4 w-4 animate-bounce mr-2" />
+                ) : (
+                    <UploadCloud className="h-4 w-4 mr-2" />
+                )}
+                {loading ? 'Deploying...' : 'Deploy to LINE'}
+            </Button>
+        </div>
+    )
+}
 
 function AnnouncementManager() {
     const [message, setMessage] = useState('')
@@ -247,6 +298,16 @@ export default function SettingsPage() {
                                 </Button>
                             </div>
                         ))}
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader>
+                        <CardTitle className="text-white">LINE Rich Menu</CardTitle>
+                        <p className="text-sm text-neutral-400">Deploy the <code>public/richmenu.png</code> as the default menu for all users.</p>
+                    </CardHeader>
+                    <CardContent>
+                        <RichMenuManager />
                     </CardContent>
                 </Card>
             </div>
