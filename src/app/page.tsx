@@ -6,19 +6,27 @@ import { User, Zap, Send } from 'lucide-react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 
 function HomeContent() {
   const { isLoggedIn, profile } = useLiff()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const redirectPath = searchParams.get('path')
 
-  // Performance Optimization: 
-  // If there is a redirect path, show a loader immediately instead of the landing page.
-  // This prevents the "Flash of Landing Page" during client-side redirects (RouteHandler).
-  // Ideally middleware handles this, but this is a fail-safe for perceived speed.
+  // Performance Optimization & Fail-safe Redirect
+  // If there is a redirect path, show a loader and FORCE redirect immediately.
+  useEffect(() => {
+    if (redirectPath) {
+      // Decode URI component just in case, though usually processed by next
+      const target = decodeURIComponent(redirectPath)
+      console.log('Force redirecting to:', target)
+      router.replace(target)
+    }
+  }, [redirectPath, router])
+
   if (redirectPath) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white space-y-4">
