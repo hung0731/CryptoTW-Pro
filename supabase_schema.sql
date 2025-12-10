@@ -79,8 +79,18 @@ FOR SELECT USING (is_published = true AND access_level = 'free');
 -- Pro content requires logic, for now enable read for all to simplify dev, will restrict later
 CREATE POLICY "Allow read all content" ON public.content FOR SELECT USING (is_published = true);
 
+-- Admin modification policies for Content
+CREATE POLICY "Allow admin all content" ON public.content FOR ALL USING (
+    (SELECT membership_status FROM users WHERE id = auth.uid()) = 'admin' OR auth.role() = 'service_role'
+);
+
 -- Activities:
 CREATE POLICY "Allow public read activities" ON public.activities FOR SELECT USING (is_active = true);
+
+-- Admin modification policies for Activities
+CREATE POLICY "Allow admin all activities" ON public.activities FOR ALL USING (
+    (SELECT membership_status FROM users WHERE id = auth.uid()) = 'admin' OR auth.role() = 'service_role'
+);
 
 -- Analytics Events Table
 CREATE TABLE analytics_events (

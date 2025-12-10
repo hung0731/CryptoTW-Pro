@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('content')
             .select('*')
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('content')
             .insert({
@@ -53,6 +55,7 @@ export async function PUT(req: NextRequest) {
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
 
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('content')
             .update({
@@ -81,6 +84,7 @@ export async function DELETE(req: NextRequest) {
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
 
+        const supabase = createAdminClient()
         const { error } = await supabase
             .from('content')
             .delete()
