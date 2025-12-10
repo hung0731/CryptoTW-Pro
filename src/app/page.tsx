@@ -8,8 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 import { useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { Suspense } from 'react'
 
-export default function Home() {
+function HomeContent() {
   const { isLoggedIn, profile } = useLiff()
   const searchParams = useSearchParams()
   const redirectPath = searchParams.get('path')
@@ -95,5 +96,13 @@ export default function Home() {
         </p>
       </footer>
     </main>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
   )
 }
