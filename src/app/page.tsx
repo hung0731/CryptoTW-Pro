@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { User, Crown, Zap, Activity, ChevronRight, TrendingUp, Sparkles, Send } from 'lucide-react'
+import { User, Crown, Zap, Activity, ChevronRight, TrendingUp, Sparkles, Send, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
