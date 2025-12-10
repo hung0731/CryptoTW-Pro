@@ -67,7 +67,7 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-6 md:p-8 space-y-8 w-full">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-white">總覽 (Overview)</h1>

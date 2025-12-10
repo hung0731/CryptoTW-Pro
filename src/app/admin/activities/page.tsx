@@ -119,7 +119,7 @@ export default function ActivitiesAdminPage() {
     }
 
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-6 md:p-8 space-y-8 w-full">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-white">活動管理 (Events)</h1>

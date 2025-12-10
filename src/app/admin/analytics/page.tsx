@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
     const totalClicks = Object.values(stats).reduce((acc, curr) => acc + curr.clicks, 0)
 
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-6 md:p-8 space-y-8 w-full">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight text-white">數據分析 (Analytics)</h1>
                 <p className="text-neutral-400 mt-2">查看交易所活動成效與用戶增長。</p>

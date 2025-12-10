@@ -80,7 +80,7 @@ export default function PushAdminPage() {
     }
 
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-6 md:p-8 space-y-8 w-full">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight text-white">推播訊息 (Push Notification)</h1>
                 <p className="text-neutral-400 mt-2">發送 LINE 推播訊息給用戶。請謹慎使用以避免被封鎖。</p>

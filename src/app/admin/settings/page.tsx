@@ -426,7 +426,7 @@ function ExchangeManager() {
 
 export default function AdminSettings() {
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="p-6 md:p-8 space-y-8 w-full">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight text-white">設定 (Settings)</h1>
                 <p className="text-neutral-400 mt-2">管理推薦連結、系統公告與 LINE 選單。</p>
