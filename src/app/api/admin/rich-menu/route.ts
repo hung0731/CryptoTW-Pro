@@ -9,15 +9,15 @@ const getRichMenuObject = (liffId: string) => ({
         height: 1686
     },
     selected: true,
-    name: "CryptoTW Pro Menu v2",
+    name: "CryptoTW Pro Menu v3",
     chatBarText: "開啟選單",
     areas: [
-        // A: Top Main (0,0) - 2500x843 - Action: Open LIFF Home
+        // A: Top Main (0,0) - 2500x843 - Action: Open Feed (Pro Page)
         {
             bounds: { x: 0, y: 0, width: 2500, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}/?path=/`
+                uri: `https://liff.line.me/${liffId}/feed?path=/feed`
             }
         },
         // B: Bottom Left (0,843) - 833x843 - Action: Open VIP
