@@ -147,10 +147,10 @@ export default function FeedPage() {
         <main className="min-h-screen font-sans bg-black text-white pb-24">
 
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-4 pb-0 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
+            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
+                <div className="flex items-center justify-between px-4 h-14">
                     <div className="flex items-center gap-2">
-                        <img src="/logo.svg" alt="CryptoTW" className="h-8 w-auto" />
+                        <img src="/logo.svg" alt="CryptoTW" className="h-6 w-auto" />
                     </div>
                     {profile && (
                         <Link href="/profile">
@@ -159,45 +159,110 @@ export default function FeedPage() {
                     )}
                 </div>
 
-                {/* Tabs */}
-                <Tabs defaultValue="all" className="w-full">
-                    <TabsList className="bg-transparent p-0 gap-6 h-auto w-full justify-start overflow-x-auto no-scrollbar border-b border-transparent">
-                        <TabsTrigger value="all" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                            全部
-                        </TabsTrigger>
-                        <TabsTrigger value="news" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                            快訊
-                        </TabsTrigger>
-                        <TabsTrigger value="alpha" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                            深度 / 原創
-                        </TabsTrigger>
-                        <TabsTrigger value="weekly" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                            週報
-                        </TabsTrigger>
-                    </TabsList>
+                {/* Tabs - Inside Header to keep sticky */}
+                <div className="px-4 pb-0">
+                    <Tabs defaultValue="all" className="w-full">
+                        <TabsList className="bg-transparent p-0 gap-6 h-auto w-full justify-start overflow-x-auto no-scrollbar border-b border-transparent">
+                            <TabsTrigger value="all" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                全部
+                            </TabsTrigger>
+                            <TabsTrigger value="news" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                快訊
+                            </TabsTrigger>
+                            <TabsTrigger value="alpha" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                深度 / 原創
+                            </TabsTrigger>
+                            <TabsTrigger value="weekly" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                週報
+                            </TabsTrigger>
+                        </TabsList>
 
-                    <div className="mt-4 space-y-8 max-w-md mx-auto">
-                        {/* Market Signals (Only show on 'all' or specific tab? Let's show on All and News) */}
-                        <TabsContent value="all" className="mt-0">
-                            <MarketActivities activities={activities} />
-                            <ContentList items={content} />
-                        </TabsContent>
-
-                        <TabsContent value="news" className="mt-0">
-                            <MarketActivities activities={activities} />
-                            <ContentList items={getFilteredContent('news')} />
-                        </TabsContent>
-
-                        <TabsContent value="alpha" className="mt-0">
-                            <ContentList items={getFilteredContent('alpha')} />
-                        </TabsContent>
-
-                        <TabsContent value="weekly" className="mt-0">
-                            <ContentList items={getFilteredContent('weekly')} />
-                        </TabsContent>
-                    </div>
-                </Tabs>
+                        {/* Tabs Content - Move outside header if you want content to scroll UNDER header, 
+                            BUT Tabs component structure usually wraps content. 
+                            If we keep content inside Tabs, the whole Tabs component is in Header which is wrong for scrolling.
+                            
+                            Refactoring: We need to lift state up or use TabsPrimitive correctly to separate List and Content.
+                            OR just render TabsContent OUTSIDE header.
+                            
+                            Let's separate standard Tabs usage.
+                        */}
+                    </Tabs>
+                </div>
             </header>
+
+            {/* Main Content Area - Re-implementing Tabs manually or using context if feasible. 
+                Radix Tabs usually requires all in one Root. 
+                To fix this, we will wrap the whole page in Tabs Root, put List in Header, and Content in Main.
+            */}
+            <Tabs defaultValue="all" className="w-full">
+                {/* Re-declaring Tabs List in fixed header requires matching Root. 
+                     Actually simpler: Keep Header sticky, put TabsList inside it. 
+                     But TabsContent must be outside header to scroll.
+                     
+                     Solution: 
+                     Wrap <main> in <Tabs>. 
+                     Header contains <TabsList>.
+                     Container contains <TabsContent>.
+                 */}
+            </Tabs>
+
+            {/* 
+               Correct approach for Sticky Header + Scrollable Content with Radix Tabs:
+               1. Root wraps everything.
+               2. Header (sticky) contains List.
+               3. Main (scrollable) contains Content.
+            */}
+
+            <Tabs defaultValue="all" className="w-full">
+                <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 pt-2">
+                    <div className="flex items-center justify-between px-4 pb-2">
+                        <div className="flex items-center gap-2">
+                            <img src="/logo.svg" alt="CryptoTW" className="h-6 w-auto" />
+                        </div>
+                        {profile && (
+                            <Link href="/profile">
+                                <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20" />
+                            </Link>
+                        )}
+                    </div>
+                    <div className="px-4">
+                        <TabsList className="bg-transparent p-0 gap-6 h-auto w-full justify-start overflow-x-auto no-scrollbar border-b border-transparent">
+                            <TabsTrigger value="all" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                全部
+                            </TabsTrigger>
+                            <TabsTrigger value="news" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                快訊
+                            </TabsTrigger>
+                            <TabsTrigger value="alpha" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                深度 / 原創
+                            </TabsTrigger>
+                            <TabsTrigger value="weekly" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
+                                週報
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
+                </header>
+
+                <div className="mt-6 px-4 space-y-8 max-w-md mx-auto min-h-screen">
+                    <TabsContent value="all" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <MarketActivities activities={activities} />
+                        <ContentList items={content} />
+                    </TabsContent>
+
+                    <TabsContent value="news" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <MarketActivities activities={activities} />
+                        <ContentList items={getFilteredContent('news')} />
+                    </TabsContent>
+
+                    <TabsContent value="alpha" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <ContentList items={getFilteredContent('alpha')} />
+                    </TabsContent>
+
+                    <TabsContent value="weekly" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <ContentList items={getFilteredContent('weekly')} />
+                    </TabsContent>
+                </div>
+            </Tabs>
         </main>
     )
 }

@@ -15,8 +15,11 @@ export default function Home() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-white/[0.03] blur-3xl rounded-full pointer-events-none" />
 
       {/* Header (Minimal) */}
-      <header className="absolute top-0 z-50 w-full p-6">
-        <div className="container mx-auto flex justify-end items-center">
+      <header className="absolute top-0 z-50 w-full p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          {/* Small Logo for Brand Presence */}
+          <img src="/logo.svg" alt="CryptoTW" className="h-6 w-auto opacity-80" />
+
           {isLoggedIn && profile && (
             <Link href="/profile">
               <Avatar className="h-8 w-8 cursor-pointer ring-1 ring-white/20 hover:ring-white/50 transition-all">

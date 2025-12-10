@@ -122,17 +122,23 @@ export default function BindingPage() {
 
     return (
         <div className="min-h-screen bg-black text-white p-4 pb-20 font-sans">
-            <div className="max-w-md mx-auto space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
+                <div className="flex items-center justify-between px-4 h-14 max-w-md mx-auto w-full">
                     <div className="flex items-center gap-2">
                         <Link href="/register">
-                            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white hover:bg-white/10 rounded-full"><ArrowLeft className="h-5 w-5" /></Button>
+                            <Button variant="ghost" size="icon" className="hover:bg-white/10 text-neutral-400 hover:text-white rounded-full">
+                                <ArrowLeft className="h-5 w-5" />
+                            </Button>
                         </Link>
-                        <h1 className="text-xl font-bold">綁定 {exchange.name}</h1>
+                        <h1 className="text-lg font-bold tracking-tight text-white">
+                            綁定 {exchange.name}
+                        </h1>
                     </div>
-                    <img src="/logo.svg" alt="Logo" className="h-6 w-auto opacity-80" />
+                    <img src="/logo.svg" alt="Logo" className="h-6 w-auto" />
                 </div>
+            </header>
+
+            <div className="max-w-md mx-auto p-4 space-y-6">
 
                 {/* Step 1: Register */}
                 <Card className="bg-neutral-900 border-white/10">
