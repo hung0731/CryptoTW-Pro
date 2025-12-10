@@ -78,7 +78,7 @@ export default function AdminVipPage() {
                         <CardContent><div className="text-2xl font-bold text-blue-600">{apps.filter(a => a.status === 'new').length}</div></CardContent>
                     </Card>
                     <Card>
-                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Whales (>1M)</CardTitle></CardHeader>
+                        <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Whales (&gt;1M)</CardTitle></CardHeader>
                         <CardContent><div className="text-2xl font-bold text-amber-600">{apps.filter(a => a.asset_tier === '>1M').length}</div></CardContent>
                     </Card>
                 </div>
