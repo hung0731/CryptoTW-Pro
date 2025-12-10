@@ -5,6 +5,7 @@ CREATE TABLE public.users (
     display_name TEXT,
     picture_url TEXT,
     membership_status TEXT CHECK (membership_status IN ('free', 'pending', 'pro')) DEFAULT 'free',
+    notification_preferences JSONB DEFAULT '{"market_signals": true, "airdrops": true, "news": true}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -48,6 +48,41 @@ export default function ProfilePage() {
         }
     }
 
+    const handleToggle = async (key: string) => {
+        if (!dbUser || !profile) return
+
+        const currentSettings = dbUser.notification_preferences || {
+            market_signals: true,
+            airdrops: true,
+            news: true
+        }
+
+        const newSettings = {
+            ...currentSettings,
+            [key]: !currentSettings[key as keyof typeof currentSettings]
+        }
+
+        // Optimistic update (need to update local dbUser state ideally, but simpler to just call API)
+        // For now, we rely on re-fetching or handling local state if we had a setDbUser
+        // Since we don't expose setDbUser from useLiff, we might just call API and force reload or just wait for next fetch
+        // To make UI responsive, we really should have local state or update the context.
+        // Let's assume we trigger an update via API and maybe reload.
+
+        try {
+            await fetch('/api/user/settings', {
+                method: 'POST',
+                body: JSON.stringify({
+                    lineUserId: profile.userId,
+                    settings: newSettings
+                })
+            })
+            // Force reload to reflect changes for now since we don't have setDbUser in context
+            window.location.reload()
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     if (authLoading) return <div className="p-8"><Skeleton className="h-20 w-full rounded-2xl" /></div>
 
     if (!isLoggedIn) {
@@ -191,7 +226,51 @@ export default function ProfilePage() {
                             </Button>
                         </Link>
                     )}
+
+                    {/* Notification Settings */}
+                    <div className="pt-6">
+                        <h3 className="font-bold text-lg flex items-center gap-2 mb-4">推播設定 🔔</h3>
+                        <Card className="border-0 shadow-sm bg-white/90">
+                            <CardContent className="p-0 divide-y divide-slate-100">
+                                <NotificationToggle
+                                    label="關鍵交易信號"
+                                    desc="接收高勝率買賣點位通知"
+                                    checked={dbUser?.notification_preferences?.market_signals ?? true}
+                                    onToggle={() => handleToggle('market_signals')}
+                                />
+                                <NotificationToggle
+                                    label="精選空投機會"
+                                    desc="即時獲取代幣空投活動資訊"
+                                    checked={dbUser?.notification_preferences?.airdrops ?? true}
+                                    onToggle={() => handleToggle('airdrops')}
+                                />
+                                <NotificationToggle
+                                    label="市場快訊"
+                                    desc="每日重點新聞與市場動向"
+                                    checked={dbUser?.notification_preferences?.news ?? true}
+                                    onToggle={() => handleToggle('news')}
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
+            </div>
+        </div>
+    )
+}
+
+function NotificationToggle({ label, desc, checked, onToggle }: { label: string, desc: string, checked: boolean, onToggle: () => void }) {
+    return (
+        <div className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+            <div className="space-y-0.5">
+                <div className="font-medium text-slate-900">{label}</div>
+                <div className="text-xs text-slate-500">{desc}</div>
+            </div>
+            <div
+                onClick={onToggle}
+                className={`w-11 h-6 rounded-full flex items-center transition-colors cursor-pointer px-0.5 ${checked ? 'bg-indigo-500' : 'bg-slate-300'}`}
+            >
+                <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-[20px]' : ''}`} />
             </div>
         </div>
     )

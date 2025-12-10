@@ -22,6 +22,11 @@ export interface Database {
                     display_name: string | null
                     picture_url: string | null
                     membership_status: MembershipStatus
+                    notification_preferences: {
+                        market_signals: boolean
+                        airdrops: boolean
+                        news: boolean
+                    }
                     created_at: string
                     updated_at: string
                 }
