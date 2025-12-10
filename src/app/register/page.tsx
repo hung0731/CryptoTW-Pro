@@ -34,7 +34,7 @@ export default function RegisterPage() {
     if (authLoading) return <div className="p-8 text-center"><Skeleton className="h-10 w-full rounded-2xl" /></div>
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/20 p-4 pb-20">
+        <div className="min-h-screen bg-slate-50 p-4 pb-20">
             <div className="max-w-md mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex items-center gap-2 mb-2">
@@ -48,7 +48,7 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                <div className="bg-white/60 backdrop-blur-sm border border-white/50 rounded-2xl p-6 shadow-sm">
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                     <h2 className="text-lg font-bold mb-2">解鎖 Alpha 會員資格 🔓</h2>
                     <p className="text-muted-foreground text-sm leading-relaxed">
                         為了獲取 Pro 級別的市場洞察與空投機會，請註冊我們合作的交易所並綁定 UID。
@@ -56,48 +56,43 @@ export default function RegisterPage() {
                     </p>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid grid-cols-1 gap-5 sm:gap-6">
                     {loadingExchanges ? (
                         <>
-                            <Skeleton className="h-28 w-full rounded-2xl" />
-                            <Skeleton className="h-28 w-full rounded-2xl" />
-                            <Skeleton className="h-28 w-full rounded-2xl" />
+                            <Skeleton className="h-20 w-full rounded-md" />
+                            <Skeleton className="h-20 w-full rounded-md" />
+                            <Skeleton className="h-20 w-full rounded-md" />
                         </>
                     ) : exchanges.map((ex) => (
-                        <Card key={ex.id} className="relative overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 border-0 shadow-md group bg-white/80">
-                            <Link href={`/register/${ex.slug}`} className="block h-full">
-                                <CardContent className="p-0 flex items-stretch h-28">
-                                    {/* Logo/Brand Area */}
-                                    <div className={`w-28 flex items-center justify-center font-bold text-lg bg-slate-900 text-white relative overflow-hidden`}>
-                                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-                                        {ex.logo_url ? (
-                                            <img src={ex.logo_url} alt={ex.name} className="h-12 w-12 object-contain relative z-10 transform group-hover:scale-110 transition-transform" />
-                                        ) : (
-                                            <span className="text-2xl relative z-10">{ex.name[0]}</span>
-                                        )}
-                                    </div>
-
-                                    {/* Info Area */}
-                                    <div className="flex-1 p-5 flex flex-col justify-between">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-bold text-lg">{ex.name}</h3>
-                                            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] font-bold tracking-wider bg-yellow-100 text-yellow-700 border-yellow-200">
-                                                獨家優惠 🎁
+                        <Link href={`/register/${ex.slug}`} key={ex.id} className="block w-full">
+                            <Card className="flex flex-row w-full gap-0 rounded-md shadow-sm overflow-hidden py-0 border-slate-200 cursor-pointer group hover:shadow-md transition-all">
+                                <div className="flex w-16 shrink-0 items-center justify-center bg-slate-50 text-sm font-medium border-r border-slate-100">
+                                    {ex.logo_url ? (
+                                        <img src={ex.logo_url} alt={ex.name} className="h-8 w-8 object-contain transition-transform group-hover:scale-110" />
+                                    ) : (
+                                        <span className="text-xl text-slate-300 group-hover:text-primary transition-colors">{ex.name[0]}</span>
+                                    )}
+                                </div>
+                                <CardContent className="flex flex-1 items-center justify-between truncate p-0 bg-white">
+                                    <div className="flex-1 truncate px-4 py-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="font-medium text-slate-900 group-hover:text-primary transition-colors text-base">{ex.name}</span>
+                                            <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-bold bg-primary/5 text-primary border-primary/10">
+                                                獨家優惠
                                             </Badge>
                                         </div>
-                                        <div className="flex items-end justify-between">
-                                            <div className="text-sm text-slate-500 font-medium">
-                                                <span className="block text-xs text-slate-400 mb-0.5">推薦碼:</span>
-                                                <span className="text-primary truncate block w-40">{ex.referral_link}</span>
-                                            </div>
-                                            <div className="bg-slate-100 p-1.5 rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
-                                                <ChevronRight className="h-4 w-4" />
-                                            </div>
-                                        </div>
+                                        <p className="text-slate-500 text-xs truncate flex items-center gap-1">
+                                            推薦碼 <span className="font-mono text-slate-900">{ex.referral_link}</span>
+                                        </p>
+                                    </div>
+                                    <div className="shrink-0 pr-4">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-slate-50 group-hover:bg-primary group-hover:text-white transition-colors">
+                                            <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-white" />
+                                        </Button>
                                     </div>
                                 </CardContent>
-                            </Link>
-                        </Card>
+                            </Card>
+                        </Link>
                     ))}
                 </div>
             </div>

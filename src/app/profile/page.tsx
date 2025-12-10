@@ -102,7 +102,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/20 p-4 pb-20">
+        <div className="min-h-screen bg-slate-50 p-4 pb-20">
             <div className="max-w-md mx-auto space-y-6">
                 {/* Header */}
                 <div className="flex items-center gap-2 mb-4">
@@ -114,20 +114,19 @@ export default function ProfilePage() {
 
                 {/* Profile Card */}
                 <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-indigo-500/20 blur-xl transform scale-95" />
-                    <Card className="relative bg-white/80 backdrop-blur-xl border-white/50 shadow-lg overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-slate-100 to-slate-200/50" />
+                    <Card className="relative bg-white border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-24 bg-slate-100/50" />
                         <CardContent className="pt-12 flex flex-col items-center relative z-10">
-                            <Avatar className="h-24 w-24 mb-4 ring-4 ring-white shadow-md">
+                            <Avatar className="h-24 w-24 mb-4 ring-4 ring-white shadow-sm bg-white">
                                 <AvatarImage src={profile?.pictureUrl} />
-                                <AvatarFallback><User className="h-10 w-10" /></AvatarFallback>
+                                <AvatarFallback><User className="h-10 w-10 text-slate-300" /></AvatarFallback>
                             </Avatar>
                             <h2 className="text-2xl font-black text-slate-900 tracking-tight">{profile?.displayName}</h2>
                             <div className="mt-2 flex items-center gap-2">
                                 {dbUser?.membership_status === 'pro' ? (
-                                    <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 border-0 shadow-sm px-3 py-1 text-sm">Alpha 指揮官 💎</Badge>
+                                    <Badge className="bg-primary text-primary-foreground border-0 shadow-sm px-3 py-1 text-sm bg-primary hover:bg-primary/90">Alpha 指揮官 💎</Badge>
                                 ) : dbUser?.membership_status === 'pending' ? (
-                                    <Badge variant="outline" className="text-orange-500 border-orange-500 bg-orange-50">審核中 ⏳</Badge>
+                                    <Badge variant="outline" className="text-slate-600 border-slate-300 bg-slate-50">審核中 ⏳</Badge>
                                 ) : (
                                     <Badge variant="secondary" className="bg-slate-100 text-slate-600">探索者 🌱</Badge>
                                 )}
@@ -147,13 +146,13 @@ export default function ProfilePage() {
 
                     {loading ? (
                         <div className="space-y-3">
-                            <Skeleton className="h-24 w-full rounded-2xl" />
-                            <Skeleton className="h-24 w-full rounded-2xl" />
+                            <Skeleton className="h-20 w-full rounded-md" />
+                            <Skeleton className="h-20 w-full rounded-md" />
                         </div>
                     ) : bindings.length === 0 ? (
-                        <Card className="border-2 border-dashed bg-white/50 border-slate-200">
+                        <Card className="border-2 border-dashed bg-white border-slate-200 shadow-none">
                             <CardContent className="py-10 text-center text-muted-foreground flex flex-col items-center gap-4">
-                                <div className="p-4 bg-slate-100 rounded-full">
+                                <div className="p-4 bg-slate-50 rounded-full">
                                     <AlertCircle className="h-8 w-8 text-slate-300" />
                                 </div>
                                 <div>
@@ -161,61 +160,56 @@ export default function ProfilePage() {
                                     <p className="text-xs mt-1">綁定交易所即可解鎖 Alpha 權限</p>
                                 </div>
                                 <Link href="/register">
-                                    <Button size="sm" className="rounded-full px-6">立即綁定</Button>
+                                    <Button size="sm" className="rounded-full px-6 bg-slate-900 text-white hover:bg-slate-800">立即綁定</Button>
                                 </Link>
                             </CardContent>
                         </Card>
                     ) : (
-                        bindings.map(b => (
-                            <Card key={b.id} className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white/90 group">
-                                <CardContent className="p-5">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <div className="flex items-center gap-3">
-                                                <Badge variant="outline" className="uppercase font-bold bg-slate-50 border-slate-200 text-slate-700 tracking-wider">
-                                                    {b.exchange_name}
-                                                </Badge>
-                                                <span className="font-mono text-sm font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                                                    {b.exchange_uid}
-                                                </span>
+                        <div className="grid grid-cols-1 gap-5">
+                            {bindings.map(b => (
+                                <Card key={b.id} className="flex flex-row w-full gap-0 rounded-md shadow-sm overflow-hidden py-0 border-slate-200">
+                                    <div className="flex w-16 shrink-0 items-center justify-center bg-slate-50 text-sm font-medium border-r border-slate-100 uppercase text-slate-500">
+                                        {b.exchange_name.slice(0, 3)}
+                                    </div>
+                                    <CardContent className="flex flex-1 items-center justify-between truncate p-0 bg-white">
+                                        <div className="flex-1 truncate px-4 py-3">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-medium text-slate-900 text-base">{b.exchange_name}</span>
+                                                <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">UID: {b.exchange_uid}</span>
                                             </div>
-                                            <div className="text-[10px] text-muted-foreground mt-2 font-medium uppercase tracking-wide">
-                                                提交於 {new Date(b.created_at).toLocaleDateString()}
-                                            </div>
+                                            {b.status === 'rejected' ? (
+                                                <p className="text-xs text-red-500 truncate font-medium">
+                                                    驗證失敗: {b.rejection_reason || '請重新檢查'}
+                                                </p>
+                                            ) : (
+                                                <p className="text-xs text-slate-500 truncate">
+                                                    提交於 {new Date(b.created_at).toLocaleDateString()}
+                                                </p>
+                                            )}
                                         </div>
-                                        <div>
+                                        <div className="shrink-0 pr-4">
                                             {b.status === 'verified' && (
-                                                <div className="bg-green-100 text-green-700 p-1.5 rounded-full">
+                                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                                     <CheckCircle className="h-5 w-5" />
                                                 </div>
                                             )}
                                             {b.status === 'pending' && (
-                                                <div className="bg-orange-100 text-orange-600 p-1.5 rounded-full animate-pulse">
-                                                    <RefreshCw className="h-5 w-5" />
+                                                <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 animate-pulse">
+                                                    <RefreshCw className="h-4 w-4" />
                                                 </div>
                                             )}
                                             {b.status === 'rejected' && (
-                                                <div className="bg-red-100 text-red-600 p-1.5 rounded-full">
-                                                    <XCircle className="h-5 w-5" />
-                                                </div>
+                                                <Link href={`/register/${b.exchange_name}`}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100">
+                                                        <ChevronRight className="h-5 w-5" />
+                                                    </Button>
+                                                </Link>
                                             )}
                                         </div>
-                                    </div>
-                                    {b.status === 'rejected' && (
-                                        <div className="mt-4 bg-red-50 p-3 rounded-lg text-xs text-red-600 border border-red-100 flex items-start gap-2">
-                                            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                                            <div>
-                                                <span className="font-bold block mb-1">驗證失敗</span>
-                                                原因: {b.rejection_reason || '資訊不正確。'}
-                                                <Link href={`/register/${b.exchange_name}`} className="underline font-bold mt-2 block hover:text-red-800">
-                                                    更新資訊 →
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        ))
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
                     )}
 
                     {/* Add Exchange Button */}
@@ -230,7 +224,7 @@ export default function ProfilePage() {
                     {/* Notification Settings */}
                     <div className="pt-6">
                         <h3 className="font-bold text-lg flex items-center gap-2 mb-4">推播設定 🔔</h3>
-                        <Card className="border-0 shadow-sm bg-white/90">
+                        <Card className="border border-slate-200 shadow-sm bg-white">
                             <CardContent className="p-0 divide-y divide-slate-100">
                                 <NotificationToggle
                                     label="關鍵交易信號"
@@ -268,7 +262,7 @@ function NotificationToggle({ label, desc, checked, onToggle }: { label: string,
             </div>
             <div
                 onClick={onToggle}
-                className={`w-11 h-6 rounded-full flex items-center transition-colors cursor-pointer px-0.5 ${checked ? 'bg-indigo-500' : 'bg-slate-300'}`}
+                className={`w-11 h-6 rounded-full flex items-center transition-colors cursor-pointer px-0.5 ${checked ? 'bg-primary' : 'bg-slate-300'}`}
             >
                 <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-[20px]' : ''}`} />
             </div>
