@@ -142,8 +142,8 @@ export default function AdminVipPage() {
                                             <Badge
                                                 variant={app.status === 'approved' ? 'default' : app.status === 'rejected' ? 'destructive' : 'secondary'}
                                                 className={`uppercase tracking-wider font-bold ${app.status === 'approved' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' :
-                                                        app.status === 'rejected' ? 'bg-red-950/50 text-red-500 hover:bg-red-900/50' :
-                                                            'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                                                    app.status === 'rejected' ? 'bg-red-950/50 text-red-500 hover:bg-red-900/50' :
+                                                        'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
                                                     }`}
                                             >
                                                 {app.status}
@@ -214,4 +214,3 @@ export default function AdminVipPage() {
         </div>
     )
 }
-```
