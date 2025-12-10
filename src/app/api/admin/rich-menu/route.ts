@@ -17,7 +17,7 @@ const getRichMenuObject = (liffId: string) => ({
             bounds: { x: 0, y: 0, width: 2500, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}/feed?path=/feed`
+                uri: `https://liff.line.me/${liffId}?path=/feed`
             }
         },
         // B: Bottom Left (0,843) - 833x843 - Action: Open VIP
@@ -25,7 +25,7 @@ const getRichMenuObject = (liffId: string) => ({
             bounds: { x: 0, y: 843, width: 833, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}/vip?path=/vip`
+                uri: `https://liff.line.me/${liffId}?path=/vip`
             }
         },
         // C: Bottom Center (833,843) - 834x843 - Action: Open Register
@@ -33,7 +33,7 @@ const getRichMenuObject = (liffId: string) => ({
             bounds: { x: 833, y: 843, width: 834, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}/register?path=/register`
+                uri: `https://liff.line.me/${liffId}?path=/register`
             }
         },
         // D: Bottom Right (1667,843) - 833x843 - Action: Open Profile
@@ -41,7 +41,7 @@ const getRichMenuObject = (liffId: string) => ({
             bounds: { x: 1667, y: 843, width: 833, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}/profile?path=/profile`
+                uri: `https://liff.line.me/${liffId}?path=/profile`
             }
         }
     ]
