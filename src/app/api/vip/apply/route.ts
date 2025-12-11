@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 import { sendAdminNotification } from '@/lib/notify'
 
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
-        const supabase = createClient()
+        const supabase = createAdminClient()
         const { error } = await supabase
             .from('vip_applications')
             .insert({
