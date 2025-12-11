@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import liff from '@line/liff'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database'
+import GlobalLoader from './GlobalLoader'
 
 type DBUser = Database['public']['Tables']['users']['Row']
 
@@ -101,6 +102,7 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
 
     return (
         <LiffContext.Provider value={{ liffObject, isLoggedIn, profile, dbUser, error, isLoading }}>
+            {isLoading && <GlobalLoader />}
             {children}
         </LiffContext.Provider>
     )

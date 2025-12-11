@@ -36,22 +36,28 @@ export default function RegisterPage() {
     return (
         <div className="min-h-screen bg-black p-4 pb-20 text-white">
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="flex items-center justify-between px-4 h-14 max-w-md mx-auto w-full">
-                    <div className="flex items-center gap-2">
+                <div className="grid grid-cols-3 items-center px-4 h-14 max-w-md mx-auto w-full">
+                    <div className="flex items-center justify-start">
                         <Link href="/">
                             <Button variant="ghost" size="icon" className="hover:bg-white/10 text-neutral-400 hover:text-white rounded-full">
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                         </Link>
-                        <h1 className="text-lg font-bold tracking-tight text-white">
-                            選擇交易所
-                        </h1>
                     </div>
-                    <img src="/logo.svg" alt="Logo" className="h-6 w-auto" />
+                    <div className="flex items-center justify-center">
+                        <img src="/logo.svg" alt="Logo" className="h-5 w-auto" />
+                    </div>
+                    <div className="flex items-center justify-end">
+                        {/* Right Slot */}
+                    </div>
                 </div>
             </header>
 
             <div className="max-w-md mx-auto p-4 space-y-6">
+
+                <h1 className="text-2xl font-bold tracking-tight text-white px-1">
+                    選擇交易所
+                </h1>
 
                 <div className="bg-neutral-900 border border-white/5 rounded-2xl p-6 shadow-sm">
                     <h2 className="text-lg font-bold mb-2 text-white">解鎖 Pro 會員資格 🔓</h2>

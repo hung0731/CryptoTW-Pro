@@ -148,15 +148,20 @@ export default function FeedPage() {
 
             {/* Header */}
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="flex items-center justify-between px-4 h-14">
-                    <div className="flex items-center gap-2">
-                        <img src="/logo.svg" alt="CryptoTW" className="h-6 w-auto" />
+                <div className="grid grid-cols-3 items-center px-4 h-14">
+                    <div className="flex items-center justify-start">
+                        {/* Left Slot */}
                     </div>
-                    {profile && (
-                        <Link href="/profile">
-                            <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20" />
-                        </Link>
-                    )}
+                    <div className="flex items-center justify-center">
+                        <img src="/logo.svg" alt="CryptoTW" className="h-5 w-auto" />
+                    </div>
+                    <div className="flex items-center justify-end">
+                        {profile && (
+                            <Link href="/profile">
+                                <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20" />
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
                 {/* Tabs - Inside Header to keep sticky */}
@@ -215,15 +220,20 @@ export default function FeedPage() {
 
             <Tabs defaultValue="all" className="w-full">
                 <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 pt-2">
-                    <div className="flex items-center justify-between px-4 pb-2">
-                        <div className="flex items-center gap-2">
-                            <img src="/logo.svg" alt="CryptoTW" className="h-6 w-auto" />
+                    <div className="grid grid-cols-3 items-center px-4 pb-2 h-14">
+                        <div className="flex items-center justify-start">
+                            {/* Left Slot - Empty or Back Button */}
                         </div>
-                        {profile && (
-                            <Link href="/profile">
-                                <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20" />
-                            </Link>
-                        )}
+                        <div className="flex items-center justify-center">
+                            <img src="/logo.svg" alt="CryptoTW" className="h-5 w-auto" />
+                        </div>
+                        <div className="flex items-center justify-end">
+                            {profile && (
+                                <Link href="/profile">
+                                    <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20" />
+                                </Link>
+                            )}
+                        </div>
                     </div>
                     <div className="px-4">
                         <TabsList className="bg-transparent p-0 gap-6 h-auto w-full justify-start overflow-x-auto no-scrollbar border-b border-transparent">

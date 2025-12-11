@@ -78,17 +78,22 @@ export default function VipPage() {
     return (
         <div className="min-h-screen bg-black text-white font-sans pb-20">
             {/* Header */}
+            {/* Header */}
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="container mx-auto px-4 h-14 flex items-center justify-between max-w-md">
-                    <div className="flex items-center gap-2">
+                <div className="container mx-auto px-4 h-14 grid grid-cols-3 items-center max-w-md">
+                    <div className="flex items-center justify-start">
                         <Link href="/">
                             <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white hover:bg-white/10 rounded-full">
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                         </Link>
-                        <span className="font-bold tracking-tight text-lg text-white">VIP Access</span>
                     </div>
-                    <img src="/logo.svg" alt="CryptoTW" className="h-6 w-auto" />
+                    <div className="flex items-center justify-center">
+                        <img src="/logo.svg" alt="CryptoTW" className="h-5 w-auto" />
+                    </div>
+                    <div className="flex items-center justify-end">
+                        {/* Right Slot Empty */}
+                    </div>
                 </div>
             </header>
 
