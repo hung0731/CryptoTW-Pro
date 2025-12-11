@@ -16,6 +16,7 @@ interface PredictionCardProps {
     className?: string
     type?: 'group' | 'single'
     groupOutcomes?: { label: string, probability: string }[]
+    category?: string
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -30,7 +31,7 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null
 }
 
-export function PredictionCard({ title, image, probability, volume, className, type = 'single', groupOutcomes }: PredictionCardProps) {
+export function PredictionCard({ title, image, probability, volume, className, type = 'single', groupOutcomes, category }: PredictionCardProps) {
     // Single Mode Logic
     const prob = probability ? parseFloat(probability) : 0
     const isHighProb = prob > 50
@@ -42,9 +43,16 @@ export function PredictionCard({ title, image, probability, volume, className, t
                     <div className="w-8 h-8 rounded-full bg-neu-800 shrink-0 overflow-hidden bg-neutral-800 border border-white/10 flex items-center justify-center">
                         <img src={image} alt="" className="w-full h-full object-cover opacity-80" />
                     </div>
-                    <h3 className="font-medium text-neutral-200 text-sm leading-snug line-clamp-2">
-                        {title}
-                    </h3>
+                    <div className="space-y-1">
+                        {category && (
+                            <div className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-neutral-800 text-neutral-400 border border-white/5 mb-1">
+                                {category}
+                            </div>
+                        )}
+                        <h3 className="font-medium text-neutral-200 text-sm leading-snug line-clamp-2">
+                            {title}
+                        </h3>
+                    </div>
                 </div>
 
                 {type === 'group' && groupOutcomes ? (

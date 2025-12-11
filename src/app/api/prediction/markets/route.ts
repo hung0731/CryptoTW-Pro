@@ -62,7 +62,8 @@ export async function GET(req: NextRequest) {
                 image: eventImage,
                 volume: eventData.volume,
                 type: 'group',
-                groupOutcomes: groupOutcomes
+                groupOutcomes: groupOutcomes,
+                category: '總經'
             }
         }).filter(Boolean)
 
