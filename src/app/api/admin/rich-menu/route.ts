@@ -41,7 +41,7 @@ const getRichMenuObject = (liffId: string) => ({
             bounds: { x: 833, y: 843, width: 834, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/prediction`
+                uri: `https://liff.line.me/${liffId}?path=/vip`
             }
         },
         // D: Bottom Right (1667,843) - 833x843 - Action: Open Profile (User Settings)

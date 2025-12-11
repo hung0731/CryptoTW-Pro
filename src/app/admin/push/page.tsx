@@ -101,8 +101,8 @@ export default function PushAdminPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">所有用戶 (All Users)</SelectItem>
-                                        <SelectItem value="vip">僅限 VIP (Pro Only)</SelectItem>
-                                        <SelectItem value="pending_vip">待審核 VIP (Pending)</SelectItem>
+                                        <SelectItem value="vip">僅限 大客戶 (Pro Only)</SelectItem>
+                                        <SelectItem value="pending_vip">待審核 大客戶 (Pending)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

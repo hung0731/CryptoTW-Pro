@@ -228,7 +228,7 @@ export default function ContentAdminPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="free">免費 (Free)</SelectItem>
-                                        <SelectItem value="pro">Pro 會員 (VIP)</SelectItem>
+                                        <SelectItem value="pro">Pro 會員 (大客戶)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

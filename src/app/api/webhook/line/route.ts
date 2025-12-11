@@ -56,7 +56,7 @@ const WELCOME_FLEX_MESSAGE = {
                         },
                         {
                             type: "text",
-                            text: "• VIP 與機構服務",
+                            text: "• 大客戶計畫與機構服務",
                             size: "sm",
                             color: "#333333"
                         }

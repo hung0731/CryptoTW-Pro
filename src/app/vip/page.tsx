@@ -62,7 +62,7 @@ export default function VipPage() {
                     <div>
                         <h2 className="text-2xl font-bold text-white mb-2">Application Submitted</h2>
                         <p className="text-neutral-400">
-                            感謝您的申請。專屬顧問將會在 24 小時內聯繫您，為您開通 VIP 權限。
+                            感謝您的申請。專屬顧問將會在 24 小時內聯繫您，為您開通 大客戶計畫 權限。
                         </p>
                     </div>
                     <Link href="/">
@@ -106,7 +106,7 @@ export default function VipPage() {
                         <span>私人客戶</span>
                     </div>
                     <h1 className="text-4xl font-bold tracking-tighter text-white">
-                        CryptoTW Prime
+                        CryptoTW 大客戶計畫
                     </h1>
                     <p className="text-neutral-400 leading-relaxed">
                         專為高淨值交易者打造。<br />

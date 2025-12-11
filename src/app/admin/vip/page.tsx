@@ -99,8 +99,8 @@ export default function AdminVipPage() {
         <div className="p-6 md:p-8 space-y-8 w-full">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white">VIP 申請管理</h1>
-                    <p className="text-neutral-400 mt-2">管理與審核所有 VIP 資格申請。總計申請數: {stats.total}</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-white">大客戶計畫 申請管理</h1>
+                    <p className="text-neutral-400 mt-2">管理與審核所有 大客戶計畫 資格申請。總計申請數: {stats.total}</p>
                 </div>
             </div>
 
