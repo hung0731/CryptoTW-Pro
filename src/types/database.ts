@@ -15,9 +15,107 @@ export type ExchangeName = 'binance' | 'okx' | 'bybit' | 'bingx' | 'pionex' | 'a
 export interface Database {
     public: {
         Tables: {
-            // ... users ...
-            // ... exchange_bindings ...
-            // ... content ...
+            users: {
+                Row: {
+                    id: string
+                    line_user_id: string
+                    display_name: string | null
+                    picture_url: string | null
+                    membership_status: MembershipStatus
+                    notification_preferences: {
+                        market_signals: boolean
+                        airdrops: boolean
+                        news: boolean
+                    }
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    line_user_id: string
+                    display_name?: string | null
+                    picture_url?: string | null
+                    membership_status?: MembershipStatus
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    line_user_id?: string
+                    display_name?: string | null
+                    picture_url?: string | null
+                    membership_status?: MembershipStatus
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
+            exchange_bindings: {
+                Row: {
+                    id: string
+                    user_id: string
+                    exchange_name: ExchangeName
+                    exchange_uid: string
+                    status: BindingStatus
+                    rejection_reason: string | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    exchange_name: ExchangeName
+                    exchange_uid: string
+                    status?: BindingStatus
+                    rejection_reason?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    exchange_name?: ExchangeName
+                    exchange_uid?: string
+                    status?: BindingStatus
+                    rejection_reason?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
+            content: {
+                Row: {
+                    id: string
+                    title: string
+                    body: string | null
+                    type: ContentType
+                    access_level: AccessLevel
+                    is_published: boolean
+                    author_id: string | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    title: string
+                    body?: string | null
+                    type: ContentType
+                    access_level?: AccessLevel
+                    is_published?: boolean
+                    author_id?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    title?: string
+                    body?: string | null
+                    type?: ContentType
+                    access_level?: AccessLevel
+                    is_published?: boolean
+                    author_id?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
             activities: {
                 Row: {
                     id: string
