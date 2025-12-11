@@ -2,41 +2,49 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 
-// Layout Definition (Template 4: Large, 1 Top + 3 Bottom)
+// Layout Definition (Template: Large, 2 Top + 3 Bottom)
 const getRichMenuObject = (liffId: string) => ({
     size: {
         width: 2500,
         height: 1686
     },
     selected: true,
-    name: "CryptoTW Pro Menu v3",
+    name: "CryptoTW Pro Menu v4",
     chatBarText: "開啟選單",
     areas: [
-        // A: Top Main (0,0) - 2500x843 - Action: Open Feed (Pro Page)
+        // A1: Top Left (0,0) - 1250x843 - Action: Open Feed (Entering System)
         {
-            bounds: { x: 0, y: 0, width: 2500, height: 843 },
+            bounds: { x: 0, y: 0, width: 1250, height: 843 },
             action: {
                 type: "uri",
                 uri: `https://liff.line.me/${liffId}?path=/feed`
             }
         },
-        // B: Bottom Left (0,843) - 833x843 - Action: Open VIP
+        // A2: Top Right (1250,0) - 1250x843 - Action: Open Register (Join Pro)
         {
-            bounds: { x: 0, y: 843, width: 833, height: 843 },
-            action: {
-                type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/vip`
-            }
-        },
-        // C: Bottom Center (833,843) - 834x843 - Action: Open Register
-        {
-            bounds: { x: 833, y: 843, width: 834, height: 843 },
+            bounds: { x: 1250, y: 0, width: 1250, height: 843 },
             action: {
                 type: "uri",
                 uri: `https://liff.line.me/${liffId}?path=/register`
             }
         },
-        // D: Bottom Right (1667,843) - 833x843 - Action: Open Profile
+        // B: Bottom Left (0,843) - 833x843 - Action: Open Register (Welfare Center)
+        {
+            bounds: { x: 0, y: 843, width: 833, height: 843 },
+            action: {
+                type: "uri",
+                uri: `https://liff.line.me/${liffId}?path=/register`
+            }
+        },
+        // C: Bottom Center (833,843) - 834x843 - Action: Open VIP (Big Client Plan)
+        {
+            bounds: { x: 833, y: 843, width: 834, height: 843 },
+            action: {
+                type: "uri",
+                uri: `https://liff.line.me/${liffId}?path=/vip`
+            }
+        },
+        // D: Bottom Right (1667,843) - 833x843 - Action: Open Profile (User Settings)
         {
             bounds: { x: 1667, y: 843, width: 833, height: 843 },
             action: {
