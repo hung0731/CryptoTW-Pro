@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Loader2, Mail, CheckCircle, AlertCircle } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
     const searchParams = useSearchParams()
     const [email, setEmail] = useState('')
     const [loading, setLoading] = useState(false)
@@ -100,8 +100,9 @@ export default function LoginPage() {
                         </div>
 
                         {error && (
-                            <div className="text-red-400 text-sm bg-red-950/30 p-3 rounded border border-red-900/50">
-                                {error}
+                            <div className="text-red-400 text-sm bg-red-950/30 p-3 rounded border border-red-900/50 flex items-start gap-2">
+                                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                <span>{error}</span>
                             </div>
                         )}
 
@@ -113,5 +114,13 @@ export default function LoginPage() {
                 </CardContent>
             </Card>
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>}>
+            <LoginForm />
+        </Suspense>
     )
 }
