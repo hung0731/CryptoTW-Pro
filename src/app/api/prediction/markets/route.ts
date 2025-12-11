@@ -4,91 +4,73 @@ export const revalidate = 1800 // 30 minutes cache
 
 export async function GET(req: NextRequest) {
     try {
-        const { searchParams } = new URL(req.url)
-        const limit = searchParams.get('limit') || '20'
-
-        // 1. Fetch Pinned Event (Fed Decision)
-        const pinnedSlug = 'fed-decision-in-january'
-        const pinnedUrl = `https://gamma-api.polymarket.com/events?slug=${pinnedSlug}`
-
-        // 2. Fetch Trending Markets
-        const trendingUrl = `https://gamma-api.polymarket.com/markets?limit=${limit}&active=true&closed=false&order=volume&ascending=false`
-
-        const [pinnedRes, trendingRes] = await Promise.all([
-            fetch(pinnedUrl, { next: { revalidate: 1800 } }),
-            fetch(trendingUrl, { next: { revalidate: 1800 } })
-        ])
-
-        let pinnedMarkets: any[] = []
-        if (pinnedRes.ok) {
-            const pinnedData = await pinnedRes.json()
-            if (pinnedData && pinnedData.length > 0 && pinnedData[0].markets) {
-                // Determine the image to use (Event image is usually better for grouped markets)
-                const eventImage = pinnedData[0].image
-
-                // Aggregate Fed Decision markets into one group
-                const groupOutcomes = pinnedData[0].markets.map((m: any) => {
-                    let probability = 0
-                    try {
-                        const prices = JSON.parse(m.outcomePrices)
-                        probability = parseFloat(prices[0]) * 100
-                    } catch (e) {
-                        probability = 0
-                    }
-                    return {
-                        id: m.id,
-                        label: m.groupItemTitle || m.question, // Use group title like "25 bps decrease"
-                        probability: probability.toFixed(1),
-                        color: probability > 50 ? 'green' : 'neutral'
-                    }
-                }).sort((a: any, b: any) => parseFloat(b.probability) - parseFloat(a.probability)) // Sort by probability descending
-
-                pinnedMarkets = [{
-                    id: pinnedData[0].id || 'fed-decision-group',
-                    title: pinnedData[0].title, // "Fed decision in January?"
-                    image: eventImage,
-                    volume: pinnedData[0].volume, // Total event volume
-                    type: 'group',
-                    groupOutcomes: groupOutcomes
-                }]
+        // defined events configuration
+        const eventsConfig = [
+            {
+                slug: 'fed-decision-in-january',
+                title: '美國聯準會(Fed) 會在 1 月降息嗎',
+                id_override: 'fed-jan'
+            },
+            {
+                slug: 'fed-decision-in-march-885',
+                title: '美國聯準會(Fed) 會在 3 月降息嗎',
+                id_override: 'fed-mar'
+            },
+            {
+                slug: 'fed-decision-in-april',
+                title: '美國聯準會(Fed) 會在 4 月降息嗎',
+                id_override: 'fed-apr'
             }
-        }
+        ]
 
-        let trendingMarkets: any[] = []
-        if (trendingRes.ok) {
-            const trendingData = await trendingRes.json()
-            trendingMarkets = trendingData.map((m: any) => {
+        // Fetch all events in parallel
+        const responses = await Promise.all(
+            eventsConfig.map(config =>
+                fetch(`https://gamma-api.polymarket.com/events?slug=${config.slug}`, {
+                    next: { revalidate: 1800 }
+                }).then(res => res.json().catch(() => null))
+            )
+        )
+
+        const markets = responses.map((data, index) => {
+            if (!data || data.length === 0 || !data[0].markets) return null
+
+            const eventData = data[0]
+            const config = eventsConfig[index]
+            const eventImage = eventData.image
+
+            // Process outcomes
+            const groupOutcomes = eventData.markets.map((m: any) => {
                 let probability = 0
                 try {
                     const prices = JSON.parse(m.outcomePrices)
                     probability = parseFloat(prices[0]) * 100
                 } catch (e) {
-                    probability = 50
+                    probability = 0
                 }
-
                 return {
                     id: m.id,
-                    title: m.question,
-                    image: m.image,
-                    volume: m.volume,
+                    label: m.groupItemTitle || m.question,
                     probability: probability.toFixed(1),
-                    endDate: m.endDate,
-                    outcomes: JSON.parse(m.outcomes || '[]')
+                    color: probability > 50 ? 'green' : 'neutral'
                 }
-            })
-        }
+            }).sort((a: any, b: any) => parseFloat(b.probability) - parseFloat(a.probability))
 
-        // 3. Merge and Dedup
-        const pinnedIds = new Set(pinnedMarkets.map(m => m.id))
-        const finalMarkets = [
-            ...pinnedMarkets,
-            ...trendingMarkets.filter(m => !pinnedIds.has(m.id))
-        ]
+            return {
+                id: config.id_override,
+                title: config.title,
+                image: eventImage,
+                volume: eventData.volume,
+                type: 'group',
+                groupOutcomes: groupOutcomes
+            }
+        }).filter(Boolean)
 
-        return NextResponse.json({ markets: finalMarkets })
+        return NextResponse.json({ markets })
 
     } catch (e: any) {
         console.error('Prediction API Error:', e)
         return NextResponse.json({ error: 'Failed to fetch prediction markets' }, { status: 500 })
     }
 }
+
