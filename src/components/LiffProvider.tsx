@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import liff from '@line/liff'
+import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database'
 
 type DBUser = Database['public']['Tables']['users']['Row']
@@ -69,6 +70,16 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                             if (res.ok) {
                                 const data = await res.json()
                                 setDbUser(data.user)
+
+                                // Set Supabase Session
+                                if (data.session) {
+                                    const { error: sessionError } = await supabase.auth.setSession(data.session)
+                                    if (sessionError) {
+                                        console.error('Supabase SetSession Error:', sessionError)
+                                    } else {
+                                        console.log('Supabase Auth: Session set successfully')
+                                    }
+                                }
                             } else {
                                 console.error('Failed to sync user with backend')
                             }

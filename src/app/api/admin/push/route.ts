@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 import { multicastMessage } from '@/lib/line-bot'
 
 const BATCH_SIZE = 500
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Message is required' }, { status: 400 })
         }
 
-        const supabase = createClient()
+        const supabase = createAdminClient()
 
         // 1. Create Record
         const { data: record, error: dbError } = await supabase
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
     try {
-        const supabase = createClient()
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('push_messages')
             .select('*')
