@@ -7,11 +7,16 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { RefreshCw, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useLiff } from '@/components/LiffProvider'
+import { ProAccessGate } from '@/components/ProAccessGate'
 
 export default function PredictionPage() {
+    const { isLoggedIn, profile, dbUser, isLoading: isAuthLoading } = useLiff()
     const [markets, setMarkets] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('all')
+
+    const hasAccess = !isAuthLoading && dbUser && (dbUser.membership_status === 'pro' || dbUser.membership_status === 'lifetime')
 
     const categories = [
         { id: 'all', label: '全部' },
@@ -36,8 +41,25 @@ export default function PredictionPage() {
     }
 
     useEffect(() => {
-        fetchMarkets()
-    }, [])
+        if (hasAccess) {
+            fetchMarkets()
+        } else {
+            setLoading(false) // Stop loading if no access to prevent infinite loading state
+        }
+    }, [hasAccess])
+
+    if (isAuthLoading) {
+        return (
+            <div className="min-h-screen bg-black p-4 space-y-8">
+                <Skeleton className="h-12 w-full bg-neutral-900" />
+                <Skeleton className="h-40 w-full bg-neutral-900" />
+            </div>
+        )
+    }
+
+    if (!hasAccess) {
+        return <ProAccessGate />
+    }
 
     const filteredMarkets = activeTab === 'all'
         ? markets

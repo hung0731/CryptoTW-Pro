@@ -6,7 +6,7 @@ export type Json =
     | { [key: string]: Json | undefined }
     | Json[]
 
-export type MembershipStatus = 'free' | 'pending' | 'pro'
+export type MembershipStatus = 'free' | 'pending' | 'pro' | 'lifetime'
 export type BindingStatus = 'pending' | 'verified' | 'rejected'
 export type AccessLevel = 'free' | 'pro'
 export type ContentType = 'news' | 'alpha' | 'weekly'

@@ -20,28 +20,28 @@ const getRichMenuObject = (liffId: string) => ({
                 uri: `https://liff.line.me/${liffId}?path=/feed`
             }
         },
-        // A2: Top Right (1250,0) - 1250x843 - Action: Open Register (Join Pro)
+        // A2: Top Right (1250,0) - 1250x843 - Action: Open Join Page (How to Pro)
         {
             bounds: { x: 1250, y: 0, width: 1250, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/register`
+                uri: `https://liff.line.me/${liffId}?path=/join`
             }
         },
-        // B: Bottom Left (0,843) - 833x843 - Action: Open Register (Welfare Center)
+        // B: Bottom Left (0,843) - 833x843 - Action: Open Events
         {
             bounds: { x: 0, y: 843, width: 833, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/register`
+                uri: `https://liff.line.me/${liffId}?path=/events`
             }
         },
-        // C: Bottom Center (833,843) - 834x843 - Action: Open VIP (Big Client Plan)
+        // C: Bottom Center (833,843) - 834x843 - Action: Open Prediction
         {
             bounds: { x: 833, y: 843, width: 834, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/vip`
+                uri: `https://liff.line.me/${liffId}?path=/prediction`
             }
         },
         // D: Bottom Right (1667,843) - 833x843 - Action: Open Profile (User Settings)
