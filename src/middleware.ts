@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
         // Also check for localhost development cookie if applicable, but strict mode prefers strict check.
 
         if (!hasAuthCookie) {
-            console.warn(`Security: Unauthorized access attempt to ${request.nextUrl.pathname} from ${request.ip}`)
+            console.warn(`Security: Unauthorized access attempt to ${request.nextUrl.pathname}`)
             const loginUrl = new URL('/login', request.url)
             loginUrl.searchParams.set('error', 'unauthorized')
             return NextResponse.redirect(loginUrl)
