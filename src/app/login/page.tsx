@@ -30,7 +30,9 @@ function LoginForm() {
             const { error } = await supabase.auth.signInWithOtp({
                 email,
                 options: {
-                    emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/admin` : undefined
+                    emailRedirectTo: typeof window !== 'undefined'
+                        ? `${window.location.origin}/auth/callback?next=/admin`
+                        : undefined
                 }
             })
 

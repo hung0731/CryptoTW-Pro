@@ -57,20 +57,15 @@ function HomeContent() {
 
         {/* Single CTA Button */}
         <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-          <a
-            href="https://lin.ee/cQQ52w9"
-            target="_blank"
-            rel="noreferrer"
-            className="block w-full"
-          >
+          <Link href="/join" className="block w-full">
             <Button
               size="lg"
               className="w-full rounded-full bg-white text-black hover:bg-neutral-200 font-bold h-12 text-sm tracking-wide shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all hover:scale-[1.02]"
             >
               <Send className="mr-2 h-4 w-4" />
-              立即加入 LINE
+              立即加入 / 升級 Pro
             </Button>
-          </a>
+          </Link>
         </div>
 
       </div>
