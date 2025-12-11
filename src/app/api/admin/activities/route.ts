@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json()
-        const { title, exchange_name, description, url, is_active } = body
+        const { title, exchange_name, description, content, url, is_active, end_date } = body
 
         if (!title || !exchange_name) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -34,7 +34,10 @@ export async function POST(req: NextRequest) {
                 title,
                 exchange_name,
                 description,
+                content, // Added
                 url,
+                start_date: new Date().toISOString(), // Default to now for creation
+                end_date: end_date || null, // Added
                 is_active: is_active || false
             })
             .select()
@@ -51,7 +54,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     try {
         const body = await req.json()
-        const { id, title, exchange_name, description, url, is_active } = body
+        const { id, title, exchange_name, description, content, url, is_active, end_date } = body
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
 
@@ -62,7 +65,9 @@ export async function PUT(req: NextRequest) {
                 title,
                 exchange_name,
                 description,
+                content, // Added
                 url,
+                end_date: end_date || null, // Added
                 is_active,
             })
             .eq('id', id)

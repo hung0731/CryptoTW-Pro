@@ -32,7 +32,7 @@ export function ProAccessGate() {
                             title: "註冊交易所",
                             desc: "使用我們的推薦連結註冊指定交易所。",
                             action: "前往註冊",
-                            link: "/register"
+                            link: "/vip"
                         },
                         {
                             icon: <LinkIcon className="w-5 h-5" />,
