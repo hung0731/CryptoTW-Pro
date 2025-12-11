@@ -66,79 +66,32 @@ export async function POST(req: NextRequest) {
                 const { pushMessage } = await import('@/lib/line-bot')
 
                 // Flex Message: Verification Success
-                // Primary Color approx: #7544FC (Manual conversion or use hardcoded hex matching the vibe)
-                // The Oklch oklch(0.488 0.243 264.376) is a strong Purple/Violet. 
-                // Let's use #7c3aed (Violet 600) as a safe fallback or specific hex if needed.
-                const BRAND_COLOR = '#7C3AED'
+                const BRAND_COLOR = '#211FFF'
 
                 await pushMessage(updatedUser.line_user_id, [
                     {
                         type: "flex",
-                        altText: "恭喜！CryptoTW Pro 權限已開通 🚀",
+                        altText: "Membership Status Update",
                         contents: {
                             type: "bubble",
-                            hero: {
-                                type: "image",
-                                url: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2832&auto=format&fit=crop",
-                                size: "full",
-                                aspectRatio: "20:13",
-                                aspectMode: "cover",
-                                action: {
-                                    type: "uri",
-                                    uri: "https://pro.cryptotw.io/profile"
-                                }
-                            },
                             body: {
                                 type: "box",
                                 layout: "vertical",
                                 contents: [
                                     {
                                         type: "text",
-                                        text: "身份驗證成功",
+                                        text: "Membership Activated",
                                         weight: "bold",
                                         size: "xl",
-                                        color: BRAND_COLOR
+                                        color: "#000000"
                                     },
                                     {
                                         type: "text",
-                                        text: "歡迎加入 Pro 核心圈",
-                                        weight: "bold",
-                                        size: "md",
-                                        color: "#111111",
-                                        margin: "md"
-                                    },
-                                    {
-                                        type: "text",
-                                        text: "您現在可以解鎖以下權限：",
+                                        text: "Pro Status Confirmed",
+                                        weight: "regular",
                                         size: "xs",
-                                        color: "#999999",
+                                        color: BRAND_COLOR,
                                         margin: "sm"
-                                    },
-                                    {
-                                        type: "box",
-                                        layout: "vertical",
-                                        margin: "md",
-                                        spacing: "sm",
-                                        contents: [
-                                            {
-                                                type: "text",
-                                                text: "✅ 關鍵交易信號",
-                                                size: "sm",
-                                                color: "#555555"
-                                            },
-                                            {
-                                                type: "text",
-                                                text: "✅ 精選空投機會",
-                                                size: "sm",
-                                                color: "#555555"
-                                            },
-                                            {
-                                                type: "text",
-                                                text: "✅ Pro 級別市場洞察",
-                                                size: "sm",
-                                                color: "#555555"
-                                            }
-                                        ]
                                     },
                                     {
                                         type: "separator",
@@ -157,17 +110,17 @@ export async function POST(req: NextRequest) {
                                                 contents: [
                                                     {
                                                         type: "text",
-                                                        text: "綁定 UID",
+                                                        text: "Account",
                                                         color: "#aaaaaa",
-                                                        size: "xs",
+                                                        size: "sm",
                                                         flex: 2
                                                     },
                                                     {
                                                         type: "text",
-                                                        text: binding.exchange_uid,
+                                                        text: updatedUser.display_name || "User",
                                                         wrap: true,
                                                         color: "#666666",
-                                                        size: "xs",
+                                                        size: "sm",
                                                         flex: 4
                                                     }
                                                 ]
@@ -179,17 +132,39 @@ export async function POST(req: NextRequest) {
                                                 contents: [
                                                     {
                                                         type: "text",
-                                                        text: "會員等級",
+                                                        text: "UID Bounded",
                                                         color: "#aaaaaa",
-                                                        size: "xs",
+                                                        size: "sm",
                                                         flex: 2
                                                     },
                                                     {
                                                         type: "text",
-                                                        text: "CryptoTW Pro 💎",
+                                                        text: binding.exchange_uid,
                                                         wrap: true,
-                                                        color: BRAND_COLOR,
-                                                        size: "xs",
+                                                        color: "#666666",
+                                                        size: "sm",
+                                                        flex: 4
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                type: "box",
+                                                layout: "baseline",
+                                                spacing: "sm",
+                                                contents: [
+                                                    {
+                                                        type: "text",
+                                                        text: "Status",
+                                                        color: "#aaaaaa",
+                                                        size: "sm",
+                                                        flex: 2
+                                                    },
+                                                    {
+                                                        type: "text",
+                                                        text: "Active Pro Member",
+                                                        wrap: true,
+                                                        color: "#000000",
+                                                        size: "sm",
                                                         flex: 4,
                                                         weight: "bold"
                                                     }
@@ -210,13 +185,12 @@ export async function POST(req: NextRequest) {
                                         height: "sm",
                                         action: {
                                             type: "uri",
-                                            label: "🚀 立即進入 Pro 核心圈",
-                                            uri: "https://liff.line.me/" + process.env.NEXT_PUBLIC_LIFF_ID
+                                            label: "Access Pro Dashboard",
+                                            uri: "https://liff.line.me/" + process.env.NEXT_PUBLIC_LIFF_ID + "?path=/feed"
                                         },
-                                        color: BRAND_COLOR
+                                        color: "#000000"
                                     }
-                                ],
-                                flex: 0
+                                ]
                             }
                         }
                     }

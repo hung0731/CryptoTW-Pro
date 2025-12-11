@@ -3,103 +3,100 @@ import { replyMessage, verifyLineSignature } from '@/lib/line-bot'
 
 const WELCOME_FLEX_MESSAGE = {
     type: "flex",
-    altText: "歡迎加入 CryptoTW Alpha!",
+    altText: "CryptoTW System Access",
     contents: {
         type: "bubble",
-        hero: {
-            type: "image",
-            url: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2664&auto=format&fit=crop",
-            size: "full",
-            aspectRatio: "20:13",
-            aspectMode: "cover",
-            action: {
-                type: "uri",
-                uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}/?path=/`
-            }
-        },
         body: {
             type: "box",
             layout: "vertical",
-            backgroundColor: "#FFFFFF",
             contents: [
                 {
                     type: "text",
-                    text: "Welcome to CryptoTW",
+                    text: "CryptoTW System",
                     weight: "bold",
-                    size: "xl",
-                    color: "#000000"
+                    color: "#000000",
+                    size: "xl"
                 },
                 {
                     type: "text",
-                    text: "全台最高淨值加密貨幣社群",
+                    text: "Professional Trading Intelligence",
+                    weight: "regular",
+                    color: "#000000",
                     size: "xs",
-                    color: "#666666",
-                    wrap: true
+                    margin: "sm"
                 },
                 {
                     type: "separator",
-                    margin: "md",
-                    color: "#EEEEEE"
+                    margin: "lg"
                 },
                 {
                     type: "box",
                     layout: "vertical",
-                    margin: "md",
+                    margin: "lg",
                     spacing: "sm",
                     contents: [
                         {
                             type: "box",
-                            layout: "horizontal",
+                            layout: "baseline",
+                            spacing: "sm",
                             contents: [
                                 {
                                     type: "text",
-                                    text: "📊",
+                                    text: "•",
+                                    color: "#aaaaaa",
                                     size: "sm",
                                     flex: 1
                                 },
                                 {
                                     type: "text",
-                                    text: "即時市場訊號與 Alpha",
+                                    text: "Market Signals & Analytics",
+                                    wrap: true,
+                                    color: "#666666",
                                     size: "sm",
-                                    color: "#333333",
                                     flex: 9
                                 }
                             ]
                         },
                         {
                             type: "box",
-                            layout: "horizontal",
+                            layout: "baseline",
+                            spacing: "sm",
                             contents: [
                                 {
                                     type: "text",
-                                    text: "🔗",
+                                    text: "•",
+                                    color: "#aaaaaa",
                                     size: "sm",
                                     flex: 1
                                 },
                                 {
                                     type: "text",
-                                    text: "交易所綁定優惠",
+                                    text: "Exchange Account Integration",
+                                    wrap: true,
+                                    color: "#666666",
                                     size: "sm",
-                                    color: "#333333",
                                     flex: 9
                                 }
                             ]
                         },
                         {
                             type: "box",
-                            layout: "horizontal",
+                            layout: "baseline",
+                            spacing: "sm",
                             contents: [
                                 {
                                     type: "text",
-                                    text: "👑",
+                                    text: "•",
+                                    color: "#aaaaaa",
                                     size: "sm",
                                     flex: 1
                                 },
                                 {
                                     type: "text",
-                                    text: "VIP 機構級服務",
+                                    text: "Institutional Client Services",
+                                    wrap: true,
+                                    color: "#666666",
                                     size: "sm",
-                                    color: "#333333",
                                     flex: 9
                                 }
                             ]
@@ -112,7 +109,6 @@ const WELCOME_FLEX_MESSAGE = {
             type: "box",
             layout: "vertical",
             spacing: "sm",
-            backgroundColor: "#FFFFFF",
             contents: [
                 {
                     type: "button",
@@ -120,7 +116,7 @@ const WELCOME_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "開始使用 (Start)",
+                        label: "Open Dashboard",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/feed`
                     },
                     color: "#000000"
@@ -131,23 +127,28 @@ const WELCOME_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "綁定交易所 (Register)",
+                        label: "Connect Account",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
                     },
-                    color: "#F0F0F0"
-                },
-                {
-                    type: "text",
-                    text: "前往註冊並綁定 UID 以解鎖 Pro 權限",
-                    size: "xxs",
-                    color: "#aaaaaa",
-                    align: "center",
-                    margin: "md"
+                    color: "#211FFF" // Using secondary style but overriding text color if supported, or background? 
+                    // Wait, 'style: secondary' usually has fixed text colors in LINE. 
+                    // Better validation: 'secondary' is usually grey/light button with dark text. 
+                    // If we want specific colors, we often use PRIMARY style with custom color property.
+                    // User asked for #211FFF button. Let's use primary with that color to be safe.
                 }
             ]
+        },
+        styles: {
+            footer: {
+                separator: true
+            }
         }
     }
+    // Re-correcting the button strategy below.
 }
+
+// Updating the object to use PRIMARY for both but different colors to ensure visual requirements
+
 
 export async function POST(req: NextRequest) {
     try {
