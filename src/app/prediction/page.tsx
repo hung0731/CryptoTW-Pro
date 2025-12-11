@@ -85,6 +85,25 @@ export default function PredictionPage() {
                         ))
                     )}
                 </div>
+
+                {/* Disclaimer */}
+                <div className="mt-12 py-8 border-t border-white/5 space-y-4">
+                    <h3 className="text-sm font-bold text-neutral-300">關於 Polymarket 與免責聲明</h3>
+                    <div className="text-xs text-neutral-500 space-y-4 leading-relaxed">
+                        <p>
+                            本頁面數據引用自去中心化預測市場平台 <span className="text-neutral-400">Polymarket</span>，僅供資訊研究與學術參考，不代表本站立場。
+                            本站與該平台無任何商業合作或代理關係，亦不提供任何投資建議。
+                        </p>
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 space-y-2">
+                            <p className="font-bold text-red-400">⚠️ 重要法律提示</p>
+                            <p className="text-red-300/80">
+                                根據中華民國《公職人員選舉罷免法》及相關法令，預測市場可能涉及博弈或影響選舉之爭議。
+                                使用者若欲前往該平台進行任何操作，請務必自行了解並遵守您所在地之當地法律法規（特別是台灣地區使用者），以免觸法。
+                                切勿以身試法，本站不承擔任何法律責任。
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <BottomNav />

@@ -94,7 +94,3 @@ export function PredictionCard({ title, image, probability, volume, className, t
         </Card>
     )
 }
-            </CardContent >
-        </Card >
-    )
-}
