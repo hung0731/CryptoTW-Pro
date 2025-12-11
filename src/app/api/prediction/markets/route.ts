@@ -26,26 +26,31 @@ export async function GET(req: NextRequest) {
                 // Determine the image to use (Event image is usually better for grouped markets)
                 const eventImage = pinnedData[0].image
 
-                pinnedMarkets = pinnedData[0].markets.map((m: any) => {
-                    // Calculate probability
+                // Aggregate Fed Decision markets into one group
+                const groupOutcomes = pinnedData[0].markets.map((m: any) => {
                     let probability = 0
                     try {
                         const prices = JSON.parse(m.outcomePrices)
                         probability = parseFloat(prices[0]) * 100
                     } catch (e) {
-                        probability = 50
+                        probability = 0
                     }
-
                     return {
                         id: m.id,
-                        title: m.question,
-                        image: eventImage || m.image, // Use event image if available
-                        volume: m.volume,
+                        label: m.groupItemTitle || m.question, // Use group title like "25 bps decrease"
                         probability: probability.toFixed(1),
-                        endDate: m.endDate,
-                        outcomes: JSON.parse(m.outcomes || '[]')
+                        color: probability > 50 ? 'green' : 'neutral'
                     }
-                })
+                }).sort((a: any, b: any) => parseFloat(b.probability) - parseFloat(a.probability)) // Sort by probability descending
+
+                pinnedMarkets = [{
+                    id: pinnedData[0].id || 'fed-decision-group',
+                    title: pinnedData[0].title, // "Fed decision in January?"
+                    image: eventImage,
+                    volume: pinnedData[0].volume, // Total event volume
+                    type: 'group',
+                    groupOutcomes: groupOutcomes
+                }]
             }
         }
 

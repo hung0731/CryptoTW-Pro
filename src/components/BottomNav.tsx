@@ -1,6 +1,6 @@
 'use client'
 
-import { Home, Crown, User, TrendingUp } from 'lucide-react'
+import { Home, Gift, User, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -11,16 +11,16 @@ export function BottomNav() {
     // Define navigation items
     const navItems = [
         {
-            label: '首頁',
+            label: '文章',
             icon: Home,
             href: '/feed',
             active: pathname === '/feed' || pathname.startsWith('/content')
         },
         {
-            label: 'VIP',
-            icon: Crown,
-            href: '/vip',
-            active: pathname === '/vip'
+            label: '活動',
+            icon: Gift,
+            href: '/events',
+            active: pathname === '/events'
         },
         {
             label: '預測',

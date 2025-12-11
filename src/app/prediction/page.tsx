@@ -79,6 +79,8 @@ export default function PredictionPage() {
                                 image={market.image}
                                 probability={market.probability}
                                 volume={market.volume}
+                                type={market.type || 'single'}
+                                groupOutcomes={market.groupOutcomes}
                             />
                         ))
                     )}
