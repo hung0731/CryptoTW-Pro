@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 
 export async function GET() {
+    const supabase = createAdminClient()
     try {
         const { data: bindings, error } = await supabase
             .from('exchange_bindings')
@@ -31,6 +32,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const supabase = createAdminClient()
     try {
         const { bindingId, action } = await req.json()
 
