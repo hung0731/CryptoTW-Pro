@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge'
 import { TrendingUp, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts'
+
 interface PredictionCardProps {
     id: string
     title: string
@@ -16,6 +18,18 @@ interface PredictionCardProps {
     groupOutcomes?: { label: string, probability: string }[]
 }
 
+const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-neutral-900 border border-white/10 p-2 rounded shadow-xl text-xs">
+                <p className="text-white font-medium mb-1">{payload[0].payload.label}</p>
+                <p className="text-neutral-400">機率: <span className="text-white font-mono">{payload[0].value}%</span></p>
+            </div>
+        )
+    }
+    return null
+}
+
 export function PredictionCard({ title, image, probability, volume, className, type = 'single', groupOutcomes }: PredictionCardProps) {
     // Single Mode Logic
     const prob = probability ? parseFloat(probability) : 0
@@ -23,7 +37,7 @@ export function PredictionCard({ title, image, probability, volume, className, t
 
     return (
         <Card className={cn("bg-neutral-900 border-white/5 hover:border-white/20 transition-all duration-300 group", className)}>
-            <CardContent className="p-4 flex flex-col justify-between h-full gap-4">
+            <CardContent className="p-4 flex flex-col justify-between gap-4 h-full">
                 <div className="flex gap-3 items-start">
                     <div className="w-8 h-8 rounded-full bg-neu-800 shrink-0 overflow-hidden bg-neutral-800 border border-white/10 flex items-center justify-center">
                         <img src={image} alt="" className="w-full h-full object-cover opacity-80" />
@@ -34,24 +48,31 @@ export function PredictionCard({ title, image, probability, volume, className, t
                 </div>
 
                 {type === 'group' && groupOutcomes ? (
-                    <div className="space-y-3 pt-2">
-                        {groupOutcomes.map((outcome, idx) => {
-                            const p = parseFloat(outcome.probability)
-                            return (
-                                <div key={idx} className="space-y-1">
-                                    <div className="flex justify-between text-[11px] text-neutral-400">
-                                        <span>{outcome.label}</span>
-                                        <span className={cn("font-mono", p > 50 ? "text-green-400 font-bold" : "")}>{outcome.probability}%</span>
-                                    </div>
-                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div
-                                            className={cn("h-full rounded-full transition-all duration-500", p > 50 ? "bg-green-500" : "bg-neutral-600")}
-                                            style={{ width: `${p}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            )
-                        })}
+                    <div className="h-[180px] w-full -ml-4">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                data={groupOutcomes}
+                                layout="vertical"
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                barCategoryGap={10}
+                            >
+                                <XAxis type="number" hide domain={[0, 100]} />
+                                <YAxis
+                                    dataKey="label"
+                                    type="category"
+                                    width={100}
+                                    tick={{ fill: '#a3a3a3', fontSize: 10 }}
+                                    axisLine={false}
+                                    tickLine={false}
+                                />
+                                <Tooltip cursor={{ fill: 'transparent' }} content={<CustomTooltip />} />
+                                <Bar dataKey="probability" radius={[0, 4, 4, 0]} barSize={20}>
+                                    {groupOutcomes.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={parseFloat(entry.probability) > 50 ? '#4ade80' : '#525252'} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
                 ) : (
                     <div className="flex items-end justify-between">
@@ -71,5 +92,9 @@ export function PredictionCard({ title, image, probability, volume, className, t
                 )}
             </CardContent>
         </Card>
+    )
+}
+            </CardContent >
+        </Card >
     )
 }
