@@ -8,23 +8,26 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')
 
-        let query = supabase
-            .from('activities')
-            .select('*')
-            .eq('is_active', true)
-
         if (id) {
-            query = query.eq('id', id).single()
+            const { data, error } = await supabase
+                .from('activities')
+                .select('*')
+                .eq('is_active', true)
+                .eq('id', id)
+                .single()
+
+            if (error) throw error
+            return NextResponse.json({ activity: data })
         } else {
-            query = query.order('created_at', { ascending: false })
+            const { data, error } = await supabase
+                .from('activities')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+
+            if (error) throw error
+            return NextResponse.json({ activities: data })
         }
-
-        const { data, error } = await query
-
-        if (error) throw error
-
-        // Return structure depends on if it's list or single
-        return NextResponse.json(id ? { activity: data } : { activities: data })
     } catch (e) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
