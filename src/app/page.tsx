@@ -17,15 +17,20 @@ function HomeContent() {
   const redirectPath = searchParams.get('path')
 
   // Performance Optimization & Fail-safe Redirect
-  // If there is a redirect path, show a loader and FORCE redirect immediately.
+  // 1. If there is a redirect path, show a loader and FORCE redirect immediately.
   useEffect(() => {
     if (redirectPath) {
-      // Decode URI component just in case, though usually processed by next
       const target = decodeURIComponent(redirectPath)
-      console.log('Force redirecting to:', target)
       router.replace(target)
     }
   }, [redirectPath, router])
+
+  // 2. Traffic Controller: If user is logged in, redirect to /feed (App Home)
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.replace('/feed')
+    }
+  }, [isLoggedIn, router])
 
   if (redirectPath) {
     return (

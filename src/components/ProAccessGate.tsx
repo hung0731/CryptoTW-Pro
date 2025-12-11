@@ -19,7 +19,7 @@ export function ProAccessGate() {
                     <h1 className="text-3xl font-bold tracking-tighter">
                         解鎖 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">Pro 會員</span>
                     </h1>
-                    <p className="text-neutral-400 text-sm leading-relaxed">
+                    <p className="text-neutral-400 text-base leading-relaxed">
                         您目前尚無瀏覽權限。<br />
                         請完成以下步驟加入全台最高淨值社群。
                     </p>

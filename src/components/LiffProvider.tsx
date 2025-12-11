@@ -50,6 +50,20 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
 
         const initLiff = async () => {
             try {
+                // 1. Optimistic Load from Cache
+                const cachedUser = localStorage.getItem('dbUser')
+                if (cachedUser) {
+                    try {
+                        const parsed = JSON.parse(cachedUser)
+                        setDbUser(parsed)
+                        setIsLoggedIn(true)
+                        setIsLoading(false) // Unblock UI immediately
+                        console.log('Optimistic load success')
+                    } catch (e) {
+                        console.error('Cache parse error', e)
+                    }
+                }
+
                 await liff.init({ liffId })
                 setLiffObject(liff)
 
@@ -71,14 +85,14 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                             if (res.ok) {
                                 const data = await res.json()
                                 setDbUser(data.user)
+                                // Update Cache
+                                localStorage.setItem('dbUser', JSON.stringify(data.user))
 
                                 // Set Supabase Session
                                 if (data.session) {
                                     const { error: sessionError } = await supabase.auth.setSession(data.session)
                                     if (sessionError) {
                                         console.error('Supabase SetSession Error:', sessionError)
-                                    } else {
-                                        console.log('Supabase Auth: Session set successfully')
                                     }
                                 }
                             } else {
@@ -88,6 +102,10 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                             console.error('Auth API Error', err)
                         }
                     }
+                } else {
+                    // If not logged in but had cache, clear it? 
+                    // Ideally yes, to prevent stale state if user cleared LINE auth but not local Storage
+                    // But for speed we keep it until explicit logout or error
                 }
             } catch (e) {
                 console.error('LIFF Initialization failed', e)

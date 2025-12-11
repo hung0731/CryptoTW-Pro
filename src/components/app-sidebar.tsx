@@ -51,7 +51,12 @@ const data = {
           icon: CreditCard,
         },
         {
-          title: "VIP 申請審核",
+          title: "用戶管理",
+          url: "/admin/users",
+          icon: Users,
+        },
+        {
+          title: "大客戶計畫",
           url: "/admin/vip",
           icon: Crown,
         },
