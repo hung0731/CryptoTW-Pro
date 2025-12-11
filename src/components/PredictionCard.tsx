@@ -19,47 +19,30 @@ export function PredictionCard({ title, image, probability, volume, className }:
     const isHighProb = prob > 50
 
     return (
-        <Card className={cn("bg-neutral-900 border-white/5 overflow-hidden hover:border-white/20 transition-all duration-300 group", className)}>
-            <div className="aspect-[2/1] relative overflow-hidden bg-neutral-950">
-                <img
-                    src={image}
-                    alt={title}
-                    className="object-cover w-full h-full opacity-80 group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-2 right-2 flex gap-1">
-                    <Badge variant="secondary" className="bg-black/60 backdrop-blur-md text-white border-white/10 text-[10px] font-mono">
-                        Vol: ${parseInt(volume).toLocaleString()}
-                    </Badge>
+        <Card className={cn("bg-neutral-900 border-white/5 hover:border-white/20 transition-all duration-300 group", className)}>
+            <CardContent className="p-4 flex flex-col justify-between h-full gap-4">
+                <div className="flex gap-3 items-start">
+                    <div className="w-8 h-8 rounded-full bg-neu-800 shrink-0 overflow-hidden bg-neutral-800 border border-white/10 flex items-center justify-center">
+                        <img src={image} alt="" className="w-full h-full object-cover opacity-80" />
+                    </div>
+                    <h3 className="font-medium text-neutral-200 text-sm leading-snug line-clamp-2">
+                        {title}
+                    </h3>
                 </div>
-            </div>
-            <CardContent className="p-4 space-y-3">
-                <h3 className="font-semibold text-white leading-snug line-clamp-2 h-10 text-sm">
-                    {title}
-                </h3>
 
-                <div className="flex items-center justify-between pt-2">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Yes Probability</span>
+                <div className="flex items-end justify-between">
+                    <div className="space-y-0.5">
+                        <div className="text-[10px] text-neutral-500 font-mono uppercase">Chance</div>
                         <span className={cn(
-                            "text-2xl font-bold tracking-tight",
+                            "text-2xl font-bold tracking-tight nums",
                             isHighProb ? "text-green-400" : "text-neutral-400"
                         )}>
                             {probability}%
                         </span>
                     </div>
-
-                    {/* Visual Indicator */}
-                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-white/5">
-                        <TrendingUp className={cn("w-5 h-5", isHighProb ? "text-green-400" : "text-neutral-600")} />
+                    <div className={cn("flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium border", isHighProb ? "border-green-500/20 bg-green-500/10 text-green-400" : "border-white/5 bg-white/5 text-neutral-500")}>
+                        {isHighProb ? 'High' : 'Neutral'}
                     </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div
-                        className={cn("h-full rounded-full", isHighProb ? "bg-green-500" : "bg-neutral-500")}
-                        style={{ width: `${probability}%` }}
-                    />
                 </div>
             </CardContent>
         </Card>
