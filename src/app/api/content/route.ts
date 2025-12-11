@@ -5,17 +5,29 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
-        // In a real app we'd filter body content based on user auth here or in middleware.
-        // For MVP frontend, we return all published info, but frontend will mask body if not pro.
-        // Or safer: We strip body if not pro.
-        // Let's implement basic safety: Frontend sends ID token? No this is public endpoint usually.
-        // Let's simplified: Return full content, frontend hides it. (MVP tradeoff)
+        const { searchParams } = new URL(req.url)
+        const id = searchParams.get('id')
 
-        const { data, error } = await supabase
-            .from('content')
-            .select('*')
-            .eq('is_published', true)
-            .order('created_at', { ascending: false })
+        let data, error
+
+        if (id) {
+            const result = await supabase
+                .from('content')
+                .select('*')
+                .eq('is_published', true)
+                .eq('id', id)
+                .single()
+            data = result.data
+            error = result.error
+        } else {
+            const result = await supabase
+                .from('content')
+                .select('*')
+                .eq('is_published', true)
+                .order('created_at', { ascending: false })
+            data = result.data
+            error = result.error
+        }
 
         if (error) throw error
         return NextResponse.json({ content: data })

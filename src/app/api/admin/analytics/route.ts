@@ -1,16 +1,13 @@
-
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
-        // 1. Fetch Bindings Stats (Group by exchange name)
-        // Note: Supabase JS client doesn't support complex group by easily without RPC.
-        // We will fetch all and count in JS for MVP simplicity (assuming < 10k records).
-        // For production, use RPC or Views.
+        const supabase = createAdminClient()
 
+        // 1. Fetch Bindings Stats (Group by exchange name)
         const { data: bindings, error: bindError } = await supabase
             .from('exchange_bindings')
             .select('exchange_name, status')

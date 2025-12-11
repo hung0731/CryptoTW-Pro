@@ -1,0 +1,172 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, Clock, Calendar, Lock, ChevronLeft } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { useLiff } from '@/components/LiffProvider'
+import { cn } from '@/lib/utils'
+
+interface Article {
+    id: string
+    title: string
+    body: string
+    summary?: string
+    type: string
+    created_at: string
+    thumbnail_url?: string
+    is_public: boolean
+}
+
+export default function ArticlePage() {
+    const params = useParams()
+    const { isLoggedIn, dbUser, isLoading: isAuthLoading } = useLiff()
+    const [article, setArticle] = useState<Article | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
+
+    useEffect(() => {
+        if (!params.id) return
+        const fetchArticle = async () => {
+            try {
+                const res = await fetch(`/api/content?id=${params.id}`)
+                if (!res.ok) throw new Error('Failed to fetch')
+                const data = await res.json()
+                if (data.content) {
+                    setArticle(data.content)
+                } else {
+                    setError('Article not found')
+                }
+            } catch (e) {
+                setError('Error loading article')
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchArticle()
+    }, [params.id])
+
+    // Loading State
+    if (loading || isAuthLoading) {
+        return (
+            <div className="min-h-screen bg-black text-white p-6 max-w-3xl mx-auto space-y-8 pt-20">
+                <Skeleton className="h-4 w-20 bg-neutral-800" />
+                <Skeleton className="h-12 w-3/4 bg-neutral-800" />
+                <Skeleton className="h-4 w-1/2 bg-neutral-800" />
+                <div className="space-y-4 pt-8">
+                    <Skeleton className="h-4 w-full bg-neutral-800" />
+                    <Skeleton className="h-4 w-full bg-neutral-800" />
+                    <Skeleton className="h-4 w-2/3 bg-neutral-800" />
+                </div>
+            </div>
+        )
+    }
+
+    if (error || !article) {
+        return (
+            <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
+                <p className="text-neutral-400 mb-4">{error || 'Article not found'}</p>
+                <Link href="/feed">
+                    <Button variant="outline" className="border-white/10 text-white hover:bg-white/10">Back to Feed</Button>
+                </Link>
+            </div>
+        )
+    }
+
+    // Access Check
+    // If article is public => Allow
+    // If article is NOT public => Check if user is PRO
+    const userStatus = dbUser?.membership_status as string
+    const isPro = userStatus === 'pro' || userStatus === 'lifetime'
+    const hasAccess = article.is_public || isPro
+
+    if (!hasAccess) {
+        return (
+            <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto">
+                <div className="bg-neutral-900/50 p-8 rounded-2xl border border-white/5 space-y-6">
+                    <div className="w-12 h-12 bg-yellow-500/10 text-yellow-500 rounded-full flex items-center justify-center mx-auto">
+                        <Lock className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold mb-2">PRO 會員限定</h2>
+                        <p className="text-neutral-400 text-sm">此為深度分析或獨家內容，僅供 PRO 會員瀏覽。</p>
+                    </div>
+                    <div className="flex gap-3 justify-center">
+                        <Link href="/feed">
+                            <Button variant="ghost" className="text-neutral-400 hover:text-white hover:bg-white/5">返回</Button>
+                        </Link>
+                        <Link href="/profile">
+                            <Button className="bg-yellow-500 text-black hover:bg-yellow-400">升級會員</Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <article className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30">
+            {/* Navigation */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5 h-16 flex items-center">
+                <div className="max-w-4xl mx-auto w-full px-6 flex items-center justify-between">
+                    <Link href="/feed" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm font-medium">
+                        <ChevronLeft className="w-4 h-4" /> 返回
+                    </Link>
+                    {/* Share / Actions could go here */}
+                </div>
+            </nav>
+
+            <div className="max-w-3xl mx-auto px-6 pt-32 pb-24">
+                {/* Header */}
+                <header className="mb-12 space-y-6">
+                    <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="text-blue-400 border-blue-400/20 bg-blue-400/10 uppercase tracking-wider text-[10px] px-2 py-0.5 rounded-full">
+                            {article.type}
+                        </Badge>
+                        <span className="text-neutral-500 text-xs uppercase tracking-widest flex items-center gap-1">
+                            {new Date(article.created_at).toLocaleDateString()}
+                        </span>
+                    </div>
+
+                    <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight text-white/95">
+                        {article.title}
+                    </h1>
+
+                    {article.summary && (
+                        <div className="text-lg md:text-xl text-neutral-400 leading-relaxed font-light border-l-2 border-blue-500/50 pl-6 py-1">
+                            {article.summary}
+                        </div>
+                    )}
+                </header>
+
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-12" />
+
+                {/* Content */}
+                <div className="prose prose-invert prose-lg max-w-none 
+                    prose-headings:font-bold prose-headings:tracking-tight 
+                    prose-p:text-neutral-300 prose-p:leading-8 prose-p:my-6
+                    prose-li:text-neutral-300
+                    prose-strong:text-white prose-strong:font-semibold
+                    prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+                    prose-code:text-blue-300 prose-code:bg-blue-500/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+                    prose-pre:bg-neutral-900 prose-pre:border prose-pre:border-white/10
+                    prose-img:rounded-xl prose-img:border prose-img:border-white/10 prose-img:w-full
+                    prose-hr:border-white/10
+                ">
+                    <ReactMarkdown
+                        components={{
+                            // Override H1 to be smaller if it appears in body (since main title is H1)
+                            h1: ({ node, ...props }) => <h2 className="text-2xl font-bold mt-10 mb-4" {...props} />,
+                        }}
+                    >
+                        {article.body}
+                    </ReactMarkdown>
+                </div>
+            </div>
+        </article>
+    )
+}

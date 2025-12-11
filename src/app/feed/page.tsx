@@ -8,13 +8,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Zap, Lock, ChevronRight, UserPlus, Link as LinkIcon, CheckCircle, Newspaper, BookOpen, ScrollText } from 'lucide-react'
 import Link from 'next/link'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { BottomNav } from '@/components/BottomNav'
+import { cn } from '@/lib/utils'
 
 export default function FeedPage() {
     const { isLoggedIn, profile, dbUser, isLoading: isAuthLoading } = useLiff()
     const [activities, setActivities] = useState<any[]>([])
     const [content, setContent] = useState<any[]>([])
     const [dataLoading, setDataLoading] = useState(true)
+    const [activeTab, setActiveTab] = useState('all')
 
     // Fetch Data only if authorized
     useEffect(() => {
@@ -66,16 +68,13 @@ export default function FeedPage() {
 
     if (!hasAccess) {
         return (
-            <main className="min-h-screen font-sans bg-black text-white flex flex-col">
+            <main className="min-h-screen font-sans bg-black text-white flex flex-col pb-20">
                 {/* Header */}
-                <header className="p-6 flex justify-between items-center">
+                <header className="p-6 flex justify-between items-center bg-black/50 backdrop-blur-sm sticky top-0 z-40">
                     <div className="flex items-center gap-2">
                         <Zap className="h-5 w-5 text-yellow-500" fill="currentColor" />
                         <span className="font-bold tracking-tight">Access Restricted</span>
                     </div>
-                    {profile && (
-                        <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20 opacity-50" />
-                    )}
                 </header>
 
                 <div className="flex-1 px-6 pb-12 flex flex-col justify-center max-w-md mx-auto w-full space-y-10">
@@ -132,16 +131,22 @@ export default function FeedPage() {
                         ))}
                     </div>
                 </div>
+                <BottomNav />
             </main>
         )
     }
 
     // 3. Pro Member State (Feed)
-    // Filtering Helper
-    const getFilteredContent = (type: string) => {
-        if (type === 'all') return content
-        return content.filter(c => c.type === type)
-    }
+    const categories = [
+        { id: 'all', label: '全部' },
+        { id: 'news', label: '快訊' },
+        { id: 'alpha', label: '深度 / 原創' },
+        { id: 'weekly', label: '週報' },
+    ]
+
+    const filteredContent = activeTab === 'all'
+        ? content
+        : content.filter(c => c.type === activeTab)
 
     return (
         <main className="min-h-screen font-sans bg-black text-white pb-24">
@@ -149,9 +154,7 @@ export default function FeedPage() {
             {/* Header */}
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
                 <div className="grid grid-cols-3 items-center px-4 h-14">
-                    <div className="flex items-center justify-start">
-                        {/* Left Slot */}
-                    </div>
+                    <div className="flex items-center justify-start"></div>
                     <div className="flex items-center justify-center">
                         <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
                     </div>
@@ -164,115 +167,41 @@ export default function FeedPage() {
                     </div>
                 </div>
 
-                {/* Tabs - Inside Header to keep sticky */}
-                <div className="px-4 pb-0">
-                    <Tabs defaultValue="all" className="w-full">
-                        <TabsList className="bg-transparent p-0 gap-6 h-auto w-full justify-start overflow-x-auto no-scrollbar border-b border-transparent">
-                            <TabsTrigger value="all" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                全部
-                            </TabsTrigger>
-                            <TabsTrigger value="news" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                快訊
-                            </TabsTrigger>
-                            <TabsTrigger value="alpha" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                深度 / 原創
-                            </TabsTrigger>
-                            <TabsTrigger value="weekly" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                週報
-                            </TabsTrigger>
-                        </TabsList>
-
-                        {/* Tabs Content - Move outside header if you want content to scroll UNDER header, 
-                            BUT Tabs component structure usually wraps content. 
-                            If we keep content inside Tabs, the whole Tabs component is in Header which is wrong for scrolling.
-                            
-                            Refactoring: We need to lift state up or use TabsPrimitive correctly to separate List and Content.
-                            OR just render TabsContent OUTSIDE header.
-                            
-                            Let's separate standard Tabs usage.
-                        */}
-                    </Tabs>
+                {/* Category Filter Pills (Scrollable) */}
+                <div className="w-full overflow-x-auto no-scrollbar px-4 pb-3">
+                    <div className="flex space-x-2">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setActiveTab(cat.id)}
+                                className={cn(
+                                    "px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap",
+                                    activeTab === cat.id
+                                        ? "bg-white text-black"
+                                        : "bg-neutral-900 text-neutral-400 hover:text-white border border-white/5"
+                                )}
+                            >
+                                {cat.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </header>
 
-            {/* Main Content Area - Re-implementing Tabs manually or using context if feasible. 
-                Radix Tabs usually requires all in one Root. 
-                To fix this, we will wrap the whole page in Tabs Root, put List in Header, and Content in Main.
-            */}
-            <Tabs defaultValue="all" className="w-full">
-                {/* Re-declaring Tabs List in fixed header requires matching Root. 
-                     Actually simpler: Keep Header sticky, put TabsList inside it. 
-                     But TabsContent must be outside header to scroll.
-                     
-                     Solution: 
-                     Wrap <main> in <Tabs>. 
-                     Header contains <TabsList>.
-                     Container contains <TabsContent>.
-                 */}
-            </Tabs>
+            <div className="mt-6 px-4 space-y-8 max-w-md mx-auto min-h-screen">
 
-            {/* 
-               Correct approach for Sticky Header + Scrollable Content with Radix Tabs:
-               1. Root wraps everything.
-               2. Header (sticky) contains List.
-               3. Main (scrollable) contains Content.
-            */}
+                {/* Always show activities unless specific tab logic requires hiding (Usually kept on top) */}
+                <MarketActivities activities={activities} />
 
-            <Tabs defaultValue="all" className="w-full">
-                <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 pt-2">
-                    <div className="grid grid-cols-3 items-center px-4 pb-2 h-14">
-                        <div className="flex items-center justify-start">
-                            {/* Left Slot - Empty or Back Button */}
-                        </div>
-                        <div className="flex items-center justify-center">
-                            <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
-                        </div>
-                        <div className="flex items-center justify-end">
-                            {profile && (
-                                <Link href="/profile">
-                                    <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20" />
-                                </Link>
-                            )}
-                        </div>
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">最新內容</h2>
                     </div>
-                    <div className="px-4">
-                        <TabsList className="bg-transparent p-0 gap-6 h-auto w-full justify-start overflow-x-auto no-scrollbar border-b border-transparent">
-                            <TabsTrigger value="all" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                全部
-                            </TabsTrigger>
-                            <TabsTrigger value="news" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                快訊
-                            </TabsTrigger>
-                            <TabsTrigger value="alpha" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                深度 / 原創
-                            </TabsTrigger>
-                            <TabsTrigger value="weekly" className="data-[state=active]:text-white text-neutral-500 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-white px-0 font-bold bg-transparent">
-                                週報
-                            </TabsTrigger>
-                        </TabsList>
-                    </div>
-                </header>
-
-                <div className="mt-6 px-4 space-y-8 max-w-md mx-auto min-h-screen">
-                    <TabsContent value="all" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <MarketActivities activities={activities} />
-                        <ContentList items={content} />
-                    </TabsContent>
-
-                    <TabsContent value="news" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <MarketActivities activities={activities} />
-                        <ContentList items={getFilteredContent('news')} />
-                    </TabsContent>
-
-                    <TabsContent value="alpha" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <ContentList items={getFilteredContent('alpha')} />
-                    </TabsContent>
-
-                    <TabsContent value="weekly" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <ContentList items={getFilteredContent('weekly')} />
-                    </TabsContent>
+                    <ContentList items={filteredContent} />
                 </div>
-            </Tabs>
+            </div>
+
+            <BottomNav />
         </main>
     )
 }
@@ -287,17 +216,17 @@ function MarketActivities({ activities }: { activities: any[] }) {
             </div>
             <div className="space-y-3">
                 {activities.map((act) => (
-                    <Card key={act.id} className="bg-neutral-900 border-white/5 overflow-hidden group">
-                        <CardContent className="p-4 flex items-start gap-4 relaltive">
-                            <div className={`mt-1 h-2 w-2 rounded-full ${act.is_active ? 'bg-green-500 animate-pulse' : 'bg-neutral-600'}`} />
+                    <Card key={act.id} className="bg-neutral-900 border-white/5 overflow-hidden group hover:border-white/10 transition-colors">
+                        <CardContent className="p-4 flex items-start gap-4">
+                            <div className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${act.is_active ? 'bg-green-500 animate-pulse' : 'bg-neutral-600'}`} />
                             <div className="space-y-1 flex-1">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors">{act.title}</h3>
-                                    <span className="text-[10px] text-neutral-600 font-mono uppercase bg-white/5 px-2 py-0.5 rounded">{act.exchange_name}</span>
+                                    <h3 className="font-semibold text-white text-sm group-hover:text-blue-400 transition-colors">{act.title}</h3>
+                                    <span className="text-[10px] text-neutral-500 font-mono uppercase bg-black px-2 py-0.5 rounded border border-white/5">{act.exchange_name}</span>
                                 </div>
-                                <p className="text-sm text-neutral-400 leading-relaxed">{act.description}</p>
+                                <p className="text-xs text-neutral-400 leading-relaxed">{act.description}</p>
                                 {act.url && (
-                                    <a href={act.url} target="_blank" className="inline-flex items-center text-xs text-blue-400 hover:text-blue-300 mt-2 font-medium">
+                                    <a href={act.url} target="_blank" className="inline-flex items-center text-[10px] text-blue-400 hover:text-blue-300 mt-2 font-medium">
                                         查看詳情 <ArrowRight className="h-3 w-3 ml-1" />
                                     </a>
                                 )}
@@ -313,7 +242,7 @@ function MarketActivities({ activities }: { activities: any[] }) {
 function ContentList({ items }: { items: any[] }) {
     if (items.length === 0) {
         return (
-            <div className="p-12 text-center border border-dashed border-white/10 rounded-xl">
+            <div className="p-12 text-center border border-dashed border-white/10 rounded-xl bg-neutral-900/50">
                 <p className="text-neutral-500 text-sm">暫無內容</p>
             </div>
         )
@@ -322,9 +251,9 @@ function ContentList({ items }: { items: any[] }) {
         <div className="grid gap-4 pb-12">
             {items.map((item) => (
                 <Link href={`/content/${item.id}`} key={item.id} className="block group">
-                    <Card className="bg-transparent border-white/10 hover:border-white/20 transition-all hover:bg-white/[0.02]">
+                    <Card className="bg-neutral-900/50 border-white/5 hover:border-white/20 transition-all hover:bg-neutral-900 overflow-hidden">
                         {item.thumbnail_url && (
-                            <div className="aspect-video w-full bg-neutral-900 relative overflow-hidden rounded-t-lg">
+                            <div className="aspect-video w-full bg-neutral-950 relative overflow-hidden text-neutral-800">
                                 <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
                                 {!item.is_public && (
                                     <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-yellow-500 flex items-center gap-1 border border-yellow-500/20">
@@ -333,15 +262,15 @@ function ContentList({ items }: { items: any[] }) {
                                 )}
                             </div>
                         )}
-                        <CardContent className="p-4 space-y-2">
-                            <div className="flex gap-2">
-                                <Badge variant="secondary" className="bg-white/10 text-neutral-300 hover:bg-white/20 text-[10px] h-5 rounded-sm">{item.type?.toUpperCase() || 'ARTICLE'}</Badge>
-                                <span className="text-[10px] text-neutral-500 self-center">{new Date(item.created_at).toLocaleDateString()}</span>
+                        <CardContent className="p-4 space-y-3">
+                            <div className="flex gap-2 items-center">
+                                <Badge variant="secondary" className="bg-white/5 text-neutral-400 hover:bg-white/10 text-[10px] h-5 rounded px-1.5 font-normal tracking-wide">{item.type?.toUpperCase() || 'ARTICLE'}</Badge>
+                                <span className="text-[10px] text-neutral-600 self-center">{new Date(item.created_at).toLocaleDateString()}</span>
                             </div>
                             <h3 className="font-bold text-lg text-white group-hover:text-blue-400 transition-colors leading-snug">
                                 {item.title}
                             </h3>
-                            <p className="text-sm text-neutral-400 line-clamp-2">
+                            <p className="text-sm text-neutral-400 line-clamp-2 leading-relaxed">
                                 {item.summary || item.content?.substring(0, 100)}...
                             </p>
                         </CardContent>
