@@ -20,6 +20,7 @@ interface Article {
     created_at: string
     thumbnail_url?: string
     is_public: boolean
+    metadata?: any
 }
 
 export default function ArticlePage() {
@@ -132,11 +133,56 @@ export default function ArticlePage() {
                         </span>
                     </div>
 
+                    {/* Source & Reliability */}
+                    {(article.metadata as any)?.source_name && (
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="text-xs font-mono text-neutral-500">SOURCE:</span>
+                            <Badge variant="secondary" className="bg-neutral-800 text-neutral-300 border-neutral-700">
+                                {(article.metadata as any).source_name}
+                            </Badge>
+                            {(article.metadata as any).source_reliability && (
+                                <Badge
+                                    className={cn(
+                                        "text-[10px] uppercase font-bold",
+                                        (article.metadata as any).source_reliability === 'high' ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                                            (article.metadata as any).source_reliability === 'medium' ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" :
+                                                "bg-red-500/10 text-red-400 border-red-500/20"
+                                    )}
+                                    variant="outline"
+                                >
+                                    {(article.metadata as any).source_reliability === 'high' ? 'High Trust' :
+                                        (article.metadata as any).source_reliability === 'medium' ? 'Medium Trust' : 'Low Trust'}
+                                </Badge>
+                            )}
+                        </div>
+                    )}
+
                     <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight text-white/95">
                         {article.title}
                     </h1>
 
-                    {article.summary && (
+                    {/* AI Key Takeaways */}
+                    {(article.metadata as any)?.key_takeaways && ((article.metadata as any).key_takeaways as string[]).length > 0 && (
+                        <div className="bg-neutral-900/50 border border-white/10 rounded-2xl p-6 space-y-4 my-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <img src="/logo.svg" className="w-24 h-24" />
+                            </div>
+                            <div className="flex items-center gap-2 text-purple-400 font-bold text-sm tracking-widest uppercase">
+                                <span className="flex h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+                                CryptoTW AI Highlights
+                            </div>
+                            <ul className="space-y-3">
+                                {((article.metadata as any).key_takeaways as string[]).map((point, i) => (
+                                    <li key={i} className="flex items-start gap-3 text-base text-neutral-200 leading-relaxed group">
+                                        <span className="text-purple-500/50 font-mono mt-0.5 group-hover:text-purple-400 transition-colors">0{i + 1}.</span>
+                                        <span>{point}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {article.summary && !((article.metadata as any)?.key_takeaways) && (
                         <div className="text-lg md:text-xl text-neutral-400 leading-relaxed font-light border-l-2 border-blue-500/50 pl-6 py-1">
                             {article.summary}
                         </div>

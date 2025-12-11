@@ -103,6 +103,7 @@ export interface Database {
                     author_id?: string | null
                     created_at?: string
                     updated_at?: string
+                    metadata?: Json | null // Added
                 }
                 Update: {
                     id?: string
@@ -114,6 +115,7 @@ export interface Database {
                     author_id?: string | null
                     created_at?: string
                     updated_at?: string
+                    metadata?: Json | null // Added
                 }
             }
             activities: {
