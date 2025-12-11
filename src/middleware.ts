@@ -21,6 +21,26 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(targetUrl)
     }
 
+    // 2. Security: Protect /admin routes
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+        // Strict check: Must have Supabase Session Cookie
+        // Note: The specific cookie name depends on Supabase config, usually `sb-<ref>-auth-token`
+        // We will check for any cookie starting with `sb-` or containing `auth` as a heuristic if strict name unknown,
+        // OR better: check for specific `sb-access-token` if generic, or try to use specific project ref if known.
+        // Given we don't know the exact project ref here easily, we check for 'sb-' prefix primarily.
+
+        const hasAuthCookie = request.cookies.getAll().some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'))
+
+        // Also check for localhost development cookie if applicable, but strict mode prefers strict check.
+
+        if (!hasAuthCookie) {
+            console.warn(`Security: Unauthorized access attempt to ${request.nextUrl.pathname} from ${request.ip}`)
+            const loginUrl = new URL('/login', request.url)
+            loginUrl.searchParams.set('error', 'unauthorized')
+            return NextResponse.redirect(loginUrl)
+        }
+    }
+
     return NextResponse.next()
 }
 
