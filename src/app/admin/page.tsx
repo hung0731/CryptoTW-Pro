@@ -31,58 +31,77 @@ export default function AdminPage() {
     }, [])
 
     return (
-        <div className="p-6 md:p-8 space-y-8 w-full">
+    return (
+        <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
-                <p className="text-neutral-400 mt-2">歡迎回到 CryptoTW Pro 管理後台。</p>
+                <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Dashboard</h1>
+                <p className="text-neutral-400 text-sm">歡迎回到 CryptoTW Pro 管理後台。這裡顯示您的平台即時概況。</p>
             </div>
 
             {/* Quick Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader className="flex flex-row items-center justify-between Space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">總用戶數</CardTitle>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-neutral-400">總用戶數</span>
                         <Users className="h-4 w-4 text-neutral-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-white">
+                    </div>
+                    <div>
+                        <div className="text-3xl font-bold text-white tracking-tight">
                             {loading ? <Loader2 className="h-6 w-6 animate-spin text-neutral-600" /> : stats.totalUsers}
                         </div>
-                        <p className="text-xs text-neutral-500">Active Members</p>
-                    </CardContent>
+                        <p className="text-xs text-neutral-500 mt-1">Active Members</p>
+                    </div>
                 </Card>
 
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader className="flex flex-row items-center justify-between Space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">Pro 會員</CardTitle>
-                        <Crown className="h-4 w-4 text-purple-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-white">
+                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-neutral-400">Pro 會員</span>
+                        <Crown className="h-4 w-4 text-yellow-500" />
+                    </div>
+                    <div>
+                        <div className="text-3xl font-bold text-white tracking-tight">
                             {loading ? <Loader2 className="h-6 w-6 animate-spin text-neutral-600" /> : stats.verifiedUsers}
                         </div>
-                        <p className="text-xs text-neutral-500">Verified Users</p>
-                    </CardContent>
+                        <p className="text-xs text-neutral-500 mt-1">Verified Users</p>
+                    </div>
                 </Card>
 
-                <Link href="/admin/bindings">
-                    <Card className="bg-neutral-900 border-white/5 hover:bg-neutral-800/50 transition-colors cursor-pointer">
-                        <CardHeader className="flex flex-row items-center justify-between Space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-neutral-400">待審核綁定</CardTitle>
+                <Link href="/admin/bindings" className="block group">
+                    <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4 group-hover:border-yellow-500/30 transition-all cursor-pointer">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-neutral-400 group-hover:text-yellow-500 transition-colors">待審核綁定</span>
                             <CreditCard className="h-4 w-4 text-yellow-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-white text-yellow-500">
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-yellow-500 tracking-tight">
                                 {loading ? <Loader2 className="h-6 w-6 animate-spin text-neutral-600" /> : stats.pendingBindings}
                             </div>
-                            <p className="text-xs text-neutral-500">Pending Requests</p>
-                        </CardContent>
+                            <p className="text-xs text-neutral-500 mt-1">Pending Requests</p>
+                        </div>
                     </Card>
                 </Link>
+
+                {/* Placeholder for future stat */}
+                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4 opacity-50">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-neutral-400">系統狀態</span>
+                        <Activity className="h-4 w-4 text-green-500" />
+                    </div>
+                    <div>
+                        <div className="text-3xl font-bold text-white tracking-tight">Normal</div>
+                        <p className="text-xs text-neutral-500 mt-1">All Systems Operational</p>
+                    </div>
+                </Card>
             </div>
 
-            <div className="rounded-lg border border-white/5 bg-neutral-900 p-8 text-center">
-                <p className="text-neutral-500">請從左側選單選擇功能開始管理。</p>
+            <div className="rounded-xl border border-white/5 bg-neutral-900/30 p-12 text-center">
+                <div className="max-w-sm mx-auto space-y-4">
+                    <div className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                        <Activity className="h-6 w-6 text-neutral-500" />
+                    </div>
+                    <h3 className="text-lg font-medium text-white">更多數據即將推出</h3>
+                    <p className="text-sm text-neutral-500">我們正在建構更詳細的分析報表，包含用戶留存率、內容閱讀量等指標。</p>
+                </div>
             </div>
         </div>
     )

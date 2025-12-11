@@ -64,15 +64,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/5 bg-black px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-                    <SidebarTrigger className="-ml-1" />
-                    <Separator orientation="vertical" className="mr-2 h-4" />
+                <header className="flex h-14 shrink-0 items-center gap-2 border-b border-white/5 bg-black px-4">
+                    <SidebarTrigger className="-ml-1 text-neutral-400 hover:text-white" />
+                    <Separator orientation="vertical" className="mr-2 h-4 bg-white/10" />
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">CryptoTW Pro 管理後台</span>
+                        <span className="font-medium text-sm text-neutral-400">管理後台</span>
                     </div>
                 </header>
-                <div className="flex flex-1 flex-col gap-4 p-4 bg-black text-white">
-                    {children}
+                <div className="flex flex-1 flex-col p-6 bg-black text-white overflow-y-auto">
+                    <div className="mx-auto w-full max-w-7xl space-y-8">
+                        {children}
+                    </div>
                 </div>
             </SidebarInset>
         </SidebarProvider>

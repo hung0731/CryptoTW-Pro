@@ -47,10 +47,20 @@ export default function Home() {
   }, [isAuthLoading, dbUser])
 
   // 1. Loading State
-  const loadingStatus = dbUser?.membership_status as string
-  if (isAuthLoading || (dataLoading && (loadingStatus === 'pro' || loadingStatus === 'lifetime'))) {
+  // 1. Loading State
+  // Determine effective loading state:
+  // - Initial Auth Loading (Liff)
+  // - Logged in but waiting for DB User sync
+  // - Pro User waiting for Content Data
+  const isPending = isAuthLoading || (isLoggedIn && !dbUser)
+  const isPro = dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime'
+
+  if (isPending || (isPro && dataLoading)) {
     return (
       <div className="min-h-screen bg-black p-4 space-y-8">
+        <div className="flex items-center justify-center p-4">
+          <img src="/logo.svg" className="h-6 w-auto opacity-50 animate-pulse" />
+        </div>
         <Skeleton className="h-12 w-full bg-neutral-900" />
         <div className="flex gap-2">
           <Skeleton className="h-8 w-16 bg-neutral-900" />
@@ -63,10 +73,8 @@ export default function Home() {
   }
 
   // 2. Non-Member State (Join Guide / Mask)
-  const currentStatus = dbUser?.membership_status as string
-  const hasAccess = currentStatus === 'pro' || currentStatus === 'lifetime'
-
-  if (!hasAccess) {
+  // Only show Gate if we are SURE user is not Pro (Auth loaded, DB loaded, Status checked)
+  if (!isPro) {
     return <ProAccessGate />
   }
 
