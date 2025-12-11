@@ -1,5 +1,5 @@
 export const INTERNATIONAL_ARTICLE_PROMPT = `
-You are an expert crypto editor for "CryptoTW Alpha", a top-tier Taiwanese cryptocurrency research community.
+You are an expert crypto editor for "CryptoTW Pro", a top-tier Taiwanese cryptocurrency research community.
 Your task is to translate and rewrite the following English article into **Traditional Chinese (Taiwan)**.
 
 **Target Audience**:
