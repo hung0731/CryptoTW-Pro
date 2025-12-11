@@ -153,7 +153,7 @@ export default function FeedPage() {
                         {/* Left Slot */}
                     </div>
                     <div className="flex items-center justify-center">
-                        <img src="/logo.svg" alt="CryptoTW" className="h-5 w-auto" />
+                        <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
                     </div>
                     <div className="flex items-center justify-end">
                         {profile && (
@@ -225,7 +225,7 @@ export default function FeedPage() {
                             {/* Left Slot - Empty or Back Button */}
                         </div>
                         <div className="flex items-center justify-center">
-                            <img src="/logo.svg" alt="CryptoTW" className="h-5 w-auto" />
+                            <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
                         </div>
                         <div className="flex items-center justify-end">
                             {profile && (
@@ -282,8 +282,8 @@ function MarketActivities({ activities }: { activities: any[] }) {
     return (
         <section className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
-                <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">Signals</h2>
-                <Badge variant="outline" className="border-green-500/30 text-green-400 bg-green-500/10">Live</Badge>
+                <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">交易信號</h2>
+                <Badge variant="outline" className="border-green-500/30 text-green-400 bg-green-500/10">即時</Badge>
             </div>
             <div className="space-y-3">
                 {activities.map((act) => (
@@ -328,7 +328,7 @@ function ContentList({ items }: { items: any[] }) {
                                 <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
                                 {!item.is_public && (
                                     <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-yellow-500 flex items-center gap-1 border border-yellow-500/20">
-                                        <Lock className="w-3 h-3" /> PRO ONLY
+                                        <Lock className="w-3 h-3" /> PRO 限定
                                     </div>
                                 )}
                             </div>

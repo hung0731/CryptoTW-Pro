@@ -16,7 +16,7 @@ const notoSansTC = Noto_Sans_TC({
 
 
 export const metadata: Metadata = {
-  title: "CryptoTW Pro",
+  title: "CryptoTW",
   description: "Crypto Market Insights & Exclusive Airdrops",
 };
 

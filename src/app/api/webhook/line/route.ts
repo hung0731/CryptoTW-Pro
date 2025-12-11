@@ -3,7 +3,7 @@ import { replyMessage, verifyLineSignature } from '@/lib/line-bot'
 
 const WELCOME_FLEX_MESSAGE = {
     type: "flex",
-    altText: "CryptoTW System Access",
+    altText: "CryptoTW 系統存取",
     contents: {
         type: "bubble",
         body: {
@@ -12,14 +12,14 @@ const WELCOME_FLEX_MESSAGE = {
             contents: [
                 {
                     type: "text",
-                    text: "CryptoTW System",
+                    text: "CryptoTW 系統",
                     weight: "bold",
                     color: "#000000",
                     size: "xl"
                 },
                 {
                     type: "text",
-                    text: "Professional Trading Intelligence",
+                    text: "專業交易情報",
                     weight: "regular",
                     color: "#000000",
                     size: "xs",
@@ -36,70 +36,29 @@ const WELCOME_FLEX_MESSAGE = {
                     spacing: "sm",
                     contents: [
                         {
-                            type: "box",
-                            layout: "baseline",
-                            spacing: "sm",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: "•",
-                                    color: "#aaaaaa",
-                                    size: "sm",
-                                    flex: 1
-                                },
-                                {
-                                    type: "text",
-                                    text: "Market Signals & Analytics",
-                                    wrap: true,
-                                    color: "#666666",
-                                    size: "sm",
-                                    flex: 9
-                                }
-                            ]
+                            type: "text",
+                            text: "服務項目：",
+                            size: "xs",
+                            color: "#aaaaaa",
+                            margin: "sm"
                         },
                         {
-                            type: "box",
-                            layout: "baseline",
-                            spacing: "sm",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: "•",
-                                    color: "#aaaaaa",
-                                    size: "sm",
-                                    flex: 1
-                                },
-                                {
-                                    type: "text",
-                                    text: "Exchange Account Integration",
-                                    wrap: true,
-                                    color: "#666666",
-                                    size: "sm",
-                                    flex: 9
-                                }
-                            ]
+                            type: "text",
+                            text: "• 市場信號與分析",
+                            size: "sm",
+                            color: "#333333"
                         },
                         {
-                            type: "box",
-                            layout: "baseline",
-                            spacing: "sm",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: "•",
-                                    color: "#aaaaaa",
-                                    size: "sm",
-                                    flex: 1
-                                },
-                                {
-                                    type: "text",
-                                    text: "Institutional Client Services",
-                                    wrap: true,
-                                    color: "#666666",
-                                    size: "sm",
-                                    flex: 9
-                                }
-                            ]
+                            type: "text",
+                            text: "• 交易所帳戶串接",
+                            size: "sm",
+                            color: "#333333"
+                        },
+                        {
+                            type: "text",
+                            text: "• VIP 與機構服務",
+                            size: "sm",
+                            color: "#333333"
                         }
                     ]
                 }
@@ -116,18 +75,18 @@ const WELCOME_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "Open Dashboard",
+                        label: "開啟控制台",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/feed`
                     },
                     color: "#000000"
                 },
                 {
                     type: "button",
-                    style: "secondary",
+                    style: "primary",
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "Connect Account",
+                        label: "連結帳戶",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
                     },
                     color: "#211FFF" // Using secondary style but overriding text color if supported, or background? 

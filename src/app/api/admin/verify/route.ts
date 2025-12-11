@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
                 await pushMessage(updatedUser.line_user_id, [
                     {
                         type: "flex",
-                        altText: "Membership Status Update",
+                        altText: "會員狀態更新",
                         contents: {
                             type: "bubble",
                             body: {
@@ -80,14 +80,14 @@ export async function POST(req: NextRequest) {
                                 contents: [
                                     {
                                         type: "text",
-                                        text: "Membership Activated",
+                                        text: "會員資格已開通",
                                         weight: "bold",
                                         size: "xl",
                                         color: "#000000"
                                     },
                                     {
                                         type: "text",
-                                        text: "Pro Status Confirmed",
+                                        text: "已確認 Pro 權限",
                                         weight: "regular",
                                         size: "xs",
                                         color: BRAND_COLOR,
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
                                                 contents: [
                                                     {
                                                         type: "text",
-                                                        text: "Account",
+                                                        text: "帳戶",
                                                         color: "#aaaaaa",
                                                         size: "sm",
                                                         flex: 2
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
                                                 contents: [
                                                     {
                                                         type: "text",
-                                                        text: "UID Bounded",
+                                                        text: "已綁定 UID",
                                                         color: "#aaaaaa",
                                                         size: "sm",
                                                         flex: 2
@@ -154,14 +154,14 @@ export async function POST(req: NextRequest) {
                                                 contents: [
                                                     {
                                                         type: "text",
-                                                        text: "Status",
+                                                        text: "狀態",
                                                         color: "#aaaaaa",
                                                         size: "sm",
                                                         flex: 2
                                                     },
                                                     {
                                                         type: "text",
-                                                        text: "Active Pro Member",
+                                                        text: "Pro 會員 (生效中)",
                                                         wrap: true,
                                                         color: "#000000",
                                                         size: "sm",
@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
                                         height: "sm",
                                         action: {
                                             type: "uri",
-                                            label: "Access Pro Dashboard",
+                                            label: "進入 Pro 控制台",
                                             uri: "https://liff.line.me/" + process.env.NEXT_PUBLIC_LIFF_ID + "?path=/feed"
                                         },
                                         color: "#000000"

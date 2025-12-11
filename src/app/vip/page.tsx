@@ -103,7 +103,7 @@ export default function VipPage() {
                 <div className="text-center space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-400 text-xs font-medium uppercase tracking-wider backdrop-blur-sm mx-auto">
                         <Crown className="w-3 h-3 text-white" />
-                        <span>Private Client</span>
+                        <span>私人客戶</span>
                     </div>
                     <h1 className="text-4xl font-bold tracking-tighter text-white">
                         CryptoTW Prime
@@ -117,9 +117,9 @@ export default function VipPage() {
                 {/* Benefits */}
                 <div className="grid gap-4">
                     {[
-                        { title: "Zero Fees", desc: "機構級費率優惠 (Maker 0%)", icon: <Diamond className="w-4 h-4" /> },
-                        { title: "Direct Contact", desc: "專屬客戶經理 1 對 1 服務", icon: <ShieldCheck className="w-4 h-4" /> },
-                        { title: "Private Events", desc: "受邀參加線下私密聚會", icon: <Sparkles className="w-4 h-4" /> },
+                        { title: "零手續費", desc: "機構級費率優惠 (Maker 0%)", icon: <Diamond className="w-4 h-4" /> },
+                        { title: "專屬聯繫", desc: "專屬客戶經理 1 對 1 服務", icon: <ShieldCheck className="w-4 h-4" /> },
+                        { title: "私密活動", desc: "受邀參加線下私密聚會", icon: <Sparkles className="w-4 h-4" /> },
                     ].map((item, i) => (
                         <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-neutral-900/40 border border-white/5">
                             <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 text-white ring-1 ring-white/10 shrink-0">
@@ -136,7 +136,7 @@ export default function VipPage() {
                 {/* Form */}
                 <div className="space-y-6">
                     <div className="h-px bg-white/10" />
-                    <h3 className="text-lg font-bold text-white">Apply Now</h3>
+                    <h3 className="text-lg font-bold text-white">立即申請</h3>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
@@ -168,7 +168,7 @@ export default function VipPage() {
                             <Label className="text-neutral-400">總資產規模 (AUM)</Label>
                             <Select name="asset_tier" required>
                                 <SelectTrigger className="bg-neutral-900 border-white/10 text-white h-12">
-                                    <SelectValue placeholder="Select Tier" />
+                                    <SelectValue placeholder="選擇等級" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-neutral-900 border-white/10 text-white">
                                     <SelectItem value=">50k">$50k - $200k</SelectItem>
@@ -189,11 +189,11 @@ export default function VipPage() {
                         </div>
 
                         <Button type="submit" className="w-full bg-white text-black hover:bg-neutral-200 font-bold h-12 rounded-full" disabled={isLoading}>
-                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Application'}
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : '提交申請'}
                         </Button>
 
                         <p className="text-[10px] text-center text-neutral-600">
-                            By submitting, you agree to our private client terms.
+                            提交即代表同意我們的隱私權條款與服務協議。
                         </p>
                     </form>
                 </div>

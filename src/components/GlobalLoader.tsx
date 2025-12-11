@@ -10,7 +10,7 @@ export default function GlobalLoader() {
 
             <div className="flex items-center gap-2 text-neutral-400">
                 <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                <span className="text-xs font-mono tracking-widest uppercase">System Loading...</span>
+                <span className="text-xs font-mono tracking-widest uppercase">系統載入中...</span>
             </div>
 
             <style jsx>{`
