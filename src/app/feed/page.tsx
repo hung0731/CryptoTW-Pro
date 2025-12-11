@@ -88,7 +88,7 @@ export default function FeedPage() {
 
             {/* Header */}
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="grid grid-cols-3 items-center px-4 h-14">
+                <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
                     <div className="flex items-center justify-start"></div>
                     <div className="flex items-center justify-center">
                         <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
@@ -103,14 +103,14 @@ export default function FeedPage() {
                 </div>
 
                 {/* Category Filter Pills (Scrollable) */}
-                <div className="w-full overflow-x-auto no-scrollbar px-4 pb-3">
+                <div className="w-full overflow-x-auto no-scrollbar px-4 pb-3 max-w-lg mx-auto">
                     <div className="flex space-x-2">
                         {categories.map((cat) => (
                             <button
                                 key={cat.id}
                                 onClick={() => setActiveTab(cat.id)}
                                 className={cn(
-                                    "px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap",
+                                    "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
                                     activeTab === cat.id
                                         ? "bg-white text-black"
                                         : "bg-neutral-900 text-neutral-400 hover:text-white border border-white/5"
@@ -123,7 +123,7 @@ export default function FeedPage() {
                 </div>
             </header>
 
-            <div className="mt-6 px-4 space-y-8 max-w-md mx-auto min-h-screen">
+            <div className="mt-6 px-4 space-y-8 max-w-lg mx-auto min-h-screen">
 
                 {/* Always show activities unless specific tab logic requires hiding (Usually kept on top) */}
                 <MarketActivities activities={activities} />

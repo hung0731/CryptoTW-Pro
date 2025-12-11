@@ -76,28 +76,25 @@ export default function VipPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans pb-20">
-            {/* Header */}
+        <div className="min-h-screen bg-black text-white font-sans pb-24">
             {/* Header */}
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="container mx-auto px-4 h-14 grid grid-cols-3 items-center max-w-md">
+                <div className="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
                     <div className="flex items-center justify-start">
                         <Link href="/">
-                            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white hover:bg-white/10 rounded-full">
-                                <ArrowLeft className="h-5 w-5" />
+                            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white hover:bg-white/10 rounded-full h-8 w-8">
+                                <ArrowLeft className="h-4 w-4" />
                             </Button>
                         </Link>
                     </div>
                     <div className="flex items-center justify-center">
-                        <img src="/logo.svg" alt="CryptoTW" className="h-5 w-auto" />
+                        <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
                     </div>
-                    <div className="flex items-center justify-end">
-                        {/* Right Slot Empty */}
-                    </div>
+                    <div className="w-8" /> {/* Spacer */}
                 </div>
             </header>
 
-            <div className="container max-w-lg mx-auto p-6 space-y-12">
+            <div className="max-w-lg mx-auto p-6 space-y-12">
 
                 {/* Hero */}
                 <div className="text-center space-y-4">
