@@ -1,6 +1,6 @@
 'use client'
 
-import { Home, Crown, User, Wallet } from 'lucide-react'
+import { Home, Crown, User, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -23,10 +23,10 @@ export function BottomNav() {
             active: pathname === '/vip'
         },
         {
-            label: '錢包',
-            icon: Wallet, // Placeholder for future wallet/asset feature if needed, or binding
-            href: '/register',
-            active: pathname === '/register'
+            label: '預測',
+            icon: TrendingUp,
+            href: '/prediction',
+            active: pathname === '/prediction'
         },
         {
             label: '我的',
