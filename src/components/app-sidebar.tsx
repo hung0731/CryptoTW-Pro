@@ -82,8 +82,8 @@ const data = {
           url: "/admin/articles",
         },
         {
-          title: "國際文章",
-          url: "/admin/international",
+          title: "全球精選",
+          url: "/admin/global",
         },
         {
           title: "活動管理",

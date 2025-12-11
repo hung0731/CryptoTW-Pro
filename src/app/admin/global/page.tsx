@@ -185,7 +185,7 @@ export default function InternationalAdminPage() {
                     <Card className="bg-neutral-900 border-white/5 border-dashed">
                         <CardContent className="flex flex-col items-center justify-center py-12 text-center text-neutral-500">
                             <Globe className="h-12 w-12 mb-4 opacity-50" />
-                            <p>尚未建立任何國際文章</p>
+                            <p>尚未建立任何全球文章</p>
                             <Button variant="link" onClick={() => setIsImportOpen(true)} className="text-blue-400 mt-2">
                                 試試 AI 導入功能
                             </Button>
@@ -198,7 +198,7 @@ export default function InternationalAdminPage() {
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-2">
                                         <Badge variant="outline" className="text-cyan-400 border-cyan-400/20 bg-cyan-400/10">
-                                            國際
+                                            全球
                                         </Badge>
                                         <CardTitle className="text-base font-medium text-white">{item.title}</CardTitle>
                                     </div>
