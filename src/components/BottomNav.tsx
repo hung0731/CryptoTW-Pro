@@ -13,8 +13,8 @@ export function BottomNav() {
         {
             label: '文章',
             icon: Home,
-            href: '/feed',
-            active: pathname === '/feed' || pathname.startsWith('/content')
+            href: '/',
+            active: pathname === '/' || pathname.startsWith('/content')
         },
         {
             label: '活動',

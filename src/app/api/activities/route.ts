@@ -5,14 +5,26 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
-        const { data, error } = await supabase
+        const { searchParams } = new URL(req.url)
+        const id = searchParams.get('id')
+
+        let query = supabase
             .from('activities')
             .select('*')
             .eq('is_active', true)
-            .order('created_at', { ascending: false })
+
+        if (id) {
+            query = query.eq('id', id).single()
+        } else {
+            query = query.order('created_at', { ascending: false })
+        }
+
+        const { data, error } = await query
 
         if (error) throw error
-        return NextResponse.json({ activities: data })
+
+        // Return structure depends on if it's list or single
+        return NextResponse.json(id ? { activity: data } : { activities: data })
     } catch (e) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }

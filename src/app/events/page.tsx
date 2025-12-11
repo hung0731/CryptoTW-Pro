@@ -9,6 +9,7 @@ import { ExternalLink, Calendar, Users, Clock, ChevronRight } from 'lucide-react
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import ReactMarkdown from 'react-markdown'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 interface Activity {
@@ -113,93 +114,42 @@ export default function EventsPage() {
                     </div>
                 ) : (
                     filteredActivities.map((activity) => (
-                        <Card
-                            key={activity.id}
-                            className="bg-neutral-900 border-white/5 hover:border-white/10 transition-all duration-300 cursor-pointer group"
-                            onClick={() => setSelectedActivity(activity)}
-                        >
-                            <CardHeader className="pb-3 pt-4 px-4">
-                                <div className="flex justify-between items-start gap-4">
-                                    <Badge variant="outline" className={`${getExchangeColor(activity.exchange_name)} uppercase text-[10px] px-2 py-0.5 border-opacity-30`}>
-                                        {activity.exchange_name === 'all' ? 'Users' : activity.exchange_name}
-                                    </Badge>
-                                    {activity.end_date ? (
-                                        <CountdownTimer targetDate={activity.end_date} />
-                                    ) : (
-                                        <span className="text-[10px] text-neutral-500 flex items-center gap-1 font-mono">
-                                            {new Date(activity.created_at).toLocaleDateString()}
-                                        </span>
-                                    )}
-                                </div>
-                                <CardTitle className="text-base font-bold text-white pt-2 leading-snug group-hover:text-blue-400 transition-colors">
-                                    {activity.title}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="px-4 pb-4 space-y-4">
-                                <p className="text-sm text-neutral-400 line-clamp-2 leading-relaxed">
-                                    {activity.description}
-                                </p>
-                                <div className="flex items-center text-[10px] text-neutral-500 font-medium">
-                                    <span className="underline decoration-neutral-700 underline-offset-2 group-hover:text-neutral-300">查看詳情</span>
-                                    <ChevronRight className="w-3 h-3 ml-0.5 opacity-50 group-hover:translate-x-0.5 transition-transform" />
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <Link href={`/events/${activity.id}`} key={activity.id}>
+                            <Card
+                                className="bg-neutral-900 border-white/5 hover:border-white/10 transition-all duration-300 cursor-pointer group"
+                            >
+                                <CardHeader className="pb-3 pt-4 px-4">
+                                    <div className="flex justify-between items-start gap-4">
+                                        <Badge variant="outline" className={`${getExchangeColor(activity.exchange_name)} uppercase text-[10px] px-2 py-0.5 border-opacity-30`}>
+                                            {activity.exchange_name === 'all' ? 'Users' : activity.exchange_name}
+                                        </Badge>
+                                        {activity.end_date ? (
+                                            <CountdownTimer targetDate={activity.end_date} />
+                                        ) : (
+                                            <span className="text-[10px] text-neutral-500 flex items-center gap-1 font-mono">
+                                                {new Date(activity.created_at).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <CardTitle className="text-base font-bold text-white pt-2 leading-snug group-hover:text-blue-400 transition-colors">
+                                        {activity.title}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="px-4 pb-4 space-y-4">
+                                    <p className="text-sm text-neutral-400 line-clamp-2 leading-relaxed">
+                                        {activity.description}
+                                    </p>
+                                    <div className="flex items-center text-[10px] text-neutral-500 font-medium">
+                                        <span className="underline decoration-neutral-700 underline-offset-2 group-hover:text-neutral-300">查看詳情</span>
+                                        <ChevronRight className="w-3 h-3 ml-0.5 opacity-50 group-hover:translate-x-0.5 transition-transform" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
                     ))
                 )}
             </div>
 
-            {/* Detail Modal */}
-            <Dialog open={!!selectedActivity} onOpenChange={(open) => !open && setSelectedActivity(null)}>
-                <DialogContent className="bg-neutral-900 border-white/10 text-white sm:max-w-md max-h-[85vh] overflow-y-auto w-[90%] rounded-2xl p-0 gap-0">
-                    {selectedActivity && (
-                        <>
-                            <div className="sticky top-0 z-10 bg-neutral-900/80 backdrop-blur-md border-b border-white/5 p-4 flex items-start justify-between">
-                                <div className="space-y-1 pr-8">
-                                    <Badge variant="outline" className={`${getExchangeColor(selectedActivity.exchange_name)} uppercase text-[10px] px-2 py-0.5 border-opacity-30`}>
-                                        {selectedActivity.exchange_name}
-                                    </Badge>
-                                    <DialogTitle className="text-lg font-bold leading-tight">
-                                        {selectedActivity.title}
-                                    </DialogTitle>
-                                </div>
-                            </div>
-
-                            <div className="p-5 space-y-6">
-                                {/* Countdown in Modal */}
-                                {selectedActivity.end_date && (
-                                    <div className="bg-neutral-950/50 rounded-xl p-4 border border-white/5 flex items-center justify-between">
-                                        <span className="text-xs text-neutral-400 flex items-center gap-2">
-                                            <Clock className="w-3 h-3" /> 距離活動結束
-                                        </span>
-                                        <CountdownTimer targetDate={selectedActivity.end_date} className="text-base font-mono text-white" />
-                                    </div>
-                                )}
-
-                                <div className="prose prose-invert prose-sm max-w-none prose-neutral">
-                                    <ReactMarkdown
-                                        components={{
-                                            a: ({ node, ...props }) => <a {...props} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer" />,
-                                            img: ({ node, ...props }) => <img {...props} className="rounded-xl border border-white/10" />,
-                                        }}
-                                    >
-                                        {selectedActivity.content || selectedActivity.description || '暫無詳細內容'}
-                                    </ReactMarkdown>
-                                </div>
-
-                                {selectedActivity.url && (
-                                    <Button
-                                        className="w-full bg-white text-black hover:bg-neutral-200 rounded-xl h-12 text-sm font-bold"
-                                        onClick={() => window.open(selectedActivity.url, '_blank')}
-                                    >
-                                        前往活動頁面 <ExternalLink className="w-4 h-4 ml-2" />
-                                    </Button>
-                                )}
-                            </div>
-                        </>
-                    )}
-                </DialogContent>
-            </Dialog>
 
             <BottomNav />
         </main>
