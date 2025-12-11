@@ -1,6 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+export async function GET() {
+    try {
+        const { data: bindings, error } = await supabase
+            .from('exchange_bindings')
+            .select(`
+                id,
+                exchange_name,
+                exchange_uid,
+                status,
+                created_at,
+                user:users (
+                    id,
+                    line_user_id,
+                    display_name,
+                    picture_url
+                )
+            `)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        return NextResponse.json({ bindings })
+    } catch (e) {
+        console.error('Verify GET Error', e)
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    }
+}
+
 export async function POST(req: NextRequest) {
     try {
         const { bindingId, action } = await req.json()

@@ -11,6 +11,7 @@ import {
   LineChart,
   Command,
   Send,
+  CreditCard,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -45,6 +46,11 @@ const data = {
       isActive: true, // Expand by default
       items: [
         {
+          title: "交易所綁定",
+          url: "/admin/bindings",
+          icon: CreditCard,
+        },
+        {
           title: "VIP 申請審核",
           url: "/admin/vip",
           icon: Crown,
@@ -68,8 +74,12 @@ const data = {
       isActive: true, // Expand by default
       items: [
         {
-          title: "內容管理 (CMS)",
-          url: "/admin/content",
+          title: "快訊管理",
+          url: "/admin/news",
+        },
+        {
+          title: "文章管理",
+          url: "/admin/articles",
         },
         {
           title: "活動管理",
