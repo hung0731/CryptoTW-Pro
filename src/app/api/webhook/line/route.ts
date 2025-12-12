@@ -321,6 +321,7 @@ function createRankingCard(data: any) {
             footer: {
                 type: "box",
                 layout: "vertical",
+                spacing: "sm",
                 contents: [
                     {
                         type: "text",
@@ -328,6 +329,18 @@ function createRankingCard(data: any) {
                         size: "xxs",
                         color: "#888888",
                         align: "center"
+                    },
+                    {
+                        type: "button",
+                        style: "primary",
+                        height: "sm",
+                        action: {
+                            type: "message",
+                            label: "免費加入加密台灣 Pro",
+                            text: "加入會員"
+                        },
+                        color: "#1F1AD9",
+                        margin: "sm"
                     }
                 ]
             }
