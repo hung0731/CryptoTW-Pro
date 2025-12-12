@@ -105,6 +105,10 @@ const data = {
           title: "全站設定",
           url: "/admin/settings",
         },
+        {
+          title: "Bot 關鍵字",
+          url: "/admin/bot",
+        },
       ],
     },
   ],

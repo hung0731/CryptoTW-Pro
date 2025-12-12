@@ -31,7 +31,6 @@ export default function AdminPage() {
     }, [])
 
     return (
-    return (
         <div className="space-y-8">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Dashboard</h1>
