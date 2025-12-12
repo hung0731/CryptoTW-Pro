@@ -236,10 +236,14 @@ function RichMenuControl() {
                             type="text"
                             value={text}
                             onChange={e => setText(e.target.value)}
-                            placeholder="例如: 開啟選單, 更多服務..."
+                            placeholder="例如: 開啟選單 (限14字)"
+                            maxLength={14}
                             className="w-full bg-black/50 border border-white/10 rounded h-10 px-3 text-white text-sm"
                         />
-                        <p className="text-xs text-neutral-500 mt-1">顯示在 LINE 聊天室底部的文字</p>
+                        <p className="text-xs text-neutral-500 mt-1 flex justify-between">
+                            <span>顯示在 LINE 聊天室底部的文字</span>
+                            <span className={text.length === 14 ? 'text-orange-500' : ''}>{text.length}/14</span>
+                        </p>
                     </div>
                     <button
                         onClick={handleUpdate}

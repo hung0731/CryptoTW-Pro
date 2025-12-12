@@ -78,7 +78,12 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json().catch(() => ({}))
-        const { chatBarText } = body
+        let { chatBarText } = body
+        // Ensure max length 14
+        if (chatBarText && chatBarText.length > 14) {
+            console.warn('[RichMenu] chatBarText too long, truncating to 14 chars')
+            chatBarText = chatBarText.substring(0, 14)
+        }
         console.log('[RichMenu] Target Text:', chatBarText)
 
         // 1. Create Rich Menu
