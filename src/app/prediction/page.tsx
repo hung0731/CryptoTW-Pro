@@ -4,9 +4,18 @@ import React, { useEffect, useState } from 'react'
 import { BottomNav } from '@/components/BottomNav'
 import { PredictionCard } from '@/components/PredictionCard'
 import { Skeleton } from '@/components/ui/skeleton'
-import { RefreshCw, TrendingUp, BarChart3, Gauge } from 'lucide-react'
+import { RefreshCw, TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Coins } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+interface GlobalData {
+    totalMarketCap: string
+    totalVolume: string
+    btcDominance: string
+    btcMarketCap: string
+    stablecoinMarketCap: string
+    stablecoinDominance: string
+}
 
 export default function DataPage() {
     const [activeTab, setActiveTab] = useState('market')
@@ -15,6 +24,7 @@ export default function DataPage() {
     const [marketData, setMarketData] = useState<{ gainers: any[], losers: any[] } | null>(null)
     const [marketLoading, setMarketLoading] = useState(true)
     const [fearGreed, setFearGreed] = useState<{ value: string, classification: string } | null>(null)
+    const [globalData, setGlobalData] = useState<GlobalData | null>(null)
 
     // Prediction Data State
     const [markets, setMarkets] = useState<any[]>([])
@@ -23,44 +33,11 @@ export default function DataPage() {
     const fetchMarketData = async () => {
         setMarketLoading(true)
         try {
-            // Fetch OKX market data
-            const res = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT')
-            const json = await res.json()
-
-            if (json.code === '0' && json.data) {
-                // Filter USDT pairs only
-                const usdtPairs = json.data.filter((t: any) => t.instId.endsWith('-USDT'))
-
-                // Calculate 24h change and sort
-                const withChange = usdtPairs.map((t: any) => {
-                    const last = parseFloat(t.last)
-                    const open = parseFloat(t.open24h)
-                    const change = open > 0 ? ((last - open) / open * 100) : 0
-                    return {
-                        symbol: t.instId.replace('-USDT', ''),
-                        lastPrice: t.last,
-                        priceChangePercent: change.toFixed(2)
-                    }
-                })
-
-                // Filter out stablecoins
-                const ignored = ['USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP']
-                const filtered = withChange.filter((t: any) => !ignored.includes(t.symbol))
-
-                filtered.sort((a: any, b: any) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))
-
-                setMarketData({
-                    gainers: filtered.slice(0, 5),
-                    losers: filtered.slice(-5).reverse()
-                })
-            }
-
-            // Fetch Fear & Greed Index
-            const fgRes = await fetch('https://api.alternative.me/fng/')
-            const fgData = await fgRes.json()
-            if (fgData.data && fgData.data.length > 0) {
-                setFearGreed(fgData.data[0])
-            }
+            const res = await fetch('/api/market')
+            const data = await res.json()
+            if (data.market) setMarketData(data.market)
+            if (data.fearGreed) setFearGreed(data.fearGreed)
+            if (data.global) setGlobalData(data.global)
         } catch (e) {
             console.error(e)
         } finally {
@@ -73,9 +50,7 @@ export default function DataPage() {
         try {
             const res = await fetch('/api/prediction/markets?limit=20')
             const data = await res.json()
-            if (data.markets) {
-                setMarkets(data.markets)
-            }
+            if (data.markets) setMarkets(data.markets)
         } catch (e) {
             console.error(e)
         } finally {
@@ -136,23 +111,58 @@ export default function DataPage() {
 
                     {/* Tab 1: Market Data */}
                     <TabsContent value="market" className="space-y-4 mt-6">
-                        {/* Fear & Greed Index */}
-                        {!marketLoading && fearGreed && (
-                            <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
-                                        <Gauge className="w-5 h-5 text-neutral-400" />
+                        {/* Global Stats Grid */}
+                        {!marketLoading && (fearGreed || globalData) && (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {/* Fear & Greed */}
+                                {fearGreed && (
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Gauge className="w-4 h-4 text-neutral-500" />
+                                            <span className="text-xs text-neutral-500">恐懼貪婪</span>
+                                        </div>
+                                        <div className={`text-xl font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
+                                            {fearGreed.value}
+                                        </div>
+                                        <div className="text-xs text-neutral-400">{fearGreed.classification}</div>
                                     </div>
-                                    <div>
-                                        <div className="text-xs text-neutral-500">恐慌貪婪指數</div>
-                                        <div className="text-sm text-neutral-400">{fearGreed.classification}</div>
+                                )}
+                                {/* Total Market Cap */}
+                                {globalData && (
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <DollarSign className="w-4 h-4 text-neutral-500" />
+                                            <span className="text-xs text-neutral-500">總市值</span>
+                                        </div>
+                                        <div className="text-xl font-bold font-mono text-white">${globalData.totalMarketCap}</div>
+                                        <div className="text-xs text-neutral-400">24h 量 ${globalData.totalVolume}</div>
                                     </div>
-                                </div>
-                                <div className={`text-3xl font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
-                                    {fearGreed.value}
-                                </div>
+                                )}
+                                {/* BTC Dominance */}
+                                {globalData && (
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Bitcoin className="w-4 h-4 text-orange-500" />
+                                            <span className="text-xs text-neutral-500">BTC 市佔</span>
+                                        </div>
+                                        <div className="text-xl font-bold font-mono text-orange-400">{globalData.btcDominance}%</div>
+                                        <div className="text-xs text-neutral-400">${globalData.btcMarketCap}</div>
+                                    </div>
+                                )}
+                                {/* Stablecoin */}
+                                {globalData && (
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3 sm:col-span-1 col-span-2">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Coins className="w-4 h-4 text-green-500" />
+                                            <span className="text-xs text-neutral-500">穩定幣市佔</span>
+                                        </div>
+                                        <div className="text-xl font-bold font-mono text-green-400">{globalData.stablecoinDominance}%</div>
+                                        <div className="text-xs text-neutral-400">${globalData.stablecoinMarketCap}</div>
+                                    </div>
+                                )}
                             </div>
                         )}
+
 
                         {/* Ranking Title */}
                         <div className="flex items-center justify-between">
@@ -215,56 +225,64 @@ export default function DataPage() {
                         </div>
                     </TabsContent>
 
-                    {/* Tab 2: Prediction Data (Original Content) */}
-                    <TabsContent value="prediction" className="space-y-8 mt-6">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-bold text-white">熱門預測</h2>
-                            <p className="text-neutral-400 text-sm">來自 Polymarket 的即時機率數據。</p>
+                    {/* Tab 2: Prediction Data */}
+                    <TabsContent value="prediction" className="space-y-4 mt-6">
+                        {/* Title */}
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-lg font-bold text-white">熱門預測</h2>
+                            <span className="text-xs text-neutral-500">Polymarket</span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {predictLoading ? (
-                                Array.from({ length: 8 }).map((_, i) => (
-                                    <div key={i} className="space-y-3">
-                                        <Skeleton className="h-32 w-full bg-neutral-900 rounded-xl" />
-                                        <Skeleton className="h-4 w-3/4 bg-neutral-900" />
-                                        <Skeleton className="h-8 w-full bg-neutral-900" />
-                                    </div>
-                                ))
-                            ) : (
-                                markets.map((market) => (
-                                    <PredictionCard
-                                        key={market.id}
-                                        id={market.id}
-                                        title={market.title}
-                                        image={market.image}
-                                        probability={market.probability}
-                                        volume={market.volume}
-                                        type={market.type || 'single'}
-                                        groupOutcomes={market.groupOutcomes}
-                                    />
-                                ))
-                            )}
-                        </div>
+                        {predictLoading ? (
+                            <div className="space-y-2">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-16 w-full bg-neutral-900 rounded-lg" />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
+                                {markets.map((market) => {
+                                    const isGroup = market.type === 'group' && market.groupOutcomes
+                                    const topOutcome = isGroup
+                                        ? market.groupOutcomes.reduce((a: any, b: any) => parseFloat(a.probability) > parseFloat(b.probability) ? a : b)
+                                        : null
+                                    const probability = isGroup ? topOutcome?.probability : market.probability
+                                    const prob = parseFloat(probability || '0')
+                                    const isHigh = prob > 50
+
+                                    return (
+                                        <div key={market.id} className="p-3">
+                                            <div className="flex items-start gap-3">
+                                                <img
+                                                    src={market.image}
+                                                    alt=""
+                                                    className="w-8 h-8 rounded-full bg-neutral-800 border border-white/10 object-cover shrink-0"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <h3 className="text-sm font-medium text-neutral-200 line-clamp-2 leading-snug">
+                                                            {market.title}
+                                                        </h3>
+                                                        <div className={`shrink-0 text-lg font-bold font-mono ${isHigh ? 'text-green-400' : 'text-neutral-400'}`}>
+                                                            {prob.toFixed(0)}%
+                                                        </div>
+                                                    </div>
+                                                    {isGroup && topOutcome && (
+                                                        <div className="text-xs text-neutral-500 mt-1">
+                                                            最高：{topOutcome.label}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
 
                         {/* Disclaimer */}
-                        <div className="mt-12 py-8 border-t border-white/5 space-y-4">
-                            {/* ... Disclaimer content ... */}
-                            <h3 className="text-sm font-bold text-neutral-300">關於 Polymarket</h3>
-                            <div className="text-xs text-neutral-500 space-y-4 leading-relaxed">
-                                <p>
-                                    本頁面數據引用自去中心化預測市場平台 <span className="text-neutral-400">Polymarket</span>，僅供資訊研究與學術參考，不代表本站立場。
-                                    本站與該平台無任何商業合作或代理關係，亦不提供任何投資建議。
-                                </p>
-                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 space-y-2">
-                                    <p className="font-bold text-red-400">⚠️ 重要法律提示</p>
-                                    <p className="text-red-300/80">
-                                        根據中華民國《公職人員選舉罷免法》及相關法令，預測市場可能涉及博弈或影響選舉之爭議。
-                                        使用者若欲前往該平台進行任何操作，請務必自行了解並遵守您所在地之當地法律法規，以免觸法。
-                                        切勿以身試法，本站不承擔任何法律責任。
-                                    </p>
-                                </div>
-                            </div>
+                        <div className="text-xs text-neutral-600 text-center mt-4">
+                            數據來源：Polymarket（僅供參考，不構成投資建議）
                         </div>
                     </TabsContent>
                 </Tabs>

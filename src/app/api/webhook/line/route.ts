@@ -1101,14 +1101,15 @@ export async function POST(req: NextRequest) {
                             const value = parseInt(fg.value)
                             let emoji = '😨'
                             let color = '#D00000'
-                            if (value >= 75) { emoji = '🤑'; color = '#00B900' }
-                            else if (value >= 55) { emoji = '😏'; color = '#7CB900' }
-                            else if (value >= 45) { emoji = '😐'; color = '#FFB800' }
-                            else if (value >= 25) { emoji = '😰'; color = '#FF6600' }
+                            let classification = '極度恐懼'
+                            if (value >= 75) { emoji = '🤑'; color = '#00B900'; classification = '極度貪婪' }
+                            else if (value >= 55) { emoji = '😏'; color = '#7CB900'; classification = '貪婪' }
+                            else if (value >= 45) { emoji = '😐'; color = '#FFB800'; classification = '中立' }
+                            else if (value >= 25) { emoji = '😰'; color = '#FF6600'; classification = '恐懼' }
 
                             const flexMsg = {
                                 type: "flex",
-                                altText: `恐慌貪婪指數: ${fg.value}`,
+                                altText: `恐懼貪婪指數: ${fg.value}`,
                                 contents: {
                                     type: "bubble",
                                     size: "kilo",
@@ -1120,7 +1121,7 @@ export async function POST(req: NextRequest) {
                                                 type: "box",
                                                 layout: "horizontal",
                                                 contents: [
-                                                    { type: "text", text: "😱 恐慌貪婪指數", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                                                    { type: "text", text: "恐懼貪婪指數", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
                                                     { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
                                                 ]
                                             },
@@ -1135,7 +1136,7 @@ export async function POST(req: NextRequest) {
                                                         layout: "vertical",
                                                         contents: [
                                                             { type: "text", text: emoji, size: "3xl", align: "center" },
-                                                            { type: "text", text: fg.value_classification, size: "sm", color: "#666666", align: "center", margin: "sm" }
+                                                            { type: "text", text: classification, size: "sm", color: "#666666", align: "center", margin: "sm" }
                                                         ],
                                                         flex: 1
                                                     },
