@@ -284,21 +284,68 @@ async function fetchOkxTicker(symbol: string) {
         }
 
         const data = json.data[0]
-        // 轉換為統一格式
-        const ticker = {
+        return {
             symbol: symbol.toUpperCase() + 'USDT',
             lastPrice: data.last,
             priceChangePercent: ((parseFloat(data.last) - parseFloat(data.open24h)) / parseFloat(data.open24h) * 100).toFixed(2),
             highPrice: data.high24h,
             lowPrice: data.low24h,
-            volume: data.vol24h
+            volume: data.vol24h,
+            source: 'OKX'
         }
-        console.log(`[OKX] Success: ${ticker.symbol} @ ${ticker.lastPrice}`)
-        return ticker
     } catch (e) {
         console.error('[OKX] Fetch Error:', e)
         return null
     }
+}
+
+// Fetch 24h ticker from Binance (備援)
+async function fetchBinanceTicker(symbol: string) {
+    const pair = `${symbol.toUpperCase()}USDT`
+    console.log(`[Binance] Fetching ticker for: ${pair}`)
+
+    try {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${pair}`, {
+            headers: { 'Accept': 'application/json' }
+        })
+
+        if (!res.ok) {
+            console.error(`[Binance] API Error: ${res.status} ${res.statusText}`)
+            return null
+        }
+
+        const data = await res.json()
+        return {
+            symbol: data.symbol,
+            lastPrice: data.lastPrice,
+            priceChangePercent: data.priceChangePercent,
+            highPrice: data.highPrice,
+            lowPrice: data.lowPrice,
+            volume: data.volume,
+            source: 'Binance'
+        }
+    } catch (e) {
+        console.error('[Binance] Fetch Error:', e)
+        return null
+    }
+}
+
+// 智能查詢：OKX 優先，Binance 備援
+async function fetchCryptoTicker(symbol: string) {
+    const okxData = await fetchOkxTicker(symbol)
+    if (okxData) {
+        console.log(`[Ticker] Using OKX for ${symbol}`)
+        return okxData
+    }
+
+    console.log(`[Ticker] OKX failed, trying Binance for ${symbol}`)
+    const binanceData = await fetchBinanceTicker(symbol)
+    if (binanceData) {
+        console.log(`[Ticker] Using Binance for ${symbol}`)
+        return binanceData
+    }
+
+    return null
 }
 
 // Create Price Flex Message
@@ -395,7 +442,7 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "24h 最高", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: "24h 最高價", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: formatNumber(data.highPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "md"
@@ -404,7 +451,7 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "24h 最低", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: "24h 最低價", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: formatNumber(data.lowPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "sm"
@@ -430,7 +477,7 @@ function createPriceCard(data: any) {
                         type: "button",
                         action: {
                             type: "uri",
-                            label: "前往 OKX 交易",
+                            label: "註冊 OKX 獨家手續費 8 折",
                             uri: `https://www.okx.com/trade-spot/${symbol.toLowerCase()}-usdt`
                         },
                         style: "primary",
@@ -441,7 +488,7 @@ function createPriceCard(data: any) {
                         type: "button",
                         action: {
                             type: "uri",
-                            label: "註冊其他交易所",
+                            label: "免費加入 CryptoTW Pro 會員",
                             uri: "https://pro.cryptotw.io/exchanges"
                         },
                         style: "primary",
@@ -763,7 +810,7 @@ export async function POST(req: NextRequest) {
                     // Skip if it matched currency codes already handled (though 'continue' handles it)
                     if (['TWD', 'USD', 'USDT', 'HOT', 'TOP', 'RANK'].includes(symbol)) return
 
-                    const ticker = await fetchOkxTicker(symbol)
+                    const ticker = await fetchCryptoTicker(symbol)
 
                     if (ticker) {
                         const flexMsg = createPriceCard(ticker)
