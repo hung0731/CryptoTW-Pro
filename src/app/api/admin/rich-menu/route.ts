@@ -4,14 +4,14 @@ import path from 'path'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 // Layout Definition (Template: Large, 2 Top + 3 Bottom)
-const getRichMenuObject = (liffId: string) => ({
+const getRichMenuObject = (liffId: string, chatBarText: string = "開啟選單") => ({
     size: {
         width: 2500,
         height: 1686
     },
     selected: true,
     name: "CryptoTW Pro Menu v4",
-    chatBarText: "開啟選單",
+    chatBarText: chatBarText,
     areas: [
         // A1: Top Left (0,0) - 1250x843 - Action: Open Feed (Entering System)
         {
@@ -67,6 +67,9 @@ export async function POST(req: NextRequest) {
         if (!token) return NextResponse.json({ error: 'Missing LINE_CHANNEL_ACCESS_TOKEN' }, { status: 500 })
         if (!liffId) return NextResponse.json({ error: 'Missing NEXT_PUBLIC_LIFF_ID' }, { status: 500 })
 
+        const body = await req.json().catch(() => ({}))
+        const { chatBarText } = body
+
         // 1. Create Rich Menu
         const createRes = await fetch('https://api.line.me/v2/bot/richmenu', {
             method: 'POST',
@@ -74,7 +77,7 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(getRichMenuObject(liffId))
+            body: JSON.stringify(getRichMenuObject(liffId, chatBarText || "選單"))
         })
 
         if (!createRes.ok) {

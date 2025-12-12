@@ -192,6 +192,64 @@ export default function BotAdminPage() {
                     </Card>
                 ))}
             </div>
+
+            {/* Rich Menu Section */}
+            <RichMenuControl />
         </div>
+    )
+}
+
+function RichMenuControl() {
+    const [text, setText] = useState('開啟選單')
+    const [loading, setLoading] = useState(false)
+
+    async function handleUpdate() {
+        if (!confirm(`確定要將選單文字更新為 "${text}" 嗎？這將會重新建立 Rich Menu。`)) return
+        setLoading(true)
+        try {
+            const res = await fetch('/api/admin/rich-menu', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chatBarText: text })
+            })
+            if (res.ok) alert('Rich Menu 更新成功！')
+            else alert('更新失敗，請檢查 Log')
+        } catch (e) {
+            console.error(e)
+            alert('發生錯誤')
+        }
+        setLoading(false)
+    }
+
+    return (
+        <Card className="bg-neutral-900 border-white/10 mt-8">
+            <CardHeader>
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                    📱 LINE 圖文選單設定 (Rich Menu)
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="flex items-end gap-4 max-w-md">
+                    <div className="flex-1">
+                        <label className="text-sm text-neutral-400 block mb-1">選單列文字 (Chat Bar Text)</label>
+                        <input
+                            type="text"
+                            value={text}
+                            onChange={e => setText(e.target.value)}
+                            placeholder="例如: 開啟選單, 更多服務..."
+                            className="w-full bg-black/50 border border-white/10 rounded h-10 px-3 text-white text-sm"
+                        />
+                        <p className="text-xs text-neutral-500 mt-1">顯示在 LINE 聊天室底部的文字</p>
+                    </div>
+                    <button
+                        onClick={handleUpdate}
+                        disabled={loading}
+                        className="h-10 px-4 bg-purple-600 text-white rounded hover:bg-purple-500 disabled:opacity-50 whitespace-nowrap"
+                    >
+                        {loading ? '更新中...' : '更新選單'}
+                    </button>
+                </div>
+            </CardContent>
+        </Card>
     )
 }
