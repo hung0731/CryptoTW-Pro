@@ -243,13 +243,24 @@ function formatNumber(num: number | string) {
 
 // Fetch 24h ticker from Binance
 async function fetchBinanceTicker(symbol: string) {
+    const pair = symbol.toUpperCase().endsWith('USDT') ? symbol.toUpperCase() : `${symbol.toUpperCase()}USDT`
+    console.log(`[Binance] Fetching ticker for: ${pair}`)
+
     try {
-        const pair = symbol.toUpperCase().endsWith('USDT') ? symbol.toUpperCase() : `${symbol.toUpperCase()}USDT`
-        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${pair}`)
-        if (!res.ok) return null
-        return await res.json()
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${pair}`, {
+            headers: { 'Accept': 'application/json' }
+        })
+
+        if (!res.ok) {
+            console.error(`[Binance] API Error: ${res.status} ${res.statusText}`)
+            return null
+        }
+
+        const data = await res.json()
+        console.log(`[Binance] Success: ${data.symbol} @ ${data.lastPrice}`)
+        return data
     } catch (e) {
-        console.error('Binance API Error:', e)
+        console.error('[Binance] Fetch Error:', e)
         return null
     }
 }
