@@ -324,11 +324,15 @@ function createRankingCard(data: any) {
                 spacing: "sm",
                 contents: [
                     {
-                        type: "text",
-                        text: "輸入 #BTC 查看單幣詳情",
-                        size: "xxs",
-                        color: "#888888",
-                        align: "center"
+                        type: "button",
+                        style: "primary",
+                        height: "sm",
+                        action: {
+                            type: "uri",
+                            label: "註冊 OKX 交易所",
+                            uri: "https://www.okx.com/join/CRYPTOTW"
+                        },
+                        color: "#1F1AD9"
                     },
                     {
                         type: "button",
@@ -336,11 +340,10 @@ function createRankingCard(data: any) {
                         height: "sm",
                         action: {
                             type: "message",
-                            label: "免費加入加密台灣 Pro",
+                            label: "加入 加密台灣 Pro",
                             text: "加入會員"
                         },
-                        color: "#1F1AD9",
-                        margin: "sm"
+                        color: "#000000"
                     }
                 ]
             }
@@ -599,25 +602,25 @@ function createPriceCard(data: any) {
                 contents: [
                     {
                         type: "button",
+                        style: "primary",
+                        height: "sm",
                         action: {
                             type: "uri",
-                            label: "註冊 OKX 獨家手續費 8 折",
-                            uri: `https://www.okx.com/trade-spot/${symbol.toLowerCase()}-usdt`
+                            label: "註冊 OKX 交易所",
+                            uri: "https://www.okx.com/join/CRYPTOTW"
                         },
-                        style: "primary",
-                        color: "#1F1AD9",
-                        height: "sm"
+                        color: "#1F1AD9"
                     },
                     {
                         type: "button",
-                        action: {
-                            type: "uri",
-                            label: "免費加入 CryptoTW Pro 會員",
-                            uri: "https://pro.cryptotw.io/exchanges"
-                        },
                         style: "primary",
-                        color: "#000000",
-                        height: "sm"
+                        height: "sm",
+                        action: {
+                            type: "message",
+                            label: "加入 Pro 會員",
+                            text: "加入會員"
+                        },
+                        color: "#000000"
                     }
                 ],
                 paddingTop: "10px"
@@ -805,21 +808,29 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
             footer: {
                 type: "box",
                 layout: "vertical",
+                spacing: "sm",
                 contents: [
                     {
                         type: "button",
-                        action: { type: "uri", label: "前往 MAX 交易", uri: "https://max.maicoin.com/markets/usdttwd" },
                         style: "primary",
-                        color: "#1F1AD9",
-                        height: "sm"
+                        height: "sm",
+                        action: {
+                            type: "uri",
+                            label: "註冊 OKX 交易所",
+                            uri: "https://www.okx.com/join/CRYPTOTW"
+                        },
+                        color: "#1F1AD9"
                     },
                     {
                         type: "button",
-                        action: { type: "uri", label: "前往 BitoPro 交易", uri: "https://www.bitopro.com/ns/trading/usdt_twd" },
                         style: "primary",
-                        color: "#000000",
                         height: "sm",
-                        margin: "sm"
+                        action: {
+                            type: "message",
+                            label: "加入 Pro 會員",
+                            text: "加入會員"
+                        },
+                        color: "#000000"
                     }
                 ]
             }
