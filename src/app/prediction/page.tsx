@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
 import { PredictionCard } from '@/components/PredictionCard'
 import { Skeleton } from '@/components/ui/skeleton'
-import { RefreshCw, TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Coins } from 'lucide-react'
+import { RefreshCw, TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Coins, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -83,22 +84,28 @@ export default function DataPage() {
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
             {/* Header */}
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="flex items-center justify-between px-6 h-16 max-w-5xl mx-auto">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center text-blue-500">
-                            <BarChart3 className="w-5 h-5" />
-                        </div>
-                        <h1 className="text-lg font-bold tracking-tight">市場數據</h1>
+                <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
+                    <div className="flex items-center justify-start">
+                        <Link href="/">
+                            <Button variant="ghost" size="icon" className="hover:bg-white/10 text-neutral-400 hover:text-white rounded-full h-8 w-8">
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                        </Link>
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleRefresh}
-                        disabled={isLoading}
-                        className="text-neutral-400 hover:text-white"
-                    >
-                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                    </Button>
+                    <div className="flex items-center justify-center">
+                        <img src="/logo.svg" alt="Logo" className="h-4 w-auto" />
+                    </div>
+                    <div className="flex items-center justify-end">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleRefresh}
+                            disabled={isLoading}
+                            className="text-neutral-400 hover:text-white hover:bg-white/10 rounded-full h-8 w-8"
+                        >
+                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                        </Button>
+                    </div>
                 </div>
             </header>
 
@@ -248,7 +255,11 @@ export default function DataPage() {
                                         : null
                                     const probability = isGroup ? topOutcome?.probability : market.probability
                                     const prob = parseFloat(probability || '0')
-                                    const isYes = prob > 50
+
+                                    // For single events: Green if >50%, Red if <50%
+                                    // For group events: Blue (neutral, showing top option)
+                                    const chartColor = isGroup ? "#60a5fa" : (prob > 50 ? "#4ade80" : "#f87171")
+                                    const textColorClass = isGroup ? "text-blue-400" : (prob > 50 ? "text-green-400" : "text-red-400")
 
                                     // For donut chart
                                     const circumference = 2 * Math.PI * 40
@@ -275,7 +286,7 @@ export default function DataPage() {
                                                             cy="50"
                                                             r="40"
                                                             fill="none"
-                                                            stroke={isYes ? "#4ade80" : "#f87171"}
+                                                            stroke={chartColor}
                                                             strokeWidth="8"
                                                             strokeLinecap="round"
                                                             strokeDasharray={strokeDasharray}
@@ -283,11 +294,11 @@ export default function DataPage() {
                                                     </svg>
                                                     {/* Center text */}
                                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                                        <span className={`text-lg font-bold font-mono ${isYes ? 'text-green-400' : 'text-red-400'}`}>
+                                                        <span className={`text-lg font-bold font-mono ${textColorClass}`}>
                                                             {prob.toFixed(0)}%
                                                         </span>
-                                                        <span className="text-[10px] text-neutral-500">
-                                                            {isYes ? '會' : '不會'}
+                                                        <span className="text-[9px] text-neutral-500 text-center px-1 leading-tight">
+                                                            {isGroup ? '最高' : (prob > 50 ? '會' : '不會')}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -298,8 +309,8 @@ export default function DataPage() {
                                                         {market.title}
                                                     </h3>
                                                     {isGroup && topOutcome ? (
-                                                        <div className="text-xs text-neutral-400 bg-neutral-800/50 rounded px-2 py-1 inline-block">
-                                                            最可能: <span className="text-white font-medium">{topOutcome.label}</span>
+                                                        <div className="text-xs text-blue-400 bg-blue-500/10 rounded px-2 py-1 inline-block border border-blue-500/20">
+                                                            📊 {topOutcome.label}
                                                         </div>
                                                     ) : (
                                                         <div className="flex gap-2 text-xs">

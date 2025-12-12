@@ -8,17 +8,17 @@ export async function GET(req: NextRequest) {
         const eventsConfig = [
             {
                 slug: 'fed-decision-in-january',
-                title: '美國聯準會(Fed) 會在 1 月降息嗎',
+                title: '🇺🇸 美國會在 1 月降息嗎',
                 id_override: 'fed-jan'
             },
             {
                 slug: 'fed-decision-in-march-885',
-                title: '美國聯準會(Fed) 會在 3 月降息嗎',
+                title: '🇺🇸 美國會在 3 月降息嗎',
                 id_override: 'fed-mar'
             },
             {
                 slug: 'fed-decision-in-april',
-                title: '美國聯準會(Fed) 會在 4 月降息嗎',
+                title: '🇺🇸 美國會在 4 月降息嗎',
                 id_override: 'fed-apr'
             }
         ]
@@ -39,6 +39,15 @@ export async function GET(req: NextRequest) {
             const config = eventsConfig[index]
             const eventImage = eventData.image
 
+            // Translation map for Fed decision outcomes
+            const translations: Record<string, string> = {
+                'No change': '維持不變',
+                '25 bps decrease': '降息 1 碼',
+                '50+ bps decrease': '降息 2 碼以上',
+                '25 bps increase': '升息 1 碼',
+                '50+ bps increase': '升息 2 碼以上'
+            }
+
             // Process outcomes
             const groupOutcomes = eventData.markets.map((m: any) => {
                 let probability = 0
@@ -48,9 +57,10 @@ export async function GET(req: NextRequest) {
                 } catch (e) {
                     probability = 0
                 }
+                const rawLabel = m.groupItemTitle || m.question
                 return {
                     id: m.id,
-                    label: m.groupItemTitle || m.question,
+                    label: translations[rawLabel] || rawLabel,
                     probability: probability.toFixed(1),
                     color: probability > 50 ? 'green' : 'neutral'
                 }
