@@ -13,6 +13,20 @@ import { cookies } from 'next/headers'
 // 尺寸：bubble=kilo, 標題=lg, 內文=sm
 // ============================================
 
+async function trackEvent(userId: string | undefined, eventType: string, eventName: string) {
+    if (!userId) return
+    try {
+        const supabase = createAdminClient()
+        await supabase.from('analytics_events').insert({
+            user_id: userId,
+            event_type: eventType,
+            event_name: eventName
+        })
+    } catch (e) {
+        console.error('[Analytics] Error:', e)
+    }
+}
+
 const WELCOME_FLEX_MESSAGE = {
     type: "flex",
     altText: "歡迎加入 加密台灣 Pro",
@@ -1040,15 +1054,29 @@ export async function POST(req: NextRequest) {
 
             // 1. Handle FOLLOW event
             if (event.type === 'follow') {
+                await trackEvent(event.source.userId, 'follow', 'user_follow')
                 await replyMessage(replyToken, [WELCOME_FLEX_MESSAGE])
+            }
+
+            // 1.5 Handle UNFOLLOW event
+            if (event.type === 'unfollow') {
+                await trackEvent(event.source.userId, 'unfollow', 'user_unfollow')
+            }
+
+            // 1.6 Handle POSTBACK event
+            if (event.type === 'postback') {
+                const data = event.postback.data
+                await trackEvent(event.source.userId, 'postback', data)
+                // Handle specific postbacks here if needed
             }
 
             // 2. Handle MESSAGE event
             if (event.type === 'message' && event.message.type === 'text') {
-                const text = event.message.text.trim().toUpperCase() // Use raw text for matching? Actually we want case insensitive usually.
-                // But for #commands we normalized to uppercase.
-                // For natural language keywords (e.g. "換算"), users might type any case.
+                const text = event.message.text.trim().toUpperCase()
                 const originalText = event.message.text.trim()
+
+                // Tracking
+                await trackEvent(event.source.userId, 'message', originalText)
 
                 // A. Check Custom Triggers (Highest Priority if not starting with #?)
                 // Actually, let's keep #commands hardcoded as they are specialized logic.

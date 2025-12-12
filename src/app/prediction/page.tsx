@@ -344,7 +344,7 @@ export default function DataPage() {
 
                                         {/* Outcomes */}
                                         <div className="space-y-1.5">
-                                            {market.outcomes.slice(0, 2).map((outcome: any, idx: number) => (
+                                            {(market.outcomes || []).slice(0, 2).map((outcome: any, idx: number) => (
                                                 <div key={idx} className="relative h-8 bg-black/40 rounded-lg overflow-hidden flex items-center px-3 border border-white/5">
                                                     <div
                                                         className={`absolute inset-0 opacity-20 ${idx === 0 ? 'bg-green-500' : 'bg-red-500'}`}

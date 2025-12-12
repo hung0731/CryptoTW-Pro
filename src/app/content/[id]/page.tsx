@@ -41,6 +41,19 @@ export default function ArticlePage() {
                 const data = await res.json()
                 if (data.content) {
                     setArticle(data.content)
+                    // Track View
+                    if (dbUser?.id) {
+                        fetch('/api/analytics/track', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId: dbUser.id,
+                                eventType: 'view_article',
+                                eventName: data.content.title,
+                                metadata: { article_id: data.content.id, type: data.content.type }
+                            })
+                        }).catch(e => console.error('Tracking Error:', e))
+                    }
                 } else {
                     setError('Article not found')
                 }
@@ -50,8 +63,14 @@ export default function ArticlePage() {
                 setLoading(false)
             }
         }
-        fetchArticle()
-    }, [params.id])
+        if (dbUser?.id) { // Only fetch if user is ready (or maybe fetch article first then track?)
+            // Actually article fetching doesn't need auth per se for public ones, but tracking does. 
+            // Let's keep logic simple: fetch article regardless, track if user exists.
+            fetchArticle()
+        } else {
+            fetchArticle()
+        }
+    }, [params.id, dbUser?.id])
 
     // Loading State
     if (loading || isAuthLoading) {
