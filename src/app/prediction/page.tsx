@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { BottomNav } from '@/components/BottomNav'
 import { PredictionCard } from '@/components/PredictionCard'
 import { Skeleton } from '@/components/ui/skeleton'
-import { RefreshCw, TrendingUp, BarChart3, Trophy } from 'lucide-react'
+import { RefreshCw, TrendingUp, BarChart3, Gauge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -14,6 +14,7 @@ export default function DataPage() {
     // Market Data State
     const [marketData, setMarketData] = useState<{ gainers: any[], losers: any[] } | null>(null)
     const [marketLoading, setMarketLoading] = useState(true)
+    const [fearGreed, setFearGreed] = useState<{ value: string, classification: string } | null>(null)
 
     // Prediction Data State
     const [markets, setMarkets] = useState<any[]>([])
@@ -22,28 +23,44 @@ export default function DataPage() {
     const fetchMarketData = async () => {
         setMarketLoading(true)
         try {
-            // Re-using the logic we put in webhook or create a new public API?
-            // Since we implemented the logic in webhook only, we need a public API for frontend to fetch.
-            // But we don't have a public API for ranking yet. 
-            // We can fetch Binance directly here since it's client side and public API!
-            const res = await fetch('https://api.binance.com/api/v3/ticker/24hr')
-            const allTickers = await res.json()
+            // Fetch OKX market data
+            const res = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT')
+            const json = await res.json()
 
-            // Filter & Sort Logic (Same as Webhook)
-            const ignored = ['USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'EUR', 'GBP']
-            const filtered = allTickers.filter((t: any) => {
-                if (!t.symbol.endsWith('USDT')) return false
-                const base = t.symbol.replace('USDT', '')
-                if (ignored.includes(base)) return false
-                if (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BEAR') || base.endsWith('BULL')) return false
-                return true
-            })
-            filtered.sort((a: any, b: any) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))
+            if (json.code === '0' && json.data) {
+                // Filter USDT pairs only
+                const usdtPairs = json.data.filter((t: any) => t.instId.endsWith('-USDT'))
 
-            setMarketData({
-                gainers: filtered.slice(0, 10),
-                losers: filtered.slice(-10).reverse()
-            })
+                // Calculate 24h change and sort
+                const withChange = usdtPairs.map((t: any) => {
+                    const last = parseFloat(t.last)
+                    const open = parseFloat(t.open24h)
+                    const change = open > 0 ? ((last - open) / open * 100) : 0
+                    return {
+                        symbol: t.instId.replace('-USDT', ''),
+                        lastPrice: t.last,
+                        priceChangePercent: change.toFixed(2)
+                    }
+                })
+
+                // Filter out stablecoins
+                const ignored = ['USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP']
+                const filtered = withChange.filter((t: any) => !ignored.includes(t.symbol))
+
+                filtered.sort((a: any, b: any) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))
+
+                setMarketData({
+                    gainers: filtered.slice(0, 5),
+                    losers: filtered.slice(-5).reverse()
+                })
+            }
+
+            // Fetch Fear & Greed Index
+            const fgRes = await fetch('https://api.alternative.me/fng/')
+            const fgData = await fgRes.json()
+            if (fgData.data && fgData.data.length > 0) {
+                setFearGreed(fgData.data[0])
+            }
         } catch (e) {
             console.error(e)
         } finally {
@@ -78,6 +95,15 @@ export default function DataPage() {
 
     const isLoading = activeTab === 'market' ? marketLoading : predictLoading
 
+    // Fear & Greed color
+    const getFearGreedColor = (value: number) => {
+        if (value <= 25) return 'text-red-500'
+        if (value <= 45) return 'text-orange-500'
+        if (value <= 55) return 'text-yellow-500'
+        if (value <= 75) return 'text-lime-500'
+        return 'text-green-500'
+    }
+
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
             {/* Header */}
@@ -109,61 +135,74 @@ export default function DataPage() {
                     </TabsList>
 
                     {/* Tab 1: Market Data */}
-                    <TabsContent value="market" className="space-y-6 mt-6">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-bold text-white">24h 漲跌排行榜</h2>
-                            <p className="text-neutral-400 text-sm">Binance 交易所現貨 (USDT)</p>
+                    <TabsContent value="market" className="space-y-4 mt-6">
+                        {/* Fear & Greed Index */}
+                        {!marketLoading && fearGreed && (
+                            <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
+                                        <Gauge className="w-5 h-5 text-neutral-400" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-neutral-500">恐慌貪婪指數</div>
+                                        <div className="text-sm text-neutral-400">{fearGreed.classification}</div>
+                                    </div>
+                                </div>
+                                <div className={`text-3xl font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
+                                    {fearGreed.value}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Ranking Title */}
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-lg font-bold text-white">24h 漲跌排行</h2>
+                            <span className="text-xs text-neutral-500">OKX</span>
                         </div>
 
                         {marketLoading ? (
-                            <div className="space-y-4">
-                                <Skeleton className="h-20 w-full bg-neutral-900 rounded-xl" />
-                                <Skeleton className="h-20 w-full bg-neutral-900 rounded-xl" />
-                                <Skeleton className="h-20 w-full bg-neutral-900 rounded-xl" />
+                            <div className="space-y-2">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-12 w-full bg-neutral-900 rounded-lg" />
+                                ))}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-2 gap-3">
                                 {/* Gainers */}
-                                <div className="space-y-4">
-                                    <h3 className="flex items-center gap-2 text-green-500 font-bold">
-                                        <TrendingUp className="w-4 h-4" /> 漲幅榜 (Top Gainers)
+                                <div className="space-y-2">
+                                    <h3 className="text-xs font-bold text-green-500 flex items-center gap-1">
+                                        <TrendingUp className="w-3 h-3" /> 漲幅榜
                                     </h3>
-                                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 overflow-hidden">
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
                                         {marketData?.gainers.map((item: any, i: number) => (
-                                            <div key={item.symbol} className="flex items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`text-sm font-mono w-6 text-center ${i < 3 ? 'text-yellow-500 font-bold' : 'text-neutral-500'}`}>{i + 1}</span>
-                                                    <div>
-                                                        <div className="font-bold">{item.symbol.replace('USDT', '')}</div>
-                                                        <div className="text-xs text-neutral-500">${parseFloat(item.lastPrice)}</div>
-                                                    </div>
+                                            <div key={item.symbol} className="flex items-center justify-between px-3 py-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-neutral-500 w-4">{i + 1}</span>
+                                                    <span className="font-medium text-sm">{item.symbol}</span>
                                                 </div>
-                                                <div className="text-green-500 font-bold font-mono">
-                                                    +{parseFloat(item.priceChangePercent).toFixed(2)}%
-                                                </div>
+                                                <span className="text-green-500 text-sm font-mono">
+                                                    +{parseFloat(item.priceChangePercent).toFixed(1)}%
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Losers */}
-                                <div className="space-y-4">
-                                    <h3 className="flex items-center gap-2 text-red-500 font-bold">
-                                        <TrendingUp className="w-4 h-4 rotate-180" /> 跌幅榜 (Top Losers)
+                                <div className="space-y-2">
+                                    <h3 className="text-xs font-bold text-red-500 flex items-center gap-1">
+                                        <TrendingUp className="w-3 h-3 rotate-180" /> 跌幅榜
                                     </h3>
-                                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 overflow-hidden">
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
                                         {marketData?.losers.map((item: any, i: number) => (
-                                            <div key={item.symbol} className="flex items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`text-sm font-mono w-6 text-center text-neutral-500`}>{i + 1}</span>
-                                                    <div>
-                                                        <div className="font-bold">{item.symbol.replace('USDT', '')}</div>
-                                                        <div className="text-xs text-neutral-500">${parseFloat(item.lastPrice)}</div>
-                                                    </div>
+                                            <div key={item.symbol} className="flex items-center justify-between px-3 py-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-neutral-500 w-4">{i + 1}</span>
+                                                    <span className="font-medium text-sm">{item.symbol}</span>
                                                 </div>
-                                                <div className="text-red-500 font-bold font-mono">
-                                                    {parseFloat(item.priceChangePercent).toFixed(2)}%
-                                                </div>
+                                                <span className="text-red-500 text-sm font-mono">
+                                                    {parseFloat(item.priceChangePercent).toFixed(1)}%
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
@@ -171,8 +210,8 @@ export default function DataPage() {
                             </div>
                         )}
 
-                        <div className="text-center text-xs text-neutral-600 mt-8">
-                            數據來源：Binance Spot API (非即時推送)
+                        <div className="text-center text-xs text-neutral-600 mt-4">
+                            數據來源：OKX Spot API
                         </div>
                     </TabsContent>
 
