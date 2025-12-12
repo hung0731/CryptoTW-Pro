@@ -87,6 +87,117 @@ const WELCOME_FLEX_MESSAGE = {
     }
 }
 
+// 加入會員 Flex Message
+const JOIN_MEMBER_FLEX_MESSAGE = {
+    type: "flex",
+    altText: "加入 加密台灣 Pro 會員",
+    contents: {
+        type: "bubble",
+        size: "kilo",
+        body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "🎉 加入會員",
+                            weight: "bold",
+                            size: "lg",
+                            color: "#1F1AD9",
+                            flex: 1
+                        },
+                        {
+                            type: "text",
+                            text: "加密台灣 Pro",
+                            size: "xxs",
+                            color: "#888888",
+                            align: "end",
+                            gravity: "center"
+                        }
+                    ]
+                },
+                {
+                    type: "separator",
+                    margin: "lg",
+                    color: "#f0f0f0"
+                },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    margin: "lg",
+                    spacing: "sm",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "📝 Step 1. 透過推薦碼註冊交易所",
+                            size: "sm",
+                            color: "#333333"
+                        },
+                        {
+                            type: "text",
+                            text: "🔗 Step 2. 綁定交易所 UID",
+                            size: "sm",
+                            color: "#333333"
+                        },
+                        {
+                            type: "text",
+                            text: "✅ Step 3. 等待審核 (24h 內)",
+                            size: "sm",
+                            color: "#333333"
+                        }
+                    ]
+                },
+                {
+                    type: "separator",
+                    margin: "lg",
+                    color: "#f0f0f0"
+                },
+                {
+                    type: "text",
+                    text: "✨ 會員福利：即時信號、獨家分析、VIP 社群",
+                    size: "xs",
+                    color: "#888888",
+                    margin: "lg",
+                    wrap: true
+                }
+            ]
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
+            spacing: "sm",
+            contents: [
+                {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    action: {
+                        type: "uri",
+                        label: "立即加入",
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
+                    },
+                    color: "#1F1AD9"
+                },
+                {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    action: {
+                        type: "uri",
+                        label: "了解更多福利",
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/vip`
+                    },
+                    color: "#000000"
+                }
+            ]
+        }
+    }
+}
+
 // Updating the object to use PRIMARY for both but different colors to ensure visual requirements
 
 
@@ -152,7 +263,7 @@ function createRankingCard(data: any) {
 
     return {
         type: "flex",
-        altText: "📊 24h 市場異動排行榜",
+        altText: "市場排行榜",
         contents: {
             type: "bubble",
             size: "kilo", // Slightly wider
@@ -162,7 +273,7 @@ function createRankingCard(data: any) {
                 contents: [
                     {
                         type: "text",
-                        text: "📊 24h 市場異動",
+                        text: "市場排行榜",
                         weight: "bold",
                         size: "lg",
                         color: "#1F1AD9",
@@ -187,7 +298,7 @@ function createRankingCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "🚀 漲幅榜", size: "md", weight: "bold", color: "#00B900" }
+                            { type: "text", text: "漲幅榜", size: "md", weight: "bold", color: "#00B900" }
                         ],
                         margin: "sm"
                     },
@@ -199,7 +310,7 @@ function createRankingCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "📉 跌幅榜", size: "md", weight: "bold", color: "#D00000" }
+                            { type: "text", text: "跌幅榜", size: "md", weight: "bold", color: "#D00000" }
                         ],
                         margin: "lg"
                     },
@@ -442,7 +553,7 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "24h 最高價", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: "單日最高價", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: formatNumber(data.highPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "md"
@@ -451,7 +562,7 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "24h 最低價", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: "單日最低價", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: formatNumber(data.lowPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "sm"
@@ -755,6 +866,12 @@ export async function POST(req: NextRequest) {
                     } else {
                         await replyMessage(replyToken, [{ type: "text", text: "⚠️ 目前無法取得市場數據。" }])
                     }
+                    continue
+                }
+
+                // B2. Join Member Command (加入會員)
+                if (originalText === '加入會員' || originalText === '註冊' || originalText === '會員') {
+                    await replyMessage(replyToken, [JOIN_MEMBER_FLEX_MESSAGE])
                     continue
                 }
 
