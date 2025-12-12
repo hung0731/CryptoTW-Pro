@@ -204,7 +204,7 @@ const HELP_COMMAND_FLEX_MESSAGE = {
     altText: "指令說明",
     contents: {
         type: "bubble",
-        size: "kilo",
+        size: "mega",
         body: {
             type: "box",
             layout: "vertical",
@@ -240,8 +240,9 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                     type: "box",
                     layout: "vertical",
                     margin: "lg",
-                    spacing: "md",
+                    spacing: "sm",
                     contents: [
+                        // 幣價查詢
                         {
                             type: "text",
                             text: "💰 幣價查詢",
@@ -251,8 +252,15 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                         },
                         {
                             type: "text",
-                            text: "#BTC  @ETH  $SOL",
-                            size: "sm",
+                            text: "查詢加密貨幣即時價格與 24h 漲跌幅",
+                            size: "xs",
+                            color: "#666666",
+                            wrap: true
+                        },
+                        {
+                            type: "text",
+                            text: "範例：#BTC  @ETH  $SOL  #DOGE",
+                            size: "xs",
                             color: "#333333"
                         },
                         {
@@ -260,6 +268,7 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                             margin: "md",
                             color: "#f0f0f0"
                         },
+                        // 市場排行榜
                         {
                             type: "text",
                             text: "📊 市場排行榜",
@@ -269,8 +278,14 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                         },
                         {
                             type: "text",
-                            text: "#HOT  @TOP  $RANK",
-                            size: "sm",
+                            text: "查看 24h 漲幅/跌幅 Top 5",
+                            size: "xs",
+                            color: "#666666"
+                        },
+                        {
+                            type: "text",
+                            text: "範例：#HOT  @TOP  $RANK",
+                            size: "xs",
                             color: "#333333"
                         },
                         {
@@ -278,6 +293,7 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                             margin: "md",
                             color: "#f0f0f0"
                         },
+                        // 匯率查詢
                         {
                             type: "text",
                             text: "💱 匯率查詢 / 換算",
@@ -287,15 +303,48 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                         },
                         {
                             type: "text",
-                            text: "#TWD  @TWD 1000  $USDT 50",
+                            text: "查台幣匯率，或換算金額",
+                            size: "xs",
+                            color: "#666666"
+                        },
+                        {
+                            type: "text",
+                            text: "範例：#TWD (查匯率)  #TWD 1000 (換算)",
+                            size: "xs",
+                            color: "#333333",
+                            wrap: true
+                        },
+                        {
+                            type: "separator",
+                            margin: "md",
+                            color: "#f0f0f0"
+                        },
+                        // 恐慌指數
+                        {
+                            type: "text",
+                            text: "😱 恐慌貪婪指數",
+                            weight: "bold",
                             size: "sm",
+                            color: "#1F1AD9"
+                        },
+                        {
+                            type: "text",
+                            text: "市場情緒指標 (0=極度恐慌, 100=極度貪婪)",
+                            size: "xs",
+                            color: "#666666",
+                            wrap: true
+                        },
+                        {
+                            type: "text",
+                            text: "範例：恐慌  FGI  情緒",
+                            size: "xs",
                             color: "#333333"
                         }
                     ]
                 },
                 {
                     type: "text",
-                    text: "支援前綴：# @ $",
+                    text: "💡 幣價和排行支援前綴：# @ $",
                     size: "xxs",
                     color: "#888888",
                     margin: "lg",
@@ -1039,6 +1088,91 @@ export async function POST(req: NextRequest) {
                 // B3. Help Command (指令)
                 if (originalText === '指令' || originalText === '幫助' || originalText === 'help') {
                     await replyMessage(replyToken, [HELP_COMMAND_FLEX_MESSAGE])
+                    continue
+                }
+
+                // B4. Fear & Greed Index (恐慌指數)
+                if (originalText === '恐慌' || originalText === 'FGI' || originalText === 'fgi' || originalText === '情緒' || originalText === '恐慌指數') {
+                    try {
+                        const fgRes = await fetch('https://api.alternative.me/fng/')
+                        const fgData = await fgRes.json()
+                        if (fgData.data && fgData.data.length > 0) {
+                            const fg = fgData.data[0]
+                            const value = parseInt(fg.value)
+                            let emoji = '😨'
+                            let color = '#D00000'
+                            if (value >= 75) { emoji = '🤑'; color = '#00B900' }
+                            else if (value >= 55) { emoji = '😏'; color = '#7CB900' }
+                            else if (value >= 45) { emoji = '😐'; color = '#FFB800' }
+                            else if (value >= 25) { emoji = '😰'; color = '#FF6600' }
+
+                            const flexMsg = {
+                                type: "flex",
+                                altText: `恐慌貪婪指數: ${fg.value}`,
+                                contents: {
+                                    type: "bubble",
+                                    size: "kilo",
+                                    body: {
+                                        type: "box",
+                                        layout: "vertical",
+                                        contents: [
+                                            {
+                                                type: "box",
+                                                layout: "horizontal",
+                                                contents: [
+                                                    { type: "text", text: "😱 恐慌貪婪指數", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                                                    { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                                                ]
+                                            },
+                                            { type: "separator", margin: "lg", color: "#f0f0f0" },
+                                            {
+                                                type: "box",
+                                                layout: "horizontal",
+                                                margin: "xl",
+                                                contents: [
+                                                    {
+                                                        type: "box",
+                                                        layout: "vertical",
+                                                        contents: [
+                                                            { type: "text", text: emoji, size: "3xl", align: "center" },
+                                                            { type: "text", text: fg.value_classification, size: "sm", color: "#666666", align: "center", margin: "sm" }
+                                                        ],
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        type: "text",
+                                                        text: fg.value,
+                                                        size: "4xl",
+                                                        weight: "bold",
+                                                        color: color,
+                                                        align: "center",
+                                                        gravity: "center",
+                                                        flex: 1
+                                                    }
+                                                ]
+                                            },
+                                            { type: "text", text: "0 = 極度恐慌 | 100 = 極度貪婪", size: "xxs", color: "#888888", margin: "xl", align: "center" }
+                                        ]
+                                    },
+                                    footer: {
+                                        type: "box",
+                                        layout: "vertical",
+                                        spacing: "sm",
+                                        contents: [
+                                            { type: "button", style: "primary", height: "sm", action: { type: "uri", label: "註冊 OKX 交易所", uri: "https://www.okx.com/join/CRYPTOTW" }, color: "#1F1AD9" },
+                                            { type: "button", style: "primary", height: "sm", action: { type: "message", label: "加入 Pro 會員", text: "加入會員" }, color: "#000000" }
+                                        ]
+                                    }
+                                }
+                            }
+                            await replyMessage(replyToken, [flexMsg])
+                        } else {
+                            await replyMessage(replyToken, [{ type: "text", text: "⚠️ 無法取得恐慌指數，請稍後再試。" }])
+                        }
+                    } catch (e) {
+                        console.error('FGI Error:', e)
+                        await replyMessage(replyToken, [{ type: "text", text: "⚠️ 無法取得恐慌指數，請稍後再試。" }])
+                    }
                     continue
                 }
 
