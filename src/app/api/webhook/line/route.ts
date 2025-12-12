@@ -111,6 +111,138 @@ const WELCOME_FLEX_MESSAGE = {
 // Updating the object to use PRIMARY for both but different colors to ensure visual requirements
 
 
+// Fetch Market Top Movers (Gainers & Losers)
+async function fetchMarketRanking() {
+    try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/24hr', { next: { revalidate: 60 } }) // Cache 1 min
+        if (!res.ok) return null
+        const allTickers = await res.json()
+
+        // Filter: USDT pairs only, exclude stablecoins & leveraged
+        const ignored = ['USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'EUR', 'GBP']
+        const filtered = allTickers.filter((t: any) => {
+            if (!t.symbol.endsWith('USDT')) return false
+            const base = t.symbol.replace('USDT', '')
+            if (ignored.includes(base)) return false
+            if (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BEAR') || base.endsWith('BULL')) return false
+            return true
+        })
+
+        // Sort by Change %
+        filtered.sort((a: any, b: any) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))
+
+        const topGainers = filtered.slice(0, 5)
+        const topLosers = filtered.slice(-5).reverse() // Bottom 5, reversed to show worst first
+
+        return { gainers: topGainers, losers: topLosers }
+    } catch (e) {
+        console.error('Ranking API Error:', e)
+        return null
+    }
+}
+
+// Create Ranking Flex Message
+function createRankingCard(data: any) {
+    const { gainers, losers } = data
+
+    const createRow = (item: any, isGainer: boolean) => {
+        const symbol = item.symbol.replace('USDT', '')
+        const change = parseFloat(item.priceChangePercent).toFixed(2)
+        const price = parseFloat(item.lastPrice)
+        const displayPrice = price < 1 ? price.toFixed(4) : price < 10 ? price.toFixed(3) : price.toFixed(2)
+
+        return {
+            type: "box",
+            layout: "horizontal",
+            contents: [
+                { type: "text", text: symbol, size: "sm", color: "#111111", weight: "bold", flex: 3 },
+                { type: "text", text: `${displayPrice}`, size: "sm", color: "#555555", align: "end", flex: 3 },
+                {
+                    type: "text",
+                    text: `${isGainer ? '+' : ''}${change}%`,
+                    size: "sm",
+                    color: isGainer ? "#00B900" : "#D00000",
+                    align: "end",
+                    weight: "bold",
+                    flex: 2
+                }
+            ],
+            margin: "sm"
+        }
+    }
+
+    return {
+        type: "flex",
+        altText: "📊 24h 市場異動排行榜",
+        contents: {
+            type: "bubble",
+            size: "kilo", // Slightly wider
+            header: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    {
+                        type: "text",
+                        text: "📊 24h 市場異動",
+                        weight: "bold",
+                        size: "xl",
+                        color: "#111111"
+                    },
+                    {
+                        type: "text",
+                        text: "Binance Spot (USDT)",
+                        size: "xs",
+                        color: "#aaaaaa",
+                        margin: "xs"
+                    }
+                ]
+            },
+            body: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    // Gainers Section
+                    {
+                        type: "box",
+                        layout: "horizontal",
+                        contents: [
+                            { type: "text", text: "🚀 漲幅榜 (Top Gainers)", size: "md", weight: "bold", color: "#00B900" }
+                        ],
+                        margin: "sm"
+                    },
+                    { type: "separator", margin: "sm" },
+                    ...gainers.map((item: any) => createRow(item, true)),
+
+                    // Losers Section
+                    {
+                        type: "box",
+                        layout: "horizontal",
+                        contents: [
+                            { type: "text", text: "📉 跌幅榜 (Top Losers)", size: "md", weight: "bold", color: "#D00000" }
+                        ],
+                        margin: "lg"
+                    },
+                    { type: "separator", margin: "sm" },
+                    ...losers.map((item: any) => createRow(item, false))
+                ]
+            },
+            footer: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    {
+                        type: "text",
+                        text: "點擊代幣可查看詳情 (尚未實裝)",
+                        size: "xxs",
+                        color: "#aaaaaa",
+                        align: "center"
+                    }
+                ]
+            }
+        }
+    }
+}
+
 // Helper: Check for custom DB triggers
 async function fetchCustomTrigger(text: string) {
     // Note: In a high-traffic bot, we should cache this or use a smart matching strategy.
@@ -514,7 +646,19 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // B. Currency Converter & Rates (#TWD, #USD, #USDT)
+                // B. Ranking Command (#HOT, #TOP, #RANK)
+                if (['#HOT', '#TOP', '#RANK'].includes(text)) {
+                    const rankingData = await fetchMarketRanking()
+                    if (rankingData) {
+                        const flexMsg = createRankingCard(rankingData)
+                        await replyMessage(replyToken, [flexMsg])
+                    } else {
+                        await replyMessage(replyToken, [{ type: "text", text: "⚠️ 目前無法取得市場數據。" }])
+                    }
+                    continue
+                }
+
+                // C. Currency Converter & Rates (#TWD, #USD, #USDT)
                 // Patterns: #TWD, #TWD 1000, #USD, #USD 100, #USDT, #USDT 100
                 const currencyMatch = text.match(/^#(TWD|USD|USDT)(\s+(\d+(\.\d+)?))?$/)
 
@@ -558,13 +702,13 @@ export async function POST(req: NextRequest) {
                     continue // Skip other checks
                 }
 
-                // C. Crypto Price Check (#BTC)
+                // D. Crypto Price Check (#BTC)
                 const cryptoMatch = text.match(/^#([A-Z0-9]{2,10})$/)
 
                 if (cryptoMatch) {
                     const symbol = cryptoMatch[1]
                     // Skip if it matched currency codes already handled (though 'continue' handles it)
-                    if (['TWD', 'USD', 'USDT'].includes(symbol)) return
+                    if (['TWD', 'USD', 'USDT', 'HOT', 'TOP', 'RANK'].includes(symbol)) return
 
                     const ticker = await fetchBinanceTicker(symbol)
 

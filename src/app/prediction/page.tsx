@@ -4,15 +4,55 @@ import React, { useEffect, useState } from 'react'
 import { BottomNav } from '@/components/BottomNav'
 import { PredictionCard } from '@/components/PredictionCard'
 import { Skeleton } from '@/components/ui/skeleton'
-import { RefreshCw, TrendingUp } from 'lucide-react'
+import { RefreshCw, TrendingUp, BarChart3, Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export default function PredictionPage() {
+export default function DataPage() {
+    const [activeTab, setActiveTab] = useState('market')
+
+    // Market Data State
+    const [marketData, setMarketData] = useState<{ gainers: any[], losers: any[] } | null>(null)
+    const [marketLoading, setMarketLoading] = useState(true)
+
+    // Prediction Data State
     const [markets, setMarkets] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+    const [predictLoading, setPredictLoading] = useState(true)
 
-    const fetchMarkets = async () => {
-        setLoading(true)
+    const fetchMarketData = async () => {
+        setMarketLoading(true)
+        try {
+            // Re-using the logic we put in webhook or create a new public API?
+            // Since we implemented the logic in webhook only, we need a public API for frontend to fetch.
+            // But we don't have a public API for ranking yet. 
+            // We can fetch Binance directly here since it's client side and public API!
+            const res = await fetch('https://api.binance.com/api/v3/ticker/24hr')
+            const allTickers = await res.json()
+
+            // Filter & Sort Logic (Same as Webhook)
+            const ignored = ['USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'EUR', 'GBP']
+            const filtered = allTickers.filter((t: any) => {
+                if (!t.symbol.endsWith('USDT')) return false
+                const base = t.symbol.replace('USDT', '')
+                if (ignored.includes(base)) return false
+                if (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BEAR') || base.endsWith('BULL')) return false
+                return true
+            })
+            filtered.sort((a: any, b: any) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))
+
+            setMarketData({
+                gainers: filtered.slice(0, 10),
+                losers: filtered.slice(-10).reverse()
+            })
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setMarketLoading(false)
+        }
+    }
+
+    const fetchPredictionMarkets = async () => {
+        setPredictLoading(true)
         try {
             const res = await fetch('/api/prediction/markets?limit=20')
             const data = await res.json()
@@ -22,13 +62,21 @@ export default function PredictionPage() {
         } catch (e) {
             console.error(e)
         } finally {
-            setLoading(false)
+            setPredictLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchMarkets()
+        fetchMarketData()
+        fetchPredictionMarkets()
     }, [])
+
+    const handleRefresh = () => {
+        if (activeTab === 'market') fetchMarketData()
+        else fetchPredictionMarkets()
+    }
+
+    const isLoading = activeTab === 'market' ? marketLoading : predictLoading
 
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
@@ -37,77 +85,155 @@ export default function PredictionPage() {
                 <div className="flex items-center justify-between px-6 h-16 max-w-5xl mx-auto">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center text-blue-500">
-                            <TrendingUp className="w-5 h-5" />
+                            <BarChart3 className="w-5 h-5" />
                         </div>
-                        <h1 className="text-lg font-bold tracking-tight">市場預測</h1>
+                        <h1 className="text-lg font-bold tracking-tight">市場數據</h1>
                     </div>
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={fetchMarkets}
-                        disabled={loading}
+                        onClick={handleRefresh}
+                        disabled={isLoading}
                         className="text-neutral-400 hover:text-white"
                     >
-                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                     </Button>
                 </div>
             </header>
 
-            <div className="p-6 max-w-5xl mx-auto space-y-8">
-                {/* Description */}
-                <div className="space-y-1">
-                    <h2 className="text-2xl font-bold text-white">熱門預測</h2>
-                    <p className="text-neutral-400 text-sm">來自 Polymarket 的即時機率數據。</p>
-                </div>
+            <div className="p-6 max-w-5xl mx-auto space-y-6">
+                <Tabs defaultValue="market" className="w-full" onValueChange={setActiveTab}>
+                    <TabsList className="grid w-full grid-cols-2 bg-neutral-900">
+                        <TabsTrigger value="market">市場異動</TabsTrigger>
+                        <TabsTrigger value="prediction">預測市場</TabsTrigger>
+                    </TabsList>
 
-                {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {loading ? (
-                        Array.from({ length: 8 }).map((_, i) => (
-                            <div key={i} className="space-y-3">
-                                <Skeleton className="h-32 w-full bg-neutral-900 rounded-xl" />
-                                <Skeleton className="h-4 w-3/4 bg-neutral-900" />
-                                <Skeleton className="h-8 w-full bg-neutral-900" />
-                            </div>
-                        ))
-                    ) : (
-                        markets.map((market) => (
-                            <PredictionCard
-                                key={market.id}
-                                id={market.id}
-                                title={market.title}
-                                image={market.image}
-                                probability={market.probability}
-                                volume={market.volume}
-                                type={market.type || 'single'}
-                                groupOutcomes={market.groupOutcomes}
-                            />
-                        ))
-                    )}
-                </div>
-
-                {/* Disclaimer */}
-                <div className="mt-12 py-8 border-t border-white/5 space-y-4">
-                    <h3 className="text-sm font-bold text-neutral-300">關於 Polymarket</h3>
-                    <div className="text-xs text-neutral-500 space-y-4 leading-relaxed">
-                        <p>
-                            本頁面數據引用自去中心化預測市場平台 <span className="text-neutral-400">Polymarket</span>，僅供資訊研究與學術參考，不代表本站立場。
-                            本站與該平台無任何商業合作或代理關係，亦不提供任何投資建議。
-                        </p>
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 space-y-2">
-                            <p className="font-bold text-red-400">⚠️ 重要法律提示</p>
-                            <p className="text-red-300/80">
-                                根據中華民國《公職人員選舉罷免法》及相關法令，預測市場可能涉及博弈或影響選舉之爭議。
-                                使用者若欲前往該平台進行任何操作，請務必自行了解並遵守您所在地之當地法律法規，以免觸法。
-                                切勿以身試法，本站不承擔任何法律責任。
-                            </p>
+                    {/* Tab 1: Market Data */}
+                    <TabsContent value="market" className="space-y-6 mt-6">
+                        <div className="space-y-1">
+                            <h2 className="text-2xl font-bold text-white">24h 漲跌排行榜</h2>
+                            <p className="text-neutral-400 text-sm">Binance 交易所現貨 (USDT)</p>
                         </div>
-                    </div>
-                </div>
+
+                        {marketLoading ? (
+                            <div className="space-y-4">
+                                <Skeleton className="h-20 w-full bg-neutral-900 rounded-xl" />
+                                <Skeleton className="h-20 w-full bg-neutral-900 rounded-xl" />
+                                <Skeleton className="h-20 w-full bg-neutral-900 rounded-xl" />
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Gainers */}
+                                <div className="space-y-4">
+                                    <h3 className="flex items-center gap-2 text-green-500 font-bold">
+                                        <TrendingUp className="w-4 h-4" /> 漲幅榜 (Top Gainers)
+                                    </h3>
+                                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 overflow-hidden">
+                                        {marketData?.gainers.map((item: any, i: number) => (
+                                            <div key={item.symbol} className="flex items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-sm font-mono w-6 text-center ${i < 3 ? 'text-yellow-500 font-bold' : 'text-neutral-500'}`}>{i + 1}</span>
+                                                    <div>
+                                                        <div className="font-bold">{item.symbol.replace('USDT', '')}</div>
+                                                        <div className="text-xs text-neutral-500">${parseFloat(item.lastPrice)}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-green-500 font-bold font-mono">
+                                                    +{parseFloat(item.priceChangePercent).toFixed(2)}%
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Losers */}
+                                <div className="space-y-4">
+                                    <h3 className="flex items-center gap-2 text-red-500 font-bold">
+                                        <TrendingUp className="w-4 h-4 rotate-180" /> 跌幅榜 (Top Losers)
+                                    </h3>
+                                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 overflow-hidden">
+                                        {marketData?.losers.map((item: any, i: number) => (
+                                            <div key={item.symbol} className="flex items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-sm font-mono w-6 text-center text-neutral-500`}>{i + 1}</span>
+                                                    <div>
+                                                        <div className="font-bold">{item.symbol.replace('USDT', '')}</div>
+                                                        <div className="text-xs text-neutral-500">${parseFloat(item.lastPrice)}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-red-500 font-bold font-mono">
+                                                    {parseFloat(item.priceChangePercent).toFixed(2)}%
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="text-center text-xs text-neutral-600 mt-8">
+                            數據來源：Binance Spot API (非即時推送)
+                        </div>
+                    </TabsContent>
+
+                    {/* Tab 2: Prediction Data (Original Content) */}
+                    <TabsContent value="prediction" className="space-y-8 mt-6">
+                        <div className="space-y-1">
+                            <h2 className="text-2xl font-bold text-white">熱門預測</h2>
+                            <p className="text-neutral-400 text-sm">來自 Polymarket 的即時機率數據。</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {predictLoading ? (
+                                Array.from({ length: 8 }).map((_, i) => (
+                                    <div key={i} className="space-y-3">
+                                        <Skeleton className="h-32 w-full bg-neutral-900 rounded-xl" />
+                                        <Skeleton className="h-4 w-3/4 bg-neutral-900" />
+                                        <Skeleton className="h-8 w-full bg-neutral-900" />
+                                    </div>
+                                ))
+                            ) : (
+                                markets.map((market) => (
+                                    <PredictionCard
+                                        key={market.id}
+                                        id={market.id}
+                                        title={market.title}
+                                        image={market.image}
+                                        probability={market.probability}
+                                        volume={market.volume}
+                                        type={market.type || 'single'}
+                                        groupOutcomes={market.groupOutcomes}
+                                    />
+                                ))
+                            )}
+                        </div>
+
+                        {/* Disclaimer */}
+                        <div className="mt-12 py-8 border-t border-white/5 space-y-4">
+                            {/* ... Disclaimer content ... */}
+                            <h3 className="text-sm font-bold text-neutral-300">關於 Polymarket</h3>
+                            <div className="text-xs text-neutral-500 space-y-4 leading-relaxed">
+                                <p>
+                                    本頁面數據引用自去中心化預測市場平台 <span className="text-neutral-400">Polymarket</span>，僅供資訊研究與學術參考，不代表本站立場。
+                                    本站與該平台無任何商業合作或代理關係，亦不提供任何投資建議。
+                                </p>
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 space-y-2">
+                                    <p className="font-bold text-red-400">⚠️ 重要法律提示</p>
+                                    <p className="text-red-300/80">
+                                        根據中華民國《公職人員選舉罷免法》及相關法令，預測市場可能涉及博弈或影響選舉之爭議。
+                                        使用者若欲前往該平台進行任何操作，請務必自行了解並遵守您所在地之當地法律法規，以免觸法。
+                                        切勿以身試法，本站不承擔任何法律責任。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </div>
 
             <BottomNav />
         </main>
     )
 }
+
 

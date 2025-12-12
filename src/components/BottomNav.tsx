@@ -23,9 +23,9 @@ export function BottomNav() {
             active: pathname === '/events'
         },
         {
-            label: '預測',
+            label: '數據',
             icon: TrendingUp,
-            href: '/prediction',
+            href: '/prediction', // Keep same route for now to avoid breaking existing links
             active: pathname === '/prediction'
         },
         {
