@@ -1,13 +1,14 @@
-import { createSafeServerClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 // GET: List all triggers
 export async function GET() {
-    try {
-        const cookieStore = await cookies()
-        const supabase = createSafeServerClient(cookieStore)
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
 
+    try {
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('bot_triggers')
             .select('*')
@@ -23,9 +24,11 @@ export async function GET() {
 
 // POST: Create new trigger
 export async function POST(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
-        const cookieStore = await cookies()
-        const supabase = createSafeServerClient(cookieStore)
+        const supabase = createAdminClient()
         const body = await req.json()
 
         const { keywords, reply_type, reply_content, is_active } = body
@@ -50,9 +53,11 @@ export async function POST(req: NextRequest) {
 
 // PUT: Update trigger
 export async function PUT(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
-        const cookieStore = await cookies()
-        const supabase = createSafeServerClient(cookieStore)
+        const supabase = createAdminClient()
         const body = await req.json()
         const { id, keywords, reply_type, reply_content, is_active } = body
 
@@ -75,9 +80,11 @@ export async function PUT(req: NextRequest) {
 
 // DELETE: Remove trigger
 export async function DELETE(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
-        const cookieStore = await cookies()
-        const supabase = createSafeServerClient(cookieStore)
+        const supabase = createAdminClient()
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')
 

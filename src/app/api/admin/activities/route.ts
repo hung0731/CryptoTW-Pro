@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const supabase = createAdminClient()
         const { data, error } = await supabase
@@ -19,6 +23,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const body = await req.json()
         const { title, exchange_name, description, content, url, is_active, end_date } = body
@@ -34,10 +41,10 @@ export async function POST(req: NextRequest) {
                 title,
                 exchange_name,
                 description,
-                content, // Added
+                content,
                 url,
-                start_date: new Date().toISOString(), // Default to now for creation
-                end_date: end_date || null, // Added
+                start_date: new Date().toISOString(),
+                end_date: end_date || null,
                 is_active: is_active || false
             })
             .select()
@@ -52,6 +59,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const body = await req.json()
         const { id, title, exchange_name, description, content, url, is_active, end_date } = body
@@ -65,9 +75,9 @@ export async function PUT(req: NextRequest) {
                 title,
                 exchange_name,
                 description,
-                content, // Added
+                content,
                 url,
-                end_date: end_date || null, // Added
+                end_date: end_date || null,
                 is_active,
             })
             .eq('id', id)
@@ -82,6 +92,9 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')

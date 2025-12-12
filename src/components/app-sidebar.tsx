@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Crown,
   FileText,
-  Activity,
   Settings,
   Users,
   LineChart,

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { ACTIVITY_ANALYSIS_PROMPT } from '@/lib/prompts'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export async function POST(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const { url } = await req.json()
 

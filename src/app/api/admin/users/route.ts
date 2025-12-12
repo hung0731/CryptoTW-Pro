@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const { searchParams } = new URL(req.url)
         const page = parseInt(searchParams.get('page') || '1')
@@ -44,6 +48,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const body = await req.json()
         const { id, membership_status } = body

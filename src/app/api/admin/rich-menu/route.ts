@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 // Layout Definition (Template: Large, 2 Top + 3 Bottom)
 const getRichMenuObject = (liffId: string) => ({
@@ -56,6 +57,9 @@ const getRichMenuObject = (liffId: string) => ({
 })
 
 export async function POST(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const token = process.env.LINE_CHANNEL_ACCESS_TOKEN
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const supabase = createAdminClient()
         const { data } = await supabase
@@ -19,6 +23,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const { message, level, is_active } = await req.json()
 
@@ -26,7 +33,6 @@ export async function POST(req: NextRequest) {
 
         const supabase = createAdminClient()
 
-        // If active, turn off others (optional logic, but single banner is cleaner)
         if (is_active) {
             await supabase.from('system_announcements').update({ is_active: false }).neq('id', '0')
         }
@@ -46,6 +52,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const { id, message, level, is_active } = await req.json()
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 })
@@ -71,6 +80,9 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')

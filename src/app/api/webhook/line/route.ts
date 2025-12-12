@@ -3,72 +3,43 @@ import { replyMessage, verifyLineSignature } from '@/lib/line-bot'
 import { createAdminClient } from '@/lib/supabase' // Use Service Role for background
 import { cookies } from 'next/headers'
 
+// ============================================
+// FLEX MESSAGE 設計規範
+// ============================================
+// 色彩：primary=#000000, accent=#211FFF, up=#00B900, down=#D00000
+// 尺寸：bubble=kilo, 標題=lg, 內文=sm
+// 原則：簡潔、快速理解、不花俏
+// ============================================
+
 const WELCOME_FLEX_MESSAGE = {
     type: "flex",
-    altText: "CryptoTW 系統存取",
+    altText: "歡迎加入 CryptoTW",
     contents: {
         type: "bubble",
+        size: "kilo",
         body: {
             type: "box",
             layout: "vertical",
             contents: [
                 {
                     type: "text",
-                    text: "CryptoTW 系統",
+                    text: "👋 歡迎加入 CryptoTW",
                     weight: "bold",
-                    color: "#000000",
-                    size: "xl"
+                    size: "lg"
                 },
                 {
                     type: "text",
-                    text: "專業交易情報",
-                    weight: "regular",
-                    color: "#000000",
+                    text: "輸入 #BTC 查價格 | #TWD 查匯率 | #HOT 看排行",
                     size: "xs",
-                    margin: "sm"
-                },
-                {
-                    type: "separator",
-                    margin: "lg"
-                },
-                {
-                    type: "box",
-                    layout: "vertical",
-                    margin: "lg",
-                    spacing: "sm",
-                    contents: [
-                        {
-                            type: "text",
-                            text: "服務項目：",
-                            size: "xs",
-                            color: "#aaaaaa",
-                            margin: "sm"
-                        },
-                        {
-                            type: "text",
-                            text: "• 市場信號與分析",
-                            size: "sm",
-                            color: "#333333"
-                        },
-                        {
-                            type: "text",
-                            text: "• 交易所帳戶串接",
-                            size: "sm",
-                            color: "#333333"
-                        },
-                        {
-                            type: "text",
-                            text: "• 大客戶計畫與機構服務",
-                            size: "sm",
-                            color: "#333333"
-                        }
-                    ]
+                    color: "#888888",
+                    margin: "md",
+                    wrap: true
                 }
             ]
         },
         footer: {
             type: "box",
-            layout: "vertical",
+            layout: "horizontal",
             spacing: "sm",
             contents: [
                 {
@@ -84,28 +55,17 @@ const WELCOME_FLEX_MESSAGE = {
                 },
                 {
                     type: "button",
-                    style: "primary",
+                    style: "secondary",
                     height: "sm",
                     action: {
                         type: "uri",
                         label: "連結帳戶",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
-                    },
-                    color: "#211FFF" // Using secondary style but overriding text color if supported, or background? 
-                    // Wait, 'style: secondary' usually has fixed text colors in LINE. 
-                    // Better validation: 'secondary' is usually grey/light button with dark text. 
-                    // If we want specific colors, we often use PRIMARY style with custom color property.
-                    // User asked for #211FFF button. Let's use primary with that color to be safe.
+                    }
                 }
             ]
-        },
-        styles: {
-            footer: {
-                separator: true
-            }
         }
     }
-    // Re-correcting the button strategy below.
 }
 
 // Updating the object to use PRIMARY for both but different colors to ensure visual requirements
@@ -232,9 +192,9 @@ function createRankingCard(data: any) {
                 contents: [
                     {
                         type: "text",
-                        text: "點擊代幣可查看詳情 (尚未實裝)",
+                        text: "輸入 #BTC 查看單幣詳情",
                         size: "xxs",
-                        color: "#aaaaaa",
+                        color: "#888888",
                         align: "center"
                     }
                 ]

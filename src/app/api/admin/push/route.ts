@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 import { multicastMessage } from '@/lib/line-bot'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 const BATCH_SIZE = 500
 
 export async function POST(request: NextRequest) {
+    // Auth Check
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const body = await request.json()
         const { message, audience = 'all' } = body
@@ -81,6 +86,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
+    // Auth Check
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const supabase = createAdminClient()
         const { data, error } = await supabase

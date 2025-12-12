@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MessageSquare, Plus, Trash, Save, Edit, X } from 'lucide-react'
+import { MessageSquare, Plus, Trash, Save, Edit } from 'lucide-react'
 
 export default function BotAdminPage() {
     const [triggers, setTriggers] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
     const [editData, setEditData] = useState<any>({
         id: null,
@@ -16,20 +16,20 @@ export default function BotAdminPage() {
         is_active: true
     })
 
-    useEffect(() => {
-        fetchTriggers()
-    }, [])
-
-    async function fetchTriggers() {
-        setLoading(true)
+    const fetchTriggers = useCallback(async () => {
+        setIsLoading(true)
         try {
             const res = await fetch('/api/admin/bot/triggers')
             if (res.ok) {
                 setTriggers(await res.json())
             }
         } catch (e) { console.error(e) }
-        setLoading(false)
-    }
+        setIsLoading(false)
+    }, [])
+
+    useEffect(() => {
+        fetchTriggers()
+    }, [fetchTriggers])
 
     async function handleSave() {
         const keywordsArray = editData.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k)

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export async function GET() {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     const supabase = createAdminClient()
     try {
         const { data: bindings, error } = await supabase
@@ -32,6 +36,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     const supabase = createAdminClient()
     try {
         const { bindingId, action } = await req.json()

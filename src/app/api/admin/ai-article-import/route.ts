@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { INTERNATIONAL_ARTICLE_PROMPT } from '@/lib/prompts'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
-export const maxDuration = 60 // Allow longer timeout for AI generation
+export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
         const { url } = await req.json()
 

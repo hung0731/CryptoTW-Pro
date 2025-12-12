@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-    try {
-        // In a real app, verify Admin Session here!
-        // For MVP/Demo, we assume the route is protected by knowledge or simple header check if needed.
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
 
+    try {
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('exchange_bindings')
             .select(`

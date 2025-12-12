@@ -1,12 +1,15 @@
-
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     try {
-        // Fetch verified bindings joined with user data
+        const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('exchange_bindings')
             .select(`
