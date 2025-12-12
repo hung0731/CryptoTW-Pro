@@ -109,15 +109,24 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                                 }
                             } else {
                                 console.error('Failed to sync user with backend')
+                                // If sync failed and we have 'basic' cache, we might want to retry or clear?
+                                // For now, keep as is, but maybe force reload?
                             }
                         } catch (err) {
                             console.error('Auth API Error', err)
                         }
                     }
                 } else {
-                    // If not logged in but had cache, clear it? 
-                    // Ideally yes, to prevent stale state if user cleared LINE auth but not local Storage
-                    // But for speed we keep it until explicit logout or error
+                    // CRITICAL FIX:
+                    // If LIFF is NOT logged in, but we have optimistic cache (isLoggedIn=true),
+                    // we MUST clear it. Otherwise user appears as "Basic" (from cache) but effectively logged out relative to Line.
+                    // This prevents "Basic" state triggering Gate when they should just be "Guest" (Login Page).
+                    if (cachedUser) {
+                        console.log('Clearing stale cache - LIFF not logged in')
+                        setDbUser(null)
+                        setIsLoggedIn(false)
+                        localStorage.removeItem('dbUser')
+                    }
                 }
             } catch (e) {
                 console.error('LIFF Initialization failed', e)

@@ -72,40 +72,45 @@ export default function EventsPage() {
 
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
-            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 space-y-2 pb-2">
-                <div className="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
-                    <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-orange-500" />
-                        <h1 className="text-sm font-bold tracking-tight">活動與福利</h1>
+            {/* Header */}
+            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
+                <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
+                    <div className="flex items-center justify-start">
+                        {/* Empty left slot */}
                     </div>
-                </div>
-                {/* Scrollable Tabs */}
-                <div className="w-full overflow-x-auto no-scrollbar px-4 pb-2 max-w-lg mx-auto">
-                    <div className="flex space-x-2">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={cn(
-                                    "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
-                                    activeTab === tab.id
-                                        ? "bg-white text-black"
-                                        : "bg-neutral-900 text-neutral-400 hover:text-white border border-white/5"
-                                )}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
+                    <div className="flex items-center justify-center">
+                        <img src="/logo.svg" alt="Logo" className="h-4 w-auto" />
+                    </div>
+                    <div className="flex items-center justify-end">
+                        {/* Empty right slot */}
                     </div>
                 </div>
             </header>
 
+            {/* Scrollable Tabs */}
+            <div className="w-full overflow-x-auto no-scrollbar px-4 pt-4 pb-2 max-w-lg mx-auto sticky top-14 z-30 bg-black/80 backdrop-blur-xl">
+                <div className="flex space-x-2">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={cn(
+                                "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
+                                activeTab === tab.id
+                                    ? "bg-white text-black"
+                                    : "bg-neutral-900 text-neutral-400 hover:text-white border border-white/5"
+                            )}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <div className="max-w-lg mx-auto p-4 space-y-4">
                 {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="space-y-3">
-                            <Skeleton className="h-40 w-full bg-neutral-900 rounded-xl" />
-                        </div>
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full bg-neutral-900 rounded-lg" />
                     ))
                 ) : filteredActivities.length === 0 ? (
                     <div className="text-center text-neutral-500 py-12 flex flex-col items-center gap-3">
@@ -113,40 +118,43 @@ export default function EventsPage() {
                         <span className="text-xs">目前此類別沒有活動</span>
                     </div>
                 ) : (
-                    filteredActivities.map((activity) => (
-                        <Link href={`/events/${activity.id}`} key={activity.id}>
-                            <Card
-                                className="bg-neutral-900 border-white/5 hover:border-white/10 transition-all duration-300 cursor-pointer group"
-                            >
-                                <CardHeader className="pb-3 pt-4 px-4">
-                                    <div className="flex justify-between items-start gap-4">
-                                        <Badge variant="outline" className={`${getExchangeColor(activity.exchange_name)} uppercase text-[10px] px-2 py-0.5 border-opacity-30`}>
-                                            {activity.exchange_name === 'all' ? 'Users' : activity.exchange_name}
-                                        </Badge>
-                                        {activity.end_date ? (
-                                            <CountdownTimer targetDate={activity.end_date} />
-                                        ) : (
-                                            <span className="text-[10px] text-neutral-500 flex items-center gap-1 font-mono">
-                                                {new Date(activity.created_at).toLocaleDateString()}
-                                            </span>
-                                        )}
+                    <div className="grid gap-2">
+                        {filteredActivities.map((activity) => (
+                            <Link href={`/events/${activity.id}`} key={activity.id}>
+                                <div className="group flex items-center justify-between p-3 rounded-lg bg-neutral-900/50 border border-white/5 hover:bg-white/5 transition-all cursor-pointer">
+                                    <div className="flex items-center gap-4 overflow-hidden">
+                                        {/* Status Dot */}
+                                        <div className={cn(
+                                            "w-1.5 h-1.5 rounded-full shrink-0",
+                                            activity.end_date && new Date(activity.end_date) > new Date() ? "bg-green-500 animate-pulse" : "bg-neutral-600"
+                                        )} />
+
+                                        <div className="space-y-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-4 border-opacity-30", getExchangeColor(activity.exchange_name))}>
+                                                    {activity.exchange_name === 'all' ? 'ALL' : activity.exchange_name}
+                                                </Badge>
+                                                <h3 className="text-sm font-medium text-neutral-200 truncate group-hover:text-white transition-colors">
+                                                    {activity.title}
+                                                </h3>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-[10px] text-neutral-500 font-mono">
+                                                <span>{new Date(activity.created_at).toLocaleDateString()}</span>
+                                                {activity.end_date && (
+                                                    <span className="flex items-center gap-1 text-orange-400/80">
+                                                        <Clock className="w-3 h-3" />
+                                                        {new Date(activity.end_date).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <CardTitle className="text-base font-bold text-white pt-2 leading-snug group-hover:text-blue-400 transition-colors">
-                                        {activity.title}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="px-4 pb-4 space-y-4">
-                                    <p className="text-sm text-neutral-400 line-clamp-2 leading-relaxed">
-                                        {activity.description}
-                                    </p>
-                                    <div className="flex items-center text-[10px] text-neutral-500 font-medium">
-                                        <span className="underline decoration-neutral-700 underline-offset-2 group-hover:text-neutral-300">查看詳情</span>
-                                        <ChevronRight className="w-3 h-3 ml-0.5 opacity-50 group-hover:translate-x-0.5 transition-transform" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    ))
+
+                                    <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-neutral-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
                 )}
             </div>
 
