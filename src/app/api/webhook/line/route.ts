@@ -157,8 +157,7 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
                     color: "#f0f0f0"
                 },
                 {
-                    type: "text",
-                    text: "✨ 會員福利：即時信號、獨家分析、VIP 社群",
+                    text: "✨ 會員福利：即時信號、獨家分析、大客戶社群",
                     size: "xs",
                     color: "#888888",
                     margin: "lg",

@@ -278,7 +278,7 @@ export default function ActivitiesAdminPage() {
                                     </SelectTrigger>
                                     <SelectContent className="bg-neutral-800 border-white/10 text-white">
                                         <SelectItem value="all">全部用戶 (All)</SelectItem>
-                                        <SelectItem value="vip">大客戶 (VIP)</SelectItem>
+                                        <SelectItem value="vip">大客戶</SelectItem>
                                         <SelectItem value="pro">Pro 用戶</SelectItem>
                                         <SelectItem value="binance">Binance</SelectItem>
                                         <SelectItem value="okx">OKX</SelectItem>
