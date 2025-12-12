@@ -2,39 +2,58 @@
 
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useLiff } from '@/components/LiffProvider'
 
 interface PageHeaderProps {
-    title?: string
-    backHref?: string
-    backLabel?: string
-    rightContent?: React.ReactNode
+    title?: string // Optional: Center title instead of Logo
+    backHref?: string // Optional: Left Back Button
+    backLabel?: string // Optional: Label for Back Button
+    showLogo?: boolean // Default: true
 }
 
 export function PageHeader({
     title,
-    backHref = '/feed',
-    backLabel = '返回',
-    rightContent
+    backHref,
+    backLabel,
+    showLogo = true
 }: PageHeaderProps) {
+    const { profile } = useLiff()
+
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 h-14">
-            <div className="max-w-5xl mx-auto w-full px-4 h-full flex items-center justify-between">
-                <Link
-                    href={backHref}
-                    className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm font-medium"
-                >
-                    <ChevronLeft className="w-4 h-4" />
-                    {backLabel}
-                </Link>
+        <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
+            <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
+                {/* Left: Back Button or Empty */}
+                <div className="flex items-center justify-start">
+                    {backHref && (
+                        <Link href={backHref}>
+                            <Button variant="ghost" className="hover:bg-white/10 text-neutral-400 hover:text-white rounded-full h-8 px-2 -ml-2 text-sm font-medium">
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                {backLabel}
+                            </Button>
+                        </Link>
+                    )}
+                </div>
 
-                {title && (
-                    <h1 className="absolute left-1/2 -translate-x-1/2 text-sm font-bold text-white truncate max-w-[50%]">
-                        {title}
-                    </h1>
-                )}
+                {/* Center: Logo or Title */}
+                <div className="flex items-center justify-center">
+                    {title ? (
+                        <span className="text-sm font-bold text-white truncate max-w-[150px]">{title}</span>
+                    ) : showLogo ? (
+                        <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
+                    ) : null}
+                </div>
 
-                <div className="flex items-center gap-2">
-                    {rightContent}
+                {/* Right: Profile Icon */}
+                <div className="flex items-center justify-end">
+                    {profile && (
+                        <Link href="/profile">
+                            <div className="relative group cursor-pointer">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
+                                <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
+                            </div>
+                        </Link>
+                    )}
                 </div>
             </div>
         </header>

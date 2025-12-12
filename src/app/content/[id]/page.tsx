@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Calendar, Lock, ChevronLeft } from 'lucide-react'
+import { Clock, Calendar, Lock } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
+import { PageHeader } from '@/components/PageHeader'
+import { BottomNav } from '@/components/BottomNav'
 
 interface Article {
     id: string
@@ -110,19 +112,11 @@ export default function ArticlePage() {
     }
 
     return (
-        <article className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30">
-            {/* Navigation */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5 h-16 flex items-center">
-                <div className="max-w-4xl mx-auto w-full px-6 flex items-center justify-between">
-                    <Link href="/feed" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm font-medium">
-                        <ChevronLeft className="w-4 h-4" /> 返回
-                    </Link>
-                    {/* Share / Actions could go here */}
-                </div>
-            </nav>
+        <article className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30 pb-24">
+            <PageHeader backHref="/feed" backLabel="返回" />
 
-            <div className="max-w-3xl mx-auto px-6 pt-32 pb-24">
-                {/* Header */}
+            <div className="max-w-3xl mx-auto px-6 pt-4">
+                {/* Header Info */}
                 <header className="mb-12 space-y-6">
                     <div className="flex items-center gap-3">
                         <Badge variant="outline" className="text-blue-400 border-blue-400/20 bg-blue-400/10 uppercase tracking-wider text-[10px] px-2 py-0.5 rounded-full">
@@ -213,6 +207,7 @@ export default function ArticlePage() {
                     </ReactMarkdown>
                 </div>
             </div>
+            <BottomNav />
         </article>
     )
 }

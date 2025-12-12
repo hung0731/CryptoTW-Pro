@@ -9,6 +9,7 @@ import { RefreshCw, TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Coins, Ch
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLiff } from '@/components/LiffProvider'
+import { PageHeader } from '@/components/PageHeader'
 
 interface GlobalData {
     totalMarketCap: string

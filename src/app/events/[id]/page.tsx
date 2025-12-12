@@ -9,6 +9,7 @@ import { ExternalLink, Calendar, Users, Clock, ArrowLeft, Loader2, Share2 } from
 import { BottomNav } from '@/components/BottomNav'
 import ReactMarkdown from 'react-markdown'
 import { cn } from '@/lib/utils'
+import { PageHeader } from '@/components/PageHeader'
 
 interface Activity {
     id: string
@@ -77,24 +78,7 @@ export default function SingleEventPage() {
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
-                    <div className="flex items-center">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => router.back()}
-                            className="text-neutral-400 hover:text-white hover:bg-white/10 -ml-2"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                        </Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold truncate max-w-[200px]">{activity.title}</span>
-                    </div>
-                    <div className="w-8" />
-                </div>
-            </header>
+            <PageHeader backHref="/events" backLabel="返回" title={activity.title} />
 
             <div className="max-w-lg mx-auto p-4 space-y-6">
 
