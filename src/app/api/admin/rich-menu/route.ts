@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import fs from 'fs'
+import path from 'path'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 // Layout Definition (Template: Large, 2 Top + 3 Bottom)
@@ -55,20 +57,32 @@ const getRichMenuObject = (liffId: string, chatBarText: string = "開啟選單")
 })
 
 export async function POST(req: NextRequest) {
+    console.log('[RichMenu] Starting update process...')
     const admin = await verifyAdmin()
-    if (!admin) return unauthorizedResponse()
+    if (!admin) {
+        console.log('[RichMenu] Unauthorized')
+        return unauthorizedResponse()
+    }
 
     try {
         const token = process.env.LINE_CHANNEL_ACCESS_TOKEN
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID
 
-        if (!token) return NextResponse.json({ error: 'Missing LINE_CHANNEL_ACCESS_TOKEN' }, { status: 500 })
-        if (!liffId) return NextResponse.json({ error: 'Missing NEXT_PUBLIC_LIFF_ID' }, { status: 500 })
+        if (!token) {
+            console.error('[RichMenu] Missing LINE_CHANNEL_ACCESS_TOKEN')
+            return NextResponse.json({ error: 'Missing LINE_CHANNEL_ACCESS_TOKEN' }, { status: 500 })
+        }
+        if (!liffId) {
+            console.error('[RichMenu] Missing NEXT_PUBLIC_LIFF_ID')
+            return NextResponse.json({ error: 'Missing NEXT_PUBLIC_LIFF_ID' }, { status: 500 })
+        }
 
         const body = await req.json().catch(() => ({}))
         const { chatBarText } = body
+        console.log('[RichMenu] Target Text:', chatBarText)
 
         // 1. Create Rich Menu
+        console.log('[RichMenu] Creating menu object...')
         const createRes = await fetch('https://api.line.me/v2/bot/richmenu', {
             method: 'POST',
             headers: {
@@ -80,26 +94,27 @@ export async function POST(req: NextRequest) {
 
         if (!createRes.ok) {
             const err = await createRes.text()
+            console.error('[RichMenu] Create failed:', err)
             return NextResponse.json({ error: `Failed to create rich menu: ${err}` }, { status: 500 })
         }
 
         const { richMenuId } = await createRes.json()
-        console.log('Created Rich Menu ID:', richMenuId)
+        console.log('[RichMenu] Created ID:', richMenuId)
 
         // 2. Upload Image
-        // Use fetch to get the image from the public URL instead of filesystem to avoid Vercel path issues
-        const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
-        const host = req.headers.get('host') || 'localhost:3000'
-        const imageUrl = `${protocol}://${host}/richmenu.png`
+        console.log('[RichMenu] Reading image file...')
+        const imagePath = path.join(process.cwd(), 'public', 'richmenu.png')
 
-        console.log('Fetching Rich Menu Image from:', imageUrl)
-        const imageRes = await fetch(imageUrl)
-
-        if (!imageRes.ok) {
-            return NextResponse.json({ error: `Failed to fetch richmenu.png from ${imageUrl}` }, { status: 404 })
+        if (!fs.existsSync(imagePath)) {
+            console.error('[RichMenu] Image not found at:', imagePath)
+            console.log('[RichMenu] CWD contents:', fs.readdirSync(process.cwd()))
+            // Try looking into .next/server or other places if specific to Vercel?
+            // Usually public files are copied to root in standalone mode, but let's stick to standard first.
+            return NextResponse.json({ error: `richmenu.png not found at ${imagePath}` }, { status: 404 })
         }
 
-        const imageBuffer = await imageRes.arrayBuffer()
+        const imageBuffer = fs.readFileSync(imagePath)
+        console.log('[RichMenu] Image read success, size:', imageBuffer.length)
 
         const uploadRes = await fetch(`https://api-data.line.me/v2/bot/richmenu/${richMenuId}/content`, {
             method: 'POST',
@@ -107,13 +122,15 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'image/png',
                 'Authorization': `Bearer ${token}`
             },
-            body: Buffer.from(imageBuffer) // Convert ArrayBuffer to Buffer
+            body: imageBuffer
         })
 
         if (!uploadRes.ok) {
             const err = await uploadRes.text()
+            console.error('[RichMenu] Upload failed:', err)
             return NextResponse.json({ error: `Failed to upload image: ${err}` }, { status: 500 })
         }
+        console.log('[RichMenu] Image uploaded.')
 
         // 3. Set Default
         const defaultRes = await fetch(`https://api.line.me/v2/bot/user/all/richmenu/${richMenuId}`, {
@@ -125,13 +142,15 @@ export async function POST(req: NextRequest) {
 
         if (!defaultRes.ok) {
             const err = await defaultRes.text()
+            console.error('[RichMenu] Set default failed:', err)
             return NextResponse.json({ error: `Failed to set default: ${err}` }, { status: 500 })
         }
+        console.log('[RichMenu] Default set success.')
 
         return NextResponse.json({ success: true, richMenuId })
 
     } catch (e: any) {
-        console.error(e)
-        return NextResponse.json({ error: e.message }, { status: 500 })
+        console.error('[RichMenu] Exception:', e)
+        return NextResponse.json({ error: e.message, stack: e.stack }, { status: 500 })
     }
 }
