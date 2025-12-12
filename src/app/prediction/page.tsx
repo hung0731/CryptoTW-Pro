@@ -234,13 +234,13 @@ export default function DataPage() {
                         </div>
 
                         {predictLoading ? (
-                            <div className="space-y-2">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                    <Skeleton key={i} className="h-16 w-full bg-neutral-900 rounded-lg" />
+                            <div className="space-y-3">
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-24 w-full bg-neutral-900 rounded-lg" />
                                 ))}
                             </div>
                         ) : (
-                            <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
+                            <div className="space-y-3">
                                 {markets.map((market) => {
                                     const isGroup = market.type === 'group' && market.groupOutcomes
                                     const topOutcome = isGroup
@@ -248,28 +248,64 @@ export default function DataPage() {
                                         : null
                                     const probability = isGroup ? topOutcome?.probability : market.probability
                                     const prob = parseFloat(probability || '0')
-                                    const isHigh = prob > 50
+                                    const isYes = prob > 50
+
+                                    // For donut chart
+                                    const circumference = 2 * Math.PI * 40
+                                    const strokeDasharray = `${(prob / 100) * circumference} ${circumference}`
 
                                     return (
-                                        <div key={market.id} className="p-3">
-                                            <div className="flex items-start gap-3">
-                                                <img
-                                                    src={market.image}
-                                                    alt=""
-                                                    className="w-8 h-8 rounded-full bg-neutral-800 border border-white/10 object-cover shrink-0"
-                                                />
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-start justify-between gap-2">
-                                                        <h3 className="text-sm font-medium text-neutral-200 line-clamp-2 leading-snug">
-                                                            {market.title}
-                                                        </h3>
-                                                        <div className={`shrink-0 text-lg font-bold font-mono ${isHigh ? 'text-green-400' : 'text-neutral-400'}`}>
+                                        <div key={market.id} className="bg-neutral-900/50 rounded-lg border border-white/5 p-4">
+                                            <div className="flex items-center gap-4">
+                                                {/* Donut Chart */}
+                                                <div className="relative w-20 h-20 shrink-0">
+                                                    <svg className="w-20 h-20 -rotate-90" viewBox="0 0 100 100">
+                                                        {/* Background circle */}
+                                                        <circle
+                                                            cx="50"
+                                                            cy="50"
+                                                            r="40"
+                                                            fill="none"
+                                                            stroke="#262626"
+                                                            strokeWidth="8"
+                                                        />
+                                                        {/* Progress circle */}
+                                                        <circle
+                                                            cx="50"
+                                                            cy="50"
+                                                            r="40"
+                                                            fill="none"
+                                                            stroke={isYes ? "#4ade80" : "#f87171"}
+                                                            strokeWidth="8"
+                                                            strokeLinecap="round"
+                                                            strokeDasharray={strokeDasharray}
+                                                        />
+                                                    </svg>
+                                                    {/* Center text */}
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                        <span className={`text-lg font-bold font-mono ${isYes ? 'text-green-400' : 'text-red-400'}`}>
                                                             {prob.toFixed(0)}%
-                                                        </div>
+                                                        </span>
+                                                        <span className="text-[10px] text-neutral-500">
+                                                            {isYes ? '會' : '不會'}
+                                                        </span>
                                                     </div>
-                                                    {isGroup && topOutcome && (
-                                                        <div className="text-xs text-neutral-500 mt-1">
-                                                            最高：{topOutcome.label}
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-sm font-medium text-neutral-200 line-clamp-2 leading-snug mb-2">
+                                                        {market.title}
+                                                    </h3>
+                                                    {isGroup && topOutcome ? (
+                                                        <div className="text-xs text-neutral-400 bg-neutral-800/50 rounded px-2 py-1 inline-block">
+                                                            最可能: <span className="text-white font-medium">{topOutcome.label}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex gap-2 text-xs">
+                                                            <span className="text-green-400">✓ {prob.toFixed(0)}% 會發生</span>
+                                                            <span className="text-neutral-500">|</span>
+                                                            <span className="text-red-400">✗ {(100 - prob).toFixed(0)}% 不會</span>
                                                         </div>
                                                     )}
                                                 </div>

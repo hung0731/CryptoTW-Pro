@@ -5,9 +5,9 @@ let marketCache: { data: any, timestamp: number } | null = null
 let fgiCache: { data: any, timestamp: number } | null = null
 let globalCache: { data: any, timestamp: number } | null = null
 
-const MARKET_CACHE_TTL = 60 * 1000 // 60 seconds
-const FGI_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
-const GLOBAL_CACHE_TTL = 2 * 60 * 1000 // 2 minutes
+const MARKET_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+const FGI_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+const GLOBAL_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
 
 // Format large numbers (e.g. 1.5T, 180B, 50M)
 function formatNumber(num: number): string {
