@@ -57,8 +57,20 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                         const parsed = JSON.parse(cachedUser)
                         setDbUser(parsed)
                         setIsLoggedIn(true)
-                        setIsLoading(false) // Unblock UI immediately
-                        console.log('Optimistic load success')
+
+                        // Smart Optimistic UI:
+                        // Only unblock immediately if user was already PRO.
+                        // If they were FREE, wait for fresh API data to check if they upgraded.
+                        // This prevents "Flash of Gate" for users who just bound/upgraded.
+                        const status = parsed.membership_status
+                        const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
+
+                        if (isPro) {
+                            setIsLoading(false)
+                            console.log('Optimistic load success (Pro)')
+                        } else {
+                            console.log('Optimistic load success (Basic - waiting for verify)')
+                        }
                     } catch (e) {
                         console.error('Cache parse error', e)
                     }

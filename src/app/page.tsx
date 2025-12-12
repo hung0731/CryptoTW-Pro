@@ -18,12 +18,12 @@ export default function Home() {
   const [dataLoading, setDataLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
 
-  // Fetch Data only if authorized
+  // Fetch Data only if authorized (Strict Mode)
   useEffect(() => {
     if (isAuthLoading) return
 
     const status = dbUser?.membership_status as string
-    const isPro = status === 'pro' || status === 'lifetime'
+    const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
 
     if (isPro) {
       const fetchData = async () => {
@@ -47,14 +47,11 @@ export default function Home() {
   }, [isAuthLoading, dbUser])
 
   // 1. Loading State
-  // 1. Loading State
-  // Determine effective loading state:
-  // - Initial Auth Loading (Liff)
-  // - Logged in but waiting for DB User sync
-  // - Pro User waiting for Content Data
   const isPending = isAuthLoading || (isLoggedIn && !dbUser)
-  const isPro = dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime'
+  const status = dbUser?.membership_status as string
+  const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
 
+  // If loading or (pro but data loading)
   if (isPending || (isPro && dataLoading)) {
     return (
       <div className="min-h-screen bg-black p-4 space-y-8">
@@ -72,11 +69,12 @@ export default function Home() {
     )
   }
 
-  // 2. Non-Member State (Join Guide / Mask)
-  // Only show Gate if we are SURE user is not Pro (Auth loaded, DB loaded, Status checked)
+  // 2. Strict Access Gate
+  // If we are sure user is NOT Pro, show gate.
   if (!isPro) {
     return <ProAccessGate />
   }
+
 
   // 3. Pro Member State (Feed)
   const categories = [
