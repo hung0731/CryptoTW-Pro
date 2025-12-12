@@ -96,6 +96,28 @@ async function fetchGlobalData() {
     }
 }
 
+// Fetch CoinGecko Categories
+async function fetchCategories() {
+    try {
+        const res = await fetch('https://api.coingecko.com/api/v3/coins/categories')
+        const json = await res.json()
+        if (Array.isArray(json)) {
+            // Sort by market cap descending (default usually) and take top 5
+            return json.slice(0, 5).map((c: any) => ({
+                id: c.id,
+                name: c.name,
+                market_cap_change_24h: c.market_cap_change_24h,
+                top_3_coins: c.top_3_coins,
+                market_cap: formatNumber(c.market_cap)
+            }))
+        }
+        return null
+    } catch (e) {
+        console.error('[Market API] CoinGecko Categories Error:', e)
+        return null
+    }
+}
+
 export async function GET() {
     const now = Date.now()
 
@@ -117,7 +139,17 @@ export async function GET() {
     if (!globalCache || now - globalCache.timestamp > GLOBAL_CACHE_TTL) {
         console.log('[Market API] Fetching fresh CoinGecko global data...')
         const data = await fetchGlobalData()
-        if (data) globalCache = { data, timestamp: now }
+        const categories = await fetchCategories()
+
+        if (data && categories) {
+            globalCache = {
+                data: { ...data, categories },
+                timestamp: now
+            }
+        } else if (data) {
+            // Fallback if categories fail
+            globalCache = { data, timestamp: now }
+        }
     }
 
     return NextResponse.json({

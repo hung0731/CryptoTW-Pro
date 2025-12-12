@@ -1,6 +1,6 @@
 'use client'
 
-import { Home, Gift, User, TrendingUp } from 'lucide-react'
+import { Home, Gift, User, TrendingUp, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -12,7 +12,7 @@ export function BottomNav() {
     const navItems = [
         {
             label: '文章',
-            icon: Home,
+            icon: FileText,
             href: '/',
             active: pathname === '/' || pathname.startsWith('/content')
         },

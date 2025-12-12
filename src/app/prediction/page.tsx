@@ -16,6 +16,7 @@ interface GlobalData {
     btcMarketCap: string
     stablecoinMarketCap: string
     stablecoinDominance: string
+    categories?: any[]
 }
 
 export default function DataPage() {
@@ -158,7 +159,7 @@ export default function DataPage() {
                                 )}
                                 {/* Stablecoin */}
                                 {globalData && (
-                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3 sm:col-span-1 col-span-2">
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <Coins className="w-4 h-4 text-green-500" />
                                             <span className="text-xs text-neutral-500">穩定幣市佔</span>
@@ -224,6 +225,38 @@ export default function DataPage() {
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* Market Categories */}
+                                {globalData?.categories && (
+                                    <div className="space-y-2 mt-6 col-span-2">
+                                        <h3 className="text-xs font-bold text-white flex items-center gap-1">
+                                            <TrendingUp className="w-3 h-3 text-purple-400" /> 熱門板塊 (24h)
+                                        </h3>
+                                        <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
+                                            {globalData.categories.map((cat: any, i: number) => (
+                                                <div key={cat.id} className="flex items-center justify-between px-3 py-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-xs text-neutral-500 w-4 font-mono">{i + 1}</span>
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium text-sm text-white">{cat.name}</span>
+                                                            <div className="flex -space-x-1 mt-1">
+                                                                {cat.top_3_coins.map((url: string, idx: number) => (
+                                                                    <img key={idx} src={url} className="w-4 h-4 rounded-full border border-black" />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className={`text-sm font-bold font-mono ${cat.market_cap_change_24h > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                            {cat.market_cap_change_24h > 0 ? '+' : ''}{cat.market_cap_change_24h.toFixed(1)}%
+                                                        </div>
+                                                        <span className="text-[10px] text-neutral-500 font-mono">${cat.market_cap}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 

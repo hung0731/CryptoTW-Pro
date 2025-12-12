@@ -191,33 +191,46 @@ function ContentList({ items }: { items: any[] }) {
     )
   }
   return (
-    <div className="grid gap-4 pb-12">
+    <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
       {items.map((item) => (
         <Link href={`/content/${item.id}`} key={item.id} className="block group">
-          <Card className="bg-neutral-900/50 border-white/5 hover:border-white/20 transition-all hover:bg-neutral-900 overflow-hidden">
+          <div className="flex items-start gap-4 p-4 hover:bg-white/5 transition-colors">
+            {/* Thumbnail */}
             {item.thumbnail_url && (
-              <div className="aspect-video w-full bg-neutral-950 relative overflow-hidden text-neutral-800">
+              <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-800 border border-white/10">
                 <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
                 {!item.is_public && (
-                  <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-yellow-500 flex items-center gap-1 border border-yellow-500/20">
-                    <Lock className="w-3 h-3" /> PRO 限定
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-yellow-500 drop-shadow-md" />
                   </div>
                 )}
               </div>
             )}
-            <CardContent className="p-4 space-y-3">
-              <div className="flex gap-2 items-center">
-                <Badge variant="secondary" className="bg-white/5 text-neutral-400 hover:bg-white/10 text-[10px] h-5 rounded px-1.5 font-normal tracking-wide">{item.type?.toUpperCase() || 'ARTICLE'}</Badge>
-                <span className="text-[10px] text-neutral-600 self-center">{new Date(item.created_at).toLocaleDateString()}</span>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-neutral-400 font-normal">
+                  {item.type?.toUpperCase() || 'ARTICLE'}
+                </Badge>
+                {/* Date */}
+                <span className="text-[10px] text-neutral-600">
+                  {new Date(item.created_at).toLocaleDateString()}
+                </span>
               </div>
-              <h3 className="font-bold text-lg text-white group-hover:text-blue-400 transition-colors leading-snug">
+              <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                 {item.title}
               </h3>
-              <p className="text-sm text-neutral-400 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
                 {item.summary || item.content?.substring(0, 100)}...
               </p>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Arrow */}
+            <div className="self-center shrink-0 opacity-0 group-hover:opacity-50 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+              <ChevronRight className="w-4 h-4 text-neutral-400" />
+            </div>
+          </div>
         </Link>
       ))}
     </div>
