@@ -24,18 +24,26 @@ const WELCOME_FLEX_MESSAGE = {
             layout: "vertical",
             contents: [
                 {
-                    type: "text",
-                    text: "加密台灣 Pro",
-                    size: "xxs",
-                    color: "#888888"
-                },
-                {
-                    type: "text",
-                    text: "👋 歡迎加入",
-                    weight: "bold",
-                    size: "lg",
-                    color: "#1F1AD9",
-                    margin: "sm"
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "👋 歡迎加入",
+                            weight: "bold",
+                            size: "lg",
+                            color: "#1F1AD9",
+                            flex: 1
+                        },
+                        {
+                            type: "text",
+                            text: "加密台灣 Pro",
+                            size: "xxs",
+                            color: "#888888",
+                            align: "end",
+                            gravity: "center"
+                        }
+                    ]
                 },
                 {
                     type: "text",
@@ -150,21 +158,23 @@ function createRankingCard(data: any) {
             size: "kilo", // Slightly wider
             header: {
                 type: "box",
-                layout: "vertical",
+                layout: "horizontal",
                 contents: [
-                    {
-                        type: "text",
-                        text: "加密台灣 Pro",
-                        size: "xxs",
-                        color: "#888888"
-                    },
                     {
                         type: "text",
                         text: "📊 24h 市場異動",
                         weight: "bold",
                         size: "lg",
                         color: "#1F1AD9",
-                        margin: "sm"
+                        flex: 1
+                    },
+                    {
+                        type: "text",
+                        text: "加密台灣 Pro",
+                        size: "xxs",
+                        color: "#888888",
+                        align: "end",
+                        gravity: "center"
                     }
                 ]
             },
@@ -295,12 +305,6 @@ function createPriceCard(data: any) {
                 layout: "vertical",
                 contents: [
                     {
-                        type: "text",
-                        text: "加密台灣 Pro",
-                        size: "xxs",
-                        color: "#888888"
-                    },
-                    {
                         type: "box",
                         layout: "horizontal",
                         contents: [
@@ -314,15 +318,13 @@ function createPriceCard(data: any) {
                             },
                             {
                                 type: "text",
-                                text: `$${parseFloat(data.lastPrice).toLocaleString()}`,
-                                weight: "bold",
-                                size: "xl",
-                                color: "#111111",
+                                text: "加密台灣 Pro",
+                                size: "xxs",
+                                color: "#888888",
                                 align: "end",
-                                flex: 2
+                                gravity: "center"
                             }
-                        ],
-                        margin: "sm"
+                        ]
                     },
                     {
                         type: "box",
@@ -330,9 +332,10 @@ function createPriceCard(data: any) {
                         contents: [
                             {
                                 type: "text",
-                                text: "幣安現貨",
-                                size: "xs",
-                                color: "#aaaaaa"
+                                text: `$${parseFloat(data.lastPrice).toLocaleString()}`,
+                                weight: "bold",
+                                size: "xl",
+                                color: "#111111"
                             },
                             {
                                 type: "text",
@@ -340,7 +343,8 @@ function createPriceCard(data: any) {
                                 size: "sm",
                                 color: color,
                                 align: "end",
-                                weight: "bold"
+                                weight: "bold",
+                                gravity: "center"
                             }
                         ],
                         margin: "sm"
@@ -478,25 +482,33 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                 layout: "vertical",
                 contents: [
                     {
-                        type: "text",
-                        text: "加密台灣 Pro",
-                        size: "xxs",
-                        color: "#888888"
-                    },
-                    {
-                        type: "text",
-                        text: headerTitle,
-                        weight: "bold",
-                        size: "lg",
-                        color: "#1F1AD9",
-                        margin: "sm"
+                        type: "box",
+                        layout: "horizontal",
+                        contents: [
+                            {
+                                type: "text",
+                                text: headerTitle,
+                                weight: "bold",
+                                size: "lg",
+                                color: "#1F1AD9",
+                                flex: 1
+                            },
+                            {
+                                type: "text",
+                                text: "加密台灣 Pro",
+                                size: "xxs",
+                                color: "#888888",
+                                align: "end",
+                                gravity: "center"
+                            }
+                        ]
                     },
                     ...(calcResult ? [{
                         type: "text",
                         text: calcResult,
                         weight: "bold",
                         size: "xl",
-                        color: "#00B900",
+                        color: "#111111",
                         margin: "sm",
                         wrap: true
                     }] : [])
