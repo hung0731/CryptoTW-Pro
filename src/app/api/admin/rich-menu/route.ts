@@ -29,12 +29,12 @@ const getRichMenuObject = (liffId: string) => ({
                 uri: `https://liff.line.me/${liffId}?path=/join`
             }
         },
-        // B: Bottom Left (0,843) - 833x843 - Action: Open Events
+        // B: Bottom Left (0,843) - 833x843 - Action: Send "指令" message
         {
             bounds: { x: 0, y: 843, width: 833, height: 843 },
             action: {
-                type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/events`
+                type: "message",
+                text: "指令"
             }
         },
         // C: Bottom Center (833,843) - 834x843 - Action: Open Prediction

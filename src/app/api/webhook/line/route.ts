@@ -198,6 +198,143 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
     }
 }
 
+// 指令說明 Flex Message
+const HELP_COMMAND_FLEX_MESSAGE = {
+    type: "flex",
+    altText: "指令說明",
+    contents: {
+        type: "bubble",
+        size: "kilo",
+        body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "📖 指令說明",
+                            weight: "bold",
+                            size: "lg",
+                            color: "#1F1AD9",
+                            flex: 1
+                        },
+                        {
+                            type: "text",
+                            text: "加密台灣 Pro",
+                            size: "xxs",
+                            color: "#888888",
+                            align: "end",
+                            gravity: "center"
+                        }
+                    ]
+                },
+                {
+                    type: "separator",
+                    margin: "lg",
+                    color: "#f0f0f0"
+                },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    margin: "lg",
+                    spacing: "md",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "💰 幣價查詢",
+                            weight: "bold",
+                            size: "sm",
+                            color: "#1F1AD9"
+                        },
+                        {
+                            type: "text",
+                            text: "#BTC  @ETH  $SOL",
+                            size: "sm",
+                            color: "#333333"
+                        },
+                        {
+                            type: "separator",
+                            margin: "md",
+                            color: "#f0f0f0"
+                        },
+                        {
+                            type: "text",
+                            text: "📊 市場排行榜",
+                            weight: "bold",
+                            size: "sm",
+                            color: "#1F1AD9"
+                        },
+                        {
+                            type: "text",
+                            text: "#HOT  @TOP  $RANK",
+                            size: "sm",
+                            color: "#333333"
+                        },
+                        {
+                            type: "separator",
+                            margin: "md",
+                            color: "#f0f0f0"
+                        },
+                        {
+                            type: "text",
+                            text: "💱 匯率查詢 / 換算",
+                            weight: "bold",
+                            size: "sm",
+                            color: "#1F1AD9"
+                        },
+                        {
+                            type: "text",
+                            text: "#TWD  @TWD 1000  $USDT 50",
+                            size: "sm",
+                            color: "#333333"
+                        }
+                    ]
+                },
+                {
+                    type: "text",
+                    text: "支援前綴：# @ $",
+                    size: "xxs",
+                    color: "#888888",
+                    margin: "lg",
+                    align: "center"
+                }
+            ]
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
+            spacing: "sm",
+            contents: [
+                {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    action: {
+                        type: "uri",
+                        label: "註冊 OKX 交易所",
+                        uri: "https://www.okx.com/join/CRYPTOTW"
+                    },
+                    color: "#1F1AD9"
+                },
+                {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    action: {
+                        type: "message",
+                        label: "加入 Pro 會員",
+                        text: "加入會員"
+                    },
+                    color: "#000000"
+                }
+            ]
+        }
+    }
+}
+
 // Updating the object to use PRIMARY for both but different colors to ensure visual requirements
 
 
@@ -881,8 +1018,8 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // B. Ranking Command (#HOT, #TOP, #RANK)
-                if (['#HOT', '#TOP', '#RANK'].includes(text)) {
+                // B. Ranking Command (#HOT, @HOT, $HOT, etc.)
+                if (/^[#@$](HOT|TOP|RANK)$/.test(text)) {
                     const rankingData = await fetchMarketRanking()
                     if (rankingData) {
                         const flexMsg = createRankingCard(rankingData)
@@ -899,9 +1036,14 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // C. Currency Converter & Rates (#TWD, #USD, #USDT)
-                // Patterns: #TWD, #TWD 1000, #USD, #USD 100, #USDT, #USDT 100
-                const currencyMatch = text.match(/^#(TWD|USD|USDT)(\s+(\d+(\.\d+)?))?$/)
+                // B3. Help Command (指令)
+                if (originalText === '指令' || originalText === '幫助' || originalText === 'help') {
+                    await replyMessage(replyToken, [HELP_COMMAND_FLEX_MESSAGE])
+                    continue
+                }
+
+                // C. Currency Converter & Rates (#TWD, @TWD, $TWD, etc.)
+                const currencyMatch = text.match(/^[#@$](TWD|USD|USDT)(\s+(\d+(\.\d+)?))?$/)
 
                 if (currencyMatch) {
                     const type = currencyMatch[1] // TWD, USD, USDT
@@ -943,8 +1085,8 @@ export async function POST(req: NextRequest) {
                     continue // Skip other checks
                 }
 
-                // D. Crypto Price Check (#BTC)
-                const cryptoMatch = text.match(/^#([A-Z0-9]{2,10})$/)
+                // D. Crypto Price Check (#BTC, @BTC, $BTC)
+                const cryptoMatch = text.match(/^[#@$]([A-Z0-9]{2,10})$/)
 
                 if (cryptoMatch) {
                     const symbol = cryptoMatch[1]
