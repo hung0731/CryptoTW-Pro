@@ -251,7 +251,7 @@ export default function DataPage() {
                         </div>
                     ) : (
                         <div className="grid gap-3">
-                            {marketData?.top_gainers?.slice(0, 5).map((coin: any, i: number) => (
+                            {marketData?.gainers?.slice(0, 5).map((coin: any, i: number) => (
                                 <div key={i} className="group relative overflow-hidden bg-neutral-900/30 border border-white/5 rounded-xl p-3 flex items-center justify-between hover:bg-white/5 transition-all cursor-default">
                                     <div className="flex items-center gap-3 relative z-10">
                                         <span className="text-neutral-600 font-mono text-xs w-4">0{i + 1}</span>
@@ -318,7 +318,7 @@ export default function DataPage() {
                         </div>
                     )}
 
-                    {loading ? (
+                    {predictLoading ? (
                         <div className="space-y-3">
                             <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-xl" />
                             <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-xl" />
