@@ -262,41 +262,72 @@ function formatNumber(num: number | string) {
     return Number(num).toLocaleString('en-US', { maximumFractionDigits: 8 })
 }
 
-// Fetch 24h ticker from Binance
-async function fetchBinanceTicker(symbol: string) {
-    const pair = symbol.toUpperCase().endsWith('USDT') ? symbol.toUpperCase() : `${symbol.toUpperCase()}USDT`
-    console.log(`[Binance] Fetching ticker for: ${pair}`)
+// Fetch 24h ticker from OKX
+async function fetchOkxTicker(symbol: string) {
+    const instId = `${symbol.toUpperCase()}-USDT`
+    console.log(`[OKX] Fetching ticker for: ${instId}`)
 
     try {
-        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${pair}`, {
+        const res = await fetch(`https://www.okx.com/api/v5/market/ticker?instId=${instId}`, {
             headers: { 'Accept': 'application/json' }
         })
 
         if (!res.ok) {
-            console.error(`[Binance] API Error: ${res.status} ${res.statusText}`)
+            console.error(`[OKX] API Error: ${res.status} ${res.statusText}`)
             return null
         }
 
-        const data = await res.json()
-        console.log(`[Binance] Success: ${data.symbol} @ ${data.lastPrice}`)
-        return data
+        const json = await res.json()
+        if (json.code !== '0' || !json.data || json.data.length === 0) {
+            console.error(`[OKX] No data for: ${instId}`)
+            return null
+        }
+
+        const data = json.data[0]
+        // 轉換為統一格式
+        const ticker = {
+            symbol: symbol.toUpperCase() + 'USDT',
+            lastPrice: data.last,
+            priceChangePercent: ((parseFloat(data.last) - parseFloat(data.open24h)) / parseFloat(data.open24h) * 100).toFixed(2),
+            highPrice: data.high24h,
+            lowPrice: data.low24h,
+            volume: data.vol24h
+        }
+        console.log(`[OKX] Success: ${ticker.symbol} @ ${ticker.lastPrice}`)
+        return ticker
     } catch (e) {
-        console.error('[Binance] Fetch Error:', e)
+        console.error('[OKX] Fetch Error:', e)
         return null
     }
 }
 
 // Create Price Flex Message
-// Create Price Flex Message
+// 智能價格格式化：根據價格大小決定小數位數
+function formatPrice(price: number): string {
+    if (price >= 1000) {
+        return Math.round(price).toLocaleString() // 92,294
+    } else if (price >= 10) {
+        return price.toFixed(2) // 234.56
+    } else if (price >= 1) {
+        return price.toFixed(2) // 2.45
+    } else if (price >= 0.01) {
+        return price.toFixed(4) // 0.1234
+    } else {
+        return price.toFixed(6) // 0.000123
+    }
+}
+
 // Create Price Flex Message
 function createPriceCard(data: any) {
     const isUp = parseFloat(data.priceChangePercent) >= 0
-    const color = isUp ? "#00B900" : "#D00000" // Green : Red
+    const color = isUp ? "#00B900" : "#D00000"
     const sign = isUp ? "+" : ""
+    const symbol = data.symbol.replace("USDT", "")
+    const price = parseFloat(data.lastPrice)
 
     return {
         type: "flex",
-        altText: `${data.symbol.replace('USDT', '')} 即時價格`,
+        altText: `${symbol} 價格`,
         contents: {
             type: "bubble",
             size: "kilo",
@@ -310,9 +341,9 @@ function createPriceCard(data: any) {
                         contents: [
                             {
                                 type: "text",
-                                text: data.symbol.replace("USDT", ""),
+                                text: `${symbol} 價格`,
                                 weight: "bold",
-                                size: "xl",
+                                size: "lg",
                                 color: "#1F1AD9",
                                 flex: 1
                             },
@@ -332,7 +363,7 @@ function createPriceCard(data: any) {
                         contents: [
                             {
                                 type: "text",
-                                text: `$${parseFloat(data.lastPrice).toLocaleString()}`,
+                                text: `$${formatPrice(price)}`,
                                 weight: "bold",
                                 size: "xl",
                                 color: "#111111"
@@ -393,16 +424,28 @@ function createPriceCard(data: any) {
             footer: {
                 type: "box",
                 layout: "vertical",
+                spacing: "sm",
                 contents: [
                     {
                         type: "button",
                         action: {
                             type: "uri",
-                            label: "前往幣安交易",
-                            uri: `https://www.binance.com/en/trade/${data.symbol}`
+                            label: "前往 OKX 交易",
+                            uri: `https://www.okx.com/trade-spot/${symbol.toLowerCase()}-usdt`
                         },
                         style: "primary",
                         color: "#1F1AD9",
+                        height: "sm"
+                    },
+                    {
+                        type: "button",
+                        action: {
+                            type: "uri",
+                            label: "註冊其他交易所",
+                            uri: "https://pro.cryptotw.io/exchanges"
+                        },
+                        style: "primary",
+                        color: "#000000",
                         height: "sm"
                     }
                 ],
@@ -720,18 +763,15 @@ export async function POST(req: NextRequest) {
                     // Skip if it matched currency codes already handled (though 'continue' handles it)
                     if (['TWD', 'USD', 'USDT', 'HOT', 'TOP', 'RANK'].includes(symbol)) return
 
-                    const ticker = await fetchBinanceTicker(symbol)
+                    const ticker = await fetchOkxTicker(symbol)
 
                     if (ticker) {
                         const flexMsg = createPriceCard(ticker)
                         await replyMessage(replyToken, [flexMsg])
                     } else {
-                        // Only reply error if it looks like a ticker command and wasn't handled
-                        // For better UX, maybe SILENT fail if unknown, or generic help?
-                        // User asked for error message previously.
                         await replyMessage(replyToken, [{
                             type: "text",
-                            text: `⚠️ 找不到代幣 "${symbol}" 或 Binance 尚未上架。`
+                            text: `⚠️ 找不到代幣 "${symbol}" 或 OKX 尚未上架。`
                         }])
                     }
                 }
