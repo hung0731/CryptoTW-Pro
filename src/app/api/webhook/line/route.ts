@@ -4,16 +4,18 @@ import { createAdminClient } from '@/lib/supabase' // Use Service Role for backg
 import { cookies } from 'next/headers'
 
 // ============================================
-// FLEX MESSAGE 設計規範
+// FLEX MESSAGE 設計規範 - 加密台灣 Pro
 // ============================================
-// 色彩：primary=#000000, accent=#211FFF, up=#00B900, down=#D00000
+// 主色：brand=#1F1AD9 (標題、主按鈕)
+// 副色：secondary=#000000 (副按鈕)
+// 狀態：up=#00B900, down=#D00000
+// 頂部標籤：「加密台灣 Pro」
 // 尺寸：bubble=kilo, 標題=lg, 內文=sm
-// 原則：簡潔、快速理解、不花俏
 // ============================================
 
 const WELCOME_FLEX_MESSAGE = {
     type: "flex",
-    altText: "歡迎加入 CryptoTW",
+    altText: "歡迎加入 加密台灣 Pro",
     contents: {
         type: "bubble",
         size: "kilo",
@@ -23,9 +25,17 @@ const WELCOME_FLEX_MESSAGE = {
             contents: [
                 {
                     type: "text",
-                    text: "👋 歡迎加入 CryptoTW",
+                    text: "加密台灣 Pro",
+                    size: "xxs",
+                    color: "#888888"
+                },
+                {
+                    type: "text",
+                    text: "👋 歡迎加入",
                     weight: "bold",
-                    size: "lg"
+                    size: "lg",
+                    color: "#1F1AD9",
+                    margin: "sm"
                 },
                 {
                     type: "text",
@@ -51,17 +61,18 @@ const WELCOME_FLEX_MESSAGE = {
                         label: "開啟控制台",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/feed`
                     },
-                    color: "#000000"
+                    color: "#1F1AD9"
                 },
                 {
                     type: "button",
-                    style: "secondary",
+                    style: "primary",
                     height: "sm",
                     action: {
                         type: "uri",
                         label: "連結帳戶",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
-                    }
+                    },
+                    color: "#000000"
                 }
             ]
         }
@@ -143,17 +154,17 @@ function createRankingCard(data: any) {
                 contents: [
                     {
                         type: "text",
-                        text: "📊 24h 市場異動",
-                        weight: "bold",
-                        size: "xl",
-                        color: "#111111"
+                        text: "加密台灣 Pro",
+                        size: "xxs",
+                        color: "#888888"
                     },
                     {
                         type: "text",
-                        text: "Binance Spot (USDT)",
-                        size: "xs",
-                        color: "#aaaaaa",
-                        margin: "xs"
+                        text: "📊 24h 市場異動",
+                        weight: "bold",
+                        size: "lg",
+                        color: "#1F1AD9",
+                        margin: "sm"
                     }
                 ]
             },
@@ -284,6 +295,12 @@ function createPriceCard(data: any) {
                 layout: "vertical",
                 contents: [
                     {
+                        type: "text",
+                        text: "加密台灣 Pro",
+                        size: "xxs",
+                        color: "#888888"
+                    },
+                    {
                         type: "box",
                         layout: "horizontal",
                         contents: [
@@ -292,7 +309,7 @@ function createPriceCard(data: any) {
                                 text: data.symbol.replace("USDT", ""),
                                 weight: "bold",
                                 size: "xl",
-                                color: "#111111",
+                                color: "#1F1AD9",
                                 flex: 1
                             },
                             {
@@ -304,7 +321,8 @@ function createPriceCard(data: any) {
                                 align: "end",
                                 flex: 2
                             }
-                        ]
+                        ],
+                        margin: "sm"
                     },
                     {
                         type: "box",
@@ -380,7 +398,7 @@ function createPriceCard(data: any) {
                             uri: `https://www.binance.com/en/trade/${data.symbol}`
                         },
                         style: "primary",
-                        color: "#F0B90B", // Binance Yellow
+                        color: "#1F1AD9",
                         height: "sm"
                     }
                 ],
@@ -457,38 +475,31 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
             size: "kilo",
             header: {
                 type: "box",
-                layout: "horizontal",
+                layout: "vertical",
                 contents: [
                     {
-                        type: "box",
-                        layout: "vertical",
-                        flex: 1,
-                        contents: [
-                            {
-                                type: "text",
-                                text: headerTitle,
-                                weight: "bold",
-                                size: "lg",
-                                color: "#111111"
-                            },
-                            ...(calcResult ? [{
-                                type: "text",
-                                text: calcResult,
-                                weight: "bold",
-                                size: "xl",
-                                color: "#00B900",
-                                margin: "sm",
-                                wrap: true
-                            }] : [])
-                        ]
+                        type: "text",
+                        text: "加密台灣 Pro",
+                        size: "xxs",
+                        color: "#888888"
                     },
                     {
-                        type: "image",
-                        url: "https://pro.cryptotw.io/logo-b.svg",
-                        size: "xxs",
-                        aspectRatio: "1:1",
-                        flex: 0
-                    }
+                        type: "text",
+                        text: headerTitle,
+                        weight: "bold",
+                        size: "lg",
+                        color: "#1F1AD9",
+                        margin: "sm"
+                    },
+                    ...(calcResult ? [{
+                        type: "text",
+                        text: calcResult,
+                        weight: "bold",
+                        size: "xl",
+                        color: "#00B900",
+                        margin: "sm",
+                        wrap: true
+                    }] : [])
                 ]
             },
             body: {
@@ -572,13 +583,15 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                     {
                         type: "button",
                         action: { type: "uri", label: "前往 MAX 交易", uri: "https://max.maicoin.com/markets/usdttwd" },
-                        style: "secondary",
+                        style: "primary",
+                        color: "#1F1AD9",
                         height: "sm"
                     },
                     {
                         type: "button",
                         action: { type: "uri", label: "前往 BitoPro 交易", uri: "https://www.bitopro.com/ns/trading/usdt_twd" },
-                        style: "secondary",
+                        style: "primary",
+                        color: "#000000",
                         height: "sm",
                         margin: "sm"
                     }
