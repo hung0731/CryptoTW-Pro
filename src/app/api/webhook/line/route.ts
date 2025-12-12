@@ -107,7 +107,7 @@ function createRankingCard(data: any) {
 
     const createRow = (item: any, isGainer: boolean) => {
         const symbol = item.symbol.replace('USDT', '')
-        const change = parseFloat(item.priceChangePercent).toFixed(2)
+        const change = parseFloat(item.priceChangePercent).toFixed(1)
         const price = parseFloat(item.lastPrice)
         const displayPrice = price < 1 ? price.toFixed(4) : price < 10 ? price.toFixed(3) : price.toFixed(2)
 
@@ -166,7 +166,7 @@ function createRankingCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "🚀 漲幅榜 (Top Gainers)", size: "md", weight: "bold", color: "#00B900" }
+                            { type: "text", text: "🚀 漲幅榜", size: "md", weight: "bold", color: "#00B900" }
                         ],
                         margin: "sm"
                     },
@@ -178,7 +178,7 @@ function createRankingCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "📉 跌幅榜 (Top Losers)", size: "md", weight: "bold", color: "#D00000" }
+                            { type: "text", text: "📉 跌幅榜", size: "md", weight: "bold", color: "#D00000" }
                         ],
                         margin: "lg"
                     },
@@ -275,7 +275,7 @@ function createPriceCard(data: any) {
 
     return {
         type: "flex",
-        altText: `${data.symbol} Price: ${data.lastPrice}`,
+        altText: `${data.symbol.replace('USDT', '')} 即時價格`,
         contents: {
             type: "bubble",
             size: "kilo",
@@ -312,13 +312,13 @@ function createPriceCard(data: any) {
                         contents: [
                             {
                                 type: "text",
-                                text: "Binance Spot",
+                                text: "幣安現貨",
                                 size: "xs",
                                 color: "#aaaaaa"
                             },
                             {
                                 type: "text",
-                                text: `${sign}${parseFloat(data.priceChangePercent).toFixed(2)}%`,
+                                text: `${sign}${parseFloat(data.priceChangePercent).toFixed(1)}%`,
                                 size: "sm",
                                 color: color,
                                 align: "end",
@@ -342,7 +342,7 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "24h High", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: "24h 最高", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: formatNumber(data.highPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "md"
@@ -351,7 +351,7 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "24h Low", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: "24h 最低", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: formatNumber(data.lowPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "sm"
@@ -360,7 +360,7 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "Vol (BTC)", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: "成交量", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: formatNumber(parseFloat(data.volume).toFixed(2)), size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "sm"
@@ -376,7 +376,7 @@ function createPriceCard(data: any) {
                         type: "button",
                         action: {
                             type: "uri",
-                            label: "前往 Binance 交易",
+                            label: "前往幣安交易",
                             uri: `https://www.binance.com/en/trade/${data.symbol}`
                         },
                         style: "primary",
