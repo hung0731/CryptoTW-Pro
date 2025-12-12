@@ -457,24 +457,38 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
             size: "kilo",
             header: {
                 type: "box",
-                layout: "vertical",
+                layout: "horizontal",
                 contents: [
                     {
-                        type: "text",
-                        text: headerTitle,
-                        weight: "bold",
-                        size: "lg",
-                        color: "#111111"
+                        type: "box",
+                        layout: "vertical",
+                        flex: 1,
+                        contents: [
+                            {
+                                type: "text",
+                                text: headerTitle,
+                                weight: "bold",
+                                size: "lg",
+                                color: "#111111"
+                            },
+                            ...(calcResult ? [{
+                                type: "text",
+                                text: calcResult,
+                                weight: "bold",
+                                size: "xl",
+                                color: "#00B900",
+                                margin: "sm",
+                                wrap: true
+                            }] : [])
+                        ]
                     },
-                    ...(calcResult ? [{
-                        type: "text",
-                        text: calcResult,
-                        weight: "bold",
-                        size: "xl",
-                        color: "#00B900",
-                        wrap: true,
-                        margin: "md"
-                    }] : [])
+                    {
+                        type: "image",
+                        url: "https://pro.cryptotw.io/logo-b.svg",
+                        size: "xxs",
+                        aspectRatio: "1:1",
+                        flex: 0
+                    }
                 ]
             },
             body: {
@@ -657,11 +671,11 @@ export async function POST(req: NextRequest) {
                             if (type === 'TWD') {
                                 // TWD -> USDT (Buy U at Ask Price)
                                 const result = (amount / maxBuyRef).toFixed(2)
-                                calcResult = `${amount} TWD ≈ ${result} USDT`
+                                calcResult = `${amount.toLocaleString()} TWD\n≈ ${parseFloat(result).toLocaleString()} USDT`
                             } else {
                                 // USD/USDT -> TWD (Sell U at Bid Price)
                                 const result = (amount * maxSellRef).toFixed(0)
-                                calcResult = `${amount} USDT ≈ ${result} TWD`
+                                calcResult = `${amount.toLocaleString()} USDT\n≈ ${parseInt(result).toLocaleString()} TWD`
                             }
                         }
 
