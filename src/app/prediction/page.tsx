@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { RefreshCw, TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Coins, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useLiff } from '@/components/LiffProvider'
 
 interface GlobalData {
     totalMarketCap: string
@@ -20,6 +21,7 @@ interface GlobalData {
 }
 
 export default function DataPage() {
+    const { profile } = useLiff()
     const [activeTab, setActiveTab] = useState('market')
 
     // Market Data State
@@ -96,7 +98,15 @@ export default function DataPage() {
                     <div className="flex items-center justify-center">
                         <img src="/logo.svg" alt="Logo" className="h-4 w-auto" />
                     </div>
-                    <div className="flex items-center justify-end">
+                    <div className="flex items-center justify-end gap-2"> {/* Added gap-2 for spacing */}
+                        {profile && (
+                            <Link href="/profile">
+                                <div className="relative group cursor-pointer">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
+                                    <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
+                                </div>
+                            </Link>
+                        )}
                         <Button
                             variant="ghost"
                             size="icon"

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { BottomNav } from '@/components/BottomNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useLiff } from '@/components/LiffProvider'
 import { Button } from '@/components/ui/button'
 import { ExternalLink, Calendar, Users, Clock, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -24,6 +25,7 @@ interface Activity {
 }
 
 export default function EventsPage() {
+    const { dbUser, profile } = useLiff()
     const [activities, setActivities] = useState<Activity[]>([])
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('all')
@@ -82,7 +84,14 @@ export default function EventsPage() {
                         <img src="/logo.svg" alt="Logo" className="h-4 w-auto" />
                     </div>
                     <div className="flex items-center justify-end">
-                        {/* Empty right slot */}
+                        {profile && (
+                            <Link href="/profile">
+                                <div className="relative group cursor-pointer">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
+                                    <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
+                                </div>
+                            </Link>
+                        )}
                     </div>
                 </div>
             </header>
