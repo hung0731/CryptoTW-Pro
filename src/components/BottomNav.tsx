@@ -1,6 +1,6 @@
 'use client'
 
-import { Home, Gift, User, TrendingUp, FileText } from 'lucide-react'
+import { Home, Gift, User, TrendingUp, FileText, Crown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -29,10 +29,10 @@ export function BottomNav() {
             active: pathname === '/prediction'
         },
         {
-            label: '我的',
-            icon: User,
-            href: '/profile',
-            active: pathname === '/profile'
+            label: '大客戶',
+            icon: Crown,
+            href: '/vip',
+            active: pathname === '/vip'
         }
     ]
 

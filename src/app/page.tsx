@@ -101,7 +101,10 @@ export default function Home() {
           <div className="flex items-center justify-end">
             {profile && (
               <Link href="/profile">
-                <img src={profile.pictureUrl} alt="Profile" className="w-8 h-8 rounded-full ring-1 ring-white/20" />
+                <div className="relative group cursor-pointer">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
+                  <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
+                </div>
               </Link>
             )}
           </div>
