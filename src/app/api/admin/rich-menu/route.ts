@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 // Layout Definition (Template: Large, 2 Top + 3 Bottom)
@@ -89,11 +87,19 @@ export async function POST(req: NextRequest) {
         console.log('Created Rich Menu ID:', richMenuId)
 
         // 2. Upload Image
-        const imagePath = path.join(process.cwd(), 'public', 'richmenu.png')
-        if (!fs.existsSync(imagePath)) {
-            return NextResponse.json({ error: 'richmenu.png not found in public folder' }, { status: 404 })
+        // Use fetch to get the image from the public URL instead of filesystem to avoid Vercel path issues
+        const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+        const host = req.headers.get('host') || 'localhost:3000'
+        const imageUrl = `${protocol}://${host}/richmenu.png`
+
+        console.log('Fetching Rich Menu Image from:', imageUrl)
+        const imageRes = await fetch(imageUrl)
+
+        if (!imageRes.ok) {
+            return NextResponse.json({ error: `Failed to fetch richmenu.png from ${imageUrl}` }, { status: 404 })
         }
-        const imageBuffer = fs.readFileSync(imagePath)
+
+        const imageBuffer = await imageRes.arrayBuffer()
 
         const uploadRes = await fetch(`https://api-data.line.me/v2/bot/richmenu/${richMenuId}/content`, {
             method: 'POST',
@@ -101,7 +107,7 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'image/png',
                 'Authorization': `Bearer ${token}`
             },
-            body: imageBuffer
+            body: Buffer.from(imageBuffer) // Convert ArrayBuffer to Buffer
         })
 
         if (!uploadRes.ok) {
