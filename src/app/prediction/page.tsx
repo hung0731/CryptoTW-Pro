@@ -47,14 +47,11 @@ function WhaleWatchList() {
 
     return (
         <div className="grid gap-3">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
-                    <h2 className="text-sm font-bold text-white tracking-wider">Top Traders (Month)</h2>
-                </div>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-white">本月頂尖交易者</h2>
                 <div className="flex items-center gap-1.5 text-[10px] text-neutral-500">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Live Data
+                    即時數據
                 </div>
             </div>
 
@@ -66,11 +63,11 @@ function WhaleWatchList() {
                             <span className="text-neutral-500 font-mono text-xs w-4">0{i + 1}</span>
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-white font-mono">{whale.displayAddress}</span>
-                                <span className="text-[10px] text-neutral-500">PnL: <span className="text-green-400 font-mono">+${whale.pnl.toLocaleString()}</span></span>
+                                <span className="text-[10px] text-neutral-500">盈虧: <span className="text-green-400 font-mono">+${whale.pnl.toLocaleString()}</span></span>
                             </div>
                         </div>
                         <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px]">
-                            ROI {whale.roi}%
+                            報酬率 {whale.roi}%
                         </Badge>
                     </div>
 
@@ -83,12 +80,12 @@ function WhaleWatchList() {
                                         "text-[9px] px-1 h-4 rounded border-0",
                                         pos.type === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                                     )}>
-                                        {pos.type} {pos.leverage}x
+                                        {pos.type === 'LONG' ? '做多' : '做空'} {pos.leverage}x
                                     </Badge>
                                     <span className="font-bold text-white">{pos.coin}</span>
                                 </div>
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[10px] text-neutral-400">Entry: {pos.entryPrice}</span>
+                                    <span className="text-[10px] text-neutral-400">入場價: {pos.entryPrice}</span>
                                     <span className={cn("font-mono font-medium", pos.pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
                                         {pos.pnl >= 0 ? '+' : ''}{pos.pnl.toFixed(1)} u
                                     </span>
@@ -96,7 +93,7 @@ function WhaleWatchList() {
                             </div>
                         ))}
                         {whale.positions.length === 0 && (
-                            <div className="text-center text-[10px] text-neutral-600 py-1">No active top positions</div>
+                            <div className="text-center text-[10px] text-neutral-600 py-1">目前無主要倉位</div>
                         )}
                     </div>
                 </div>
@@ -236,12 +233,9 @@ export default function DataPage() {
 
 
                     <div className="flex items-center justify-between mb-4 mt-6">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1 h-4 bg-yellow-500 rounded-full"></div>
-                            <h2 className="text-sm font-bold text-white tracking-wider">熱門板塊 (Hot Sectors)</h2>
-                        </div>
+                        <h2 className="text-lg font-bold text-white">熱門幣種</h2>
                         <Badge variant="outline" className="text-[10px] text-neutral-500 border-neutral-800 bg-neutral-900/50">
-                            24h Change
+                            24小時漲幅
                         </Badge>
                     </div>
 
@@ -262,7 +256,7 @@ export default function DataPage() {
                                             <div className="flex items-center gap-1.5">
                                                 <span className="text-sm font-bold text-white">{coin.symbol?.toUpperCase()}</span>
                                                 <Badge variant="secondary" className="text-[9px] h-4 px-1 bg-white/10 text-white/70 hover:bg-white/20 border-0">
-                                                    Rank #{coin.market_cap_rank}
+                                                    排名 #{coin.market_cap_rank}
                                                 </Badge>
                                             </div>
                                             <div className="flex items-center gap-2 mt-0.5">
@@ -275,7 +269,7 @@ export default function DataPage() {
                                             {coin.price_change_percentage_24h >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
                                             {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
                                         </span>
-                                        <span className="text-[9px] text-neutral-600 font-mono uppercase">24h Vol</span>
+                                        <span className="text-[9px] text-neutral-600 font-mono">24小時</span>
                                     </div>
                                     <div className={`absolute inset-0 opacity-[0.03] ${coin.price_change_percentage_24h >= 0 ? 'bg-gradient-to-r from-transparent to-green-500' : 'bg-gradient-to-r from-transparent to-red-500'}`} />
                                 </div>
@@ -292,24 +286,21 @@ export default function DataPage() {
                 {/* TAB 3: Prediction */}
                 <TabsContent value="prediction" className="space-y-4 p-4 min-h-[50vh]">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
-                            <h2 className="text-sm font-bold text-white tracking-wider">Polymarket 預測</h2>
-                        </div>
+                        <h2 className="text-lg font-bold text-white">市場預測</h2>
                     </div>
 
                     {/* Stats Cards */}
                     {globalData && (
                         <div className="grid grid-cols-2 gap-3 mb-6">
                             <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-3 relative overflow-hidden">
-                                <span className="text-[10px] text-neutral-500 uppercase tracking-wider block mb-1">Total Volume</span>
+                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">總交易量</span>
                                 <span className="text-base font-bold text-white font-mono">${(Number(globalData.totalVolume) / 1000000).toFixed(1)}M</span>
                                 <div className="absolute right-0 bottom-0 p-2 opacity-10">
                                     <BarChart3 className="w-8 h-8 text-white" />
                                 </div>
                             </div>
                             <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-3 relative overflow-hidden">
-                                <span className="text-[10px] text-neutral-500 uppercase tracking-wider block mb-1">Active Users</span>
+                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">活躍用戶</span>
                                 <span className="text-base font-bold text-white font-mono">24.5k</span>
                                 <div className="absolute right-0 bottom-0 p-2 opacity-10">
                                     <Users className="w-8 h-8 text-white" />

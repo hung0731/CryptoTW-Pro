@@ -49,30 +49,30 @@ export async function GET(req: NextRequest) {
             }
 
             // Process outcomes
-            const groupOutcomes = eventData.markets.map((m: any) => {
+            const outcomes = eventData.markets.map((m: any) => {
                 let probability = 0
                 try {
                     const prices = JSON.parse(m.outcomePrices)
-                    probability = parseFloat(prices[0]) * 100
+                    probability = parseFloat(prices[0]) // 0-1 scale
                 } catch (e) {
                     probability = 0
                 }
                 const rawLabel = m.groupItemTitle || m.question
                 return {
                     id: m.id,
-                    label: translations[rawLabel] || rawLabel,
-                    probability: probability.toFixed(1),
-                    color: probability > 50 ? 'green' : 'neutral'
+                    name: translations[rawLabel] || rawLabel,
+                    probability: probability // 0-1 scale for frontend
                 }
-            }).sort((a: any, b: any) => parseFloat(b.probability) - parseFloat(a.probability))
+            }).sort((a: any, b: any) => b.probability - a.probability)
 
             return {
                 id: config.id_override,
-                title: config.title,
-                image: eventImage,
+                question: config.title,
+                slug: config.slug,
+                icon: eventImage,
                 volume: eventData.volume,
                 type: 'group',
-                groupOutcomes: groupOutcomes,
+                outcomes: outcomes,
                 category: '總經'
             }
         }).filter(Boolean)
