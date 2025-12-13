@@ -2,8 +2,45 @@
 
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, Users, Crown, CreditCard, Loader2 } from 'lucide-react'
+import { Activity, Users, Crown, CreditCard, Loader2, Play } from 'lucide-react'
 import Link from 'next/link'
+import { triggerMarketSummaryAction } from '@/app/actions/admin-actions'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
+
+function TriggerSummaryButton() {
+    const [isLoading, setIsLoading] = useState(false)
+    const { toast } = useToast()
+
+    const handleTrigger = async () => {
+        setIsLoading(true)
+        try {
+            const res = await triggerMarketSummaryAction()
+            if (res.success) {
+                toast({ title: 'AI 分析報告已生成', description: '首頁數據已更新' })
+            } else {
+                toast({ title: '生成失敗', description: res.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', description: '未知錯誤', variant: 'destructive' })
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    return (
+        <Button
+            onClick={handleTrigger}
+            disabled={isLoading}
+            variant="outline"
+            size="sm"
+            className="mt-2 w-full border-white/10 hover:bg-white/5 text-xs h-8"
+        >
+            {isLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Play className="w-3 h-3 mr-1" />}
+            手動觸發報告
+        </Button>
+    )
+}
 
 export default function AdminPage() {
     const [stats, setStats] = useState({
@@ -80,15 +117,15 @@ export default function AdminPage() {
                     </Card>
                 </Link>
 
-                {/* Placeholder for future stat */}
-                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4 opacity-50">
+                {/* System Ops */}
+                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-neutral-400">系統狀態</span>
-                        <Activity className="h-4 w-4 text-green-500" />
+                        <span className="text-sm font-medium text-neutral-400">系統操作</span>
+                        <Activity className="h-4 w-4 text-orange-500" />
                     </div>
                     <div>
-                        <div className="text-3xl font-bold text-white tracking-tight">Normal</div>
-                        <p className="text-xs text-neutral-500 mt-1">All Systems Operational</p>
+                        <div className="text-3xl font-bold text-white tracking-tight">AI</div>
+                        <TriggerSummaryButton />
                     </div>
                 </Card>
             </div>
