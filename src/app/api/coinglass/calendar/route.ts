@@ -50,6 +50,11 @@ export async function GET() {
         // Process and Enrich Data
         const enrichedEvents = rawEvents
             .map((event: any) => {
+                // 0. Strict Country Filter: Only US events
+                // Coinglass usually uses 'US' for country_code or 'United States' for country_name
+                const isUS = event.country_code === 'US' || event.country_name === 'United States'
+                if (!isUS) return null
+
                 // 1. Filter: specific country (User focused on USD, maybe generic global S-Tier)
                 // Actually, our knowledge base keywords are English, so we match directly.
 
