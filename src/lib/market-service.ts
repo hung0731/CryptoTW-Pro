@@ -18,7 +18,6 @@ export async function updateMarketSummary() {
     console.log('[MarketService] Report Generated. Saving...')
 
     // 3. Save to Supabase
-    // Try using Admin Client if Service Key exists (Bypass RLS)
     let dbClient = supabase
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         try {
@@ -28,14 +27,20 @@ export async function updateMarketSummary() {
         }
     }
 
+    // Store the full report as JSON in metadata column
     const { error } = await dbClient.from('market_reports').insert({
         sentiment: report.sentiment,
         sentiment_score: report.sentiment_score,
-        summary: report.summary,
-        key_points: report.key_points,
-        strategy: report.actionable_insight, // Mapping 'actionable_insight' to 'strategy' column
+        summary: report.headline, // Map headline to summary column
+        key_points: [], // No longer used, but keep for schema compatibility
+        strategy: report.action_suggestion?.risk_note || '', // Use risk_note as strategy
         emoji: report.emoji,
-        metadata: { ...snapshot, metrics: report.metrics } // Save metrics in metadata
+        metadata: {
+            ...snapshot,
+            analysis: report.analysis,
+            action_suggestion: report.action_suggestion,
+            headline: report.headline
+        }
     })
 
     if (error) {
@@ -45,3 +50,4 @@ export async function updateMarketSummary() {
 
     return report
 }
+
