@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils'
 import { AIMarketPulse } from '@/components/AIMarketPulse'
 import { TopCoinCards } from '@/components/TopCoinCards'
+import { PromoBanner } from '@/components/PromoBanner'
 import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/components/CoinglassWidgets'
 
 export default function HomePage() {
@@ -104,16 +105,16 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Top Coins Price Cards */}
+                {/* ===== 1. Top Coins - 第一眼看價格 ===== */}
                 <section>
                     <h2 className="text-sm font-medium text-neutral-500 mb-3">🔥 熱門幣種</h2>
                     <TopCoinCards />
                 </section>
 
-                {/* AI Pulse Widget */}
+                {/* ===== 2. AI Market Pulse - 核心價值 ===== */}
                 <AIMarketPulse />
 
-                {/* Market Stats Grid */}
+                {/* ===== 3. Market Stats - 快速指標 ===== */}
                 <section>
                     <h2 className="text-sm font-medium text-neutral-500 mb-3">📊 市場一眼看</h2>
                     {loading ? (
@@ -124,7 +125,6 @@ export default function HomePage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-3 gap-2">
-                            {/* Fear & Greed */}
                             {fearGreed && (
                                 <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
                                     <div className="flex items-center gap-1.5 mb-1">
@@ -137,7 +137,6 @@ export default function HomePage() {
                                     <div className="text-[10px] text-neutral-500">{fearGreed.classification}</div>
                                 </div>
                             )}
-                            {/* Total Market Cap */}
                             {globalData && (
                                 <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
                                     <div className="flex items-center gap-1.5 mb-1">
@@ -148,7 +147,6 @@ export default function HomePage() {
                                     <div className="text-[10px] text-neutral-500">24h ${globalData.totalVolume}</div>
                                 </div>
                             )}
-                            {/* BTC Dominance */}
                             {globalData && (
                                 <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
                                     <div className="flex items-center gap-1.5 mb-1">
@@ -163,18 +161,53 @@ export default function HomePage() {
                     )}
                 </section>
 
-
-
-                {/* Gainers & Losers */}
+                {/* ===== 4. Core Data - 專業數據 ===== */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">📈 漲跌榜</h2>
-                        <Link href="/prediction" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
-                            查看詳情 <ChevronRight className="w-3 h-3" />
-                        </Link>
+                        <h2 className="text-sm font-medium text-neutral-500">📈 核心數據</h2>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        {/* Gainers */}
+                        <LiquidationSummary />
+                        <FundingSummary />
+                        <LongShortSummary />
+                        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 h-full">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                                    <span className="text-xs font-bold text-white">財經日曆</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                {(calendar || []).slice(0, 2).map((event: any, i: number) => (
+                                    <div key={i} className="flex justify-between items-center">
+                                        <span className="text-xs text-neutral-300 line-clamp-1">{event.event}</span>
+                                        <div className="flex gap-0.5 shrink-0 ml-2">
+                                            {[...Array(3)].map((_, starIdx) => (
+                                                <div
+                                                    key={starIdx}
+                                                    className={cn(
+                                                        "w-1.5 h-1.5 rounded-full",
+                                                        starIdx < event.importance ? (event.importance === 3 ? "bg-red-500" : "bg-yellow-500") : "bg-neutral-800"
+                                                    )}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                {(!calendar || calendar.length === 0) && (
+                                    <span className="text-[10px] text-neutral-500">今日無重大事件</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ===== 5. Gainers & Losers ===== */}
+                <section>
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-medium text-neutral-500">📊 漲跌榜</h2>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
                         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
                             <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-white/5">
                                 <TrendingUp className="w-3.5 h-3.5 text-green-400" />
@@ -191,8 +224,6 @@ export default function HomePage() {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Losers */}
                         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
                             <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-white/5">
                                 <TrendingUp className="w-3.5 h-3.5 text-red-400 rotate-180" />
@@ -212,13 +243,13 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* Whale Watch */}
+                {/* ===== 6. OKX Promo Banner ===== */}
+                <PromoBanner affiliateLink="https://www.okx.com/join/CRYPTOTW" />
+
+                {/* ===== 7. Whale Watch ===== */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-sm font-medium text-neutral-500">🐋 巨鯨動向</h2>
-                        <Link href="/prediction" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
-                            查看詳情 <ChevronRight className="w-3 h-3" />
-                        </Link>
                     </div>
                     <Link href="/prediction">
                         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4 hover:bg-white/5 transition-all">
@@ -241,7 +272,7 @@ export default function HomePage() {
                     </Link>
                 </section>
 
-                {/* Prediction Markets */}
+                {/* ===== 8. Prediction Markets ===== */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-sm font-medium text-neutral-500">🎯 預測市場</h2>
@@ -269,52 +300,6 @@ export default function HomePage() {
                             ))}
                         </div>
                     )}
-                </section>
-
-                {/* Coinglass Data Summaries */}
-                <section>
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">📊 核心數據</h2>
-                        <Link href="/prediction" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
-                            更多 <ChevronRight className="w-3 h-3" />
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <LiquidationSummary />
-                        <FundingSummary />
-                        <LongShortSummary />
-                        {/* Calendar Summary - Moved here to align grid */}
-                        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                                    <span className="text-xs font-bold text-white">財經日曆</span>
-                                </div>
-                                <span className="text-[9px] text-neutral-500">Upcoming</span>
-                            </div>
-                            <div className="space-y-2">
-                                {(calendar || []).slice(0, 2).map((event: any, i: number) => (
-                                    <div key={i} className="flex justify-between items-center">
-                                        <span className="text-xs text-neutral-300 line-clamp-1">{event.event}</span>
-                                        <div className="flex gap-0.5 shrink-0 ml-2">
-                                            {[...Array(3)].map((_, starIdx) => (
-                                                <div
-                                                    key={starIdx}
-                                                    className={cn(
-                                                        "w-1.5 h-1.5 rounded-full",
-                                                        starIdx < event.importance ? (event.importance === 3 ? "bg-red-500" : "bg-yellow-500") : "bg-neutral-800"
-                                                    )}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                                {(!calendar || calendar.length === 0) && (
-                                    <span className="text-[10px] text-neutral-500">今日無重大事件</span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
                 </section>
 
 
