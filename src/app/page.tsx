@@ -1,239 +1,220 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useLiff } from '@/components/LiffProvider'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowRight, Lock, ChevronRight } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { PageHeader } from '@/components/PageHeader'
 import { BottomNav } from '@/components/BottomNav'
-import { ProAccessGate } from '@/components/ProAccessGate'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useLiff } from '@/components/LiffProvider'
+import {
+    Crown, Settings, Wallet, Bell, Gift,
+    TrendingUp, FileText, BarChart3, Calendar,
+    ChevronRight, Sparkles, Users
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export default function Home() {
-  const { isLoggedIn, profile, dbUser, isLoading: isAuthLoading } = useLiff()
-  const [activities, setActivities] = useState<any[]>([])
-  const [content, setContent] = useState<any[]>([])
-  const [dataLoading, setDataLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('all')
-
-  // Fetch Data only if authorized (Strict Mode)
-  useEffect(() => {
-    if (isAuthLoading) return
-
-    const status = dbUser?.membership_status as string
-    const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
-
-    if (isPro) {
-      const fetchData = async () => {
-        try {
-          const [actRes, contRes] = await Promise.all([
-            fetch('/api/activities').then(r => r.json()),
-            fetch('/api/content').then(r => r.json())
-          ])
-          if (actRes.activities) setActivities(actRes.activities)
-          if (contRes.content) setContent(contRes.content)
-        } catch (e) {
-          console.error(e)
-        } finally {
-          setDataLoading(false)
-        }
-      }
-      fetchData()
-    } else {
-      setDataLoading(false)
-    }
-  }, [isAuthLoading, dbUser])
-
-  // 1. Loading State
-  const isPending = isAuthLoading || (isLoggedIn && !dbUser)
-  const status = dbUser?.membership_status as string
-  const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
-
-  // If loading or (pro but data loading)
-  if (isPending || (isPro && dataLoading)) {
+// Quick Action Button Component
+function QuickAction({ icon: Icon, label, href, color }: {
+    icon: any, label: string, href: string, color?: string
+}) {
     return (
-      <div className="min-h-screen bg-black p-4 space-y-8">
-        <div className="flex items-center justify-center p-4">
-          <img src="/logo.svg" className="h-6 w-auto opacity-50 animate-pulse" />
-        </div>
-        <Skeleton className="h-12 w-full bg-neutral-900" />
-        <div className="flex gap-2">
-          <Skeleton className="h-8 w-16 bg-neutral-900" />
-          <Skeleton className="h-8 w-16 bg-neutral-900" />
-          <Skeleton className="h-8 w-16 bg-neutral-900" />
-        </div>
-        <Skeleton className="h-40 w-full bg-neutral-900" />
-      </div>
-    )
-  }
-
-  // 2. Strict Access Gate
-  // If we are sure user is NOT Pro, show gate.
-  if (!isPro) {
-    return <ProAccessGate />
-  }
-
-
-  // 3. Pro Member State (Feed)
-  const categories = [
-    { id: 'all', label: '全部' },
-    { id: 'news', label: '快訊' },
-    { id: 'alpha', label: '深度 / 原創' },
-    { id: 'weekly', label: '週報' },
-  ]
-
-  const filteredContent = activeTab === 'all'
-    ? content
-    : content.filter(c => c.type === activeTab)
-
-  return (
-    <main className="min-h-screen font-sans bg-black text-white pb-24">
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-        <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
-          <div className="flex items-center justify-start"></div>
-          <div className="flex items-center justify-center">
-            <img src="/logo.svg" alt="加密台灣 Pro" className="h-4 w-auto" />
-          </div>
-          <div className="flex items-center justify-end">
-            {profile && (
-              <Link href="/profile">
-                <div className="relative group cursor-pointer">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
-                  <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
-                </div>
-              </Link>
-            )}
-          </div>
-        </div>
-
-        {/* Category Filter Pills (Scrollable) */}
-        <div className="w-full overflow-x-auto no-scrollbar px-4 pb-3 max-w-lg mx-auto">
-          <div className="flex space-x-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                className={cn(
-                  "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
-                  activeTab === cat.id
-                    ? "bg-white text-black"
-                    : "bg-neutral-900 text-neutral-400 hover:text-white border border-white/5"
-                )}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      <div className="mt-6 px-4 space-y-8 max-w-lg mx-auto min-h-screen">
-
-        {/* Always show activities unless specific tab logic requires hiding (Usually kept on top) */}
-        <MarketActivities activities={activities} />
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">最新內容</h2>
-          </div>
-          <ContentList items={filteredContent} />
-        </div>
-      </div>
-
-      <BottomNav />
-    </main>
-  )
-}
-
-function MarketActivities({ activities }: { activities: any[] }) {
-  if (activities.length === 0) return null
-  return (
-    <section className="space-y-4 mb-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">交易信號</h2>
-        <Badge variant="outline" className="border-green-500/30 text-green-400 bg-green-500/10">即時</Badge>
-      </div>
-      <div className="space-y-3">
-        {activities.map((act) => (
-          <Link href={`/events/${act.id}`} key={act.id}>
-            <Card className="bg-neutral-900 border-white/5 overflow-hidden group hover:border-white/10 transition-colors cursor-pointer">
-              <CardContent className="p-4 flex items-start gap-4">
-                <div className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${act.is_active ? 'bg-green-500 animate-pulse' : 'bg-neutral-600'}`} />
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-white text-sm group-hover:text-blue-400 transition-colors">{act.title}</h3>
-                    <span className="text-[10px] text-neutral-500 font-mono uppercase bg-black px-2 py-0.5 rounded border border-white/5">{act.exchange_name}</span>
-                  </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">{act.description}</p>
-                  <div className="flex items-center text-[10px] text-neutral-500 mt-2 font-medium">
-                    <span className="group-hover:text-neutral-300">查看詳情</span>
-                    <ChevronRight className="w-3 h-3 ml-0.5 opacity-50 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function ContentList({ items }: { items: any[] }) {
-  if (items.length === 0) {
-    return (
-      <div className="p-12 text-center border border-dashed border-white/10 rounded-xl bg-neutral-900/50">
-        <p className="text-neutral-500 text-sm">暫無內容</p>
-      </div>
-    )
-  }
-  return (
-    <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
-      {items.map((item) => (
-        <Link href={`/content/${item.id}`} key={item.id} className="block group">
-          <div className="flex items-start gap-4 p-4 hover:bg-white/5 transition-colors">
-            {/* Thumbnail */}
-            {item.thumbnail_url && (
-              <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-800 border border-white/10">
-                <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
-                {!item.is_public && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <Lock className="w-5 h-5 text-yellow-500 drop-shadow-md" />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Content */}
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-neutral-400 font-normal">
-                  {item.type?.toUpperCase() || 'ARTICLE'}
-                </Badge>
-                {/* Date */}
-                <span className="text-[10px] text-neutral-600">
-                  {new Date(item.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
-                {item.title}
-              </h3>
-              <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
-                {item.summary || item.content?.substring(0, 100)}...
-              </p>
+        <Link href={href} className="flex flex-col items-center gap-1.5">
+            <div className={cn(
+                "w-12 h-12 rounded-2xl flex items-center justify-center",
+                color || "bg-white/10"
+            )}>
+                <Icon className="w-5 h-5 text-white" />
             </div>
-
-            {/* Arrow */}
-            <div className="self-center shrink-0 opacity-0 group-hover:opacity-50 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
-              <ChevronRight className="w-4 h-4 text-neutral-400" />
-            </div>
-          </div>
+            <span className="text-[10px] text-neutral-400">{label}</span>
         </Link>
-      ))}
-    </div>
-  )
+    )
+}
+
+// Dashboard Card Component
+function DashboardCard({
+    title, icon: Icon, children, href, badge
+}: {
+    title: string, icon: any, children: React.ReactNode, href?: string, badge?: string
+}) {
+    const content = (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Icon className="w-4 h-4 text-[#211FFF]" />
+                    <span className="text-sm font-medium text-white">{title}</span>
+                    {badge && (
+                        <span className="text-[9px] bg-[#211FFF]/20 text-[#211FFF] px-1.5 py-0.5 rounded-full">
+                            {badge}
+                        </span>
+                    )}
+                </div>
+                {href && <ChevronRight className="w-4 h-4 text-neutral-600" />}
+            </div>
+            {children}
+        </div>
+    )
+
+    if (href) {
+        return <Link href={href}>{content}</Link>
+    }
+    return content
+}
+
+export default function ProDashboard() {
+    const { profile } = useLiff()
+    const [loading, setLoading] = useState(true)
+    const [predictions, setPredictions] = useState<any[]>([])
+    const [articles, setArticles] = useState<any[]>([])
+    const [marketData, setMarketData] = useState<any>(null)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch predictions
+                const predRes = await fetch('/api/prediction/markets')
+                const predData = await predRes.json()
+                setPredictions(predData.markets?.slice(0, 3) || [])
+
+                // Fetch articles
+                const artRes = await fetch('/api/content?limit=3')
+                const artData = await artRes.json()
+                setArticles(artData.articles || [])
+
+                // Fetch market data
+                const mktRes = await fetch('/api/market')
+                const mktData = await mktRes.json()
+                setMarketData(mktData)
+            } catch (e) {
+                console.error(e)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
+
+    return (
+        <div className="min-h-screen bg-black text-white pb-24">
+            <PageHeader showLogo />
+
+            {/* User Welcome Section */}
+            <div className="px-4 pt-4 pb-6">
+                <div className="flex items-center gap-3 mb-6">
+                    {profile?.pictureUrl ? (
+                        <img
+                            src={profile.pictureUrl}
+                            alt="Avatar"
+                            className="w-12 h-12 rounded-full border-2 border-[#211FFF]"
+                        />
+                    ) : (
+                        <div className="w-12 h-12 rounded-full bg-[#211FFF]/20 flex items-center justify-center">
+                            <Sparkles className="w-6 h-6 text-[#211FFF]" />
+                        </div>
+                    )}
+                    <div>
+                        <p className="text-sm text-neutral-400">歡迎回來</p>
+                        <h1 className="text-lg font-bold text-white">
+                            {profile?.displayName || 'Pro 會員'}
+                        </h1>
+                    </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-5 gap-4">
+                    <QuickAction icon={Crown} label="大客戶" href="/vip" color="bg-[#211FFF]" />
+                    <QuickAction icon={Wallet} label="交易所" href="/events" />
+                    <QuickAction icon={Bell} label="通知" href="/profile" />
+                    <QuickAction icon={Gift} label="空投" href="/events" />
+                    <QuickAction icon={Settings} label="設定" href="/profile" />
+                </div>
+            </div>
+
+            {/* Dashboard Content */}
+            <div className="px-4 space-y-4">
+
+                {/* Market Overview Card */}
+                <DashboardCard title="市場概況" icon={BarChart3} href="/prediction">
+                    {loading ? (
+                        <Skeleton className="h-16 bg-neutral-900/50" />
+                    ) : marketData ? (
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-black/30 rounded-xl p-2 text-center">
+                                <p className="text-[10px] text-neutral-500">恐懼指數</p>
+                                <p className="text-sm font-bold text-white">{marketData.fearGreed?.value || '--'}</p>
+                            </div>
+                            <div className="bg-black/30 rounded-xl p-2 text-center">
+                                <p className="text-[10px] text-neutral-500">BTC 主導</p>
+                                <p className="text-sm font-bold text-white">{marketData.globalData?.btcDominance || '--'}%</p>
+                            </div>
+                            <div className="bg-black/30 rounded-xl p-2 text-center">
+                                <p className="text-[10px] text-neutral-500">24H 交易量</p>
+                                <p className="text-sm font-bold text-white">${marketData.globalData?.totalVolume || '--'}</p>
+                            </div>
+                        </div>
+                    ) : null}
+                </DashboardCard>
+
+                {/* Prediction Markets Card */}
+                <DashboardCard title="預測市場" icon={TrendingUp} href="/prediction" badge="HOT">
+                    {loading ? (
+                        <Skeleton className="h-20 bg-neutral-900/50" />
+                    ) : (
+                        <div className="space-y-2">
+                            {predictions.map((market, i) => (
+                                <div key={i} className="flex items-center justify-between py-1">
+                                    <span className="text-xs text-neutral-400 truncate flex-1 mr-2">
+                                        {market.question}
+                                    </span>
+                                    <span className="text-xs font-mono text-[#211FFF]">
+                                        {market.outcomes?.[0]?.probability
+                                            ? `${(market.outcomes[0].probability * 100).toFixed(0)}%`
+                                            : '--'}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </DashboardCard>
+
+                {/* Featured Articles Card */}
+                <DashboardCard title="精選文章" icon={FileText} href="/articles">
+                    {loading ? (
+                        <Skeleton className="h-20 bg-neutral-900/50" />
+                    ) : (
+                        <div className="space-y-2">
+                            {articles.map((article, i) => (
+                                <div key={i} className="flex items-center gap-2 py-1">
+                                    <span className="text-[10px] text-neutral-600">{i + 1}</span>
+                                    <span className="text-xs text-white truncate">
+                                        {article.title}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </DashboardCard>
+
+                {/* Whale Watch Card */}
+                <DashboardCard title="巨鯨動向" icon={Users} href="/prediction">
+                    <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <span className="text-xs text-neutral-400">即時追蹤中</span>
+                        </div>
+                        <span className="text-xs text-[#211FFF]">查看詳情 →</span>
+                    </div>
+                </DashboardCard>
+
+                {/* Economic Calendar Card */}
+                <DashboardCard title="財經日曆" icon={Calendar} badge="即將推出">
+                    <div className="py-2 text-center">
+                        <span className="text-xs text-neutral-500">敬請期待 Coinglass 整合</span>
+                    </div>
+                </DashboardCard>
+
+            </div>
+
+            <BottomNav />
+        </div>
+    )
 }
