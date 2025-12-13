@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Clock, Calendar, Lock } from 'lucide-react'
+import { Clock, Calendar, Lock, Share2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
-import { PageHeader } from '@/components/PageHeader'
+import { UnifiedHeader } from '@/components/UnifiedHeader'
 import { BottomNav } from '@/components/BottomNav'
 
 interface Article {
@@ -132,7 +132,7 @@ export default function ArticlePage() {
 
     return (
         <article className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30 pb-24">
-            <PageHeader backHref="/feed" backLabel="返回" />
+            <UnifiedHeader level="secondary" title="文章" backHref="/articles" />
 
             <div className="max-w-3xl mx-auto px-6 pt-4">
                 {/* Header Info */}

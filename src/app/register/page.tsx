@@ -1,13 +1,15 @@
 'use client'
 
 import { useLiff } from '@/components/LiffProvider'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
-import { ChevronRight, ArrowLeft } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { UnifiedHeader } from '@/components/UnifiedHeader'
+import { BottomNav } from '@/components/BottomNav'
 
 export default function RegisterPage() {
     const { isLoggedIn, isLoading: authLoading } = useLiff()
@@ -31,82 +33,87 @@ export default function RegisterPage() {
         fetchExchanges()
     }, [])
 
-    if (authLoading) return <div className="p-8 text-center"><Skeleton className="h-10 w-full rounded-2xl" /></div>
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-black p-4">
+                <Skeleton className="h-14 w-full rounded-xl mb-4" />
+                <Skeleton className="h-24 w-full rounded-xl mb-4" />
+                <Skeleton className="h-20 w-full rounded-xl mb-2" />
+                <Skeleton className="h-20 w-full rounded-xl mb-2" />
+            </div>
+        )
+    }
 
     return (
-        <div className="min-h-screen bg-black p-4 pb-20 text-white">
-            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="grid grid-cols-3 items-center px-4 h-14 max-w-md mx-auto w-full">
-                    <div className="flex items-center justify-start">
-                        <Link href="/">
-                            <Button variant="ghost" size="icon" className="hover:bg-white/10 text-neutral-400 hover:text-white rounded-full">
-                                <ArrowLeft className="h-5 w-5" />
-                            </Button>
-                        </Link>
-                    </div>
-                    <div className="flex items-center justify-center">
-                        <img src="/logo.svg" alt="Logo" className="h-5 w-auto" />
-                    </div>
-                    <div className="flex items-center justify-end">
-                        {/* Right Slot */}
-                    </div>
-                </div>
-            </header>
+        <div className="min-h-screen bg-black text-white font-sans pb-24">
+            <UnifiedHeader level="secondary" title="交易所綁定" backHref="/profile/bindings" />
 
-            <div className="max-w-md mx-auto p-4 space-y-6">
+            <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
 
-                <h1 className="text-2xl font-bold tracking-tight text-white px-1">
-                    選擇交易所
-                </h1>
-
-                <div className="bg-neutral-900 border border-white/5 rounded-2xl p-6 shadow-sm">
-                    <h2 className="text-lg font-bold mb-2 text-white">解鎖 Pro 會員資格 🔓</h2>
+                {/* Info Card */}
+                <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-5">
+                    <h2 className="text-base font-bold mb-2 text-white">解鎖 Pro 會員資格 🔓</h2>
                     <p className="text-neutral-400 text-sm leading-relaxed">
-                        為了獲取 Pro 級別的市場洞察與空投機會，請註冊我們合作的交易所並綁定 UID。
-                        <br /><span className="font-semibold text-white mt-1 inline-block">通過後立即開通權限 🚀</span>
+                        選擇下方交易所完成註冊綁定，即可立即開通 Pro 會員權限，享受獨家市場洞察與空投機會。
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 sm:gap-6">
+                {/* Exchange List */}
+                <section>
+                    <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">選擇交易所</h3>
+
                     {loadingExchanges ? (
-                        <>
-                            <Skeleton className="h-20 w-full rounded-md bg-neutral-900" />
-                            <Skeleton className="h-20 w-full rounded-md bg-neutral-900" />
-                            <Skeleton className="h-20 w-full rounded-md bg-neutral-900" />
-                        </>
-                    ) : exchanges.map((ex) => (
-                        <Link href={`/register/${ex.slug}`} key={ex.id} className="block w-full">
-                            <Card className="flex flex-row w-full gap-0 rounded-md shadow-sm overflow-hidden py-0 border-white/5 bg-neutral-900 cursor-pointer group hover:bg-neutral-800 transition-all">
-                                <div className="flex w-16 shrink-0 items-center justify-center bg-neutral-950 text-sm font-medium border-r border-white/5">
-                                    {ex.logo_url ? (
-                                        <img src={ex.logo_url} alt={ex.name} className="h-8 w-8 object-contain transition-transform group-hover:scale-110" />
-                                    ) : (
-                                        <span className="text-xl text-neutral-500 group-hover:text-white transition-colors">{ex.name[0]}</span>
-                                    )}
-                                </div>
-                                <CardContent className="flex flex-1 items-center justify-between truncate p-0 bg-neutral-900 group-hover:bg-neutral-800 transition-colors">
-                                    <div className="flex-1 truncate px-4 py-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-medium text-white transition-colors text-base">{ex.name}</span>
-                                            <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-bold bg-white/10 text-white border-white/5">
-                                                獨家優惠
-                                            </Badge>
+                        <div className="space-y-2">
+                            <Skeleton className="h-20 w-full rounded-xl bg-neutral-900" />
+                            <Skeleton className="h-20 w-full rounded-xl bg-neutral-900" />
+                            <Skeleton className="h-20 w-full rounded-xl bg-neutral-900" />
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {exchanges.map((ex) => (
+                                <Link href={`/register/${ex.slug}`} key={ex.id}>
+                                    <div className="flex items-center gap-4 p-4 rounded-xl bg-neutral-900/50 border border-white/5 hover:bg-white/5 transition-all group">
+                                        {/* Logo */}
+                                        <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center border border-white/10 shrink-0">
+                                            {ex.logo_url ? (
+                                                <img src={ex.logo_url} alt={ex.name} className="h-8 w-8 object-contain group-hover:scale-110 transition-transform" />
+                                            ) : (
+                                                <span className="text-xl font-bold text-neutral-500">{ex.name[0]}</span>
+                                            )}
                                         </div>
-                                        <p className="text-neutral-500 text-xs truncate flex items-center gap-1">
-                                            推薦碼 <span className="font-mono text-white">{ex.referral_link}</span>
-                                        </p>
+
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <span className="font-medium text-white text-sm">{ex.name}</span>
+                                                <Badge className="px-1.5 py-0 text-[9px] font-bold bg-green-500/10 text-green-400 border-green-500/20">
+                                                    獨家優惠
+                                                </Badge>
+                                            </div>
+                                            <p className="text-[11px] text-neutral-500 truncate">
+                                                推薦碼 <span className="font-mono text-neutral-300">{ex.referral_link}</span>
+                                            </p>
+                                        </div>
+
+                                        {/* Arrow */}
+                                        <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-neutral-400 transition-colors shrink-0" />
                                     </div>
-                                    <div className="shrink-0 pr-4">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-neutral-950 text-neutral-400 group-hover:bg-white group-hover:text-black transition-colors">
-                                            <ChevronRight className="h-5 w-5" />
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    ))}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Help Text */}
+                <div className="bg-neutral-900/30 rounded-xl p-4 border border-white/5">
+                    <p className="text-xs text-neutral-500 leading-relaxed">
+                        💡 選擇交易所後將引導您完成註冊流程。完成後綁定 UID 即可開通權限。
+                    </p>
                 </div>
+
             </div>
+
+            <BottomNav />
         </div>
     )
 }

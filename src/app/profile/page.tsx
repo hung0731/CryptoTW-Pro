@@ -1,89 +1,70 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useLiff } from '@/components/LiffProvider'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { User, LogOut, ArrowLeft, RefreshCw, AlertCircle, CheckCircle, XCircle, ChevronRight } from 'lucide-react'
+import {
+    User, LogOut, Bell, Link2, Crown, HelpCircle, ChevronRight,
+    Bookmark, Settings, Shield
+} from 'lucide-react'
 import { BottomNav } from '@/components/BottomNav'
+import { PageHeader } from '@/components/PageHeader'
 
-interface Binding {
-    id: string
-    exchange_name: string
-    exchange_uid: string
-    status: 'pending' | 'verified' | 'rejected'
-    rejection_reason?: string
-    created_at: string
+function MenuLink({
+    icon: Icon,
+    label,
+    href,
+    badge,
+    external
+}: {
+    icon: any,
+    label: string,
+    href: string,
+    badge?: string,
+    external?: boolean
+}) {
+    const content = (
+        <div className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-xl">
+            <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-neutral-400" />
+                </div>
+                <span className="text-sm font-medium text-white">{label}</span>
+                {badge && (
+                    <span className="text-[9px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full">{badge}</span>
+                )}
+            </div>
+            <ChevronRight className="w-4 h-4 text-neutral-600" />
+        </div>
+    )
+
+    if (external) {
+        return <a href={href} target="_blank" rel="noopener noreferrer">{content}</a>
+    }
+    return <Link href={href}>{content}</Link>
 }
 
 export default function ProfilePage() {
     const { isLoggedIn, profile, dbUser, isLoading: authLoading } = useLiff()
-    const [bindings, setBindings] = useState<Binding[]>([])
-    const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        if (profile?.userId) {
-            fetchBindings(profile.userId)
-        }
-    }, [profile])
-
-    const fetchBindings = async (lineUserId: string) => {
-        setLoading(true)
-        try {
-            const res = await fetch('/api/user/bindings', {
-                method: 'POST',
-                body: JSON.stringify({ lineUserId })
-            })
-            const data = await res.json()
-            if (data.bindings) {
-                setBindings(data.bindings)
-            }
-        } catch (e) {
-            console.error(e)
-        } finally {
-            setLoading(false)
-        }
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-black p-4">
+                <Skeleton className="h-14 w-full rounded-xl mb-4" />
+                <Skeleton className="h-24 w-full rounded-xl mb-4" />
+                <Skeleton className="h-48 w-full rounded-xl" />
+            </div>
+        )
     }
-
-    const handleToggle = async (key: string) => {
-        if (!dbUser || !profile) return
-
-        const currentSettings = dbUser.notification_preferences || {
-            market_signals: true,
-            airdrops: true,
-            news: true
-        }
-
-        const newSettings = {
-            ...currentSettings,
-            [key]: !currentSettings[key as keyof typeof currentSettings]
-        }
-
-        try {
-            await fetch('/api/user/settings', {
-                method: 'POST',
-                body: JSON.stringify({
-                    lineUserId: profile.userId,
-                    settings: newSettings
-                })
-            })
-            // Force reload to reflect changes for now
-            window.location.reload()
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
-    if (authLoading) return <div className="p-8"><Skeleton className="h-20 w-full rounded-2xl" /></div>
 
     if (!isLoggedIn) {
         return (
             <div className="min-h-screen bg-black p-4 flex items-center justify-center">
-                <Card className="text-center p-8 bg-neutral-900 border-white/5 border shadow-lg">
+                <div className="text-center p-8 bg-neutral-900 border-white/5 border rounded-2xl shadow-lg max-w-sm">
                     <div className="bg-neutral-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                         <User className="h-8 w-8 text-neutral-400" />
                     </div>
@@ -91,176 +72,105 @@ export default function ProfilePage() {
                     <Link href="/">
                         <Button className="w-full rounded-full bg-white text-black hover:bg-neutral-200">回到首頁</Button>
                     </Link>
-                </Card>
+                </div>
             </div>
         )
     }
 
+    const getMembershipBadge = () => {
+        switch (dbUser?.membership_status) {
+            case 'pro':
+            case 'lifetime':
+                return (
+                    <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 backdrop-blur-md transition-colors px-2 py-0.5 text-xs">
+                        💎 PRO 會員
+                    </Badge>
+                )
+            default:
+                // Handle 'vip' and other cases
+                if ((dbUser?.membership_status as string) === 'vip') {
+                    return (
+                        <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 px-2 py-0.5 text-xs">
+                            👑 大客戶
+                        </Badge>
+                    )
+                }
+                return (
+                    <Badge variant="secondary" className="bg-neutral-800 text-neutral-400 border border-white/5 px-2 py-0.5 text-xs">
+                        🌱 免費會員
+                    </Badge>
+                )
+            case 'pending':
+                return (
+                    <Badge variant="outline" className="text-yellow-500 border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-xs">
+                        ⏳ 審核中
+                    </Badge>
+                )
+        }
+    }
+
     return (
-        <div className="min-h-screen bg-black p-4 pb-24 text-white font-sans">
-            {/* Header */}
-            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 -mx-4 -mt-4 mb-4">
-                <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto w-full">
-                    <div className="flex items-center justify-start">
-                        {/* Empty left slot for unification */}
-                    </div>
-                    <div className="flex items-center justify-center">
-                        <img src="/logo.svg" alt="Logo" className="h-4 w-auto" />
-                    </div>
-                    <div className="flex items-center justify-end">
-                        {/* Right Slot */}
-                    </div>
-                </div>
-            </header>
+        <div className="min-h-screen bg-black text-white font-sans pb-24">
+            <PageHeader showLogo />
 
-            <div className="max-w-lg mx-auto space-y-6">
+            <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
 
-                {/* Profile Section */}
-                <div className="space-y-2">
-                    <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest px-1">Identity</h2>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-neutral-900/50 border border-white/5 backdrop-blur-sm">
+                {/* Profile Card */}
+                <section>
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-neutral-900/50 border border-white/5">
                         <Avatar className="h-16 w-16 ring-2 ring-white/10 shadow-lg">
                             <AvatarImage src={profile?.pictureUrl} />
                             <AvatarFallback><User className="h-8 w-8 text-neutral-500" /></AvatarFallback>
                         </Avatar>
 
-                        <div className="space-y-1">
+                        <div className="space-y-1.5 flex-1">
                             <h2 className="text-xl font-bold text-white tracking-tight">{profile?.displayName}</h2>
-                            <div className="flex items-center gap-2">
-                                {dbUser?.membership_status === 'pro' ? (
-                                    <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 backdrop-blur-md transition-colors px-2 py-0.5 text-xs">
-                                        💎 PRO COMMANDER
-                                    </Badge>
-                                ) : dbUser?.membership_status === 'pending' ? (
-                                    <Badge variant="outline" className="text-yellow-500 border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-xs">
-                                        ⏳ VERIFYING
-                                    </Badge>
-                                ) : (
-                                    <Badge variant="secondary" className="bg-neutral-800 text-neutral-400 border border-white/5 px-2 py-0.5 text-xs">
-                                        🌱 EXPLORER
-                                    </Badge>
-                                )}
-                            </div>
+                            {getMembershipBadge()}
                         </div>
                     </div>
+                </section>
+
+                {/* Quick Actions */}
+                <section>
+                    <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">設定</h2>
+                    <div className="bg-neutral-900/30 rounded-2xl border border-white/5 divide-y divide-white/5">
+                        <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
+                        <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
+                        <MenuLink icon={Crown} label="大客戶計劃" href="/vip" />
+                    </div>
+                </section>
+
+                {/* More */}
+                <section>
+                    <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">更多</h2>
+                    <div className="bg-neutral-900/30 rounded-2xl border border-white/5 divide-y divide-white/5">
+                        <MenuLink icon={Bookmark} label="我的收藏" href="/bookmarks" badge="即將推出" />
+                        <MenuLink icon={HelpCircle} label="幫助中心" href="https://line.me/R/ti/p/@cryptotw" external />
+                    </div>
+                </section>
+
+                {/* Logout */}
+                <section>
+                    <Button
+                        variant="outline"
+                        className="w-full border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl py-6"
+                        onClick={() => {
+                            window.location.href = '/'
+                        }}
+                    >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        登出
+                    </Button>
+                </section>
+
+                {/* Version */}
+                <div className="text-center pt-4">
+                    <p className="text-[10px] text-neutral-600">加密台灣 Pro v2.0</p>
                 </div>
 
-                <div className="space-y-4 pt-4">
-                    <div className="flex items-center justify-between px-1">
-                        <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Exchange Bindings</h3>
-                        <Button variant="ghost" size="sm" onClick={() => profile?.userId && fetchBindings(profile.userId)} className="hover:bg-white/10 text-white rounded-full h-6 w-6 p-0">
-                            <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-                        </Button>
-                    </div>
-
-                    {loading ? (
-                        <div className="space-y-2">
-                            <Skeleton className="h-12 w-full rounded-lg bg-neutral-900" />
-                            <Skeleton className="h-12 w-full rounded-lg bg-neutral-900" />
-                        </div>
-                    ) : bindings.length === 0 ? (
-                        <div className="border border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center text-center gap-3">
-                            <div className="p-3 bg-white/5 rounded-full">
-                                <AlertCircle className="h-5 w-5 text-neutral-500" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-neutral-300">No Exchange Bound</p>
-                                <p className="text-[10px] text-neutral-500 mt-1">Bind an exchange to unlock Pro access.</p>
-                            </div>
-                            <Link href="/register">
-                                <Button size="sm" className="rounded-full bg-white text-black hover:bg-neutral-200 font-bold px-6 h-8 text-xs mt-2">
-                                    Bind Now
-                                </Button>
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="grid gap-2">
-                            {bindings.map(b => (
-                                <div key={b.id} className="group flex items-center justify-between p-3 rounded-lg bg-neutral-900/40 border border-white/5 hover:bg-white/5 transition-all">
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center border border-white/10 text-[10px] font-bold uppercase text-neutral-500">
-                                            {b.exchange_name.slice(0, 2)}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium text-white">{b.exchange_name}</span>
-                                                {b.status === 'verified' && <CheckCircle className="w-3 h-3 text-green-500" />}
-                                                {b.status === 'pending' && <RefreshCw className="w-3 h-3 text-yellow-500 animate-spin" />}
-                                                {b.status === 'rejected' && <XCircle className="w-3 h-3 text-red-500" />}
-                                            </div>
-                                            <div className="text-[10px] text-neutral-500 font-mono truncate">
-                                                UID: {b.exchange_uid}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {b.status === 'rejected' && (
-                                        <Link href={`/register/${b.exchange_name}`}>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-full">
-                                                <ChevronRight className="w-4 h-4" />
-                                            </Button>
-                                        </Link>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Add Exchange Button */}
-                    {bindings.length > 0 && (
-                        <Link href="/register">
-                            <Button variant="outline" className="w-full border-dashed border border-white/10 bg-transparent py-6 text-neutral-500 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all">
-                                + 綁定其他交易所
-                            </Button>
-                        </Link>
-                    )}
-
-                    {/* Notification Settings */}
-                    <div className="pt-6">
-                        <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4 px-1">Preferences</h3>
-                        <Card className="border border-white/5 shadow-sm bg-neutral-900">
-                            <CardContent className="p-0 divide-y divide-white/5">
-                                <NotificationToggle
-                                    label="關鍵交易信號"
-                                    desc="接收高勝率買賣點位通知"
-                                    checked={dbUser?.notification_preferences?.market_signals ?? true}
-                                    onToggle={() => handleToggle('market_signals')}
-                                />
-                                <NotificationToggle
-                                    label="精選空投機會"
-                                    desc="即時獲取代幣空投活動資訊"
-                                    checked={dbUser?.notification_preferences?.airdrops ?? true}
-                                    onToggle={() => handleToggle('airdrops')}
-                                />
-                                <NotificationToggle
-                                    label="市場快訊"
-                                    desc="每日重點新聞與市場動向"
-                                    checked={dbUser?.notification_preferences?.news ?? true}
-                                    onToggle={() => handleToggle('news')}
-                                />
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
             </div>
+
             <BottomNav />
-        </div>
-    )
-}
-
-function NotificationToggle({ label, desc, checked, onToggle }: { label: string, desc: string, checked: boolean, onToggle: () => void }) {
-    return (
-        <div className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
-            <div className="space-y-0.5">
-                <div className="font-medium text-white">{label}</div>
-                <div className="text-xs text-neutral-500">{desc}</div>
-            </div>
-            <div
-                onClick={onToggle}
-                className={`w-11 h-6 rounded-full flex items-center transition-colors cursor-pointer px-0.5 ${checked ? 'bg-white' : 'bg-neutral-700'}`}
-            >
-                <div className={`w-5 h-5 bg-black rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-[20px]' : ''}`} />
-            </div>
         </div>
     )
 }

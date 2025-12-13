@@ -5,10 +5,11 @@ import { useLiff } from '@/components/LiffProvider'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowRight, Lock, ChevronRight } from 'lucide-react'
+import { Lock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
 import { ProAccessGate } from '@/components/ProAccessGate'
+import { PageHeader } from '@/components/PageHeader'
 import { cn } from '@/lib/utils'
 
 export default function Home() {
@@ -92,26 +93,11 @@ export default function Home() {
     <main className="min-h-screen font-sans bg-black text-white pb-24">
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-        <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
-          <div className="flex items-center justify-start"></div>
-          <div className="flex items-center justify-center">
-            <img src="/logo.svg" alt="加密台灣 Pro" className="h-4 w-auto" />
-          </div>
-          <div className="flex items-center justify-end">
-            {profile && (
-              <Link href="/profile">
-                <div className="relative group cursor-pointer">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
-                  <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
-                </div>
-              </Link>
-            )}
-          </div>
-        </div>
+      <PageHeader showLogo />
 
-        {/* Category Filter Pills (Scrollable) */}
-        <div className="w-full overflow-x-auto no-scrollbar px-4 pb-3 max-w-lg mx-auto">
+      {/* Category Filter Pills (Scrollable) */}
+      <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5">
+        <div className="w-full overflow-x-auto no-scrollbar px-4 py-3 max-w-lg mx-auto">
           <div className="flex space-x-2">
             {categories.map((cat) => (
               <button
@@ -129,7 +115,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </header>
+      </div>
 
       <div className="mt-6 px-4 space-y-8 max-w-lg mx-auto min-h-screen">
 

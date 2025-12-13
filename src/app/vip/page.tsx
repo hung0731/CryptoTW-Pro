@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BottomNav } from '@/components/BottomNav'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/PageHeader'
 
 export default function VipPage() {
     const { dbUser, profile, isLoading: isAuthLoading } = useLiff()
@@ -89,26 +90,7 @@ export default function VipPage() {
     return (
         <main className="min-h-screen bg-black text-white font-sans pb-24">
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
-                    <div className="flex items-center justify-start">
-                        {/* Empty left slot */}
-                    </div>
-                    <div className="flex items-center justify-center">
-                        <img src="/logo.svg" alt="Logo" className="h-4 w-auto" />
-                    </div>
-                    <div className="flex items-center justify-end">
-                        {profile && (
-                            <Link href="/profile">
-                                <div className="relative group cursor-pointer">
-                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
-                                    <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
-                                </div>
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            </header>
+            <PageHeader showLogo />
 
             <div className="max-w-lg mx-auto p-4 space-y-8">
 
