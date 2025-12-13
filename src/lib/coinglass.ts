@@ -1,7 +1,10 @@
 // Coinglass API Configuration
 // API Documentation: https://docs.coinglass.com
 
-const COINGLASS_BASE_URL = 'https://open-api.coinglass.com'
+// V2 API (legacy)
+const COINGLASS_V2_URL = 'https://open-api.coinglass.com'
+// V4 API (new, for Hyperliquid etc.)
+const COINGLASS_V4_URL = 'https://open-api-v4.coinglass.com'
 
 // Get API key from environment
 export const getCoinglassApiKey = () => {
@@ -13,14 +16,24 @@ export const getCoinglassApiKey = () => {
     return key
 }
 
-// Common headers for all Coinglass requests
-export const getCoinglassHeaders = () => ({
+// V2 headers (uses coinglassSecret)
+export const getCoinglassV2Headers = () => ({
     'Accept': 'application/json',
     'coinglassSecret': getCoinglassApiKey() || '',
     'Content-Type': 'application/json'
 })
 
-// Helper function to make Coinglass API requests
+// V4 headers (uses CG-API-KEY)
+export const getCoinglassV4Headers = () => ({
+    'Accept': 'application/json',
+    'CG-API-KEY': getCoinglassApiKey() || '',
+    'Content-Type': 'application/json'
+})
+
+// Legacy alias
+export const getCoinglassHeaders = getCoinglassV2Headers
+
+// Helper function to make Coinglass V2 API requests
 export async function coinglassRequest<T>(
     endpoint: string,
     params?: Record<string, string | number>,
@@ -33,39 +46,79 @@ export async function coinglassRequest<T>(
     }
 
     try {
-        const url = new URL(`${COINGLASS_BASE_URL}${endpoint}`)
+        const url = new URL(`${COINGLASS_V2_URL}${endpoint}`)
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
                 url.searchParams.append(key, String(value))
             })
         }
 
-        // Default cache: 60 seconds
-        const defaultOptions: RequestInit = {
-            next: { revalidate: 60 }
-        }
-
         const response = await fetch(url.toString(), {
-            headers: getCoinglassHeaders(),
-            ...defaultOptions,
-            ...options, // Allow override
+            headers: getCoinglassV2Headers(),
+            next: { revalidate: 60 },
+            ...options,
         })
 
         if (!response.ok) {
-            console.error(`Coinglass API error: ${response.status} ${response.statusText}`)
+            console.error(`Coinglass V2 API error: ${response.status} ${response.statusText}`)
             return null
         }
 
         const data = await response.json()
 
         if (data.code !== '0') {
-            console.error(`Coinglass API error: ${data.msg}`)
+            console.error(`Coinglass V2 API error: ${data.msg}`)
             return null
         }
 
         return data.data as T
     } catch (error) {
-        console.error('Coinglass API request failed:', error)
+        console.error('Coinglass V2 API request failed:', error)
+        return null
+    }
+}
+
+// Helper function to make Coinglass V4 API requests
+export async function coinglassV4Request<T>(
+    endpoint: string,
+    params?: Record<string, string | number>,
+    options?: RequestInit
+): Promise<T | null> {
+    const apiKey = getCoinglassApiKey()
+    if (!apiKey) {
+        console.error('Coinglass API key not configured')
+        return null
+    }
+
+    try {
+        const url = new URL(`${COINGLASS_V4_URL}${endpoint}`)
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                url.searchParams.append(key, String(value))
+            })
+        }
+
+        const response = await fetch(url.toString(), {
+            headers: getCoinglassV4Headers(),
+            next: { revalidate: 60 },
+            ...options,
+        })
+
+        if (!response.ok) {
+            console.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`)
+            return null
+        }
+
+        const data = await response.json()
+
+        if (data.code !== '0') {
+            console.error(`Coinglass V4 API error: ${data.msg}`)
+            return null
+        }
+
+        return data.data as T
+    } catch (error) {
+        console.error('Coinglass V4 API request failed:', error)
         return null
     }
 }

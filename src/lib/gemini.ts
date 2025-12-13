@@ -42,25 +42,28 @@ export async function generateMarketSummary(marketData: any): Promise<MarketSumm
 【數據】
 ${JSON.stringify(marketData, null, 2)}
 
-【規則】
+【分析邏輯】
 • 費率 > 0.05% = 過熱 | < -0.05% = 過冷
 • OI漲+價漲=趨勢強 | OI漲+價跌=建空單
 • 大戶多空比 > 1.2 看多 | < 0.8 看空
-• 交易所流入=賣壓 | 流出=囤貨
+• ETF 淨流入 = 機構在買 | 淨流出 = 機構在賣
+• Coinbase 溢價正 = 美國買盤強
+• Taker Buy/Sell > 1 = 主動買盤強
+• 恐懼貪婪 < 25 = 恐慌拋售機會 | > 75 = 見頂風險
 
 【輸出要求】
 1. summary 最多 8 個字
 2. interpretation 最多 10 個字
 3. 價格用簡寫：10萬、9.8萬、4.5萬
 4. 不要 $ 符號
-5. headline 最多 12 個字
+5. headline 最多 15 個字
 
 【JSON】
 {
   "emoji": "🔥",
   "sentiment": "偏多",
   "sentiment_score": 72,
-  "headline": "大戶加倉，散戶觀望",
+  "headline": "ETF資金狂流入，大戶加倉",
   
   "analysis": {
     "price_momentum": {
@@ -68,20 +71,20 @@ ${JSON.stringify(marketData, null, 2)}
       "signal": "多頭"
     },
     "capital_flow": {
-      "summary": "費率0.01%",
-      "interpretation": "資金進場做多"
+      "summary": "費率0.1%，OI增",
+      "interpretation": "資金湧入做多"
     },
     "whale_activity": {
-      "summary": "多空比1.35",
-      "interpretation": "大戶押注上漲"
+      "summary": "大戶比1.35，ETF+",
+      "interpretation": "機構在加倉"
     },
     "retail_sentiment": {
-      "summary": "恐懼指數45",
-      "interpretation": "散戶怕高"
+      "summary": "恐懼45，買賣比1.2",
+      "interpretation": "散戶追漲中"
     },
     "risk_zones": {
       "summary": "爆倉區9.5萬",
-      "interpretation": "注意洗盤"
+      "interpretation": "小心插針洗盤"
     }
   },
   
@@ -90,7 +93,7 @@ ${JSON.stringify(marketData, null, 2)}
     "entry_zone": "9.8-9.9萬",
     "stop_loss_zone": "9.4萬",
     "take_profit_zone": "10.8萬",
-    "risk_note": "別追高，等回調"
+    "risk_note": "ETF流入強勢，但別追高"
   }
 }
 `
