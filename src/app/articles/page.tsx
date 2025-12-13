@@ -182,93 +182,151 @@ function ContentList({ items }: { items: any[] }) {
       </div>
     )
   }
-  return (
-    <div className="space-y-3">
-      {items.map((item) => {
-        // Flash News Style (Compact, no big thumbnail, high information density)
-        if (item.type === 'news') {
-          return (
-            <Link href={item.url || `/content/${item.id}`} key={item.id} target={item.url ? "_blank" : undefined} className="block group">
-              <div className="bg-neutral-900/30 border border-white/5 rounded-lg p-3 hover:bg-white/5 transition-all flex gap-3">
-                {/* Time Column */}
-                <div className="flex flex-col items-center shrink-0 w-12 pt-0.5">
-                  <span className="text-xs font-bold text-neutral-300 font-mono">
-                    {new Date(item.created_at).getHours().toString().padStart(2, '0')}:{new Date(item.created_at).getMinutes().toString().padStart(2, '0')}
-                  </span>
-                  <div className="h-full w-px bg-white/10 my-1 group-hover:bg-blue-500/50 transition-colors"></div>
-                </div>
+  // State for News Dialog
+  const [selectedNews, setSelectedNews] = useState<any | null>(null)
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-blue-500/30 text-blue-400 bg-blue-500/10 font-normal">
-                      快訊
-                    </Badge>
-                    <span className="text-[10px] text-neutral-500">
-                      {new Date(item.created_at).toLocaleDateString()}
+  return (
+    <>
+      <div className="space-y-3">
+        {items.map((item) => {
+          // Flash News Style (Compact, no big thumbnail, high information density)
+          if (item.type === 'news') {
+            // Strip HTML for preview
+            const plainSummary = item.summary ? item.summary.replace(/<[^>]+>/g, '') : ''
+
+            return (
+              <div
+                key={item.id}
+                onClick={() => setSelectedNews(item)}
+                className="block group cursor-pointer"
+              >
+                <div className="bg-neutral-900/30 border border-white/5 rounded-lg p-3 hover:bg-white/5 transition-all flex gap-3">
+                  {/* Time Column */}
+                  <div className="flex flex-col items-center shrink-0 w-12 pt-0.5">
+                    <span className="text-xs font-bold text-neutral-300 font-mono">
+                      {new Date(item.created_at).getHours().toString().padStart(2, '0')}:{new Date(item.created_at).getMinutes().toString().padStart(2, '0')}
                     </span>
-                    {item.source && (
-                      <span className="text-[10px] text-neutral-500 border-l border-neutral-800 pl-2">
-                        {item.source}
-                      </span>
-                    )}
+                    <div className="h-full w-px bg-white/10 my-1 group-hover:bg-blue-500/50 transition-colors"></div>
                   </div>
-                  <h3 className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors leading-snug mb-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
-                    {item.summary}
-                  </p>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-blue-500/30 text-blue-400 bg-blue-500/10 font-normal">
+                        快訊
+                      </Badge>
+                      <span className="text-[10px] text-neutral-500">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
+                      {item.source && (
+                        <span className="text-[10px] text-neutral-500 border-l border-neutral-800 pl-2">
+                          {item.source}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors leading-snug mb-1">
+                      {item.title}
+                    </h3>
+                    {/* Show stripped summary */}
+                    <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
+                      {plainSummary}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          // Standard Article Style
+          return (
+            <Link href={`/content/${item.id}`} key={item.id} className="block group">
+              <div className="bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden hover:bg-white/5 transition-colors">
+                <div className="flex items-start gap-4 p-4">
+                  {/* Thumbnail */}
+                  {item.thumbnail_url && (
+                    <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-800 border border-white/10">
+                      <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
+                      {!item.is_public && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <Lock className="w-5 h-5 text-yellow-500 drop-shadow-md" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-neutral-400 font-normal">
+                        {item.type?.toUpperCase() || 'ARTICLE'}
+                      </Badge>
+                      <span className="text-[10px] text-neutral-600">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
+                      {item.summary || item.content?.substring(0, 100)}...
+                    </p>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="self-center shrink-0 opacity-0 group-hover:opacity-50 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                    <ChevronRight className="w-4 h-4 text-neutral-400" />
+                  </div>
                 </div>
               </div>
             </Link>
           )
-        }
+        })}
+      </div>
 
-        // Standard Article Style
-        return (
-          <Link href={`/content/${item.id}`} key={item.id} className="block group">
-            <div className="bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden hover:bg-white/5 transition-colors">
-              <div className="flex items-start gap-4 p-4">
-                {/* Thumbnail */}
-                {item.thumbnail_url && (
-                  <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-800 border border-white/10">
-                    <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
-                    {!item.is_public && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <Lock className="w-5 h-5 text-yellow-500 drop-shadow-md" />
-                      </div>
+      {/* News Detail Dialog (Modal) */}
+      {selectedNews && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedNews(null)}>
+          <div className="bg-neutral-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="p-4 space-y-4">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-blue-500/30 text-blue-400 bg-blue-500/10">快訊</Badge>
+                    <span className="text-xs text-neutral-500">{new Date(selectedNews.created_at).toLocaleString()}</span>
+                    {selectedNews.source && (
+                      <span className="text-xs text-neutral-500 border-l border-white/10 pl-2">{selectedNews.source}</span>
                     )}
                   </div>
-                )}
-
-                {/* Content */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-neutral-400 font-normal">
-                      {item.type?.toUpperCase() || 'ARTICLE'}
-                    </Badge>
-                    <span className="text-[10px] text-neutral-600">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
-                    {item.summary || item.content?.substring(0, 100)}...
-                  </p>
+                  <h3 className="text-lg font-bold text-white leading-snug">{selectedNews.title}</h3>
                 </div>
+                <button onClick={() => setSelectedNews(null)} className="p-1 hover:bg-white/10 rounded-full transition-colors">
+                  <span className="text-2xl text-neutral-400">×</span>
+                </button>
+              </div>
 
-                {/* Arrow */}
-                <div className="self-center shrink-0 opacity-0 group-hover:opacity-50 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
-                  <ChevronRight className="w-4 h-4 text-neutral-400" />
-                </div>
+              <div className="h-px bg-white/5" />
+
+              {/* Content (Render HTML safely) */}
+              <div
+                className="prose prose-invert prose-sm max-w-none text-neutral-300 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: selectedNews.content || selectedNews.summary }}
+              />
+
+              {/* Footer */}
+              <div className="pt-4 flex justify-end">
+                <button
+                  onClick={() => setSelectedNews(null)}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-neutral-300 text-sm font-medium rounded-lg transition-colors"
+                >
+                  關閉
+                </button>
               </div>
             </div>
-          </Link>
-        )
-      })}
-    </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
+```

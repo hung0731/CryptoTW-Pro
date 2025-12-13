@@ -184,9 +184,11 @@ function CryptoPricePrediction() {
     )
 }
 
+import { DerivativesView, SmartMoneyView } from '@/components/DataDashboards'
+
 export default function DataPage() {
     const { profile } = useLiff()
-    const [activeTab, setActiveTab] = useState('market')
+    const [activeTab, setActiveTab] = useState('overview')
 
     // Market Data State
     const [marketData, setMarketData] = useState<{ gainers: any[], losers: any[] } | null>(null)
@@ -198,14 +200,25 @@ export default function DataPage() {
     const [markets, setMarkets] = useState<any[]>([])
     const [predictLoading, setPredictLoading] = useState(true)
 
+    // Calendar Snapshot for Overview
+    const [calendarEvents, setCalendarEvents] = useState<any[]>([])
+
     const fetchMarketData = async () => {
         setMarketLoading(true)
         try {
-            const res = await fetch('/api/market')
-            const data = await res.json()
-            if (data.market) setMarketData(data.market)
-            if (data.fearGreed) setFearGreed(data.fearGreed)
-            if (data.global) setGlobalData(data.global)
+            const [marketRes, calendarRes] = await Promise.all([
+                fetch('/api/market').then(r => r.json()),
+                fetch('/api/coinglass/calendar').then(r => r.json())
+            ])
+
+            if (marketRes.market) setMarketData(marketRes.market)
+            if (marketRes.fearGreed) setFearGreed(marketRes.fearGreed)
+            if (marketRes.global) setGlobalData(marketRes.global)
+
+            if (calendarRes.calendar?.events) {
+                // Get today's high importance events
+                setCalendarEvents(calendarRes.calendar.events.filter((e: any) => e.importance >= 2).slice(0, 3))
+            }
         } catch (e) {
             console.error(e)
         } finally {
@@ -232,11 +245,11 @@ export default function DataPage() {
     }, [])
 
     const handleRefresh = () => {
-        if (activeTab === 'market') fetchMarketData()
-        else fetchPredictionMarkets()
+        fetchMarketData()
+        fetchPredictionMarkets()
     }
 
-    const isLoading = activeTab === 'market' ? marketLoading : predictLoading
+    const isLoading = marketLoading
 
     // Fear & Greed color
     const getFearGreedColor = (value: number) => {
@@ -251,99 +264,86 @@ export default function DataPage() {
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
             <PageHeader />
 
-            <Tabs defaultValue="market" className="w-full" onValueChange={setActiveTab}>
-                {/* Custom Tabs List */}
+            <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
+                {/* 3-Tab Structure */}
                 <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
-                    <TabsList className="w-full grid grid-cols-6 h-auto p-1 bg-neutral-900/50 rounded-lg">
-                        <TabsTrigger value="market" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <BarChart3 className="w-3 h-3" />
-                            市場
+                    <TabsList className="w-full grid grid-cols-3 h-auto p-1 bg-neutral-900/50 rounded-lg">
+                        <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5">
+                            <Gauge className="w-3.5 h-3.5" />
+                            市場總覽
                         </TabsTrigger>
-                        <TabsTrigger value="liquidation" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <Flame className="w-3 h-3 text-orange-400" />
-                            爆倉
+                        <TabsTrigger value="derivatives" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5">
+                            <Flame className="w-3.5 h-3.5 text-orange-400" />
+                            合約數據
                         </TabsTrigger>
-                        <TabsTrigger value="funding" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <Percent className="w-3 h-3 text-yellow-400" />
-                            費率
-                        </TabsTrigger>
-                        <TabsTrigger value="exchange" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <DollarSign className="w-3 h-3 text-green-400" />
-                            交易所
-                        </TabsTrigger>
-                        <TabsTrigger value="whales" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <Radar className="w-3 h-3 text-purple-400" />
-                            巨鯨
-                        </TabsTrigger>
-                        <TabsTrigger value="calendar" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <Calendar className="w-3 h-3 text-blue-400" />
-                            日曆
-                        </TabsTrigger>
-                        <TabsTrigger value="prediction" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <Gauge className="w-3 h-3" />
-                            預測
+                        <TabsTrigger value="smartmoney" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5">
+                            <Radar className="w-3.5 h-3.5 text-purple-400" />
+                            聰明錢
                         </TabsTrigger>
                     </TabsList>
                 </div>
 
-                {/* TAB 1: Market Data */}
-                <TabsContent value="market" className="space-y-4 p-4 min-h-[50vh]">
-                    {/* Global Stats Grid */}
-                    {!marketLoading && (fearGreed || globalData) && (
-                        <div className="space-y-4">
-                            {/* Row 1: 3 Columns (Fear/Greed, Cap, Dom) */}
-                            <div className="grid grid-cols-3 gap-2">
-                                {/* Fear & Greed */}
-                                {fearGreed && (
-                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
-                                        <div className="flex items-center gap-1 mb-1">
-                                            <Gauge className="w-3 h-3 text-neutral-500" />
-                                            <span className="text-[10px] text-neutral-500">恐懼貪婪</span>
-                                        </div>
-                                        <div className={`text-lg font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
-                                            {fearGreed.value}
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">{fearGreed.classification}</div>
-                                    </div>
-                                )}
-                                {/* Total Market Cap */}
-                                {globalData && (
-                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
-                                        <div className="flex items-center gap-1 mb-1">
-                                            <DollarSign className="w-3 h-3 text-neutral-500" />
-                                            <span className="text-[10px] text-neutral-500">總市值</span>
-                                        </div>
-                                        <div className="text-lg font-bold font-mono text-white">${globalData.totalMarketCap}</div>
-                                        <div className="text-[10px] text-neutral-400">24h ${globalData.totalVolume}</div>
-                                    </div>
-                                )}
-                                {/* BTC Dominance */}
-                                {globalData && (
-                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
-                                        <div className="flex items-center gap-1 mb-1">
-                                            <Bitcoin className="w-3 h-3 text-orange-500" />
-                                            <span className="text-[10px] text-neutral-500">BTC 市佔</span>
-                                        </div>
-                                        <div className="text-lg font-bold font-mono text-orange-400">{globalData.btcDominance}%</div>
-                                        <div className="text-[10px] text-neutral-400">${globalData.btcMarketCap}</div>
-                                    </div>
-                                )}
-                            </div>
+                {/* TAB 1: Market Overview */}
+                <TabsContent value="overview" className="space-y-6 p-4 min-h-[50vh]">
 
-                            {/* Row 2: Long/Short Ratio (Merged here) */}
-                            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <BarChart3 className="w-3 h-3 text-blue-400" />
-                                    <span className="text-xs font-bold text-white">BTC 多空比</span>
+                    {/* 1. Critical Stats Marquee */}
+                    {globalData && fearGreed && (
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
+                                <div className="flex items-center gap-1 mb-1">
+                                    <Gauge className="w-3 h-3 text-neutral-500" />
+                                    <span className="text-[10px] text-neutral-500">恐慌指數</span>
                                 </div>
-                                <LongShortRatio />
+                                <div className={`text-lg font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
+                                    {fearGreed.value}
+                                </div>
+                            </div>
+                            <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
+                                <div className="flex items-center gap-1 mb-1">
+                                    <Bitcoin className="w-3 h-3 text-orange-500" />
+                                    <span className="text-[10px] text-neutral-500">BTC Dominance</span>
+                                </div>
+                                <div className="text-lg font-bold font-mono text-white">{globalData.btcDominance}%</div>
+                            </div>
+                            <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
+                                <div className="flex items-center gap-1 mb-1">
+                                    <BarChart3 className="w-3 h-3 text-blue-500" />
+                                    <span className="text-[10px] text-neutral-500">Long/Short</span>
+                                </div>
+                                <div className="text-lg font-bold font-mono text-white">--</div> {/* Handled by widget separately if needed */}
                             </div>
                         </div>
                     )}
 
+                    {/* 2. Important Events (Calendar Snippet) */}
+                    {calendarEvents.length > 0 && (
+                        <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-blue-400" />
+                                    <h3 className="text-sm font-bold text-white">今日重點</h3>
+                                </div>
+                                <Link href="/calendar" className="text-[10px] text-neutral-500 hover:text-white transition-colors">更多 →</Link>
+                            </div>
+                            <div className="space-y-2">
+                                {calendarEvents.map((e, i) => (
+                                    <div key={i} className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-neutral-500 font-mono">{e.time}</span>
+                                            <span className="text-neutral-300">{e.country} {e.event}</span>
+                                        </div>
+                                        <div className="flex gap-0.5">
+                                            {[...Array(e.importance)].map((_, idx) => (
+                                                <div key={idx} className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
-                    <h2 className="text-lg font-bold text-white mt-6 mb-4">熱門幣種</h2>
-
+                    {/* 3. Gainers/Losers (Existing) */}
                     {marketLoading ? (
                         <div className="grid grid-cols-2 gap-4">
                             <Skeleton className="h-48 w-full bg-neutral-900/50 rounded-xl" />
@@ -371,7 +371,6 @@ export default function DataPage() {
                                     ))}
                                 </div>
                             </div>
-
                             {/* Losers */}
                             <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
@@ -394,113 +393,57 @@ export default function DataPage() {
                             </div>
                         </div>
                     )}
-                </TabsContent>
 
-                {/* TAB: Liquidation */}
-                <TabsContent value="liquidation" className="space-y-4 p-4 min-h-[50vh]">
-                    <LiquidationWaterfall />
-                    <div className="border-t border-white/5 my-6"></div>
-                    <LiquidationHeatmap />
-                </TabsContent>
+                    {/* 4. Prediction Markets (Polymarket) */}
+                    <div className="space-y-4 pt-4">
+                        <CryptoPricePrediction />
 
-                {/* TAB: Funding Rate */}
-                <TabsContent value="funding" className="space-y-4 p-4 min-h-[50vh]">
-                    <FundingRateRankings />
-                </TabsContent>
-
-                {/* TAB: Exchange */}
-                <TabsContent value="exchange" className="space-y-4 p-4 min-h-[50vh]">
-                    <ExchangeTransparency />
-                </TabsContent>
-
-                {/* TAB: Whale Watch */}
-                <TabsContent value="whales" className="space-y-4 p-4 min-h-[50vh]">
-                    <WhaleAlertFeed />
-                    <WhalePositionsList />
-                </TabsContent>
-
-                {/* TAB: Calendar */}
-                <TabsContent value="calendar" className="space-y-4 p-4 min-h-[50vh]">
-                    <EconomicCalendar />
-                </TabsContent>
-
-                {/* TAB 3: Prediction */}
-                <TabsContent value="prediction" className="space-y-4 p-4 min-h-[50vh]">
-                    {/* BTC/ETH Price Prediction Section */}
-                    <CryptoPricePrediction />
-
-                    {/* Separator */}
-                    <div className="border-t border-white/5 my-6"></div>
-
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold text-white">其他預測市場</h2>
-                    </div>
-
-                    {/* Stats Cards */}
-                    {globalData && (
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                            <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-3 relative overflow-hidden">
-                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">24小時交易量</span>
-                                <span className="text-base font-bold text-white font-mono">${globalData.totalVolume}</span>
-                                <div className="absolute right-0 bottom-0 p-2 opacity-10">
-                                    <BarChart3 className="w-8 h-8 text-white" />
-                                </div>
-                            </div>
-                            <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-3 relative overflow-hidden">
-                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">追蹤市場</span>
-                                <span className="text-base font-bold text-white font-mono">{markets.length} 個</span>
-                                <div className="absolute right-0 bottom-0 p-2 opacity-10">
-                                    <Gauge className="w-8 h-8 text-white" />
-                                </div>
-                            </div>
+                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                            <h2 className="text-lg font-bold text-white">預測市場 (Polymarket)</h2>
                         </div>
-                    )}
 
-                    {predictLoading ? (
-                        <div className="space-y-3">
-                            <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-xl" />
-                            <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-xl" />
-                            <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-xl" />
-                        </div>
-                    ) : (
-                        <div className="grid gap-3">
-                            {markets.map((market) => (
-                                <Link href={`https://polymarket.com/event/${market.slug}`} target="_blank" key={market.id}>
-                                    <div className="group bg-neutral-900/30 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
-                                        <div className="flex items-start justify-between gap-3 mb-3">
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-white/5 p-1.5 shrink-0 border border-white/10">
-                                                    <img src={market.icon || '/logo.svg'} className="w-full h-full object-contain opacity-80" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-sm font-medium text-neutral-200 line-clamp-2 leading-snug group-hover:text-white transition-colors">
-                                                        {market.question}
-                                                    </h3>
+                        {predictLoading ? (
+                            <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
+                        ) : (
+                            <div className="grid gap-3">
+                                {markets.slice(0, 3).map((market) => (
+                                    <Link href={`https://polymarket.com/event/${market.slug}`} target="_blank" key={market.id}>
+                                        <div className="group bg-neutral-900/30 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
+                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    {market.icon && <img src={market.icon} className="w-5 h-5 rounded-full" />}
+                                                    <h3 className="text-sm font-medium text-neutral-200 line-clamp-1 group-hover:text-white transition-colors">{market.question}</h3>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        {/* Outcomes */}
-                                        <div className="space-y-1.5">
-                                            {(market.outcomes || []).slice(0, 2).map((outcome: any, idx: number) => (
-                                                <div key={idx} className="relative h-8 bg-black/40 rounded-lg overflow-hidden flex items-center px-3 border border-white/5">
-                                                    <div
-                                                        className={`absolute inset-0 opacity-20 ${idx === 0 ? 'bg-green-500' : 'bg-red-500'}`}
-                                                        style={{ width: `${outcome.probability * 100}%` }}
-                                                    />
-                                                    <div className="relative z-10 flex items-center justify-between w-full text-xs">
-                                                        <span className="font-medium text-neutral-300">{outcome.name}</span>
-                                                        <span className="font-mono font-bold text-white">{(outcome.probability * 100).toFixed(0)}%</span>
+                                            <div className="space-y-1">
+                                                {(market.outcomes || []).slice(0, 2).map((outcome: any, idx: number) => (
+                                                    <div key={idx} className="relative h-6 bg-black/40 rounded overflow-hidden flex items-center px-2 border border-white/5">
+                                                        <div className={`absolute inset-0 opacity-20 ${idx === 0 ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${outcome.probability * 100}%` }} />
+                                                        <div className="relative z-10 flex items-center justify-between w-full text-[10px]">
+                                                            <span className="font-medium text-neutral-300">{outcome.name}</span>
+                                                            <span className="font-mono font-bold text-white">{(outcome.probability * 100).toFixed(0)}%</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </TabsContent>
+
+                {/* TAB 2: Derivatives */}
+                <TabsContent value="derivatives" className="p-4 min-h-[50vh]">
+                    <DerivativesView />
+                </TabsContent>
+
+                {/* TAB 3: Smart Money */}
+                <TabsContent value="smartmoney" className="p-4 min-h-[50vh]">
+                    <SmartMoneyView />
+                </TabsContent>
+
             </Tabs>
 
             <BottomNav />
