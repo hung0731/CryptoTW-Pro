@@ -4,6 +4,7 @@ import "./globals.css";
 import { LiffProvider } from "@/components/LiffProvider";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import { RouteHandler } from "@/components/RouteHandler"; // New Import
+import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react"; // Required for useSearchParams
 
 const notoSansTC = Noto_Sans_TC({
@@ -34,6 +35,7 @@ export default function RootLayout({
           </Suspense>
           <AnnouncementBanner />
           {children}
+          <Toaster />
         </LiffProvider>
       </body>
     </html>

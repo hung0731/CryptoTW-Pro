@@ -7,7 +7,7 @@ import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLiff } from '@/components/LiffProvider'
 import {
-    TrendingUp, FileText, BarChart3, Calendar, Users,
+    TrendingUp, BarChart3, Calendar, Users,
     ChevronRight, Gauge, DollarSign, Bitcoin, Bell, Settings, Flame
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -17,7 +17,7 @@ import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/componen
 export default function HomePage() {
     const { profile, isLoading: isAuthLoading } = useLiff()
     const [loading, setLoading] = useState(true)
-    const [articles, setArticles] = useState<any[]>([])
+
     const [marketData, setMarketData] = useState<any>(null)
     const [fearGreed, setFearGreed] = useState<any>(null)
     const [globalData, setGlobalData] = useState<any>(null)
@@ -27,19 +27,16 @@ export default function HomePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [artRes, mktRes, predRes, calRes] = await Promise.all([
-                    fetch('/api/content?limit=3'),
+                const [mktRes, predRes, calRes] = await Promise.all([
                     fetch('/api/market'),
                     fetch('/api/prediction/markets?limit=3'),
                     fetch('/api/coinglass/calendar')
                 ])
 
-                const artData = await artRes.json()
                 const mktData = await mktRes.json()
                 const predData = await predRes.json()
                 const calData = await calRes.json()
 
-                setArticles(artData.content || [])
                 if (mktData.market) setMarketData(mktData.market)
                 if (mktData.fearGreed) setFearGreed(mktData.fearGreed)
                 if (mktData.global) setGlobalData(mktData.global)
@@ -159,32 +156,7 @@ export default function HomePage() {
                     )}
                 </section>
 
-                {/* Today's Focus - Featured Article */}
-                <section>
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">🔥 今日焦點</h2>
-                        <Link href="/articles" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
-                            更多 <ChevronRight className="w-3 h-3" />
-                        </Link>
-                    </div>
-                    {loading ? (
-                        <Skeleton className="h-24 bg-neutral-900/50 rounded-xl" />
-                    ) : articles[0] && (
-                        <Link href={`/content/${articles[0].id}`}>
-                            <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4 hover:bg-white/5 transition-all">
-                                <div className="flex gap-3">
-                                    {articles[0].thumbnail_url && (
-                                        <img src={articles[0].thumbnail_url} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-sm font-medium text-white line-clamp-2 mb-1">{articles[0].title}</h3>
-                                        <p className="text-[11px] text-neutral-500 line-clamp-2">{articles[0].description}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                    )}
-                </section>
+
 
                 {/* Gainers & Losers */}
                 <section>
@@ -338,29 +310,7 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* More Articles */}
-                <section>
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">📝 更多文章</h2>
-                        <Link href="/articles" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
-                            全部文章 <ChevronRight className="w-3 h-3" />
-                        </Link>
-                    </div>
-                    {loading ? (
-                        <Skeleton className="h-16 bg-neutral-900/50 rounded-xl" />
-                    ) : (
-                        <div className="bg-neutral-900/50 rounded-xl border border-white/5 divide-y divide-white/5">
-                            {articles.slice(1, 4).map((article, i) => (
-                                <Link href={`/content/${article.id}`} key={i}>
-                                    <div className="p-3 hover:bg-white/5 transition-all flex items-center justify-between">
-                                        <span className="text-xs text-neutral-300 line-clamp-1">{article.title}</span>
-                                        <ChevronRight className="w-3 h-3 text-neutral-600 shrink-0" />
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </section>
+
 
             </div>
 
