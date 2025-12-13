@@ -90,7 +90,6 @@ export async function GET(request: Request) {
         })
     }
 }
-}
 
 function formatAmount(usd: number): string {
     if (usd >= 1000000) return `$${(usd / 1000000).toFixed(2)}M`
