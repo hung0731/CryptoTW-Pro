@@ -4,11 +4,11 @@ import React from 'react'
 import {
     LiquidationWaterfall,
     FundingRateRankings,
-    LiquidationHeatmap,
     LongShortRatio,
     ExchangeTransparency,
     WhaleAlertFeed,
-    WhalePositionsList
+    WhalePositionsList,
+    IndicatorsGrid
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 
@@ -56,25 +56,7 @@ export function DerivativesView() {
                 </div>
             </div>
 
-            {/* Middle: Heatmap */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 pl-1">
-                    <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">爆倉熱力圖</h3>
-                    <ExplainTooltip
-                        term="清算熱力圖 (Heatmap)"
-                        definition="預測價格可能去觸碰的「高流動性」區域。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>亮色帶 (黃/紅)</strong>：代表該價格堆積了大量高倍槓桿止損單。</li>
-                                <li><strong>交易策略</strong>：價格常被吸往亮區清算，卻在清算後迅速反轉，適合掛單止盈。</li>
-                            </ul>
-                        }
-                    />
-                </div>
-                <LiquidationHeatmap />
-            </div>
-
-            {/* Bottom: Long/Short Analysis */}
+            {/* Long/Short Analysis */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 pl-1">
                     <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">多空情緒分析</h3>
@@ -153,6 +135,34 @@ export function SmartMoneyView() {
                     </div>
                     <WhalePositionsList />
                 </div>
+            </div>
+        </div>
+    )
+}
+
+// ============================================
+// Indicators View (for /prediction)
+// ============================================
+export function IndicatorsView() {
+    return (
+        <div className="space-y-6">
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pl-1">
+                    <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">鏈上指標</h3>
+                    <ExplainTooltip
+                        term="鏈上指標"
+                        definition="基於比特幣區塊鏈數據計算的長線投資指標。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>AHR999</strong>：判斷是否適合定投屯幣。</li>
+                                <li><strong>泡沫指數</strong>：判斷市場是否高估或低估。</li>
+                                <li><strong>Puell 指標</strong>：衡量礦工獲利狀態。</li>
+                                <li><strong>牛市頂部</strong>：綜合指標判斷是否見頂。</li>
+                            </ul>
+                        }
+                    />
+                </div>
+                <IndicatorsGrid />
             </div>
         </div>
     )

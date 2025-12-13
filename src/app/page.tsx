@@ -16,7 +16,7 @@ import { TopCoinCards } from '@/components/TopCoinCards'
 import { PromoBanner } from '@/components/PromoBanner'
 import { QuickActions } from '@/components/QuickActions'
 import { MarketFeelingCard, WhaleStatusCard, LiquidationPressureCard } from '@/components/MarketSignalCards'
-import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/components/CoinglassWidgets'
+import { LiquidationSummary, FundingSummary, LongShortSummary, IndicatorsGrid } from '@/components/CoinglassWidgets'
 import type { MarketSignals } from '@/lib/signal-engine'
 
 export default function HomePage() {
@@ -196,6 +196,12 @@ export default function HomePage() {
                             <LiquidationPressureCard signals={signals} loading={signalsLoading} />
                         </div>
                     </div>
+                </section>
+
+                {/* ===== NEW: Bitcoin Indicators - 鏈上指標 ===== */}
+                <section>
+                    <h2 className="text-sm font-medium text-neutral-500 mb-3">鏈上指標</h2>
+                    <IndicatorsGrid compact />
                 </section>
 
                 {/* ===== 4. Core Data - 專業數據 ===== */}

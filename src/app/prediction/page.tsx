@@ -16,7 +16,6 @@ import {
     FundingRateRankings,
     WhaleAlertFeed,
     WhalePositionsList,
-    LiquidationHeatmap,
     ExchangeTransparency,
     LongShortRatio,
     EconomicCalendar

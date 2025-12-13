@@ -39,7 +39,7 @@ export async function getMarketSnapshot() {
         etfFlows,
         coinbasePremium,
         hyperliquidWhales,
-        liquidationHeatmap
+        liquidationCoinList
     ] = await Promise.all([
         fetchBtcTicker(),
         fetchBinanceRSI('BTCUSDT', '1h'),
@@ -49,7 +49,7 @@ export async function getMarketSnapshot() {
         cachedCoinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }, CacheTTL.MEDIUM),
         // 全球多空比 (5 min cache)
         cachedCoinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM),
-        // 大戶多空比 (5 min cache)
+        // 大戶多空比 (5 min cache) - 目前 API 故障
         cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM),
         // 持倉量 (1 min cache - changes faster)
         cachedCoinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: 'BTC' }, CacheTTL.FAST),
@@ -63,8 +63,8 @@ export async function getMarketSnapshot() {
         cachedCoinglassV4Request<any[]>('/api/coinbase-premium-index', { limit: 1 }, CacheTTL.MEDIUM).catch(() => null),
         // Hyperliquid 鯨魚 (1 min cache)
         cachedCoinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}, CacheTTL.FAST).catch(() => null),
-        // 清算地圖 (5 min cache - compute heavy)
-        cachedCoinglassV4Request<any>('/api/futures/liquidation-heatmap', { symbol: 'BTC', range: '3d' }, CacheTTL.MEDIUM).catch(() => null)
+        // 爆倉 coin-list (1 min cache) - 替代壞掉的 heatmap
+        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/coin-list', {}, CacheTTL.FAST).catch(() => null)
     ])
 
     // Debug logging
@@ -159,8 +159,8 @@ export async function getMarketSnapshot() {
         // Hyperliquid 巨鯨動態 (from Coinglass V4)
         whales: processWhaleAlerts(hyperliquidWhales),
 
-        // 清算地圖 (Liquidation Heatmap)
-        liquidation_map: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price),
+        // 爆倉數據 (from coin-list - 替代 heatmap)
+        liquidation_map: processLiquidationCoinList(liquidationCoinList),
 
         // ===== Signal Engine 輸出 =====
         signals: generateMarketSignals({
@@ -168,10 +168,10 @@ export async function getMarketSnapshot() {
             funding_rate: fundingRates?.[0]?.stablecoin_margin_list?.[0]?.funding_rate,
             long_short_ratio: globalLongShort?.[0]?.longShortRatio,
             top_trader_long_short_ratio: topLongShort?.[0]?.longShortRatio,
-            liquidation_above_usd: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.total_above_usd,
-            liquidation_below_usd: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.total_below_usd,
-            liquidation_above_price: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.resistance_1,
-            liquidation_below_price: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.support_1,
+            liquidation_above_usd: processLiquidationCoinList(liquidationCoinList)?.summary?.short_liquidation_24h,
+            liquidation_below_usd: processLiquidationCoinList(liquidationCoinList)?.summary?.long_liquidation_24h,
+            liquidation_above_price: undefined, // heatmap 不可用
+            liquidation_below_price: undefined, // heatmap 不可用
             price: btcPrice?.price,
             price_change_24h: btcPrice?.change_24h,
             price_high_24h: btcPrice?.high_24h,
@@ -244,75 +244,49 @@ function processWhaleAlerts(alerts: any[] | null) {
     }
 }
 
-// Process liquidation heatmap into key levels
-function processLiquidationHeatmap(data: any, currentPrice: number | undefined) {
-    if (!data || !currentPrice) {
+// Process liquidation coin-list into summary (替代 heatmap)
+function processLiquidationCoinList(coinList: any[] | null) {
+    if (!coinList || coinList.length === 0) {
         return { has_data: false, summary: null }
     }
 
-    const levels = data.levels || data.priceList || []
-    if (levels.length === 0) {
+    // Find BTC data
+    const btcData = coinList.find((c: any) => c.symbol === 'BTC')
+    if (!btcData) {
         return { has_data: false, summary: null }
     }
 
-    // Find liquidation levels above and below current price
-    const aboveLevels = levels
-        .filter((l: any) => (l.price || l.p) > currentPrice)
-        .sort((a: any, b: any) => (a.price || a.p) - (b.price || b.p))
-        .slice(0, 3)
-        .map((l: any) => ({
-            price: l.price || l.p,
-            liq_usd: l.longLiquidation || l.liqLong || 0,
-        }))
+    const longLiq24h = btcData.long_liquidation_usd_24h || 0
+    const shortLiq24h = btcData.short_liquidation_usd_24h || 0
+    const totalLiq24h = btcData.liquidation_usd_24h || 0
 
-    const belowLevels = levels
-        .filter((l: any) => (l.price || l.p) < currentPrice)
-        .sort((a: any, b: any) => (b.price || b.p) - (a.price || a.p))
-        .slice(0, 3)
-        .map((l: any) => ({
-            price: l.price || l.p,
-            liq_usd: l.shortLiquidation || l.liqShort || 0,
-        }))
-
-    // Calculate total liquidation pressure
-    const totalAbove = aboveLevels.reduce((sum: number, l: any) => sum + l.liq_usd, 0)
-    const totalBelow = belowLevels.reduce((sum: number, l: any) => sum + l.liq_usd, 0)
-
-    // Find max liquidation level (max pain)
-    const allLevels = [...aboveLevels, ...belowLevels]
-    const maxPainLevel = allLevels.reduce((max: any, l: any) =>
-        l.liq_usd > (max?.liq_usd || 0) ? l : max, allLevels[0])
-
-    // Determine signal
-    let signal = '均衡'
-    let direction = 'neutral'
-    if (totalAbove > totalBelow * 1.5) {
-        signal = '上方阻力強'
-        direction = 'bearish'
-    } else if (totalBelow > totalAbove * 1.5) {
-        signal = '下方支撐弱'
-        direction = 'bullish'  // Price tends to hunt weak side
-    }
-
-    // Format for AI consumption
-    const formatPrice = (p: number) => p >= 1000 ? `${(p / 1000).toFixed(1)}K` : p.toFixed(0)
+    // Format helper
     const formatUsd = (u: number) => {
         if (u >= 1e9) return `${(u / 1e9).toFixed(1)}B`
-        if (u >= 1e6) return `${(u / 1e6).toFixed(0)}M`
+        if (u >= 1e6) return `${(u / 1e6).toFixed(1)}M`
         return `${(u / 1e3).toFixed(0)}K`
+    }
+
+    // Determine signal based on long vs short liquidation
+    // 多單爆倉多 = 下跌趨勢, 空單爆倉多 = 上漲趨勢
+    let signal = '均衡'
+    let direction = 'neutral'
+    if (longLiq24h > shortLiq24h * 1.5) {
+        signal = '多單爆倉主導'
+        direction = 'bearish' // 多單爆=下跌
+    } else if (shortLiq24h > longLiq24h * 1.5) {
+        signal = '空單爆倉主導'
+        direction = 'bullish' // 空單爆=上漲
     }
 
     return {
         has_data: true,
         summary: {
-            current_price: currentPrice,
-            resistance_1: aboveLevels[0]?.price,
-            resistance_1_liq: formatUsd(aboveLevels[0]?.liq_usd || 0),
-            support_1: belowLevels[0]?.price,
-            support_1_liq: formatUsd(belowLevels[0]?.liq_usd || 0),
-            total_above_usd: totalAbove,
-            total_below_usd: totalBelow,
-            max_pain_price: maxPainLevel?.price,
+            long_liquidation_24h: longLiq24h,
+            short_liquidation_24h: shortLiq24h,
+            total_liquidation_24h: totalLiq24h,
+            long_liq_formatted: formatUsd(longLiq24h),
+            short_liq_formatted: formatUsd(shortLiq24h),
             signal: signal,
             direction: direction,
         }

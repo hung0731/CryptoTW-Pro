@@ -211,10 +211,10 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
     }
 }
 
-// 指令說明 Flex Message
-const HELP_COMMAND_FLEX_MESSAGE = {
+// Pro 有什麼 Flex Message (會員福利說明)
+const PRO_BENEFITS_FLEX_MESSAGE = {
     type: "flex",
-    altText: "指令說明",
+    altText: "Pro 有什麼",
     contents: {
         type: "bubble",
         size: "mega",
@@ -228,7 +228,186 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                     contents: [
                         {
                             type: "text",
-                            text: "📖 指令說明",
+                            text: "⭐ Pro 有什麼",
+                            weight: "bold",
+                            size: "lg",
+                            color: "#1F1AD9",
+                            flex: 1
+                        },
+                        {
+                            type: "text",
+                            text: "加密台灣 Pro",
+                            size: "xxs",
+                            color: "#888888",
+                            align: "end",
+                            gravity: "center"
+                        }
+                    ]
+                },
+                {
+                    type: "separator",
+                    margin: "lg",
+                    color: "#f0f0f0"
+                },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    margin: "lg",
+                    spacing: "md",
+                    contents: [
+                        // 即時市場快訊
+                        {
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "📡", size: "lg", flex: 0 },
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    paddingStart: "md",
+                                    flex: 1,
+                                    contents: [
+                                        { type: "text", text: "即時市場快訊", weight: "bold", size: "sm", color: "#333333" },
+                                        { type: "text", text: "大行情、重要事件即時推播通知", size: "xs", color: "#666666", wrap: true }
+                                    ]
+                                }
+                            ]
+                        },
+                        // AI 行情分析
+                        {
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "🤖", size: "lg", flex: 0 },
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    paddingStart: "md",
+                                    flex: 1,
+                                    contents: [
+                                        { type: "text", text: "AI 市場脈動", weight: "bold", size: "sm", color: "#333333" },
+                                        { type: "text", text: "每日 AI 自動彙整市場數據與情緒分析", size: "xs", color: "#666666", wrap: true }
+                                    ]
+                                }
+                            ]
+                        },
+                        // 鏈上數據
+                        {
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "📊", size: "lg", flex: 0 },
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    paddingStart: "md",
+                                    flex: 1,
+                                    contents: [
+                                        { type: "text", text: "專業鏈上數據", weight: "bold", size: "sm", color: "#333333" },
+                                        { type: "text", text: "AHR999、泡沫指數、巨鯨追蹤等 20+ 指標", size: "xs", color: "#666666", wrap: true }
+                                    ]
+                                }
+                            ]
+                        },
+                        // 財經日曆
+                        {
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "📅", size: "lg", flex: 0 },
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    paddingStart: "md",
+                                    flex: 1,
+                                    contents: [
+                                        { type: "text", text: "財經日曆", weight: "bold", size: "sm", color: "#333333" },
+                                        { type: "text", text: "CPI、FOMC、非農等重大事件預警", size: "xs", color: "#666666", wrap: true }
+                                    ]
+                                }
+                            ]
+                        },
+                        // VIP 社群
+                        {
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "👥", size: "lg", flex: 0 },
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    paddingStart: "md",
+                                    flex: 1,
+                                    contents: [
+                                        { type: "text", text: "VIP 優先交流群", weight: "bold", size: "sm", color: "#333333" },
+                                        { type: "text", text: "與其他 Pro 會員交流策略與資訊", size: "xs", color: "#666666", wrap: true }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    type: "text",
+                    text: "💡 透過推薦碼註冊交易所，永久免費使用",
+                    size: "xxs",
+                    color: "#1F1AD9",
+                    margin: "lg",
+                    align: "center",
+                    weight: "bold"
+                }
+            ]
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
+            spacing: "sm",
+            contents: [
+                {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    action: {
+                        type: "uri",
+                        label: "立即加入 Pro",
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
+                    },
+                    color: "#1F1AD9"
+                },
+                {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    action: {
+                        type: "uri",
+                        label: "查看 VIP 福利",
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/vip`
+                    },
+                    color: "#000000"
+                }
+            ]
+        }
+    }
+}
+
+// 快速查詢 Flex Message
+const HELP_COMMAND_FLEX_MESSAGE = {
+    type: "flex",
+    altText: "快速查詢",
+    contents: {
+        type: "bubble",
+        size: "mega",
+        body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "🔍 快速查詢",
                             weight: "bold",
                             size: "lg",
                             color: "#1F1AD9",
@@ -1112,13 +1291,19 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // B3. Help Command (指令)
-                if (originalText === '指令' || originalText === '幫助' || originalText === 'help') {
+                // B3. Help Command (快速查詢)
+                if (originalText === '快速查詢' || originalText === '指令' || originalText === '幫助' || originalText === 'help') {
                     await replyMessage(replyToken, [HELP_COMMAND_FLEX_MESSAGE])
                     continue
                 }
 
-                // B4. Fear & Greed Index (恐慌指數)
+                // B4. Pro Benefits Command (Pro 有什麼)
+                if (originalText === 'Pro 有什麼' || originalText === 'pro 有什麼' || originalText === 'Pro有什麼' || originalText === '有什麼' || originalText === 'pro') {
+                    await replyMessage(replyToken, [PRO_BENEFITS_FLEX_MESSAGE])
+                    continue
+                }
+
+                // B5. Fear & Greed Index (恐慌指數)
                 if (originalText === '恐慌' || originalText === 'FGI' || originalText === 'fgi' || originalText === '情緒' || originalText === '恐慌指數') {
                     try {
                         const fgRes = await fetch('https://api.alternative.me/fng/')

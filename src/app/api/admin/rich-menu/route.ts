@@ -3,49 +3,57 @@ import fs from 'fs'
 import path from 'path'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
-// Layout Definition (Template: Large, 2 Top + 3 Bottom)
+// Layout Definition (Template: 6-grid, 3 Top + 3 Bottom)
 const getRichMenuObject = (liffId: string, chatBarText: string = "開啟選單") => ({
     size: {
         width: 2500,
         height: 1686
     },
     selected: true,
-    name: "加密台灣 Pro Menu v4",
+    name: "加密台灣 Pro Menu v5",
     chatBarText: chatBarText,
     areas: [
-        // A1: Top Left (0,0) - 1250x843 - Action: Open Feed (Entering System)
+        // A1: Top Left (0,0) - 833x843 - Action: Open Home
         {
-            bounds: { x: 0, y: 0, width: 1250, height: 843 },
+            bounds: { x: 0, y: 0, width: 833, height: 843 },
             action: {
                 type: "uri",
                 uri: `https://liff.line.me/${liffId}?path=/`
             }
         },
-        // A2: Top Right (1250,0) - 1250x843 - Action: Open Join Page (How to Pro)
+        // A2: Top Center (833,0) - 834x843 - Action: Open Home
         {
-            bounds: { x: 1250, y: 0, width: 1250, height: 843 },
+            bounds: { x: 833, y: 0, width: 834, height: 843 },
+            action: {
+                type: "uri",
+                uri: `https://liff.line.me/${liffId}?path=/`
+            }
+        },
+        // A3: Top Right (1667,0) - 833x843 - Action: Open Join Page (How to Pro)
+        {
+            bounds: { x: 1667, y: 0, width: 833, height: 843 },
             action: {
                 type: "uri",
                 uri: `https://liff.line.me/${liffId}?path=/join`
             }
         },
-        // B: Bottom Left (0,843) - 833x843 - Action: Send "指令" message
+        // B1: Bottom Left (0,843) - 833x843 - Action: Send "快速查詢" message
         {
             bounds: { x: 0, y: 843, width: 833, height: 843 },
             action: {
                 type: "message",
-                text: "指令"
+                text: "快速查詢"
             }
         },
-        // C: Bottom Center (833,843) - 834x843 - Action: Open Prediction
+        // B2: Bottom Center (833,843) - 834x843 - Action: Send "Pro 有什麼" message
         {
             bounds: { x: 833, y: 843, width: 834, height: 843 },
             action: {
-                type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/vip`
+                type: "message",
+                text: "Pro 有什麼"
             }
         },
-        // D: Bottom Right (1667,843) - 833x843 - Action: Open Profile (User Settings)
+        // B3: Bottom Right (1667,843) - 833x843 - Action: Open Profile
         {
             bounds: { x: 1667, y: 843, width: 833, height: 843 },
             action: {

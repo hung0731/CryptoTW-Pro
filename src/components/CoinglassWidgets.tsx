@@ -389,121 +389,6 @@ export function LongShortRatio() {
 }
 
 // ============================================
-// Liquidation Heatmap Component
-// ============================================
-export function LiquidationHeatmap() {
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/coinglass/heatmap?symbol=BTC')
-                const json = await res.json()
-                setData(json.heatmap)
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
-        }
-        fetchData()
-    }, [])
-
-    if (loading) {
-        return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
-    }
-
-    if (!data) return null
-
-    const maxAmount = Math.max(
-        ...(data.above || []).map((l: any) => l.liquidationUsd),
-        ...(data.below || []).map((l: any) => l.liquidationUsd)
-    )
-
-    return (
-        <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-red-400" />
-                    <span className="text-lg font-bold text-white">BTC 清算分布</span>
-                    <ExplainTooltip
-                        term="清算熱力圖 (Liquidation Heatmap)"
-                        definition="預測不同價格區間會有多少合約強制平倉 (爆倉) 的地圖。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>顏色越亮</strong>：代表爆倉強度越高 (高流動性)。</li>
-                                <li><strong>磁吸效應</strong>：價格傾向去觸碰亮區，吸收流動性後再反轉。</li>
-                                <li><strong>實戰應用</strong>：不要在亮區追價，反而是掛單止盈的好位置。</li>
-                            </ul>
-                        }
-                    />
-                </div>
-                <span className="text-xs text-neutral-400">現價 {data.currentPriceFormatted}</span>
-            </div>
-
-            {/* Heatmap Levels */}
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-2">
-                {/* Above current price (Long liquidations) */}
-                {(data.above || []).map((level: any, i: number) => (
-                    <div key={`above-${i}`} className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-neutral-400 w-16">{level.priceFormatted}</span>
-                        <div className="flex-1 h-5 bg-neutral-800 rounded overflow-hidden">
-                            <div
-                                className="h-full bg-green-500/50 rounded flex items-center px-2"
-                                style={{ width: `${(level.liquidationUsd / maxAmount) * 100}%`, minWidth: '40px' }}
-                            >
-                                <span className="text-[9px] text-white font-mono">{level.liquidationFormatted}</span>
-                            </div>
-                        </div>
-                        <span className="text-[9px] text-green-400 w-8">多單</span>
-                    </div>
-                ))}
-
-                {/* Current price indicator */}
-                <div className="flex items-center gap-2 py-2 border-y border-white/10">
-                    <span className="text-xs font-mono text-white w-16 font-bold">{data.currentPriceFormatted}</span>
-                    <div className="flex-1 text-center text-[10px] text-neutral-500">── 現價 ──</div>
-                    <span className="w-8"></span>
-                </div>
-
-                {/* Below current price (Short liquidations) */}
-                {(data.below || []).map((level: any, i: number) => (
-                    <div key={`below-${i}`} className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-neutral-400 w-16">{level.priceFormatted}</span>
-                        <div className="flex-1 h-5 bg-neutral-800 rounded overflow-hidden">
-                            <div
-                                className="h-full bg-red-500/50 rounded flex items-center px-2"
-                                style={{ width: `${(level.liquidationUsd / maxAmount) * 100}%`, minWidth: '40px' }}
-                            >
-                                <span className="text-[9px] text-white font-mono">{level.liquidationFormatted}</span>
-                            </div>
-                        </div>
-                        <span className="text-[9px] text-red-400 w-8">空單</span>
-                    </div>
-                ))}
-            </div>
-
-            {/* Max Pain */}
-            {data.maxPain && (
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-                    <span className="text-xs text-neutral-400">🎯 最大痛點: </span>
-                    <span className="text-sm font-bold text-yellow-400">{data.maxPain.priceFormatted}</span>
-                </div>
-            )}
-
-            {/* Signal */}
-            {data.signal && (
-                <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
-                    <p className="text-xs text-neutral-400">💡 {data.signal.text}</p>
-                    <div className="mt-2 text-[10px] text-neutral-500 border-t border-white/5 pt-2">
-                        <p>顏色越亮代表累積的清算金額越高。價格傾向於去觸碰這些「高流動性」區域，隨後可能發生反轉。</p>
-                    </div>
-                </div>
-            )}
-        </div>
-    )
-}
-
-// ============================================
 // Exchange Transparency Component
 // ============================================
 export function ExchangeTransparency() {
@@ -1112,5 +997,224 @@ export function WhalePositionsList() {
             </div>
         </div>
 
+    )
+}
+
+// ============================================
+// Bitcoin Indicators Grid Component
+// ============================================
+export function IndicatorsGrid({ compact = false }: { compact?: boolean }) {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/indicators')
+                const json = await res.json()
+                setData(json.indicators)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return (
+            <div className="grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full bg-neutral-900/50 rounded-xl" />)}
+            </div>
+        )
+    }
+
+    if (!data) return null
+
+    const colorMap: Record<string, string> = {
+        green: 'text-green-400 bg-green-500/10 border-green-500/20',
+        blue: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+        yellow: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+        orange: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+        red: 'text-red-400 bg-red-500/10 border-red-500/20',
+    }
+
+    const indicators = [
+        {
+            name: 'AHR999 屯幣指標',
+            value: data.ahr999?.value,
+            signal: data.ahr999?.signal,
+            color: data.ahr999?.color,
+            description: data.ahr999?.description,
+            tooltip: {
+                term: 'AHR999 屯幣指標',
+                definition: '衡量比特幣是否適合定投的指標。',
+                explanation: (
+                    <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>&lt; 0.45</strong>：抄底區，歷史性買入機會</li>
+                        <li><strong>&lt; 1.2</strong>：定投區，適合定期買入</li>
+                        <li><strong>1.2-4</strong>：觀望區，減少買入</li>
+                        <li><strong>&gt; 4</strong>：賣出區，考慮獲利了結</li>
+                    </ul>
+                ),
+            },
+        },
+        {
+            name: '泡沫指數',
+            value: data.bubbleIndex?.value,
+            signal: data.bubbleIndex?.signal,
+            color: data.bubbleIndex?.color,
+            description: data.bubbleIndex?.description,
+            tooltip: {
+                term: 'Bitcoin Bubble Index',
+                definition: '根據鏈上數據計算的估值指標。',
+                explanation: (
+                    <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>&lt; -2</strong>：嚴重低估，恐慌拋售</li>
+                        <li><strong>-2 到 0</strong>：低估區，買入機會</li>
+                        <li><strong>0-20</strong>：合理區間</li>
+                        <li><strong>&gt; 20</strong>：泡沫區，謹慎</li>
+                    </ul>
+                ),
+            },
+        },
+        {
+            name: 'Puell 礦工指標',
+            value: data.puellMultiple?.value,
+            signal: data.puellMultiple?.signal,
+            color: data.puellMultiple?.color,
+            description: data.puellMultiple?.description,
+            tooltip: {
+                term: 'Puell Multiple (礦工指標)',
+                definition: '衡量礦工收益是否過高或過低。',
+                explanation: (
+                    <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>&lt; 0.5</strong>：礦工投降，通常是底部</li>
+                        <li><strong>0.5-1</strong>：礦工低迷，市場低估</li>
+                        <li><strong>1-4</strong>：正常範圍</li>
+                        <li><strong>&gt; 4</strong>：礦工過度獲利，警惕頂部</li>
+                    </ul>
+                ),
+            },
+        },
+        {
+            name: '牛市頂部指標',
+            value: `${data.bullMarketPeak?.hitCount}/${data.bullMarketPeak?.totalCount}`,
+            signal: data.bullMarketPeak?.signal,
+            color: data.bullMarketPeak?.color,
+            description: data.bullMarketPeak?.description,
+            tooltip: {
+                term: '牛市頂部指標',
+                definition: '綜合 30 個鏈上指標判斷是否見頂。',
+                explanation: (
+                    <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>0 觸發</strong>：市場安全</li>
+                        <li><strong>&lt; 20%</strong>：牛市早期</li>
+                        <li><strong>20-50%</strong>：開始警戒</li>
+                        <li><strong>&gt; 50%</strong>：牛市後期，考慮減倉</li>
+                    </ul>
+                ),
+            },
+        },
+    ]
+
+    if (compact) {
+        // Compact version for homepage - 2x2 grid
+        return (
+            <div className="grid grid-cols-2 gap-2">
+                {indicators.map((ind, i) => (
+                    <div
+                        key={i}
+                        className={cn(
+                            "rounded-xl p-3 border transition-all",
+                            colorMap[ind.color] || 'bg-neutral-900/30 border-white/5'
+                        )}
+                    >
+                        <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] text-neutral-400 truncate flex-1">{ind.name}</span>
+                            <ExplainTooltip {...ind.tooltip} />
+                        </div>
+                        <div className="flex items-end justify-between">
+                            <span className="text-xl font-bold font-mono">{ind.value}</span>
+                            <span className={cn(
+                                "text-[10px] px-1.5 py-0.5 rounded font-medium",
+                                ind.color === 'green' && 'bg-green-500/20 text-green-400',
+                                ind.color === 'blue' && 'bg-blue-500/20 text-blue-400',
+                                ind.color === 'yellow' && 'bg-yellow-500/20 text-yellow-400',
+                                ind.color === 'orange' && 'bg-orange-500/20 text-orange-400',
+                                ind.color === 'red' && 'bg-red-500/20 text-red-400',
+                            )}>
+                                {ind.signal}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+
+    // Full version for data page
+    return (
+        <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+                {indicators.map((ind, i) => (
+                    <div
+                        key={i}
+                        className={cn(
+                            "rounded-xl p-4 border transition-all",
+                            colorMap[ind.color] || 'bg-neutral-900/30 border-white/5'
+                        )}
+                    >
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-neutral-400">{ind.name}</span>
+                            <ExplainTooltip {...ind.tooltip} />
+                        </div>
+                        <div className="flex items-end justify-between mb-2">
+                            <span className="text-2xl font-bold font-mono">{ind.value}</span>
+                            <span className={cn(
+                                "text-xs px-2 py-0.5 rounded font-medium",
+                                ind.color === 'green' && 'bg-green-500/20 text-green-400',
+                                ind.color === 'blue' && 'bg-blue-500/20 text-blue-400',
+                                ind.color === 'yellow' && 'bg-yellow-500/20 text-yellow-400',
+                                ind.color === 'orange' && 'bg-orange-500/20 text-orange-400',
+                                ind.color === 'red' && 'bg-red-500/20 text-red-400',
+                            )}>
+                                {ind.signal}
+                            </span>
+                        </div>
+                        <p className="text-[10px] text-neutral-500 leading-relaxed">{ind.description}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Bull Market Peak Details */}
+            {data.bullMarketPeak?.indicators && (
+                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                    <h4 className="text-xs font-bold text-neutral-400 mb-3">🎯 頂部指標詳情</h4>
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                        {data.bullMarketPeak.indicators.map((ind: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-white/5 last:border-0">
+                                <div className="flex items-center gap-2">
+                                    <span className={cn(
+                                        "w-2 h-2 rounded-full",
+                                        ind.hit ? "bg-red-500" : "bg-green-500"
+                                    )} />
+                                    <span className="text-neutral-300 truncate max-w-[150px]">{ind.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-mono text-neutral-400">{ind.currentValue}</span>
+                                    <span className="text-neutral-600">/</span>
+                                    <span className="font-mono text-neutral-500">{ind.targetValue}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
+                <p className="text-[10px] text-neutral-500">
+                    💡 這些指標基於鏈上數據計算，適合長線投資參考。短線交易請結合技術面和衍生品數據。
+                </p>
+            </div>
+        </div>
     )
 }
