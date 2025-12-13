@@ -17,6 +17,16 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const symbol = searchParams.get('symbol') || 'BTC'
     const limit = parseInt(searchParams.get('limit') || '30')
+    const timeframe = searchParams.get('timeframe') || '1h'
+
+    // map timeframe to milliseconds
+    const timeMap: { [key: string]: number } = {
+        '1h': 3600 * 1000,
+        '4h': 4 * 3600 * 1000,
+        '12h': 12 * 3600 * 1000,
+        '24h': 24 * 3600 * 1000,
+    }
+    const timeWindow = timeMap[timeframe] || 3600 * 1000
 
     try {
         // Fetch liquidation orders
@@ -47,8 +57,8 @@ export async function GET(request: Request) {
 
         // Calculate summary stats
         const now = Date.now()
-        const oneHourAgo = now - 3600000
-        const recentLiquidations = liquidations.filter(l => l.time > oneHourAgo)
+        const cutoffTime = now - timeWindow
+        const recentLiquidations = liquidations.filter(l => l.time > cutoffTime)
 
         const longLiquidated = recentLiquidations
             .filter(l => l.side === 'LONG')
@@ -79,6 +89,7 @@ export async function GET(request: Request) {
             liquidations: getDemoData()
         })
     }
+}
 }
 
 function formatAmount(usd: number): string {

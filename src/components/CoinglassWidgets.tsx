@@ -137,7 +137,6 @@ export function LiquidationWaterfall() {
         <div className="space-y-4">
             {/* Header with Timeframe Tabs */}
             <div className="flex items-center justify-between">
-                {/* Transformed: Removed icon and title as requested, replaced with timeframe selector */}
                 <div className="flex bg-neutral-900 rounded-lg p-0.5 border border-white/5">
                     {['1h', '4h', '12h', '24h'].map((tf) => (
                         <button
@@ -158,60 +157,29 @@ export function LiquidationWaterfall() {
                 </div>
             </div>
 
-            {/* Summary */}
-            <div className="grid grid-cols-2 gap-3">
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-                    <span className="text-[10px] text-neutral-500 block">多單爆倉 ({timeframe.toUpperCase()})</span>
-                    <span className="text-lg font-bold text-red-400 font-mono">{data.summary?.longLiquidatedFormatted || '$0'}</span>
+            {/* Summary - Compact Grid */}
+            <div className="grid grid-cols-2 gap-2">
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex flex-col justify-center items-center">
+                    <span className="text-[10px] text-neutral-400 mb-1">多單爆倉 ({timeframe.toUpperCase()})</span>
+                    <span className="text-xl font-bold text-red-400 font-mono tracking-tight">{data.summary?.longLiquidatedFormatted || '$0'}</span>
                 </div>
-                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3">
-                    <span className="text-[10px] text-neutral-500 block">空單爆倉 ({timeframe.toUpperCase()})</span>
-                    <span className="text-lg font-bold text-green-400 font-mono">{data.summary?.shortLiquidatedFormatted || '$0'}</span>
+                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 flex flex-col justify-center items-center">
+                    <span className="text-[10px] text-neutral-400 mb-1">空單爆倉 ({timeframe.toUpperCase()})</span>
+                    <span className="text-xl font-bold text-green-400 font-mono tracking-tight">{data.summary?.shortLiquidatedFormatted || '$0'}</span>
                 </div>
             </div>
 
             {/* Signal */}
             {data.summary?.signal && (
                 <div className={cn(
-                    "rounded-lg p-3 border",
+                    "rounded-lg p-2.5 border flex items-center justify-center",
                     data.summary.signal.type === 'bullish' ? 'bg-green-500/10 border-green-500/20' :
                         data.summary.signal.type === 'bearish' ? 'bg-red-500/10 border-red-500/20' :
                             'bg-neutral-800/50 border-white/5'
                 )}>
-                    <p className="text-xs text-neutral-300">💡 {data.summary.signal.text}</p>
+                    <p className="text-xs text-neutral-300 font-medium">💡 {data.summary.signal.text}</p>
                 </div>
             )}
-
-            {/* List */}
-            <div className="space-y-2">
-                {(data.items || []).slice(0, 10).map((item: any, i: number) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-neutral-900/30 border border-white/5 rounded-lg hover:bg-white/5 transition-all">
-                        <div className="flex items-center gap-3">
-                            <div className={cn(
-                                "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold",
-                                item.side === 'LONG' ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
-                            )}>
-                                {item.side === 'LONG' ? '多' : '空'}
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-white">{item.symbol}</span>
-                                    <span className="text-xs font-mono text-neutral-400">{item.amountFormatted}</span>
-                                </div>
-                                <span className="text-[10px] text-neutral-500">@ ${item.price?.toLocaleString()}</span>
-                            </div>
-                        </div>
-                        <span className="text-[10px] text-neutral-500">{item.timeAgo}</span>
-                    </div>
-                ))}
-            </div>
-
-            {/* Explanation */}
-            <div className="bg-neutral-900 rounded-lg p-3 border border-white/5 mt-3">
-                <p className="text-[10px] text-neutral-500">
-                    💡 瀑布流展示了大額爆倉事件。當出現大規模「多單爆倉」時，市場可能短期超賣；反之「空單爆倉」則可能超買。
-                </p>
-            </div>
         </div>
     )
 }

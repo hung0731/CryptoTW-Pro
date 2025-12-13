@@ -21,8 +21,9 @@ export async function triggerMarketSummaryAction() {
         .eq('id', user.id)
         .single()
 
-    // Allow 'admin' or temporary bypass if needed for initial setup (comment out if strict)
-    if (userData?.membership_status !== 'admin') {
+    // Allow 'admin' or 'super_admin'
+    const allowedRoles = ['admin', 'super_admin']
+    if (!userData?.membership_status || !allowedRoles.includes(userData.membership_status)) {
         return { success: false, error: 'Forbidden: Admins Only' }
     }
 
