@@ -11,26 +11,11 @@ export interface MarketSummaryResult {
     headline: string
 
     analysis: {
-        price_momentum: {
-            summary: string
-            signal: string
-        }
-        capital_flow: {
-            summary: string
-            interpretation: string
-        }
-        whale_activity: {
-            summary: string
-            interpretation: string
-        }
-        retail_sentiment: {
-            summary: string
-            interpretation: string
-        }
-        risk_zones: {
-            summary: string
-            interpretation: string
-        }
+        price_momentum: { summary: string; signal: string }
+        capital_flow: { summary: string; interpretation: string }
+        whale_activity: { summary: string; interpretation: string }
+        retail_sentiment: { summary: string; interpretation: string }
+        risk_zones: { summary: string; interpretation: string }
     }
 
     action_suggestion: {
@@ -52,73 +37,64 @@ export async function generateMarketSummary(marketData: any): Promise<MarketSumm
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
         const prompt = `
-你是一位專業的加密貨幣交易分析師，請根據以下 Coinglass 數據生成一份「可操作」的市場分析報告。
+你是幣圈交易老手。看數據，給結論。說話要像交易群裡的老司機：直白、有料、不囉嗦。
 
-【即時數據】
+【數據】
 ${JSON.stringify(marketData, null, 2)}
 
-【分析框架 - 5 個維度】
+【分析邏輯】
+• 費率 > 0.05% = 多頭過熱
+• 費率 < -0.05% = 空頭過熱
+• OI 漲 + 價漲 = 趨勢強
+• OI 漲 + 價跌 = 有人在建空單
+• 大戶多空比 > 1.2 = 大戶看多
+• 大戶多空比 < 0.8 = 大戶看空
+• 大戶 vs 散戶方向相反 = 跟大戶
+• 交易所 BTC 流入 = 準備賣
+• 交易所 BTC 流出 = 在囤貨
 
-1. **價格動能**：BTC 目前價格、24H 漲跌、趨勢方向
-2. **資金熱度**：
-   - 資金費率 > 0.1% = 過熱，可能回調
-   - 資金費率 < -0.1% = 過冷，可能反彈
-   - 持倉量 (OI) 變化 + 價格變化 = 趨勢確認
-3. **大戶動向**：
-   - 大戶多空比 > 1.2 = 大戶看多
-   - 大戶多空比 < 0.8 = 大戶看空
-   - 大戶 vs 散戶分歧 = 跟隨大戶
-4. **散戶情緒**：
-   - 恐懼貪婪指數
-   - 散戶多空比（通常做反向指標）
-5. **風險區域**：
-   - 交易所儲備流入 = 賣壓增加
-   - 交易所儲備流出 = 囤積信號
-   - 過去 1H 爆倉量
+【輸出要求】
+1. 每段話不超過 15 個字
+2. 用大白話，不要專業術語
+3. 操作建議給具體價格
+4. Emoji 選一個最傳神的
 
-【輸出規則】
-1. 用繁體中文，口語化，像在跟朋友分享交易想法
-2. 說話直接，不要模稜兩可
-3. 操作建議要具體：給價格區間
-4. 風險提醒要明確
-5. 選一個最能代表市場氣氛的 Emoji
-
-【嚴格 JSON 輸出格式】
+【JSON 格式】
 {
-  "emoji": "一個 Emoji",
-  "sentiment": "偏多" | "偏空" | "震盪",
-  "sentiment_score": 0-100,
-  "headline": "一句話總結，像新聞標題",
+  "emoji": "🔥",
+  "sentiment": "偏多",
+  "sentiment_score": 72,
+  "headline": "大戶加倉，散戶還在猶豫",
   
   "analysis": {
     "price_momentum": {
-      "summary": "BTC 現價如何？漲還是跌？",
-      "signal": "多頭/空頭/中性"
+      "summary": "BTC 10萬，小漲1%",
+      "signal": "多頭"
     },
     "capital_flow": {
-      "summary": "資金費率多少？持倉量變化？",
-      "interpretation": "這代表什麼意思？"
+      "summary": "費率0.01%，OI漲3%",
+      "interpretation": "新資金在進場做多"
     },
     "whale_activity": {
-      "summary": "大戶多空比多少？在做什麼？",
-      "interpretation": "這對價格有什麼影響？"
+      "summary": "大戶多空比1.35",
+      "interpretation": "大戶在押注上漲"
     },
     "retail_sentiment": {
-      "summary": "散戶情緒如何？恐懼還是貪婪？",
-      "interpretation": "散戶通常是反向指標"
+      "summary": "恐懼指數45，偏恐懼",
+      "interpretation": "散戶怕高，反而是好事"
     },
     "risk_zones": {
-      "summary": "最近爆倉狀況？交易所資金流向？",
-      "interpretation": "目前的風險在哪裡？"
+      "summary": "爆倉集中在9.5萬",
+      "interpretation": "小心別被洗下車"
     }
   },
   
   "action_suggestion": {
-    "bias": "偏多/偏空/觀望",
-    "entry_zone": "建議進場價格區間",
-    "stop_loss_zone": "建議止損價格",
-    "take_profit_zone": "建議止盈價格",
-    "risk_note": "最重要的風險提醒"
+    "bias": "偏多",
+    "entry_zone": "$98K-$99K",
+    "stop_loss_zone": "$94K",
+    "take_profit_zone": "$108K",
+    "risk_note": "別追高，等回調"
   }
 }
 `
@@ -142,5 +118,3 @@ ${JSON.stringify(marketData, null, 2)}
         return null
     }
 }
-
-
