@@ -1,25 +1,42 @@
 export const RSS_URL = 'https://www.panewslab.com/zh/rss/newsflash.xml'
 
-export async function fetchRSSTitles(limit: number = 50): Promise<string> {
+export async function fetchRSSTitles(limit: number = 30): Promise<string> {
     try {
         console.log('Fetching RSS from:', RSS_URL)
-        const rssRes = await fetch(RSS_URL, { next: { revalidate: 1800 } })
+        const rssRes = await fetch(RSS_URL, { next: { revalidate: 300 } }) // Lower cache time to 5m for "News Flash"
         if (!rssRes.ok) {
             console.error(`Failed to fetch RSS: ${rssRes.status}`)
             return ''
         }
         const xmlText = await rssRes.text()
 
-        // Simple Regex to extract titles to avoid heavy xml parsers
-        const titleMatches = xmlText.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/g) || []
+        // Extract items using regex to get both title and description
+        // Matches <item>...</item> block
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g
+        const items = []
+        let match
 
-        const titles = titleMatches
-            .map(t => t.replace(/<title><!\[CDATA\[|\]\]><\/title>/g, ''))
-            .filter(t => t && !t.includes('PANews')) // Filter out site meta titles if any
-            .slice(0, limit)
-            .join('\n')
+        while ((match = itemRegex.exec(xmlText)) !== null) {
+            if (items.length >= limit) break
+            const itemContent = match[1]
 
-        return titles
+            // Extract Title
+            const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || itemContent.match(/<title>(.*?)<\/title>/)
+            const title = titleMatch ? titleMatch[1] : ''
+
+            // Extract Description
+            const descMatch = itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) || itemContent.match(/<description>(.*?)<\/description>/)
+            let desc = descMatch ? descMatch[1] : ''
+
+            // Clean HTML tags from description if any
+            desc = desc.replace(/<[^>]*>?/gm, '')
+
+            if (title) {
+                items.push(`標題: ${title}\n內文: ${desc.slice(0, 150)}...`) // Limit description length
+            }
+        }
+
+        return items.join('\n\n')
     } catch (error) {
         console.error('RSS Fetch Error:', error)
         return ''

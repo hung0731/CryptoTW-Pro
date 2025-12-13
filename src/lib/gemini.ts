@@ -88,7 +88,7 @@ ${JSON.stringify(marketData.signals || {}, null, 2)}
 Alert Events (12H): ${recentAlerts.length > 0 ? JSON.stringify(recentAlerts, null, 2) : "無顯著異常"}
 原始數據: ${JSON.stringify({ btc: marketData.btc, etf: marketData.etf, long_short: marketData.long_short }, null, 2)}
 
-【輸入數據 2：消息面 (過去 24 小時新聞標題)】
+【輸入數據 2：消息面 (過去 24 小時新聞快訊 - 標題與重點)】
 ${rssTitles || '無新聞數據'}
 
 【輸出格式】(Strict JSON)
