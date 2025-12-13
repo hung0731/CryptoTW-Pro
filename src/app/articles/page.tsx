@@ -183,7 +183,6 @@ function ContentList({ items }: { items: any[] }) {
     )
   }
   return (
-  return (
     <div className="space-y-3">
       {items.map((item) => {
         // Flash News Style (Compact, no big thumbnail, high information density)
@@ -271,6 +270,5 @@ function ContentList({ items }: { items: any[] }) {
         )
       })}
     </div>
-  )
   )
 }

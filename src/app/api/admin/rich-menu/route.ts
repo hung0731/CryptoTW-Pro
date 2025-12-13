@@ -18,7 +18,7 @@ const getRichMenuObject = (liffId: string, chatBarText: string = "開啟選單")
             bounds: { x: 0, y: 0, width: 1250, height: 843 },
             action: {
                 type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/feed`
+                uri: `https://liff.line.me/${liffId}?path=/`
             }
         },
         // A2: Top Right (1250,0) - 1250x843 - Action: Open Join Page (How to Pro)
