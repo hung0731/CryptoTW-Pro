@@ -1,26 +1,36 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLiff } from '@/components/LiffProvider'
 import { useToast } from '@/hooks/use-toast'
-import { ProAccessGate } from '@/components/ProAccessGate'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Check, ExternalLink, Loader2, ChevronRight, ArrowRight, Sparkles } from 'lucide-react'
+import Link from 'next/link'
 import GlobalLoader from '@/components/GlobalLoader'
 
 export default function JoinPage() {
-    const { dbUser, isLoading } = useLiff()
+    const { dbUser, profile, isLoading } = useLiff()
     const router = useRouter()
     const { toast } = useToast()
 
+    const [uid, setUid] = useState('')
+    const [submitting, setSubmitting] = useState(false)
+    const [submitted, setSubmitted] = useState(false)
+    const [responseMessage, setResponseMessage] = useState('')
+    const [autoVerified, setAutoVerified] = useState(false)
+
+    // Check if user is already Pro
     useEffect(() => {
         if (isLoading) return
 
-        // Check if user is already Pro
         const status = dbUser?.membership_status
         const isPro = status === 'pro' || status === 'lifetime'
 
         if (isPro) {
-            // Show toast and redirect to home
             toast({
                 title: "✅ 你已經是 Pro 會員",
                 description: "歡迎回來！享受完整的 Pro 功能。",
@@ -29,18 +39,261 @@ export default function JoinPage() {
         }
     }, [dbUser, isLoading, router, toast])
 
-    // Show loader while checking
-    if (isLoading) {
-        return <GlobalLoader />
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!uid.trim() || !profile?.userId) return
+
+        setSubmitting(true)
+        try {
+            const res = await fetch('/api/binding', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lineUserId: profile.userId,
+                    exchange: 'okx',
+                    uid: uid.trim()
+                })
+            })
+
+            const data = await res.json()
+
+            if (res.ok) {
+                setSubmitted(true)
+                setResponseMessage(data.message || '提交成功')
+                setAutoVerified(data.autoVerified || false)
+
+                if (data.autoVerified) {
+                    // Auto redirect after success
+                    setTimeout(() => router.push('/'), 3000)
+                }
+            } else {
+                toast({
+                    title: "提交失敗",
+                    description: data.error || '請稍後再試',
+                    variant: "destructive"
+                })
+            }
+        } catch (e) {
+            toast({
+                title: "網路錯誤",
+                description: "請檢查網路連線",
+                variant: "destructive"
+            })
+        } finally {
+            setSubmitting(false)
+        }
     }
 
-    // If user is Pro, don't render gate (will redirect)
+    if (isLoading) return <GlobalLoader />
+
+    // Check if already Pro
     const status = dbUser?.membership_status
     const isPro = status === 'pro' || status === 'lifetime'
-    if (isPro) {
-        return <GlobalLoader />
+    if (isPro) return <GlobalLoader />
+
+    // Success State
+    if (submitted) {
+        return (
+            <main className="min-h-screen bg-black text-white font-sans">
+                <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${autoVerified ? 'bg-white' : 'bg-white/10 border border-white/20'
+                        }`}>
+                        {autoVerified ? (
+                            <Check className="w-10 h-10 text-black" />
+                        ) : (
+                            <Loader2 className="w-10 h-10 text-white animate-spin" />
+                        )}
+                    </div>
+
+                    <h1 className="text-2xl font-bold mb-3">
+                        {autoVerified ? '🎉 Pro 會員已開通' : '📝 已提交審核'}
+                    </h1>
+
+                    <p className="text-neutral-400 mb-8 max-w-sm leading-relaxed">
+                        {responseMessage}
+                    </p>
+
+                    <Link href="/">
+                        <Button className="bg-white text-black hover:bg-neutral-200 rounded-full px-8 h-12 font-bold">
+                            {autoVerified ? '開始使用' : '返回首頁'}
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
+                </div>
+            </main>
+        )
     }
 
-    // Show the access gate for non-Pro users
-    return <ProAccessGate />
+    return (
+        <main className="min-h-screen bg-black text-white font-sans">
+            {/* Hero Section */}
+            <section className="relative overflow-hidden">
+                {/* Subtle gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent" />
+
+                <div className="relative px-6 pt-16 pb-12">
+                    {/* Logo */}
+                    <div className="flex justify-center mb-8">
+                        <img src="/logo.svg" alt="CryptoTW" className="h-8 w-auto" />
+                    </div>
+
+                    {/* Main Title */}
+                    <h1 className="text-4xl font-bold text-center mb-4 tracking-tight">
+                        解鎖 Pro 權限
+                    </h1>
+
+                    <p className="text-neutral-400 text-center max-w-sm mx-auto leading-relaxed">
+                        透過 OKX 推薦碼註冊，即可永久免費使用全部 Pro 功能
+                    </p>
+                </div>
+            </section>
+
+            {/* Requirements Section */}
+            <section className="px-6 pb-8">
+                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 space-y-6">
+                    <h2 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">
+                        開通條件
+                    </h2>
+
+                    {/* Step 1 */}
+                    <div className="flex gap-4">
+                        <div className="w-8 h-8 rounded-full bg-white text-black font-bold text-sm flex items-center justify-center shrink-0">
+                            1
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-white mb-1">使用推薦碼註冊 OKX</h3>
+                            <p className="text-sm text-neutral-500 mb-3">
+                                透過專屬連結註冊，確保邀請碼為 <span className="text-white font-mono">CTW20</span>
+                            </p>
+                            <a
+                                href="https://www.okx.com/join/CTW20"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-neutral-300 transition-colors"
+                            >
+                                前往 OKX 註冊
+                                <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-white/5" />
+
+                    {/* Step 2 */}
+                    <div className="flex gap-4">
+                        <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 text-white font-bold text-sm flex items-center justify-center shrink-0">
+                            2
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-white mb-1">完成 KYC 身份驗證</h3>
+                            <p className="text-sm text-neutral-500">
+                                在 OKX App 內完成 KYC2 等級的身份驗證
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-white/5" />
+
+                    {/* Step 3 */}
+                    <div className="flex gap-4">
+                        <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 text-white font-bold text-sm flex items-center justify-center shrink-0">
+                            3
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-white mb-1">入金至少 $1 USDT</h3>
+                            <p className="text-sm text-neutral-500">
+                                完成首次入金以啟用交易功能
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-white/5" />
+
+                    {/* Step 4 */}
+                    <div className="flex gap-4">
+                        <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 text-white font-bold text-sm flex items-center justify-center shrink-0">
+                            4
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-white mb-1">提交 UID 自動開通</h3>
+                            <p className="text-sm text-neutral-500">
+                                填寫下方表單，系統將自動驗證並開通權限
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* UID Form Section */}
+            <section className="px-6 pb-8">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="uid" className="text-sm font-bold text-neutral-400">
+                            OKX UID
+                        </Label>
+                        <Input
+                            id="uid"
+                            type="text"
+                            placeholder="例如：123456789"
+                            value={uid}
+                            onChange={(e) => setUid(e.target.value)}
+                            disabled={submitting}
+                            className="h-14 bg-white/[0.03] border-white/10 text-white placeholder:text-neutral-600 text-lg font-mono rounded-xl focus:border-white/30 focus:ring-0"
+                        />
+                        <p className="text-xs text-neutral-600">
+                            在 OKX App 內點選「個人中心」即可查看 UID
+                        </p>
+                    </div>
+
+                    <Button
+                        type="submit"
+                        disabled={!uid.trim() || submitting}
+                        className="w-full h-14 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 rounded-xl font-bold text-base"
+                    >
+                        {submitting ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                            <>
+                                提交驗證
+                                <ChevronRight className="ml-1 h-5 w-5" />
+                            </>
+                        )}
+                    </Button>
+                </form>
+            </section>
+
+            {/* Pro Benefits Section */}
+            <section className="px-6 pb-12">
+                <div className="border-t border-white/5 pt-8">
+                    <h2 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <Sparkles className="h-4 w-4" />
+                        Pro 會員專屬
+                    </h2>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        {[
+                            '即時市場快訊',
+                            'AI 市場分析',
+                            '鏈上數據追蹤',
+                            '財經日曆預警',
+                            '巨鯨動態監控',
+                            'VIP 交流群'
+                        ].map((benefit, i) => (
+                            <div key={i} className="flex items-center gap-2 text-sm text-neutral-400">
+                                <Check className="h-4 w-4 text-white shrink-0" />
+                                {benefit}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Back to Home Link */}
+            <section className="px-6 pb-8">
+                <Link href="/" className="block text-center text-sm text-neutral-600 hover:text-neutral-400 transition-colors">
+                    ← 返回首頁
+                </Link>
+            </section>
+        </main>
+    )
 }

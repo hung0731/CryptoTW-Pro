@@ -1,5 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { getInviteeDetail, parseOkxData } from '@/lib/okx-affiliate'
+
+// Default verification rules (fallback if DB config unavailable)
+const DEFAULT_CONFIG = {
+    okx_affiliate_code: 'CTW20',
+    okx_min_deposit: 1,
+    okx_require_kyc: true,
+    auto_verify_enabled: true,
+}
+
+// Get verification config from database
+async function getVerificationConfig(supabase: ReturnType<typeof createAdminClient>) {
+    try {
+        const { data } = await supabase
+            .from('system_config')
+            .select('value')
+            .eq('key', 'verification_rules')
+            .single()
+
+        if (data?.value) {
+            return { ...DEFAULT_CONFIG, ...data.value }
+        }
+    } catch (e) {
+        console.log('[Binding] Using default config (DB unavailable)')
+    }
+    return DEFAULT_CONFIG
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -13,7 +40,7 @@ export async function POST(req: NextRequest) {
         // 1. Get User ID from line_user_id
         const { data: user, error: userError } = await supabase
             .from('users')
-            .select('id')
+            .select('id, line_user_id, display_name')
             .eq('line_user_id', lineUserId)
             .single()
 
@@ -21,35 +48,133 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
-        // 2. Insert Binding
+        // 2. For OKX bindings, try auto-verification
+        let autoVerified = false
+        let okxUpdateData = {}
+        let rejectionReason: string | null = null
+
+        if (exchange.toLowerCase() === 'okx') {
+            // Get verification config from database
+            const config = await getVerificationConfig(supabase)
+
+            if (!config.auto_verify_enabled) {
+                console.log('[Binding] Auto-verify disabled, skipping')
+            } else {
+                try {
+                    console.log('[Binding] Checking OKX API for UID:', uid)
+                    const okxData = await getInviteeDetail(uid)
+
+                    if (okxData) {
+                        console.log('[Binding] OKX data received:', JSON.stringify(okxData))
+
+                        // Parse and prepare update data
+                        okxUpdateData = parseOkxData(okxData)
+
+                        // Check auto-verification criteria using DB config
+                        const affiliateMatch = okxData.affiliateCode === config.okx_affiliate_code
+                        const hasKyc = !config.okx_require_kyc || (!!okxData.kycTime && okxData.kycTime !== '')
+                        const hasDeposit = parseFloat(okxData.depAmt) >= config.okx_min_deposit
+
+                        console.log('[Binding] Verification check:', {
+                            config,
+                            affiliateCode: okxData.affiliateCode,
+                            affiliateMatch,
+                            kycTime: okxData.kycTime,
+                            hasKyc,
+                            depAmt: okxData.depAmt,
+                            hasDeposit
+                        })
+
+                        if (affiliateMatch && hasKyc && hasDeposit) {
+                            autoVerified = true
+                            console.log('[Binding] ✅ Auto-verified!')
+                        } else {
+                            // Build rejection reason
+                            const reasons: string[] = []
+                            if (!affiliateMatch) reasons.push(`邀請碼不符 (需 ${config.okx_affiliate_code}，實際 ${okxData.affiliateCode})`)
+                            if (!hasKyc) reasons.push('尚未完成 KYC')
+                            if (!hasDeposit) reasons.push(`入金不足 (需 ≥$${config.okx_min_deposit}，實際 $${okxData.depAmt})`)
+                            rejectionReason = reasons.join('; ')
+                            console.log('[Binding] ❌ Auto-verify failed:', rejectionReason)
+                        }
+                    } else {
+                        rejectionReason = `OKX API 查無此 UID，請確認是否已使用推薦碼 ${config.okx_affiliate_code} 註冊`
+                        console.log('[Binding] ❌ OKX API returned no data for UID:', uid)
+                    }
+                } catch (okxError) {
+                    console.error('[Binding] OKX API error:', okxError)
+                    // If API fails, fall back to manual review
+                    rejectionReason = null // Don't set reason, just pending
+                }
+            }
+        }
+
+        // 3. Insert Binding with appropriate status
+        const bindingStatus = autoVerified ? 'verified' : 'pending'
+
         const { data, error } = await supabase
             .from('exchange_bindings')
             .insert({
                 user_id: user.id,
                 exchange_name: exchange,
                 exchange_uid: uid,
-                status: 'pending' // Default status
+                status: bindingStatus,
+                rejection_reason: autoVerified ? null : rejectionReason,
+                ...okxUpdateData
             })
             .select()
             .single()
 
         if (error) {
-            // Handle unique constraint (User already bound this exchange)
-            if (error.code === '23505') { // Postgres unique violation code
-                return NextResponse.json({ error: 'You have already submitted a UID for this exchange.' }, { status: 409 })
+            if (error.code === '23505') {
+                return NextResponse.json({ error: '您已提交過此交易所的 UID' }, { status: 409 })
             }
             console.error('Binding Error', error)
             return NextResponse.json({ error: 'Failed to submit binding' }, { status: 500 })
         }
 
-        // 3. Update User Status to pending if currently free?
-        // The requirement says "Automatic upgrade to pro on verification".
-        // For pending, we might want to set membership to 'pending' if it's currently 'free'.
-        // Let's do that to reflect state in UI.
+        // 4. Update user membership status
+        if (autoVerified) {
+            // Auto-verified: upgrade to pro immediately
+            await supabase
+                .from('users')
+                .update({ membership_status: 'pro', updated_at: new Date().toISOString() })
+                .eq('id', user.id)
 
-        await supabase.from('users').update({ membership_status: 'pending' }).eq('id', user.id).eq('membership_status', 'free')
+            // Send LINE notification for auto-verification
+            try {
+                const { pushMessage } = await import('@/lib/line-bot')
+                await pushMessage(lineUserId, [{
+                    type: 'text',
+                    text: '🎉 恭喜！您的 OKX 帳號已自動驗證通過，Pro 會員資格已開通！'
+                }])
+            } catch (e) {
+                console.error('[Binding] Failed to send LINE notification:', e)
+            }
 
-        return NextResponse.json({ success: true, binding: data })
+            return NextResponse.json({
+                success: true,
+                binding: data,
+                autoVerified: true,
+                message: '🎉 驗證通過！Pro 會員已開通'
+            })
+        } else {
+            // Not auto-verified: set to pending
+            await supabase
+                .from('users')
+                .update({ membership_status: 'pending' })
+                .eq('id', user.id)
+                .eq('membership_status', 'free')
+
+            return NextResponse.json({
+                success: true,
+                binding: data,
+                autoVerified: false,
+                message: rejectionReason
+                    ? `⚠️ 自動驗證未通過：${rejectionReason}。已提交人工審核。`
+                    : '已提交審核，我們將在 24 小時內驗證您的資訊。'
+            })
+        }
     } catch (e) {
         console.error('API Error:', e)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
