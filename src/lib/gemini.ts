@@ -9,22 +9,14 @@ export interface MarketSummaryResult {
     sentiment: '偏多' | '偏空' | '震盪'
     sentiment_score: number
     headline: string
-
-    analysis: {
-        price_momentum: { summary: string; signal: string }
-        capital_flow: { summary: string; interpretation: string }
-        whale_activity: { summary: string; interpretation: string }
-        retail_sentiment: { summary: string; interpretation: string }
-        risk_zones: { summary: string; interpretation: string }
-    }
-
-    action_suggestion: {
+    analysis: string  // 整合段落
+    action: {
         bias: string
         entry_zone: string
-        stop_loss_zone: string
-        take_profit_zone: string
-        risk_note: string
+        stop_loss: string
+        take_profit: string
     }
+    risk_note: string
 }
 
 export async function generateMarketSummary(marketData: any): Promise<MarketSummaryResult | null> {
@@ -37,72 +29,43 @@ export async function generateMarketSummary(marketData: any): Promise<MarketSumm
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
         const prompt = `
-你是幣圈老司機。看數據，給分析。解釋要清楚，操作建議要具體。
+你是專業的加密貨幣市場分析師。請基於以下數據撰寫一份簡潔的市場日報。
+
+【語氣要求】
+- 專業但平易近人，語氣柔和、不武斷
+- 使用「可能」、「或許」、「看來」等委婉用語
+- 避免命令式語句，改用「可以考慮」、「建議留意」
+- 不使用俗語 (如：莊家、韭菜、老司機)
 
 【數據】
 ${JSON.stringify(marketData, null, 2)}
 
-【分析邏輯】
-1. **趨勢判斷**：
-   - 價格漲 + OI漲 = 強勢上漲 (Trend Following)
-   - 價格跌 + OI漲 = 主力建倉空單 (Short Build)
-   - 價格漲 + OI跌 = 空頭回補 (Short Cover)
-   - 價格跌 + OI跌 = 多頭止損 (Long Liquidation)
+【分析邏輯參考】
+- 價格漲 + OI漲 = 趨勢增強
+- 價格跌 + OI漲 = 賣壓增加
+- RSI > 70 偏熱 | < 30 偏冷
+- ETF 淨流入 = 機構資金支撐
 
-2. **背離信號 (Divergence)**：
-   - 價格創新高 + RSI 未創新高 = 頂背離 (看跌)
-   - 價格創新低 + RSI 未創新低 = 底背離 (看漲)
-   - 價格跌 + Taker Buy 強勢 = 主力吸籌 (Absorption)
+【輸出格式】
+1. **headline**: 15-25 字的日報標題，簡潔點出市場狀態
+2. **analysis**: 50-80 字的整合段落，將價格、技術指標、資金流向、機構動態融合為流暢敘述
+3. **action**: 操作參考 (偏多/偏空/觀望 + 進場區 + 止損 + 目標)
+4. **risk_note**: 15-30 字的風險提示，語氣溫和
 
-3. **關鍵指標**：
-   - RSI > 70 過熱 | < 30 超賣
-   - 資金費率 > 0.05% 偏高 | < -0.05% 偏低
-   - ETF 淨流入 = 機構買盤支撐
-
-【輸出要求】
-1. summary 15-25 個字，包含關鍵數據變化
-2. interpretation 15-25 個字，解讀背後資金意圖
-3. 價格用簡寫：10萬、9.8萬
-4. headline 20-30 個字，必須包含「趨勢」或「背離」關鍵字
-5. risk_note 要具體說明理由 (如：RSI頂背離、費率過熱)
-
-【JSON】
+【JSON 範例】
 {
-  "emoji": "🔥",
+  "emoji": "📊",
   "sentiment": "偏多",
-  "sentiment_score": 72,
-  "headline": "BTC 突破 10 萬大關，量價配合完美，RSI 未見背離，趨勢強勁",
-  
-  "analysis": {
-    "price_momentum": {
-      "summary": "報價 10.2 萬，RSI 68 接近超買但未背離",
-      "signal": "多頭"
-    },
-    "capital_flow": {
-      "summary": "OI 1H 增加 2.5%，費率 0.02% 健康",
-      "interpretation": "價格與持倉量同步上漲，標準的趨勢延續信號"
-    },
-    "whale_activity": {
-      "summary": "大戶持倉比 1.35，ETF 淨流入 2.3 億",
-      "interpretation": "機構持續買入，籌碼集中度提高，主力控盤"
-    },
-    "retail_sentiment": {
-      "summary": "恐懼貪婪 65，Taker 買跌比 1.2",
-      "interpretation": "散戶情緒樂觀但未瘋狂，主動買盤承接力強"
-    },
-    "risk_zones": {
-      "summary": "上方壓力 10.5 萬，下方爆倉密集區 9.8 萬",
-      "interpretation": "若跌破 9.8 萬將觸發大量多單止損，需防守"
-    }
-  },
-  
-  "action_suggestion": {
+  "sentiment_score": 65,
+  "headline": "BTC 回測支撐後企穩，機構資金持續流入",
+  "analysis": "目前價格在 9.1 萬附近整理，RSI 回落至 40 左右，技術面呈現超賣後的修復態勢。持倉量小幅回升，資金費率維持中性，顯示市場槓桿水位健康。ETF 昨日淨流入約 2 億美元，機構買盤仍在，整體來看短線或有反彈空間。",
+  "action": {
     "bias": "偏多",
-    "entry_zone": "9.9-10.0萬",
-    "stop_loss_zone": "9.7萬",
-    "take_profit_zone": "10.8萬",
-    "risk_note": "雖趨勢看多，但 RSI 已高，避免追高，等待回踩支撐進場"
-  }
+    "entry_zone": "9.0-9.15萬",
+    "stop_loss": "8.75萬",
+    "take_profit": "9.5萬"
+  },
+  "risk_note": "若跌破 8.8 萬支撐，建議重新評估多頭策略"
 }
 `
 

@@ -31,15 +31,16 @@ export async function updateMarketSummary() {
     const { error } = await dbClient.from('market_reports').insert({
         sentiment: report.sentiment,
         sentiment_score: report.sentiment_score,
-        summary: report.headline, // Map headline to summary column
-        key_points: [], // No longer used, but keep for schema compatibility
-        strategy: report.action_suggestion?.risk_note || '', // Use risk_note as strategy
+        summary: report.headline,
+        key_points: [],
+        strategy: report.risk_note || '',
         emoji: report.emoji,
         metadata: {
             ...snapshot,
             analysis: report.analysis,
-            action_suggestion: report.action_suggestion,
-            headline: report.headline
+            action: report.action,
+            headline: report.headline,
+            risk_note: report.risk_note
         }
     })
 
