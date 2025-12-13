@@ -85,10 +85,13 @@ export function BullBearIndex() {
             </div>
 
             {/* Suggestion */}
-            <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+            <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
                 <p className="text-xs text-neutral-400">
                     💡 {data.suggestion}
                 </p>
+                <div className="mt-2 text-[10px] text-neutral-500 border-t border-white/5 pt-2">
+                    <p>指數 0-100：極度恐懼 (0-25) 通常是買入機會，極度貪婪 (75-100) 則需警惕回調風險。</p>
+                </div>
             </div>
         </div>
     )
@@ -285,10 +288,13 @@ export function FundingRateRankings() {
             </div>
 
             {/* Info */}
-            <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+            <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
                 <p className="text-xs text-neutral-400">
                     💡 費率 &gt; 0.1% 做空勝率高，&lt; -0.05% 做多勝率高
                 </p>
+                <div className="mt-2 text-[10px] text-neutral-500 border-t border-white/5 pt-2">
+                    <p>正費率代表多頭需支付費用給空頭 (情緒偏多)，過高可能反轉；負費率代表空頭支付費用 (情緒偏空)。</p>
+                </div>
             </div>
         </div>
     )
@@ -385,6 +391,13 @@ export function LongShortRatio() {
                     <p className="text-xs text-neutral-300">💡 {data.signal.text}</p>
                 </div>
             )}
+
+            {/* Explanation */}
+            <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
+                <p className="text-[10px] text-neutral-500">
+                    💡 「全網」代表散戶情緒，「大戶」代表聰明錢。當散戶極度看多但大戶做空時，行情容易反轉向下 (割韭菜)。
+                </p>
+            </div>
         </div>
     )
 }
@@ -482,8 +495,11 @@ export function LiquidationHeatmap() {
 
             {/* Signal */}
             {data.signal && (
-                <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+                <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
                     <p className="text-xs text-neutral-400">💡 {data.signal.text}</p>
+                    <div className="mt-2 text-[10px] text-neutral-500 border-t border-white/5 pt-2">
+                        <p>顏色越亮代表累積的清算金額越高。價格傾向於去觸碰這些「高流動性」區域，隨後可能發生反轉。</p>
+                    </div>
                 </div>
             )}
         </div>
@@ -575,10 +591,13 @@ export function ExchangeTransparency() {
             </div>
 
             {/* Info */}
-            <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+            <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
                 <p className="text-xs text-neutral-400">
                     💡 交易所餘額減少通常被視為長期持有的信號 (提幣至錢包)
                 </p>
+                <div className="mt-2 text-[10px] text-neutral-500 border-t border-white/5 pt-2">
+                    <p>資金流入交易所 (Inflow) 通常代表潛在賣壓；流出交易所 (Outflow) 則代表投資者傾向囤幣惜售。</p>
+                </div>
             </div>
         </div>
     )
