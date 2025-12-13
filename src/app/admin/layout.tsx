@@ -1,12 +1,6 @@
 'use client'
 
 import { AppSidebar } from "@/components/app-sidebar"
-import { Separator } from "@/components/ui/separator"
-import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
-} from "@/components/ui/sidebar"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -61,22 +55,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!isAuthenticated) return null
 
     return (
-        <SidebarProvider>
+        <div className="min-h-screen bg-black">
             <AppSidebar />
-            <SidebarInset>
-                <header className="flex h-14 shrink-0 items-center gap-2 border-b border-white/5 bg-black px-4">
-                    <SidebarTrigger className="-ml-1 text-neutral-400 hover:text-white" />
-                    <Separator orientation="vertical" className="mr-2 h-4 bg-white/10" />
-                    <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm text-neutral-400">管理後台</span>
-                    </div>
-                </header>
-                <div className="flex flex-1 flex-col p-6 bg-black text-white overflow-y-auto">
-                    <div className="mx-auto w-full max-w-7xl space-y-8">
+            <main className="ml-56 min-h-screen">
+                <div className="p-8 text-white">
+                    <div className="mx-auto max-w-7xl">
                         {children}
                     </div>
                 </div>
-            </SidebarInset>
-        </SidebarProvider>
+            </main>
+        </div>
     )
 }
