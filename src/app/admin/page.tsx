@@ -34,7 +34,7 @@ export default function AdminPage() {
         <div className="space-y-8">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Dashboard</h1>
-                <p className="text-neutral-400 text-sm">歡迎回到 CryptoTW Pro 管理後台。這裡顯示您的平台即時概況。</p>
+                <p className="text-neutral-400 text-sm">歡迎回到加密台灣 Pro 管理後台。這裡顯示您的平台即時概況。</p>
             </div>
 
             {/* Quick Stats */}

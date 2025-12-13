@@ -40,7 +40,7 @@ export function PageHeader({
                     {title ? (
                         <span className="text-sm font-bold text-white truncate max-w-[150px]">{title}</span>
                     ) : showLogo ? (
-                        <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
+                        <img src="/logo.svg" alt="加密台灣 Pro" className="h-4 w-auto" />
                     ) : null}
                 </div>
 

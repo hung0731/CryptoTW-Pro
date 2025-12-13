@@ -20,6 +20,16 @@ export async function GET(req: NextRequest) {
                 slug: 'fed-decision-in-april',
                 title: '🇺🇸 美國會在 4 月降息嗎',
                 id_override: 'fed-apr'
+            },
+            {
+                slug: 'will-china-invade-taiwan-in-2025',
+                title: '🇹🇼 中國會在 2025 年入侵台灣嗎',
+                id_override: 'taiwan-2025'
+            },
+            {
+                slug: 'will-china-invade-taiwan-before-2027',
+                title: '🇹🇼 中國會在 2026 年入侵台灣嗎',
+                id_override: 'taiwan-2026'
             }
         ]
 
@@ -39,13 +49,15 @@ export async function GET(req: NextRequest) {
             const config = eventsConfig[index]
             const eventImage = eventData.image
 
-            // Translation map for Fed decision outcomes
+            // Translation map for outcomes
             const translations: Record<string, string> = {
                 'No change': '維持不變',
                 '25 bps decrease': '降息 1 碼',
                 '50+ bps decrease': '降息 2 碼以上',
                 '25 bps increase': '升息 1 碼',
-                '50+ bps increase': '升息 2 碼以上'
+                '50+ bps increase': '升息 2 碼以上',
+                'Yes': '是',
+                'No': '否'
             }
 
             // Process outcomes

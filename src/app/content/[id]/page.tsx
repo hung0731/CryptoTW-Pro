@@ -182,7 +182,7 @@ export default function ArticlePage() {
                             </div>
                             <div className="flex items-center gap-2 text-purple-400 font-bold text-sm tracking-widest uppercase">
                                 <span className="flex h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
-                                CryptoTW AI Highlights
+                                加密台灣 AI Highlights
                             </div>
                             <ul className="space-y-3">
                                 {((article.metadata as any).key_takeaways as string[]).map((point, i) => (

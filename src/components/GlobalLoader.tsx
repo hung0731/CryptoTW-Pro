@@ -5,7 +5,7 @@ export default function GlobalLoader() {
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center space-y-4">
             <div className="relative">
                 <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full" />
-                <img src="/logo.svg" alt="CryptoTW" className="w-24 h-24 relative z-10" />
+                <img src="/logo.svg" alt="加密台灣 Pro" className="w-24 h-24 relative z-10" />
             </div>
 
             <div className="flex items-center gap-2 text-neutral-400">

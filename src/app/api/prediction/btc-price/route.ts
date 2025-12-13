@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-// BTC Price Prediction from Polymarket
+// Unified Crypto Price Prediction API
+// Supports: BTC, ETH from Polymarket
 // Cache for 5 minutes
-let btcPriceCache: { data: any, timestamp: number } | null = null
+let priceCache: { [key: string]: { data: any, timestamp: number } } = {}
 const CACHE_TTL = 5 * 60 * 1000
 
 interface PriceTarget {
@@ -14,24 +15,31 @@ interface PriceTarget {
     closed: boolean
 }
 
-export async function GET() {
-    const now = Date.now()
-
-    // Return cache if fresh
-    if (btcPriceCache && now - btcPriceCache.timestamp < CACHE_TTL) {
-        return NextResponse.json(btcPriceCache.data)
+const CRYPTO_CONFIG: { [key: string]: { slug: string, name: string, icon: string } } = {
+    btc: {
+        slug: 'what-price-will-bitcoin-hit-in-2025',
+        name: 'BTC 2025',
+        icon: '🔶'
+    },
+    eth: {
+        slug: 'what-price-will-ethereum-hit-in-2025',
+        name: 'ETH 2025',
+        icon: '💎'
     }
+}
+
+async function fetchPriceData(crypto: string) {
+    const config = CRYPTO_CONFIG[crypto]
+    if (!config) return null
 
     try {
         const res = await fetch(
-            'https://gamma-api.polymarket.com/events?slug=what-price-will-bitcoin-hit-in-2025',
+            `https://gamma-api.polymarket.com/events?slug=${config.slug}`,
             { next: { revalidate: 300 } }
         )
         const events = await res.json()
 
-        if (!events || events.length === 0) {
-            return NextResponse.json({ error: 'No data' }, { status: 404 })
-        }
+        if (!events || events.length === 0) return null
 
         const event = events[0]
         const markets = event.markets || []
@@ -42,9 +50,8 @@ export async function GET() {
             .map((m: any) => {
                 const groupTitle = m.groupItemTitle || ''
 
-                // Parse direction: ↑ means bullish target, ↓ means bearish dip
-                const isUp = groupTitle.includes('↑') || (!groupTitle.includes('↓') && m.question?.includes('reach'))
-                const isDown = groupTitle.includes('↓') || m.question?.includes('dip')
+                // Parse direction: check for ↑/↓ or "reach"/"dip"
+                const isDown = groupTitle.includes('↓') || m.question?.toLowerCase().includes('dip')
 
                 // Extract price from title
                 const priceMatch = groupTitle.match(/[\d,]+/) || m.question?.match(/\$([\d,]+)/)
@@ -68,8 +75,8 @@ export async function GET() {
                     closed: m.closed || false
                 }
             })
-            .filter((t: PriceTarget) => t.price > 0 && !t.closed) // Only active markets
-            .sort((a: PriceTarget, b: PriceTarget) => b.probability - a.probability) // Sort by probability
+            .filter((t: PriceTarget) => t.price > 0 && !t.closed)
+            .sort((a: PriceTarget, b: PriceTarget) => b.probability - a.probability)
 
         // Group by direction
         const bullish = priceTargets.filter(t => t.direction === 'up').sort((a, b) => a.price - b.price)
@@ -78,22 +85,39 @@ export async function GET() {
         // Find top 3 most likely outcomes
         const topPredictions = priceTargets.slice(0, 3)
 
-        const result = {
-            title: 'BTC 2025 價格預測',
+        return {
+            crypto,
+            name: config.name,
+            icon: config.icon,
             slug: event.slug,
             totalVolume: event.volume,
             bullish,
             bearish,
-            topPredictions,
-            updatedAt: new Date().toISOString()
+            topPredictions
         }
-
-        // Cache result
-        btcPriceCache = { data: result, timestamp: now }
-
-        return NextResponse.json(result)
     } catch (error) {
-        console.error('BTC Price Prediction API Error:', error)
-        return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
+        console.error(`Crypto Price API Error (${crypto}):`, error)
+        return null
     }
+}
+
+export async function GET(req: NextRequest) {
+    const crypto = req.nextUrl.searchParams.get('crypto') || 'btc'
+    const now = Date.now()
+
+    // Return cache if fresh
+    if (priceCache[crypto] && now - priceCache[crypto].timestamp < CACHE_TTL) {
+        return NextResponse.json(priceCache[crypto].data)
+    }
+
+    const data = await fetchPriceData(crypto)
+
+    if (!data) {
+        return NextResponse.json({ error: 'No data' }, { status: 404 })
+    }
+
+    // Cache result
+    priceCache[crypto] = { data, timestamp: now }
+
+    return NextResponse.json(data)
 }

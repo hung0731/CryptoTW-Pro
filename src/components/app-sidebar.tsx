@@ -68,7 +68,7 @@ export function AppSidebar() {
           <Command className="w-4 h-4" />
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-white">CryptoTW Pro</span>
+          <span className="text-sm font-semibold text-white">加密台灣 Pro</span>
           <span className="text-[10px] text-neutral-500">管理後台</span>
         </div>
       </div>

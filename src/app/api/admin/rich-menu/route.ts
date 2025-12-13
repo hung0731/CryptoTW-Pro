@@ -10,7 +10,7 @@ const getRichMenuObject = (liffId: string, chatBarText: string = "開啟選單")
         height: 1686
     },
     selected: true,
-    name: "CryptoTW Pro Menu v4",
+    name: "加密台灣 Pro Menu v4",
     chatBarText: chatBarText,
     areas: [
         // A1: Top Left (0,0) - 1250x843 - Action: Open Feed (Entering System)

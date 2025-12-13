@@ -96,7 +96,7 @@ export default function Home() {
         <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
           <div className="flex items-center justify-start"></div>
           <div className="flex items-center justify-center">
-            <img src="/logo.svg" alt="CryptoTW" className="h-4 w-auto" />
+            <img src="/logo.svg" alt="加密台灣 Pro" className="h-4 w-auto" />
           </div>
           <div className="flex items-center justify-end">
             {profile && (
