@@ -606,7 +606,7 @@ export function ExchangeTransparency() {
 // ============================================
 // Economic Calendar Component
 // ============================================
-export function EconomicCalendar({ filter = 'key' }: { filter?: 'key' | 'all' }) {
+export function EconomicCalendar() {
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [expanded, setExpanded] = useState<Record<string, boolean>>({})
@@ -636,13 +636,9 @@ export function EconomicCalendar({ filter = 'key' }: { filter?: 'key' | 'all' })
 
     if (!data) return null
 
-    // Client-side Filter logic based on Tier
-    const filteredEvents = (data.events || []).filter((e: any) => {
-        if (filter === 'key') return e.tier === 'S'
-        return true // 'all' includes S and A
-    })
+    const events = data.events || []
 
-    if (filteredEvents.length === 0) {
+    if (events.length === 0) {
         return (
             <div className="text-center py-10">
                 <p className="text-neutral-500 text-sm">此期間無符合條件的數據</p>
@@ -651,7 +647,7 @@ export function EconomicCalendar({ filter = 'key' }: { filter?: 'key' | 'all' })
     }
 
     // Group by date
-    const grouped = filteredEvents.reduce((acc: any, event: any) => {
+    const grouped = events.reduce((acc: any, event: any) => {
         if (!acc[event.date]) acc[event.date] = []
         acc[event.date].push(event)
         return acc
