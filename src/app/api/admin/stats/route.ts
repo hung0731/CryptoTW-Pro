@@ -11,33 +11,80 @@ export async function GET() {
     try {
         const supabase = createAdminClient()
 
-        // 1. Total Users
-        const { count: totalUsers, error: usersError } = await supabase
-            .from('users')
-            .select('*', { count: 'exact', head: true })
+        // 1. Basic Stats (Parallel Fetch)
+        const [
+            { count: totalUsers },
+            { count: verifiedUsers },
+            { count: pendingBindings },
+            { count: vipUsers },
+            { data: recentUsers }
+        ] = await Promise.all([
+            // Total
+            supabase.from('users').select('*', { count: 'exact', head: true }),
+            // Pro
+            supabase.from('users').select('*', { count: 'exact', head: true }).eq('membership_status', 'pro'),
+            // Pending
+            supabase.from('exchange_bindings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+            // VIP
+            supabase.from('users').select('*', { count: 'exact', head: true }).eq('membership_status', 'vip'),
+            // User Growth Data (Last 30 Days) - Fetch created_at only
+            supabase
+                .from('users')
+                .select('created_at')
+                .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+                .order('created_at', { ascending: true })
+        ])
 
-        if (usersError) throw usersError
+        // 2. Aggregate User Growth (Daily)
+        const dailyGrowth: Record<string, number> = {}
+        const today = new Date()
+        // Initialize last 30 days with 0
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(today)
+            d.setDate(d.getDate() - i)
+            const key = d.toISOString().split('T')[0] // YYYY-MM-DD
+            dailyGrowth[key] = 0
+        }
 
-        // 2. Verified Users (Pro)
-        const { count: verifiedUsers, error: proError } = await supabase
-            .from('users')
-            .select('*', { count: 'exact', head: true })
-            .eq('membership_status', 'pro')
+        // Fill real data
+        recentUsers?.forEach((u: any) => {
+            const key = new Date(u.created_at).toISOString().split('T')[0]
+            if (dailyGrowth[key] !== undefined) {
+                dailyGrowth[key]++
+            }
+        })
 
-        if (proError) throw proError
+        const userGrowthChart = Object.entries(dailyGrowth).map(([date, count]) => ({
+            date: date.slice(5), // MM-DD
+            value: count
+        }))
 
-        // 3. Pending Bindings
-        const { count: pendingBindings, error: bindingError } = await supabase
-            .from('exchange_bindings')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'pending')
-
-        if (bindingError) throw bindingError
+        // 3. Mock Volume/Revenue Data (Until we have real transaction logs synced)
+        // In production, this would verify against an aggregations table
+        const volumeTrendChart = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date()
+            d.setDate(d.getDate() - (6 - i))
+            return {
+                date: d.toISOString().slice(5, 10), // MM-DD
+                volume: Math.floor(Math.random() * 5000000) + 1000000, // 1M - 6M mockup
+                commission: Math.floor(Math.random() * 5000) + 1000      // 1K - 6K mockup
+            }
+        })
 
         return NextResponse.json({
-            totalUsers: totalUsers || 0,
-            verifiedUsers: verifiedUsers || 0,
-            pendingBindings: pendingBindings || 0
+            stats: {
+                total_users: totalUsers || 0,
+                verified_users: verifiedUsers || 0,
+                pending_bindings: pendingBindings || 0,
+                vip_users: vipUsers || 0,
+                // Mock total volume/commission for now
+                total_volume: 125400000,
+                total_commission: 45200
+            },
+            charts: {
+                userGrowth: userGrowthChart,
+                volumeTrend: volumeTrendChart
+            }
         })
 
     } catch (e) {

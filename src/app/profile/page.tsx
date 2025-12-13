@@ -133,7 +133,7 @@ export default function ProfilePage() {
                 {/* Quick Actions */}
                 <section>
                     <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">設定</h2>
-                    <div className="bg-neutral-900/30 rounded-2xl border border-white/5 divide-y divide-white/5">
+                    <div className="bg-neutral-900/50 rounded-2xl border border-white/5 divide-y divide-white/5">
                         <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
                         <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
                         <MenuLink icon={Crown} label="大客戶計劃" href="/join" />
@@ -143,7 +143,7 @@ export default function ProfilePage() {
                 {/* More */}
                 <section>
                     <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">更多</h2>
-                    <div className="bg-neutral-900/30 rounded-2xl border border-white/5 divide-y divide-white/5">
+                    <div className="bg-neutral-900/50 rounded-2xl border border-white/5 divide-y divide-white/5">
                         <MenuLink icon={Bookmark} label="我的收藏" href="/bookmarks" badge="即將推出" />
                         <MenuLink icon={HelpCircle} label="幫助中心" href="https://line.me/R/ti/p/@cryptotw" external />
                     </div>

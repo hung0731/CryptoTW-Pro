@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Users, TrendingUp, DollarSign, Activity, Clock, RefreshCw, Loader2 } from 'lucide-react'
@@ -7,19 +5,23 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { UserGrowthChart } from '@/components/admin/charts/UserGrowthChart'
+import { VolumeTrendChart } from '@/components/admin/charts/VolumeTrendChart'
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null)
+    const [chartsData, setChartsData] = useState<any>(null)
     const [recentBindings, setRecentBindings] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     const loadData = async () => {
         setLoading(true)
         try {
-            // 1. Fetch Stats
+            // 1. Fetch Stats & Charts
             const statsRes = await fetch('/api/admin/stats')
             const statsData = await statsRes.json()
             if (statsData.stats) setStats(statsData.stats)
+            if (statsData.charts) setChartsData(statsData.charts)
 
             // 2. Fetch Recent Pending Bindings
             const pendingRes = await fetch('/api/admin/bindings?status=pending')
@@ -111,41 +113,49 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                        {/* OKX 統計 */}
-                        <Card className="col-span-4 bg-neutral-900/50 border-white/5">
-                            <CardHeader>
-                                <CardTitle className="text-white">OKX 數據概覽</CardTitle>
-                                <CardDescription className="text-neutral-400">已驗證用戶交易統計</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div className="p-4 bg-black/20 rounded-lg border border-white/5">
-                                        <div className="flex items-center gap-2 text-neutral-400 text-sm mb-2">
-                                            <TrendingUp className="h-4 w-4" />
-                                            總交易量
+                        {/* Charts Section */}
+                        <div className="col-span-4 space-y-4">
+                            {/* Growth Chart */}
+                            <Card className="bg-neutral-900/50 border-white/5">
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <CardTitle className="text-white">用戶增長</CardTitle>
+                                            <CardDescription className="text-neutral-400">過去 30 天新增用戶趨勢</CardDescription>
                                         </div>
-                                        <div className="text-xl font-bold text-white">{formatCurrency(stats?.total_volume || 0)}</div>
                                     </div>
-                                    <div className="p-4 bg-black/20 rounded-lg border border-white/5">
-                                        <div className="flex items-center gap-2 text-neutral-400 text-sm mb-2">
-                                            <DollarSign className="h-4 w-4" />
-                                            累計返佣
-                                        </div>
-                                        <div className="text-xl font-bold text-green-400">{formatCurrency(stats?.total_commission || 0)}</div>
-                                    </div>
-                                    <div className="p-4 bg-black/20 rounded-lg border border-white/5">
-                                        <div className="flex items-center gap-2 text-neutral-400 text-sm mb-2">
-                                            <Users className="h-4 w-4" />
-                                            VIP 用戶
-                                        </div>
-                                        <div className="text-xl font-bold text-purple-400">{stats?.vip_users || 0}</div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardHeader>
+                                <CardContent>
+                                    <UserGrowthChart data={chartsData?.userGrowth || []} />
+                                </CardContent>
+                            </Card>
 
-                        {/* 待審核列表 */}
-                        <Card className="col-span-3 bg-neutral-900/50 border-white/5">
+                            {/* Volume/Revenue Overview */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <Card className="bg-neutral-900/50 border-white/5 p-4">
+                                    <div className="text-sm text-neutral-400 mb-1">本月總交易量 (預估)</div>
+                                    <div className="text-2xl font-bold text-white">{formatCurrency(stats?.total_volume || 0)}</div>
+                                </Card>
+                                <Card className="bg-neutral-900/50 border-white/5 p-4">
+                                    <div className="text-sm text-neutral-400 mb-1">本月總返佣 (預估)</div>
+                                    <div className="text-2xl font-bold text-green-400">{formatCurrency(stats?.total_commission || 0)}</div>
+                                </Card>
+                            </div>
+
+                            {/* Volume Trend Chart */}
+                            <Card className="bg-neutral-900/50 border-white/5">
+                                <CardHeader>
+                                    <CardTitle className="text-white">交易量趨勢</CardTitle>
+                                    <CardDescription className="text-neutral-400">過去 7 天交易量與返佣</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <VolumeTrendChart data={chartsData?.volumeTrend || []} />
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Recent Bindings List */}
+                        <Card className="col-span-3 bg-neutral-900/50 border-white/5 h-fit">
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <div>
                                     <CardTitle className="text-white">待處理申請</CardTitle>
@@ -164,7 +174,7 @@ export default function AdminDashboard() {
                                     )}
 
                                     {recentBindings.map((item, i) => (
-                                        <div key={i} className="flex items-center gap-4">
+                                        <div key={i} className="flex items-center gap-4 border-b border-white/5 pb-3 last:border-0 last:pb-0">
                                             <Avatar className="h-9 w-9 ring-1 ring-white/10">
                                                 <AvatarImage src={item.user?.picture_url} alt="Avatar" />
                                                 <AvatarFallback className="bg-neutral-800 text-neutral-400">U</AvatarFallback>
@@ -173,14 +183,15 @@ export default function AdminDashboard() {
                                                 <p className="text-sm font-medium leading-none text-white">
                                                     {item.user?.display_name || '未知用戶'}
                                                 </p>
-                                                <p className="text-xs text-neutral-500">
-                                                    OKX: <span className="text-neutral-300 font-mono">{item.exchange_uid}</span>
+                                                <p className="text-xs text-neutral-500 font-mono">
+                                                    UID: {item.exchange_uid}
                                                 </p>
                                             </div>
-                                            <div className="text-xs text-neutral-500 flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
-                                                {new Date(item.created_at).toLocaleDateString('zh-TW')}
-                                            </div>
+                                            <Link href={`/admin/bindings?id=${item.id}`}>
+                                                <Button size="sm" variant="outline" className="h-7 text-xs border-green-500/30 text-green-400 hover:bg-green-500/10">
+                                                    審核
+                                                </Button>
+                                            </Link>
                                         </div>
                                     ))}
                                 </div>

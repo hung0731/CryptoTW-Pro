@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { PageHeader } from '@/components/PageHeader'
 import { BottomNav } from '@/components/BottomNav'
 import { Bell, Sparkles, TrendingUp, TrendingDown, Zap, Users, AlertTriangle, Activity, RefreshCw } from 'lucide-react'
+import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 
@@ -89,11 +90,22 @@ export default function AlertsPage() {
             <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
                 {/* Current Market State */}
                 {marketState && (
-                    <div className="bg-gradient-to-br from-neutral-900 to-neutral-800/50 rounded-xl p-4 border border-white/5">
+                    <div className="bg-neutral-900/50 rounded-xl p-4 border border-white/5">
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                                 <Activity className="w-4 h-4 text-blue-400" />
                                 <span className="text-xs font-bold text-white">BTC 市場狀態</span>
+                                <ExplainTooltip
+                                    term="BTC 市場狀態"
+                                    definition="比特幣當前的市場健康度檢查。"
+                                    explanation={
+                                        <ul className="list-disc pl-4 space-y-1">
+                                            <li><strong>槓桿狀態</strong>：過熱代表大量借貸做多，容易回調。</li>
+                                            <li><strong>巨鯨狀態</strong>：大戶做多代表有主力護盤。</li>
+                                            <li><strong>爆倉壓力</strong>：顯示價格容易被吸往哪個方向。</li>
+                                        </ul>
+                                    }
+                                />
                             </div>
                             <button onClick={handleRefresh} disabled={refreshing} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                                 <RefreshCw className={`w-3.5 h-3.5 text-neutral-400 ${refreshing ? 'animate-spin' : ''}`} />
@@ -130,13 +142,23 @@ export default function AlertsPage() {
                         {aiReport && (
                             <div className="space-y-2">
                                 <h3 className="text-xs font-medium text-neutral-500 ml-1">AI 市場解讀</h3>
-                                <div className="bg-gradient-to-br from-neutral-900 to-neutral-900/50 border border-purple-500/20 rounded-xl p-4 relative overflow-hidden">
+                                <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 p-3 opacity-10">
                                         <Sparkles className="w-12 h-12 text-purple-500" />
                                     </div>
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></div>
                                         <span className="text-[10px] font-bold text-purple-400">AI Insight</span>
+                                        <ExplainTooltip
+                                            term="AI Insight"
+                                            definition="AI 自動分析過去 24 小時的所有異動訊號，生成摘要報告。"
+                                            explanation={
+                                                <ul className="list-disc pl-4 space-y-1">
+                                                    <li>幫助你快速掌握今日市場主旋律。</li>
+                                                    <li>過濾雜訊，只專注於有意義的結構改變。</li>
+                                                </ul>
+                                            }
+                                        />
                                     </div>
                                     <h4 className="text-sm font-bold text-white mb-2">{aiReport.headline}</h4>
                                     <p className="text-xs text-neutral-300 leading-relaxed border-l-2 border-purple-500/30 pl-3">

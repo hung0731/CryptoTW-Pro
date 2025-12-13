@@ -42,16 +42,9 @@ const menuSections = [
     ]
   },
   {
-    label: "內容",
+    label: "系統",
     items: [
-      { title: "快訊管理", url: "/admin/news", icon: Newspaper },
-      { title: "活動管理", url: "/admin/activities", icon: CalendarDays },
-      { title: "全球精選", url: "/admin/global", icon: Globe },
-    ]
-  },
-  {
-    label: "設定",
-    items: [
+      { title: "系統日誌", url: "/admin/logs", icon: FileText },
       { title: "Bot 關鍵字", url: "/admin/bot", icon: Bot },
       { title: "系統設定", url: "/admin/settings", icon: Cog },
     ]

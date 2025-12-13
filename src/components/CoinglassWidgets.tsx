@@ -488,6 +488,7 @@ export function ExchangeTransparency() {
 // ============================================
 // Economic Calendar Component
 // ============================================
+
 // ============================================
 // Economic Calendar Component
 // ============================================
@@ -503,8 +504,6 @@ export function EconomicCalendar() {
                 const res = await fetch('/api/coinglass/calendar')
                 const json = await res.json()
                 setData(json.calendar)
-
-                // Auto-expand the first Key event if prominent? No, keep it clean.
             } catch (e) { console.error(e) }
             finally { setLoading(false) }
         }
@@ -556,9 +555,11 @@ export function EconomicCalendar() {
                             return (
                                 <div key={event.id} className={cn(
                                     "rounded-xl transition-all relative overflow-hidden border",
+                                    // Unified bg to neutral-900/50, only use border for emphasis
+                                    "bg-neutral-900/50 hover:bg-white/5",
                                     isKey
-                                        ? "bg-neutral-900/60 border-blue-500/30 hover:border-blue-500/50"
-                                        : "bg-neutral-900/30 border-white/5 hover:bg-white/5"
+                                        ? "border-blue-500/30 hover:border-blue-500/50"
+                                        : "border-white/5"
                                 )}>
                                     {/* S-Tier Indicator */}
                                     {isKey && (
@@ -766,6 +767,17 @@ export function LiquidationSummary() {
             <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-3.5 h-3.5 text-orange-400" />
                 <span className="text-xs font-bold text-white">爆倉 (24H)</span>
+                <ExplainTooltip
+                    term="爆倉數據 (Liquidation)"
+                    definition="過去24小時內被迫強制平倉的總金額。"
+                    explanation={
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li><strong>爆量</strong>：代表市場劇烈波動，去槓桿化剛發生，短期趨勢可能延續或反轉。</li>
+                            <li><strong>多單爆倉大</strong>：市場殺多，容易見底。</li>
+                            <li><strong>空單爆倉大</strong>：市場軋空，容易見頂。</li>
+                        </ul>
+                    }
+                />
             </div>
             <div className="grid grid-cols-2 gap-2 mt-1">
                 <div className="text-center bg-red-500/10 rounded py-1.5">

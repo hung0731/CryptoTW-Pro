@@ -112,7 +112,7 @@ function CryptoPricePrediction() {
             ) : data ? (
                 <>
                     {/* Top 3 Predictions */}
-                    <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4 space-y-3">
+                    <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4 space-y-3">
                         <p className="text-xs text-neutral-500 mb-3">最可能達到的價格</p>
                         {data.topPredictions?.slice(0, 3).map((target: any, i: number) => {
                             // Format probability - show 1 decimal for low values
@@ -149,7 +149,7 @@ function CryptoPricePrediction() {
                     {/* All Targets - 2 Column */}
                     <div className="grid grid-cols-2 gap-3">
                         {/* Bullish */}
-                        <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
                             <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-white/5">
                                 <span className="text-green-400 text-xs">↑</span>
                                 <span className="text-xs font-medium text-green-400">看漲目標</span>
@@ -168,7 +168,7 @@ function CryptoPricePrediction() {
                         </div>
 
                         {/* Bearish */}
-                        <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
                             <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-white/5">
                                 <span className="text-red-400 text-xs">↓</span>
                                 <span className="text-xs font-medium text-red-400">看跌目標</span>
@@ -357,7 +357,7 @@ export default function DataPage() {
 
                     {/* 2. Important Events (Calendar Snippet) */}
                     {calendarEvents.length > 0 && (
-                        <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <Calendar className="w-4 h-4 text-blue-400" />
@@ -392,7 +392,7 @@ export default function DataPage() {
                     ) : (
                         <div className="grid grid-cols-2 gap-4">
                             {/* Gainers */}
-                            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
                                     <TrendingUp className="w-4 h-4 text-green-400" />
                                     <span className="text-sm font-medium text-green-400">漲幅榜</span>
@@ -412,7 +412,7 @@ export default function DataPage() {
                                 </div>
                             </div>
                             {/* Losers */}
-                            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
                                     <TrendingUp className="w-4 h-4 text-red-400 rotate-180" />
                                     <span className="text-sm font-medium text-red-400">跌幅榜</span>
@@ -448,7 +448,7 @@ export default function DataPage() {
                             <div className="grid gap-3">
                                 {markets.slice(0, 3).map((market) => (
                                     <Link href={`https://polymarket.com/event/${market.slug}`} target="_blank" key={market.id}>
-                                        <div className="group bg-neutral-900/30 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
+                                        <div className="group bg-neutral-900/50 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
                                             <div className="flex items-start justify-between gap-3 mb-2">
                                                 <div className="flex items-center gap-2">
                                                     {market.icon && <img src={market.icon} className="w-5 h-5 rounded-full" />}
