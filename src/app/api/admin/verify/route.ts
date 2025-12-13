@@ -48,17 +48,49 @@ export async function POST(req: NextRequest) {
         }
 
         if (action === 'verify') {
-            // 1. Update Binding Status
+            // 1. Get the binding first to get exchange_uid
+            const { data: bindingData, error: fetchError } = await supabase
+                .from('exchange_bindings')
+                .select('*')
+                .eq('id', bindingId)
+                .single()
+
+            if (fetchError) throw fetchError
+
+            // 2. Fetch OKX affiliate data if it's an OKX binding
+            let okxUpdateData = {}
+            if (bindingData.exchange_name.toLowerCase() === 'okx') {
+                try {
+                    const { getInviteeDetail, parseOkxData } = await import('@/lib/okx-affiliate')
+                    const okxData = await getInviteeDetail(bindingData.exchange_uid)
+
+                    if (okxData) {
+                        okxUpdateData = parseOkxData(okxData)
+                        console.log('[Verify] OKX data fetched for UID:', bindingData.exchange_uid)
+                    } else {
+                        console.warn('[Verify] No OKX data returned for UID:', bindingData.exchange_uid)
+                    }
+                } catch (okxError) {
+                    console.error('[Verify] OKX API error (non-blocking):', okxError)
+                    // Continue with verification even if OKX API fails
+                }
+            }
+
+            // 3. Update Binding Status with OKX data
             const { data: binding, error: bindError } = await supabase
                 .from('exchange_bindings')
-                .update({ status: 'verified', updated_at: new Date().toISOString() })
+                .update({
+                    status: 'verified',
+                    updated_at: new Date().toISOString(),
+                    ...okxUpdateData
+                })
                 .eq('id', bindingId)
                 .select()
                 .single()
 
             if (bindError) throw bindError
 
-            // 2. Update User Membership to PRO
+            // 4. Update User Membership to PRO
             const { data: updatedUser, error: userError } = await supabase
                 .from('users')
                 .update({ membership_status: 'pro', updated_at: new Date().toISOString() })
@@ -208,12 +240,40 @@ export async function POST(req: NextRequest) {
         }
 
         if (action === 'reject') {
+            // 1. Get the binding to find user_id
+            const { data: bindingData, error: fetchError } = await supabase
+                .from('exchange_bindings')
+                .select('user_id')
+                .eq('id', bindingId)
+                .single()
+
+            if (fetchError) throw fetchError
+
+            // 2. Update binding status to rejected
             const { error } = await supabase
                 .from('exchange_bindings')
                 .update({ status: 'rejected', updated_at: new Date().toISOString() })
                 .eq('id', bindingId)
 
             if (error) throw error
+
+            // 3. Check if user has any other verified bindings
+            const { data: otherBindings } = await supabase
+                .from('exchange_bindings')
+                .select('id')
+                .eq('user_id', bindingData.user_id)
+                .eq('status', 'verified')
+                .limit(1)
+
+            // 4. If no verified bindings, rollback membership to 'free'
+            if (!otherBindings || otherBindings.length === 0) {
+                await supabase
+                    .from('users')
+                    .update({ membership_status: 'free', updated_at: new Date().toISOString() })
+                    .eq('id', bindingData.user_id)
+                    .in('membership_status', ['pending']) // Only rollback if still pending
+            }
+
             return NextResponse.json({ success: true })
         }
 

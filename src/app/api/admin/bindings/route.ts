@@ -9,8 +9,13 @@ export async function GET(req: NextRequest) {
     if (!admin) return unauthorizedResponse()
 
     try {
+        const { searchParams } = new URL(req.url)
+        const status = searchParams.get('status') || 'pending'
+        const exchange = searchParams.get('exchange') // optional filter
+
         const supabase = createAdminClient()
-        const { data, error } = await supabase
+
+        let query = supabase
             .from('exchange_bindings')
             .select(`
                 *,
@@ -21,8 +26,15 @@ export async function GET(req: NextRequest) {
                     line_user_id
                 )
             `)
-            .eq('status', 'pending')
+            .eq('status', status)
             .order('created_at', { ascending: false })
+
+        // Optional exchange filter
+        if (exchange) {
+            query = query.eq('exchange_name', exchange)
+        }
+
+        const { data, error } = await query
 
         if (error) {
             console.error('Fetch Bindings Error', error)

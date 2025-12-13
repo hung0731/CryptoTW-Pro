@@ -10,36 +10,57 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink, Info, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
-const EXCHANGE_INFO: Record<string, { name: string, link: string, bonus: string }> = {
-    binance: { name: 'Binance', link: 'https://accounts.binance.com/register?ref=YOUR_REF', bonus: '20% Fee Discount' },
-    okx: { name: 'OKX', link: 'https://www.okx.com/join/YOUR_REF', bonus: 'Mystery Box' },
-    bybit: { name: 'Bybit', link: 'https://www.bybit.com/register?affiliate_id=YOUR_REF', bonus: '$30,000 Bonus' },
-    bingx: { name: 'BingX', link: 'https://bingx.com/invite/YOUR_REF', bonus: '500+ USDT' },
-    pionex: { name: 'Pionex', link: 'https://www.pionex.com/en/sign/ref/YOUR_REF', bonus: 'Trading Bots' },
+interface ExchangeData {
+    id: string
+    name: string
+    slug: string
+    referral_link: string
+    logo_url?: string
+    bonus_text?: string
+    uid_instruction?: string
+    is_active: boolean
 }
 
 export default function BindingPage() {
     const params = useParams()
     const router = useRouter()
-    // Handle case insensitivity and potential undefined
     const rawExchangeId = params?.exchange as string || ''
-    const exchangeId = rawExchangeId.toLowerCase()
-    const exchange = EXCHANGE_INFO[exchangeId]
+    const exchangeSlug = rawExchangeId.toLowerCase()
 
-    const { isLoggedIn, profile, isLoading } = useLiff()
+    const { isLoggedIn, profile, isLoading: authLoading } = useLiff()
+
+    // Exchange data from DB
+    const [exchange, setExchange] = useState<ExchangeData | null>(null)
+    const [loadingExchange, setLoadingExchange] = useState(true)
+
+    // Form state
     const [uid, setUid] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
 
-    // Redirect if invalid exchange
+    // Fetch exchange data from DB
     useEffect(() => {
-        if (!isLoading && !exchange && rawExchangeId) {
-            // Optional: Redirect or just show error state
-            // router.push('/register')
+        const fetchExchange = async () => {
+            try {
+                const res = await fetch('/api/admin/exchanges')
+                const data = await res.json()
+                if (data.exchanges) {
+                    const found = data.exchanges.find(
+                        (e: ExchangeData) => e.slug.toLowerCase() === exchangeSlug && e.is_active
+                    )
+                    setExchange(found || null)
+                }
+            } catch (e) {
+                console.error('Failed to fetch exchange:', e)
+            } finally {
+                setLoadingExchange(false)
+            }
         }
-    }, [exchange, isLoading, rawExchangeId, router])
+        fetchExchange()
+    }, [exchangeSlug])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -57,7 +78,7 @@ export default function BindingPage() {
                 method: 'POST',
                 body: JSON.stringify({
                     lineUserId: profile.userId,
-                    exchange: exchangeId,
+                    exchange: exchange?.slug || exchangeSlug,
                     uid
                 })
             })
@@ -77,11 +98,17 @@ export default function BindingPage() {
     }
 
     // Loading State
-    if (isLoading) {
-        return <div className="min-h-screen flex items-center justify-center bg-black text-white"><Loader2 className="animate-spin" /></div>
+    if (authLoading || loadingExchange) {
+        return (
+            <div className="min-h-screen bg-black p-4">
+                <Skeleton className="h-14 w-full rounded-xl mb-4" />
+                <Skeleton className="h-40 w-full rounded-xl mb-4" />
+                <Skeleton className="h-60 w-full rounded-xl" />
+            </div>
+        )
     }
 
-    // Error State
+    // Exchange not found or inactive
     if (!exchange) {
         return (
             <div className="min-h-screen bg-black text-white p-8 flex flex-col items-center justify-center space-y-4">
@@ -91,6 +118,7 @@ export default function BindingPage() {
         )
     }
 
+    // Success State
     if (success) {
         return (
             <div className="min-h-screen bg-black p-4 flex items-center justify-center">
@@ -150,10 +178,10 @@ export default function BindingPage() {
                     <CardContent className="pt-4">
                         <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 p-4 rounded-xl flex items-center justify-between">
                             <div>
-                                <div className="font-bold text-yellow-500">{exchange.bonus}</div>
+                                <div className="font-bold text-yellow-500">{exchange.bonus_text || '獨家優惠'}</div>
                                 <div className="text-xs text-neutral-400 font-medium">獨家福利 🎁</div>
                             </div>
-                            <a href={exchange.link} target="_blank" rel="noopener noreferrer">
+                            <a href={exchange.referral_link} target="_blank" rel="noopener noreferrer">
                                 <Button size="sm" className="gap-2 bg-yellow-500 hover:bg-yellow-600 text-black border-0 font-bold">
                                     前往註冊 <ExternalLink className="h-3 w-3" />
                                 </Button>
@@ -182,7 +210,7 @@ export default function BindingPage() {
                                     className="bg-black border-white/10 focus:border-white/30 text-white transition-colors h-12"
                                 />
                                 <p className="text-[10px] text-neutral-600 flex items-center gap-1">
-                                    <Info className="h-3 w-3" /> 通常可以在個人中心或選單中找到
+                                    <Info className="h-3 w-3" /> {exchange.uid_instruction || '通常可以在個人中心或選單中找到'}
                                 </p>
                             </div>
 
