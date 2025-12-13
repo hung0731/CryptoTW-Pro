@@ -102,6 +102,114 @@ function WhaleWatchList() {
     )
 }
 
+// BTC Price Prediction Component
+function BTCPricePrediction() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/prediction/btc-price')
+                const json = await res.json()
+                if (!json.error) setData(json)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) return (
+        <div className="space-y-3">
+            <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
+            <Skeleton className="h-48 w-full bg-neutral-900/50 rounded-xl" />
+        </div>
+    )
+
+    if (!data) return null
+
+    return (
+        <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Bitcoin className="w-5 h-5 text-orange-500" />
+                    <h2 className="text-lg font-bold text-white">BTC 2025 價格預測</h2>
+                </div>
+                <Link
+                    href="https://polymarket.com/event/what-price-will-bitcoin-hit-in-2025"
+                    target="_blank"
+                    className="text-[10px] text-neutral-500 hover:text-white transition-colors"
+                >
+                    查看詳情 →
+                </Link>
+            </div>
+
+            {/* Top 3 Predictions */}
+            <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4 space-y-3">
+                <p className="text-xs text-neutral-500 mb-3">最可能達到的價格</p>
+                {data.topPredictions?.slice(0, 3).map((target: any, i: number) => (
+                    <div key={i} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                            <span className={cn(
+                                "font-medium flex items-center gap-1",
+                                target.direction === 'up' ? 'text-green-400' : 'text-red-400'
+                            )}>
+                                {target.direction === 'up' ? '↑' : '↓'} {target.label}
+                            </span>
+                            <span className="font-mono font-bold text-white">{(target.probability * 100).toFixed(0)}%</span>
+                        </div>
+                        <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                            <div
+                                className={cn(
+                                    "h-full rounded-full transition-all",
+                                    target.direction === 'up' ? 'bg-green-500' : 'bg-red-500'
+                                )}
+                                style={{ width: `${target.probability * 100}%` }}
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* All Targets - 2 Column */}
+            <div className="grid grid-cols-2 gap-3">
+                {/* Bullish */}
+                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                    <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-white/5">
+                        <span className="text-green-400 text-xs">↑</span>
+                        <span className="text-xs font-medium text-green-400">看漲目標</span>
+                    </div>
+                    <div className="space-y-1.5">
+                        {data.bullish?.slice(0, 6).map((t: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-xs">
+                                <span className="text-neutral-400">{t.label}</span>
+                                <span className="font-mono text-white">{(t.probability * 100).toFixed(0)}%</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Bearish */}
+                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                    <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-white/5">
+                        <span className="text-red-400 text-xs">↓</span>
+                        <span className="text-xs font-medium text-red-400">看跌目標</span>
+                    </div>
+                    <div className="space-y-1.5">
+                        {data.bearish?.slice(0, 6).map((t: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-xs">
+                                <span className="text-neutral-400">{t.label}</span>
+                                <span className="font-mono text-white">{(t.probability * 100).toFixed(0)}%</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export default function DataPage() {
     const { profile } = useLiff()
     const [activeTab, setActiveTab] = useState('market')
@@ -293,8 +401,14 @@ export default function DataPage() {
 
                 {/* TAB 3: Prediction */}
                 <TabsContent value="prediction" className="space-y-4 p-4 min-h-[50vh]">
+                    {/* BTC Price Prediction Section */}
+                    <BTCPricePrediction />
+
+                    {/* Separator */}
+                    <div className="border-t border-white/5 my-6"></div>
+
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-bold text-white">市場預測</h2>
+                        <h2 className="text-lg font-bold text-white">其他預測市場</h2>
                     </div>
 
                     {/* Stats Cards */}
