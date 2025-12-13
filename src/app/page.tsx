@@ -85,7 +85,7 @@ export default function ProDashboard() {
                 {/* Sticky Tabs */}
                 <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
                     <TabsList className="grid w-full grid-cols-3 bg-neutral-900/50 p-0.5 rounded-lg h-9">
-                        <TabsTrigger value="overview" className="data-[state=active]:bg-[#211FFF] data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
+                        <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
                             <LayoutDashboard className="w-3.5 h-3.5" />
                             儀表板
                         </TabsTrigger>
@@ -109,11 +109,11 @@ export default function ProDashboard() {
                             <img
                                 src={profile.pictureUrl}
                                 alt="Avatar"
-                                className="w-11 h-11 rounded-full border-2 border-[#211FFF]"
+                                className="w-11 h-11 rounded-full border-2 border-white/20"
                             />
                         ) : (
-                            <div className="w-11 h-11 rounded-full bg-[#211FFF]/20 flex items-center justify-center">
-                                <Sparkles className="w-5 h-5 text-[#211FFF]" />
+                            <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center">
+                                <Sparkles className="w-5 h-5 text-white" />
                             </div>
                         )}
                         <div>
@@ -126,7 +126,7 @@ export default function ProDashboard() {
 
                     {/* Quick Actions */}
                     <div className="grid grid-cols-5 gap-2 mb-6">
-                        <QuickAction icon={Crown} label="大客戶" href="/vip" color="bg-[#211FFF]" />
+                        <QuickAction icon={Crown} label="大客戶" href="/vip" color="bg-white/10" />
                         <QuickAction icon={Wallet} label="交易所" href="/events" />
                         <QuickAction icon={Bell} label="通知" href="/profile" />
                         <QuickAction icon={Gift} label="空投" href="/events" />
@@ -249,7 +249,7 @@ export default function ProDashboard() {
                 <TabsContent value="articles" className="space-y-4 p-4 min-h-[50vh]">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-bold text-white">精選文章</h2>
-                        <Link href="/articles" className="text-xs text-[#211FFF]">查看全部 →</Link>
+                        <Link href="/articles" className="text-xs text-neutral-400 hover:text-white">查看全部 →</Link>
                     </div>
 
                     {loading ? (
@@ -282,7 +282,7 @@ export default function ProDashboard() {
                 <TabsContent value="prediction" className="space-y-4 p-4 min-h-[50vh]">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-bold text-white">預測市場</h2>
-                        <Link href="/prediction" className="text-xs text-[#211FFF]">查看全部 →</Link>
+                        <Link href="/prediction" className="text-xs text-neutral-400 hover:text-white">查看全部 →</Link>
                     </div>
 
                     {loading ? (

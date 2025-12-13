@@ -76,14 +76,14 @@ export function BottomNav() {
                     <div className={cn(
                         "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg",
                         isProActive
-                            ? "bg-[#211FFF] shadow-[#211FFF]/40"
-                            : "bg-[#211FFF] shadow-[#211FFF]/20 hover:shadow-[#211FFF]/40"
+                            ? "bg-white shadow-white/20"
+                            : "bg-neutral-800 shadow-neutral-800/20 hover:bg-neutral-700"
                     )}>
-                        <Sparkles className="w-7 h-7 text-white" />
+                        <Sparkles className={cn("w-7 h-7", isProActive ? "text-black" : "text-white")} />
                     </div>
                     <span className={cn(
                         "text-[10px] font-medium mt-1",
-                        isProActive ? "text-[#211FFF]" : "text-neutral-400"
+                        isProActive ? "text-white" : "text-neutral-400"
                     )}>
                         Pro
                     </span>
