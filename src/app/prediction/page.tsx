@@ -11,7 +11,15 @@ import { useLiff } from '@/components/LiffProvider'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { BullBearIndex, LiquidationWaterfall, FundingRateRankings, LongShortRatio, LiquidationHeatmap, ExchangeTransparency } from '@/components/CoinglassWidgets'
+import {
+    LiquidationWaterfall,
+    FundingRateRankings,
+    WhaleAlertFeed,
+    WhalePositionsList,
+    LiquidationHeatmap,
+    ExchangeTransparency,
+    LongShortRatio
+} from '@/components/CoinglassWidgets'
 
 interface GlobalData {
     totalMarketCap: string
@@ -23,103 +31,6 @@ interface GlobalData {
     categories?: any[]
 }
 
-// Whale Watch Component
-function WhaleWatchList() {
-    const [whales, setWhales] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        const fetchWhales = async () => {
-            try {
-                const res = await fetch('/api/market/whales')
-                const data = await res.json()
-                if (data.whales) setWhales(data.whales)
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
-        }
-        fetchWhales()
-    }, [])
-
-    if (loading) return (
-        <div className="space-y-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full bg-neutral-900/50 rounded-xl" />)}
-        </div>
-    )
-
-    return (
-        <div className="grid gap-3">
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-white">本月頂尖交易者</h2>
-                <div className="flex items-center gap-1.5 text-[10px] text-neutral-500">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    即時數據
-                </div>
-            </div>
-
-            {whales.map((whale, i) => {
-                // Format PnL with thousand separators
-                const formatPnl = (pnl: number) => {
-                    if (pnl >= 1000000) return `${(pnl / 1000000).toFixed(1)}M`
-                    if (pnl >= 1000) return `${(pnl / 1000).toFixed(0)}K`
-                    return pnl.toFixed(0)
-                }
-
-                // Format entry price smartly based on value
-                const formatPrice = (price: number) => {
-                    if (price >= 10000) return price.toLocaleString('en-US', { maximumFractionDigits: 0 })
-                    if (price >= 1000) return price.toLocaleString('en-US', { maximumFractionDigits: 1 })
-                    if (price >= 100) return price.toLocaleString('en-US', { maximumFractionDigits: 2 })
-                    if (price >= 1) return price.toFixed(2)
-                    return price.toFixed(4)
-                }
-
-                return (
-                    <div key={i} className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-3 hover:bg-white/5 transition-all">
-                        {/* Header */}
-                        <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                            <div className="flex items-center gap-3">
-                                <span className="text-neutral-500 font-mono text-xs w-4">0{i + 1}</span>
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-bold text-white font-mono">{whale.displayAddress}</span>
-                                    <span className="text-[10px] text-neutral-500">盈虧: <span className={whale.pnl >= 0 ? 'text-green-400' : 'text-red-400'} style={{ fontFamily: 'monospace' }}>{whale.pnl >= 0 ? '+' : ''}${formatPnl(whale.pnl)}</span></span>
-                                </div>
-                            </div>
-                            <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px]">
-                                報酬率 {parseFloat(whale.roi).toFixed(1)}%
-                            </Badge>
-                        </div>
-
-                        {/* Positions */}
-                        <div className="space-y-2">
-                            {whale.positions.map((pos: any, idx: number) => (
-                                <div key={idx} className="flex items-center justify-between text-xs bg-black/20 p-2 rounded-lg">
-                                    <div className="flex items-center gap-2">
-                                        <Badge className={cn(
-                                            "text-[9px] px-1 h-4 rounded border-0",
-                                            pos.type === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                                        )}>
-                                            {pos.type === 'LONG' ? '做多' : '做空'} {pos.leverage}x
-                                        </Badge>
-                                        <span className="font-bold text-white">{pos.coin}</span>
-                                    </div>
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-[10px] text-neutral-400">入場價: ${formatPrice(pos.entryPrice)}</span>
-                                        <span className={cn("font-mono font-medium", pos.pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
-                                            {pos.pnl >= 0 ? '+' : ''}{pos.pnl >= 1000 ? `${(pos.pnl / 1000).toFixed(1)}K` : pos.pnl.toFixed(0)} u
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                            {whale.positions.length === 0 && (
-                                <div className="text-center text-[10px] text-neutral-600 py-1">目前無主要倉位</div>
-                            )}
-                        </div>
-                    </div>
-                )
-            })}
-        </div>
-    )
-}
 
 // Crypto Price Prediction Component with Tabs (BTC / ETH)
 function CryptoPricePrediction() {
@@ -499,7 +410,8 @@ export default function DataPage() {
 
                 {/* TAB: Whale Watch */}
                 <TabsContent value="whales" className="space-y-4 p-4 min-h-[50vh]">
-                    <WhaleWatchList />
+                    <WhaleAlertFeed />
+                    <WhalePositionsList />
                 </TabsContent>
 
                 {/* TAB 3: Prediction */}

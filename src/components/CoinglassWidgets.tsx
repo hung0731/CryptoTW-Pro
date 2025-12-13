@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge, Calendar as CalendarIcon, ArrowLeftRight } from 'lucide-react'
+import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge, Calendar as CalendarIcon, ArrowLeftRight, Radar, Users } from 'lucide-react'
 
 // ============================================
 // Bull/Bear Index Component
@@ -816,5 +816,167 @@ export function LongShortSummary() {
                 </div>
             </div>
         </div>
+    )
+}
+
+// ============================================
+// Whale Watch Components
+// ============================================
+
+export function WhaleAlertFeed() {
+    const [alerts, setAlerts] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchAlerts = async () => {
+            try {
+                const res = await fetch('/api/market/whales')
+                const json = await res.json()
+                if (json.whales?.alerts) {
+                    setAlerts(json.whales.alerts)
+                }
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchAlerts()
+        const interval = setInterval(fetchAlerts, 30000)
+        return () => clearInterval(interval)
+    }, [])
+
+    if (loading) return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+
+    // Since mock data or API might return empty list initially
+    if (!alerts || alerts.length === 0) {
+        return (
+            <div className="bg-neutral-900/50 rounded-xl p-8 text-center border border-dashed border-white/10">
+                <Radar className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
+                <p className="text-sm text-neutral-500">暫無巨鯨快訊</p>
+            </div>
+        )
+    }
+
+    return (
+        <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
+            <div className="p-3 border-b border-white/5 bg-neutral-900/50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Radar className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm font-bold text-white">巨鯨快訊 ({'>'} $1M)</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 rounded-full border border-green-500/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[10px] text-green-400 font-mono">LIVE</span>
+                </div>
+            </div>
+            <div className="divide-y divide-white/5 max-h-[400px] overflow-y-auto">
+                {alerts.map((alert, i) => (
+                    <div key={i} className="p-3 hover:bg-white/5 transition-colors flex items-center justify-between group">
+                        <div className="flex items-center gap-3">
+                            <div className={cn(
+                                "w-2 h-8 rounded-full",
+                                alert.side === 'LONG' || alert.side === 'BUY' ? "bg-green-500" : "bg-red-500"
+                            )} />
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-bold text-white">{alert.symbol}</span>
+                                    <span className={cn(
+                                        "text-[10px] px-1.5 rounded border font-mono",
+                                        alert.side === 'LONG' || alert.side === 'BUY'
+                                            ? "text-green-400 border-green-500/30 bg-green-500/10"
+                                            : "text-red-400 border-red-500/30 bg-red-500/10"
+                                    )}>
+                                        {alert.side === 'BUY' ? 'LONG' : (alert.side === 'SELL' ? 'SHORT' : alert.side)}
+                                    </span>
+                                </div>
+                                <span className="text-xs text-neutral-400 font-mono">
+                                    Price: {alert.price ? `$${parseFloat(alert.price).toLocaleString()}` : '--'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-sm font-mono font-bold text-white">
+                                ${parseInt(alert.amount || alert.volUsd || '0').toLocaleString()}
+                            </div>
+                            <div className="text-[10px] text-neutral-500">
+                                {new Date(alert.createTime || alert.time).toLocaleTimeString()}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+export function WhalePositionsList() {
+    const [positions, setPositions] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/market/whales')
+                const json = await res.json()
+                if (json.whales?.positions) {
+                    setPositions(json.whales.positions)
+                }
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+
+    if (!positions || positions.length === 0) {
+        return (
+            <div className="bg-neutral-900/50 rounded-xl p-8 text-center border border-dashed border-white/10">
+                <Users className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
+                <p className="text-sm text-neutral-500">暫無持倉數據</p>
+            </div>
+        )
+    }
+
+    return (
+        <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
+            <div className="p-3 border-b border-white/5 bg-neutral-900/50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-blue-400" />
+                    <span className="text-sm font-bold text-white">Top 巨鯨持倉</span>
+                </div>
+            </div>
+            <div className="divide-y divide-white/5">
+                {positions.map((pos, i) => (
+                    <div key={i} className="p-3 hover:bg-white/5 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-mono text-neutral-400 border border-white/10">
+                                    {i + 1}
+                                </div>
+                                <span className="text-xs font-mono text-neutral-300">
+                                    {pos.address || pos.user || 'Unknown'}
+                                </span>
+                            </div>
+                            <span className="text-xs font-mono font-bold text-blue-400">
+                                Leverage: x{pos.leverage || '1'}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 mt-2 bg-black/20 rounded p-2">
+                            <div>
+                                <span className="text-[10px] text-neutral-500 block">Symbol</span>
+                                <span className="text-xs font-bold text-white">{pos.symbol || pos.coin}</span>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-[10px] text-neutral-500 block">Size (USD)</span>
+                                <span className="text-xs font-mono text-white">
+                                    ${parseFloat(pos.amount || pos.szi || '0').toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
     )
 }
