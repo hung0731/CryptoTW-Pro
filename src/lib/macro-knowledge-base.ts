@@ -66,12 +66,28 @@ export const MACRO_EVENTS: MacroEventDefinition[] = [
         cryptoReaction: '影響通常較短暫。若 GDP 大幅衰退 (硬著陸恐慌) 可能帶崩市場；若數據穩健 (軟著陸)，則有利比特幣長線走勢。'
     },
     {
-        id: 'ism_pmi',
-        keywords: ['ISM Manufacturing PMI', 'ISM Services PMI'],
-        titleTW: 'ISM 採購經理人指數 (PMI)',
+        id: 'ppi',
+        keywords: ['PPI (MoM)', 'PPI (YoY)', 'Producer Price Index'],
+        titleTW: '生產者物價指數 (PPI)',
         tier: 'A',
-        whyImportant: '50為榮枯線。由採購經理人調查得出的領先指標，最快反映企業是否看好未來景氣。',
-        cryptoReaction: '通常影響中性，但若數據意外跌破榮枯線 (50)，會引發衰退擔憂。'
+        whyImportant: '預示未來 CPI 走向的領先指標。生產端成本增加，最終會轉嫁給消費者 (推升 CPI)。',
+        cryptoReaction: '雖然影響力不如 CPI，但若大幅高於預期，仍會引發通膨擔憂 (利空)；低於預期則利多。'
+    },
+    {
+        id: 'jobless_claims',
+        keywords: ['Initial Jobless Claims'],
+        titleTW: '初領失業金人數',
+        tier: 'A',
+        whyImportant: '每週公布的高頻數據，最即時反映勞動力市場變化。人數越少代表就業越強。',
+        cryptoReaction: '數據低於預期 (就業過強) -> 降息預期降 -> 利空。數據高於預期 (失業增) -> 降息預期升 -> 利多。'
+    },
+    {
+        id: 'consumer_confidence',
+        keywords: ['CB Consumer Confidence', 'Michigan Consumer Sentiment', 'Consumer Confidence'],
+        titleTW: '消費者信心指數',
+        tier: 'A',
+        whyImportant: '反映消費者對經濟前景的信心，信心越強越敢花錢 (支撐 GDP)。',
+        cryptoReaction: '信心指數若意外崩跌，市場會恐慌「經濟衰退」，短期可能利空 (避險情緒)。'
     }
 ]
 

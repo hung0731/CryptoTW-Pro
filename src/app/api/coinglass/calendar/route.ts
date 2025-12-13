@@ -23,29 +23,57 @@ export async function GET() {
             })
         }
 
-        // Calculate time window: -15 days to +15 days (API Limit)
+        // Fetch data in chunks to bypass 15-day limit (assuming limit is on query span)
+        // Goal: Past 30 days, Future 60 days
         const now = Date.now()
         const dayMs = 86400000
-        const startTime = now - (14 * dayMs) // Safe buffer
-        const endTime = now + (14 * dayMs)
 
-        // Fetch data
-        const url = `${BASE_URL}?start_time=${startTime}&end_time=${endTime}&language=en`
+        // Define 15-day chunks
+        const chunks = [
+            { start: -30, end: -15 },
+            { start: -15, end: 0 },
+            { start: 0, end: 15 },
+            { start: 15, end: 30 },
+            { start: 30, end: 45 },
+            { start: 45, end: 60 }
+        ]
 
-        const res = await fetch(url, {
-            headers: {
-                'CG-API-KEY': API_KEY,
-                'accept': 'application/json'
-            },
-            next: { revalidate: 600 }
-        })
+        const fetchChunk = async (startOffset: number, endOffset: number) => {
+            const startTime = now + (startOffset * dayMs)
+            const endTime = now + (endOffset * dayMs)
+            const url = `${BASE_URL}?start_time=${startTime}&end_time=${endTime}&language=en`
 
-        if (!res.ok) {
-            throw new Error(`Coinglass API Error: ${res.statusText}`)
+            try {
+                const res = await fetch(url, {
+                    headers: {
+                        'CG-API-KEY': API_KEY,
+                        'accept': 'application/json'
+                    },
+                    next: { revalidate: 600 }
+                })
+                if (!res.ok) return []
+                const json = await res.json()
+                return json.data || []
+            } catch (e) {
+                console.error(`Fetch error for chunk ${startOffset}-${endOffset}:`, e)
+                return []
+            }
         }
 
-        const json = await res.json()
-        const rawEvents = json.data || []
+        const results = await Promise.all(chunks.map(c => fetchChunk(c.start, c.end)))
+
+        // Deduplicate events by ID (timestamp + name) just in case overlaps occur
+        const allEvents = results.flat()
+        const seenIds = new Set()
+        const rawEvents = []
+
+        for (const ev of allEvents) {
+            const id = `${ev.publish_timestamp}-${ev.calendar_name}`
+            if (!seenIds.has(id)) {
+                seenIds.add(id)
+                rawEvents.push(ev)
+            }
+        }
 
         // Process and Enrich Data
         const enrichedEvents = rawEvents
