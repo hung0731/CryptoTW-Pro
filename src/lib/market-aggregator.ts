@@ -3,19 +3,23 @@ import { fetchBinanceRSI } from './technical-analysis'
 import { generateMarketSignals, type MarketSignals, type RawMarketData } from './signal-engine'
 
 // CoinGecko for BTC price (more reliable)
-async function fetchBtcPrice() {
+// Binance for BTC price & volatility data (High/Low)
+async function fetchBtcTicker() {
     try {
         const res = await fetch(
-            'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
-            { next: { revalidate: 60 } }
+            'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT',
+            { next: { revalidate: 30 } }
         )
-        const json = await res.json()
+        const data = await res.json()
         return {
-            price: json.bitcoin?.usd,
-            change_24h: json.bitcoin?.usd_24h_change
+            price: parseFloat(data.lastPrice),
+            change_24h: parseFloat(data.priceChangePercent),
+            high_24h: parseFloat(data.highPrice),
+            low_24h: parseFloat(data.lowPrice),
+            volume_24h: parseFloat(data.quoteVolume) // USDT volume
         }
     } catch (e) {
-        console.error('CoinGecko BTC Price fetch error', e)
+        console.error('Binance BTC Ticker fetch error', e)
         return null
     }
 }
@@ -36,7 +40,7 @@ export async function getMarketSnapshot() {
         hyperliquidWhales,
         liquidationHeatmap
     ] = await Promise.all([
-        fetchBtcPrice(),
+        fetchBtcTicker(),
         fetchBinanceRSI('BTCUSDT', '1h'),
         // 恐懼貪婪指數 (from Coinglass)
         coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }),
@@ -83,6 +87,9 @@ export async function getMarketSnapshot() {
         btc: {
             price: btcPrice?.price,
             change_24h_percent: btcPrice?.change_24h,
+            high_24h: btcPrice?.high_24h,
+            low_24h: btcPrice?.low_24h,
+            volume_24h: btcPrice?.volume_24h,
             rsi_1h: rsi,
             rsi_status: rsi > 70 ? '超買' : rsi < 30 ? '超賣' : '中性',
         },
@@ -166,6 +173,8 @@ export async function getMarketSnapshot() {
             liquidation_below_price: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.support_1,
             price: btcPrice?.price,
             price_change_24h: btcPrice?.change_24h,
+            price_high_24h: btcPrice?.high_24h,
+            price_low_24h: btcPrice?.low_24h,
             whale_long_count: processWhaleAlerts(hyperliquidWhales)?.summary?.long_count,
             whale_short_count: processWhaleAlerts(hyperliquidWhales)?.summary?.short_count,
             whale_long_value: processWhaleAlerts(hyperliquidWhales)?.summary?.total_long_value_usd,

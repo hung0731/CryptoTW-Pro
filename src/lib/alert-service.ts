@@ -1,6 +1,8 @@
 import { createAdminClient } from '@/lib/supabase'
 import { getMarketSnapshot } from '@/lib/market-aggregator'
-import { detectAlerts } from '@/lib/alert-engine'
+import { detectAlerts, MarketStateRecord } from '@/lib/alert-engine'
+// LINE Notification temporarily disabled
+// import { sendAlertNotifications } from '@/lib/notification-service'
 
 export async function runAlertCheck() {
     const supabase = createAdminClient()
@@ -15,8 +17,7 @@ export async function runAlertCheck() {
     }
 
     // 2. Get Previous State from DB
-    // We assume 'BTC' for now
-    const { data: prevState, error: fetchError } = await supabase
+    const { data: prevStateData, error: fetchError } = await supabase
         .from('market_states')
         .select('*')
         .eq('market', 'BTC')
@@ -24,24 +25,38 @@ export async function runAlertCheck() {
         .limit(1)
         .single()
 
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "Relation not found" or "No rows"
+    // Map DB response to strict Type (handle potential nulls or type mismatch)
+    const prevState: MarketStateRecord | null = prevStateData ? {
+        price: Number(prevStateData.price),
+        open_interest: Number(prevStateData.open_interest),
+        funding_rate: Number(prevStateData.funding_rate),
+        long_short_ratio: Number(prevStateData.long_short_ratio),
+        leverage_status: prevStateData.leverage_state, // DB: leverage_state -> Interface: leverage_status
+        whale_status: prevStateData.whale_state,       // DB: whale_state -> Interface: whale_status
+        liquidation_pressure: prevStateData.liquidation_pressure,
+        updated_at: prevStateData.updated_at
+    } : null
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('Error fetching market state:', fetchError)
-        // Assuming table exists, if row not found (PGRST116), we treat as first run
     }
 
     // 3. Detect Alerts
-    // If no prevState, we can't compare, just save current state
     const currentPrice = btc.price
     const currentOI = capital_flow.open_interest_total || 0
     const currentFunding = capital_flow.funding_rate || 0
     const currentLSR = long_short.global_ratio || 1
+    const currentWhaleLSR = long_short.whale_ratio // Added for whale divergence
 
-    const alerts = prevState ? detectAlerts(
+    const alerts = detectAlerts(
         {
             price: currentPrice,
             oi: currentOI,
             funding: currentFunding,
             lsr: currentLSR,
+            whale_lsr: currentWhaleLSR,
+            price_high_24h: btc.high_24h, // market-aggregator returns high_24h
+            price_low_24h: btc.low_24h,   // market-aggregator returns low_24h
             liquidations: {
                 total: snapshot.liquidations?.total_liquidated || 0,
                 long: snapshot.liquidations?.long_liquidated || 0,
@@ -50,16 +65,13 @@ export async function runAlertCheck() {
         },
         signals,
         prevState
-    ) : []
+    )
 
     // 4. Save New State
-    // Insert new row to keep history, or update single row? 
-    // User said "Update market_state". Usually keeping history is better for charts, but we only need latest for alerts.
-    // Migration said we keep history (IDs are unique). 
-    // But we might want to clean up old states periodically.
+    // Always insert new state for history tracking (Analytics/AI Interpretation needs history)
     const { error: insertError } = await supabase.from('market_states').insert({
         market: 'BTC',
-        leverage_state: signals.leverage_status,
+        leverage_state: signals.leverage_status, // Map signal engine Enum to DB Enum string (ensure they match)
         whale_state: signals.whale_status,
         liquidation_pressure: signals.liquidation_pressure,
         price: currentPrice,
@@ -72,10 +84,11 @@ export async function runAlertCheck() {
         console.error('Error saving market state:', insertError)
     }
 
-    // 5. Save Events if any
+    // 5. Processing Alerts
     if (alerts.length > 0) {
         console.log(`[Alert] Detected ${alerts.length} alerts for BTC`)
 
+        // Save to DB
         const eventsToInsert = alerts.map(alert => ({
             market: alert.market,
             alert_type: alert.type,
@@ -88,10 +101,11 @@ export async function runAlertCheck() {
 
         if (alertError) {
             console.error('Error saving alerts:', alertError)
-        } else {
-            // TODO: Trigger Notification Service (LINE Push)
-            // await sendAlertNotifications(eventsToInsert)
         }
+        // LINE Notification temporarily disabled
+        // else {
+        //     await sendAlertNotifications(alerts)
+        // }
     }
 
     return {

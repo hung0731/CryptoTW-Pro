@@ -1,12 +1,18 @@
 import { MarketSignals } from './signal-engine'
 
 export interface AlertEvent {
-    type: 'price_pump' | 'price_drop' | 'oi_spike' | 'funding_high' | 'funding_flip_neg' | 'whale_shift' | 'liquidation_flip' | 'heavy_dump' | 'heavy_pump'
+    type: AlertType
     market: 'BTC'
     severity: 'low' | 'medium' | 'high'
     summary: string
     metrics: Record<string, any>
 }
+
+export type AlertType =
+    | 'price_pump' | 'price_drop' | 'volatility_warning'
+    | 'heavy_dump' | 'heavy_pump' | 'liquidation_flip'
+    | 'oi_spike' | 'funding_high' | 'funding_flip_neg'
+    | 'whale_shift' | 'whale_divergence'
 
 export interface MarketStateRecord {
     price: number
@@ -25,6 +31,9 @@ export function detectAlerts(
         oi: number;
         funding: number;
         lsr: number;
+        whale_lsr?: number;
+        price_high_24h?: number;
+        price_low_24h?: number;
         liquidations?: { total: number; long: number; short: number }
     },
     currentSignals: MarketSignals,
@@ -34,80 +43,82 @@ export function detectAlerts(
 
     if (!previousState) return alerts
 
-    // 1. Price Volatility (1.5% threshold)
-    const priceChange = (currentData.price - previousState.price) / previousState.price
-    const priceChangeAbs = Math.abs(priceChange)
+    // Helper to calculate percentage change
+    const pctChange = (curr: number, prev: number) => (curr - prev) / prev
+    const formatPct = (val: number) => (val * 100).toFixed(2) + '%'
+
+    // ==========================================
+    // A 類｜價格與波動 (Price & Volatility)
+    // ==========================================
+
+    // A1. 快速漲跌 (1.5% Threshold)
+    const priceChange = pctChange(currentData.price, previousState.price)
 
     if (priceChange <= -0.015) {
         alerts.push({
             type: 'price_drop',
             market: 'BTC',
             severity: 'high',
-            summary: '⚠️ BTC 價格在短時間內快速下跌',
-            metrics: { change: (priceChange * 100).toFixed(2) + '%', price: currentData.price }
+            summary: '⚠️ BTC 短時快速下跌',
+            metrics: { change: formatPct(priceChange), price: currentData.price }
         })
     } else if (priceChange >= 0.015) {
         alerts.push({
             type: 'price_pump',
             market: 'BTC',
             severity: 'high',
-            summary: '⚠️ BTC 價格在短時間內快速上漲',
-            metrics: { change: '+' + (priceChange * 100).toFixed(2) + '%', price: currentData.price }
+            summary: '🚀 BTC 短時快速上漲',
+            metrics: { change: '+' + formatPct(priceChange), price: currentData.price }
         })
     }
 
-    // 2. OI Spike with Stable Price
-    // Price change < 0.3%, OI increase > 3%
-    const oiChange = (currentData.oi - previousState.open_interest) / previousState.open_interest
+    // A2. 波動率警示 (如果價格變化小但其他指標劇烈)
+    // 邏輯: 價格橫盤 (<0.5%) 但 OI 劇烈變化 (>3%) 表示蓄力
+    // (這其實有點像 C1，但用來作為"波動前兆")
+    const priceFlat = Math.abs(priceChange) < 0.005
+    const oiChange = pctChange(currentData.oi, previousState.open_interest)
 
-    if (priceChangeAbs < 0.003 && oiChange > 0.03) {
+    if (priceFlat && Math.abs(oiChange) > 0.03) {
         alerts.push({
-            type: 'oi_spike',
+            type: 'volatility_warning',
             market: 'BTC',
             severity: 'medium',
-            summary: '⚠️ BTC 槓桿快速升溫 (價格盤整)',
-            metrics: { oi_change: '+' + (oiChange * 100).toFixed(2) + '%', price_change: (priceChange * 100).toFixed(2) + '%' }
+            summary: '⚠️ 市場波動蓄力中 (量增價平)',
+            metrics: { oi_change: formatPct(oiChange), price_change: formatPct(priceChange) }
         })
     }
 
-    // 3. Funding Rate Flip
-    if (previousState.funding_rate > 0 && currentData.funding < 0) {
-        alerts.push({
-            type: 'funding_flip_neg',
-            market: 'BTC',
-            severity: 'medium',
-            summary: '⚠️ BTC 資金費率轉負',
-            metrics: { current_funding: currentData.funding, prev_funding: previousState.funding_rate }
-        })
+    // ==========================================
+    // B 類｜爆倉事件 (Liquidation)
+    // ==========================================
+
+    // B1. 大規模單邊爆倉 (> 30M USD & > 70% 佔比)
+    const liqTotal = currentData.liquidations?.total || 0
+    const liqLong = currentData.liquidations?.long || 0
+    const liqShort = currentData.liquidations?.short || 0
+    const LIQ_THRESHOLD = 30_000_000 // 30M
+
+    if (liqTotal > LIQ_THRESHOLD) {
+        if (liqLong > liqTotal * 0.7) {
+            alerts.push({
+                type: 'heavy_dump',
+                market: 'BTC',
+                severity: 'high',
+                summary: '🔥 BTC 出現大規模多單爆倉',
+                metrics: { total: (liqTotal / 1e6).toFixed(1) + 'M', long_ratio: formatPct(liqLong / liqTotal) }
+            })
+        } else if (liqShort > liqTotal * 0.7) {
+            alerts.push({
+                type: 'heavy_pump',
+                market: 'BTC',
+                severity: 'high',
+                summary: '🔥 BTC 出現大規模空單爆倉',
+                metrics: { total: (liqTotal / 1e6).toFixed(1) + 'M', short_ratio: formatPct(liqShort / liqTotal) }
+            })
+        }
     }
 
-    // High Funding (Example threshold 0.02% which is high for default 0.01%) - Adjust based on data cycle
-    if (currentData.funding > 0.02 && currentData.funding > previousState.funding_rate * 1.2) {
-        alerts.push({
-            type: 'funding_high',
-            market: 'BTC',
-            severity: 'medium',
-            summary: '⚠️ BTC 資金費率快速升溫',
-            metrics: { current_funding: currentData.funding }
-        })
-    }
-
-    // 4. Whale Status Change
-    if (previousState.whale_status !== currentSignals.whale_status) {
-        // Only trigger if changing TO or FROM 'withdrawal' or 'long' maybe?
-        // User said: Change "Long -> Neutral", "Neutral -> Short", "Hedge -> Exit"
-        // Let's alert on ANY change for now, as whale state changes are rare and significant.
-        alerts.push({
-            type: 'whale_shift',
-            market: 'BTC',
-            severity: 'high',
-            summary: '🐋 巨鯨行為出現變化',
-            metrics: { from: previousState.whale_status, to: currentSignals.whale_status }
-        })
-    }
-
-    // 5. Liquidation Flip (Predicted Pressure from Heatmap)
-    // '上方壓力' | '下方壓力' | '均衡'
+    // B2. 爆倉方向翻轉 (Liquidation Pressure Flip)
     if (previousState.liquidation_pressure !== '均衡' &&
         currentSignals.liquidation_pressure !== '均衡' &&
         previousState.liquidation_pressure !== currentSignals.liquidation_pressure) {
@@ -115,38 +126,92 @@ export function detectAlerts(
         alerts.push({
             type: 'liquidation_flip',
             market: 'BTC',
-            severity: 'high',
-            summary: '🔄 BTC 爆倉方向出現轉變',
+            severity: 'medium',
+            summary: '🔄 爆倉壓力方向轉變',
             metrics: { from: previousState.liquidation_pressure, to: currentSignals.liquidation_pressure }
         })
     }
 
-    // 6. Actual Liquidation Spike (New)
-    // Threshold usually $20M or $50M for 1h spike depending on market cap, user suggested $100M but that's very high.
-    // Let's stick to user requirement: Only alert if SIGNIFICANT.
-    const liquidationTotal = currentData.liquidations?.total || 0
-    const longLiq = currentData.liquidations?.long || 0
-    const shortLiq = currentData.liquidations?.short || 0
+    // ==========================================
+    // C 類｜槓桿與資金 (Leverage & Funding)
+    // ==========================================
 
-    // Threshold $30M for MVP (adjust as needed)
-    if (liquidationTotal > 30_000_000) {
-        if (longLiq > liquidationTotal * 0.7) {
-            alerts.push({
-                type: 'heavy_dump', // Many longs rekt usually means rapid drop
-                market: 'BTC',
-                severity: 'high',
-                summary: '🔥 BTC 發生大規模多單爆倉',
-                metrics: { total: liquidationTotal, long_ratio: (longLiq / liquidationTotal * 100).toFixed(0) + '%' }
-            })
-        } else if (shortLiq > liquidationTotal * 0.7) {
-            alerts.push({
-                type: 'heavy_pump',
-                market: 'BTC',
-                severity: 'high',
-                summary: '🔥 BTC 發生大規模空單爆倉',
-                metrics: { total: liquidationTotal, short_ratio: (shortLiq / liquidationTotal * 100).toFixed(0) + '%' }
-            })
-        }
+    // C1. OI 快速升溫 (同 A2 邏輯，如果 A2 沒觸發，這裡專注於槓桿層面)
+    // 這裡我們只抓 "快速上升" > 5% 非常顯著
+    if (oiChange > 0.05) {
+        alerts.push({
+            type: 'oi_spike',
+            market: 'BTC',
+            severity: 'medium',
+            summary: '⚠️ 合約持倉量激增',
+            metrics: { change: '+' + formatPct(oiChange), current_oi: (currentData.oi / 1e9).toFixed(2) + 'B' }
+        })
+    }
+
+    // C2. 資金費率異常
+    // 翻負
+    if (previousState.funding_rate > 0 && currentData.funding < 0) {
+        alerts.push({
+            type: 'funding_flip_neg',
+            market: 'BTC',
+            severity: 'medium',
+            summary: '⚠️ 資金費率轉負',
+            metrics: { funding: (currentData.funding * 100).toFixed(4) + '%' }
+        })
+    }
+    // 極端高 (> 0.05%)
+    if (currentData.funding > 0.05 && currentData.funding > previousState.funding_rate) {
+        alerts.push({
+            type: 'funding_high',
+            market: 'BTC',
+            severity: 'high',
+            summary: '⚠️ 資金費率過熱',
+            metrics: { funding: (currentData.funding * 100).toFixed(4) + '%' }
+        })
+    }
+
+    // ==========================================
+    // D 類｜巨鯨行為 (Whale)
+    // ==========================================
+
+    // D1. 巨鯨狀態改變 (Whale Status Shift)
+    // 忽略 "觀望" 的進出，只關注有明確方向的改變
+    const importantStates = ['低調做多', '偏空', '防守對沖', '撤退中']
+    if (previousState.whale_status !== currentSignals.whale_status &&
+        (importantStates.includes(currentSignals.whale_status) || importantStates.includes(previousState.whale_status))) {
+
+        alerts.push({
+            type: 'whale_shift',
+            market: 'BTC',
+            severity: 'high',
+            summary: `🐋 巨鯨行為改變：${currentSignals.whale_status}`,
+            metrics: { from: previousState.whale_status, to: currentSignals.whale_status }
+        })
+    }
+
+    // D2. 巨鯨與散戶背離 (Whale Divergence)
+    // 散戶 (Global LSR) 看多 > 1.2，巨鯨 (Top LSR) 看空 < 0.8
+    if (currentData.lsr > 1.2 && currentData.whale_lsr && currentData.whale_lsr < 0.8) {
+        // Check if this is a NEW divergence (prev state didn't have it) usually we check state, 
+        // but simple check: just alert if it persists? Better limit frequency in DB layer. 
+        // For now we always generate, assuming notification service handles dupes or cron freq is low.
+        alerts.push({
+            type: 'whale_divergence',
+            market: 'BTC',
+            severity: 'high',
+            summary: '🐋 ⚠️ 巨鯨與散戶方向分歧 (散戶多/巨鯨空)',
+            metrics: { retail_lsr: currentData.lsr, whale_lsr: currentData.whale_lsr }
+        })
+    }
+    // 反向背離
+    if (currentData.lsr < 0.8 && currentData.whale_lsr && currentData.whale_lsr > 1.2) {
+        alerts.push({
+            type: 'whale_divergence',
+            market: 'BTC',
+            severity: 'high',
+            summary: '🐋 ✅ 巨鯨與散戶方向分歧 (散戶空/巨鯨多)',
+            metrics: { retail_lsr: currentData.lsr, whale_lsr: currentData.whale_lsr }
+        })
     }
 
     return alerts

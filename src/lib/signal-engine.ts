@@ -261,6 +261,8 @@ export interface RawMarketData {
     // 價格
     price?: number
     price_change_24h?: number
+    price_high_24h?: number
+    price_low_24h?: number
 
     // 巨鯨
     whale_long_count?: number

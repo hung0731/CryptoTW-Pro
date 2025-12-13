@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const apiKey = process.env.GEMINI_API_KEY
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
-const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025'
+const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
 
 export interface MarketSummaryResult {
     emoji: string
@@ -18,6 +18,36 @@ export interface MarketSummaryResult {
         resistance_zone: string   // 潛在壓力區 (原 take_profit)
     }
     risk_note: string
+}
+
+export async function generateAlertExplanation(alert: any): Promise<string | null> {
+    if (!genAI) return null
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+        const prompt = `
+你是一個加密貨幣市場快訊解讀 AI。
+請將以下「市場快訊事件」翻譯成白話文，並解釋其「常見市場含義」。
+
+【嚴重限制】
+1. 輸出長度：限 30-50 字 (非常精簡)
+2. 語氣：客觀、冷靜、事實陳述
+3. ❌ 禁止預測未來價格
+4. ❌ 禁止給予投資建議 (如買入、賣出、止損)
+5. ✅ 重點解釋：這個訊號通常代表什麼？(例如：OI 上升代表波動可能放大)
+
+【快訊事件】
+類型：${alert.type}
+摘要：${alert.summary}
+數據：${JSON.stringify(alert.metrics)}
+
+【輸出】(直接輸出文字，不要有其他廢話)
+`
+        const result = await model.generateContent(prompt)
+        return result.response.text().trim()
+    } catch (e) {
+        console.error('Gemini Alert Explainer Error:', e)
+        return null // Fallback to static text
+    }
 }
 
 export async function generateMarketSummary(
