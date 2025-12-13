@@ -1,4 +1,5 @@
-import { coinglassV4Request } from './coinglass'
+import { cachedCoinglassV4Request } from './coinglass'
+import { CacheTTL } from './cache'
 import { fetchBinanceRSI } from './technical-analysis'
 import { generateMarketSignals, type MarketSignals, type RawMarketData } from './signal-engine'
 
@@ -42,28 +43,28 @@ export async function getMarketSnapshot() {
     ] = await Promise.all([
         fetchBtcTicker(),
         fetchBinanceRSI('BTCUSDT', '1h'),
-        // 恐懼貪婪指數 (from Coinglass)
-        coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }),
-        // 資金費率
-        coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }),
-        // 全球多空比
-        coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }),
-        // 大戶多空比
-        coinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }),
-        // 持倉量
-        coinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: 'BTC' }),
-        // 爆倉
-        coinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: 'BTC', interval: '1h', limit: 1 }),
-        // 主動買賣比
-        coinglassV4Request<any>('/api/futures/taker-buy-sell-volume/exchange-list', { symbol: 'BTC', range: '1h' }),
-        // BTC ETF 資金流
-        coinglassV4Request<any[]>('/api/etf/bitcoin/flow-history', { limit: 1 }).catch(() => null),
-        // Coinbase 溢價
-        coinglassV4Request<any[]>('/api/coinbase-premium-index', { limit: 1 }).catch(() => null),
-        // Hyperliquid 鯨魚
-        coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}).catch(() => null),
-        // 清算地圖
-        coinglassV4Request<any>('/api/futures/liquidation-heatmap', { symbol: 'BTC', range: '3d' }).catch(() => null)
+        // 恐懼貪婪指數 (15 min cache - daily data)
+        cachedCoinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }, CacheTTL.SLOW),
+        // 資金費率 (5 min cache - 8hr settlement)
+        cachedCoinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }, CacheTTL.MEDIUM),
+        // 全球多空比 (5 min cache)
+        cachedCoinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM),
+        // 大戶多空比 (5 min cache)
+        cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM),
+        // 持倉量 (1 min cache - changes faster)
+        cachedCoinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: 'BTC' }, CacheTTL.FAST),
+        // 爆倉 (1 min cache)
+        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: 'BTC', interval: '1h', limit: 1 }, CacheTTL.FAST),
+        // 主動買賣比 (1 min cache)
+        cachedCoinglassV4Request<any>('/api/futures/taker-buy-sell-volume/exchange-list', { symbol: 'BTC', range: '1h' }, CacheTTL.FAST),
+        // BTC ETF 資金流 (15 min cache - daily data)
+        cachedCoinglassV4Request<any[]>('/api/etf/bitcoin/flow-history', { limit: 1 }, CacheTTL.SLOW).catch(() => null),
+        // Coinbase 溢價 (5 min cache)
+        cachedCoinglassV4Request<any[]>('/api/coinbase-premium-index', { limit: 1 }, CacheTTL.MEDIUM).catch(() => null),
+        // Hyperliquid 鯨魚 (1 min cache)
+        cachedCoinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}, CacheTTL.FAST).catch(() => null),
+        // 清算地圖 (5 min cache - compute heavy)
+        cachedCoinglassV4Request<any>('/api/futures/liquidation-heatmap', { symbol: 'BTC', range: '3d' }, CacheTTL.MEDIUM).catch(() => null)
     ])
 
     // Debug logging

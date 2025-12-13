@@ -1,6 +1,8 @@
 // Coinglass API Configuration
 // API Documentation: https://docs.coinglass.com
 
+import { getCache, setCache, CacheTTL } from './cache'
+
 // V2 API (legacy)
 const COINGLASS_V2_URL = 'https://open-api.coinglass.com'
 // V4 API (new, for Hyperliquid etc.)
@@ -121,6 +123,34 @@ export async function coinglassV4Request<T>(
         console.error('Coinglass V4 API request failed:', error)
         return null
     }
+}
+
+/**
+ * Cached version of coinglassV4Request
+ * Uses in-memory cache to reduce API calls
+ */
+export async function cachedCoinglassV4Request<T>(
+    endpoint: string,
+    params?: Record<string, string | number>,
+    ttlSeconds: number = CacheTTL.FAST
+): Promise<T | null> {
+    const cacheKey = `coinglass:${endpoint}:${JSON.stringify(params || {})}`
+
+    // Check cache first
+    const cached = getCache<T>(cacheKey)
+    if (cached !== null) {
+        return cached
+    }
+
+    // Fetch from API
+    const data = await coinglassV4Request<T>(endpoint, params)
+
+    // Cache successful responses
+    if (data !== null) {
+        setCache(cacheKey, data, ttlSeconds)
+    }
+
+    return data
 }
 
 // ============================================
