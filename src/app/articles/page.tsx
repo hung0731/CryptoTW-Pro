@@ -35,16 +35,16 @@ export default function ArticlesPage() {
         // Process Coinglass News
         if (newsRes.news) {
           const externalNews = newsRes.news.map((item: any) => ({
-            id: `cg-${item.id || Math.random()}`,
-            title: item.title || item.article_title,
-            content: item.content || item.article_content,
-            summary: item.intro || item.article_content?.substring(0, 100),
-            thumbnail_url: item.cover || item.article_picture,
+            id: `cg-${Math.random().toString(36).substr(2, 9)}`, // V4 data doesn't seem to have a unique ID in the example, generating one
+            title: item.article_title,
+            content: item.article_content,
+            summary: item.article_description || item.article_content?.substring(0, 100),
+            thumbnail_url: item.article_picture,
             type: 'news',
-            created_at: item.createTime || item.article_release_time,
-            url: item.url, // Ensure URL is captured if available
+            created_at: item.article_release_time, // This is a timestamp number
+            url: null, // V4 example doesn't show a direct URL, might need to construct or it's missing
             is_public: true,
-            source: 'Coinglass'
+            source: item.source_name || 'Coinglass'
           }))
           setCoinglassNews(externalNews)
         }
