@@ -32,7 +32,8 @@ export async function getMarketSnapshot() {
         takerBuySell,
         etfFlows,
         coinbasePremium,
-        hyperliquidWhales
+        hyperliquidWhales,
+        liquidationHeatmap
     ] = await Promise.all([
         fetchBtcPrice(),
         fetchBinanceRSI('BTCUSDT', '1h'),
@@ -55,7 +56,9 @@ export async function getMarketSnapshot() {
         // Coinbase 溢價
         coinglassV4Request<any[]>('/api/coinbase-premium-index', { limit: 1 }).catch(() => null),
         // Hyperliquid 鯨魚
-        coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}).catch(() => null)
+        coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}).catch(() => null),
+        // 清算地圖
+        coinglassV4Request<any>('/api/futures/liquidation-heatmap', { symbol: 'BTC', range: '3d' }).catch(() => null)
     ])
 
     // Debug logging
@@ -146,6 +149,9 @@ export async function getMarketSnapshot() {
 
         // Hyperliquid 巨鯨動態 (from Coinglass V4)
         whales: processWhaleAlerts(hyperliquidWhales),
+
+        // 清算地圖 (Liquidation Heatmap)
+        liquidation_map: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price),
     }
 }
 
@@ -208,7 +214,77 @@ function processWhaleAlerts(alerts: any[] | null) {
     }
 }
 
+// Process liquidation heatmap into key levels
+function processLiquidationHeatmap(data: any, currentPrice: number | undefined) {
+    if (!data || !currentPrice) {
+        return { has_data: false, summary: null }
+    }
 
+    const levels = data.levels || data.priceList || []
+    if (levels.length === 0) {
+        return { has_data: false, summary: null }
+    }
 
+    // Find liquidation levels above and below current price
+    const aboveLevels = levels
+        .filter((l: any) => (l.price || l.p) > currentPrice)
+        .sort((a: any, b: any) => (a.price || a.p) - (b.price || b.p))
+        .slice(0, 3)
+        .map((l: any) => ({
+            price: l.price || l.p,
+            liq_usd: l.longLiquidation || l.liqLong || 0,
+        }))
 
+    const belowLevels = levels
+        .filter((l: any) => (l.price || l.p) < currentPrice)
+        .sort((a: any, b: any) => (b.price || b.p) - (a.price || a.p))
+        .slice(0, 3)
+        .map((l: any) => ({
+            price: l.price || l.p,
+            liq_usd: l.shortLiquidation || l.liqShort || 0,
+        }))
 
+    // Calculate total liquidation pressure
+    const totalAbove = aboveLevels.reduce((sum: number, l: any) => sum + l.liq_usd, 0)
+    const totalBelow = belowLevels.reduce((sum: number, l: any) => sum + l.liq_usd, 0)
+
+    // Find max liquidation level (max pain)
+    const allLevels = [...aboveLevels, ...belowLevels]
+    const maxPainLevel = allLevels.reduce((max: any, l: any) =>
+        l.liq_usd > (max?.liq_usd || 0) ? l : max, allLevels[0])
+
+    // Determine signal
+    let signal = '均衡'
+    let direction = 'neutral'
+    if (totalAbove > totalBelow * 1.5) {
+        signal = '上方阻力強'
+        direction = 'bearish'
+    } else if (totalBelow > totalAbove * 1.5) {
+        signal = '下方支撐弱'
+        direction = 'bullish'  // Price tends to hunt weak side
+    }
+
+    // Format for AI consumption
+    const formatPrice = (p: number) => p >= 1000 ? `${(p / 1000).toFixed(1)}K` : p.toFixed(0)
+    const formatUsd = (u: number) => {
+        if (u >= 1e9) return `${(u / 1e9).toFixed(1)}B`
+        if (u >= 1e6) return `${(u / 1e6).toFixed(0)}M`
+        return `${(u / 1e3).toFixed(0)}K`
+    }
+
+    return {
+        has_data: true,
+        summary: {
+            current_price: currentPrice,
+            resistance_1: aboveLevels[0]?.price,
+            resistance_1_liq: formatUsd(aboveLevels[0]?.liq_usd || 0),
+            support_1: belowLevels[0]?.price,
+            support_1_liq: formatUsd(belowLevels[0]?.liq_usd || 0),
+            total_above_usd: totalAbove,
+            total_below_usd: totalBelow,
+            max_pain_price: maxPainLevel?.price,
+            signal: signal,
+            direction: direction,
+        }
+    }
+}
