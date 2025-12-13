@@ -96,7 +96,7 @@ export default function BindingsPage() {
                                 <p className="text-sm font-medium text-neutral-300">尚未綁定任何交易所</p>
                                 <p className="text-xs text-neutral-500 mt-1">綁定交易所以解鎖 Pro 會員資格</p>
                             </div>
-                            <Link href="/register">
+                            <Link href="/join">
                                 <Button size="sm" className="rounded-full bg-white text-black hover:bg-neutral-200 font-bold px-6 h-9 text-xs mt-2">
                                     立即綁定
                                 </Button>
@@ -141,7 +141,7 @@ export default function BindingsPage() {
                                     </div>
 
                                     {b.status === 'rejected' && (
-                                        <Link href={`/register/${b.exchange_name}`}>
+                                        <Link href="/join">
                                             <Button variant="ghost" size="icon" className="h-9 w-9 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-full">
                                                 <ChevronRight className="w-4 h-4" />
                                             </Button>
@@ -154,7 +154,7 @@ export default function BindingsPage() {
                 </section>
 
                 {/* Add New Binding Button */}
-                <Link href="/register">
+                <Link href="/join">
                     <Button variant="outline" className="w-full border-dashed border border-white/10 bg-transparent py-6 text-neutral-400 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all rounded-xl">
                         <Plus className="w-4 h-4 mr-2" />
                         綁定其他交易所

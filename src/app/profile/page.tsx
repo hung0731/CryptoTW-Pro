@@ -136,7 +136,7 @@ export default function ProfilePage() {
                     <div className="bg-neutral-900/30 rounded-2xl border border-white/5 divide-y divide-white/5">
                         <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
                         <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
-                        <MenuLink icon={Crown} label="大客戶計劃" href="/vip" />
+                        <MenuLink icon={Crown} label="大客戶計劃" href="/join" />
                     </div>
                 </section>
 

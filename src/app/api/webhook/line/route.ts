@@ -92,7 +92,7 @@ const WELCOME_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "連結帳戶",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
                     },
                     color: "#000000"
                 }
@@ -191,7 +191,7 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "立即加入",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
                     },
                     color: "#1F1AD9"
                 },
@@ -202,7 +202,7 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "了解更多福利",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/vip`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
                     },
                     color: "#000000"
                 }
@@ -370,7 +370,7 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "立即加入 Pro",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/register`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
                     },
                     color: "#1F1AD9"
                 },
@@ -381,7 +381,7 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
                     action: {
                         type: "uri",
                         label: "查看 VIP 福利",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/vip`
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
                     },
                     color: "#000000"
                 }
