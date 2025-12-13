@@ -205,6 +205,13 @@ export function LiquidationWaterfall() {
                     </div>
                 ))}
             </div>
+
+            {/* Explanation */}
+            <div className="bg-neutral-900 rounded-lg p-3 border border-white/5 mt-3">
+                <p className="text-[10px] text-neutral-500">
+                    💡 瀑布流展示了大額爆倉事件。當出現大規模「多單爆倉」時，市場可能短期超賣；反之「空單爆倉」則可能超買。
+                </p>
+            </div>
         </div>
     )
 }
