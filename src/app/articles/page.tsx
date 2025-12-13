@@ -42,6 +42,7 @@ export default function ArticlesPage() {
             thumbnail_url: item.cover || item.article_picture,
             type: 'news',
             created_at: item.createTime || item.article_release_time,
+            url: item.url, // Ensure URL is captured if available
             is_public: true,
             source: 'Coinglass'
           }))
@@ -182,53 +183,94 @@ function ContentList({ items }: { items: any[] }) {
     )
   }
   return (
-    <div className="bg-neutral-900/50 rounded-lg border border-white/5 divide-y divide-white/5">
-      {items.map((item) => (
-        <Link href={`/content/${item.id}`} key={item.id} className="block group">
-          <div className="flex items-start gap-4 p-4 hover:bg-white/5 transition-colors">
-            {/* Thumbnail */}
-            {item.thumbnail_url && (
-              <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-800 border border-white/10">
-                <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
-                {!item.is_public && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <Lock className="w-5 h-5 text-yellow-500 drop-shadow-md" />
+  return (
+    <div className="space-y-3">
+      {items.map((item) => {
+        // Flash News Style (Compact, no big thumbnail, high information density)
+        if (item.type === 'news') {
+          return (
+            <Link href={item.url || `/content/${item.id}`} key={item.id} target={item.url ? "_blank" : undefined} className="block group">
+              <div className="bg-neutral-900/30 border border-white/5 rounded-lg p-3 hover:bg-white/5 transition-all flex gap-3">
+                {/* Time Column */}
+                <div className="flex flex-col items-center shrink-0 w-12 pt-0.5">
+                  <span className="text-xs font-bold text-neutral-300 font-mono">
+                    {new Date(item.created_at).getHours().toString().padStart(2, '0')}:{new Date(item.created_at).getMinutes().toString().padStart(2, '0')}
+                  </span>
+                  <div className="h-full w-px bg-white/10 my-1 group-hover:bg-blue-500/50 transition-colors"></div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-blue-500/30 text-blue-400 bg-blue-500/10 font-normal">
+                      快訊
+                    </Badge>
+                    <span className="text-[10px] text-neutral-500">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </span>
+                    {item.source && (
+                      <span className="text-[10px] text-neutral-500 border-l border-neutral-800 pl-2">
+                        {item.source}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors leading-snug mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
+                    {item.summary}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          )
+        }
+
+        // Standard Article Style
+        return (
+          <Link href={`/content/${item.id}`} key={item.id} className="block group">
+            <div className="bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden hover:bg-white/5 transition-colors">
+              <div className="flex items-start gap-4 p-4">
+                {/* Thumbnail */}
+                {item.thumbnail_url && (
+                  <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-800 border border-white/10">
+                    <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
+                    {!item.is_public && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <Lock className="w-5 h-5 text-yellow-500 drop-shadow-md" />
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Content */}
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-neutral-400 font-normal">
-                  {item.type?.toUpperCase() || 'ARTICLE'}
-                </Badge>
-                {/* Date */}
-                <span className="text-[10px] text-neutral-600">
-                  {new Date(item.created_at).toLocaleDateString()}
-                </span>
-                {item.source && (
-                  <span className="text-[10px] text-neutral-500 border-l border-neutral-800 pl-2 ml-1">
-                    {item.source}
-                  </span>
-                )}
-              </div>
-              <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
-                {item.title}
-              </h3>
-              <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
-                {item.summary || item.content?.substring(0, 100)}...
-              </p>
-            </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-neutral-400 font-normal">
+                      {item.type?.toUpperCase() || 'ARTICLE'}
+                    </Badge>
+                    <span className="text-[10px] text-neutral-600">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
+                    {item.summary || item.content?.substring(0, 100)}...
+                  </p>
+                </div>
 
-            {/* Arrow */}
-            <div className="self-center shrink-0 opacity-0 group-hover:opacity-50 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
-              <ChevronRight className="w-4 h-4 text-neutral-400" />
+                {/* Arrow */}
+                <div className="self-center shrink-0 opacity-0 group-hover:opacity-50 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                  <ChevronRight className="w-4 h-4 text-neutral-400" />
+                </div>
+              </div>
             </div>
-          </div>
-        </Link>
-      ))}
+          </Link>
+        )
+      })}
     </div>
+  )
   )
 }

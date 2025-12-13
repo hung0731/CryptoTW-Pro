@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart } from 'lucide-react'
+import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLiff } from '@/components/LiffProvider'
@@ -18,7 +18,8 @@ import {
     WhalePositionsList,
     LiquidationHeatmap,
     ExchangeTransparency,
-    LongShortRatio
+    LongShortRatio,
+    EconomicCalendar
 } from '@/components/CoinglassWidgets'
 
 interface GlobalData {
@@ -253,7 +254,7 @@ export default function DataPage() {
             <Tabs defaultValue="market" className="w-full" onValueChange={setActiveTab}>
                 {/* Custom Tabs List */}
                 <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
-                    <TabsList className="w-full grid grid-cols-5 h-auto p-1 bg-neutral-900/50 rounded-lg">
+                    <TabsList className="w-full grid grid-cols-6 h-auto p-1 bg-neutral-900/50 rounded-lg">
                         <TabsTrigger value="market" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
                             <BarChart3 className="w-3 h-3" />
                             市場
@@ -273,6 +274,10 @@ export default function DataPage() {
                         <TabsTrigger value="whales" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
                             <Radar className="w-3 h-3 text-purple-400" />
                             巨鯨
+                        </TabsTrigger>
+                        <TabsTrigger value="calendar" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <Calendar className="w-3 h-3 text-blue-400" />
+                            日曆
                         </TabsTrigger>
                         <TabsTrigger value="prediction" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
                             <Gauge className="w-3 h-3" />
@@ -412,6 +417,11 @@ export default function DataPage() {
                 <TabsContent value="whales" className="space-y-4 p-4 min-h-[50vh]">
                     <WhaleAlertFeed />
                     <WhalePositionsList />
+                </TabsContent>
+
+                {/* TAB: Calendar */}
+                <TabsContent value="calendar" className="space-y-4 p-4 min-h-[50vh]">
+                    <EconomicCalendar />
                 </TabsContent>
 
                 {/* TAB 3: Prediction */}

@@ -34,11 +34,17 @@ export async function middleware(request: NextRequest) {
     // Refresh Session
     const { data: { user } } = await supabase.auth.getUser()
 
+
     // Handle "path" query param redirect (Fix for LIFF Concatenate issue)
     const { searchParams } = request.nextUrl
     const path = searchParams.get('path')
     if (path && path.startsWith('/')) {
         return NextResponse.redirect(new URL(path, request.url))
+    }
+
+    // Fix 404: Redirect /pro to /
+    if (request.nextUrl.pathname === '/pro') {
+        return NextResponse.redirect(new URL('/', request.url))
     }
 
     // Security: Protect /admin routes
