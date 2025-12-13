@@ -15,16 +15,20 @@ export async function triggerMarketSummaryAction() {
     }
 
     // 2. Check Admin Role
-    const { data: userData } = await supabase
+    const { data: userData, error: userError } = await supabase
         .from('users')
         .select('membership_status')
         .eq('id', user.id)
         .single()
 
+    console.log('[AdminAction] User:', user.id)
+    console.log('[AdminAction] DB Role:', userData?.membership_status)
+    console.log('[AdminAction] DB Error:', userError)
+
     // Allow 'admin' or 'super_admin'
     const allowedRoles = ['admin', 'super_admin']
     if (!userData?.membership_status || !allowedRoles.includes(userData.membership_status)) {
-        return { success: false, error: 'Forbidden: Admins Only' }
+        return { success: false, error: `Forbidden: Admins Only (Role: ${userData?.membership_status || 'None'})` }
     }
 
     // 3. Run Workflow
