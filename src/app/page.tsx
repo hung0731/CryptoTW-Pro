@@ -11,10 +11,11 @@ import {
     ChevronRight, Gauge, DollarSign, Bitcoin, Bell, Settings, Flame
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AIMarketPulse } from '@/components/AIMarketPulse'
 import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/components/CoinglassWidgets'
 
 export default function HomePage() {
-    const { profile } = useLiff()
+    const { profile, isLoading: isAuthLoading } = useLiff()
     const [loading, setLoading] = useState(true)
     const [articles, setArticles] = useState<any[]>([])
     const [marketData, setMarketData] = useState<any>(null)

@@ -14,6 +14,7 @@ export interface MarketSummaryResult {
     key_points: string[]
     actionable_insight: string
     risk_level: string
+    emoji?: string
 }
 
 export async function generateMarketSummary(marketData: any): Promise<MarketSummaryResult | null> {
@@ -36,12 +37,14 @@ Requirements:
 1. **Conservatism**: When giving advice, be extremely conservative. Emphasize risk management. Avoid "moon boy" predictions.
 2. **Language**: Traditional Chinese (Taiwanese crypto terminology).
 3. **Format**: Returns strictly valid JSON.
-4. **Content**:
+4. **Emoji**: Select ONE single emoji that best represents the current market vibe. Be creative and diverse (e.g., 🎢, 🩸, 🌱, 🧊, 🌋, 🐢, 🚀, 💀, 🧘, 🌪️). Avoid just using 📈/📉 repeatedly.
+5. **Content**:
     - Sentiment Score (0-100, <30 Bearish, >70 Bullish)
     - Short Summary (3-4 lines, summarize the WHOLE market state).
     - Key Points (3 bullet points of what matters NOW).
     - Actionable Insight (One conservative piece of advice).
     - Risk Level (Low/Medium/High/Extreme).
+    - Emoji (The selected emoji character).
 
 Output JSON Schema:
 {
@@ -50,7 +53,8 @@ Output JSON Schema:
   "summary": "string",
   "key_points": ["string", "string", "string"],
   "actionable_insight": "string",
-  "risk_level": "string"
+  "risk_level": "string",
+  "emoji": "string"
 }
 `
 

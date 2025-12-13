@@ -21,7 +21,9 @@ export function PageHeader({
     const { profile } = useLiff()
 
     return (
-        <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
+        <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/10">
+            {/* Gradient Separator */}
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
             <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
                 {/* Left: Back Button or Empty */}
                 <div className="flex items-center justify-start">

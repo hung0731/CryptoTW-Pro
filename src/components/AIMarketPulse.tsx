@@ -15,6 +15,7 @@ interface MarketReport {
     summary: string
     key_points: string[]
     strategy: string
+    emoji?: string
 }
 
 export function AIMarketPulse() {
@@ -74,7 +75,11 @@ export function AIMarketPulse() {
                     {/* Icon & Score */}
                     <div className="flex flex-col items-center gap-1 shrink-0">
                         <div className="w-10 h-10 rounded-lg bg-black border border-white/10 flex items-center justify-center relative overflow-hidden group">
-                            <BrainCircuit className="w-5 h-5 text-purple-400 z-10" />
+                            {report.emoji ? (
+                                <span className="text-xl z-10">{report.emoji}</span>
+                            ) : (
+                                <BrainCircuit className="w-5 h-5 text-purple-400 z-10" />
+                            )}
                             <div className="absolute inset-0 bg-purple-500/20 blur-md opacity-50 group-hover:opacity-100 transition-opacity" />
                         </div>
                         <span className={cn(

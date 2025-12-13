@@ -7,6 +7,7 @@ create table if not exists market_reports (
   summary text not null,
   key_points jsonb, -- Array of strings
   strategy text,
+  emoji text, -- AI selected emoji
   metadata jsonb -- For raw data snapshot if needed
 );
 
