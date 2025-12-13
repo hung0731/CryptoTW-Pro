@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge, Calendar as CalendarIcon, ArrowLeftRight, Radar, Users } from 'lucide-react'
+import { ExplainTooltip } from './ExplainTooltip'
 
 // ============================================
 // Bull/Bear Index Component
@@ -52,6 +53,16 @@ export function BullBearIndex() {
                 <div className="flex items-center gap-2">
                     <Gauge className="w-4 h-4 text-neutral-500" />
                     <span className="text-sm font-medium text-white">牛熊指標</span>
+                    <ExplainTooltip
+                        term="牛熊指標"
+                        definition="衡量市場情緒的綜合指數，範圍 0-100。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>0-25 (極度恐懼)</strong>：市場非理性恐慌，通常是長線買點。</li>
+                                <li><strong>75-100 (極度貪婪)</strong>：市場FOMO情緒高漲，需警惕回調風險。</li>
+                            </ul>
+                        }
+                    />
                 </div>
                 <div className="flex items-center gap-2">
                     <span className={cn("text-2xl font-bold font-mono", getColor(data.index))}>
@@ -414,6 +425,17 @@ export function LiquidationHeatmap() {
                 <div className="flex items-center gap-2">
                     <Flame className="w-4 h-4 text-red-400" />
                     <span className="text-lg font-bold text-white">BTC 清算分布</span>
+                    <ExplainTooltip
+                        term="清算熱力圖 (Liquidation Heatmap)"
+                        definition="預測不同價格區間會有多少合約強制平倉 (爆倉) 的地圖。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>顏色越亮</strong>：代表爆倉強度越高 (高流動性)。</li>
+                                <li><strong>磁吸效應</strong>：價格傾向去觸碰亮區，吸收流動性後再反轉。</li>
+                                <li><strong>實戰應用</strong>：不要在亮區追價，反而是掛單止盈的好位置。</li>
+                            </ul>
+                        }
+                    />
                 </div>
                 <span className="text-xs text-neutral-400">現價 {data.currentPriceFormatted}</span>
             </div>
@@ -746,6 +768,16 @@ export function FundingSummary() {
             <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-3.5 h-3.5 text-yellow-400" />
                 <span className="text-xs font-bold text-white">資金費率</span>
+                <ExplainTooltip
+                    term="資金費率 (Funding Rate)"
+                    definition="確保合約價格貼近現貨價格的機制。正費率代表多頭付費給空頭。"
+                    explanation={
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li><strong>費率飆升 (&gt;0.05%)</strong>：多頭過度擁擠，主力可能砸盤殺多。</li>
+                            <li><strong>費率轉負</strong>：空頭擁擠，可能出現軋空 (Short Squeeze) 上漲。</li>
+                        </ul>
+                    }
+                />
             </div>
             <div className="space-y-2">
                 {topPositive && (
@@ -832,6 +864,17 @@ export function LongShortSummary() {
             <div className="flex items-center gap-2 mb-2">
                 <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
                 <span className="text-xs font-bold text-white">BTC 多空比</span>
+                <ExplainTooltip
+                    term="多空比 (Long/Short Ratio)"
+                    definition="市場上做多帳戶與做空帳戶的數量比例。"
+                    explanation={
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li><strong>全網多空比</strong>：代表散戶情緒，過高通常是反指標 (散戶都在做多)。</li>
+                            <li><strong>大戶多空比</strong>：代表聰明錢動向，更具參考價值。</li>
+                            <li><strong>背離訊號</strong>：若全網極度看多，但價格下跌，代表主力正在出貨。</li>
+                        </ul>
+                    }
+                />
             </div>
 
             <div className="mt-3">
