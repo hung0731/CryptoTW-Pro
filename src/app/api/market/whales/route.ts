@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
-import { getHyperliquidWhaleAlerts, getHyperliquidWhalePositions } from '@/lib/coinglass'
+import { coinglassV4Request } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
         const [alerts, positions] = await Promise.all([
-            getHyperliquidWhaleAlerts(),
-            getHyperliquidWhalePositions()
+            coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}),
+            coinglassV4Request<any[]>('/api/hyperliquid/whale-position', {})
         ])
 
         return NextResponse.json({

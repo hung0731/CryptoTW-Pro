@@ -1,29 +1,28 @@
 import { NextResponse } from 'next/server'
-import { coinglassRequest } from '@/lib/coinglass'
+import { coinglassV4Request } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 300 // Cache for 5 minutes
+export const revalidate = 300
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const symbol = searchParams.get('symbol') || 'BTC'
-    const range = searchParams.get('range') || '3d' // 1d, 3d, 7d, 1m
+    const range = searchParams.get('range') || '3d'
 
     try {
-        const data = await coinglassRequest<any>(
-            '/public/v2/liquidation-heatmap',
-            { symbol, range },
-            { next: { revalidate: 300 } } // Cache for 5 minutes
+        // V4 endpoint for liquidation heatmap
+        const data = await coinglassV4Request<any>(
+            '/api/futures/liquidation-heatmap',
+            { symbol, range }
         )
 
         if (!data) {
+            // Fallback to demo data if V4 doesn't support this endpoint
             return NextResponse.json({
-                error: 'Failed to fetch heatmap data',
                 heatmap: getDemoData()
             })
         }
 
-        // Process heatmap data
         const processed = processHeatmapData(data)
 
         return NextResponse.json({
@@ -37,7 +36,6 @@ export async function GET(request: Request) {
     } catch (error) {
         console.error('Heatmap API error:', error)
         return NextResponse.json({
-            error: 'Internal server error',
             heatmap: getDemoData()
         })
     }

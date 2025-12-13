@@ -144,11 +144,67 @@ export async function getMarketSnapshot() {
             has_data: !!coinbasePremium?.[0],
         },
 
-        // Hyperliquid 鯨魚 (from Coinglass V4)
-        whales: {
-            hyperliquid_alerts: hyperliquidWhales?.slice(0, 5) || [],
-            has_data: (hyperliquidWhales?.length || 0) > 0,
-        }
+        // Hyperliquid 巨鯨動態 (from Coinglass V4)
+        whales: processWhaleAlerts(hyperliquidWhales),
+    }
+}
+
+// Process whale alerts into useful summary
+function processWhaleAlerts(alerts: any[] | null) {
+    if (!alerts || alerts.length === 0) {
+        return { has_data: false, summary: null, recent_alerts: [] }
+    }
+
+    // Filter BTC related alerts and recent ones (last 24h)
+    const now = Date.now()
+    const oneDayAgo = now - 24 * 60 * 60 * 1000
+
+    const recentAlerts = alerts
+        .filter((a: any) => a.create_time > oneDayAgo)
+        .slice(0, 10)
+
+    // Calculate summary stats
+    const btcAlerts = recentAlerts.filter((a: any) => a.symbol === 'BTC')
+    const openPositions = recentAlerts.filter((a: any) => a.position_action === 1)
+    const closePositions = recentAlerts.filter((a: any) => a.position_action === 2)
+
+    // Long vs Short (positive position_size = long, negative = short)
+    const longAlerts = recentAlerts.filter((a: any) => a.position_size > 0)
+    const shortAlerts = recentAlerts.filter((a: any) => a.position_size < 0)
+
+    // Total value
+    const totalLongValue = longAlerts.reduce((sum: number, a: any) => sum + (a.position_value_usd || 0), 0)
+    const totalShortValue = shortAlerts.reduce((sum: number, a: any) => sum + (a.position_value_usd || 0), 0)
+
+    // Determine sentiment
+    let whaleSentiment = '中性'
+    if (totalLongValue > totalShortValue * 1.5) {
+        whaleSentiment = '偏多'
+    } else if (totalShortValue > totalLongValue * 1.5) {
+        whaleSentiment = '偏空'
+    }
+
+    return {
+        has_data: true,
+        summary: {
+            total_alerts_24h: recentAlerts.length,
+            btc_alerts: btcAlerts.length,
+            open_count: openPositions.length,
+            close_count: closePositions.length,
+            long_count: longAlerts.length,
+            short_count: shortAlerts.length,
+            total_long_value_usd: totalLongValue,
+            total_short_value_usd: totalShortValue,
+            whale_sentiment: whaleSentiment,
+        },
+        recent_alerts: recentAlerts.slice(0, 3).map((a: any) => ({
+            symbol: a.symbol,
+            side: a.position_size > 0 ? 'LONG' : 'SHORT',
+            action: a.position_action === 1 ? 'OPEN' : 'CLOSE',
+            value_usd: a.position_value_usd,
+            entry_price: a.entry_price,
+            time: new Date(a.create_time).toISOString(),
+        }))
     }
 }
 

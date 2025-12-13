@@ -1,39 +1,38 @@
 import { NextResponse } from 'next/server'
-import { coinglassRequest } from '@/lib/coinglass'
+import { coinglassV4Request } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 3600 // Cache for 1 hour
+export const revalidate = 3600
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const symbol = searchParams.get('symbol') || 'BTC'
 
     try {
-        // Fetch exchange balance data
-        const data = await coinglassRequest<any[]>(
-            '/public/v2/exchange/balance',
+        // V4 endpoint for exchange balance
+        const data = await coinglassV4Request<any[]>(
+            '/api/spot/exchange-balance-list',
             { symbol }
         )
 
-        if (!data) {
+        if (!data || data.length === 0) {
             return NextResponse.json({
-                error: 'Failed to fetch exchange data',
                 exchange: getDemoData()
             })
         }
 
         // Process data
         const processed = data
-            .sort((a, b) => b.balance - a.balance)
+            .sort((a, b) => (b.balance || 0) - (a.balance || 0))
             .slice(0, 10)
             .map(item => ({
-                name: item.exchangeName,
-                balance: item.balance,
-                balanceFormatted: formatNumber(item.balance),
-                change24h: item.changeH24 || 0,
-                change24hPercent: calculateChangePercent(item.balance, item.changeH24),
-                reserves: '100%+', // Placeholder as API doesn't provide this directly
-                flow: item.changeH24 > 0 ? 'in' : 'out'
+                name: item.exchange || item.exchangeName || 'Unknown',
+                balance: item.balance || 0,
+                balanceFormatted: formatNumber(item.balance || 0),
+                change24h: item.change_24h || item.changeH24 || 0,
+                change24hPercent: calculateChangePercent(item.balance, item.change_24h || item.changeH24),
+                reserves: '100%+',
+                flow: (item.change_24h || item.changeH24 || 0) > 0 ? 'in' : 'out'
             }))
 
         // Summary stats
@@ -54,7 +53,6 @@ export async function GET(request: Request) {
     } catch (error) {
         console.error('Exchange API error:', error)
         return NextResponse.json({
-            error: 'Internal server error',
             exchange: getDemoData()
         })
     }

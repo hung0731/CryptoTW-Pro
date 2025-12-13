@@ -38,6 +38,7 @@ export async function updateMarketSummary() {
         metadata: {
             ...snapshot,
             analysis: report.analysis,
+            whale_summary: report.whale_summary,
             action: report.action,
             headline: report.headline,
             risk_note: report.risk_note
