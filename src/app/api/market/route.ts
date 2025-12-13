@@ -5,7 +5,7 @@ let marketCache: { data: any, timestamp: number } | null = null
 let fgiCache: { data: any, timestamp: number } | null = null
 let globalCache: { data: any, timestamp: number } | null = null
 
-const MARKET_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+const MARKET_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 const FGI_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
 const GLOBAL_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
 
@@ -18,35 +18,54 @@ function formatNumber(num: number): string {
     return num.toFixed(0)
 }
 
-// Fetch OKX market data
-async function fetchOkxMarketData() {
+// Fetch CoinGecko Market Data (with images)
+async function fetchCoinGeckoMarketData() {
     try {
-        const res = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT')
+        const res = await fetch(
+            'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h',
+            { next: { revalidate: 300 } }
+        )
         const json = await res.json()
 
-        if (json.code === '0' && json.data) {
-            const usdtPairs = json.data.filter((t: any) => t.instId.endsWith('-USDT'))
-            const withChange = usdtPairs.map((t: any) => {
-                const last = parseFloat(t.last)
-                const open = parseFloat(t.open24h)
-                const change = open > 0 ? ((last - open) / open * 100) : 0
-                return {
-                    symbol: t.instId.replace('-USDT', ''),
-                    lastPrice: t.last,
-                    priceChangePercent: change.toFixed(2)
-                }
-            })
-            const ignored = ['USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP']
-            const filtered = withChange.filter((t: any) => !ignored.includes(t.symbol))
-            filtered.sort((a: any, b: any) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))
-            return {
-                gainers: filtered.slice(0, 5),
-                losers: filtered.slice(-5).reverse()
-            }
+        if (Array.isArray(json)) {
+            // Filter out stablecoins
+            const ignored = ['usdt', 'usdc', 'fdusd', 'tusd', 'busd', 'dai', 'usdp', 'frax', 'usdd']
+            const filtered = json.filter((c: any) => !ignored.includes(c.id))
+
+            // Sort by 24h price change
+            const sorted = [...filtered].sort((a: any, b: any) =>
+                (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0)
+            )
+
+            const gainers = sorted.slice(0, 10).map((c: any) => ({
+                id: c.id,
+                symbol: c.symbol,
+                name: c.name,
+                image: c.image,
+                current_price: c.current_price,
+                price_change_percentage_24h: c.price_change_percentage_24h || 0,
+                market_cap_rank: c.market_cap_rank,
+                market_cap: c.market_cap,
+                total_volume: c.total_volume
+            }))
+
+            const losers = sorted.slice(-10).reverse().map((c: any) => ({
+                id: c.id,
+                symbol: c.symbol,
+                name: c.name,
+                image: c.image,
+                current_price: c.current_price,
+                price_change_percentage_24h: c.price_change_percentage_24h || 0,
+                market_cap_rank: c.market_cap_rank,
+                market_cap: c.market_cap,
+                total_volume: c.total_volume
+            }))
+
+            return { gainers, losers }
         }
         return null
     } catch (e) {
-        console.error('[Market API] OKX Error:', e)
+        console.error('[Market API] CoinGecko Markets Error:', e)
         return null
     }
 }
@@ -83,6 +102,7 @@ async function fetchGlobalData() {
             return {
                 totalMarketCap: formatNumber(d.total_market_cap.usd),
                 totalVolume: formatNumber(d.total_volume.usd),
+                totalVolumeRaw: d.total_volume.usd,
                 btcDominance: d.market_cap_percentage.btc.toFixed(1),
                 btcMarketCap: formatNumber(d.total_market_cap.usd * (d.market_cap_percentage.btc / 100)),
                 stablecoinMarketCap: formatNumber((d.market_cap_percentage.usdt + (d.market_cap_percentage.usdc || 0)) / 100 * d.total_market_cap.usd),
@@ -96,35 +116,13 @@ async function fetchGlobalData() {
     }
 }
 
-// Fetch CoinGecko Categories
-async function fetchCategories() {
-    try {
-        const res = await fetch('https://api.coingecko.com/api/v3/coins/categories')
-        const json = await res.json()
-        if (Array.isArray(json)) {
-            // Sort by market cap descending (default usually) and take top 5
-            return json.slice(0, 5).map((c: any) => ({
-                id: c.id,
-                name: c.name,
-                market_cap_change_24h: c.market_cap_change_24h,
-                top_3_coins: c.top_3_coins,
-                market_cap: formatNumber(c.market_cap)
-            }))
-        }
-        return null
-    } catch (e) {
-        console.error('[Market API] CoinGecko Categories Error:', e)
-        return null
-    }
-}
-
 export async function GET() {
     const now = Date.now()
 
     // Check market cache
     if (!marketCache || now - marketCache.timestamp > MARKET_CACHE_TTL) {
-        console.log('[Market API] Fetching fresh OKX data...')
-        const data = await fetchOkxMarketData()
+        console.log('[Market API] Fetching fresh CoinGecko market data...')
+        const data = await fetchCoinGeckoMarketData()
         if (data) marketCache = { data, timestamp: now }
     }
 
@@ -139,17 +137,7 @@ export async function GET() {
     if (!globalCache || now - globalCache.timestamp > GLOBAL_CACHE_TTL) {
         console.log('[Market API] Fetching fresh CoinGecko global data...')
         const data = await fetchGlobalData()
-        const categories = await fetchCategories()
-
-        if (data && categories) {
-            globalCache = {
-                data: { ...data, categories },
-                timestamp: now
-            }
-        } else if (data) {
-            // Fallback if categories fail
-            globalCache = { data, timestamp: now }
-        }
+        if (data) globalCache = { data, timestamp: now }
     }
 
     return NextResponse.json({

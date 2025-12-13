@@ -104,10 +104,8 @@ export async function GET() {
             })
         )
 
-        // Filter out traders with no active positions (optional, but cleaner)
-        const activeWhales = tradersWithPositions.filter(t => t.positions.length > 0)
-
-        return NextResponse.json({ whales: activeWhales })
+        // Return all top traders (including ones without active positions)
+        return NextResponse.json({ whales: tradersWithPositions })
 
     } catch (error) {
         console.error('Whale Watch API Error:', error)

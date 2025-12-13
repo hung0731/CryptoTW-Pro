@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
-import { RefreshCw, TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Coins, ChevronLeft, Users, Radar } from 'lucide-react'
+import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLiff } from '@/components/LiffProvider'
@@ -232,48 +232,56 @@ export default function DataPage() {
                     )}
 
 
-                    <div className="flex items-center justify-between mb-4 mt-6">
-                        <h2 className="text-lg font-bold text-white">熱門幣種</h2>
-                        <Badge variant="outline" className="text-[10px] text-neutral-500 border-neutral-800 bg-neutral-900/50">
-                            24小時漲幅
-                        </Badge>
-                    </div>
+                    <h2 className="text-lg font-bold text-white mt-6 mb-4">熱門幣種</h2>
 
                     {marketLoading ? (
-                        <div className="space-y-3">
-                            {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full bg-neutral-900/50 rounded-xl" />)}
+                        <div className="grid grid-cols-2 gap-4">
+                            <Skeleton className="h-48 w-full bg-neutral-900/50 rounded-xl" />
+                            <Skeleton className="h-48 w-full bg-neutral-900/50 rounded-xl" />
                         </div>
                     ) : (
-                        <div className="grid gap-3">
-                            {(marketData?.gainers || []).slice(0, 5).map((coin: any, i: number) => (
-                                <div key={i} className="group relative overflow-hidden bg-neutral-900/30 border border-white/5 rounded-xl p-3 flex items-center justify-between hover:bg-white/5 transition-all cursor-default">
-                                    <div className="flex items-center gap-3 relative z-10">
-                                        <span className="text-neutral-600 font-mono text-xs w-4">0{i + 1}</span>
-                                        <div className="w-8 h-8 rounded-full bg-black border border-white/10 flex items-center justify-center">
-                                            <img src={coin.image} alt={coin.symbol} className="w-5 h-5 rounded-full" />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-1.5">
-                                                <span className="text-sm font-bold text-white">{coin.symbol?.toUpperCase()}</span>
-                                                <Badge variant="secondary" className="text-[9px] h-4 px-1 bg-white/10 text-white/70 hover:bg-white/20 border-0">
-                                                    排名 #{coin.market_cap_rank}
-                                                </Badge>
-                                            </div>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <span className="text-[10px] text-neutral-400 font-mono">${coin.current_price?.toLocaleString()}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={`relative z-10 flex flex-col items-end ${coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        <span className="text-sm font-bold font-mono flex items-center gap-1">
-                                            {coin.price_change_percentage_24h >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
-                                            {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
-                                        </span>
-                                        <span className="text-[9px] text-neutral-600 font-mono">24小時</span>
-                                    </div>
-                                    <div className={`absolute inset-0 opacity-[0.03] ${coin.price_change_percentage_24h >= 0 ? 'bg-gradient-to-r from-transparent to-green-500' : 'bg-gradient-to-r from-transparent to-red-500'}`} />
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Gainers */}
+                            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
+                                    <TrendingUp className="w-4 h-4 text-green-400" />
+                                    <span className="text-sm font-medium text-green-400">漲幅榜</span>
                                 </div>
-                            ))}
+                                <div className="space-y-2">
+                                    {(marketData?.gainers || []).slice(0, 5).map((coin: any, i: number) => (
+                                        <div key={i} className="flex items-center justify-between py-1.5">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-neutral-600 font-mono text-xs w-4">{i + 1}</span>
+                                                <span className="text-sm font-medium text-white">{coin.symbol?.toUpperCase()}</span>
+                                            </div>
+                                            <span className="text-sm font-mono font-bold text-green-400">
+                                                +{Math.abs(coin.price_change_percentage_24h || parseFloat(coin.priceChangePercent) || 0).toFixed(2)}%
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Losers */}
+                            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
+                                    <TrendingUp className="w-4 h-4 text-red-400 rotate-180" />
+                                    <span className="text-sm font-medium text-red-400">跌幅榜</span>
+                                </div>
+                                <div className="space-y-2">
+                                    {(marketData?.losers || []).slice(0, 5).map((coin: any, i: number) => (
+                                        <div key={i} className="flex items-center justify-between py-1.5">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-neutral-600 font-mono text-xs w-4">{i + 1}</span>
+                                                <span className="text-sm font-medium text-white">{coin.symbol?.toUpperCase()}</span>
+                                            </div>
+                                            <span className="text-sm font-mono font-bold text-red-400">
+                                                {(coin.price_change_percentage_24h || parseFloat(coin.priceChangePercent) || 0).toFixed(2)}%
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     )}
                 </TabsContent>
@@ -293,17 +301,17 @@ export default function DataPage() {
                     {globalData && (
                         <div className="grid grid-cols-2 gap-3 mb-6">
                             <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-3 relative overflow-hidden">
-                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">總交易量</span>
-                                <span className="text-base font-bold text-white font-mono">${(Number(globalData.totalVolume) / 1000000).toFixed(1)}M</span>
+                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">24小時交易量</span>
+                                <span className="text-base font-bold text-white font-mono">${globalData.totalVolume}</span>
                                 <div className="absolute right-0 bottom-0 p-2 opacity-10">
                                     <BarChart3 className="w-8 h-8 text-white" />
                                 </div>
                             </div>
                             <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-3 relative overflow-hidden">
-                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">活躍用戶</span>
-                                <span className="text-base font-bold text-white font-mono">24.5k</span>
+                                <span className="text-[10px] text-neutral-500 tracking-wider block mb-1">追蹤市場</span>
+                                <span className="text-base font-bold text-white font-mono">{markets.length} 個</span>
                                 <div className="absolute right-0 bottom-0 p-2 opacity-10">
-                                    <Users className="w-8 h-8 text-white" />
+                                    <Gauge className="w-8 h-8 text-white" />
                                 </div>
                             </div>
                         </div>
