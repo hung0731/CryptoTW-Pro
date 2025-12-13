@@ -15,6 +15,10 @@ export interface MarketSummaryResult {
     actionable_insight: string
     risk_level: string
     emoji?: string
+    metrics?: {
+        whale_ratio?: number
+        global_ratio?: number
+    }
 }
 
 export async function generateMarketSummary(marketData: any): Promise<MarketSummaryResult | null> {
@@ -46,6 +50,11 @@ Requirements:
     - Risk Level (Low/Medium/High/Extreme).
     - Emoji (The selected emoji character).
 
+    **Data Focus**:
+    - Compare "Global Long/Short" (Retail) vs "Whale Ratio" (Top Accounts).
+    - If Whales are Longing (>1.1) but Sentimental is Fear -> Bullish Signal.
+    - If Whales are Shorting (<0.9) but Retail is Longing -> Bearish Divergence.
+
 Output JSON Schema:
 {
   "sentiment_score": number,
@@ -54,7 +63,11 @@ Output JSON Schema:
   "key_points": ["string", "string", "string"],
   "actionable_insight": "string",
   "risk_level": "string",
-  "emoji": "string"
+  "emoji": "string",
+  "metrics": {
+    "whale_ratio": "number", // Extract from data
+    "global_ratio": "number" // Extract from data
+  }
 }
 `
 

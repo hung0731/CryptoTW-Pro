@@ -23,22 +23,24 @@ async function fetchFearGreed() {
 }
 
 export async function getMarketSnapshot() {
-    // 1. Parallel Fetching
     const [
         globalData,
         fgi,
         fundingRates,
-        longShortRatio,
-        liquidations
+        globalLongShort,
+        topLongShort,
+        hyperliquidWhales
     ] = await Promise.all([
         fetchCoinGeckoGlobal(),
         fetchFearGreed(),
         coinglassRequest<any[]>('/public/v2/funding', { symbol: 'BTC' }),
-        coinglassRequest<any[]>('/public/v2/long-short-account-ratio', { symbol: 'BTC' }),
-        coinglassRequest<any[]>('/public/v2/liquidation/history', { symbol: 'BTC', interval: '4h' })
+        coinglassRequest<any[]>('/public/v2/long-short-ratio/global-account', { symbol: 'BTC' }),
+        coinglassRequest<any[]>('/public/v2/long-short-ratio/top-account-ratio', { symbol: 'BTC' }),
+        coinglassRequest<any[]>('/public/v2/liquidation/history', { symbol: 'BTC', interval: '4h' }) // Keep liquidations
+        // Note: Hyperliquid endpoint might not be available on public v2 free tier, trying standard L/S first as proxy for whales
     ])
 
-    // 2. Synthesize Data
+    // Consolidate Data
     return {
         timestamp: new Date().toISOString(),
         market: {
@@ -51,9 +53,14 @@ export async function getMarketSnapshot() {
             fgi_label: fgi?.value_classification
         },
         derivatives: {
-            btc_funding_rate: fundingRates?.[0]?.uMarginList?.[0]?.rate || 'Unknown', // Primary exchange
-            long_short_ratio: longShortRatio?.[0]?.longShortRatio,
-            recent_liquidations_4h: liquidations?.[0] // Last 4h bar
+            funding_rate: fundingRates?.[0]?.uMarginList?.[0]?.rate,
+            long_short: {
+                global_ratio: globalLongShort?.[0]?.longShortRatio,
+                whale_ratio: topLongShort?.[0]?.longShortRatio, // Top Accounts = Whales
+                global_long_rate: globalLongShort?.[0]?.longRate,
+                whale_long_rate: topLongShort?.[0]?.longRate,
+            },
+            liquidations_4h: hyperliquidWhales?.[0]
         }
     }
 }

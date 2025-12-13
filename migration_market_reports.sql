@@ -15,13 +15,17 @@ create table if not exists market_reports (
 alter table market_reports enable row level security;
 
 -- Policy: Everyone can read
+drop policy if exists "Public can read market reports" on market_reports;
 create policy "Public can read market reports"
   on market_reports for select
   using (true);
 
--- Policy: Only service role can insert (handled by API key in Edge Function/Cron)
--- Note: In Supabase, service role bypasses RLS, so normally no insert policy needed for service role.
--- But if we use authenticated admin user:
+-- Policy: Only service role can insert (handled by API key in Edge Function/Cron) or Admins
+-- Correction: Users table uses 'membership_status', not 'role'
+drop policy if exists "Admins can insert market reports" on market_reports;
 create policy "Admins can insert market reports"
   on market_reports for insert
-  with check (auth.role() = 'service_role' or auth.uid() in (select id from users where role = 'admin'));
+  with check (
+    auth.role() = 'service_role' OR 
+    (select membership_status from users where id = auth.uid()) = 'admin'
+  );

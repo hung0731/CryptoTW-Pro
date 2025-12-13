@@ -75,9 +75,6 @@ export default function HomePage() {
 
             <div className="mt-4 px-4 space-y-6">
 
-                {/* AI Pulse Widget */}
-                <AIMarketPulse />
-
                 {/* Welcome Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -108,6 +105,9 @@ export default function HomePage() {
                         </Link>
                     </div>
                 </div>
+
+                {/* AI Pulse Widget */}
+                <AIMarketPulse />
 
                 {/* Market Stats Grid */}
                 <section>
