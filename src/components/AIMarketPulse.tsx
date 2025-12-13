@@ -5,6 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+import { ExplainTooltip } from '@/components/ExplainTooltip'
+
 interface MarketReport {
     id: string
     created_at: string
@@ -79,6 +81,17 @@ export function AIMarketPulse() {
                 <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-purple-400" />
                     <span className="text-sm font-medium text-white">AI 市場解讀</span>
+                    <ExplainTooltip
+                        term="AI 市場解讀"
+                        definition="結合價格行為 (PA)、期貨籌碼與鏈上數據的綜合分析。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>客觀中立</strong>：AI 僅描述市場結構，不帶個人情緒。</li>
+                                <li><strong>6大異常監測</strong>：自動偵測爆量、大戶異動等事件並納入分析。</li>
+                                <li><strong>非財務建議</strong>：此報告僅供輔助判斷，投資請自負風險。</li>
+                            </ul>
+                        }
+                    />
                 </div>
                 {report.emoji && <span className="text-lg opacity-80">{report.emoji}</span>}
             </div>
@@ -99,7 +112,20 @@ export function AIMarketPulse() {
             {(structure || action) && (
                 <div className="bg-white/5 rounded-lg p-3 space-y-2 border border-white/5">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
-                        <span className="text-xs text-neutral-400">市場結構參考</span>
+                        <div className="flex items-center">
+                            <span className="text-xs text-neutral-400">市場結構參考</span>
+                            <ExplainTooltip
+                                term="市場結構 (Market Structure)"
+                                definition="基於流動性分布與支撐壓力位所繪製的戰術地圖。"
+                                explanation={
+                                    <ul className="list-disc pl-4 space-y-1">
+                                        <li><strong>關注區</strong>：價格最可能發生反應（反彈或跌破）的關鍵位置。</li>
+                                        <li><strong>結構失效</strong>：若價格收盤突破此區，代表原先趨勢改變，應立即止損重新評估。</li>
+                                        <li><strong>壓力區</strong>：上方賣壓較重的區域，適合分批獲利了結。</li>
+                                    </ul>
+                                }
+                            />
+                        </div>
                         {/* Remove bias display to be neutral, or keep it subtle */}
                     </div>
 

@@ -4,6 +4,8 @@ import React from 'react'
 import { Activity, TrendingUp, Users, AlertTriangle } from 'lucide-react'
 import type { MarketSignals } from '@/lib/signal-engine'
 
+import { ExplainTooltip } from '@/components/ExplainTooltip'
+
 interface MarketFeelingCardProps {
     signals: MarketSignals | null
     loading?: boolean
@@ -74,6 +76,17 @@ export function MarketFeelingCard({ signals, loading }: MarketFeelingCardProps) 
                 <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-neutral-500" />
                     <span className="text-sm font-medium text-white">市場體感</span>
+                    <ExplainTooltip
+                        term="市場體感 (Market Sentiment)"
+                        definition="綜合多維度數據 (價格、資金費率、多空比) 所判斷的市場當前狀態。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>偏多/偏空</strong>：價格與數據同步，趨勢明確。</li>
+                                <li><strong>擁擠 (Crowded)</strong>：太多散戶做同一方向，容易發生反轉。</li>
+                                <li><strong>混亂/中性</strong>：多空數據打架，建議觀望等待方向。</li>
+                            </ul>
+                        }
+                    />
                 </div>
                 <span className={`text-lg font-bold ${getFeelingColor()}`}>
                     {signals.market_feeling}
@@ -152,6 +165,17 @@ export function WhaleStatusCard({ signals, loading }: MarketFeelingCardProps) {
                 <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-neutral-500" />
                     <span className="text-sm font-medium text-white">巨鯨狀態</span>
+                    <ExplainTooltip
+                        term="巨鯨狀態 (Wholes)"
+                        definition="偵測大額資金持有者 (Smart Money) 的即時動向。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>低調做多</strong>：大戶多空比上升，但價格與散戶情緒看空 (最佳買點)。</li>
+                                <li><strong>防守對沖</strong>：現貨持有者透過合約開空避險，非真的看空。</li>
+                                <li><strong>撤退/倒貨</strong>：大額資金流出，需警惕下跌。</li>
+                            </ul>
+                        }
+                    />
                 </div>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getStatusColor()}`}>
                     {signals.whale_status}
@@ -218,6 +242,17 @@ export function LiquidationPressureCard({ signals, loading }: MarketFeelingCardP
                 <div className="flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-neutral-500" />
                     <span className="text-sm font-medium text-white">爆倉壓力</span>
+                    <ExplainTooltip
+                        term="爆倉壓力 (Liquidation Pressure)"
+                        definition="預測價格可能被「吸」往哪個方向去觸發強制平倉。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>上方壓力</strong>：空單大量堆積在上方，主力可能拉盤去「殺空」。</li>
+                                <li><strong>下方壓力</strong>：多單大量堆積在下方，主力可能砸盤去「殺多」。</li>
+                                <li><strong>壓力均衡</strong>：無明顯獵殺目標，價格震盪。</li>
+                            </ul>
+                        }
+                    />
                 </div>
                 <span className={`text-xs font-bold ${getPressureColor()}`}>
                     {signals.liquidation_pressure}

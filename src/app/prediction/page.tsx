@@ -21,6 +21,7 @@ import {
     LongShortRatio,
     EconomicCalendar
 } from '@/components/CoinglassWidgets'
+import { ExplainTooltip } from '@/components/ExplainTooltip'
 
 interface GlobalData {
     totalMarketCap: string
@@ -90,8 +91,18 @@ function CryptoPricePrediction() {
             </div>
 
             {/* Title */}
-            <h2 className="text-lg font-bold text-white">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 {activeToken === 'btc' ? 'BTC' : 'ETH'} 2025 價格預測
+                <ExplainTooltip
+                    term="Polymarket 預測"
+                    definition="來自去中心化預測市場的機率分佈。"
+                    explanation={
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li><strong>真金白銀</strong>：此機率是由交易者用錢押注出來的，通常比分析師更準。</li>
+                            <li><strong>解讀機率</strong>：若機率 {'>'} 50%，代表市場認為發生機會很大。</li>
+                        </ul>
+                    }
+                />
             </h2>
 
             {loading ? (
@@ -293,6 +304,16 @@ export default function DataPage() {
                                 <div className="flex items-center gap-1 mb-1">
                                     <Gauge className="w-3 h-3 text-neutral-500" />
                                     <span className="text-[10px] text-neutral-500">恐慌指數</span>
+                                    <ExplainTooltip
+                                        term="恐慌貪婪指數"
+                                        definition="衡量市場情緒的溫度計 (0-100)。"
+                                        explanation={
+                                            <ul className="list-disc pl-4 space-y-1">
+                                                <li><strong>&lt; 20 (極度恐慌)</strong>：非理性拋售，通常是買點。</li>
+                                                <li><strong>&gt; 80 (極度貪婪)</strong>：FOMO 情緒高漲，隨時可能回調。</li>
+                                            </ul>
+                                        }
+                                    />
                                 </div>
                                 <div className={`text-lg font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
                                     {fearGreed.value}
@@ -302,6 +323,16 @@ export default function DataPage() {
                                 <div className="flex items-center gap-1 mb-1">
                                     <Bitcoin className="w-3 h-3 text-orange-500" />
                                     <span className="text-[10px] text-neutral-500">BTC Dominance</span>
+                                    <ExplainTooltip
+                                        term="BTC 市占率 (Dominance)"
+                                        definition="比特幣市值佔加密貨幣總市值的百分比。"
+                                        explanation={
+                                            <ul className="list-disc pl-4 space-y-1">
+                                                <li><strong>上升趨勢</strong>：資金回流比特幣，山寨幣 (Altcoins) 通常會失血下跌。</li>
+                                                <li><strong>下降趨勢</strong>：比特幣橫盤或獲利了結，資金流向山寨幣 (Alt Season)。</li>
+                                            </ul>
+                                        }
+                                    />
                                 </div>
                                 <div className="text-lg font-bold font-mono text-white">{globalData.btcDominance}%</div>
                             </div>
@@ -309,6 +340,16 @@ export default function DataPage() {
                                 <div className="flex items-center gap-1 mb-1">
                                     <BarChart3 className="w-3 h-3 text-blue-500" />
                                     <span className="text-[10px] text-neutral-500">Long/Short</span>
+                                    <ExplainTooltip
+                                        term="多空比 (Long/Short)"
+                                        definition="市場做多與做空的人數/資金比例。"
+                                        explanation={
+                                            <ul className="list-disc pl-4 space-y-1">
+                                                <li><strong>高於 2.0</strong>：散戶極度看多，通常是反指標。</li>
+                                                <li><strong>低於 0.8</strong>：散戶極度看空，容易軋空上漲。</li>
+                                            </ul>
+                                        }
+                                    />
                                 </div>
                                 <div className="text-lg font-bold font-mono text-white">--</div> {/* Handled by widget separately if needed */}
                             </div>
