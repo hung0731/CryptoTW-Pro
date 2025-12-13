@@ -1,7 +1,7 @@
 'use server'
 
 import { updateMarketSummary } from '@/lib/market-service'
-import { createSafeServerClient } from '@/lib/supabase'
+import { createSafeServerClient, createAdminClient } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 
 export async function triggerMarketSummaryAction() {
@@ -14,8 +14,9 @@ export async function triggerMarketSummaryAction() {
         return { success: false, error: 'Unauthorized' }
     }
 
-    // 2. Check Admin Role
-    const { data: userData, error: userError } = await supabase
+    // 2. Check Admin Role (Use AdminClient to bypass RLS infinite recursion)
+    const adminClient = createAdminClient()
+    const { data: userData, error: userError } = await adminClient
         .from('users')
         .select('membership_status')
         .eq('id', user.id)
