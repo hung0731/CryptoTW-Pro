@@ -8,9 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useLiff } from '@/components/LiffProvider'
 import {
     TrendingUp, FileText, BarChart3, Calendar, Users,
-    ChevronRight, Gauge, DollarSign, Bitcoin, Bell, Settings
+    ChevronRight, Gauge, DollarSign, Bitcoin, Bell, Settings, Flame
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/components/CoinglassWidgets'
 
 export default function HomePage() {
     const { profile } = useLiff()
@@ -20,25 +21,29 @@ export default function HomePage() {
     const [fearGreed, setFearGreed] = useState<any>(null)
     const [globalData, setGlobalData] = useState<any>(null)
     const [predictions, setPredictions] = useState<any[]>([])
+    const [calendar, setCalendar] = useState<any[]>([])
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [artRes, mktRes, predRes] = await Promise.all([
+                const [artRes, mktRes, predRes, calRes] = await Promise.all([
                     fetch('/api/content?limit=3'),
                     fetch('/api/market'),
-                    fetch('/api/prediction/markets?limit=3')
+                    fetch('/api/prediction/markets?limit=3'),
+                    fetch('/api/coinglass/calendar')
                 ])
 
                 const artData = await artRes.json()
                 const mktData = await mktRes.json()
                 const predData = await predRes.json()
+                const calData = await calRes.json()
 
                 setArticles(artData.content || [])
                 if (mktData.market) setMarketData(mktData.market)
                 if (mktData.fearGreed) setFearGreed(mktData.fearGreed)
                 if (mktData.global) setGlobalData(mktData.global)
                 setPredictions(predData.markets || [])
+                setCalendar(calData.calendar?.events || [])
             } catch (e) {
                 console.error(e)
             } finally {
@@ -277,19 +282,47 @@ export default function HomePage() {
                     )}
                 </section>
 
-                {/* Economic Calendar */}
+                {/* Coinglass Data Summaries */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">📅 財經日曆</h2>
+                        <h2 className="text-sm font-medium text-neutral-500">📊 核心數據</h2>
+                        <Link href="/prediction" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
+                            更多 <ChevronRight className="w-3 h-3" />
+                        </Link>
                     </div>
-                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4 opacity-60">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                <Calendar className="w-5 h-5 text-blue-400" />
+                    <div className="grid grid-cols-2 gap-3">
+                        <LiquidationSummary />
+                        <FundingSummary />
+                        <LongShortSummary />
+                        {/* Calendar Summary - Moved here to align grid */}
+                        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                                    <span className="text-xs font-bold text-white">財經日曆</span>
+                                </div>
+                                <span className="text-[9px] text-neutral-500">Upcoming</span>
                             </div>
-                            <div>
-                                <p className="text-sm font-medium text-white">即將推出</p>
-                                <p className="text-[10px] text-neutral-500">Coinglass API 整合中</p>
+                            <div className="space-y-2">
+                                {(calendar || []).slice(0, 2).map((event: any, i: number) => (
+                                    <div key={i} className="flex justify-between items-center">
+                                        <span className="text-xs text-neutral-300 line-clamp-1">{event.event}</span>
+                                        <div className="flex gap-0.5 shrink-0 ml-2">
+                                            {[...Array(3)].map((_, starIdx) => (
+                                                <div
+                                                    key={starIdx}
+                                                    className={cn(
+                                                        "w-1.5 h-1.5 rounded-full",
+                                                        starIdx < event.importance ? (event.importance === 3 ? "bg-red-500" : "bg-yellow-500") : "bg-neutral-800"
+                                                    )}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                {(!calendar || calendar.length === 0) && (
+                                    <span className="text-[10px] text-neutral-500">今日無重大事件</span>
+                                )}
                             </div>
                         </div>
                     </div>

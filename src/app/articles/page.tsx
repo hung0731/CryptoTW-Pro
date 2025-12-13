@@ -15,6 +15,7 @@ export default function ArticlesPage() {
   const { profile, isLoading: isAuthLoading } = useLiff()
   const [activities, setActivities] = useState<any[]>([])
   const [content, setContent] = useState<any[]>([])
+  const [coinglassNews, setCoinglassNews] = useState<any[]>([])
   const [dataLoading, setDataLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
 
@@ -22,12 +23,30 @@ export default function ArticlesPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [actRes, contRes] = await Promise.all([
+        const [actRes, contRes, newsRes] = await Promise.all([
           fetch('/api/activities').then(r => r.json()),
-          fetch('/api/content').then(r => r.json())
+          fetch('/api/content').then(r => r.json()),
+          fetch('/api/coinglass/news').then(r => r.json())
         ])
+
         if (actRes.activities) setActivities(actRes.activities)
         if (contRes.content) setContent(contRes.content)
+
+        // Process Coinglass News
+        if (newsRes.news) {
+          const externalNews = newsRes.news.map((item: any) => ({
+            id: `cg-${item.id || Math.random()}`,
+            title: item.title || item.article_title,
+            content: item.content || item.article_content,
+            summary: item.intro || item.article_content?.substring(0, 100),
+            thumbnail_url: item.cover || item.article_picture,
+            type: 'news',
+            created_at: item.createTime || item.article_release_time,
+            is_public: true,
+            source: 'Coinglass'
+          }))
+          setCoinglassNews(externalNews)
+        }
       } catch (e) {
         console.error(e)
       } finally {
@@ -62,9 +81,17 @@ export default function ArticlesPage() {
     { id: 'weekly', label: '週報' },
   ]
 
-  const filteredContent = activeTab === 'all'
-    ? content
-    : content.filter(c => c.type === activeTab)
+  // Filter Logic
+  let filteredContent = activeTab === 'all' ? content : content.filter(c => c.type === activeTab)
+
+  // Merge Coinglass News if tab is 'news' or 'all'
+  if (activeTab === 'news' || activeTab === 'all') {
+    // Create a map to avoid duplicates if necessary, or just concat
+    // prioritizing internal content might be better, or mix by date
+    const combined = [...filteredContent, ...(activeTab === 'news' || activeTab === 'all' ? coinglassNews : [])]
+    // Sort by date desc
+    filteredContent = combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  }
 
   return (
     <main className="min-h-screen font-sans bg-black text-white pb-24">
@@ -181,6 +208,11 @@ function ContentList({ items }: { items: any[] }) {
                 <span className="text-[10px] text-neutral-600">
                   {new Date(item.created_at).toLocaleDateString()}
                 </span>
+                {item.source && (
+                  <span className="text-[10px] text-neutral-500 border-l border-neutral-800 pl-2 ml-1">
+                    {item.source}
+                  </span>
+                )}
               </div>
               <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                 {item.title}

@@ -68,24 +68,24 @@ export function BottomNav() {
                     </Link>
                 ))}
 
-                {/* Center Pro Button */}
+                {/* Center Home Button */}
                 <Link
                     href="/"
                     className="flex flex-col items-center justify-center w-full h-full -mt-4"
                 >
                     <div className={cn(
-                        "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg",
+                        "w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg",
                         isProActive
                             ? "bg-white shadow-white/20"
                             : "bg-neutral-800 shadow-neutral-800/20 hover:bg-neutral-700"
                     )}>
-                        <Sparkles className={cn("w-7 h-7", isProActive ? "text-black" : "text-white")} />
+                        <Home className={cn("w-7 h-7", isProActive ? "text-black" : "text-white")} />
                     </div>
                     <span className={cn(
                         "text-[10px] font-medium mt-1",
                         isProActive ? "text-white" : "text-neutral-400"
                     )}>
-                        Pro
+                        首頁
                     </span>
                 </Link>
 

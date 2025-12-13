@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge } from 'lucide-react'
+import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge, Calendar as CalendarIcon, ArrowLeftRight } from 'lucide-react'
 
 // ============================================
 // Bull/Bear Index Component
@@ -97,24 +97,28 @@ export function BullBearIndex() {
 // ============================================
 // Liquidation Waterfall Component
 // ============================================
+// ============================================
+// Liquidation Waterfall Component
+// ============================================
 export function LiquidationWaterfall() {
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [timeframe, setTimeframe] = useState<'1h' | '4h' | '12h' | '24h'>('24h') // Added timeframe state
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch('/api/coinglass/liquidation?symbol=BTC&limit=20')
+                // Fetch liquidation data with timeframe param (simulated for now as API might need update)
+                const res = await fetch(`/api/coinglass/liquidation?symbol=BTC&limit=20&timeframe=${timeframe}`)
                 const json = await res.json()
                 setData(json.liquidations)
             } catch (e) { console.error(e) }
             finally { setLoading(false) }
         }
         fetchData()
-        // Refresh every 30 seconds
         const interval = setInterval(fetchData, 30000)
         return () => clearInterval(interval)
-    }, [])
+    }, [timeframe]) // Refetch on timeframe change
 
     if (loading) {
         return (
@@ -128,26 +132,37 @@ export function LiquidationWaterfall() {
 
     return (
         <div className="space-y-4">
-            {/* Header */}
+            {/* Header with Timeframe Tabs */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-orange-400" />
-                    <span className="text-lg font-bold text-white">即時清算</span>
+                {/* Transformed: Removed icon and title as requested, replaced with timeframe selector */}
+                <div className="flex bg-neutral-900 rounded-lg p-0.5 border border-white/5">
+                    {['1h', '4h', '12h', '24h'].map((tf) => (
+                        <button
+                            key={tf}
+                            onClick={() => setTimeframe(tf as any)}
+                            className={cn(
+                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                timeframe === tf ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-neutral-300"
+                            )}
+                        >
+                            {tf.toUpperCase()}
+                        </button>
+                    ))}
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] text-neutral-500">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    即時數據
+                    即時
                 </div>
             </div>
 
             {/* Summary */}
             <div className="grid grid-cols-2 gap-3">
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-                    <span className="text-[10px] text-neutral-500 block">多單清算 (1H)</span>
+                    <span className="text-[10px] text-neutral-500 block">多單爆倉 ({timeframe.toUpperCase()})</span>
                     <span className="text-lg font-bold text-red-400 font-mono">{data.summary?.longLiquidatedFormatted || '$0'}</span>
                 </div>
                 <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3">
-                    <span className="text-[10px] text-neutral-500 block">空單清算 (1H)</span>
+                    <span className="text-[10px] text-neutral-500 block">空單爆倉 ({timeframe.toUpperCase()})</span>
                     <span className="text-lg font-bold text-green-400 font-mono">{data.summary?.shortLiquidatedFormatted || '$0'}</span>
                 </div>
             </div>
@@ -222,71 +237,57 @@ export function FundingRateRankings() {
 
     return (
         <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-yellow-400" />
-                    <span className="text-lg font-bold text-white">資金費率排行</span>
-                </div>
-                <span className="text-[10px] text-neutral-500">8H 更新一次</span>
-            </div>
+            {/* Removed header as requested */}
 
-            {/* Extreme Positive (Bearish Signal) */}
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
-                    <TrendingUp className="w-4 h-4 text-red-400" />
-                    <span className="text-sm font-medium text-red-400">極度看多 (小心回調)</span>
-                </div>
-                <div className="space-y-2">
-                    {(data.extremePositive || []).slice(0, 5).map((item: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between py-1.5">
-                            <div className="flex items-center gap-2">
-                                <span className="text-neutral-600 font-mono text-xs w-4">{i + 1}</span>
-                                <span className="text-sm font-medium text-white">{item.symbol}</span>
-                            </div>
-                            <div className="text-right">
-                                <span className="text-sm font-mono font-bold text-red-400">
+            {/* Grid Layout for compact view */}
+            <div className="grid grid-cols-2 gap-3">
+                {/* Extreme Positive (Bearish Signal) */}
+                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                    <div className="flex items-center gap-1 mb-2 pb-2 border-b border-white/5">
+                        <TrendingUp className="w-3 h-3 text-red-400" />
+                        <span className="text-xs font-bold text-red-400">極度看多</span>
+                    </div>
+                    <div className="space-y-1">
+                        {(data.extremePositive || []).slice(0, 8).map((item: any, i: number) => ( // Increased to 8 items
+                            <div key={i} className="flex items-center justify-between text-[10px]">
+                                <div className="flex items-center gap-1">
+                                    <span className="text-neutral-600 font-mono w-3">{i + 1}</span>
+                                    <span className="text-neutral-300 font-medium">{item.symbol}</span>
+                                </div>
+                                <span className="font-mono font-bold text-red-400">
                                     +{(item.rate * 100).toFixed(3)}%
                                 </span>
-                                <span className="text-[10px] text-neutral-500 block">
-                                    年化 {item.annualizedRate.toFixed(0)}%
-                                </span>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* Extreme Negative (Bullish Signal) */}
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
-                    <TrendingDown className="w-4 h-4 text-green-400" />
-                    <span className="text-sm font-medium text-green-400">極度看空 (可能反彈)</span>
-                </div>
-                <div className="space-y-2">
-                    {(data.extremeNegative || []).slice(0, 5).map((item: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between py-1.5">
-                            <div className="flex items-center gap-2">
-                                <span className="text-neutral-600 font-mono text-xs w-4">{i + 1}</span>
-                                <span className="text-sm font-medium text-white">{item.symbol}</span>
-                            </div>
-                            <div className="text-right">
-                                <span className="text-sm font-mono font-bold text-green-400">
+                {/* Extreme Negative (Bullish Signal) */}
+                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                    <div className="flex items-center gap-1 mb-2 pb-2 border-b border-white/5">
+                        <TrendingDown className="w-3 h-3 text-green-400" />
+                        <span className="text-xs font-bold text-green-400">極度看空</span>
+                    </div>
+                    <div className="space-y-1">
+                        {(data.extremeNegative || []).slice(0, 8).map((item: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-[10px]">
+                                <div className="flex items-center gap-1">
+                                    <span className="text-neutral-600 font-mono w-3">{i + 1}</span>
+                                    <span className="text-neutral-300 font-medium">{item.symbol}</span>
+                                </div>
+                                <span className="font-mono font-bold text-green-400">
                                     {(item.rate * 100).toFixed(3)}%
                                 </span>
-                                <span className="text-[10px] text-neutral-500 block">
-                                    年化 {item.annualizedRate.toFixed(0)}%
-                                </span>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
 
             {/* Info */}
             <div className="bg-black/30 rounded-lg p-3 border border-white/5">
                 <p className="text-xs text-neutral-400">
-                    💡 資金費率 &gt; 0.1% 時做空勝率較高，&lt; -0.05% 時做多勝率較高
+                    💡 費率 &gt; 0.1% 做空勝率高，&lt; -0.05% 做多勝率高
                 </p>
             </div>
         </div>
@@ -320,13 +321,7 @@ export function LongShortRatio() {
 
     return (
         <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-blue-400" />
-                    <span className="text-lg font-bold text-white">BTC 多空比</span>
-                </div>
-            </div>
+            {/* Removed header as requested */}
 
             {/* Global Ratio */}
             {data.global && (
@@ -491,6 +486,335 @@ export function LiquidationHeatmap() {
                     <p className="text-xs text-neutral-400">💡 {data.signal.text}</p>
                 </div>
             )}
+        </div>
+    )
+}
+
+// ============================================
+// Exchange Transparency Component
+// ============================================
+export function ExchangeTransparency() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/exchange?symbol=BTC')
+                const json = await res.json()
+                setData(json.exchange)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+    }
+
+    if (!data) return null
+
+    return (
+        <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <ArrowLeftRight className="w-4 h-4 text-blue-400" />
+                    <span className="text-lg font-bold text-white">交易所 BTC 儲備</span>
+                </div>
+                <span className="text-xs text-neutral-400">總計 {data.totalBalanceFormatted} BTC</span>
+            </div>
+
+            {/* Summary Card */}
+            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                    <span className="text-xs text-neutral-500 block">24H 淨流向</span>
+                    <span className={cn(
+                        "text-lg font-bold font-mono",
+                        data.netFlow === 'in' ? 'text-green-400' : 'text-red-400'
+                    )}>
+                        {data.netFlow === 'in' ? '流入' : '流出'} {data.totalChangeFormatted}
+                    </span>
+                </div>
+                <div className="h-8 w-[1px] bg-white/10"></div>
+                <div>
+                    <span className="text-xs text-neutral-500 block">儲備總量</span>
+                    <span className="text-lg font-bold text-white font-mono">{data.totalBalanceFormatted}</span>
+                </div>
+            </div>
+
+            {/* Exchange List */}
+            <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
+                <div className="grid grid-cols-12 gap-2 p-3 bg-black/20 text-[10px] text-neutral-500 font-medium border-b border-white/5">
+                    <div className="col-span-4">交易所</div>
+                    <div className="col-span-4 text-right">持有量</div>
+                    <div className="col-span-4 text-right">24H變化</div>
+                </div>
+                <div className="divide-y divide-white/5">
+                    {(data.items || []).map((item: any, i: number) => (
+                        <div key={i} className="grid grid-cols-12 gap-2 p-3 items-center hover:bg-white/5 transition-colors">
+                            <div className="col-span-4 flex items-center gap-2">
+                                <span className="text-neutral-600 font-mono text-xs w-3">{i + 1}</span>
+                                <span className="text-sm font-medium text-white">{item.name}</span>
+                            </div>
+                            <div className="col-span-4 text-right">
+                                <span className="text-sm font-mono text-white">{item.balanceFormatted}</span>
+                            </div>
+                            <div className="col-span-4 text-right">
+                                <span className={cn(
+                                    "text-xs font-mono",
+                                    item.change24h > 0 ? 'text-green-400' : 'text-red-400'
+                                )}>
+                                    {item.change24h > 0 ? '+' : ''}{item.change24h.toFixed(0)}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Info */}
+            <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+                <p className="text-xs text-neutral-400">
+                    💡 交易所餘額減少通常被視為長期持有的信號 (提幣至錢包)
+                </p>
+            </div>
+        </div>
+    )
+}
+
+// ============================================
+// Economic Calendar Component
+// ============================================
+export function EconomicCalendar() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/calendar')
+                const json = await res.json()
+                setData(json.calendar)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+    }
+
+    if (!data) return null
+
+    // Group by date
+    const grouped = (data.events || []).reduce((acc: any, event: any) => {
+        if (!acc[event.date]) acc[event.date] = []
+        acc[event.date].push(event)
+        return acc
+    }, {})
+
+    return (
+        <div className="space-y-6">
+            {Object.entries(grouped).map(([date, events]: [string, any]) => (
+                <div key={date} className="space-y-3">
+                    <div className="flex items-center gap-2 pb-2 border-b border-white/10">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <h3 className="text-sm font-bold text-white font-mono">{date}</h3>
+                    </div>
+
+                    <div className="space-y-3">
+                        {events.map((event: any, i: number) => (
+                            <div key={i} className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 hover:bg-white/5 transition-all">
+                                <div className="flex items-start justify-between gap-4 mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg text-white font-mono">{event.time}</span>
+                                        <span className="text-xl">{event.country}</span>
+                                    </div>
+                                    <div className="flex gap-0.5">
+                                        {[...Array(3)].map((_, starIdx) => (
+                                            <div
+                                                key={starIdx}
+                                                className={cn(
+                                                    "w-3 h-3 rounded-sm",
+                                                    starIdx < event.importance ?
+                                                        (event.importance === 3 ? "bg-red-500" : "bg-yellow-500") :
+                                                        "bg-neutral-800"
+                                                )}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <h4 className="text-base font-medium text-white mb-3">{event.event}</h4>
+
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                    <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                                        <span className="block text-neutral-500 mb-1">今值</span>
+                                        <span className="font-mono text-white font-bold">{event.actual || '--'}</span>
+                                    </div>
+                                    <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                                        <span className="block text-neutral-500 mb-1">預測</span>
+                                        <span className="font-mono text-neutral-300">{event.forecast || '--'}</span>
+                                    </div>
+                                    <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                                        <span className="block text-neutral-500 mb-1">前值</span>
+                                        <span className="font-mono text-neutral-400">{event.previous || '--'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+
+            <div className="text-center pt-4">
+                <p className="text-xs text-neutral-500">
+                    數據來源: Investing.com (已時區轉換 UTC+8)
+                </p>
+            </div>
+        </div>
+    )
+}
+
+// ============================================
+// Summary Components for Homepage
+// ============================================
+
+export function FundingSummary() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/funding-rate')
+                const json = await res.json()
+                setData(json.fundingRates)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
+    if (!data) return null
+
+    // Get top 2 extreme
+    const topPositive = data.extremePositive?.[0]
+    const topNegative = data.extremeNegative?.[0]
+
+    return (
+        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+            <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-3.5 h-3.5 text-yellow-400" />
+                <span className="text-xs font-bold text-white">資金費率</span>
+            </div>
+            <div className="space-y-2">
+                {topPositive && (
+                    <div className="flex justify-between items-center bg-red-500/10 rounded px-2 py-1">
+                        <span className="text-xs text-white font-medium">{topPositive.symbol}</span>
+                        <span className="text-xs font-mono text-red-400 font-bold">
+                            +{(topPositive.rate * 100).toFixed(3)}%
+                        </span>
+                    </div>
+                )}
+                {topNegative && (
+                    <div className="flex justify-between items-center bg-green-500/10 rounded px-2 py-1">
+                        <span className="text-xs text-white font-medium">{topNegative.symbol}</span>
+                        <span className="text-xs font-mono text-green-400 font-bold">
+                            {(topNegative.rate * 100).toFixed(3)}%
+                        </span>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+export function LiquidationSummary() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/liquidation?symbol=BTC&limit=1')
+                const json = await res.json()
+                setData(json.liquidations)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
+    if (!data) return null
+
+    return (
+        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+            <div className="flex items-center gap-2 mb-2">
+                <Flame className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-xs font-bold text-white">爆倉 (24H)</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="text-center bg-red-500/10 rounded py-1.5">
+                    <span className="text-[9px] text-neutral-400 block mb-0.5">多單</span>
+                    <span className="text-xs font-mono text-red-400 font-bold block">{data.summary?.longLiquidatedFormatted || '$0'}</span>
+                </div>
+                <div className="text-center bg-green-500/10 rounded py-1.5">
+                    <span className="text-[9px] text-neutral-400 block mb-0.5">空單</span>
+                    <span className="text-xs font-mono text-green-400 font-bold block">{data.summary?.shortLiquidatedFormatted || '$0'}</span>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export function LongShortSummary() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/long-short?symbol=BTC')
+                const json = await res.json()
+                setData(json.longShort)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
+    if (!data || !data.global) return null
+
+    return (
+        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+            <div className="flex items-center gap-2 mb-2">
+                <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-xs font-bold text-white">BTC 多空比</span>
+            </div>
+
+            <div className="mt-3">
+                <div className="h-4 bg-neutral-800 rounded-full overflow-hidden flex mb-2">
+                    <div
+                        className="bg-green-500/60 h-full"
+                        style={{ width: `${data.global.longRate}%` }}
+                    />
+                    <div
+                        className="bg-red-500/60 h-full"
+                        style={{ width: `${data.global.shortRate}%` }}
+                    />
+                </div>
+                <div className="flex justify-between text-xs font-mono font-bold">
+                    <span className="text-green-500">{data.global.longRate.toFixed(0)}% 多</span>
+                    <span className="text-red-500">{data.global.shortRate.toFixed(0)}% 空</span>
+                </div>
+            </div>
         </div>
     )
 }

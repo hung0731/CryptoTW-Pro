@@ -11,7 +11,7 @@ import { useLiff } from '@/components/LiffProvider'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { BullBearIndex, LiquidationWaterfall, FundingRateRankings, LongShortRatio, LiquidationHeatmap } from '@/components/CoinglassWidgets'
+import { BullBearIndex, LiquidationWaterfall, FundingRateRankings, LongShortRatio, LiquidationHeatmap, ExchangeTransparency } from '@/components/CoinglassWidgets'
 
 interface GlobalData {
     totalMarketCap: string
@@ -342,22 +342,22 @@ export default function DataPage() {
             <Tabs defaultValue="market" className="w-full" onValueChange={setActiveTab}>
                 {/* Custom Tabs List */}
                 <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
-                    <TabsList className="grid w-full grid-cols-6 bg-neutral-900/50 p-0.5 rounded-lg h-9">
+                    <TabsList className="w-full grid grid-cols-5 h-auto p-1 bg-neutral-900/50 rounded-lg">
                         <TabsTrigger value="market" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
                             <BarChart3 className="w-3 h-3" />
                             市場
                         </TabsTrigger>
                         <TabsTrigger value="liquidation" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
                             <Flame className="w-3 h-3 text-orange-400" />
-                            清算
+                            爆倉
                         </TabsTrigger>
                         <TabsTrigger value="funding" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
                             <Percent className="w-3 h-3 text-yellow-400" />
                             費率
                         </TabsTrigger>
-                        <TabsTrigger value="longshort" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
-                            <BarChart className="w-3 h-3 text-blue-400" />
-                            多空
+                        <TabsTrigger value="exchange" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <DollarSign className="w-3 h-3 text-green-400" />
+                            交易所
                         </TabsTrigger>
                         <TabsTrigger value="whales" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
                             <Radar className="w-3 h-3 text-purple-400" />
@@ -374,42 +374,54 @@ export default function DataPage() {
                 <TabsContent value="market" className="space-y-4 p-4 min-h-[50vh]">
                     {/* Global Stats Grid */}
                     {!marketLoading && (fearGreed || globalData) && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {/* Fear & Greed */}
-                            {fearGreed && (
-                                <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Gauge className="w-4 h-4 text-neutral-500" />
-                                        <span className="text-xs text-neutral-500">恐懼貪婪</span>
+                        <div className="space-y-4">
+                            {/* Row 1: 3 Columns (Fear/Greed, Cap, Dom) */}
+                            <div className="grid grid-cols-3 gap-2">
+                                {/* Fear & Greed */}
+                                {fearGreed && (
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
+                                        <div className="flex items-center gap-1 mb-1">
+                                            <Gauge className="w-3 h-3 text-neutral-500" />
+                                            <span className="text-[10px] text-neutral-500">恐懼貪婪</span>
+                                        </div>
+                                        <div className={`text-lg font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
+                                            {fearGreed.value}
+                                        </div>
+                                        <div className="text-[10px] text-neutral-400">{fearGreed.classification}</div>
                                     </div>
-                                    <div className={`text-xl font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
-                                        {fearGreed.value}
+                                )}
+                                {/* Total Market Cap */}
+                                {globalData && (
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
+                                        <div className="flex items-center gap-1 mb-1">
+                                            <DollarSign className="w-3 h-3 text-neutral-500" />
+                                            <span className="text-[10px] text-neutral-500">總市值</span>
+                                        </div>
+                                        <div className="text-lg font-bold font-mono text-white">${globalData.totalMarketCap}</div>
+                                        <div className="text-[10px] text-neutral-400">24h ${globalData.totalVolume}</div>
                                     </div>
-                                    <div className="text-xs text-neutral-400">{fearGreed.classification}</div>
+                                )}
+                                {/* BTC Dominance */}
+                                {globalData && (
+                                    <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-2 flex flex-col items-center justify-center text-center">
+                                        <div className="flex items-center gap-1 mb-1">
+                                            <Bitcoin className="w-3 h-3 text-orange-500" />
+                                            <span className="text-[10px] text-neutral-500">BTC 市佔</span>
+                                        </div>
+                                        <div className="text-lg font-bold font-mono text-orange-400">{globalData.btcDominance}%</div>
+                                        <div className="text-[10px] text-neutral-400">${globalData.btcMarketCap}</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Row 2: Long/Short Ratio (Merged here) */}
+                            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <BarChart3 className="w-3 h-3 text-blue-400" />
+                                    <span className="text-xs font-bold text-white">BTC 多空比</span>
                                 </div>
-                            )}
-                            {/* Total Market Cap */}
-                            {globalData && (
-                                <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <DollarSign className="w-4 h-4 text-neutral-500" />
-                                        <span className="text-xs text-neutral-500">總市值</span>
-                                    </div>
-                                    <div className="text-xl font-bold font-mono text-white">${globalData.totalMarketCap}</div>
-                                    <div className="text-xs text-neutral-400">24h 量 ${globalData.totalVolume}</div>
-                                </div>
-                            )}
-                            {/* BTC Dominance */}
-                            {globalData && (
-                                <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Bitcoin className="w-4 h-4 text-orange-500" />
-                                        <span className="text-xs text-neutral-500">BTC 市佔</span>
-                                    </div>
-                                    <div className="text-xl font-bold font-mono text-orange-400">{globalData.btcDominance}%</div>
-                                    <div className="text-xs text-neutral-400">${globalData.btcMarketCap}</div>
-                                </div>
-                            )}
+                                <LongShortRatio />
+                            </div>
                         </div>
                     )}
 
@@ -480,9 +492,9 @@ export default function DataPage() {
                     <FundingRateRankings />
                 </TabsContent>
 
-                {/* TAB: Long/Short Ratio */}
-                <TabsContent value="longshort" className="space-y-4 p-4 min-h-[50vh]">
-                    <LongShortRatio />
+                {/* TAB: Exchange */}
+                <TabsContent value="exchange" className="space-y-4 p-4 min-h-[50vh]">
+                    <ExchangeTransparency />
                 </TabsContent>
 
                 {/* TAB: Whale Watch */}
