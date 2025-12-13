@@ -55,49 +55,67 @@ function WhaleWatchList() {
                 </div>
             </div>
 
-            {whales.map((whale, i) => (
-                <div key={i} className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-3 hover:bg-white/5 transition-all">
-                    {/* Header */}
-                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                        <div className="flex items-center gap-3">
-                            <span className="text-neutral-500 font-mono text-xs w-4">0{i + 1}</span>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-white font-mono">{whale.displayAddress}</span>
-                                <span className="text-[10px] text-neutral-500">盈虧: <span className="text-green-400 font-mono">+${whale.pnl.toLocaleString()}</span></span>
-                            </div>
-                        </div>
-                        <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px]">
-                            報酬率 {whale.roi}%
-                        </Badge>
-                    </div>
+            {whales.map((whale, i) => {
+                // Format PnL with thousand separators
+                const formatPnl = (pnl: number) => {
+                    if (pnl >= 1000000) return `${(pnl / 1000000).toFixed(1)}M`
+                    if (pnl >= 1000) return `${(pnl / 1000).toFixed(0)}K`
+                    return pnl.toFixed(0)
+                }
 
-                    {/* Positions */}
-                    <div className="space-y-2">
-                        {whale.positions.map((pos: any, idx: number) => (
-                            <div key={idx} className="flex items-center justify-between text-xs bg-black/20 p-2 rounded-lg">
-                                <div className="flex items-center gap-2">
-                                    <Badge className={cn(
-                                        "text-[9px] px-1 h-4 rounded border-0",
-                                        pos.type === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                                    )}>
-                                        {pos.type === 'LONG' ? '做多' : '做空'} {pos.leverage}x
-                                    </Badge>
-                                    <span className="font-bold text-white">{pos.coin}</span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[10px] text-neutral-400">入場價: {pos.entryPrice}</span>
-                                    <span className={cn("font-mono font-medium", pos.pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
-                                        {pos.pnl >= 0 ? '+' : ''}{pos.pnl.toFixed(1)} u
-                                    </span>
+                // Format entry price smartly based on value
+                const formatPrice = (price: number) => {
+                    if (price >= 10000) return price.toLocaleString('en-US', { maximumFractionDigits: 0 })
+                    if (price >= 1000) return price.toLocaleString('en-US', { maximumFractionDigits: 1 })
+                    if (price >= 100) return price.toLocaleString('en-US', { maximumFractionDigits: 2 })
+                    if (price >= 1) return price.toFixed(2)
+                    return price.toFixed(4)
+                }
+
+                return (
+                    <div key={i} className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-3 hover:bg-white/5 transition-all">
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                            <div className="flex items-center gap-3">
+                                <span className="text-neutral-500 font-mono text-xs w-4">0{i + 1}</span>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-white font-mono">{whale.displayAddress}</span>
+                                    <span className="text-[10px] text-neutral-500">盈虧: <span className={whale.pnl >= 0 ? 'text-green-400' : 'text-red-400'} style={{ fontFamily: 'monospace' }}>{whale.pnl >= 0 ? '+' : ''}${formatPnl(whale.pnl)}</span></span>
                                 </div>
                             </div>
-                        ))}
-                        {whale.positions.length === 0 && (
-                            <div className="text-center text-[10px] text-neutral-600 py-1">目前無主要倉位</div>
-                        )}
+                            <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px]">
+                                報酬率 {parseFloat(whale.roi).toFixed(1)}%
+                            </Badge>
+                        </div>
+
+                        {/* Positions */}
+                        <div className="space-y-2">
+                            {whale.positions.map((pos: any, idx: number) => (
+                                <div key={idx} className="flex items-center justify-between text-xs bg-black/20 p-2 rounded-lg">
+                                    <div className="flex items-center gap-2">
+                                        <Badge className={cn(
+                                            "text-[9px] px-1 h-4 rounded border-0",
+                                            pos.type === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                        )}>
+                                            {pos.type === 'LONG' ? '做多' : '做空'} {pos.leverage}x
+                                        </Badge>
+                                        <span className="font-bold text-white">{pos.coin}</span>
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-[10px] text-neutral-400">入場價: ${formatPrice(pos.entryPrice)}</span>
+                                        <span className={cn("font-mono font-medium", pos.pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
+                                            {pos.pnl >= 0 ? '+' : ''}{pos.pnl >= 1000 ? `${(pos.pnl / 1000).toFixed(1)}K` : pos.pnl.toFixed(0)} u
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                            {whale.positions.length === 0 && (
+                                <div className="text-center text-[10px] text-neutral-600 py-1">目前無主要倉位</div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            ))}
+                )
+            })}
         </div>
     )
 }
@@ -173,28 +191,36 @@ function CryptoPricePrediction() {
                     {/* Top 3 Predictions */}
                     <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4 space-y-3">
                         <p className="text-xs text-neutral-500 mb-3">最可能達到的價格</p>
-                        {data.topPredictions?.slice(0, 3).map((target: any, i: number) => (
-                            <div key={i} className="space-y-1">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className={cn(
-                                        "font-medium flex items-center gap-1",
-                                        target.direction === 'up' ? 'text-green-400' : 'text-red-400'
-                                    )}>
-                                        {target.direction === 'up' ? '↑' : '↓'} {target.label}
-                                    </span>
-                                    <span className="font-mono font-bold text-white">{(target.probability * 100).toFixed(0)}%</span>
+                        {data.topPredictions?.slice(0, 3).map((target: any, i: number) => {
+                            // Format probability - show 1 decimal for low values
+                            const prob = target.probability * 100
+                            const probDisplay = prob < 10 ? prob.toFixed(1) : prob.toFixed(0)
+                            // For very low probabilities, use minimum bar width
+                            const barWidth = Math.max(prob, 3)
+
+                            return (
+                                <div key={i} className="space-y-1">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className={cn(
+                                            "font-medium flex items-center gap-1",
+                                            target.direction === 'up' ? 'text-green-400' : 'text-red-400'
+                                        )}>
+                                            {target.direction === 'up' ? '↑' : '↓'} {target.label}
+                                        </span>
+                                        <span className="font-mono font-bold text-white">{probDisplay}%</span>
+                                    </div>
+                                    <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                                        <div
+                                            className={cn(
+                                                "h-full rounded-full transition-all",
+                                                target.direction === 'up' ? 'bg-green-500' : 'bg-red-500'
+                                            )}
+                                            style={{ width: `${barWidth}%` }}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="h-2 bg-black/40 rounded-full overflow-hidden">
-                                    <div
-                                        className={cn(
-                                            "h-full rounded-full transition-all",
-                                            target.direction === 'up' ? 'bg-green-500' : 'bg-red-500'
-                                        )}
-                                        style={{ width: `${target.probability * 100}%` }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
 
                     {/* All Targets - 2 Column */}
@@ -206,12 +232,15 @@ function CryptoPricePrediction() {
                                 <span className="text-xs font-medium text-green-400">看漲目標</span>
                             </div>
                             <div className="space-y-1.5">
-                                {data.bullish?.slice(0, 6).map((t: any, i: number) => (
-                                    <div key={i} className="flex items-center justify-between text-xs">
-                                        <span className="text-neutral-400">{t.label}</span>
-                                        <span className="font-mono text-white">{(t.probability * 100).toFixed(0)}%</span>
-                                    </div>
-                                ))}
+                                {data.bullish?.slice(0, 6).map((t: any, i: number) => {
+                                    const prob = t.probability * 100
+                                    return (
+                                        <div key={i} className="flex items-center justify-between text-xs">
+                                            <span className="text-neutral-400">{t.label}</span>
+                                            <span className="font-mono text-white">{prob < 10 ? prob.toFixed(1) : prob.toFixed(0)}%</span>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
 
@@ -222,12 +251,15 @@ function CryptoPricePrediction() {
                                 <span className="text-xs font-medium text-red-400">看跌目標</span>
                             </div>
                             <div className="space-y-1.5">
-                                {data.bearish?.slice(0, 6).map((t: any, i: number) => (
-                                    <div key={i} className="flex items-center justify-between text-xs">
-                                        <span className="text-neutral-400">{t.label}</span>
-                                        <span className="font-mono text-white">{(t.probability * 100).toFixed(0)}%</span>
-                                    </div>
-                                ))}
+                                {data.bearish?.slice(0, 6).map((t: any, i: number) => {
+                                    const prob = t.probability * 100
+                                    return (
+                                        <div key={i} className="flex items-center justify-between text-xs">
+                                            <span className="text-neutral-400">{t.label}</span>
+                                            <span className="font-mono text-white">{prob < 10 ? prob.toFixed(1) : prob.toFixed(0)}%</span>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>
