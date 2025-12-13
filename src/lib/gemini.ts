@@ -40,6 +40,11 @@ export async function generateMarketSummary(marketData: any): Promise<MarketSumm
 - 禁止：預測價格、喊單、情緒化形容
 - 不使用俗語（如：莊家、韭菜、老司機）
 
+【價格描述規範】(重要)
+- ❌ 禁止輸出精準點位 (如：$91,234)
+- ✅ 必須使用「區間 / 壓力帶」(如：$9.11萬 - $9.15萬)
+- 單位統一使用 萬 (如：7.2萬, 9.5 萬)
+
 【中文排版規範】
 - 中英文之間加空格：BTC 價格、RSI 指標
 - 數字與單位之間加空格：9.5 萬、6.55 億美元
@@ -72,7 +77,7 @@ signals 結構說明：
 3. **whale_summary**: 根據 whale_status 和 evidence.whale 撰寫 20-30 字摘要。若無數據輸出 null
 4. **action**: 
    - bias: 直接使用 signals.market_feeling
-   - entry_zone / stop_loss / take_profit: 根據 liquidation_zones 設定
+   - entry_zone / stop_loss / take_profit: 必須是「價格區間」(e.g. 71.8k-72.2k)，參考 liquidation_zones
 5. **risk_note**: 15-25 字，指出「什麼情況下這個判斷會失效」
 
 【JSON 範例】
