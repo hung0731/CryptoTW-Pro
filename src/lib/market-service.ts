@@ -1,6 +1,7 @@
 import { getMarketSnapshot } from '@/lib/market-aggregator'
 import { generateMarketSummary } from '@/lib/gemini'
 import { createAdminClient, supabase } from '@/lib/supabase'
+import { fetchRSSTitles } from '@/lib/rss'
 
 export async function updateMarketSummary() {
     console.log('[MarketService] Starting Market Summary Generation...')
@@ -18,27 +19,36 @@ export async function updateMarketSummary() {
         }
     }
 
-    // 1.5 Fetch Recent Alert Events (Last 12H) for AI context
+    // 1.5 Fetch Recent Alert Events (Last 12H) & RSS Titles
     let recentAlerts: any[] = []
+    let rssTitles = ''
+
     try {
         const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
-        const { data: alerts } = await dbClient
-            .from('alert_events')
-            .select('alert_type, summary, severity, detected_at, metrics_snapshot')
-            .eq('market', 'BTC')
-            .gte('detected_at', twelveHoursAgo)
-            .order('detected_at', { ascending: false })
-            .limit(10)
 
-        if (alerts) {
-            recentAlerts = alerts
+        // Parallel Fetch: Alerts + RSS
+        const [alertsResult, titles] = await Promise.all([
+            dbClient
+                .from('alert_events')
+                .select('alert_type, summary, severity, detected_at, metrics_snapshot')
+                .eq('market', 'BTC')
+                .gte('detected_at', twelveHoursAgo)
+                .order('detected_at', { ascending: false })
+                .limit(10),
+            fetchRSSTitles(40) // Fetch top 40 titles
+        ])
+
+        if (alertsResult.data) {
+            recentAlerts = alertsResult.data
         }
+        rssTitles = titles
+
     } catch (e) {
-        console.warn('[MarketService] Failed to fetch alerts (table might not exist yet):', e)
+        console.warn('[MarketService] Failed to fetch context data:', e)
     }
 
-    // 2. Generate AI Report
-    const report = await generateMarketSummary(snapshot, recentAlerts)
+    // 2. Generate AI Report (Unified: Technical + Context)
+    const report = await generateMarketSummary(snapshot, recentAlerts, rssTitles)
 
     if (!report) {
         throw new Error('Failed to generate report')

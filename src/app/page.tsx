@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AIMarketPulse } from '@/components/AIMarketPulse'
+import { MarketContextCard } from '@/components/MarketContextCard'
 import { TopCoinCards } from '@/components/TopCoinCards'
 import { PromoBanner } from '@/components/PromoBanner'
 import { QuickActions } from '@/components/QuickActions'
@@ -29,50 +30,43 @@ export default function HomePage() {
     const [predictions, setPredictions] = useState<any[]>([])
     const [calendar, setCalendar] = useState<any[]>([])
     const [signals, setSignals] = useState<MarketSignals | null>(null)
+    const [marketReport, setMarketReport] = useState<any>(null)
     const [signalsLoading, setSignalsLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [mktRes, predRes, calRes] = await Promise.all([
+                const [mktRes, predRes, calRes, reportRes] = await Promise.all([
                     fetch('/api/market'),
                     fetch('/api/prediction/markets?limit=3'),
-                    fetch('/api/coinglass/calendar')
+                    fetch('/api/coinglass/calendar'),
+                    fetch('/api/market-summary')
                 ])
 
                 const mktData = await mktRes.json()
                 const predData = await predRes.json()
                 const calData = await calRes.json()
+                const reportData = await reportRes.json()
 
                 if (mktData.market) setMarketData(mktData.market)
                 if (mktData.fearGreed) setFearGreed(mktData.fearGreed)
                 if (mktData.global) setGlobalData(mktData.global)
                 setPredictions(predData.markets || [])
                 setCalendar(calData.calendar?.events || [])
+
+                // Set Signals and Report
+                if (reportData.signals) setSignals(reportData.signals)
+                if (reportData.report) setMarketReport(reportData.report)
+
             } catch (e) {
                 console.error(e)
             } finally {
                 setLoading(false)
-            }
-        }
-
-        // Fetch signals from market-summary
-        const fetchSignals = async () => {
-            try {
-                const res = await fetch('/api/market-summary')
-                const data = await res.json()
-                if (data.signals) {
-                    setSignals(data.signals)
-                }
-            } catch (e) {
-                console.error('Failed to fetch signals:', e)
-            } finally {
                 setSignalsLoading(false)
             }
         }
 
         fetchData()
-        fetchSignals()
     }, [])
 
     // Fear & Greed color
@@ -136,8 +130,19 @@ export default function HomePage() {
                     <TopCoinCards />
                 </section>
 
-                {/* ===== 2. AI Market Pulse - 核心價值 ===== */}
-                <AIMarketPulse />
+                {/* ===== 2. AI Market Intelligence - 雙核心引擎 ===== */}
+                {marketReport && (
+                    <div className="space-y-4">
+                        {/* 2a. Market Context (News/RSS) */}
+                        <MarketContextCard
+                            context={marketReport.market_context}
+                            updatedAt={marketReport.created_at}
+                        />
+
+                        {/* 2b. Technical Analysis (Price/Data) */}
+                        <AIMarketPulse report={marketReport} />
+                    </div>
+                )}
 
                 {/* ===== 3. Market Stats - 快速指標 ===== */}
                 <section>
