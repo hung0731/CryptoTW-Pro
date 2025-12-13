@@ -1,261 +1,222 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useEffect, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import { Check, X, Search, Trash2 } from 'lucide-react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Crown, TrendingUp, DollarSign, RefreshCw, Loader2, User, Star } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
-interface VipApp {
+interface VipUser {
     id: string
     user_id: string
-    full_name: string
-    phone: string
-    email: string
-    exchange_name: string
+    display_name: string
+    picture_url: string
     exchange_uid: string
-    asset_volume: string
-    telegram_id: string
-    status: 'new' | 'contacted' | 'approved' | 'rejected'
-    created_at: string
-    user?: {
-        picture_url: string
-        display_name: string
+    monthly_volume: number
+    total_commission: number
+    okx_level: string
+    rebate_rate: number
+}
+
+// VIP 門檻設定
+const VIP_TIERS = [
+    { name: '白金', minVolume: 1000000, color: 'bg-gradient-to-r from-neutral-300 to-neutral-100', textColor: 'text-neutral-900' },
+    { name: '黃金', minVolume: 500000, color: 'bg-gradient-to-r from-yellow-500 to-amber-400', textColor: 'text-black' },
+    { name: '白銀', minVolume: 100000, color: 'bg-gradient-to-r from-neutral-400 to-neutral-300', textColor: 'text-neutral-900' },
+    { name: '青銅', minVolume: 10000, color: 'bg-gradient-to-r from-orange-700 to-orange-500', textColor: 'text-white' },
+]
+
+function getTier(volume: number) {
+    for (const tier of VIP_TIERS) {
+        if (volume >= tier.minVolume) return tier
     }
+    return null
 }
 
 export default function AdminVipPage() {
-    const [apps, setApps] = useState<VipApp[]>([])
+    const [users, setUsers] = useState<VipUser[]>([])
     const [loading, setLoading] = useState(true)
-    const [processingId, setProcessingId] = useState<string | null>(null)
-    const [stats, setStats] = useState({
-        total: 0,
-        pending: 0,
-        approved: 0,
-        rejected: 0
-    })
+    const { toast } = useToast()
 
-    const fetchApplications = useCallback(() => {
+    const fetchVipUsers = async () => {
         setLoading(true)
-        fetch('/api/admin/vip')
-            .then(res => res.json())
-            .then(data => {
-                if (data.applications) {
-                    const applications: VipApp[] = data.applications
-                    setApps(applications)
+        try {
+            const res = await fetch('/api/admin/bindings?status=verified&exchange=okx')
+            const data = await res.json()
 
-                    // Calculate stats
-                    setStats({
-                        total: applications.length,
-                        pending: applications.filter(a => a.status === 'new').length,
-                        approved: applications.filter(a => a.status === 'approved').length,
-                        rejected: applications.filter(a => a.status === 'rejected').length
-                    })
-                }
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false))
-    }, [])
+            if (data.bindings) {
+                // 只取有交易量的用戶，按交易量排序
+                const vipList: VipUser[] = data.bindings
+                    .filter((b: any) => b.monthly_volume && b.monthly_volume > 0)
+                    .map((b: any) => ({
+                        id: b.id,
+                        user_id: b.user?.id,
+                        display_name: b.user?.display_name || '未知用戶',
+                        picture_url: b.user?.picture_url || '',
+                        exchange_uid: b.exchange_uid,
+                        monthly_volume: b.monthly_volume || 0,
+                        total_commission: b.total_commission || 0,
+                        okx_level: b.okx_level || '-',
+                        rebate_rate: b.rebate_rate || 0
+                    }))
+                    .sort((a: VipUser, b: VipUser) => b.monthly_volume - a.monthly_volume)
+
+                setUsers(vipList)
+            }
+        } catch (e) {
+            console.error(e)
+            toast({ title: '載入失敗', variant: 'destructive' })
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
-        fetchApplications()
-    }, [fetchApplications])
+        fetchVipUsers()
+    }, [])
 
-    const handleAction = async (id: string, action: 'approve' | 'reject') => {
-        if (!confirm(`Are you sure you want to ${action} this application?`)) return
+    const formatCurrency = (val: number) => {
+        if (val >= 1000000) return `$${(val / 1000000).toFixed(2)}M`
+        if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`
+        return `$${val.toFixed(0)}`
+    }
 
-        setProcessingId(id);
-        try {
-            const response = await fetch(`/api/admin/vip/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: action === 'approve' ? 'approved' : 'rejected' }),
-            });
-            if (response.ok) {
-                fetchApplications(); // Refresh the list
-            } else {
-                console.error('Failed to update application status');
-            }
-        } catch (error) {
-            console.error('Error updating application status:', error);
-        } finally {
-            setProcessingId(null);
-        }
-    };
+    // 統計各等級人數
+    const tierCounts = VIP_TIERS.map(tier => ({
+        ...tier,
+        count: users.filter(u => {
+            const userTier = getTier(u.monthly_volume)
+            return userTier?.name === tier.name
+        }).length
+    }))
+
+    const totalVolume = users.reduce((sum, u) => sum + u.monthly_volume, 0)
+    const totalCommission = users.reduce((sum, u) => sum + u.total_commission, 0)
 
     return (
-        <div className="p-6 md:p-8 space-y-8 w-full">
+        <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white">大客戶計畫 申請管理</h1>
-                    <p className="text-neutral-400 mt-2">管理與審核所有 大客戶計畫 資格申請。總計申請數: {stats.total}</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">
+                        <Crown className="h-8 w-8 text-yellow-500" />
+                        VIP 大戶排行
+                    </h1>
+                    <p className="text-neutral-400 mt-1">追蹤高交易量用戶</p>
                 </div>
+                <Button variant="ghost" size="icon" onClick={fetchVipUsers} className="text-neutral-400 hover:text-white">
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-                <Card className="bg-neutral-900 border-white/5">
+            {/* VIP 等級統計 */}
+            <div className="grid gap-4 md:grid-cols-4">
+                {tierCounts.map(tier => (
+                    <Card key={tier.name} className="bg-neutral-900/50 border-white/5">
+                        <CardContent className="pt-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <Badge className={`${tier.color} ${tier.textColor} border-0`}>{tier.name}</Badge>
+                                    <p className="text-xs text-neutral-500 mt-1">≥ {formatCurrency(tier.minVolume)}</p>
+                                </div>
+                                <div className="text-2xl font-bold text-white">{tier.count}</div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            {/* 總計 */}
+            <div className="grid gap-4 md:grid-cols-2">
+                <Card className="bg-neutral-900/50 border-white/5">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-white">待審核</CardTitle>
-                        <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                        <CardTitle className="text-sm font-medium text-neutral-400">VIP 用戶總交易量</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-blue-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats.pending}</div>
+                        <div className="text-2xl font-bold text-white">{formatCurrency(totalVolume)}</div>
                     </CardContent>
                 </Card>
-                <Card className="bg-neutral-900 border-white/5">
+                <Card className="bg-neutral-900/50 border-white/5">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-white">已核准</CardTitle>
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                        <CardTitle className="text-sm font-medium text-neutral-400">VIP 用戶總返佣</CardTitle>
+                        <DollarSign className="h-4 w-4 text-green-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats.approved}</div>
-                    </CardContent>
-                </Card>
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-white">已拒絕</CardTitle>
-                        <div className="h-2 w-2 rounded-full bg-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats.rejected}</div>
+                        <div className="text-2xl font-bold text-green-400">{formatCurrency(totalCommission)}</div>
                     </CardContent>
                 </Card>
             </div>
 
-            <Card className="bg-neutral-900 border-white/5">
+            {/* 排行榜 */}
+            <Card className="bg-neutral-900/50 border-white/5">
                 <CardHeader>
-                    <CardTitle className="text-white">申請列表</CardTitle>
+                    <CardTitle className="text-white flex items-center gap-2">
+                        <Star className="h-5 w-5 text-yellow-500" />
+                        交易量排行榜
+                    </CardTitle>
+                    <CardDescription className="text-neutral-400">依當月交易量排序</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border border-white/5">
+                    {loading ? (
+                        <div className="flex justify-center py-12">
+                            <Loader2 className="h-8 w-8 animate-spin text-neutral-500" />
+                        </div>
+                    ) : users.length === 0 ? (
+                        <p className="text-center py-12 text-neutral-500">目前沒有交易數據</p>
+                    ) : (
                         <Table>
-                            <TableHeader className="bg-neutral-900">
-                                <TableRow className="border-white/5 hover:bg-neutral-900">
+                            <TableHeader>
+                                <TableRow className="border-white/5 hover:bg-transparent">
+                                    <TableHead className="text-neutral-400 w-12">排名</TableHead>
                                     <TableHead className="text-neutral-400">用戶</TableHead>
-                                    <TableHead className="text-neutral-400">交易所資訊</TableHead>
-                                    <TableHead className="text-neutral-400">資產規模</TableHead>
-                                    <TableHead className="text-neutral-400">聯絡方式</TableHead>
-                                    <TableHead className="text-neutral-400">狀態</TableHead>
-                                    <TableHead className="text-neutral-400 text-right">操作</TableHead>
+                                    <TableHead className="text-neutral-400">OKX UID</TableHead>
+                                    <TableHead className="text-neutral-400 text-right">當月交易量</TableHead>
+                                    <TableHead className="text-neutral-400 text-right">累計返佣</TableHead>
+                                    <TableHead className="text-neutral-400 text-center">等級</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {loading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center h-24 text-neutral-500">
-                                            載入中 (Loading)...
-                                        </TableCell>
-                                    </TableRow>
-                                ) : apps.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center h-24 text-neutral-500">
-                                            目前沒有待審核的申請
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    apps.map((app) => (
-                                        <TableRow key={app.id} className="border-white/5 hover:bg-neutral-800/50">
+                                {users.slice(0, 50).map((user, index) => {
+                                    const tier = getTier(user.monthly_volume)
+                                    return (
+                                        <TableRow key={user.id} className="border-white/5 hover:bg-white/5">
+                                            <TableCell className="font-bold text-neutral-400">
+                                                {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                                            </TableCell>
                                             <TableCell>
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-2">
                                                     <Avatar className="h-8 w-8">
-                                                        <AvatarImage src={app.user?.picture_url} />
-                                                        <AvatarFallback className="bg-neutral-800 text-neutral-500">
-                                                            {app.full_name?.[0] || 'U'}
+                                                        <AvatarImage src={user.picture_url} />
+                                                        <AvatarFallback className="bg-neutral-800 text-neutral-400">
+                                                            <User className="w-4 h-4" />
                                                         </AvatarFallback>
                                                     </Avatar>
-                                                    <div className="grid gap-0.5">
-                                                        <span className="font-medium text-white">{app.full_name}</span>
-                                                        <span className="text-xs text-neutral-500">{app.user?.display_name}</span>
-                                                    </div>
+                                                    <span className="text-white">{user.display_name}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <div className="grid gap-0.5">
-                                                    <span className="text-neutral-300">{app.exchange_name}</span>
-                                                    <span className="text-xs text-neutral-500 font-mono">UID: {app.exchange_uid}</span>
-                                                </div>
+                                            <TableCell className="font-mono text-neutral-400">{user.exchange_uid}</TableCell>
+                                            <TableCell className="text-right font-mono font-bold text-white">
+                                                {formatCurrency(user.monthly_volume)}
                                             </TableCell>
-                                            <TableCell>
-                                                <Badge variant="secondary" className="bg-neutral-800 text-neutral-300 hover:bg-neutral-700">
-                                                    {app.asset_volume}
-                                                </Badge>
+                                            <TableCell className="text-right font-mono text-green-400">
+                                                {formatCurrency(user.total_commission)}
                                             </TableCell>
-                                            <TableCell>
-                                                <div className="grid gap-0.5 text-sm">
-                                                    <span className="text-neutral-400">Line: pending</span>
-                                                    <span className="text-neutral-400">TG: {app.telegram_id}</span>
-                                                    <span className="text-neutral-500 text-xs">{app.email}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge className={`
-                                                    ${app.status === 'new' ? 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20' :
-                                                        app.status === 'approved' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' :
-                                                            app.status === 'rejected' ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' :
-                                                                'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20'}
-                                                `}>
-                                                    {app.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-right flex items-center justify-end gap-2">
-                                                {app.status === 'new' ? (
-                                                    <>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            className="h-8 w-8 text-green-500 hover:text-green-400 hover:bg-green-500/10"
-                                                            onClick={() => handleAction(app.id, 'approve')}
-                                                            disabled={processingId === app.id}
-                                                        >
-                                                            <Check className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                                                            onClick={() => handleAction(app.id, 'reject')}
-                                                            disabled={processingId === app.id}
-                                                        >
-                                                            <X className="h-4 w-4" />
-                                                        </Button>
-                                                    </>
+                                            <TableCell className="text-center">
+                                                {tier ? (
+                                                    <Badge className={`${tier.color} ${tier.textColor} border-0`}>{tier.name}</Badge>
                                                 ) : (
-                                                    <span className="text-xs text-neutral-600 italic">已處理</span>
+                                                    <Badge variant="outline" className="border-white/20 text-neutral-500">一般</Badge>
                                                 )}
-
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="h-8 w-8 text-neutral-500 hover:text-red-500 hover:bg-red-500/10"
-                                                    onClick={async () => {
-                                                        if (!confirm('Are you sure you want to DELETE this application history?')) return
-                                                        try {
-                                                            const res = await fetch(`/api/admin/vip?id=${app.id}`, { method: 'DELETE' })
-                                                            if (res.ok) fetchApplications()
-                                                        } catch (e) { console.error(e) }
-                                                    }}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
                                             </TableCell>
                                         </TableRow>
-                                    ))
-                                )}
+                                    )
+                                })}
                             </TableBody>
                         </Table>
-                    </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

@@ -33,11 +33,11 @@ const menuSections = [
     ]
   },
   {
-    label: "管理",
+    label: "OKX 管理",
     items: [
       { title: "用戶管理", url: "/admin/users", icon: Users },
-      { title: "交易所綁定", url: "/admin/bindings", icon: CreditCard },
-      { title: "大客戶計畫", url: "/admin/vip", icon: Crown },
+      { title: "綁定審核", url: "/admin/bindings", icon: CreditCard },
+      { title: "VIP 排行", url: "/admin/vip", icon: Crown },
       { title: "數據分析", url: "/admin/analytics", icon: LineChart },
     ]
   },
@@ -53,7 +53,7 @@ const menuSections = [
     label: "設定",
     items: [
       { title: "Bot 關鍵字", url: "/admin/bot", icon: Bot },
-      { title: "全站設定", url: "/admin/settings", icon: Cog },
+      { title: "系統設定", url: "/admin/settings", icon: Cog },
     ]
   },
 ]

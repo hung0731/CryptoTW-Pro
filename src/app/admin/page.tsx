@@ -2,148 +2,193 @@
 
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, CreditCard, ArrowUpRight, Activity, Clock } from 'lucide-react'
+import { Users, TrendingUp, DollarSign, Activity, Clock, RefreshCw, Loader2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-
-// --- Dashboard Component ---
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null)
     const [recentBindings, setRecentBindings] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                // 1. Fetch Stats
-                const statsRes = await fetch('/api/admin/stats')
-                const statsData = await statsRes.json()
-                if (statsData.stats) setStats(statsData.stats)
+    const loadData = async () => {
+        setLoading(true)
+        try {
+            // 1. Fetch Stats
+            const statsRes = await fetch('/api/admin/stats')
+            const statsData = await statsRes.json()
+            if (statsData.stats) setStats(statsData.stats)
 
-                // 2. Fetch Recent Pending Bindings (as "Recent Activity")
-                const verifyRes = await fetch('/api/admin/verify')
-                const verifyData = await verifyRes.json()
-                if (verifyData.bindings) {
-                    setRecentBindings(verifyData.bindings.slice(0, 5)) // Top 5
-                }
-
-            } catch (e) {
-                console.error(e)
-            } finally {
-                setLoading(false)
+            // 2. Fetch Recent Pending Bindings
+            const pendingRes = await fetch('/api/admin/bindings?status=pending')
+            const pendingData = await pendingRes.json()
+            if (pendingData.bindings) {
+                setRecentBindings(pendingData.bindings.slice(0, 5))
             }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    useEffect(() => {
         loadData()
     }, [])
 
-    if (loading) {
-        return <div className="p-8 text-neutral-500">Loading dashboard...</div>
+    const formatCurrency = (val: number) => {
+        if (!val) return '$0'
+        if (val >= 1000000) return `$${(val / 1000000).toFixed(2)}M`
+        if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`
+        return `$${val.toFixed(0)}`
     }
 
     return (
-        <div className="p-6 md:p-8 space-y-8 w-full">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight text-white">總覽 (Dashboard)</h1>
-                <p className="text-neutral-400 mt-2">系統即時概況與待辦事項。</p>
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-white">儀表板</h1>
+                    <p className="text-neutral-400 mt-1">系統即時概況與待辦事項</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={loadData} className="text-neutral-400 hover:text-white">
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
             </div>
 
-            {/* Key Metrics */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">總用戶數 (Total Users)</CardTitle>
-                        <Users className="h-4 w-4 text-neutral-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats?.total_users || 0}</div>
-                        <p className="text-xs text-neutral-500 mt-1 flex items-center">
-                            <ArrowUpRight className="h-3 w-3 mr-1 text-green-500" />
-                            +2.5% from last month
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">Pro 會員 (Pro Users)</CardTitle>
-                        <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20">PRO</Badge>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats?.verified_users || 0}</div>
-                        <p className="text-xs text-neutral-500 mt-1">Active subscribers</p>
-                    </CardContent>
-                </Card>
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">待審核 (Pending)</CardTitle>
-                        <CreditCard className="h-4 w-4 text-neutral-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats?.pending_bindings || 0}</div>
-                        <p className="text-xs text-neutral-500 mt-1">Requires attention</p>
-                    </CardContent>
-                </Card>
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">系統狀態 (System)</CardTitle>
-                        <Activity className="h-4 w-4 text-green-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-white">Healthy</div>
-                        <p className="text-xs text-neutral-500 mt-1">All systems operational</p>
-                    </CardContent>
-                </Card>
-            </div>
+            {loading ? (
+                <div className="flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-neutral-500" />
+                </div>
+            ) : (
+                <>
+                    {/* 主要指標 */}
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <Card className="bg-neutral-900/50 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-neutral-400">總用戶數</CardTitle>
+                                <Users className="h-4 w-4 text-blue-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-white">{stats?.total_users || 0}</div>
+                                <p className="text-xs text-neutral-500 mt-1">已註冊會員</p>
+                            </CardContent>
+                        </Card>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                {/* Visual Placeholder for Analytics Graph */}
-                <Card className="col-span-4 bg-neutral-900 border-white/5">
-                    <CardHeader>
-                        <CardTitle className="text-white">流量趨勢 (Traffic Overview)</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        <div className="h-[200px] flex items-center justify-center text-neutral-600 border border-dashed border-neutral-800 rounded-lg">
-                            Chart Component Placeholder
-                        </div>
-                    </CardContent>
-                </Card>
+                        <Card className="bg-neutral-900/50 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-neutral-400">Pro 會員</CardTitle>
+                                <Badge className="bg-white text-black text-xs">PRO</Badge>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-white">{stats?.verified_users || 0}</div>
+                                <p className="text-xs text-neutral-500 mt-1">已驗證 OKX 綁定</p>
+                            </CardContent>
+                        </Card>
 
-                {/* Recent Activity Feed */}
-                <Card className="col-span-3 bg-neutral-900 border-white/5">
-                    <CardHeader>
-                        <CardTitle className="text-white">近期活動 (Recent Activity)</CardTitle>
-                        <CardDescription className="text-neutral-400">
-                            最新的交易所綁定申請。
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {recentBindings.length === 0 && <p className="text-sm text-neutral-500 text-center py-4">無近期活動</p>}
+                        <Card className="bg-neutral-900/50 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-neutral-400">待審核</CardTitle>
+                                <Clock className="h-4 w-4 text-yellow-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-yellow-400">{stats?.pending_bindings || 0}</div>
+                                <p className="text-xs text-neutral-500 mt-1">需要處理</p>
+                            </CardContent>
+                        </Card>
 
-                            {recentBindings.map((item, i) => (
-                                <div key={i} className="flex items-center gap-4">
-                                    <Avatar className="h-9 w-9 border border-white/10">
-                                        <AvatarImage src={item.user?.picture_url} alt="Avatar" />
-                                        <AvatarFallback>U</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none text-white">
-                                            {item.user?.display_name || 'Unknown User'}
-                                        </p>
-                                        <p className="text-xs text-neutral-500">
-                                            申請綁定 <span className="text-neutral-300 font-bold uppercase">{item.exchange_name}</span>
-                                        </p>
+                        <Card className="bg-neutral-900/50 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-neutral-400">系統狀態</CardTitle>
+                                <Activity className="h-4 w-4 text-green-500" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-green-400">正常</div>
+                                <p className="text-xs text-neutral-500 mt-1">所有服務運行中</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                        {/* OKX 統計 */}
+                        <Card className="col-span-4 bg-neutral-900/50 border-white/5">
+                            <CardHeader>
+                                <CardTitle className="text-white">OKX 數據概覽</CardTitle>
+                                <CardDescription className="text-neutral-400">已驗證用戶交易統計</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="p-4 bg-black/20 rounded-lg border border-white/5">
+                                        <div className="flex items-center gap-2 text-neutral-400 text-sm mb-2">
+                                            <TrendingUp className="h-4 w-4" />
+                                            總交易量
+                                        </div>
+                                        <div className="text-xl font-bold text-white">{formatCurrency(stats?.total_volume || 0)}</div>
                                     </div>
-                                    <div className="text-xs text-neutral-500 flex items-center gap-1">
-                                        <Clock className="w-3 h-3" />
-                                        {new Date(item.created_at).toLocaleDateString()}
+                                    <div className="p-4 bg-black/20 rounded-lg border border-white/5">
+                                        <div className="flex items-center gap-2 text-neutral-400 text-sm mb-2">
+                                            <DollarSign className="h-4 w-4" />
+                                            累計返佣
+                                        </div>
+                                        <div className="text-xl font-bold text-green-400">{formatCurrency(stats?.total_commission || 0)}</div>
+                                    </div>
+                                    <div className="p-4 bg-black/20 rounded-lg border border-white/5">
+                                        <div className="flex items-center gap-2 text-neutral-400 text-sm mb-2">
+                                            <Users className="h-4 w-4" />
+                                            VIP 用戶
+                                        </div>
+                                        <div className="text-xl font-bold text-purple-400">{stats?.vip_users || 0}</div>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* 待審核列表 */}
+                        <Card className="col-span-3 bg-neutral-900/50 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">待處理申請</CardTitle>
+                                    <CardDescription className="text-neutral-400">最新的 OKX 綁定申請</CardDescription>
+                                </div>
+                                <Link href="/admin/bindings">
+                                    <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
+                                        查看全部
+                                    </Button>
+                                </Link>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {recentBindings.length === 0 && (
+                                        <p className="text-sm text-neutral-500 text-center py-4">目前沒有待處理的申請 ✓</p>
+                                    )}
+
+                                    {recentBindings.map((item, i) => (
+                                        <div key={i} className="flex items-center gap-4">
+                                            <Avatar className="h-9 w-9 ring-1 ring-white/10">
+                                                <AvatarImage src={item.user?.picture_url} alt="Avatar" />
+                                                <AvatarFallback className="bg-neutral-800 text-neutral-400">U</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 space-y-1">
+                                                <p className="text-sm font-medium leading-none text-white">
+                                                    {item.user?.display_name || '未知用戶'}
+                                                </p>
+                                                <p className="text-xs text-neutral-500">
+                                                    OKX: <span className="text-neutral-300 font-mono">{item.exchange_uid}</span>
+                                                </p>
+                                            </div>
+                                            <div className="text-xs text-neutral-500 flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                {new Date(item.created_at).toLocaleDateString('zh-TW')}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </>
+            )}
         </div>
     )
 }
