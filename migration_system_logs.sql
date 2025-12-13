@@ -13,15 +13,8 @@ CREATE TABLE IF NOT EXISTS system_logs (
 ALTER TABLE system_logs ENABLE ROW LEVEL SECURITY;
 
 -- Allow admins to read all logs
-CREATE POLICY "Admins can view all logs" ON system_logs
-    FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM users
-            WHERE users.id = auth.uid()
-            AND users.role = 'admin'
-        )
-    );
+-- Policy "Admins can view all logs" removed as it relied on non-existent users.role column.
+-- Admin access is handled via Service Role Key (createAdminClient) which bypasses RLS.
 
 -- Allow system/service role to insert logs (and admins)
 CREATE POLICY "Admins and Service Role can insert logs" ON system_logs
