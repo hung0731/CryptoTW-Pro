@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
     try {
@@ -9,6 +10,13 @@ export async function POST(req: NextRequest) {
 
         if (!exchange_name || !event_type) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        }
+
+        // Rate Limit: 30 requests per minute
+        const ip = req.headers.get('x-forwarded-for') || 'unknown'
+        const { success } = await rateLimit(`track:${ip}`, 30, 60)
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
         }
 
         const { error } = await supabase

@@ -1,7 +1,7 @@
 // Coinglass API Configuration
 // API Documentation: https://docs.coinglass.com
 
-const COINGLASS_BASE_URL = 'https://open-api-v3.coinglass.com/api'
+const COINGLASS_BASE_URL = 'https://open-api.coinglass.com'
 
 // Get API key from environment
 export const getCoinglassApiKey = () => {

@@ -5,7 +5,7 @@ import { createSafeServerClient } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 
 export async function triggerMarketSummaryAction() {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const supabase = createSafeServerClient(cookieStore)
 
     // 1. Check Auth

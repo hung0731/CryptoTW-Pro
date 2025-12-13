@@ -257,11 +257,11 @@ export function FundingRateRankings() {
                         <TrendingUp className="w-3 h-3 text-red-400" />
                         <span className="text-xs font-bold text-red-400">極度看多</span>
                     </div>
-                    <div className="space-y-1">
-                        {(data.extremePositive || []).slice(0, 8).map((item: any, i: number) => ( // Increased to 8 items
-                            <div key={i} className="flex items-center justify-between text-[10px]">
-                                <div className="flex items-center gap-1">
-                                    <span className="text-neutral-600 font-mono w-3">{i + 1}</span>
+                    <div className="space-y-0.5">
+                        {(data.extremePositive || []).slice(0, 8).map((item: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-[10px] py-0.5 hover:bg-white/5 rounded px-1 transition-colors">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-neutral-600 font-mono w-3 text-[9px]">{i + 1}</span>
                                     <span className="text-neutral-300 font-medium">{item.symbol}</span>
                                 </div>
                                 <span className="font-mono font-bold text-red-400">
@@ -278,11 +278,11 @@ export function FundingRateRankings() {
                         <TrendingDown className="w-3 h-3 text-green-400" />
                         <span className="text-xs font-bold text-green-400">極度看空</span>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                         {(data.extremeNegative || []).slice(0, 8).map((item: any, i: number) => (
-                            <div key={i} className="flex items-center justify-between text-[10px]">
-                                <div className="flex items-center gap-1">
-                                    <span className="text-neutral-600 font-mono w-3">{i + 1}</span>
+                            <div key={i} className="flex items-center justify-between text-[10px] py-0.5 hover:bg-white/5 rounded px-1 transition-colors">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-neutral-600 font-mono w-3 text-[9px]">{i + 1}</span>
                                     <span className="text-neutral-300 font-medium">{item.symbol}</span>
                                 </div>
                                 <span className="font-mono font-bold text-green-400">
@@ -645,26 +645,26 @@ export function EconomicCalendar() {
     return (
         <div className="space-y-6">
             {Object.entries(grouped).map(([date, events]: [string, any]) => (
-                <div key={date} className="space-y-3">
-                    <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <h3 className="text-sm font-bold text-white font-mono">{date}</h3>
+                <div key={date} className="space-y-4">
+                    <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+                        <h3 className="text-base font-bold text-white font-mono">{date}</h3>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {events.map((event: any, i: number) => (
-                            <div key={i} className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 hover:bg-white/5 transition-all">
-                                <div className="flex items-start justify-between gap-4 mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg text-white font-mono">{event.time}</span>
-                                        <span className="text-xl">{event.country}</span>
+                            <div key={i} className="bg-neutral-900/40 border border-white/5 rounded-xl p-5 hover:bg-white/5 transition-all">
+                                <div className="flex items-start justify-between gap-4 mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xl text-white font-mono font-bold">{event.time}</span>
+                                        <span className="text-2xl">{event.country}</span>
                                     </div>
-                                    <div className="flex gap-0.5">
+                                    <div className="flex gap-1">
                                         {[...Array(3)].map((_, starIdx) => (
                                             <div
                                                 key={starIdx}
                                                 className={cn(
-                                                    "w-3 h-3 rounded-sm",
+                                                    "w-4 h-4 rounded-sm",
                                                     starIdx < event.importance ?
                                                         (event.importance === 3 ? "bg-red-500" : "bg-yellow-500") :
                                                         "bg-neutral-800"
@@ -674,20 +674,20 @@ export function EconomicCalendar() {
                                     </div>
                                 </div>
 
-                                <h4 className="text-base font-medium text-white mb-3">{event.event}</h4>
+                                <h4 className="text-lg font-medium text-white mb-4">{event.event}</h4>
 
-                                <div className="grid grid-cols-3 gap-2 text-xs">
-                                    <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
-                                        <span className="block text-neutral-500 mb-1">今值</span>
-                                        <span className="font-mono text-white font-bold">{event.actual || '--'}</span>
+                                <div className="grid grid-cols-3 gap-3 text-sm">
+                                    <div className="bg-black/30 p-3 rounded-lg text-center border border-white/5">
+                                        <span className="block text-neutral-500 mb-1.5 text-xs">今值</span>
+                                        <span className="font-mono text-white font-bold text-base">{event.actual || '--'}</span>
                                     </div>
-                                    <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
-                                        <span className="block text-neutral-500 mb-1">預測</span>
-                                        <span className="font-mono text-neutral-300">{event.forecast || '--'}</span>
+                                    <div className="bg-black/30 p-3 rounded-lg text-center border border-white/5">
+                                        <span className="block text-neutral-500 mb-1.5 text-xs">預測</span>
+                                        <span className="font-mono text-neutral-300 text-base">{event.forecast || '--'}</span>
                                     </div>
-                                    <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
-                                        <span className="block text-neutral-500 mb-1">前值</span>
-                                        <span className="font-mono text-neutral-400">{event.previous || '--'}</span>
+                                    <div className="bg-black/30 p-3 rounded-lg text-center border border-white/5">
+                                        <span className="block text-neutral-500 mb-1.5 text-xs">前值</span>
+                                        <span className="font-mono text-neutral-400 text-base">{event.previous || '--'}</span>
                                     </div>
                                 </div>
                             </div>

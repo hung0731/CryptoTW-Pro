@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase'
+import { rateLimit } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 import { sendAdminNotification } from '@/lib/notify'
 
@@ -9,6 +10,13 @@ export async function POST(req: Request) {
 
         if (!name || !contact_handle || !asset_tier) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        }
+
+        // Rate Limit: 5 requests per hour per IP
+        const ip = req.headers.get('x-forwarded-for') || 'unknown'
+        const { success } = await rateLimit(`vip_apply:${ip}`, 5, 3600)
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
         }
 
         const supabase = createAdminClient()

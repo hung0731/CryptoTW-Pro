@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
 import { createAdminClient } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
@@ -8,6 +9,13 @@ export async function POST(req: NextRequest) {
 
         if (!eventType || !eventName) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        }
+
+        // Rate Limit: 30 requests per minute per IP (High throughput allowed)
+        const ip = req.headers.get('x-forwarded-for') || 'unknown'
+        const { success } = await rateLimit(`analytics:${ip}`, 30, 60)
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
         }
 
         const supabase = createAdminClient()
