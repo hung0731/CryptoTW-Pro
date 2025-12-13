@@ -21,7 +21,8 @@ export async function GET(request: Request) {
         // Fetch funding rate data
         const data = await coinglassRequest<FundingRateData[]>(
             '/public/v2/funding',
-            symbol !== 'ALL' ? { symbol } : {}
+            symbol !== 'ALL' ? { symbol } : {},
+            { next: { revalidate: 300 } }
         )
 
         if (!data) {

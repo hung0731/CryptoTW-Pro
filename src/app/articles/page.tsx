@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { useLiff } from '@/components/LiffProvider'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Lock, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
+import { RefreshCw, Filter } from 'lucide-react'
 import { BottomNav } from '@/components/BottomNav'
 import { PageHeader } from '@/components/PageHeader'
 import { cn } from '@/lib/utils'
+import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
+import { ArticleGrid } from '@/components/news/ArticleGrid'
+import { Button } from '@/components/ui/button'
 
 export default function ArticlesPage() {
   const { profile, isLoading: isAuthLoading } = useLiff()
@@ -17,82 +17,86 @@ export default function ArticlesPage() {
   const [content, setContent] = useState<any[]>([])
   const [coinglassNews, setCoinglassNews] = useState<any[]>([])
   const [dataLoading, setDataLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('all')
+  const [activeTab, setActiveTab] = useState<'flash' | 'insights' | 'events'>('flash')
+  const [refreshing, setRefreshing] = useState(false)
+  const [importantOnly, setImportantOnly] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
-  // Fetch Data - No restrictions for testing
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [actRes, contRes, newsRes] = await Promise.all([
-          fetch('/api/activities').then(r => r.json()),
-          fetch('/api/content').then(r => r.json()),
-          fetch('/api/coinglass/news').then(r => r.json())
-        ])
+  const fetchData = async () => {
+    setRefreshing(true)
+    try {
+      const [actRes, contRes, newsRes] = await Promise.all([
+        fetch('/api/activities').then(r => r.json()),
+        fetch('/api/content').then(r => r.json()),
+        fetch('/api/coinglass/news').then(r => r.json())
+      ])
 
-        if (actRes.activities) setActivities(actRes.activities)
-        if (contRes.content) setContent(contRes.content)
+      if (actRes.activities) setActivities(actRes.activities)
+      if (contRes.content) setContent(contRes.content)
 
-        // Process Coinglass News
-        if (newsRes.news) {
-          const externalNews = newsRes.news.map((item: any) => ({
-            id: `cg-${Math.random().toString(36).substr(2, 9)}`, // V4 data doesn't seem to have a unique ID in the example, generating one
-            title: item.article_title,
-            content: item.article_content,
-            summary: item.article_description || item.article_content?.substring(0, 100),
-            thumbnail_url: item.article_picture,
-            type: 'news',
-            created_at: item.article_release_time, // This is a timestamp number
-            url: null, // V4 example doesn't show a direct URL, might need to construct or it's missing
-            is_public: true,
-            source: item.source_name || 'Coinglass'
-          }))
-          setCoinglassNews(externalNews)
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        setDataLoading(false)
+      // Process Coinglass News
+      if (newsRes.news) {
+        const externalNews = newsRes.news.map((item: any) => ({
+          id: `cg-${Math.random().toString(36).substr(2, 9)}`,
+          title: item.article_title,
+          content: item.article_content,
+          summary: item.article_description || item.article_content?.substring(0, 100),
+          thumbnail_url: item.article_picture,
+          type: 'news',
+          created_at: item.article_release_time,
+          url: null,
+          is_public: true,
+          source: item.source_name || 'Coinglass',
+          important: false // API might not give this, could try to infer from keywords
+        }))
+        setCoinglassNews(externalNews)
       }
+      setLastUpdated(new Date())
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setDataLoading(false)
+      setRefreshing(false)
     }
+  }
+
+  // Initial Fetch & Auto Refresh for Flash News
+  useEffect(() => {
     fetchData()
-  }, [])
+
+    // Auto refresh every 60s if on flash tab
+    const interval = setInterval(() => {
+      if (activeTab === 'flash') {
+        fetchData()
+      }
+    }, 60000)
+
+    return () => clearInterval(interval)
+  }, [activeTab])
 
   // Loading State
-  if (isAuthLoading || dataLoading) {
+  if (isAuthLoading || (dataLoading && !coinglassNews.length)) {
     return (
-      <div className="min-h-screen bg-black p-4 space-y-8">
-        <div className="flex items-center justify-center p-4">
-          <img src="/logo.svg" className="h-6 w-auto opacity-50 animate-pulse" />
+      <div className="min-h-screen bg-black p-4 space-y-8 pb-24">
+        <PageHeader showLogo />
+        <div className="space-y-4 px-4">
+          <Skeleton className="h-8 w-full bg-neutral-900" />
+          <Skeleton className="h-40 w-full bg-neutral-900" />
+          <Skeleton className="h-20 w-full bg-neutral-900" />
+          <Skeleton className="h-20 w-full bg-neutral-900" />
         </div>
-        <Skeleton className="h-12 w-full bg-neutral-900" />
-        <div className="flex gap-2">
-          <Skeleton className="h-8 w-16 bg-neutral-900" />
-          <Skeleton className="h-8 w-16 bg-neutral-900" />
-          <Skeleton className="h-8 w-16 bg-neutral-900" />
-        </div>
-        <Skeleton className="h-40 w-full bg-neutral-900" />
+        <BottomNav />
       </div>
     )
   }
 
-  const categories = [
-    { id: 'all', label: '全部' },
-    { id: 'news', label: '快訊' },
-    { id: 'alpha', label: '深度 / 原創' },
-    { id: 'weekly', label: '週報' },
-  ]
+  // Filter Data
+  const flashNewsItems = importantOnly
+    ? coinglassNews.filter(n => n.important)
+    : coinglassNews
 
-  // Filter Logic
-  let filteredContent = activeTab === 'all' ? content : content.filter(c => c.type === activeTab)
-
-  // Merge Coinglass News if tab is 'news' or 'all'
-  if (activeTab === 'news' || activeTab === 'all') {
-    // Create a map to avoid duplicates if necessary, or just concat
-    // prioritizing internal content might be better, or mix by date
-    const combined = [...filteredContent, ...(activeTab === 'news' || activeTab === 'all' ? coinglassNews : [])]
-    // Sort by date desc
-    filteredContent = combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  }
+  // Insights: Content typed 'alpha', 'weekly', or generic 'article' excluding pure news if mixed
+  const insightItems = content
 
   return (
     <main className="min-h-screen font-sans bg-black text-white pb-24">
@@ -100,232 +104,87 @@ export default function ArticlesPage() {
       {/* Header */}
       <PageHeader showLogo />
 
-      {/* Category Filter Pills (Scrollable) */}
-      <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5">
-        <div className="w-full overflow-x-auto no-scrollbar px-4 py-3 max-w-lg mx-auto">
-          <div className="flex space-x-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
+      {/* Sticky Tab & Controls */}
+      <div className="sticky top-14 z-30 bg-black/90 backdrop-blur-xl border-b border-white/5 pt-2 pb-0">
+        <div className="flex items-center justify-between px-4 pb-2">
+
+          {/* Tabs */}
+          <div className="flex space-x-6">
+            <button
+              onClick={() => setActiveTab('flash')}
+              className={cn(
+                "relative py-3 text-sm font-bold transition-colors",
+                activeTab === 'flash' ? "text-white" : "text-neutral-500 hover:text-neutral-300"
+              )}
+            >
+              7x24 快訊
+              {activeTab === 'flash' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('insights')}
+              className={cn(
+                "relative py-3 text-sm font-bold transition-colors",
+                activeTab === 'insights' ? "text-white" : "text-neutral-500 hover:text-neutral-300"
+              )}
+            >
+              深度觀點
+              {activeTab === 'insights' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+              )}
+            </button>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            {activeTab === 'flash' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setImportantOnly(!importantOnly)}
                 className={cn(
-                  "px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
-                  activeTab === cat.id
-                    ? "bg-white text-black"
-                    : "bg-neutral-900 text-neutral-400 hover:text-white border border-white/5"
+                  "h-7 px-2 text-[10px] rounded-full border transition-all",
+                  importantOnly
+                    ? "bg-red-500/10 border-red-500/50 text-red-400"
+                    : "bg-neutral-900 border-white/10 text-neutral-500"
                 )}
               >
-                {cat.label}
-              </button>
-            ))}
+                <Filter className="w-3 h-3 mr-1" />
+                重點
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchData}
+              className={cn("h-7 w-7 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-800", refreshing && "animate-spin")}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 px-4 space-y-8 max-w-lg mx-auto min-h-screen">
-
-        {/* Always show activities unless specific tab logic requires hiding (Usually kept on top) */}
-        <MarketActivities activities={activities} />
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">最新內容</h2>
+      <div className="mt-4 px-4 min-h-screen">
+        {activeTab === 'flash' && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="mb-4 flex items-center justify-between text-[10px] text-neutral-600 px-2">
+              <span>最後更新: {lastUpdated.toLocaleTimeString()}</span>
+              <span>共 {flashNewsItems.length} 條消息</span>
+            </div>
+            <FlashNewsFeed items={flashNewsItems} />
           </div>
-          <ContentList items={filteredContent} />
-        </div>
+        )}
+
+        {activeTab === 'insights' && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-lg mx-auto pt-2">
+            <ArticleGrid items={insightItems} />
+          </div>
+        )}
       </div>
 
       <BottomNav />
     </main>
-  )
-}
-
-function MarketActivities({ activities }: { activities: any[] }) {
-  if (activities.length === 0) return null
-  return (
-    <section className="space-y-4 mb-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">交易信號</h2>
-        <Badge variant="outline" className="border-green-500/30 text-green-400 bg-green-500/10">即時</Badge>
-      </div>
-      <div className="space-y-3">
-        {activities.map((act) => (
-          <Link href={`/events/${act.id}`} key={act.id}>
-            <Card className="bg-neutral-900 border-white/5 overflow-hidden group hover:border-white/10 transition-colors cursor-pointer">
-              <CardContent className="p-4 flex items-start gap-4">
-                <div className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${act.is_active ? 'bg-green-500 animate-pulse' : 'bg-neutral-600'}`} />
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-white text-sm group-hover:text-blue-400 transition-colors">{act.title}</h3>
-                    <span className="text-[10px] text-neutral-500 font-mono uppercase bg-black px-2 py-0.5 rounded border border-white/5">{act.exchange_name}</span>
-                  </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">{act.description}</p>
-                  <div className="flex items-center text-[10px] text-neutral-500 mt-2 font-medium">
-                    <span className="group-hover:text-neutral-300">查看詳情</span>
-                    <ChevronRight className="w-3 h-3 ml-0.5 opacity-50 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function ContentList({ items }: { items: any[] }) {
-  if (items.length === 0) {
-    return (
-      <div className="p-12 text-center border border-dashed border-white/10 rounded-xl bg-neutral-900/50">
-        <p className="text-neutral-500 text-sm">暫無內容</p>
-      </div>
-    )
-  }
-  // State for News Dialog
-  const [selectedNews, setSelectedNews] = useState<any | null>(null)
-
-  return (
-    <>
-      <div className="space-y-3">
-        {items.map((item) => {
-          // Flash News Style (Compact, no big thumbnail, high information density)
-          if (item.type === 'news') {
-            // Strip HTML for preview
-            const plainSummary = item.summary ? item.summary.replace(/<[^>]+>/g, '') : ''
-
-            return (
-              <div
-                key={item.id}
-                onClick={() => setSelectedNews(item)}
-                className="block group cursor-pointer"
-              >
-                <div className="bg-neutral-900/30 border border-white/5 rounded-lg p-3 hover:bg-white/5 transition-all flex gap-3">
-                  {/* Time Column */}
-                  <div className="flex flex-col items-center shrink-0 w-12 pt-0.5">
-                    <span className="text-xs font-bold text-neutral-300 font-mono">
-                      {new Date(item.created_at).getHours().toString().padStart(2, '0')}:{new Date(item.created_at).getMinutes().toString().padStart(2, '0')}
-                    </span>
-                    <div className="h-full w-px bg-white/10 my-1 group-hover:bg-blue-500/50 transition-colors"></div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-blue-500/30 text-blue-400 bg-blue-500/10 font-normal">
-                        快訊
-                      </Badge>
-                      <span className="text-[10px] text-neutral-500">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                      {item.source && (
-                        <span className="text-[10px] text-neutral-500 border-l border-neutral-800 pl-2">
-                          {item.source}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors leading-snug mb-1">
-                      {item.title}
-                    </h3>
-                    {/* Show stripped summary */}
-                    <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
-                      {plainSummary}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )
-          }
-
-          // Standard Article Style
-          return (
-            <Link href={`/content/${item.id}`} key={item.id} className="block group">
-              <div className="bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden hover:bg-white/5 transition-colors">
-                <div className="flex items-start gap-4 p-4">
-                  {/* Thumbnail */}
-                  {item.thumbnail_url && (
-                    <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-800 border border-white/10">
-                      <img src={item.thumbnail_url} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
-                      {!item.is_public && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <Lock className="w-5 h-5 text-yellow-500 drop-shadow-md" />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-neutral-400 font-normal">
-                        {item.type?.toUpperCase() || 'ARTICLE'}
-                      </Badge>
-                      <span className="text-[10px] text-neutral-600">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed opacity-70">
-                      {item.summary || item.content?.substring(0, 100)}...
-                    </p>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="self-center shrink-0 opacity-0 group-hover:opacity-50 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
-                    <ChevronRight className="w-4 h-4 text-neutral-400" />
-                  </div>
-                </div>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-
-      {/* News Detail Dialog (Modal) */}
-      {selectedNews && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedNews(null)}>
-          <div className="bg-neutral-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="p-4 space-y-4">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-blue-500/30 text-blue-400 bg-blue-500/10">快訊</Badge>
-                    <span className="text-xs text-neutral-500">{new Date(selectedNews.created_at).toLocaleString()}</span>
-                    {selectedNews.source && (
-                      <span className="text-xs text-neutral-500 border-l border-white/10 pl-2">{selectedNews.source}</span>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-bold text-white leading-snug">{selectedNews.title}</h3>
-                </div>
-                <button onClick={() => setSelectedNews(null)} className="p-1 hover:bg-white/10 rounded-full transition-colors">
-                  <span className="text-2xl text-neutral-400">×</span>
-                </button>
-              </div>
-
-              <div className="h-px bg-white/5" />
-
-              {/* Content (Render HTML safely) */}
-              <div
-                className="prose prose-invert prose-sm max-w-none text-neutral-300 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: selectedNews.content || selectedNews.summary }}
-              />
-
-              {/* Footer */}
-              <div className="pt-4 flex justify-end">
-                <button
-                  onClick={() => setSelectedNews(null)}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-neutral-300 text-sm font-medium rounded-lg transition-colors"
-                >
-                  關閉
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   )
 }

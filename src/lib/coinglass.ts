@@ -23,7 +23,8 @@ export const getCoinglassHeaders = () => ({
 // Helper function to make Coinglass API requests
 export async function coinglassRequest<T>(
     endpoint: string,
-    params?: Record<string, string | number>
+    params?: Record<string, string | number>,
+    options?: RequestInit
 ): Promise<T | null> {
     const apiKey = getCoinglassApiKey()
     if (!apiKey) {
@@ -39,9 +40,15 @@ export async function coinglassRequest<T>(
             })
         }
 
+        // Default cache: 60 seconds
+        const defaultOptions: RequestInit = {
+            next: { revalidate: 60 }
+        }
+
         const response = await fetch(url.toString(), {
             headers: getCoinglassHeaders(),
-            next: { revalidate: 60 } // Cache for 1 minute
+            ...defaultOptions,
+            ...options, // Allow override
         })
 
         if (!response.ok) {

@@ -22,7 +22,8 @@ export async function GET(request: Request) {
         // Fetch liquidation orders
         const data = await coinglassRequest<LiquidationItem[]>(
             '/public/v2/liquidation/order',
-            { symbol, limit }
+            { symbol, limit },
+            { next: { revalidate: 300 } }
         )
 
         if (!data) {

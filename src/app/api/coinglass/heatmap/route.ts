@@ -12,7 +12,8 @@ export async function GET(request: Request) {
     try {
         const data = await coinglassRequest<any>(
             '/public/v2/liquidation-heatmap',
-            { symbol, range }
+            { symbol, range },
+            { next: { revalidate: 300 } } // Cache for 5 minutes
         )
 
         if (!data) {
