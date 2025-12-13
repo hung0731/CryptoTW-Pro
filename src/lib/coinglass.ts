@@ -16,7 +16,7 @@ export const getCoinglassApiKey = () => {
 // Common headers for all Coinglass requests
 export const getCoinglassHeaders = () => ({
     'Accept': 'application/json',
-    'CG-API-KEY': getCoinglassApiKey() || '',
+    'coinglassSecret': getCoinglassApiKey() || '',
     'Content-Type': 'application/json'
 })
 
