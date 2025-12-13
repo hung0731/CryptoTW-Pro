@@ -581,7 +581,12 @@ export function ExchangeTransparency() {
 // ============================================
 // Economic Calendar Component
 // ============================================
-export function EconomicCalendar() {
+// ============================================
+// Economic Calendar Component
+// ============================================
+const KEY_EVENTS = ['CPI', 'PPI', 'FOMC', 'Nonfarm', 'GDP', 'Rate Decision']
+
+export function EconomicCalendar({ filter = 'all' }: { filter?: 'all' | 'high_impact' | 'usd' | 'cny' | 'eur' }) {
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
@@ -603,8 +608,25 @@ export function EconomicCalendar() {
 
     if (!data) return null
 
+    // Filter logic
+    const filteredEvents = (data.events || []).filter((e: any) => {
+        if (filter === 'high_impact') return e.importance >= 3
+        if (filter === 'usd') return e.country === 'USD'
+        if (filter === 'cny') return e.country === 'CNY'
+        if (filter === 'eur') return e.country === 'EUR'
+        return true
+    })
+
+    if (filteredEvents.length === 0) {
+        return (
+            <div className="text-center py-10">
+                <p className="text-neutral-500 text-sm">此篩選條件下無即將到來的數據</p>
+            </div>
+        )
+    }
+
     // Group by date
-    const grouped = (data.events || []).reduce((acc: any, event: any) => {
+    const grouped = filteredEvents.reduce((acc: any, event: any) => {
         if (!acc[event.date]) acc[event.date] = []
         acc[event.date].push(event)
         return acc
@@ -614,59 +636,78 @@ export function EconomicCalendar() {
         <div className="space-y-6">
             {Object.entries(grouped).map(([date, events]: [string, any]) => (
                 <div key={date} className="space-y-4">
-                    <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                    <div className="flex items-center gap-3 pb-3 border-b border-white/10 sticky top-0 bg-black/90 backdrop-blur z-10 pt-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
                         <h3 className="text-base font-bold text-white font-mono">{date}</h3>
                     </div>
 
-                    <div className="space-y-4">
-                        {events.map((event: any, i: number) => (
-                            <div key={i} className="bg-neutral-900/40 border border-white/5 rounded-xl p-5 hover:bg-white/5 transition-all">
-                                <div className="flex items-start justify-between gap-4 mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xl text-white font-mono font-bold">{event.time}</span>
-                                        <span className="text-2xl">{event.country}</span>
+                    <div className="space-y-3">
+                        {events.map((event: any, i: number) => {
+                            const isKey = KEY_EVENTS.some(k => event.event.includes(k)) && event.importance >= 3
+
+                            return (
+                                <div key={i} className={cn(
+                                    "rounded-xl p-4 transition-all relative overflow-hidden",
+                                    isKey ? "bg-blue-500/10 border border-blue-500/30" : "bg-neutral-900/40 border border-white/5 hover:bg-white/5"
+                                )}>
+                                    {isKey && (
+                                        <div className="absolute top-0 right-0 px-2 py-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-bl-lg">
+                                            KEY EVENT
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-start justify-between gap-4 mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-mono text-neutral-400 bg-neutral-800/50 px-1.5 py-0.5 rounded">{event.time}</span>
+                                            <span className="text-xs font-bold text-neutral-300 px-1.5 py-0.5 border border-white/10 rounded">{event.country}</span>
+                                        </div>
+                                        <div className="flex gap-0.5">
+                                            {[...Array(3)].map((_, starIdx) => (
+                                                <div
+                                                    key={starIdx}
+                                                    className={cn(
+                                                        "w-1.5 h-3 rounded-sm", // Vertical bars style
+                                                        starIdx < event.importance ?
+                                                            (event.importance === 3 ? "bg-red-500" : "bg-yellow-500") :
+                                                            "bg-neutral-800"
+                                                    )}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
-                                    <div className="flex gap-1">
-                                        {[...Array(3)].map((_, starIdx) => (
-                                            <div
-                                                key={starIdx}
-                                                className={cn(
-                                                    "w-4 h-4 rounded-sm",
-                                                    starIdx < event.importance ?
-                                                        (event.importance === 3 ? "bg-red-500" : "bg-yellow-500") :
-                                                        "bg-neutral-800"
-                                                )}
-                                            />
-                                        ))}
+
+                                    <h4 className={cn(
+                                        "font-medium mb-4 leading-tight",
+                                        isKey ? "text-lg text-white font-bold" : "text-sm text-neutral-200"
+                                    )}>{event.event}</h4>
+
+                                    <div className="grid grid-cols-3 gap-2 text-xs">
+                                        <div className="bg-black/20 p-2 rounded text-center">
+                                            <span className="block text-neutral-500 mb-1 scale-90">今值</span>
+                                            <span className={cn(
+                                                "font-mono font-bold text-sm",
+                                                event.actual ? "text-white" : "text-neutral-600"
+                                            )}>{event.actual || '--'}</span>
+                                        </div>
+                                        <div className="bg-black/20 p-2 rounded text-center">
+                                            <span className="block text-neutral-500 mb-1 scale-90">預測</span>
+                                            <span className="font-mono text-neutral-300 text-sm">{event.forecast || '--'}</span>
+                                        </div>
+                                        <div className="bg-black/20 p-2 rounded text-center">
+                                            <span className="block text-neutral-500 mb-1 scale-90">前值</span>
+                                            <span className="font-mono text-neutral-400 text-sm">{event.previous || '--'}</span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <h4 className="text-lg font-medium text-white mb-4">{event.event}</h4>
-
-                                <div className="grid grid-cols-3 gap-3 text-sm">
-                                    <div className="bg-black/30 p-3 rounded-lg text-center border border-white/5">
-                                        <span className="block text-neutral-500 mb-1.5 text-xs">今值</span>
-                                        <span className="font-mono text-white font-bold text-base">{event.actual || '--'}</span>
-                                    </div>
-                                    <div className="bg-black/30 p-3 rounded-lg text-center border border-white/5">
-                                        <span className="block text-neutral-500 mb-1.5 text-xs">預測</span>
-                                        <span className="font-mono text-neutral-300 text-base">{event.forecast || '--'}</span>
-                                    </div>
-                                    <div className="bg-black/30 p-3 rounded-lg text-center border border-white/5">
-                                        <span className="block text-neutral-500 mb-1.5 text-xs">前值</span>
-                                        <span className="font-mono text-neutral-400 text-base">{event.previous || '--'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </div>
             ))}
 
-            <div className="text-center pt-4">
-                <p className="text-xs text-neutral-500">
-                    數據來源: Investing.com (已時區轉換 UTC+8)
+            <div className="text-center pt-8 pb-4">
+                <p className="text-[10px] text-neutral-600">
+                    數據來源: Investing.com (UTC+8) • 只顯示本週數據
                 </p>
             </div>
         </div>
