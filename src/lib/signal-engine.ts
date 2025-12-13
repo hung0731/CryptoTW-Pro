@@ -101,59 +101,79 @@ function detectWhaleStatus(
     topTraderRatio: number | null,
     oiChange24h: number | null,
     priceChange24h: number | null,
-    longShortRatio: number | null
+    longShortRatio: number | null,
+    whaleSentiment: string | null // From Hyperliquid
 ): { status: WhaleStatus; evidence: string[] } {
     const evidence: string[] = []
 
-    // 無數據
-    if (topTraderRatio === null) {
-        return { status: '觀望', evidence: ['Top Trader 數據不足'] }
+    // 優先使用 Hyperliquid 巨鯨數據
+    if (whaleSentiment) {
+        evidence.push(`Hyperliquid 巨鯨: ${whaleSentiment}`)
+
+        if (whaleSentiment === '偏多') {
+            return { status: '低調做多', evidence }
+        }
+        if (whaleSentiment === '偏空') {
+            return { status: '偏空', evidence }
+        }
+        // 中性 -> 繼續其他判斷
     }
 
-    const bullishRatio = topTraderRatio > 1.2
-    const bearishRatio = topTraderRatio < 0.8
-    const oiUp = oiChange24h !== null && oiChange24h > 2
-    const oiDown = oiChange24h !== null && oiChange24h < -2
-    const priceSideways = priceChange24h !== null && Math.abs(priceChange24h) < 2
-    const ratioConverging = longShortRatio !== null && Math.abs(longShortRatio - 1) < 0.1
-
-    // 紀錄證據
-    evidence.push(`Top Trader 多空比 ${topTraderRatio.toFixed(2)}`)
-    if (oiChange24h !== null) {
-        const sign = oiChange24h >= 0 ? '+' : ''
-        evidence.push(`OI ${sign}${oiChange24h.toFixed(1)}%`)
-    }
-    if (longShortRatio !== null) {
-        evidence.push(`全網多空比 ${longShortRatio.toFixed(2)}`)
+    // 無數據 fallback 到 Top Trader
+    if (topTraderRatio === null && !whaleSentiment) {
+        return { status: '觀望', evidence: ['巨鯨數據不足'] }
     }
 
-    // 判斷邏輯
-    // 低調做多：大戶偏多 + OI 上升 + 價格盤整
-    if (bullishRatio && oiUp && priceSideways) {
-        return { status: '低調做多', evidence }
+    // 如果有 Top Trader 數據，用它判斷
+    if (topTraderRatio !== null) {
+        const bullishRatio = topTraderRatio > 1.2
+        const bearishRatio = topTraderRatio < 0.8
+        const oiUp = oiChange24h !== null && oiChange24h > 2
+        const oiDown = oiChange24h !== null && oiChange24h < -2
+        const priceSideways = priceChange24h !== null && Math.abs(priceChange24h) < 2
+        const ratioConverging = longShortRatio !== null && Math.abs(longShortRatio - 1) < 0.1
+
+        // 紀錄證據
+        evidence.push(`Top Trader 多空比 ${topTraderRatio.toFixed(2)}`)
+        if (oiChange24h !== null) {
+            const sign = oiChange24h >= 0 ? '+' : ''
+            evidence.push(`OI ${sign}${oiChange24h.toFixed(1)}%`)
+        }
+        if (longShortRatio !== null) {
+            evidence.push(`全網多空比 ${longShortRatio.toFixed(2)}`)
+        }
+
+        // 判斷邏輯
+        // 低調做多：大戶偏多 + OI 上升 + 價格盤整
+        if (bullishRatio && oiUp && priceSideways) {
+            return { status: '低調做多', evidence }
+        }
+
+        // 防守對沖：OI 上升 + 價格不動 + 多空比收斂
+        if (oiUp && priceSideways && ratioConverging) {
+            return { status: '防守對沖', evidence }
+        }
+
+        // 撤退中：OI 下降
+        if (oiDown) {
+            return { status: '撤退中', evidence }
+        }
+
+        // 偏空
+        if (bearishRatio) {
+            return { status: '偏空', evidence }
+        }
+
+        // 偏多（簡單判斷）
+        if (bullishRatio) {
+            return { status: '低調做多', evidence }
+        }
+
+        return { status: '觀望', evidence }
     }
 
-    // 防守對沖：OI 上升 + 價格不動 + 多空比收斂
-    if (oiUp && priceSideways && ratioConverging) {
-        return { status: '防守對沖', evidence }
-    }
-
-    // 撤退中：OI 下降
-    if (oiDown) {
-        return { status: '撤退中', evidence }
-    }
-
-    // 偏空
-    if (bearishRatio) {
-        return { status: '偏空', evidence }
-    }
-
-    // 偏多（簡單判斷）
-    if (bullishRatio) {
-        return { status: '低調做多', evidence }
-    }
-
-    return { status: '觀望', evidence }
+    // Fallback: 有 Hyperliquid 中性數據但無 Top Trader
+    return { status: '觀望', evidence: ['巨鯨狀態中性'] }
 }
 
 /**
@@ -269,6 +289,7 @@ export interface RawMarketData {
     whale_short_count?: number
     whale_long_value?: number
     whale_short_value?: number
+    whale_sentiment?: string // '偏多' | '偏空' | '中性' from Hyperliquid
 }
 
 /**
@@ -285,7 +306,8 @@ export function generateMarketSignals(data: RawMarketData): MarketSignals {
         data.top_trader_long_short_ratio ?? null,
         data.oi_change_24h ?? null,
         data.price_change_24h ?? null,
-        data.long_short_ratio ?? null
+        data.long_short_ratio ?? null,
+        data.whale_sentiment ?? null // Hyperliquid sentiment
     )
 
     const liquidation = detectLiquidationPressure(

@@ -180,6 +180,7 @@ export async function getMarketSnapshot() {
             whale_short_count: processWhaleAlerts(hyperliquidWhales)?.summary?.short_count,
             whale_long_value: processWhaleAlerts(hyperliquidWhales)?.summary?.total_long_value_usd,
             whale_short_value: processWhaleAlerts(hyperliquidWhales)?.summary?.total_short_value_usd,
+            whale_sentiment: processWhaleAlerts(hyperliquidWhales)?.summary?.whale_sentiment,
         }),
     }
 }
