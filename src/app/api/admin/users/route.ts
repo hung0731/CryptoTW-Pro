@@ -9,8 +9,9 @@ export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url)
         const page = parseInt(searchParams.get('page') || '1')
-        const limit = parseInt(searchParams.get('limit') || '20')
+        const limit = parseInt(searchParams.get('limit') || '50')
         const q = searchParams.get('q') || ''
+        const includeBindings = searchParams.get('include_bindings') === 'true'
 
         const supabase = createAdminClient()
         const from = (page - 1) * limit
@@ -23,18 +24,36 @@ export async function GET(req: NextRequest) {
             .range(from, to)
 
         if (q) {
-            query = query.or(`display_name.ilike.%${q}%,id.eq.${q}`)
+            query = query.or(`display_name.ilike.%${q}%,line_user_id.ilike.%${q}%`)
         }
 
-        const { data, error, count } = await query
+        const { data: users, error, count } = await query
 
         if (error) {
             console.error('Fetch users error:', error)
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 
+        // If include_bindings, fetch all bindings for these users
+        let usersWithBindings = users
+        if (includeBindings && users && users.length > 0) {
+            const userIds = users.map(u => u.id)
+
+            const { data: bindings } = await supabase
+                .from('exchange_bindings')
+                .select('*')
+                .in('user_id', userIds)
+                .order('created_at', { ascending: false })
+
+            // Map bindings to users
+            usersWithBindings = users.map(user => ({
+                ...user,
+                bindings: bindings?.filter(b => b.user_id === user.id) || []
+            }))
+        }
+
         return NextResponse.json({
-            data,
+            data: usersWithBindings,
             meta: {
                 total: count,
                 page,
@@ -63,7 +82,7 @@ export async function PUT(req: NextRequest) {
 
         const { data, error } = await supabase
             .from('users')
-            .update({ membership_status })
+            .update({ membership_status, updated_at: new Date().toISOString() })
             .eq('id', id)
             .select()
             .single()
@@ -73,6 +92,36 @@ export async function PUT(req: NextRequest) {
         }
 
         return NextResponse.json(data)
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 })
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
+    try {
+        const { searchParams } = new URL(req.url)
+        const id = searchParams.get('id')
+
+        if (!id) {
+            return NextResponse.json({ error: 'Missing user ID' }, { status: 400 })
+        }
+
+        const supabase = createAdminClient()
+
+        // Delete user's bindings first
+        await supabase.from('exchange_bindings').delete().eq('user_id', id)
+
+        // Delete user
+        const { error } = await supabase.from('users').delete().eq('id', id)
+
+        if (error) {
+            return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+
+        return NextResponse.json({ success: true })
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
