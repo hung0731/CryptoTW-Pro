@@ -5,23 +5,24 @@ import Link from 'next/link'
 import { PageHeader } from '@/components/PageHeader'
 import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLiff } from '@/components/LiffProvider'
 import {
-    Crown, Settings, Wallet, Bell, Gift,
-    TrendingUp, FileText, BarChart3, Calendar,
-    ChevronRight, Sparkles, Users
+    Crown, Settings, Wallet, Bell, Gift, LayoutDashboard,
+    TrendingUp, FileText, BarChart3, Calendar, Users,
+    ChevronRight, Sparkles, Gauge, DollarSign, Bitcoin
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Quick Action Button Component
+// Quick Action Component
 function QuickAction({ icon: Icon, label, href, color }: {
     icon: any, label: string, href: string, color?: string
 }) {
     return (
         <Link href={href} className="flex flex-col items-center gap-1.5">
             <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center",
-                color || "bg-white/10"
+                "w-11 h-11 rounded-xl flex items-center justify-center border border-white/5",
+                color || "bg-neutral-900/50"
             )}>
                 <Icon className="w-5 h-5 text-white" />
             </div>
@@ -30,60 +31,34 @@ function QuickAction({ icon: Icon, label, href, color }: {
     )
 }
 
-// Dashboard Card Component
-function DashboardCard({
-    title, icon: Icon, children, href, badge
-}: {
-    title: string, icon: any, children: React.ReactNode, href?: string, badge?: string
-}) {
-    const content = (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-2xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-[#211FFF]" />
-                    <span className="text-sm font-medium text-white">{title}</span>
-                    {badge && (
-                        <span className="text-[9px] bg-[#211FFF]/20 text-[#211FFF] px-1.5 py-0.5 rounded-full">
-                            {badge}
-                        </span>
-                    )}
-                </div>
-                {href && <ChevronRight className="w-4 h-4 text-neutral-600" />}
-            </div>
-            {children}
-        </div>
-    )
-
-    if (href) {
-        return <Link href={href}>{content}</Link>
-    }
-    return content
-}
-
 export default function ProDashboard() {
     const { profile } = useLiff()
+    const [activeTab, setActiveTab] = useState('overview')
     const [loading, setLoading] = useState(true)
     const [predictions, setPredictions] = useState<any[]>([])
     const [articles, setArticles] = useState<any[]>([])
     const [marketData, setMarketData] = useState<any>(null)
+    const [fearGreed, setFearGreed] = useState<any>(null)
+    const [globalData, setGlobalData] = useState<any>(null)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch predictions
-                const predRes = await fetch('/api/prediction/markets')
+                const [predRes, artRes, mktRes] = await Promise.all([
+                    fetch('/api/prediction/markets?limit=5'),
+                    fetch('/api/content?limit=5'),
+                    fetch('/api/market')
+                ])
+
                 const predData = await predRes.json()
-                setPredictions(predData.markets?.slice(0, 3) || [])
-
-                // Fetch articles
-                const artRes = await fetch('/api/content?limit=3')
                 const artData = await artRes.json()
-                setArticles(artData.articles || [])
-
-                // Fetch market data
-                const mktRes = await fetch('/api/market')
                 const mktData = await mktRes.json()
-                setMarketData(mktData)
+
+                setPredictions(predData.markets || [])
+                setArticles(artData.content || [])
+                if (mktData.market) setMarketData(mktData.market)
+                if (mktData.fearGreed) setFearGreed(mktData.fearGreed)
+                if (mktData.global) setGlobalData(mktData.global)
             } catch (e) {
                 console.error(e)
             } finally {
@@ -93,128 +68,262 @@ export default function ProDashboard() {
         fetchData()
     }, [])
 
+    // Fear & Greed color
+    const getFearGreedColor = (value: number) => {
+        if (value <= 25) return 'text-red-500'
+        if (value <= 45) return 'text-orange-500'
+        if (value <= 55) return 'text-yellow-500'
+        if (value <= 75) return 'text-lime-500'
+        return 'text-green-500'
+    }
+
     return (
-        <div className="min-h-screen bg-black text-white pb-24">
+        <main className="min-h-screen bg-black text-white pb-24 font-sans">
             <PageHeader showLogo />
 
-            {/* User Welcome Section */}
-            <div className="px-4 pt-4 pb-6">
-                <div className="flex items-center gap-3 mb-6">
-                    {profile?.pictureUrl ? (
-                        <img
-                            src={profile.pictureUrl}
-                            alt="Avatar"
-                            className="w-12 h-12 rounded-full border-2 border-[#211FFF]"
-                        />
-                    ) : (
-                        <div className="w-12 h-12 rounded-full bg-[#211FFF]/20 flex items-center justify-center">
-                            <Sparkles className="w-6 h-6 text-[#211FFF]" />
+            <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
+                {/* Sticky Tabs */}
+                <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
+                    <TabsList className="grid w-full grid-cols-3 bg-neutral-900/50 p-0.5 rounded-lg h-9">
+                        <TabsTrigger value="overview" className="data-[state=active]:bg-[#211FFF] data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
+                            <LayoutDashboard className="w-3.5 h-3.5" />
+                            儀表板
+                        </TabsTrigger>
+                        <TabsTrigger value="articles" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5" />
+                            精選文章
+                        </TabsTrigger>
+                        <TabsTrigger value="prediction" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
+                            <Gauge className="w-3.5 h-3.5" />
+                            預測市場
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
+
+                {/* TAB 1: Overview Dashboard */}
+                <TabsContent value="overview" className="space-y-4 p-4 min-h-[50vh]">
+
+                    {/* Welcome + Quick Actions */}
+                    <div className="flex items-center gap-3 mb-4">
+                        {profile?.pictureUrl ? (
+                            <img
+                                src={profile.pictureUrl}
+                                alt="Avatar"
+                                className="w-11 h-11 rounded-full border-2 border-[#211FFF]"
+                            />
+                        ) : (
+                            <div className="w-11 h-11 rounded-full bg-[#211FFF]/20 flex items-center justify-center">
+                                <Sparkles className="w-5 h-5 text-[#211FFF]" />
+                            </div>
+                        )}
+                        <div>
+                            <p className="text-xs text-neutral-500">歡迎回來</p>
+                            <h1 className="text-base font-bold text-white">
+                                {profile?.displayName || 'Pro 會員'}
+                            </h1>
                         </div>
-                    )}
-                    <div>
-                        <p className="text-sm text-neutral-400">歡迎回來</p>
-                        <h1 className="text-lg font-bold text-white">
-                            {profile?.displayName || 'Pro 會員'}
-                        </h1>
                     </div>
-                </div>
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-5 gap-4">
-                    <QuickAction icon={Crown} label="大客戶" href="/vip" color="bg-[#211FFF]" />
-                    <QuickAction icon={Wallet} label="交易所" href="/events" />
-                    <QuickAction icon={Bell} label="通知" href="/profile" />
-                    <QuickAction icon={Gift} label="空投" href="/events" />
-                    <QuickAction icon={Settings} label="設定" href="/profile" />
-                </div>
-            </div>
+                    {/* Quick Actions */}
+                    <div className="grid grid-cols-5 gap-2 mb-6">
+                        <QuickAction icon={Crown} label="大客戶" href="/vip" color="bg-[#211FFF]" />
+                        <QuickAction icon={Wallet} label="交易所" href="/events" />
+                        <QuickAction icon={Bell} label="通知" href="/profile" />
+                        <QuickAction icon={Gift} label="空投" href="/events" />
+                        <QuickAction icon={Settings} label="設定" href="/profile" />
+                    </div>
 
-            {/* Dashboard Content */}
-            <div className="px-4 space-y-4">
-
-                {/* Market Overview Card */}
-                <DashboardCard title="市場概況" icon={BarChart3} href="/prediction">
-                    {loading ? (
-                        <Skeleton className="h-16 bg-neutral-900/50" />
-                    ) : marketData ? (
-                        <div className="grid grid-cols-3 gap-2">
-                            <div className="bg-black/30 rounded-xl p-2 text-center">
-                                <p className="text-[10px] text-neutral-500">恐懼指數</p>
-                                <p className="text-sm font-bold text-white">{marketData.fearGreed?.value || '--'}</p>
-                            </div>
-                            <div className="bg-black/30 rounded-xl p-2 text-center">
-                                <p className="text-[10px] text-neutral-500">BTC 主導</p>
-                                <p className="text-sm font-bold text-white">{marketData.globalData?.btcDominance || '--'}%</p>
-                            </div>
-                            <div className="bg-black/30 rounded-xl p-2 text-center">
-                                <p className="text-[10px] text-neutral-500">24H 交易量</p>
-                                <p className="text-sm font-bold text-white">${marketData.globalData?.totalVolume || '--'}</p>
-                            </div>
-                        </div>
-                    ) : null}
-                </DashboardCard>
-
-                {/* Prediction Markets Card */}
-                <DashboardCard title="預測市場" icon={TrendingUp} href="/prediction" badge="HOT">
-                    {loading ? (
-                        <Skeleton className="h-20 bg-neutral-900/50" />
-                    ) : (
-                        <div className="space-y-2">
-                            {predictions.map((market, i) => (
-                                <div key={i} className="flex items-center justify-between py-1">
-                                    <span className="text-xs text-neutral-400 truncate flex-1 mr-2">
-                                        {market.question}
-                                    </span>
-                                    <span className="text-xs font-mono text-[#211FFF]">
-                                        {market.outcomes?.[0]?.probability
-                                            ? `${(market.outcomes[0].probability * 100).toFixed(0)}%`
-                                            : '--'}
-                                    </span>
+                    {/* Global Stats Grid */}
+                    {!loading && (fearGreed || globalData) && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {/* Fear & Greed */}
+                            {fearGreed && (
+                                <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Gauge className="w-4 h-4 text-neutral-500" />
+                                        <span className="text-xs text-neutral-500">恐懼貪婪</span>
+                                    </div>
+                                    <div className={`text-xl font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
+                                        {fearGreed.value}
+                                    </div>
+                                    <div className="text-xs text-neutral-400">{fearGreed.classification}</div>
                                 </div>
-                            ))}
+                            )}
+                            {/* Total Market Cap */}
+                            {globalData && (
+                                <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <DollarSign className="w-4 h-4 text-neutral-500" />
+                                        <span className="text-xs text-neutral-500">總市值</span>
+                                    </div>
+                                    <div className="text-xl font-bold font-mono text-white">${globalData.totalMarketCap}</div>
+                                    <div className="text-xs text-neutral-400">24h 量 ${globalData.totalVolume}</div>
+                                </div>
+                            )}
+                            {/* BTC Dominance */}
+                            {globalData && (
+                                <div className="bg-neutral-900/50 rounded-lg border border-white/5 p-3">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Bitcoin className="w-4 h-4 text-orange-500" />
+                                        <span className="text-xs text-neutral-500">BTC 市佔</span>
+                                    </div>
+                                    <div className="text-xl font-bold font-mono text-orange-400">{globalData.btcDominance}%</div>
+                                    <div className="text-xs text-neutral-400">${globalData.btcMarketCap}</div>
+                                </div>
+                            )}
                         </div>
                     )}
-                </DashboardCard>
 
-                {/* Featured Articles Card */}
-                <DashboardCard title="精選文章" icon={FileText} href="/articles">
+                    {loading && (
+                        <div className="grid grid-cols-3 gap-3">
+                            <Skeleton className="h-24 bg-neutral-900/50" />
+                            <Skeleton className="h-24 bg-neutral-900/50" />
+                            <Skeleton className="h-24 bg-neutral-900/50" />
+                        </div>
+                    )}
+
+                    {/* Market Gainers/Losers Preview */}
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                        {/* Gainers */}
+                        <Link href="/prediction" className="bg-neutral-900/30 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
+                            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/5">
+                                <TrendingUp className="w-4 h-4 text-green-400" />
+                                <span className="text-xs font-medium text-green-400">漲幅榜</span>
+                            </div>
+                            <div className="space-y-1.5">
+                                {loading ? (
+                                    <Skeleton className="h-16 bg-neutral-900/50" />
+                                ) : (marketData?.gainers || []).slice(0, 3).map((coin: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between text-xs">
+                                        <span className="text-neutral-400">{coin.symbol?.toUpperCase()}</span>
+                                        <span className="font-mono text-green-400">+{Math.abs(coin.price_change_percentage_24h || parseFloat(coin.priceChangePercent) || 0).toFixed(1)}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </Link>
+
+                        {/* Losers */}
+                        <Link href="/prediction" className="bg-neutral-900/30 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
+                            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/5">
+                                <TrendingUp className="w-4 h-4 text-red-400 rotate-180" />
+                                <span className="text-xs font-medium text-red-400">跌幅榜</span>
+                            </div>
+                            <div className="space-y-1.5">
+                                {loading ? (
+                                    <Skeleton className="h-16 bg-neutral-900/50" />
+                                ) : (marketData?.losers || []).slice(0, 3).map((coin: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between text-xs">
+                                        <span className="text-neutral-400">{coin.symbol?.toUpperCase()}</span>
+                                        <span className="font-mono text-red-400">{(coin.price_change_percentage_24h || parseFloat(coin.priceChangePercent) || 0).toFixed(1)}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </Link>
+                    </div>
+
+                    {/* Whale Watch + Calendar Preview */}
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                        <Link href="/prediction" className="bg-neutral-900/30 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Users className="w-4 h-4 text-purple-400" />
+                                <span className="text-xs font-medium text-white">巨鯨動向</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-[10px] text-neutral-500">即時追蹤中</span>
+                            </div>
+                        </Link>
+
+                        <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3 opacity-60">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Calendar className="w-4 h-4 text-blue-400" />
+                                <span className="text-xs font-medium text-white">財經日曆</span>
+                            </div>
+                            <span className="text-[10px] text-neutral-500">即將推出</span>
+                        </div>
+                    </div>
+
+                </TabsContent>
+
+                {/* TAB 2: Articles */}
+                <TabsContent value="articles" className="space-y-4 p-4 min-h-[50vh]">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold text-white">精選文章</h2>
+                        <Link href="/articles" className="text-xs text-[#211FFF]">查看全部 →</Link>
+                    </div>
+
                     {loading ? (
-                        <Skeleton className="h-20 bg-neutral-900/50" />
+                        <div className="space-y-3">
+                            <Skeleton className="h-20 bg-neutral-900/50" />
+                            <Skeleton className="h-20 bg-neutral-900/50" />
+                            <Skeleton className="h-20 bg-neutral-900/50" />
+                        </div>
                     ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {articles.map((article, i) => (
-                                <div key={i} className="flex items-center gap-2 py-1">
-                                    <span className="text-[10px] text-neutral-600">{i + 1}</span>
-                                    <span className="text-xs text-white truncate">
-                                        {article.title}
-                                    </span>
-                                </div>
+                                <Link href={`/content/${article.id}`} key={i}>
+                                    <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 hover:bg-white/5 transition-all flex items-start gap-3">
+                                        {article.thumbnail_url && (
+                                            <img src={article.thumbnail_url} alt="" className="w-16 h-16 rounded-lg object-cover" />
+                                        )}
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-medium text-white line-clamp-2">{article.title}</h3>
+                                            <p className="text-xs text-neutral-500 mt-1 line-clamp-1">{article.description}</p>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-neutral-600 shrink-0" />
+                                    </div>
+                                </Link>
                             ))}
                         </div>
                     )}
-                </DashboardCard>
+                </TabsContent>
 
-                {/* Whale Watch Card */}
-                <DashboardCard title="巨鯨動向" icon={Users} href="/prediction">
-                    <div className="flex items-center justify-between py-2">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                            <span className="text-xs text-neutral-400">即時追蹤中</span>
+                {/* TAB 3: Predictions */}
+                <TabsContent value="prediction" className="space-y-4 p-4 min-h-[50vh]">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold text-white">預測市場</h2>
+                        <Link href="/prediction" className="text-xs text-[#211FFF]">查看全部 →</Link>
+                    </div>
+
+                    {loading ? (
+                        <div className="space-y-3">
+                            <Skeleton className="h-24 bg-neutral-900/50" />
+                            <Skeleton className="h-24 bg-neutral-900/50" />
                         </div>
-                        <span className="text-xs text-[#211FFF]">查看詳情 →</span>
-                    </div>
-                </DashboardCard>
-
-                {/* Economic Calendar Card */}
-                <DashboardCard title="財經日曆" icon={Calendar} badge="即將推出">
-                    <div className="py-2 text-center">
-                        <span className="text-xs text-neutral-500">敬請期待 Coinglass 整合</span>
-                    </div>
-                </DashboardCard>
-
-            </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {predictions.slice(0, 5).map((market, i) => (
+                                <Link href={`https://polymarket.com/event/${market.slug}`} target="_blank" key={i}>
+                                    <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
+                                        <div className="flex items-start gap-3 mb-3">
+                                            <div className="w-10 h-10 rounded-lg bg-white/5 p-1.5 shrink-0 border border-white/10">
+                                                <img src={market.icon || '/logo.svg'} className="w-full h-full object-contain opacity-80" />
+                                            </div>
+                                            <h3 className="text-sm font-medium text-neutral-200 line-clamp-2">{market.question}</h3>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            {(market.outcomes || []).slice(0, 2).map((outcome: any, idx: number) => (
+                                                <div key={idx} className="relative h-8 bg-black/40 rounded-lg overflow-hidden flex items-center px-3 border border-white/5">
+                                                    <div
+                                                        className={`absolute inset-0 opacity-20 ${idx === 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                                                        style={{ width: `${outcome.probability * 100}%` }}
+                                                    />
+                                                    <div className="relative z-10 flex items-center justify-between w-full text-xs">
+                                                        <span className="font-medium text-neutral-300">{outcome.name}</span>
+                                                        <span className="font-mono font-bold text-white">{(outcome.probability * 100).toFixed(0)}%</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+            </Tabs>
 
             <BottomNav />
-        </div>
+        </main>
     )
 }
