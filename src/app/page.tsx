@@ -62,11 +62,20 @@ export default function HomePage() {
         return 'text-green-500'
     }
 
+    if (isAuthLoading) {
+        return <div className="min-h-screen bg-black flex items-center justify-center">
+            <img src="/logo.svg" className="h-8 w-auto opacity-50 animate-pulse" />
+        </div>
+    }
+
     return (
-        <main className="min-h-screen bg-black text-white pb-24 font-sans">
+        <main className="min-h-screen font-sans bg-black text-white pb-24">
             <PageHeader showLogo />
 
-            <div className="px-4 space-y-6 pt-4">
+            <div className="mt-4 px-4 space-y-6">
+
+                {/* AI Pulse Widget */}
+                <AIMarketPulse />
 
                 {/* Welcome Header */}
                 <div className="flex items-center justify-between">
