@@ -59,15 +59,7 @@ Output JSON Schema:
 {
   "sentiment_score": number,
   "sentiment": "Bullish" | "Bearish" | "Neutral",
-  "summary": "string",
-  "key_points": ["string", "string", "string"],
-  "actionable_insight": "string",
-  "risk_level": "string",
-  "emoji": "string",
-  "metrics": {
-    "whale_ratio": "number", // Extract from data
-    "global_ratio": "number" // Extract from data
-  }
+  "summary": "string"
 }
 `
 
@@ -76,10 +68,10 @@ Output JSON Schema:
         const text = response.text()
 
         // Extract JSON from markdown code block if present
-        const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/)
+        const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/)
 
         if (jsonMatch) {
-            const jsonStr = jsonMatch[1] || jsonMatch[0]
+            const jsonStr = jsonMatch[1]
             return JSON.parse(jsonStr)
         }
 
