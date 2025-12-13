@@ -8,52 +8,37 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Lock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
-import { ProAccessGate } from '@/components/ProAccessGate'
 import { PageHeader } from '@/components/PageHeader'
 import { cn } from '@/lib/utils'
 
-export default function Home() {
-  const { isLoggedIn, profile, dbUser, isLoading: isAuthLoading } = useLiff()
+export default function ArticlesPage() {
+  const { profile, isLoading: isAuthLoading } = useLiff()
   const [activities, setActivities] = useState<any[]>([])
   const [content, setContent] = useState<any[]>([])
   const [dataLoading, setDataLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
 
-  // Fetch Data only if authorized (Strict Mode)
+  // Fetch Data - No restrictions for testing
   useEffect(() => {
-    if (isAuthLoading) return
-
-    const status = dbUser?.membership_status as string
-    const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
-
-    if (isPro) {
-      const fetchData = async () => {
-        try {
-          const [actRes, contRes] = await Promise.all([
-            fetch('/api/activities').then(r => r.json()),
-            fetch('/api/content').then(r => r.json())
-          ])
-          if (actRes.activities) setActivities(actRes.activities)
-          if (contRes.content) setContent(contRes.content)
-        } catch (e) {
-          console.error(e)
-        } finally {
-          setDataLoading(false)
-        }
+    const fetchData = async () => {
+      try {
+        const [actRes, contRes] = await Promise.all([
+          fetch('/api/activities').then(r => r.json()),
+          fetch('/api/content').then(r => r.json())
+        ])
+        if (actRes.activities) setActivities(actRes.activities)
+        if (contRes.content) setContent(contRes.content)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setDataLoading(false)
       }
-      fetchData()
-    } else {
-      setDataLoading(false)
     }
-  }, [isAuthLoading, dbUser])
+    fetchData()
+  }, [])
 
-  // 1. Loading State
-  const isPending = isAuthLoading || (isLoggedIn && !dbUser)
-  const status = dbUser?.membership_status as string
-  const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
-
-  // If loading or (pro but data loading)
-  if (isPending || (isPro && dataLoading)) {
+  // Loading State
+  if (isAuthLoading || dataLoading) {
     return (
       <div className="min-h-screen bg-black p-4 space-y-8">
         <div className="flex items-center justify-center p-4">
@@ -70,14 +55,6 @@ export default function Home() {
     )
   }
 
-  // 2. Strict Access Gate
-  // If we are sure user is NOT Pro, show gate.
-  if (!isPro) {
-    return <ProAccessGate />
-  }
-
-
-  // 3. Pro Member State (Feed)
   const categories = [
     { id: 'all', label: '全部' },
     { id: 'news', label: '快訊' },
