@@ -1,7 +1,7 @@
 'use server'
 
 import { updateMarketSummary } from '@/lib/market-service'
-import { createSafeServerClient, createAdminClient } from '@/lib/supabase'
+import { createSafeServerClient } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 
 export async function triggerMarketSummaryAction() {
@@ -10,26 +10,21 @@ export async function triggerMarketSummaryAction() {
 
     // 1. Check Auth
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    if (!user || !user.email) {
         return { success: false, error: 'Unauthorized' }
     }
 
-    // 2. Check Admin Role (Use AdminClient to bypass RLS infinite recursion)
-    const adminClient = createAdminClient()
-    const { data: userData, error: userError } = await adminClient
-        .from('users')
-        .select('membership_status')
-        .eq('id', user.id)
-        .single()
+    // 2. Check Admin Email Whitelist (Same as verifyAdmin, avoids DB query entirely)
+    const allowedEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+        .split(',')
+        .map(e => e.trim())
+        .filter(Boolean)
 
-    console.log('[AdminAction] User:', user.id)
-    console.log('[AdminAction] DB Role:', userData?.membership_status)
-    console.log('[AdminAction] DB Error:', userError)
+    console.log('[AdminAction] User Email:', user.email)
+    console.log('[AdminAction] Allowed Emails:', allowedEmails)
 
-    // Allow 'admin' or 'super_admin'
-    const allowedRoles = ['admin', 'super_admin']
-    if (!userData?.membership_status || !allowedRoles.includes(userData.membership_status)) {
-        return { success: false, error: `Forbidden: Admins Only (Role: ${userData?.membership_status || 'None'})` }
+    if (allowedEmails.length > 0 && !allowedEmails.includes(user.email)) {
+        return { success: false, error: `Forbidden: Email not in admin whitelist` }
     }
 
     // 3. Run Workflow
@@ -40,3 +35,4 @@ export async function triggerMarketSummaryAction() {
         return { success: false, error: e.message }
     }
 }
+
