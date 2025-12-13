@@ -74,7 +74,7 @@ export function AIMarketPulse() {
                     <span className="text-sm font-medium text-white">AI 市場日報</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    {report.emoji && <span className="text-xl">{report.emoji}</span>}
+                    {report.emoji && <span className="text-lg text-neutral-400">{report.emoji}</span>}
                     <span className="text-xs text-neutral-500 px-2 py-0.5 rounded-full bg-neutral-800">
                         {sentimentLabel}
                     </span>
@@ -115,7 +115,7 @@ export function AIMarketPulse() {
             {/* Whale Summary */}
             {whaleSummary && (
                 <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
-                    <p className="text-xs text-neutral-400">🐋 {whaleSummary}</p>
+                    <p className="text-xs text-neutral-400">巨鯨動態：{whaleSummary}</p>
                 </div>
             )}
 
@@ -146,7 +146,7 @@ export function AIMarketPulse() {
             {/* Risk Note */}
             {riskNote && (
                 <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
-                    <p className="text-xs text-neutral-500">⚠️ {riskNote}</p>
+                    <p className="text-xs text-neutral-500">風險提示：{riskNote}</p>
                 </div>
             )}
 

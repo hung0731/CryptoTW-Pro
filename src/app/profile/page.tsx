@@ -83,7 +83,7 @@ export default function ProfilePage() {
             case 'lifetime':
                 return (
                     <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 backdrop-blur-md transition-colors px-2 py-0.5 text-xs">
-                        💎 PRO 會員
+                        PRO 會員
                     </Badge>
                 )
             default:
@@ -91,19 +91,19 @@ export default function ProfilePage() {
                 if ((dbUser?.membership_status as string) === 'vip') {
                     return (
                         <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 px-2 py-0.5 text-xs">
-                            👑 大客戶
+                            大客戶
                         </Badge>
                     )
                 }
                 return (
                     <Badge variant="secondary" className="bg-neutral-800 text-neutral-400 border border-white/5 px-2 py-0.5 text-xs">
-                        🌱 免費會員
+                        免費會員
                     </Badge>
                 )
             case 'pending':
                 return (
                     <Badge variant="outline" className="text-yellow-500 border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-xs">
-                        ⏳ 審核中
+                        審核中
                     </Badge>
                 )
         }
@@ -113,7 +113,7 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-black text-white font-sans pb-24">
             <PageHeader showLogo />
 
-            <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
+            <div className="px-4 py-6 max-w-lg mx-auto space-y-5">
 
                 {/* Profile Card */}
                 <section>

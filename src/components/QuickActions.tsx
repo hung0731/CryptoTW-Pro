@@ -1,0 +1,55 @@
+'use client'
+
+import Link from 'next/link'
+import { BarChart3, Bell, Calendar, Star, TrendingUp, Wallet } from 'lucide-react'
+
+interface QuickAction {
+    icon: React.ReactNode
+    label: string
+    href: string
+    color: string
+}
+
+const actions: QuickAction[] = [
+    {
+        icon: <BarChart3 className="w-4 h-4" />,
+        label: '數據',
+        href: '/prediction',
+        color: 'text-neutral-400'
+    },
+    {
+        icon: <Bell className="w-4 h-4" />,
+        label: '提醒',
+        href: '/profile/notifications',
+        color: 'text-neutral-400'
+    },
+    {
+        icon: <Calendar className="w-4 h-4" />,
+        label: '日曆',
+        href: '/calendar',
+        color: 'text-neutral-400'
+    },
+    {
+        icon: <TrendingUp className="w-4 h-4" />,
+        label: '預測',
+        href: '/prediction',
+        color: 'text-neutral-400'
+    }
+]
+
+export function QuickActions() {
+    return (
+        <div className="flex items-center justify-between gap-2">
+            {actions.map((action, i) => (
+                <Link
+                    key={i}
+                    href={action.href}
+                    className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl bg-neutral-900/50 border border-white/5 hover:bg-white/5 transition-all"
+                >
+                    <div className={action.color}>{action.icon}</div>
+                    <span className="text-[10px] text-neutral-400">{action.label}</span>
+                </Link>
+            ))}
+        </div>
+    )
+}

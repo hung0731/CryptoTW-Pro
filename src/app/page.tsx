@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { AIMarketPulse } from '@/components/AIMarketPulse'
 import { TopCoinCards } from '@/components/TopCoinCards'
 import { PromoBanner } from '@/components/PromoBanner'
+import { QuickActions } from '@/components/QuickActions'
 import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/components/CoinglassWidgets'
 
 export default function HomePage() {
@@ -72,7 +73,7 @@ export default function HomePage() {
         <main className="min-h-screen font-sans bg-black text-white pb-24">
             <PageHeader showLogo />
 
-            <div className="mt-4 px-4 space-y-6">
+            <div className="mt-4 px-4 space-y-5">
 
                 {/* Welcome Header */}
                 <div className="flex items-center justify-between">
@@ -105,9 +106,12 @@ export default function HomePage() {
                     </div>
                 </div>
 
+                {/* Quick Actions */}
+                <QuickActions />
+
                 {/* ===== 1. Top Coins - 第一眼看價格 ===== */}
                 <section>
-                    <h2 className="text-sm font-medium text-neutral-500 mb-3">🔥 熱門幣種</h2>
+                    <h2 className="text-sm font-medium text-neutral-500 mb-3">熱門幣種</h2>
                     <TopCoinCards />
                 </section>
 
@@ -116,7 +120,7 @@ export default function HomePage() {
 
                 {/* ===== 3. Market Stats - 快速指標 ===== */}
                 <section>
-                    <h2 className="text-sm font-medium text-neutral-500 mb-3">📊 市場一眼看</h2>
+                    <h2 className="text-sm font-medium text-neutral-500 mb-3">市場概況</h2>
                     {loading ? (
                         <div className="grid grid-cols-3 gap-2">
                             <Skeleton className="h-20 bg-neutral-900/50" />
@@ -164,7 +168,7 @@ export default function HomePage() {
                 {/* ===== 4. Core Data - 專業數據 ===== */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">📈 核心數據</h2>
+                        <h2 className="text-sm font-medium text-neutral-500">核心數據</h2>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <LiquidationSummary />
@@ -205,7 +209,7 @@ export default function HomePage() {
                 {/* ===== 5. Gainers & Losers ===== */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">📊 漲跌榜</h2>
+                        <h2 className="text-sm font-medium text-neutral-500">漲跌榜</h2>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
@@ -249,7 +253,7 @@ export default function HomePage() {
                 {/* ===== 7. Whale Watch ===== */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">🐋 巨鯨動向</h2>
+                        <h2 className="text-sm font-medium text-neutral-500">巨鯨動向</h2>
                     </div>
                     <Link href="/prediction">
                         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4 hover:bg-white/5 transition-all">
@@ -275,7 +279,7 @@ export default function HomePage() {
                 {/* ===== 8. Prediction Markets ===== */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">🎯 預測市場</h2>
+                        <h2 className="text-sm font-medium text-neutral-500">預測市場</h2>
                         <Link href="/prediction" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
                             查看全部 <ChevronRight className="w-3 h-3" />
                         </Link>

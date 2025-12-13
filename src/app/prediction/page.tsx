@@ -66,7 +66,7 @@ function CryptoPricePrediction() {
                                 : "bg-neutral-900/50 text-neutral-500 border border-white/5 hover:bg-white/5"
                         )}
                     >
-                        🔶 BTC
+                        BTC
                     </button>
                     <button
                         onClick={() => setActiveToken('eth')}
@@ -77,7 +77,7 @@ function CryptoPricePrediction() {
                                 : "bg-neutral-900/50 text-neutral-500 border border-white/5 hover:bg-white/5"
                         )}
                     >
-                        💎 ETH
+                        ETH
                     </button>
                 </div>
                 <Link
@@ -284,7 +284,7 @@ export default function DataPage() {
                 </div>
 
                 {/* TAB 1: Market Overview */}
-                <TabsContent value="overview" className="space-y-6 p-4 min-h-[50vh]">
+                <TabsContent value="overview" className="space-y-5 p-4 min-h-[50vh]">
 
                     {/* 1. Critical Stats Marquee */}
                     {globalData && fearGreed && (

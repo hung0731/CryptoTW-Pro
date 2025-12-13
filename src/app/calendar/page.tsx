@@ -21,7 +21,7 @@ export default function CalendarPage() {
                 }
             />
 
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-5">
                 {/* Filters */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
                     <Button variant="secondary" size="sm" className="bg-white text-black hover:bg-neutral-200 h-8 text-xs font-bold rounded-full px-4 shrink-0">
