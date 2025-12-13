@@ -1,76 +1,67 @@
 import { NextResponse } from 'next/server'
-import { coinglassRequest } from '@/lib/coinglass'
+import { coinglassV4Request } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 300 // Cache for 5 minutes
+export const revalidate = 300
 
-interface FundingRateData {
-    symbol: string
-    uMarginList: Array<{
-        exchangeName: string
-        rate: number
-        nextFundingTime: number
-    }>
-}
+const TOP_TOKENS = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'BNB', 'SUI', 'ADA', 'AVAX', 'LINK']
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
-    const symbol = searchParams.get('symbol') || 'ALL'
+    const symbolParam = searchParams.get('symbol')
+
+    // If a specific symbol is requested, just fetch that. Otherwise fetch top tokens.
+    const symbols = symbolParam && symbolParam !== 'ALL' ? [symbolParam] : TOP_TOKENS
 
     try {
-        // Fetch funding rate data
-        const data = await coinglassRequest<FundingRateData[]>(
-            '/public/v2/funding',
-            symbol !== 'ALL' ? { symbol } : {},
-            { next: { revalidate: 300 } }
+        const results = await Promise.all(
+            symbols.map(async (sym) => {
+                const data = await coinglassV4Request<any[]>(
+                    '/api/futures/funding-rate/exchange-list',
+                    { symbol: sym }
+                )
+                if (!data || data.length === 0) return null
+
+                // Extract data from stablecoin_margin_list (USDT margin)
+                const marginList = data[0]?.stablecoin_margin_list || []
+                if (marginList.length === 0) return null
+
+                // Calculate average funding rate
+                const rates = marginList.map((e: any) => e.funding_rate).filter((r: any) => r !== undefined)
+                const avgRate = rates.length > 0
+                    ? rates.reduce((a: number, b: number) => a + b, 0) / rates.length
+                    : 0
+
+                return {
+                    symbol: sym,
+                    rate: avgRate,
+                    annualizedRate: avgRate * 3 * 365 * 100,
+                    exchanges: marginList.slice(0, 3).map((e: any) => ({
+                        name: e.exchange || 'Unknown',
+                        rate: e.funding_rate
+                    }))
+                }
+            })
         )
 
-        if (!data) {
-            return NextResponse.json({
-                error: 'Failed to fetch funding rate data',
-                fundingRates: getDemoData()
-            })
-        }
-
-        // Process and sort by rate
-        const processed = data.map(item => {
-            // Calculate average rate across exchanges
-            const rates = item.uMarginList?.map(e => e.rate) || []
-            const avgRate = rates.length > 0
-                ? rates.reduce((a, b) => a + b, 0) / rates.length
-                : 0
-
-            return {
-                symbol: item.symbol,
-                rate: avgRate,
-                annualizedRate: avgRate * 3 * 365 * 100, // 8h funding * 3 * 365 days
-                exchanges: item.uMarginList?.slice(0, 5).map(e => ({
-                    name: e.exchangeName,
-                    rate: e.rate
-                })) || []
-            }
-        })
+        const processed = results.filter(item => item !== null)
 
         // Sort: extreme positive first, then extreme negative
-        const extremePositive = processed
-            .filter(p => p.rate > 0.0005) // > 0.05%
-            .sort((a, b) => b.rate - a.rate)
-            .slice(0, 10)
+        const extremePositive = [...processed]
+            .filter(p => p!.rate > 0.0001) // Slightly lower threshold as we have fewer tokens
+            .sort((a, b) => b!.rate - a!.rate)
 
-        const extremeNegative = processed
-            .filter(p => p.rate < -0.0002) // < -0.02%
-            .sort((a, b) => a.rate - b.rate)
-            .slice(0, 10)
+        const extremeNegative = [...processed]
+            .filter(p => p!.rate < 0)
+            .sort((a, b) => a!.rate - b!.rate)
 
-        const normal = processed
-            .filter(p => p.rate >= -0.0002 && p.rate <= 0.0005)
-            .sort((a, b) => Math.abs(b.rate) - Math.abs(a.rate))
-            .slice(0, 5)
+        // Fill normal if empty
+        const normal = processed.filter(p => p!.rate >= 0 && p!.rate <= 0.0001)
 
         return NextResponse.json({
             fundingRates: {
-                extremePositive, // Bearish signal (too many longs)
-                extremeNegative, // Bullish signal (too many shorts)
+                extremePositive: extremePositive.length > 0 ? extremePositive : normal.slice(0, 3),
+                extremeNegative: extremeNegative.length > 0 ? extremeNegative : [],
                 normal,
                 lastUpdated: new Date().toISOString()
             }
@@ -93,7 +84,6 @@ function getDemoData() {
         ],
         extremeNegative: [
             { symbol: 'APT', rate: -0.0008, annualizedRate: -87.60, exchanges: [] },
-            { symbol: 'ARB', rate: -0.0005, annualizedRate: -54.75, exchanges: [] },
         ],
         normal: [
             { symbol: 'BTC', rate: 0.0001, annualizedRate: 10.95, exchanges: [] },

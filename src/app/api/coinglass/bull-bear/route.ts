@@ -1,97 +1,46 @@
 import { NextResponse } from 'next/server'
-import { coinglassRequest } from '@/lib/coinglass'
+import { coinglassV4Request } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 60 // Cache for 1 minute
+export const revalidate = 60
 
-// Bull/Bear Index: Composite indicator from multiple data sources
-// Range: 0-100 (0 = Extreme Fear, 100 = Extreme Greed)
-
+// Bull/Bear Index: Now uses Coinglass Fear & Greed (V4)
 export async function GET() {
     try {
-        // Fetch all required data in parallel
-        const [fundingData, longShortData, oiData] = await Promise.all([
-            coinglassRequest<any[]>('/public/v2/funding', { symbol: 'BTC' }),
-            coinglassRequest<any[]>('/public/v2/long-short-account-ratio', { symbol: 'BTC' }),
-            coinglassRequest<any>('/public/v2/open-interest', { symbol: 'BTC' })
-        ])
+        const data = await coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 })
 
-        // Calculate individual components
-        const fundingScore = calculateFundingScore(fundingData)
-        const longShortScore = calculateLongShortScore(longShortData)
-        const oiScore = calculateOIScore(oiData)
+        if (!data || data.length === 0) {
+            throw new Error('No data returned')
+        }
 
-        // Weighted composite
-        const bullBearIndex = Math.round(
-            fundingScore * 0.35 +
-            longShortScore * 0.35 +
-            oiScore * 0.30
-        )
-
-        // Determine sentiment
-        const sentiment = getSentiment(bullBearIndex)
+        const latest = data[0]
+        const index = latest.value
+        const sentiment = getSentiment(index)
 
         return NextResponse.json({
             bullBear: {
-                index: bullBearIndex,
+                index: index,
                 sentiment: sentiment.label,
                 sentimentCn: sentiment.labelCn,
                 color: sentiment.color,
                 suggestion: sentiment.suggestion,
                 components: {
-                    funding: { score: fundingScore, weight: 35 },
-                    longShort: { score: longShortScore, weight: 35 },
-                    oi: { score: oiScore, weight: 30 }
+                    // Mock components since we use a composite index now
+                    funding: { score: index, weight: 33 },
+                    longShort: { score: index, weight: 33 },
+                    oi: { score: index, weight: 34 }
                 },
-                change24h: Math.floor(Math.random() * 10) - 5, // TODO: Calculate from historical
-                lastUpdated: new Date().toISOString()
+                change24h: 0,
+                lastUpdated: new Date(latest.time || Date.now()).toISOString()
             }
         })
     } catch (error) {
         console.error('Bull/Bear API error:', error)
         return NextResponse.json({
             error: 'Internal server error',
-            bullBear: getDemoData()
+            bullBear: getDemoData() // Fallback
         })
     }
-}
-
-function calculateFundingScore(data: any[] | null): number {
-    if (!data || data.length === 0) return 50
-
-    // BTC funding rate
-    const btcData = data.find(d => d.symbol === 'BTC')
-    if (!btcData) return 50
-
-    const avgRate = btcData.uMarginList?.reduce((sum: number, e: any) => sum + (e.rate || 0), 0) /
-        (btcData.uMarginList?.length || 1) || 0
-
-    // Normalize: -0.1% to +0.1% → 0 to 100
-    // Positive funding = bullish (longs paying shorts)
-    const normalized = ((avgRate + 0.001) / 0.002) * 100
-    return Math.max(0, Math.min(100, normalized))
-}
-
-function calculateLongShortScore(data: any[] | null): number {
-    if (!data || data.length === 0) return 50
-
-    const ratio = data[0]?.longShortRatio || 1
-
-    // Normalize: 0.5 to 2.0 ratio → 0 to 100
-    // High long ratio = bullish sentiment
-    const normalized = ((ratio - 0.5) / 1.5) * 100
-    return Math.max(0, Math.min(100, normalized))
-}
-
-function calculateOIScore(data: any | null): number {
-    if (!data) return 50
-
-    const change24h = data.h24Change || 0
-
-    // Normalize: -10% to +10% → 0 to 100
-    // Increasing OI = bullish
-    const normalized = ((change24h + 10) / 20) * 100
-    return Math.max(0, Math.min(100, normalized))
 }
 
 function getSentiment(index: number): {
@@ -142,17 +91,17 @@ function getSentiment(index: number): {
 
 function getDemoData() {
     return {
-        index: 68,
-        sentiment: 'Greed',
-        sentimentCn: '貪婪',
-        color: 'orange',
-        suggestion: '市場偏多，但需注意回調風險',
+        index: 50,
+        sentiment: 'Neutral',
+        sentimentCn: '中性',
+        color: 'gray',
+        suggestion: '數據暫時無法獲取，請稍後再試',
         components: {
-            funding: { score: 72, weight: 35 },
-            longShort: { score: 65, weight: 35 },
-            oi: { score: 68, weight: 30 }
+            funding: { score: 50, weight: 33 },
+            longShort: { score: 50, weight: 33 },
+            oi: { score: 50, weight: 34 }
         },
-        change24h: 5,
+        change24h: 0,
         lastUpdated: new Date().toISOString()
     }
 }

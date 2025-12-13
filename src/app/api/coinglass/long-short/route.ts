@@ -1,54 +1,71 @@
 import { NextResponse } from 'next/server'
-import { coinglassRequest } from '@/lib/coinglass'
+import { coinglassV4Request } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 60 // Cache for 1 minute
-
-interface LongShortData {
-    symbol: string
-    longRate: number
-    shortRate: number
-    longShortRatio: number
-    time?: number
-}
+export const revalidate = 60
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const symbol = searchParams.get('symbol') || 'BTC'
 
     try {
-        // Fetch long/short ratio from multiple sources
+        // Fetch long/short ratio from V4
         const [globalData, topAccountData] = await Promise.all([
-            coinglassRequest<LongShortData[]>('/public/v2/long-short-account-ratio', { symbol }),
-            coinglassRequest<LongShortData[]>('/public/v2/long-short-account-ratio/top-account', { symbol })
+            coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
+                symbol,
+                exchange: 'Binance', // V4 often requires exchange, default to Binance for major liquidity
+                interval: '1h',
+                limit: 1
+            }),
+            coinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', {
+                symbol,
+                exchange: 'Binance',
+                interval: '1h',
+                limit: 1
+            })
         ])
 
         // Process data
         const global = globalData?.[0] || null
         const topAccount = topAccountData?.[0] || null
 
-        if (!global && !topAccount) {
-            return NextResponse.json({
-                error: 'Failed to fetch long/short data',
-                longShort: getDemoData()
-            })
+        // Helper to formatting rate to percentage (0-100)
+        // V4 usually returns like 55.5 for 55.5% or 0.555. Safe check.
+        const formatRate = (rate: number) => {
+            if (rate <= 1) return rate * 100
+            return rate
         }
 
+        const globalLongRate = global?.longRate ? formatRate(global.longRate) : 0
+        const globalShortRate = global?.shortRate ? formatRate(global.shortRate) : 0
+
+        const topLongRate = topAccount?.longRate ? formatRate(topAccount.longRate) : 0
+        const topShortRate = topAccount?.shortRate ? formatRate(topAccount.shortRate) : 0
+
+        if (!global && !topAccount) {
+            throw new Error('No data returned')
+        }
+
+        // Re-construct objects for frontend compatibility
+        const globalObj = global ? {
+            longRate: globalLongRate,
+            shortRate: globalShortRate,
+            ratio: global.longShortRatio
+        } : null
+
+        const topAccountObj = topAccount ? {
+            longRate: topLongRate,
+            shortRate: topShortRate,
+            ratio: topAccount.longShortRatio
+        } : null
+
         // Calculate sentiment signal
-        const signal = calculateSignal(global, topAccount)
+        const signal = calculateSignal(globalObj, topAccountObj)
 
         return NextResponse.json({
             longShort: {
-                global: global ? {
-                    longRate: global.longRate * 100,
-                    shortRate: global.shortRate * 100,
-                    ratio: global.longShortRatio
-                } : null,
-                topAccounts: topAccount ? {
-                    longRate: topAccount.longRate * 100,
-                    shortRate: topAccount.shortRate * 100,
-                    ratio: topAccount.longShortRatio
-                } : null,
+                global: globalObj,
+                topAccounts: topAccountObj,
                 signal,
                 lastUpdated: new Date().toISOString()
             }
@@ -62,11 +79,17 @@ export async function GET(request: Request) {
     }
 }
 
-function calculateSignal(global: LongShortData | null, topAccount: LongShortData | null) {
+interface LongShortStats {
+    longRate: number
+    shortRate: number
+    ratio: number
+}
+
+function calculateSignal(global: LongShortStats | null, topAccount: LongShortStats | null) {
     if (!global) return { type: 'neutral', text: '數據不足' }
 
-    const retailLong = global.longRate * 100
-    const whaleLong = topAccount?.longRate ? topAccount.longRate * 100 : 50
+    const retailLong = global.longRate
+    const whaleLong = topAccount ? topAccount.longRate : 50
 
     // Contrarian signal: if retail is extremely long, potential top
     if (retailLong > 65) {

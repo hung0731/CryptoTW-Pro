@@ -1,4 +1,5 @@
 import { coinglassV4Request } from './coinglass'
+import { fetchBinanceRSI } from './technical-analysis'
 
 // CoinGecko for BTC price (more reliable)
 async function fetchBtcPrice() {
@@ -21,6 +22,7 @@ async function fetchBtcPrice() {
 export async function getMarketSnapshot() {
     const [
         btcPrice,
+        rsi,
         fearGreed,
         fundingRates,
         globalLongShort,
@@ -33,6 +35,7 @@ export async function getMarketSnapshot() {
         hyperliquidWhales
     ] = await Promise.all([
         fetchBtcPrice(),
+        fetchBinanceRSI('BTCUSDT', '1h'),
         // 恐懼貪婪指數 (from Coinglass)
         coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }),
         // 資金費率
@@ -57,22 +60,27 @@ export async function getMarketSnapshot() {
 
     // Debug logging
     console.log('[MarketAggregator] BTC Price:', btcPrice)
+    console.log('[MarketAggregator] RSI:', rsi)
     console.log('[MarketAggregator] Fear & Greed:', fearGreed?.[0])
-    console.log('[MarketAggregator] Funding Rates:', fundingRates?.[0])
+    console.log('[MarketAggregator] Open Interest Changes:', openInterest?.[0])
     console.log('[MarketAggregator] ETF Flows:', etfFlows?.[0])
     console.log('[MarketAggregator] Taker Buy/Sell:', takerBuySell?.[0])
 
     // Calculate aggregated OI
     const totalOI = openInterest?.reduce((sum: number, ex: any) => sum + (ex.openInterest || 0), 0) || 0
+    const oiChange1h = openInterest?.[0]?.open_interest_change_percent_1h || 0
+    const oiChange4h = openInterest?.[0]?.open_interest_change_percent_4h || 0
 
     // Consolidate Data
     return {
         timestamp: new Date().toISOString(),
 
-        // 價格動能 (from CoinGecko)
+        // 價格動能 (from CoinGecko + Binance RSI)
         btc: {
             price: btcPrice?.price,
             change_24h_percent: btcPrice?.change_24h,
+            rsi_1h: rsi,
+            rsi_status: rsi > 70 ? '超買' : rsi < 30 ? '超賣' : '中性',
         },
 
         // 市場情緒 (from Coinglass)
@@ -84,11 +92,16 @@ export async function getMarketSnapshot() {
                         fearGreed?.[0]?.value >= 25 ? '恐懼' : '極度恐懼',
         },
 
-        // 資金熱度 (from Coinglass V4)
+        // 資金熱度 & 趨勢 (from Coinglass V4)
         capital_flow: {
             funding_rate: fundingRates?.[0]?.stablecoin_margin_list?.[0]?.funding_rate,
             funding_rate_exchange: fundingRates?.[0]?.stablecoin_margin_list?.[0]?.exchange,
             open_interest_total: totalOI,
+            oi_change_1h: oiChange1h,
+            oi_change_4h: oiChange4h,
+            trend_signal: (oiChange1h > 0 && (btcPrice?.change_24h || 0) > 0) ? '強勢上漲' :
+                (oiChange1h > 0 && (btcPrice?.change_24h || 0) < 0) ? '建倉下跌' :
+                    (oiChange1h < 0 && (btcPrice?.change_24h || 0) < 0) ? '多頭止損' : '震盪整理',
         },
 
         // 多空比 (from Coinglass V4)
