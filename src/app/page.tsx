@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AIMarketPulse } from '@/components/AIMarketPulse'
+import { TopCoinCards } from '@/components/TopCoinCards'
 import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/components/CoinglassWidgets'
 
 export default function HomePage() {
@@ -102,6 +103,12 @@ export default function HomePage() {
                         </Link>
                     </div>
                 </div>
+
+                {/* Top Coins Price Cards */}
+                <section>
+                    <h2 className="text-sm font-medium text-neutral-500 mb-3">🔥 熱門幣種</h2>
+                    <TopCoinCards />
+                </section>
 
                 {/* AI Pulse Widget */}
                 <AIMarketPulse />
