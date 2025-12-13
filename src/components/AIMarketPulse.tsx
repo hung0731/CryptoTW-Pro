@@ -93,9 +93,9 @@ export function AIMarketPulse() {
                 <p className="text-base text-white font-medium leading-relaxed">{displayHeadline}</p>
             )}
 
-            {/* Analysis Grid - 2x2 */}
+            {/* Analysis - Single Column */}
             {report.analysis && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
                     {report.analysis.price_momentum && (
                         <div className="bg-neutral-900 rounded-lg p-3 border border-white/5">
                             <div className="flex items-center justify-between mb-2">
