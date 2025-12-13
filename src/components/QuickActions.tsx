@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { BarChart3, Bell, Calendar, Star, TrendingUp, Wallet } from 'lucide-react'
+import { BarChart3, Bell, Calendar, Star, TrendingUp, Wallet, Crown } from 'lucide-react'
 
 interface QuickAction {
     icon: React.ReactNode
@@ -24,9 +24,9 @@ const actions: QuickAction[] = [
         color: 'text-neutral-400'
     },
     {
-        icon: <Calendar className="w-4 h-4" />,
-        label: '日曆',
-        href: '/calendar',
+        icon: <Crown className="w-4 h-4" />,
+        label: '大客戶',
+        href: '/vip',
         color: 'text-neutral-400'
     },
     {

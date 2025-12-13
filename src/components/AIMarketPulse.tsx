@@ -22,6 +22,12 @@ interface MarketReport {
             stop_loss: string
             take_profit: string
         }
+        market_structure?: {
+            bias: string
+            focus_zone: string
+            invalidation_zone: string
+            resistance_zone: string
+        }
         risk_note?: string
         headline?: string
     }
@@ -59,6 +65,7 @@ export function AIMarketPulse() {
     const analysisText = report.metadata?.analysis
     const whaleSummary = report.metadata?.whale_summary
     const action = report.metadata?.action
+    const structure = report.metadata?.market_structure
     const riskNote = report.metadata?.risk_note
 
     // Simplified color scheme - only use accent for key data
@@ -88,33 +95,43 @@ export function AIMarketPulse() {
                 </div>
             )}
 
-            {/* Action Plan */}
-            {action && (
+            {/* Market Structure (New) or Action Plan (Legacy Fallback) */}
+            {(structure || action) && (
                 <div className="bg-white/5 rounded-lg p-3 space-y-2 border border-white/5">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
-                        <span className="text-xs text-neutral-400">操作策略</span>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${action.bias === '偏多' ? 'bg-green-500/10 text-green-400' :
-                                action.bias === '偏空' ? 'bg-red-500/10 text-red-400' :
-                                    'bg-neutral-700 text-neutral-300'
-                            }`}>{action.bias}</span>
+                        <span className="text-xs text-neutral-400">市場結構參考</span>
+                        {/* Remove bias display to be neutral, or keep it subtle */}
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 text-center">
                         <div>
-                            <span className="text-[10px] text-neutral-500 block mb-1">進場區</span>
-                            <span className="text-xs text-white font-mono block">{action.entry_zone}</span>
+                            <span className="text-[10px] text-neutral-500 block mb-1">市場關注區</span>
+                            <span className="text-xs text-neutral-200 font-mono block">
+                                {structure?.focus_zone || action?.entry_zone}
+                            </span>
                         </div>
                         <div className="relative">
-                            <span className="text-[10px] text-neutral-500 block mb-1">止損</span>
-                            <span className="text-xs text-red-400 font-mono block">{action.stop_loss}</span>
+                            <span className="text-[10px] text-neutral-500 block mb-1">結構失效區</span>
+                            <span className="text-xs text-orange-300 font-mono block">
+                                {structure?.invalidation_zone || action?.stop_loss}
+                            </span>
                             {/* Divider lines */}
                             <div className="absolute top-2 left-0 w-px h-6 bg-white/5"></div>
                             <div className="absolute top-2 right-0 w-px h-6 bg-white/5"></div>
                         </div>
                         <div>
-                            <span className="text-[10px] text-neutral-500 block mb-1">目標</span>
-                            <span className="text-xs text-green-400 font-mono block">{action.take_profit}</span>
+                            <span className="text-[10px] text-neutral-500 block mb-1">潛在壓力區</span>
+                            <span className="text-xs text-neutral-200 font-mono block">
+                                {structure?.resistance_zone || action?.take_profit}
+                            </span>
                         </div>
+                    </div>
+
+                    {/* Disclaimer */}
+                    <div className="pt-1">
+                        <p className="text-[9px] text-neutral-600 text-center transform scale-90">
+                            *僅為市場結構與流動性分布參考，非交易建議
+                        </p>
                     </div>
                 </div>
             )}
