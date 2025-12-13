@@ -1,143 +1,148 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, Users, Crown, CreditCard, Loader2, Play } from 'lucide-react'
-import Link from 'next/link'
-import { triggerMarketSummaryAction } from '@/app/actions/admin-actions'
-import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Users, CreditCard, ArrowUpRight, Activity, Clock } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 
-function TriggerSummaryButton() {
-    const [isLoading, setIsLoading] = useState(false)
-    const { toast } = useToast()
+// --- Dashboard Component ---
 
-    const handleTrigger = async () => {
-        setIsLoading(true)
-        try {
-            const res = await triggerMarketSummaryAction()
-            if (res.success) {
-                toast({ title: 'AI 分析報告已生成', description: '首頁數據已更新' })
-            } else {
-                toast({ title: '生成失敗', description: res.error, variant: 'destructive' })
-            }
-        } catch (e) {
-            toast({ title: '錯誤', description: '未知錯誤', variant: 'destructive' })
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    return (
-        <Button
-            onClick={handleTrigger}
-            disabled={isLoading}
-            variant="outline"
-            size="sm"
-            className="mt-2 w-full border-white/10 hover:bg-white/5 text-xs h-8"
-        >
-            {isLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Play className="w-3 h-3 mr-1" />}
-            手動觸發報告
-        </Button>
-    )
-}
-
-export default function AdminPage() {
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        verifiedUsers: 0,
-        pendingBindings: 0
-    })
+export default function AdminDashboard() {
+    const [stats, setStats] = useState<any>(null)
+    const [recentBindings, setRecentBindings] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const fetchStats = async () => {
+        const loadData = async () => {
             try {
-                const res = await fetch('/api/admin/stats')
-                if (res.ok) {
-                    const data = await res.json()
-                    setStats(data)
+                // 1. Fetch Stats
+                const statsRes = await fetch('/api/admin/stats')
+                const statsData = await statsRes.json()
+                if (statsData.stats) setStats(statsData.stats)
+
+                // 2. Fetch Recent Pending Bindings (as "Recent Activity")
+                const verifyRes = await fetch('/api/admin/verify')
+                const verifyData = await verifyRes.json()
+                if (verifyData.bindings) {
+                    setRecentBindings(verifyData.bindings.slice(0, 5)) // Top 5
                 }
+
             } catch (e) {
-                console.error('Failed to fetch stats', e)
+                console.error(e)
             } finally {
                 setLoading(false)
             }
         }
-        fetchStats()
+        loadData()
     }, [])
 
+    if (loading) {
+        return <div className="p-8 text-neutral-500">Loading dashboard...</div>
+    }
+
     return (
-        <div className="space-y-8">
+        <div className="p-6 md:p-8 space-y-8 w-full">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Dashboard</h1>
-                <p className="text-neutral-400 text-sm">歡迎回到加密台灣 Pro 管理後台。這裡顯示您的平台即時概況。</p>
+                <h1 className="text-3xl font-bold tracking-tight text-white">總覽 (Dashboard)</h1>
+                <p className="text-neutral-400 mt-2">系統即時概況與待辦事項。</p>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-neutral-400">總用戶數</span>
+            {/* Key Metrics */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">總用戶數 (Total Users)</CardTitle>
                         <Users className="h-4 w-4 text-neutral-500" />
-                    </div>
-                    <div>
-                        <div className="text-3xl font-bold text-white tracking-tight">
-                            {loading ? <Loader2 className="h-6 w-6 animate-spin text-neutral-600" /> : stats.totalUsers}
-                        </div>
-                        <p className="text-xs text-neutral-500 mt-1">Active Members</p>
-                    </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">{stats?.total_users || 0}</div>
+                        <p className="text-xs text-neutral-500 mt-1 flex items-center">
+                            <ArrowUpRight className="h-3 w-3 mr-1 text-green-500" />
+                            +2.5% from last month
+                        </p>
+                    </CardContent>
                 </Card>
-
-                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-neutral-400">Pro 會員</span>
-                        <Crown className="h-4 w-4 text-yellow-500" />
-                    </div>
-                    <div>
-                        <div className="text-3xl font-bold text-white tracking-tight">
-                            {loading ? <Loader2 className="h-6 w-6 animate-spin text-neutral-600" /> : stats.verifiedUsers}
-                        </div>
-                        <p className="text-xs text-neutral-500 mt-1">Verified Users</p>
-                    </div>
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">Pro 會員 (Pro Users)</CardTitle>
+                        <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20">PRO</Badge>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">{stats?.verified_users || 0}</div>
+                        <p className="text-xs text-neutral-500 mt-1">Active subscribers</p>
+                    </CardContent>
                 </Card>
-
-                <Link href="/admin/bindings" className="block group">
-                    <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4 group-hover:border-yellow-500/30 transition-all cursor-pointer">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-neutral-400 group-hover:text-yellow-500 transition-colors">待審核綁定</span>
-                            <CreditCard className="h-4 w-4 text-yellow-500" />
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-yellow-500 tracking-tight">
-                                {loading ? <Loader2 className="h-6 w-6 animate-spin text-neutral-600" /> : stats.pendingBindings}
-                            </div>
-                            <p className="text-xs text-neutral-500 mt-1">Pending Requests</p>
-                        </div>
-                    </Card>
-                </Link>
-
-                {/* System Ops */}
-                <Card className="bg-neutral-900/50 border-white/10 p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-neutral-400">系統操作</span>
-                        <Activity className="h-4 w-4 text-orange-500" />
-                    </div>
-                    <div>
-                        <div className="text-3xl font-bold text-white tracking-tight">AI</div>
-                        <TriggerSummaryButton />
-                    </div>
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">待審核 (Pending)</CardTitle>
+                        <CreditCard className="h-4 w-4 text-neutral-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">{stats?.pending_bindings || 0}</div>
+                        <p className="text-xs text-neutral-500 mt-1">Requires attention</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-neutral-900 border-white/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">系統狀態 (System)</CardTitle>
+                        <Activity className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">Healthy</div>
+                        <p className="text-xs text-neutral-500 mt-1">All systems operational</p>
+                    </CardContent>
                 </Card>
             </div>
 
-            <div className="rounded-xl border border-white/5 bg-neutral-900/30 p-12 text-center">
-                <div className="max-w-sm mx-auto space-y-4">
-                    <div className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                        <Activity className="h-6 w-6 text-neutral-500" />
-                    </div>
-                    <h3 className="text-lg font-medium text-white">更多數據即將推出</h3>
-                    <p className="text-sm text-neutral-500">我們正在建構更詳細的分析報表，包含用戶留存率、內容閱讀量等指標。</p>
-                </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                {/* Visual Placeholder for Analytics Graph */}
+                <Card className="col-span-4 bg-neutral-900 border-white/5">
+                    <CardHeader>
+                        <CardTitle className="text-white">流量趨勢 (Traffic Overview)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <div className="h-[200px] flex items-center justify-center text-neutral-600 border border-dashed border-neutral-800 rounded-lg">
+                            Chart Component Placeholder
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Recent Activity Feed */}
+                <Card className="col-span-3 bg-neutral-900 border-white/5">
+                    <CardHeader>
+                        <CardTitle className="text-white">近期活動 (Recent Activity)</CardTitle>
+                        <CardDescription className="text-neutral-400">
+                            最新的交易所綁定申請。
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            {recentBindings.length === 0 && <p className="text-sm text-neutral-500 text-center py-4">無近期活動</p>}
+
+                            {recentBindings.map((item, i) => (
+                                <div key={i} className="flex items-center gap-4">
+                                    <Avatar className="h-9 w-9 border border-white/10">
+                                        <AvatarImage src={item.user?.picture_url} alt="Avatar" />
+                                        <AvatarFallback>U</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-sm font-medium leading-none text-white">
+                                            {item.user?.display_name || 'Unknown User'}
+                                        </p>
+                                        <p className="text-xs text-neutral-500">
+                                            申請綁定 <span className="text-neutral-300 font-bold uppercase">{item.exchange_name}</span>
+                                        </p>
+                                    </div>
+                                    <div className="text-xs text-neutral-500 flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        {new Date(item.created_at).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

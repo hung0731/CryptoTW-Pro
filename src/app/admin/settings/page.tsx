@@ -21,192 +21,9 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 
-function RichMenuManager() {
-    const [loading, setLoading] = useState(false)
-    const [result, setResult] = useState<{ success?: boolean, error?: string } | null>(null)
+// ... (previous imports)
 
-    const handleDeploy = async () => {
-        if (!confirm('此操作將覆蓋所有用戶目前的圖文選單。確定要繼續嗎？')) return
-        setLoading(true)
-        setResult(null)
-        try {
-            const res = await fetch('/api/admin/rich-menu', { method: 'POST' })
-            const data = await res.json()
-            if (res.ok) {
-                setResult({ success: true })
-                alert('圖文選單部署成功！')
-            } else {
-                setResult({ error: data.error })
-                alert('部署失敗: ' + data.error)
-            }
-        } catch (e: any) {
-            setResult({ error: e.message })
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    return (
-        <div className="flex items-center justify-between p-4 border rounded-lg bg-neutral-950 border-white/5">
-            <div className="space-y-1">
-                <div className="font-medium text-white">部署預設選單 (Deploy Default Menu)</div>
-                <div className="text-xs text-neutral-500">
-                    讀取 <code>/public/richmenu.png</code> (2500x1686) 並套用至 LINE 官方帳號。
-                </div>
-                {result?.error && <div className="text-xs text-red-500 pt-1">Error: {result.error}</div>}
-                {result?.success && <div className="text-xs text-green-500 pt-1">部署成功 (Deployed successfully).</div>}
-            </div>
-            <Button
-                onClick={handleDeploy}
-                disabled={loading}
-                className="bg-white text-black hover:bg-neutral-200 font-bold"
-            >
-                {loading ? (
-                    <UploadCloud className="h-4 w-4 animate-bounce mr-2" />
-                ) : (
-                    <UploadCloud className="h-4 w-4 mr-2" />
-                )}
-                {loading ? '部署中...' : '部署至 LINE'}
-            </Button>
-        </div>
-    )
-}
-
-function AnnouncementManager() {
-    const [message, setMessage] = useState('')
-    const [level, setLevel] = useState('info')
-    const [isActive, setIsActive] = useState(true)
-    const [loading, setLoading] = useState(false)
-    const [currentAnnouncements, setCurrentAnnouncements] = useState<any[]>([])
-    const [editingId, setEditingId] = useState<string | null>(null)
-
-    const fetchAnnouncements = async () => {
-        const res = await fetch('/api/admin/announcements')
-        const data = await res.json()
-        if (data.announcements) setCurrentAnnouncements(data.announcements)
-    }
-
-    useEffect(() => {
-        fetchAnnouncements()
-    }, [])
-
-    const handleSave = async () => {
-        if (!message) return
-        setLoading(true)
-        try {
-            const method = editingId ? 'PUT' : 'POST'
-            const body = { message, level, is_active: isActive, id: editingId }
-
-            await fetch('/api/admin/announcements', {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            })
-            setMessage('')
-            setEditingId(null)
-            setIsActive(true) // Reset to default
-            fetchAnnouncements()
-        } catch (e) {
-            console.error(e)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const customEdit = (a: any) => {
-        setEditingId(a.id)
-        setMessage(a.message)
-        setLevel(a.level)
-        setIsActive(a.is_active)
-    }
-
-    const cancelEdit = () => {
-        setEditingId(null)
-        setMessage('')
-        setIsActive(true)
-    }
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('確定要刪除此公告嗎？')) return
-        try {
-            await fetch(`/api/admin/announcements?id=${id}`, { method: 'DELETE' })
-            fetchAnnouncements()
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-col gap-4 p-4 border border-white/5 rounded-lg bg-neutral-900/50">
-                <h3 className="font-semibold text-white">{editingId ? '編輯公告 (Edit)' : '新增公告 (New)'}</h3>
-                <div className="flex flex-col md:flex-row gap-4 items-start">
-                    <div className="grid gap-2 flex-1 w-full">
-                        <Label>公告內容 (Message)</Label>
-                        <Textarea
-                            placeholder="輸入公告內容..."
-                            value={message}
-                            onChange={e => setMessage(e.target.value)}
-                            className="bg-neutral-800 border-white/10"
-                        />
-                    </div>
-                    <div className="grid gap-2 w-full md:w-[180px]">
-                        <Label>等級 (Level)</Label>
-                        <Select value={level} onValueChange={setLevel}>
-                            <SelectTrigger className="bg-neutral-800 border-white/10"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="info">一般通知 (Info)</SelectItem>
-                                <SelectItem value="warning">重要提醒 (Warning)</SelectItem>
-                                <SelectItem value="alert">緊急快訊 (Alert)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-2">
-                        <Switch checked={isActive} onCheckedChange={setIsActive} />
-                        <Label>啟用公告 (Active)</Label>
-                    </div>
-                    <div className="flex gap-2">
-                        {editingId && (
-                            <Button variant="ghost" onClick={cancelEdit}>取消</Button>
-                        )}
-                        <Button onClick={handleSave} disabled={loading} className="bg-white text-black hover:bg-neutral-200">
-                            <Megaphone className="h-4 w-4 mr-2" /> {editingId ? '更新' : '發布'}
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-neutral-400">近期公告列表 (Recent)</h3>
-                {currentAnnouncements.length === 0 && <p className="text-neutral-500 text-sm">尚無公告</p>}
-                {currentAnnouncements.map((a: any) => (
-                    <div key={a.id} className={`p-4 rounded border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${a.is_active ? 'bg-green-950/10 border-green-900/30' : 'bg-neutral-950 border-white/5'}`}>
-                        <div className="flex items-start gap-3">
-                            {a.level === 'alert' && <AlertTriangle className="h-5 w-5 text-red-500 mt-1" />}
-                            {a.level === 'warning' && <AlertTriangle className="h-5 w-5 text-yellow-500 mt-1" />}
-                            {a.level === 'info' && <Info className="h-5 w-5 text-blue-500 mt-1" />}
-                            <div>
-                                <div className="font-medium text-white">{a.message}</div>
-                                <div className="text-xs text-neutral-500">{new Date(a.created_at).toLocaleString()}</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                            {a.is_active && <Badge className="bg-green-600/20 text-green-400 hover:bg-green-600/30">Active</Badge>}
-                            <Button variant="ghost" size="sm" onClick={() => customEdit(a)}>
-                                編輯 (Edit)
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)}>
-                                <Trash2 className="h-4 w-4 text-neutral-500 hover:text-red-500" />
-                            </Button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
-}
+// Removed: RichMenuManager, AnnouncementManager (Moved to /admin/operations)
 
 interface Exchange {
     id: string
@@ -218,6 +35,7 @@ interface Exchange {
 }
 
 function ExchangeManager() {
+    // ... (ExchangeManager implementation remains same)
     const [exchanges, setExchanges] = useState<Exchange[]>([])
     const [loading, setLoading] = useState(true)
     const [savingId, setSavingId] = useState<string | null>(null)
@@ -248,7 +66,6 @@ function ExchangeManager() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(ex)
             })
-            // Feedback usually
         } catch (e) {
             console.error(e)
         } finally {
@@ -290,6 +107,7 @@ function ExchangeManager() {
 
     if (loading) return <Skeleton className="h-60 w-full" />
 
+    // ... (Render ExchangeManager UI with same structure)
     return (
         <div className="space-y-6">
             <div className="flex justify-end">
@@ -429,20 +247,10 @@ export default function AdminSettings() {
         <div className="p-6 md:p-8 space-y-8 w-full">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight text-white">設定 (Settings)</h1>
-                <p className="text-neutral-400 mt-2">管理推薦連結、系統公告與 LINE 選單。</p>
+                <p className="text-neutral-400 mt-2">管理交易所推薦連結與全站設定。</p>
             </div>
 
             <div className="grid gap-8">
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader>
-                        <CardTitle className="text-white">系統公告 (System Announcement)</CardTitle>
-                        <CardDescription className="text-neutral-400">發送全站廣播訊息 (例如：維護通知、Pro 緊急快訊)。</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <AnnouncementManager />
-                    </CardContent>
-                </Card>
-
                 <Card className="bg-neutral-900 border-white/5">
                     <CardHeader>
                         <CardTitle className="text-white">交易所推薦連結 (Referrals)</CardTitle>
@@ -450,16 +258,6 @@ export default function AdminSettings() {
                     </CardHeader>
                     <CardContent>
                         <ExchangeManager />
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-neutral-900 border-white/5">
-                    <CardHeader>
-                        <CardTitle className="text-white">LINE 圖文選單 (Rich Menu)</CardTitle>
-                        <CardDescription className="text-neutral-400">部署 <code>public/richmenu.png</code> 為所有用戶的預設選單。</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <RichMenuManager />
                     </CardContent>
                 </Card>
             </div>

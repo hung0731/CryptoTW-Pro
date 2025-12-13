@@ -27,6 +27,7 @@ const menuSections = [
     label: "總覽",
     items: [
       { title: "儀表板", url: "/admin", icon: LayoutDashboard },
+      { title: "營運中心", url: "/admin/operations", icon: Send },
     ]
   },
   {
@@ -36,16 +37,14 @@ const menuSections = [
       { title: "交易所綁定", url: "/admin/bindings", icon: CreditCard },
       { title: "大客戶計畫", url: "/admin/vip", icon: Crown },
       { title: "數據分析", url: "/admin/analytics", icon: LineChart },
-      { title: "推播訊息", url: "/admin/push", icon: Send },
     ]
   },
   {
     label: "內容",
     items: [
       { title: "快訊管理", url: "/admin/news", icon: Newspaper },
-      { title: "文章管理", url: "/admin/articles", icon: FileText },
-      { title: "全球精選", url: "/admin/global", icon: Globe },
       { title: "活動管理", url: "/admin/activities", icon: CalendarDays },
+      { title: "全球精選", url: "/admin/global", icon: Globe },
     ]
   },
   {
