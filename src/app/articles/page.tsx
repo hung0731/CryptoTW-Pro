@@ -329,4 +329,3 @@ function ContentList({ items }: { items: any[] }) {
     </>
   )
 }
-```

@@ -42,8 +42,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL(path, request.url))
     }
 
-    // Fix 404: Redirect /pro to /
-    if (request.nextUrl.pathname === '/pro') {
+    // Fix 404: Redirect legacy routes (/pro, /feed) to /
+    if (request.nextUrl.pathname === '/pro' || request.nextUrl.pathname === '/feed') {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
