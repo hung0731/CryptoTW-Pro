@@ -15,7 +15,9 @@ import { AIMarketPulse } from '@/components/AIMarketPulse'
 import { TopCoinCards } from '@/components/TopCoinCards'
 import { PromoBanner } from '@/components/PromoBanner'
 import { QuickActions } from '@/components/QuickActions'
+import { MarketFeelingCard, WhaleStatusCard, LiquidationPressureCard } from '@/components/MarketSignalCards'
 import { LiquidationSummary, FundingSummary, LongShortSummary } from '@/components/CoinglassWidgets'
+import type { MarketSignals } from '@/lib/signal-engine'
 
 export default function HomePage() {
     const { profile, isLoading: isAuthLoading } = useLiff()
@@ -26,6 +28,8 @@ export default function HomePage() {
     const [globalData, setGlobalData] = useState<any>(null)
     const [predictions, setPredictions] = useState<any[]>([])
     const [calendar, setCalendar] = useState<any[]>([])
+    const [signals, setSignals] = useState<MarketSignals | null>(null)
+    const [signalsLoading, setSignalsLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -51,7 +55,24 @@ export default function HomePage() {
                 setLoading(false)
             }
         }
+
+        // Fetch signals from market-summary
+        const fetchSignals = async () => {
+            try {
+                const res = await fetch('/api/market-summary')
+                const data = await res.json()
+                if (data.signals) {
+                    setSignals(data.signals)
+                }
+            } catch (e) {
+                console.error('Failed to fetch signals:', e)
+            } finally {
+                setSignalsLoading(false)
+            }
+        }
+
         fetchData()
+        fetchSignals()
     }, [])
 
     // Fear & Greed color
@@ -163,6 +184,18 @@ export default function HomePage() {
                             )}
                         </div>
                     )}
+                </section>
+
+                {/* ===== NEW: Market Signals - 市場體感 ===== */}
+                <section>
+                    <h2 className="text-sm font-medium text-neutral-500 mb-3">市場體感</h2>
+                    <div className="grid grid-cols-1 gap-3">
+                        <MarketFeelingCard signals={signals} loading={signalsLoading} />
+                        <div className="grid grid-cols-2 gap-3">
+                            <WhaleStatusCard signals={signals} loading={signalsLoading} />
+                            <LiquidationPressureCard signals={signals} loading={signalsLoading} />
+                        </div>
+                    </div>
                 </section>
 
                 {/* ===== 4. Core Data - 專業數據 ===== */}

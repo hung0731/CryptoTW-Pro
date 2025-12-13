@@ -1,5 +1,6 @@
 import { coinglassV4Request } from './coinglass'
 import { fetchBinanceRSI } from './technical-analysis'
+import { generateMarketSignals, type MarketSignals, type RawMarketData } from './signal-engine'
 
 // CoinGecko for BTC price (more reliable)
 async function fetchBtcPrice() {
@@ -152,6 +153,24 @@ export async function getMarketSnapshot() {
 
         // 清算地圖 (Liquidation Heatmap)
         liquidation_map: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price),
+
+        // ===== Signal Engine 輸出 =====
+        signals: generateMarketSignals({
+            oi_change_24h: oiChange4h, // 使用 4h 變化
+            funding_rate: fundingRates?.[0]?.stablecoin_margin_list?.[0]?.funding_rate,
+            long_short_ratio: globalLongShort?.[0]?.longShortRatio,
+            top_trader_long_short_ratio: topLongShort?.[0]?.longShortRatio,
+            liquidation_above_usd: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.total_above_usd,
+            liquidation_below_usd: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.total_below_usd,
+            liquidation_above_price: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.resistance_1,
+            liquidation_below_price: processLiquidationHeatmap(liquidationHeatmap, btcPrice?.price)?.summary?.support_1,
+            price: btcPrice?.price,
+            price_change_24h: btcPrice?.change_24h,
+            whale_long_count: processWhaleAlerts(hyperliquidWhales)?.summary?.long_count,
+            whale_short_count: processWhaleAlerts(hyperliquidWhales)?.summary?.short_count,
+            whale_long_value: processWhaleAlerts(hyperliquidWhales)?.summary?.total_long_value_usd,
+            whale_short_value: processWhaleAlerts(hyperliquidWhales)?.summary?.total_short_value_usd,
+        }),
     }
 }
 
