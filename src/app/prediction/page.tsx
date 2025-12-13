@@ -4,13 +4,14 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar } from 'lucide-react'
+import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLiff } from '@/components/LiffProvider'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { BullBearIndex, LiquidationWaterfall, FundingRateRankings, LongShortRatio, LiquidationHeatmap } from '@/components/CoinglassWidgets'
 
 interface GlobalData {
     totalMarketCap: string
@@ -341,18 +342,30 @@ export default function DataPage() {
             <Tabs defaultValue="market" className="w-full" onValueChange={setActiveTab}>
                 {/* Custom Tabs List */}
                 <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
-                    <TabsList className="grid w-full grid-cols-3 bg-neutral-900/50 p-0.5 rounded-lg h-9">
-                        <TabsTrigger value="market" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
-                            <BarChart3 className="w-3.5 h-3.5" />
-                            市場概況
+                    <TabsList className="grid w-full grid-cols-6 bg-neutral-900/50 p-0.5 rounded-lg h-9">
+                        <TabsTrigger value="market" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <BarChart3 className="w-3 h-3" />
+                            市場
                         </TabsTrigger>
-                        <TabsTrigger value="whales" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
-                            <Radar className="w-3.5 h-3.5 text-purple-400" />
-                            巨鯨動向
+                        <TabsTrigger value="liquidation" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <Flame className="w-3 h-3 text-orange-400" />
+                            清算
                         </TabsTrigger>
-                        <TabsTrigger value="prediction" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1.5">
-                            <Gauge className="w-3.5 h-3.5" />
-                            預測市場
+                        <TabsTrigger value="funding" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <Percent className="w-3 h-3 text-yellow-400" />
+                            費率
+                        </TabsTrigger>
+                        <TabsTrigger value="longshort" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <BarChart className="w-3 h-3 text-blue-400" />
+                            多空
+                        </TabsTrigger>
+                        <TabsTrigger value="whales" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <Radar className="w-3 h-3 text-purple-400" />
+                            巨鯨
+                        </TabsTrigger>
+                        <TabsTrigger value="prediction" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-1.5 flex items-center justify-center gap-1">
+                            <Gauge className="w-3 h-3" />
+                            預測
                         </TabsTrigger>
                     </TabsList>
                 </div>
@@ -455,7 +468,24 @@ export default function DataPage() {
                     )}
                 </TabsContent>
 
-                {/* TAB 2: Whale Watch */}
+                {/* TAB: Liquidation */}
+                <TabsContent value="liquidation" className="space-y-4 p-4 min-h-[50vh]">
+                    <LiquidationWaterfall />
+                    <div className="border-t border-white/5 my-6"></div>
+                    <LiquidationHeatmap />
+                </TabsContent>
+
+                {/* TAB: Funding Rate */}
+                <TabsContent value="funding" className="space-y-4 p-4 min-h-[50vh]">
+                    <FundingRateRankings />
+                </TabsContent>
+
+                {/* TAB: Long/Short Ratio */}
+                <TabsContent value="longshort" className="space-y-4 p-4 min-h-[50vh]">
+                    <LongShortRatio />
+                </TabsContent>
+
+                {/* TAB: Whale Watch */}
                 <TabsContent value="whales" className="space-y-4 p-4 min-h-[50vh]">
                     <WhaleWatchList />
                 </TabsContent>
