@@ -98,7 +98,7 @@ export function HomeRouterWidget() {
                         {data.mainline.dimensions.map((dim, i) => (
                             <Link
                                 key={i}
-                                href={dim.name === '合約面' ? '/derivatives' : dim.name === '巨鯨面' ? '/smart-money' : '/prediction'}
+                                href={dim.name === '合約面' ? '/prediction?tab=derivatives' : dim.name === '巨鯨面' ? '/prediction?tab=smartmoney' : '/prediction'}
                                 className="group bg-neutral-900 border border-white/5 rounded-xl p-2.5 hover:bg-white/10 hover:border-white/20 transition-all text-center flex flex-col items-center justify-center h-16 relative overflow-hidden"
                             >
                                 <span className="text-[10px] text-neutral-500 mb-0.5">{dim.name}</span>

@@ -26,7 +26,7 @@ const actions: QuickAction[] = [
     {
         icon: <Crown className="w-4 h-4" />,
         label: '大客戶',
-        href: '/vip',
+        href: '/join',
         color: 'text-neutral-400'
     },
     {

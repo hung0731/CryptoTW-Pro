@@ -44,34 +44,32 @@ export function UsdtRateCard() {
     }, [])
 
     if (loading) {
-        return <Skeleton className="h-16 w-full rounded-xl bg-neutral-900/50" />
+        return <Skeleton className="h-12 w-full rounded-xl bg-neutral-900/50" />
     }
 
     if (!data) return null
 
+    // Logic: Best Buy (Lowest Ask), Best Sell (Highest Bid)
+    const bestBuy = data.maxBuy < data.bitoBuy ? { provider: 'MAX', price: data.maxBuy } : { provider: 'Bito', price: data.bitoBuy }
+    const bestSell = data.maxSell > data.bitoSell ? { provider: 'MAX', price: data.maxSell } : { provider: 'Bito', price: data.bitoSell }
+
     return (
-        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-white">USDT/TWD 匯率</span>
-                <span className="text-[10px] text-neutral-500">即時掛單</span>
+        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 flex items-center justify-between">
+            {/* Left: Buy Low */}
+            <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-neutral-400">買入較低</span>
+                <span className="text-[10px] bg-neutral-800 px-1.5 py-0.5 rounded text-neutral-400">{bestBuy.provider}</span>
+                <span className="text-sm font-mono font-bold text-red-400">{bestBuy.price.toFixed(2)}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-                {/* MAX */}
-                <div className="space-y-1">
-                    <span className="text-[10px] text-neutral-500">MAX</span>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-red-400">買 {data.maxBuy.toFixed(2)}</span>
-                        <span className="text-xs text-green-400">賣 {data.maxSell.toFixed(2)}</span>
-                    </div>
-                </div>
-                {/* BitoPro */}
-                <div className="space-y-1">
-                    <span className="text-[10px] text-neutral-500">BitoPro</span>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-red-400">買 {data.bitoBuy.toFixed(2)}</span>
-                        <span className="text-xs text-green-400">賣 {data.bitoSell.toFixed(2)}</span>
-                    </div>
-                </div>
+
+            {/* Divider */}
+            <div className="h-4 w-[1px] bg-white/10 mx-2" />
+
+            {/* Right: Sell High */}
+            <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-neutral-400">賣出較高</span>
+                <span className="text-[10px] bg-neutral-800 px-1.5 py-0.5 rounded text-neutral-400">{bestSell.provider}</span>
+                <span className="text-sm font-mono font-bold text-green-400">{bestSell.price.toFixed(2)}</span>
             </div>
         </div>
     )

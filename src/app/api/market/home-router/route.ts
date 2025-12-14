@@ -64,7 +64,7 @@ export async function GET() {
                 message: `4小時內爆倉量達 $${(totalLiq / 1000000).toFixed(0)}M`,
                 reason: '市場劇烈波動，槓桿遭到清洗',
                 risk: '短期波動加劇，建議降低槓桿',
-                link: '/derivatives'
+                link: '/prediction?tab=derivatives'
             }
         }
 
@@ -77,7 +77,7 @@ export async function GET() {
                     message: `BTC 費率達 ${(fundingRate * 100).toFixed(3)}%`,
                     reason: '多頭情緒過度樂觀，成本過高',
                     risk: '存在多頭踩踏與回調風險',
-                    link: '/derivatives'
+                    link: '/prediction?tab=derivatives'
                 }
             } else if (fundingRate < -0.0005) {
                 primaryAnomaly = {
@@ -86,7 +86,7 @@ export async function GET() {
                     message: `BTC 費率低至 ${(fundingRate * 100).toFixed(3)}%`,
                     reason: '空頭情緒過度悲觀，做空擁擠',
                     risk: '存在軋空反彈風險',
-                    link: '/derivatives'
+                    link: '/prediction?tab=derivatives'
                 }
             }
         }
@@ -104,7 +104,7 @@ export async function GET() {
             crossRefs.push({
                 source: '巨鯨動態',
                 implication: whaleStatus === '偏多' ? '大戶持續吸籌，支撐轉強' : whaleStatus === '偏空' ? '大戶正在派發，壓力沈重' : '大戶持倉觀望，方向不明',
-                link: '/smart-money'
+                link: '/prediction?tab=smartmoney'
             })
         }
 
@@ -116,13 +116,13 @@ export async function GET() {
         crossRefs.push({
             source: '合約數據',
             implication: derivImplication,
-            link: '/derivatives'
+            link: '/prediction?tab=derivatives'
         })
 
         // 4. Focus Today (Nav List)
         const focusToday = [
-            { name: '資金費率', status: derivStatus, link: '/derivatives' },
-            { name: 'BTC 巨鯨流向', status: whaleStatus, link: '/smart-money' },
+            { name: '資金費率', status: derivStatus, link: '/prediction?tab=derivatives' },
+            { name: 'BTC 巨鯨流向', status: whaleStatus, link: '/prediction?tab=smartmoney' },
             { name: '財經日曆', status: '今日事件', link: '/calendar' }
         ]
 
