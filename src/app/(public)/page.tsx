@@ -32,8 +32,30 @@ export default function HomePage() {
     const [signals, setSignals] = useState<MarketSignals | null>(null)
     const [marketReport, setMarketReport] = useState<any>(null)
     const [signalsLoading, setSignalsLoading] = useState(true)
+    const [greeting, setGreeting] = useState("")
 
     useEffect(() => {
+        // Dynamic Greeting Logic
+        const getGreeting = () => {
+            const hour = new Date().getHours()
+            const greetings = {
+                morning: ["👋 早安", "🌅 早上好", "☀️ 早安", "💪 早安，戰神", "🥐 吃早餐了嗎"],
+                noon: ["🍱 午安", "🍚 吃飽了嗎", "☀️ 中午好", "🍱 該吃飯囉"],
+                afternoon: ["☕️ 下午好", "🍰 喝杯咖啡", "🌇 堅持一下", "🍵 休息時間"],
+                evening: ["🌙 晚上好", "🥘 晚餐愉快", "🧘‍♂️ 辛苦了", "🛁 放鬆一下"],
+                night: ["💤 晚安", "🦉 夜深了", "🛌 早點休息", "🌌 該睡囉"]
+            }
+
+            let list = greetings.night
+            if (hour >= 5 && hour < 11) list = greetings.morning
+            else if (hour >= 11 && hour < 14) list = greetings.noon
+            else if (hour >= 14 && hour < 18) list = greetings.afternoon
+            else if (hour >= 18 && hour < 23) list = greetings.evening
+
+            return list[Math.floor(Math.random() * list.length)]
+        }
+        setGreeting(getGreeting())
+
         const fetchData = async () => {
             try {
                 const [mktRes, predRes, calRes, reportRes] = await Promise.all([
@@ -89,8 +111,11 @@ export default function HomePage() {
             advice = "多空拉鋸中"
         }
 
+        // Use greeting if available, else fallback to 📌
+        const prefix = greeting ? `${greeting}，` : "📌 "
+
         return {
-            text: `📌 今日市場：${status}｜${advice}`,
+            text: `${prefix}今日市場：${status}｜${advice}`,
             color: feeling.includes("多") ? "text-green-400" : feeling.includes("空") ? "text-red-400" : "text-blue-300"
         }
     }
