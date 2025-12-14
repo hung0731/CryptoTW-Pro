@@ -863,10 +863,11 @@ export function WhaleAlertFeed() {
             try {
                 const res = await fetch('/api/market/whales')
                 const json = await res.json()
-                if (json.whales?.alerts) {
+                console.log('Whale API Response:', json) // Debug
+                if (json.whales?.alerts && json.whales.alerts.length > 0) {
                     setAlerts(json.whales.alerts)
                 }
-            } catch (e) { console.error(e) }
+            } catch (e) { console.error('Whale API Error:', e) }
             finally { setLoading(false) }
         }
         fetchAlerts()
@@ -900,9 +901,11 @@ export function WhaleAlertFeed() {
             </div>
             <div className="space-y-1 max-h-[200px] overflow-y-auto">
                 {alerts.slice(0, 10).map((alert, i) => {
-                    const isLong = alert.side === 'LONG' || alert.side === 'BUY'
-                    const amount = parseInt(alert.amount || alert.volUsd || '0')
-                    const formatAmt = amount >= 1000000 ? `$${(amount / 1000000).toFixed(1)}M` : `$${(amount / 1000).toFixed(0)}K`
+                    const positionSize = alert.position_size || 0
+                    const isLong = positionSize > 0
+                    const positionValue = alert.position_value_usd || 0
+                    const isOpen = alert.position_action === 1 // 1=開倉, 2=平倉
+                    const formatAmt = positionValue >= 1000000 ? `$${(positionValue / 1000000).toFixed(1)}M` : `$${(positionValue / 1000).toFixed(0)}K`
 
                     return (
                         <div key={i} className="flex items-center justify-between text-[11px]">
@@ -918,11 +921,14 @@ export function WhaleAlertFeed() {
                                 )}>
                                     {isLong ? '↑' : '↓'}
                                 </span>
+                                <span className="text-neutral-500 text-[9px]">
+                                    {isOpen ? '開' : '平'}
+                                </span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="font-mono text-white">{formatAmt}</span>
                                 <span className="text-neutral-500 text-[10px]">
-                                    {new Date(alert.createTime || alert.time).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
+                                    {new Date(alert.create_time).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
                         </div>
@@ -983,7 +989,7 @@ export function WhalePositionsList() {
         <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2">
             <div className="flex items-center gap-2 mb-2">
                 <Users className="w-3.5 h-3.5 text-blue-400" />
-                <span className="text-xs font-bold text-white">Hyperliquid 7D Top 20</span>
+                <span className="text-xs font-bold text-white">Top 20 巨鯨持倉</span>
             </div>
 
             {/* AI Summary */}
@@ -995,9 +1001,11 @@ export function WhalePositionsList() {
 
             <div className="space-y-1 max-h-[320px] overflow-y-auto">
                 {positions.slice(0, 20).map((pos, i) => {
-                    const addr = pos.ethAddress || pos.user || 'Unknown'
-                    const accountValue = parseFloat(pos.accountValue || '0')
-                    const isProfitable = accountValue > 0
+                    const addr = pos.user || 'Unknown'
+                    const symbol = pos.symbol || 'BTC'
+                    const positionSize = pos.position_size || 0
+                    const positionValue = pos.position_value_usd || 0
+                    const isLong = positionSize > 0
 
                     return (
                         <div key={i} className="flex items-center justify-between text-[11px]">
@@ -1005,12 +1013,15 @@ export function WhalePositionsList() {
                                 <span className="text-neutral-600 font-mono w-4">{i + 1}</span>
                                 <span className="font-mono text-neutral-400">{shortenAddress(addr)}</span>
                             </div>
-                            <span className={cn(
-                                "font-mono",
-                                isProfitable ? "text-green-400" : "text-red-400"
-                            )}>
-                                {isProfitable ? '+' : ''}{formatUsd(accountValue)}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                                <span className="font-medium text-white">{symbol}</span>
+                                <span className={cn(
+                                    "font-mono",
+                                    isLong ? "text-green-400" : "text-red-400"
+                                )}>
+                                    {isLong ? '↑' : '↓'} {formatUsd(Math.abs(positionValue))}
+                                </span>
+                            </div>
                         </div>
                     )
                 })}
