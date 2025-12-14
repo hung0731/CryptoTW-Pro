@@ -803,7 +803,7 @@ const HELP_COMMAND_FLEX_MESSAGE = {
     altText: "快速查詢",
     contents: {
         type: "bubble",
-        size: "mega",
+        size: "kilo",
         body: {
             type: "box",
             layout: "vertical",
@@ -814,7 +814,7 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                     contents: [
                         {
                             type: "text",
-                            text: "🔍 快速查詢",
+                            text: "快速查詢",
                             weight: "bold",
                             size: "lg",
                             color: "#1F1AD9",
@@ -830,124 +830,49 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                         }
                     ]
                 },
-                {
-                    type: "separator",
-                    margin: "lg",
-                    color: "#f0f0f0"
-                },
+                { type: "separator", margin: "lg", color: "#f0f0f0" },
                 {
                     type: "box",
                     layout: "vertical",
                     margin: "lg",
-                    spacing: "sm",
+                    spacing: "md",
                     contents: [
                         // 幣價查詢
                         {
-                            type: "text",
-                            text: "💰 幣價查詢",
-                            weight: "bold",
-                            size: "sm",
-                            color: "#1F1AD9"
-                        },
-                        {
-                            type: "text",
-                            text: "查詢加密貨幣即時價格與 24h 漲跌幅",
-                            size: "xs",
-                            color: "#666666",
-                            wrap: true
-                        },
-                        {
-                            type: "text",
-                            text: "範例：#BTC  @ETH  $SOL  #DOGE",
-                            size: "xs",
-                            color: "#333333"
-                        },
-                        {
-                            type: "separator",
-                            margin: "md",
-                            color: "#f0f0f0"
-                        },
-                        // 市場排行榜
-                        {
-                            type: "text",
-                            text: "📊 市場排行榜",
-                            weight: "bold",
-                            size: "sm",
-                            color: "#1F1AD9"
-                        },
-                        {
-                            type: "text",
-                            text: "查看 24h 漲幅/跌幅 Top 5",
-                            size: "xs",
-                            color: "#666666"
-                        },
-                        {
-                            type: "text",
-                            text: "範例：#HOT  @TOP  $RANK",
-                            size: "xs",
-                            color: "#333333"
-                        },
-                        {
-                            type: "separator",
-                            margin: "md",
-                            color: "#f0f0f0"
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "幣價查詢", size: "sm", color: "#111111", weight: "bold", flex: 1 },
+                                { type: "text", text: "BTC、ETH、SOL", size: "xs", color: "#888888", align: "end", flex: 2 }
+                            ]
                         },
                         // 匯率查詢
                         {
-                            type: "text",
-                            text: "💱 匯率查詢 / 換算",
-                            weight: "bold",
-                            size: "sm",
-                            color: "#1F1AD9"
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "匯率查詢", size: "sm", color: "#111111", weight: "bold", flex: 1 },
+                                { type: "text", text: "USD、TWD", size: "xs", color: "#888888", align: "end", flex: 2 }
+                            ]
                         },
+                        // 換算
                         {
-                            type: "text",
-                            text: "查台幣匯率，或換算金額",
-                            size: "xs",
-                            color: "#666666"
-                        },
-                        {
-                            type: "text",
-                            text: "範例：#TWD (查匯率)  #TWD 1000 (換算)",
-                            size: "xs",
-                            color: "#333333",
-                            wrap: true
-                        },
-                        {
-                            type: "separator",
-                            margin: "md",
-                            color: "#f0f0f0"
-                        },
-                        // 恐慌指數
-                        {
-                            type: "text",
-                            text: "😱 恐慌貪婪指數",
-                            weight: "bold",
-                            size: "sm",
-                            color: "#1F1AD9"
-                        },
-                        {
-                            type: "text",
-                            text: "市場情緒指標 (0=極度恐慌, 100=極度貪婪)",
-                            size: "xs",
-                            color: "#666666",
-                            wrap: true
-                        },
-                        {
-                            type: "text",
-                            text: "範例：恐慌  FGI  情緒",
-                            size: "xs",
-                            color: "#333333"
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "金額換算", size: "sm", color: "#111111", weight: "bold", flex: 1 },
+                                { type: "text", text: "USD 1000", size: "xs", color: "#888888", align: "end", flex: 2 }
+                            ]
                         }
                     ]
                 },
+                { type: "separator", margin: "lg", color: "#f0f0f0" },
                 {
                     type: "text",
-                    text: "💡 幣價和排行支援前綴：# @ $",
+                    text: "直接輸入幣種或金額即可查詢",
                     size: "xxs",
-                    color: "#888888",
-                    margin: "lg",
-                    align: "center"
+                    color: "#aaaaaa",
+                    margin: "md"
                 }
             ]
         },
@@ -962,21 +887,10 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "註冊 OKX 交易所",
-                        uri: "https://www.okx.com/join/CRYPTOTW"
+                        label: "📊 查看市場脈絡",
+                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/`
                     },
                     color: "#1F1AD9"
-                },
-                {
-                    type: "button",
-                    style: "primary",
-                    height: "sm",
-                    action: {
-                        type: "message",
-                        label: "加入 Pro 會員",
-                        text: "加入會員"
-                    },
-                    color: "#000000"
                 }
             ]
         }
