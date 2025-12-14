@@ -43,6 +43,9 @@ export function invalidateCache(key: string): void {
     cache.delete(key)
 }
 
+// Alias for invalidateCache
+export const clearCache = invalidateCache
+
 /**
  * Clear all cache (useful for admin/debug)
  */
