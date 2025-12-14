@@ -1,13 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { ChevronDown, ChevronUp, ExternalLink, Newspaper, Sparkles, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { NewsFlashItem } from '@/lib/coinglass'
-import { format } from 'date-fns'
 import { Skeleton } from '@/components/ui/skeleton'
-import DOMPurify from 'isomorphic-dompurify'
+import { Scale } from 'lucide-react'
 
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
@@ -19,133 +15,52 @@ interface MarketContext {
     }[]
 }
 
-// Helper: Get relative time in Chinese
-function getRelativeTime(dateInput: string | number | Date): string {
-    const date = new Date(dateInput)
-    if (isNaN(date.getTime())) return ''
-
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return '剛剛'
-    if (diffMins < 60) return `${diffMins} 分鐘前`
-    if (diffHours < 24) return `${diffHours} 小時前`
-    if (diffDays < 7) return `${diffDays} 天前`
-    return format(date, 'MM/dd')
-}
-
 export function FlashNewsFeed() {
-    const [news, setNews] = useState<NewsFlashItem[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
     const [marketContext, setMarketContext] = useState<MarketContext | null>(null)
-    const [contextLoading, setContextLoading] = useState(true)
-
-    const fetchNews = async () => {
-        setLoading(true)
-        setError('')
-        try {
-            const res = await fetch('/api/coinglass/news')
-            const json = await res.json()
-            if (json.error) {
-                setError('無法獲取快訊')
-            } else if (json.news) {
-                setNews(json.news)
-            }
-        } catch (e) {
-            console.error(e)
-            setError('連線錯誤')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const fetchContext = async () => {
-        setContextLoading(true)
-        try {
-            const res = await fetch('/api/market/home-router')
-            const json = await res.json()
-            if (json.router?.marketContext) {
-                setMarketContext(json.router.marketContext)
-            }
-        } catch (e) {
-            console.error('Failed to fetch market context', e)
-        } finally {
-            setContextLoading(false)
-        }
-    }
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetchNews()
+        const fetchContext = async () => {
+            try {
+                const res = await fetch('/api/market-context')
+                const json = await res.json()
+                if (json.context) {
+                    setMarketContext(json.context)
+                }
+            } catch (e) {
+                console.error('Market context fetch error:', e)
+            } finally {
+                setLoading(false)
+            }
+        }
         fetchContext()
-        const interval = setInterval(fetchNews, 300000)
+        const interval = setInterval(fetchContext, 300000) // Refresh every 5 min
         return () => clearInterval(interval)
     }, [])
 
-    const toggleExpand = (id: string) => {
-        const newSet = new Set(expandedIds)
-        if (newSet.has(id)) {
-            newSet.delete(id)
-        } else {
-            newSet.add(id)
-        }
-        setExpandedIds(newSet)
-    }
-
-    // Generate context text from market context
-    const getContextDisplay = () => {
-        if (!marketContext) {
-            return { emoji: '📰', text: '新聞數據載入中，AI 正在分析市場脈絡...' }
-        }
-
-        const sentimentEmoji = {
-            '樂觀': '🚀',
-            '保守': '🛡️',
-            '恐慌': '🔻',
-            '中性': '⚖️'
-        }
-
-        const emoji = sentimentEmoji[marketContext.sentiment] || '📊'
-
-        // Use the summary from AI response
-        return {
-            emoji,
-            text: marketContext.summary || `市場整體呈現${marketContext.sentiment}態勢。`
-        }
-    }
-
-    const { emoji: contextEmoji, text: contextText } = getContextDisplay()
-
-    if (loading && news.length === 0) {
+    // Loading state
+    if (loading) {
         return (
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden animate-pulse">
-                {/* AI Context Skeleton */}
+            <div className="bg-neutral-900/50 border border-white/5 rounded-xl overflow-hidden animate-pulse">
+                {/* AI Header Skeleton */}
                 <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border-b border-white/5 p-4">
                     <div className="flex items-center gap-2 mb-3">
-                        <Skeleton className="w-5 h-5 rounded bg-neutral-700" />
-                        <Skeleton className="h-4 w-28 bg-neutral-700" />
+                        <Skeleton className="w-6 h-6 rounded bg-neutral-700" />
+                        <Skeleton className="h-4 w-24 bg-neutral-700" />
                     </div>
-                    <Skeleton className="h-3 w-full bg-neutral-700 mb-2" />
-                    <Skeleton className="h-3 w-3/4 bg-neutral-700" />
+                    <Skeleton className="h-4 w-full bg-neutral-700" />
                 </div>
 
-                {/* Timeline Skeleton */}
-                <div className="p-4 space-y-4">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="flex gap-3">
-                            <div className="flex flex-col items-center">
-                                <Skeleton className="w-2 h-2 rounded-full bg-neutral-700" />
-                                <Skeleton className="w-0.5 h-16 bg-neutral-800" />
-                            </div>
+                {/* List Skeleton */}
+                <div className="p-4 space-y-3">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex items-start gap-3">
+                            <Skeleton className="w-6 h-6 rounded bg-neutral-700 shrink-0" />
                             <div className="flex-1 space-y-2">
-                                <Skeleton className="h-3 w-20 bg-neutral-700" />
                                 <Skeleton className="h-4 w-full bg-neutral-700" />
-                                <Skeleton className="h-3 w-3/4 bg-neutral-700" />
+                                <Skeleton className="h-3 w-1/2 bg-neutral-700" />
                             </div>
+                            <Skeleton className="w-8 h-6 rounded bg-neutral-700" />
                         </div>
                     ))}
                 </div>
@@ -153,148 +68,78 @@ export function FlashNewsFeed() {
         )
     }
 
-    if (error) {
-        return (
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4 text-center">
-                <p className="text-red-400 mb-2">{error}</p>
-                <button onClick={fetchNews} className="text-xs underline hover:text-white text-neutral-500">重試</button>
-            </div>
-        )
+    // Get sentiment display
+    const getSentimentEmoji = (sentiment: string) => {
+        const map: Record<string, string> = {
+            '樂觀': '🚀',
+            '保守': '🛡️',
+            '恐慌': '⚠️',
+            '中性': '⚖️'
+        }
+        return map[sentiment] || '📊'
+    }
+
+    const getImpactColor = (impact: string) => {
+        if (impact === '高') return 'text-red-400 border-red-400/30 bg-red-500/10'
+        if (impact === '中') return 'text-yellow-400 border-yellow-400/30 bg-yellow-500/10'
+        return 'text-blue-400 border-blue-400/30 bg-blue-500/10'
     }
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden relative">
-
-            {/* AI Context Card */}
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl overflow-hidden">
+            {/* AI Header */}
             <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-4">
                 <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg">{contextEmoji}</span>
+                    <Scale className="w-5 h-5 text-blue-400" />
                     <h3 className="text-sm font-bold text-blue-200">AI 懶人包</h3>
+                    {marketContext?.sentiment && (
+                        <span className="text-lg ml-1">{getSentimentEmoji(marketContext.sentiment)}</span>
+                    )}
                 </div>
-                {contextLoading ? (
-                    <Skeleton className="h-4 w-3/4 bg-neutral-800" />
-                ) : (
-                    <p className="text-xs text-neutral-300 leading-relaxed font-medium">
-                        {contextText}
-                    </p>
-                )}
+                <p className="text-sm text-neutral-200 leading-relaxed font-medium">
+                    {marketContext?.summary || '正在分析市場動態...'}
+                </p>
             </div>
 
-            {/* List Header */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-black/30">
-                <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-neutral-500" />
-                    <span className="text-xs font-bold text-neutral-400">即時快訊</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]" />
-                    <span className="text-[9px] text-green-500 font-bold font-mono">LIVE</span>
-                </div>
-            </div>
+            {/* AI Ranked News List */}
+            <div className="divide-y divide-white/5">
+                {marketContext?.highlights?.slice(0, 10).map((item, index) => (
+                    <div
+                        key={index}
+                        className="flex items-start gap-3 p-4 hover:bg-white/5 transition-colors"
+                    >
+                        {/* Rank Number */}
+                        <span className={cn(
+                            "shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs font-bold",
+                            index < 3 ? "bg-red-500/20 text-red-400" : "bg-neutral-800 text-neutral-500"
+                        )}>
+                            {index + 1}
+                        </span>
 
-            {/* Timeline News List */}
-            <div className="max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
-                {news.length === 0 && (
-                    <div className="text-center py-6 text-xs text-neutral-500">
-                        暫無快訊
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-white leading-snug mb-1">
+                                {item.title}
+                            </h4>
+                            <p className="text-xs text-neutral-500">
+                                {item.reason}
+                            </p>
+                        </div>
+
+                        {/* Impact Badge */}
+                        <span className={cn(
+                            "shrink-0 px-2 py-0.5 text-xs font-bold rounded border",
+                            getImpactColor(item.impact)
+                        )}>
+                            {item.impact}
+                        </span>
                     </div>
-                )}
-
-                <div className="relative">
-                    {news.slice(0, 30).map((item, index) => {
-                        const relativeTime = getRelativeTime(item.createTime)
-                        const plainContent = item.content ? item.content.replace(/<[^>]+>/g, '') : ''
-                        const isExpanded = expandedIds.has(item.id)
-                        const isFirst = index === 0
-
-                        return (
-                            <div
-                                key={item.id}
-                                className="relative flex gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
-                            >
-                                {/* Timeline */}
-                                <div className="flex flex-col items-center pt-1.5">
-                                    {/* Dot */}
-                                    <div className={cn(
-                                        "w-2 h-2 rounded-full shrink-0 z-10",
-                                        isFirst ? "bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.5)]" :
-                                            item.highlight ? "bg-amber-500" : "bg-neutral-600"
-                                    )} />
-                                    {/* Line */}
-                                    <div className="w-0.5 flex-1 bg-neutral-800 mt-1" />
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 min-w-0 pb-2">
-                                    {/* Time & Source */}
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className={cn(
-                                            "text-[10px] font-medium",
-                                            isFirst ? "text-green-400" : "text-neutral-500"
-                                        )}>
-                                            {relativeTime}
-                                        </span>
-                                        <span className="text-[10px] text-neutral-600">·</span>
-                                        <span className={cn(
-                                            "text-[10px] font-bold",
-                                            item.highlight ? "text-amber-400" : "text-neutral-500"
-                                        )}>
-                                            {item.source || 'News'}
-                                        </span>
-                                        {item.highlight && (
-                                            <Badge variant="default" className="h-3.5 px-1 py-0 text-[8px] font-bold bg-amber-500/20 text-amber-400 border-none">
-                                                HOT
-                                            </Badge>
-                                        )}
-                                    </div>
-
-                                    {/* Title */}
-                                    <h4
-                                        onClick={() => toggleExpand(item.id)}
-                                        className={cn(
-                                            "text-sm font-medium leading-snug cursor-pointer transition-colors",
-                                            item.highlight ? "text-amber-100 hover:text-amber-50" : "text-neutral-200 hover:text-white"
-                                        )}
-                                    >
-                                        {item.title}
-                                    </h4>
-
-                                    {/* Content Preview or Full */}
-                                    {isExpanded ? (
-                                        <div className="mt-2 space-y-2">
-                                            <div
-                                                className="prose prose-invert prose-sm max-w-none text-neutral-400 text-xs leading-relaxed"
-                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
-                                            />
-                                            {item.images && item.images.length > 0 && (
-                                                <div className="flex gap-2 overflow-x-auto pb-2">
-                                                    {item.images.slice(0, 2).map((img, idx) => (
-                                                        <img key={idx} src={img} alt="News" className="h-24 w-auto rounded-lg border border-white/10" />
-                                                    ))}
-                                                </div>
-                                            )}
-                                            <button
-                                                onClick={() => toggleExpand(item.id)}
-                                                className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-white transition-colors"
-                                            >
-                                                收起 <ChevronUp className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <p
-                                            onClick={() => toggleExpand(item.id)}
-                                            className="text-xs text-neutral-500 line-clamp-2 cursor-pointer hover:text-neutral-400 transition-colors mt-1"
-                                        >
-                                            {plainContent}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        )
-                    })}
-                </div>
+                )) || (
+                        <div className="p-8 text-center text-neutral-500 text-sm">
+                            暫無 AI 分析結果
+                        </div>
+                    )}
             </div>
         </div>
     )
 }
-
