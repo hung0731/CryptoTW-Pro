@@ -584,7 +584,7 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
                         },
                         {
                             type: "text",
-                            text: "✅ Step 3. 等待審核 (24h 內)",
+                            text: "✅ Step 3. 等待審核 (24H 內)",
                             size: "sm",
                             color: "#333333"
                         }

@@ -59,6 +59,8 @@ ${JSON.stringify(top20, null, 2)}
 
 【輸出】
 直接輸出摘要文字，不要有其他格式。
+
+【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
 `
         const result = await model.generateContent(prompt)
         return result.response.text().trim()

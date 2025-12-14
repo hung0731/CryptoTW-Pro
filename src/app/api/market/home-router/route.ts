@@ -97,8 +97,8 @@ export async function GET() {
             const type = longLiq > shortLiq ? '多單爆倉' : '空單爆倉'
             primaryAnomaly = {
                 type: 'Liquidation',
-                title: `${type}激增`,
-                message: `4小時內爆倉量達 $${(totalLiq / 1000000).toFixed(0)}M`,
+                title: `${type} 激增`,
+                message: `4 小時內爆倉量達 $${(totalLiq / 1000000).toFixed(0)} M`,
                 reason: '市場劇烈波動，槓桿遭到清洗',
                 risk: '短期波動加劇，建議降低槓桿',
                 link: '/prediction?tab=derivatives'

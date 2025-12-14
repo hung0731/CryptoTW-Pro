@@ -59,7 +59,7 @@ export function BullBearIndex() {
                         explanation={
                             <ul className="list-disc pl-4 space-y-1">
                                 <li><strong>0-25 (極度恐懼)</strong>：市場非理性恐慌，通常是長線買點。</li>
-                                <li><strong>75-100 (極度貪婪)</strong>：市場FOMO情緒高漲，需警惕回調風險。</li>
+                                <li><strong>75-100 (極度貪婪)</strong>：市場 FOMO 情緒高漲，需警惕回調風險。</li>
                             </ul>
                         }
                     />
@@ -475,7 +475,7 @@ export function ExchangeTransparency() {
                 <div className="grid grid-cols-12 gap-2 p-3 bg-black/20 text-[10px] text-neutral-500 font-medium border-b border-white/5">
                     <div className="col-span-4">交易所</div>
                     <div className="col-span-4 text-right">持有量</div>
-                    <div className="col-span-4 text-right">24H變化</div>
+                    <div className="col-span-4 text-right">24H 變化</div>
                 </div>
                 <div className="divide-y divide-white/5">
                     {(data.items || []).map((item: any, i: number) => (
@@ -695,11 +695,11 @@ export function EconomicCalendar() {
 
             <div className="text-center pt-8 pb-4 space-y-1">
                 <p className="text-[10px] text-neutral-600">
-                    數據來源: Coinglass (UTC+8) • 只顯示高影響力事件 (S/A級)
+                    數據來源：Coinglass (UTC+8) • 只顯示高影響力事件 (S/A 級)
                 </p>
                 <div className="flex items-center justify-center gap-2 text-[10px] text-neutral-700">
-                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> S級核心</span>
-                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span> A級關注</span>
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> S 級核心</span>
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-neutral-600 rounded-full"></span> A 級關注</span>
                 </div>
             </div>
         </div>
@@ -767,7 +767,7 @@ export function LiquidationSummary({ data }: { data?: DashboardData['liquidation
                 <span className="text-xs font-bold text-white">24H 爆倉</span>
                 <ExplainTooltip
                     term="爆倉數據"
-                    definition="過去24小時被強制平倉的總金額。"
+                    definition="過去 24 小時被強制平倉的總金額。"
                     explanation={
                         <ul className="list-disc pl-4 space-y-1">
                             <li><strong>多單爆倉大</strong>：市場殺多，可能見底。</li>

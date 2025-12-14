@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
         const fetchChunk = async (startOffset: number, endOffset: number) => {
             const startTime = now + (startOffset * dayMs)
             const endTime = now + (endOffset * dayMs)
-            const url = `${BASE_URL}?start_time=${startTime}&end_time=${endTime}&language=en`
+            const url = `${BASE_URL}?start_time=${startTime}&end_time=${endTime}&language=zh`
 
             try {
                 const res = await fetch(url, {
@@ -82,17 +82,16 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        // Process and Enrich Data
+        // Process and Enrich Data - Only US events
         const enrichedEvents = rawEvents
             .map((event: any) => {
-                // 0. Strict Country Filter: DISABLED (Show all countries)
-                // const isUS = event.country_code === 'US' || event.country_name === 'United States'
-                // if (!isUS) return null
+                // Strict Country Filter: Only US events
+                const isUS = event.country_code === 'US' ||
+                    event.country_name === 'United States' ||
+                    event.country_name === '美國'
+                if (!isUS) return null
 
                 const enrichment = enrichMacroEvent(event.calendar_name)
-
-                // 1. Strict Allowlist: DISABLED (Show all events)
-                // if (!enrichment) return null
 
                 // Transform to frontend format
                 return {
