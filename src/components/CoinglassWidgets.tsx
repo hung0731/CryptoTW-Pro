@@ -891,8 +891,6 @@ export function WhaleAlertFeed() {
         const shortCount = filteredAlerts.filter(a => a.position_size < 0).length
 
         // Calculate Buy/Sell pressure
-        // Buy: Long Open + Short Close
-        // Sell: Short Open + Long Close
         let buyVol = 0
         let sellVol = 0
 
@@ -915,18 +913,36 @@ export function WhaleAlertFeed() {
             }
         })
 
-        // Find dominant logic
-        const topSymbol = Object.keys(symbolStats).sort((a, b) => (symbolStats[b].buys + symbolStats[b].sells) - (symbolStats[a].buys + symbolStats[a].sells))[0]
+        // Find dominant logics
+        const sortedSymbols = Object.keys(symbolStats).sort((a, b) =>
+            (symbolStats[b].buys + symbolStats[b].sells) - (symbolStats[a].buys + symbolStats[a].sells)
+        )
+        const topSymbol = sortedSymbols[0]
+        const secondSymbol = sortedSymbols[1]
 
         const bias = buyVol > sellVol * 1.2 ? "多頭主導" : sellVol > buyVol * 1.2 ? "空頭主導" : "多空拉鋸"
         contextEmoji = buyVol > sellVol * 1.2 ? "🐂" : sellVol > buyVol * 1.2 ? "🐻" : "⚖️"
 
         // Narrative construction
-        // Example: BTC 巨鯨偏觀望，ETH 與 SOL 出現主動佈局，多頭仍佔優勢。
-        const topSymStat = symbolStats[topSymbol]
-        const topAction = topSymStat.buys > topSymStat.sells ? "出現主動佈局" : "遭大額拋售"
+        // Richer narrative: "BTC 巨鯨出現主動佈局（淨流入 $50M），ETH 則遭大額拋售，整體市場多頭主導。"
+        const getActionText = (sym: string) => {
+            const stats = symbolStats[sym]
+            const net = stats.buys - stats.sells
+            const netStr = net >= 1000000 ? `$${(Math.abs(net) / 1000000).toFixed(1)}M` : `$${(Math.abs(net) / 1000).toFixed(0)}K`
+            const action = net > 0 ? "持續吸籌" : "大額倒貨"
+            const direction = net > 0 ? "淨流入" : "淨流出"
+            return `${sym} 巨鯨${action}（${direction} ${netStr}）`
+        }
 
-        contextText = `${topSymbol} 巨鯨${topAction}，整體市場${bias}。`
+        let narrative = getActionText(topSymbol)
+        if (secondSymbol) {
+            narrative += `，${getActionText(secondSymbol)}`
+        }
+
+        const totalVol = buyVol + sellVol
+        const ratio = sellVol > 0 ? (buyVol / sellVol).toFixed(1) : "∞"
+
+        contextText = `${narrative}。近一小時整體${bias}，多空比約 ${ratio}。`
     }
 
     if (loading) return <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
@@ -944,10 +960,10 @@ export function WhaleAlertFeed() {
     return (
         <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden relative group">
             {/* Key Context Card (The "Soul" of the page) */}
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-3">
-                <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm">{contextEmoji}</span>
-                    <h3 className="text-xs font-bold text-blue-200">市場脈絡 (巨鯨)</h3>
+            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">{contextEmoji}</span>
+                    <h3 className="text-sm font-bold text-blue-200">市場脈絡 (巨鯨)</h3>
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed font-medium">
                     {contextText}
@@ -970,22 +986,19 @@ export function WhaleAlertFeed() {
             </div>
 
             {/* List Content */}
-            <div className="max-h-[240px] overflow-y-auto custom-scrollbar">
+            <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                 {filteredAlerts.length === 0 && (
                     <div className="text-center py-6 text-xs text-neutral-500 font-mono">
                         無 {'>'}$1M 巨鯨操作
                     </div>
                 )}
 
-                {filteredAlerts.slice(0, 20).map((alert, i) => {
+                {filteredAlerts.slice(0, 30).map((alert, i) => {
                     const positionSize = alert.position_size || 0
                     const isLong = positionSize > 0
                     const positionValue = Math.abs(alert.position_value_usd || 0)
                     const isOpen = alert.position_action === 1 // 1=開倉, 2=平倉
 
-                    // Logic for semantic colors
-                    // Buy Pressure (Long Open / Short Close) = Green
-                    // Sell Pressure (Short Open / Long Close) = Red
                     const isBuyPressure = (isLong && isOpen) || (!isLong && !isOpen)
                     const actionColor = isBuyPressure ? "text-green-400" : "text-red-400"
                     const actionBg = isBuyPressure ? "bg-green-500/10" : "bg-red-500/10"
@@ -1025,6 +1038,48 @@ export function WhaleAlertFeed() {
                     )
                 })}
             </div>
+        </div>
+    )
+}
+
+export function WhaleAiSummaryCard() {
+    const [fetchedSummary, setFetchedSummary] = useState<string | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/market/whales')
+                const json = await res.json()
+                if (json.whales?.summary) {
+                    setFetchedSummary(json.whales.summary)
+                }
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) return <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-xl" />
+    if (!fetchedSummary) return null
+
+    return (
+        <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-xl p-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-[50px] rounded-full pointer-events-none -mt-10 -mr-10"></div>
+
+            <div className="flex items-center gap-2 mb-3">
+                <div className="bg-purple-500/20 p-1.5 rounded-lg">
+                    <Users className="w-4 h-4 text-purple-400" />
+                </div>
+                <h2 className="text-sm font-bold text-white">AI 巨鯨速覽</h2>
+                <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/20">
+                    Smart Money Analysis
+                </span>
+            </div>
+
+            <p className="text-xs text-neutral-300 leading-relaxed font-medium relative z-10">
+                {fetchedSummary}
+            </p>
         </div>
     )
 }

@@ -6,7 +6,7 @@ import {
     FundingRateRankings,
     LongShortRatio,
     WhaleAlertFeed,
-    WhalePositionsList,
+    WhaleAiSummaryCard,
     IndicatorsGrid
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
@@ -82,7 +82,7 @@ export function SmartMoneyView() {
     return (
         <div className="space-y-5">
 
-            {/* Section: 巨鯨動態 - Grid Layout */}
+            {/* Section: 巨鯨動態 */}
             <section>
                 <div className="flex items-center gap-2 mb-3">
                     <h2 className="text-sm font-medium text-neutral-500">巨鯨動態</h2>
@@ -98,9 +98,9 @@ export function SmartMoneyView() {
                         }
                     />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-3">
+                    <WhaleAiSummaryCard />
                     <WhaleAlertFeed />
-                    <WhalePositionsList />
                 </div>
             </section>
         </div>
