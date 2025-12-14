@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { replyMessage, verifyLineSignature } from '@/lib/line-bot'
 import { createAdminClient } from '@/lib/supabase' // Use Service Role for background
 import { cookies } from 'next/headers'
+import { getMarketState, type MarketState } from '@/lib/market-state'
+
+// 低頻引導緩存：記錄用戶最後一次收到提示的時間
+const fallbackHintCache = new Map<string, number>()
 
 // ============================================
 // FLEX MESSAGE 設計規範 - 加密台灣 Pro
@@ -12,6 +16,223 @@ import { cookies } from 'next/headers'
 // 頂部標籤：「加密台灣 Pro」
 // 尺寸：bubble=kilo, 標題=lg, 內文=sm
 // ============================================
+
+// ============================================
+// 幣種中英對照表 - 支援自然語言輸入 (Top 20 常見)
+// ============================================
+const COIN_ALIAS_MAP: Record<string, string> = {
+    // 比特幣
+    '比特幣': 'BTC',
+    '大餅': 'BTC',
+    'BITCOIN': 'BTC',
+    // 以太幣
+    '以太幣': 'ETH',
+    '以太': 'ETH',
+    '二餅': 'ETH',
+    'ETHEREUM': 'ETH',
+    // SOL
+    '索拉納': 'SOL',
+    'SOLANA': 'SOL',
+    // DOGE
+    '狗狗幣': 'DOGE',
+    '狗幣': 'DOGE',
+    'DOGECOIN': 'DOGE',
+    // XRP
+    '瑞波幣': 'XRP',
+    '瑞波': 'XRP',
+    'RIPPLE': 'XRP',
+    // 其他 Top 20
+    '萊特幣': 'LTC',
+    'LITECOIN': 'LTC',
+    '幣安幣': 'BNB',
+    '波卡': 'DOT',
+    'POLKADOT': 'DOT',
+    '艾達幣': 'ADA',
+    'CARDANO': 'ADA',
+    '波場': 'TRX',
+    'TRON': 'TRX',
+    '雪崩': 'AVAX',
+    'AVALANCHE': 'AVAX',
+    'POLYGON': 'MATIC',
+    '鏈結': 'LINK',
+    'CHAINLINK': 'LINK',
+    '柴犬幣': 'SHIB',
+    // 其他常問
+    '原子幣': 'ATOM',
+    'COSMOS': 'ATOM',
+    'SUI': 'SUI',
+    'APT': 'APT',
+    'ARB': 'ARB',
+    'OP': 'OP',
+}
+
+// ============================================
+// 黑名單 - 避免誤判為幣種
+// ============================================
+const COIN_BLACKLIST = new Set([
+    // 法幣
+    'USD', 'USDT', 'USDC', 'TWD', 'NTD', 'TW', 'JPY', 'EUR', 'HKD', 'CNY', 'KRW', 'GBP',
+    // 單位/縮寫
+    'K', 'M', 'B', 'W', 'U',
+    // 指令關鍵字
+    'HOT', 'TOP', 'RANK', 'PRO', 'HELP', 'FGI',
+    // 太短/太常見的詞
+    'OK', 'HI', 'NO', 'GO', 'UP', 'ON', 'IN', 'AT', 'TO', 'OF', 'IF', 'OR', 'AN',
+])
+
+// ============================================
+// 全域輸入正規化 - 所有 parser 共用
+// ============================================
+function normalizeInput(input: string): string {
+    return input
+        .trim()
+        // 全形轉半形
+        .replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+        // 全形空格轉半形
+        .replace(/\u3000/g, ' ')
+        // 移除多餘空白
+        .replace(/\s+/g, ' ')
+        // 常見標點統一
+        .replace(/，/g, ',')
+        .replace(/。/g, '.')
+        .replace(/＄/g, '$')
+        .replace(/＃/g, '#')
+        // 移除數字中的逗號 (5,000 -> 5000)
+        .replace(/(\d),(\d)/g, '$1$2')
+}
+
+// ============================================
+// 數字解析器 - 支援 k/萬/千
+// ============================================
+function parseAmount(numStr: string): number {
+    let str = numStr.toUpperCase().trim()
+    let multiplier = 1
+
+    // 萬 = 10000
+    if (str.includes('萬')) {
+        multiplier = 10000
+        str = str.replace('萬', '')
+    }
+    // 千 = 1000
+    else if (str.includes('千')) {
+        multiplier = 1000
+        str = str.replace('千', '')
+    }
+    // K = 1000
+    else if (str.endsWith('K')) {
+        multiplier = 1000
+        str = str.replace('K', '')
+    }
+    // M = 1000000
+    else if (str.endsWith('M')) {
+        multiplier = 1000000
+        str = str.replace('M', '')
+    }
+
+    const num = parseFloat(str)
+    return isNaN(num) ? 0 : num * multiplier
+}
+
+// ============================================
+// 幣種解析器（含黑名單護欄）
+// ============================================
+function parseCoinSymbol(input: string): string | null {
+    const normalized = normalizeInput(input)
+
+    // 移除常見前後綴
+    const cleaned = normalized
+        .replace(/^[#@$]/, '') // 移除前綴符號
+        .replace(/(價格|多少|的價格|現在|怎麼樣|怎樣|如何|幾錢|查|看)$/i, '') // 移除後綴詞
+        .trim()
+
+    if (!cleaned) return null
+
+    // 先檢查對照表（原始大小寫）
+    if (COIN_ALIAS_MAP[cleaned]) {
+        return COIN_ALIAS_MAP[cleaned]
+    }
+
+    // 轉大寫後再查
+    const upper = cleaned.toUpperCase()
+    if (COIN_ALIAS_MAP[upper]) {
+        return COIN_ALIAS_MAP[upper]
+    }
+
+    // 黑名單檢查
+    if (COIN_BLACKLIST.has(upper)) {
+        return null
+    }
+
+    // 純英數代碼 (2-10字元)
+    if (/^[A-Z0-9]{2,10}$/.test(upper)) {
+        return upper
+    }
+
+    return null
+}
+
+// ============================================
+// 匯率解析器（含萬/千支援）
+// ============================================
+function parseCurrencyAmount(input: string): { type: 'USD' | 'TWD', amount: number } | null {
+    const normalized = normalizeInput(input)
+    const text = normalized.toUpperCase()
+
+    // ===== USD 系列 =====
+
+    // 模式 1: "USD 1000", "USDT 500", "U 100"
+    let match = text.match(/^(USD[T]?|U)\s+([\d.]+[萬千KM]?)$/i)
+    if (match) {
+        return { type: 'USD', amount: parseAmount(match[2]) }
+    }
+
+    // 模式 2: "1000 USD", "500 USDT", "100 U"
+    match = text.match(/^([\d.]+[萬千KM]?)\s*(USD[T]?|U)$/i)
+    if (match) {
+        return { type: 'USD', amount: parseAmount(match[1]) }
+    }
+
+    // 模式 3: "1000U", "500USDT" (無空格)
+    match = text.match(/^([\d.]+[萬千KM]?)U(SDT?)?$/i)
+    if (match) {
+        return { type: 'USD', amount: parseAmount(match[1]) }
+    }
+
+    // 模式 4: 中文 "1000美金", "5萬美元", "100刀", "1000美"
+    const usdChineseMatch = normalized.match(/([\d.]+[萬千kKmM]?)\s*(美金|美元|美|刀)/i)
+    if (usdChineseMatch) {
+        return { type: 'USD', amount: parseAmount(usdChineseMatch[1]) }
+    }
+
+    // 模式 5: "換 X 美金"
+    const convertMatch = normalized.match(/換\s*([\d.]+[萬千kKmM]?)\s*(美金|美元|美|USD|U)/i)
+    if (convertMatch) {
+        return { type: 'USD', amount: parseAmount(convertMatch[1]) }
+    }
+
+    // ===== TWD 系列 =====
+
+    // 模式 6: "TWD 1000"
+    match = text.match(/^TWD\s+([\d.]+[萬千KM]?)$/i)
+    if (match) {
+        return { type: 'TWD', amount: parseAmount(match[1]) }
+    }
+
+    // 模式 7: "1000 TWD"
+    match = text.match(/^([\d.]+[萬千KM]?)\s*TWD$/i)
+    if (match) {
+        return { type: 'TWD', amount: parseAmount(match[1]) }
+    }
+
+    // 模式 8: 中文 "10000台幣", "1萬台幣"
+    const twdChineseMatch = normalized.match(/([\d.]+[萬千kKmM]?)\s*(台幣|新台幣|臺幣)/i)
+    if (twdChineseMatch) {
+        return { type: 'TWD', amount: parseAmount(twdChineseMatch[1]) }
+    }
+
+    return null
+}
+
 
 async function trackEvent(userId: string | undefined, eventType: string, eventName: string) {
     if (!userId) return
@@ -26,6 +247,181 @@ async function trackEvent(userId: string | undefined, eventType: string, eventNa
         console.error('[Analytics] Error:', e)
     }
 }
+
+// ============================================
+// Pro 用戶判斷
+// ============================================
+async function checkIsProUser(lineUserId: string): Promise<boolean> {
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('users')
+            .select('membership_status')
+            .eq('line_user_id', lineUserId)
+            .single()
+
+        if (error || !data) return false
+
+        return data.membership_status === 'pro' || data.membership_status === 'lifetime'
+    } catch (e) {
+        console.error('[Pro Check] Error:', e)
+        return false
+    }
+}
+
+// ============================================
+// 市場狀態卡片（Pro 專屬）
+// ============================================
+function createMarketStateCard(state: MarketState | null, isPro: boolean) {
+    // 計算更新時間
+    const updatedMinutesAgo = state
+        ? Math.floor((Date.now() - state.updatedAt) / 60000)
+        : 0
+    const timeText = updatedMinutesAgo <= 1
+        ? '剛剛更新'
+        : `更新於 ${updatedMinutesAgo} 分鐘前`
+
+    if (!isPro) {
+        // 非 Pro 用戶：鎖定版本
+        return {
+            type: "flex",
+            altText: "交易市場狀態（Pro）",
+            contents: {
+                type: "bubble",
+                size: "kilo",
+                body: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [
+                        {
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "📈 交易市場狀態", weight: "bold", size: "md", color: "#1F1AD9", flex: 1 },
+                                { type: "text", text: "Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                            ]
+                        },
+                        { type: "separator", margin: "md", color: "#f0f0f0" },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            margin: "md",
+                            spacing: "sm",
+                            contents: [
+                                { type: "text", text: "資金費率：🔓", size: "sm", color: "#888888" },
+                                { type: "text", text: "多空比：🔓", size: "sm", color: "#888888" },
+                                { type: "text", text: "清算壓力：🔓", size: "sm", color: "#888888" }
+                            ]
+                        },
+                        { type: "separator", margin: "md", color: "#f0f0f0" },
+                        { type: "text", text: "🔓 解鎖查看市場狀態", size: "xs", color: "#1F1AD9", margin: "md", align: "center" }
+                    ]
+                },
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [
+                        {
+                            type: "button",
+                            style: "primary",
+                            height: "sm",
+                            action: {
+                                type: "message",
+                                label: "了解 Pro 會員",
+                                text: "pro"
+                            },
+                            color: "#1F1AD9"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+    // Pro 用戶：完整狀態
+    if (!state) {
+        return {
+            type: "flex",
+            altText: "交易市場狀態",
+            contents: {
+                type: "bubble",
+                size: "kilo",
+                body: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [
+                        { type: "text", text: "📈 交易市場狀態", weight: "bold", size: "md", color: "#1F1AD9" },
+                        { type: "text", text: "⚠️ 暫時無法取得數據", size: "sm", color: "#888888", margin: "md" }
+                    ]
+                }
+            }
+        }
+    }
+
+    // 狀態顏色
+    const fundingColor = state.fundingState === '偏多' ? '#00B900' : state.fundingState === '偏空' ? '#D00000' : '#888888'
+    const longShortColor = state.longShortState === '多方佔優' ? '#00B900' : state.longShortState === '空方佔優' ? '#D00000' : '#888888'
+    const liqColor = state.liquidationState === '高' ? '#D00000' : state.liquidationState === '低' ? '#00B900' : '#888888'
+
+    return {
+        type: "flex",
+        altText: "交易市場狀態",
+        contents: {
+            type: "bubble",
+            size: "kilo",
+            body: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    {
+                        type: "box",
+                        layout: "horizontal",
+                        contents: [
+                            { type: "text", text: "📈 交易市場狀態", weight: "bold", size: "md", color: "#1F1AD9", flex: 1 },
+                            { type: "text", text: "Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                        ]
+                    },
+                    { type: "separator", margin: "md", color: "#f0f0f0" },
+                    {
+                        type: "box",
+                        layout: "vertical",
+                        margin: "md",
+                        spacing: "sm",
+                        contents: [
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                contents: [
+                                    { type: "text", text: "資金費率", size: "sm", color: "#555555", flex: 1 },
+                                    { type: "text", text: state.fundingState, size: "sm", color: fundingColor, weight: "bold", align: "end", flex: 1 }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                contents: [
+                                    { type: "text", text: "多空比", size: "sm", color: "#555555", flex: 1 },
+                                    { type: "text", text: state.longShortState, size: "sm", color: longShortColor, weight: "bold", align: "end", flex: 1 }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                contents: [
+                                    { type: "text", text: "清算壓力", size: "sm", color: "#555555", flex: 1 },
+                                    { type: "text", text: state.liquidationState, size: "sm", color: liqColor, weight: "bold", align: "end", flex: 1 }
+                                ]
+                            }
+                        ]
+                    },
+                    { type: "separator", margin: "md", color: "#f0f0f0" },
+                    { type: "text", text: `⏱ ${timeText}`, size: "xxs", color: "#888888", margin: "sm", align: "end" }
+                ]
+            }
+        }
+    }
+}
+
 
 const WELCOME_FLEX_MESSAGE = {
     type: "flex",
@@ -211,10 +607,10 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
     }
 }
 
-// Pro 有什麼 Flex Message (會員福利說明)
+// Pro 有什麼 Flex Message (會員福利說明) - 場景導向版本
 const PRO_BENEFITS_FLEX_MESSAGE = {
     type: "flex",
-    altText: "Pro 有什麼",
+    altText: "Pro 能幫你做什麼",
     contents: {
         type: "bubble",
         size: "mega",
@@ -228,7 +624,7 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
                     contents: [
                         {
                             type: "text",
-                            text: "⭐ Pro 有什麼",
+                            text: "⭐ Pro 能幫你做什麼",
                             weight: "bold",
                             size: "lg",
                             color: "#1F1AD9",
@@ -255,92 +651,74 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
                     margin: "lg",
                     spacing: "md",
                     contents: [
-                        // 即時市場快訊
+                        // 1️⃣ 第一時間知道市場在動什麼
                         {
                             type: "box",
                             layout: "horizontal",
                             contents: [
-                                { type: "text", text: "📡", size: "lg", flex: 0 },
+                                { type: "text", text: "1️⃣", size: "lg", flex: 0 },
                                 {
                                     type: "box",
                                     layout: "vertical",
                                     paddingStart: "md",
                                     flex: 1,
                                     contents: [
-                                        { type: "text", text: "即時市場快訊", weight: "bold", size: "sm", color: "#333333" },
-                                        { type: "text", text: "大行情、重要事件即時推播通知", size: "xs", color: "#666666", wrap: true }
+                                        { type: "text", text: "第一時間知道「市場在動什麼」", weight: "bold", size: "sm", color: "#333333", wrap: true },
+                                        { type: "text", text: "即時市場快訊、重大事件推播，不錯過關鍵波動", size: "xs", color: "#666666", wrap: true }
                                     ]
                                 }
                             ]
                         },
-                        // AI 行情分析
+                        // 2️⃣ 每天快速理解市場狀態
                         {
                             type: "box",
                             layout: "horizontal",
                             contents: [
-                                { type: "text", text: "🤖", size: "lg", flex: 0 },
+                                { type: "text", text: "2️⃣", size: "lg", flex: 0 },
                                 {
                                     type: "box",
                                     layout: "vertical",
                                     paddingStart: "md",
                                     flex: 1,
                                     contents: [
-                                        { type: "text", text: "AI 市場脈動", weight: "bold", size: "sm", color: "#333333" },
-                                        { type: "text", text: "每日 AI 自動彙整市場數據與情緒分析", size: "xs", color: "#666666", wrap: true }
+                                        { type: "text", text: "每天快速理解「市場狀態」", weight: "bold", size: "sm", color: "#333333", wrap: true },
+                                        { type: "text", text: "AI 市場脈動，整合數據與情緒，判斷現在該觀望還是警戒", size: "xs", color: "#666666", wrap: true }
                                     ]
                                 }
                             ]
                         },
-                        // 鏈上數據
+                        // 3️⃣ 用數據輔助決策
                         {
                             type: "box",
                             layout: "horizontal",
                             contents: [
-                                { type: "text", text: "📊", size: "lg", flex: 0 },
+                                { type: "text", text: "3️⃣", size: "lg", flex: 0 },
                                 {
                                     type: "box",
                                     layout: "vertical",
                                     paddingStart: "md",
                                     flex: 1,
                                     contents: [
-                                        { type: "text", text: "專業鏈上數據", weight: "bold", size: "sm", color: "#333333" },
-                                        { type: "text", text: "AHR999、泡沫指數、巨鯨追蹤等 20+ 指標", size: "xs", color: "#666666", wrap: true }
+                                        { type: "text", text: "用數據輔助決策，而不是感覺", weight: "bold", size: "sm", color: "#333333", wrap: true },
+                                        { type: "text", text: "AHR999、泡沫指數、巨鯨追蹤等 20+ 專業指標", size: "xs", color: "#666666", wrap: true }
                                     ]
                                 }
                             ]
                         },
-                        // 財經日曆
+                        // 4️⃣ 提前知道影響行情的大事
                         {
                             type: "box",
                             layout: "horizontal",
                             contents: [
-                                { type: "text", text: "📅", size: "lg", flex: 0 },
+                                { type: "text", text: "4️⃣", size: "lg", flex: 0 },
                                 {
                                     type: "box",
                                     layout: "vertical",
                                     paddingStart: "md",
                                     flex: 1,
                                     contents: [
-                                        { type: "text", text: "財經日曆", weight: "bold", size: "sm", color: "#333333" },
-                                        { type: "text", text: "CPI、FOMC、非農等重大事件預警", size: "xs", color: "#666666", wrap: true }
-                                    ]
-                                }
-                            ]
-                        },
-                        // VIP 社群
-                        {
-                            type: "box",
-                            layout: "horizontal",
-                            contents: [
-                                { type: "text", text: "👥", size: "lg", flex: 0 },
-                                {
-                                    type: "box",
-                                    layout: "vertical",
-                                    paddingStart: "md",
-                                    flex: 1,
-                                    contents: [
-                                        { type: "text", text: "VIP 優先交流群", weight: "bold", size: "sm", color: "#333333" },
-                                        { type: "text", text: "與其他 Pro 會員交流策略與資訊", size: "xs", color: "#666666", wrap: true }
+                                        { type: "text", text: "提前知道會影響行情的大事", weight: "bold", size: "sm", color: "#333333", wrap: true },
+                                        { type: "text", text: "CPI、FOMC、非農等事件預警，幫你提前佈局", size: "xs", color: "#666666", wrap: true }
                                     ]
                                 }
                             ]
@@ -380,7 +758,7 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "查看 VIP 福利",
+                        label: "了解更多",
                         uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
                     },
                     color: "#000000"
@@ -576,158 +954,10 @@ const HELP_COMMAND_FLEX_MESSAGE = {
     }
 }
 
+
 // Updating the object to use PRIMARY for both but different colors to ensure visual requirements
 
 
-// Fetch Market Top Movers (Gainers & Losers)
-async function fetchMarketRanking() {
-    try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/24hr', { next: { revalidate: 60 } }) // Cache 1 min
-        if (!res.ok) return null
-        const allTickers = await res.json()
-
-        // Filter: USDT pairs only, exclude stablecoins & leveraged
-        const ignored = ['USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'EUR', 'GBP']
-        const filtered = allTickers.filter((t: any) => {
-            if (!t.symbol.endsWith('USDT')) return false
-            const base = t.symbol.replace('USDT', '')
-            if (ignored.includes(base)) return false
-            if (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BEAR') || base.endsWith('BULL')) return false
-            return true
-        })
-
-        // Sort by Change %
-        filtered.sort((a: any, b: any) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))
-
-        const topGainers = filtered.slice(0, 5)
-        const topLosers = filtered.slice(-5).reverse() // Bottom 5, reversed to show worst first
-
-        return { gainers: topGainers, losers: topLosers }
-    } catch (e) {
-        console.error('Ranking API Error:', e)
-        return null
-    }
-}
-
-// Create Ranking Flex Message
-function createRankingCard(data: any) {
-    const { gainers, losers } = data
-
-    const createRow = (item: any, isGainer: boolean) => {
-        const symbol = item.symbol.replace('USDT', '')
-        const change = parseFloat(item.priceChangePercent).toFixed(1)
-        const price = parseFloat(item.lastPrice)
-        const displayPrice = price < 1 ? price.toFixed(4) : price < 10 ? price.toFixed(3) : price.toFixed(2)
-
-        return {
-            type: "box",
-            layout: "horizontal",
-            contents: [
-                { type: "text", text: symbol, size: "sm", color: "#111111", weight: "bold", flex: 3 },
-                { type: "text", text: `${displayPrice}`, size: "sm", color: "#555555", align: "end", flex: 3 },
-                {
-                    type: "text",
-                    text: `${isGainer ? '+' : ''}${change}%`,
-                    size: "sm",
-                    color: isGainer ? "#00B900" : "#D00000",
-                    align: "end",
-                    weight: "bold",
-                    flex: 2
-                }
-            ],
-            margin: "sm"
-        }
-    }
-
-    return {
-        type: "flex",
-        altText: "市場排行榜",
-        contents: {
-            type: "bubble",
-            size: "kilo", // Slightly wider
-            header: {
-                type: "box",
-                layout: "horizontal",
-                contents: [
-                    {
-                        type: "text",
-                        text: "市場排行榜",
-                        weight: "bold",
-                        size: "lg",
-                        color: "#1F1AD9",
-                        flex: 1
-                    },
-                    {
-                        type: "text",
-                        text: "加密台灣 Pro",
-                        size: "xxs",
-                        color: "#888888",
-                        align: "end",
-                        gravity: "center"
-                    }
-                ]
-            },
-            body: {
-                type: "box",
-                layout: "vertical",
-                contents: [
-                    // Gainers Section
-                    {
-                        type: "box",
-                        layout: "horizontal",
-                        contents: [
-                            { type: "text", text: "漲幅榜", size: "md", weight: "bold", color: "#00B900" }
-                        ],
-                        margin: "sm"
-                    },
-                    { type: "separator", margin: "sm" },
-                    ...gainers.map((item: any) => createRow(item, true)),
-
-                    // Losers Section
-                    {
-                        type: "box",
-                        layout: "horizontal",
-                        contents: [
-                            { type: "text", text: "跌幅榜", size: "md", weight: "bold", color: "#D00000" }
-                        ],
-                        margin: "lg"
-                    },
-                    { type: "separator", margin: "sm" },
-                    ...losers.map((item: any) => createRow(item, false))
-                ]
-            },
-            footer: {
-                type: "box",
-                layout: "vertical",
-                spacing: "sm",
-                contents: [
-                    {
-                        type: "button",
-                        style: "primary",
-                        height: "sm",
-                        action: {
-                            type: "uri",
-                            label: "註冊 OKX 交易所",
-                            uri: "https://www.okx.com/join/CRYPTOTW"
-                        },
-                        color: "#1F1AD9"
-                    },
-                    {
-                        type: "button",
-                        style: "primary",
-                        height: "sm",
-                        action: {
-                            type: "message",
-                            label: "加入 加密台灣 Pro",
-                            text: "加入會員"
-                        },
-                        color: "#000000"
-                    }
-                ]
-            }
-        }
-    }
-}
 
 // Helper: Check for custom DB triggers
 async function fetchCustomTrigger(text: string) {
@@ -876,6 +1106,37 @@ function createPriceCard(data: any) {
     const sign = isUp ? "+" : ""
     const symbol = data.symbol.replace("USDT", "")
     const price = parseFloat(data.lastPrice)
+    const high = parseFloat(data.highPrice)
+    const low = parseFloat(data.lowPrice)
+    const changePercent = Math.abs(parseFloat(data.priceChangePercent))
+
+    // ===== 狀態摘要邏輯 (規則式，不給建議) =====
+    let statusText = ''
+    if (changePercent >= 10) {
+        statusText = '📊 近 24h 波動幅度偏大'
+    } else if (changePercent >= 5) {
+        statusText = '📊 近 24h 波動中等'
+    } else if (changePercent < 2) {
+        statusText = '📊 近 24h 波動相對收斂'
+    } else {
+        statusText = '📊 近 24h 波動正常'
+    }
+
+    // ===== 位置感邏輯 =====
+    const range = high - low
+    let positionText = ''
+    if (range > 0) {
+        const position = (price - low) / range
+        if (position >= 0.8) {
+            positionText = '接近區間上緣'
+        } else if (position <= 0.2) {
+            positionText = '接近區間下緣'
+        } else {
+            positionText = '位於區間中段'
+        }
+    } else {
+        positionText = '波動極小'
+    }
 
     return {
         type: "flex",
@@ -931,6 +1192,14 @@ function createPriceCard(data: any) {
                             }
                         ],
                         margin: "sm"
+                    },
+                    // 狀態摘要
+                    {
+                        type: "text",
+                        text: statusText,
+                        size: "xs",
+                        color: "#666666",
+                        margin: "sm"
                     }
                 ],
                 paddingBottom: "10px"
@@ -943,12 +1212,13 @@ function createPriceCard(data: any) {
                         type: "separator",
                         color: "#f0f0f0"
                     },
+                    // 24h 區間（位置感）
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "單日最高價", size: "sm", color: "#555555", flex: 1 },
-                            { type: "text", text: formatNumber(data.highPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
+                            { type: "text", text: "24h 區間", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: `${formatPrice(low)} – ${formatPrice(high)}`, size: "sm", color: "#111111", align: "end", flex: 2 }
                         ],
                         margin: "md"
                     },
@@ -956,19 +1226,19 @@ function createPriceCard(data: any) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "單日最低價", size: "sm", color: "#555555", flex: 1 },
-                            { type: "text", text: formatNumber(data.lowPrice), size: "sm", color: "#111111", align: "end", flex: 2 }
+                            { type: "text", text: "目前位置", size: "sm", color: "#555555", flex: 1 },
+                            { type: "text", text: positionText, size: "sm", color: "#888888", align: "end", flex: 2 }
                         ],
                         margin: "sm"
                     },
+                    { type: "separator", margin: "md", color: "#f0f0f0" },
+                    // 教學提示
                     {
-                        type: "box",
-                        layout: "horizontal",
-                        contents: [
-                            { type: "text", text: "成交量", size: "sm", color: "#555555", flex: 1 },
-                            { type: "text", text: formatNumber(parseFloat(data.volume).toFixed(2)), size: "sm", color: "#111111", align: "end", flex: 2 }
-                        ],
-                        margin: "sm"
+                        type: "text",
+                        text: "💬 你也可以直接輸入：ETH、SOL、DOGE",
+                        size: "xxs",
+                        color: "#888888",
+                        margin: "md"
                     }
                 ],
                 paddingTop: "10px"
@@ -984,8 +1254,8 @@ function createPriceCard(data: any) {
                         height: "sm",
                         action: {
                             type: "uri",
-                            label: "註冊 OKX 交易所",
-                            uri: "https://www.okx.com/join/CRYPTOTW"
+                            label: "📊 查看市場脈絡",
+                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/`
                         },
                         color: "#1F1AD9"
                     },
@@ -994,9 +1264,9 @@ function createPriceCard(data: any) {
                         style: "primary",
                         height: "sm",
                         action: {
-                            type: "message",
-                            label: "加入 Pro 會員",
-                            text: "加入會員"
+                            type: "uri",
+                            label: "註冊 OKX 交易所",
+                            uri: "https://www.okx.com/join/CRYPTOTW"
                         },
                         color: "#000000"
                     }
@@ -1063,6 +1333,18 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
     const premium = ((maxBuyRef - forexRate) / forexRate) * 100
 
+    // ===== 溢價解讀 =====
+    let premiumNote = ''
+    if (premium >= 2) {
+        premiumNote = '📌 相較銀行匯率偏高'
+    } else if (premium >= 0.5) {
+        premiumNote = '📌 相較銀行匯率略高'
+    } else if (premium >= -0.5) {
+        premiumNote = '📌 與銀行匯率相近'
+    } else {
+        premiumNote = '📌 相較銀行匯率偏低'
+    }
+
     // Header Content
     const headerTitle = calcResult ? "換算結果" : "匯率快訊 (USDT/TWD)"
 
@@ -1115,12 +1397,13 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                 contents: [
                     { type: "separator", color: "#f0f0f0" },
 
-                    // MAX Exchange Row
+                    // MAX Exchange Row（角色標籤：參考價）
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "MAX", size: "md", color: "#111111", weight: "bold", flex: 2 },
+                            { type: "text", text: "MAX", size: "md", color: "#111111", weight: "bold", flex: 1 },
+                            { type: "text", text: "參考價", size: "xxs", color: "#888888", flex: 1, align: "end", gravity: "center" },
                             { type: "text", text: "買U", size: "xs", color: "#aaaaaa", align: "end", flex: 1 },
                             { type: "text", text: "賣U", size: "xs", color: "#aaaaaa", align: "end", flex: 1 }
                         ],
@@ -1130,21 +1413,22 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "30s 參考價", size: "xs", color: "#aaaaaa", flex: 2 },
-                            { type: "text", text: `${maxBuyRef}`, size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 }, // User Buys (Ask) - Red (Cost)
-                            { type: "text", text: `${maxSellRef}`, size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }  // User Sells (Bid) - Green (Gain)
+                            { type: "text", text: "", flex: 2 },
+                            { type: "text", text: `${maxBuyRef}`, size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
+                            { type: "text", text: `${maxSellRef}`, size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
                         ],
                         margin: "sm"
                     },
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // BitoPro Exchange Row
+                    // BitoPro Exchange Row（角色標籤：即時掛單）
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "BitoPro", size: "md", color: "#111111", weight: "bold", flex: 2 }
+                            { type: "text", text: "BitoPro", size: "md", color: "#111111", weight: "bold", flex: 1 },
+                            { type: "text", text: "即時掛單", size: "xxs", color: "#888888", flex: 1, align: "end", gravity: "center" }
                         ],
                         margin: "md"
                     },
@@ -1152,7 +1436,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "即時掛單", size: "xs", color: "#aaaaaa", flex: 2 },
+                            { type: "text", text: "", flex: 2 },
                             { type: "text", text: bitoBuyRef ? `${bitoBuyRef}` : '--', size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
                             { type: "text", text: bitoSellRef ? `${bitoSellRef}` : '--', size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
                         ],
@@ -1161,16 +1445,18 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // Bank Rate Row
+                    // Bank Rate Row（角色標籤：傳統匯率）
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
                             { type: "text", text: "銀行美金", size: "sm", color: "#555555", flex: 1 },
-                            { type: "text", text: `${forexRate} TWD`, size: "sm", color: "#111111", align: "end", flex: 2 }
+                            { type: "text", text: "傳統匯率", size: "xxs", color: "#888888", flex: 1, align: "end", gravity: "center" },
+                            { type: "text", text: `${forexRate} TWD`, size: "sm", color: "#111111", align: "end", flex: 1 }
                         ],
                         margin: "md"
                     },
+                    // 溢價 + 解讀
                     {
                         type: "box",
                         layout: "horizontal",
@@ -1178,6 +1464,32 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                             { type: "text", text: "MAX 溢價", size: "sm", color: "#555555", flex: 1 },
                             { type: "text", text: `+${premium.toFixed(2)}%`, size: "sm", color: "#ff8800", weight: "bold", align: "end", flex: 2 }
                         ],
+                        margin: "sm"
+                    },
+                    {
+                        type: "text",
+                        text: premiumNote,
+                        size: "xxs",
+                        color: "#888888",
+                        margin: "xs"
+                    },
+
+                    { type: "separator", margin: "md", color: "#f0f0f0" },
+
+                    // 價差提示 + 教學
+                    {
+                        type: "text",
+                        text: "💡 不同平台報價存在價差，實際成交以交易所為準",
+                        size: "xxs",
+                        color: "#888888",
+                        margin: "md",
+                        wrap: true
+                    },
+                    {
+                        type: "text",
+                        text: "💬 試試：USD 1000、USD 5000",
+                        size: "xxs",
+                        color: "#888888",
                         margin: "sm"
                     }
                 ],
@@ -1194,8 +1506,8 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         height: "sm",
                         action: {
                             type: "uri",
-                            label: "註冊 OKX 交易所",
-                            uri: "https://www.okx.com/join/CRYPTOTW"
+                            label: "📊 查看市場脈絡",
+                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/`
                         },
                         color: "#1F1AD9"
                     },
@@ -1204,9 +1516,9 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         style: "primary",
                         height: "sm",
                         action: {
-                            type: "message",
-                            label: "加入 Pro 會員",
-                            text: "加入會員"
+                            type: "uri",
+                            label: "註冊 OKX 交易所",
+                            uri: "https://www.okx.com/join/CRYPTOTW"
                         },
                         color: "#000000"
                     }
@@ -1215,6 +1527,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
         }
     }
 }
+
 
 export async function POST(req: NextRequest) {
     try {
@@ -1273,18 +1586,6 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // B. Ranking Command (#HOT, @HOT, $HOT, etc.)
-                if (/^[#@$](HOT|TOP|RANK)$/.test(text)) {
-                    const rankingData = await fetchMarketRanking()
-                    if (rankingData) {
-                        const flexMsg = createRankingCard(rankingData)
-                        await replyMessage(replyToken, [flexMsg])
-                    } else {
-                        await replyMessage(replyToken, [{ type: "text", text: "⚠️ 目前無法取得市場數據。" }])
-                    }
-                    continue
-                }
-
                 // B2. Join Member Command (加入會員)
                 if (originalText === '加入會員' || originalText === '註冊' || originalText === '會員') {
                     await replyMessage(replyToken, [JOIN_MEMBER_FLEX_MESSAGE])
@@ -1303,100 +1604,13 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // B5. Fear & Greed Index (恐慌指數)
-                if (originalText === '恐慌' || originalText === 'FGI' || originalText === 'fgi' || originalText === '情緒' || originalText === '恐慌指數') {
-                    try {
-                        const fgRes = await fetch('https://api.alternative.me/fng/')
-                        const fgData = await fgRes.json()
-                        if (fgData.data && fgData.data.length > 0) {
-                            const fg = fgData.data[0]
-                            const value = parseInt(fg.value)
-                            let emoji = '😨'
-                            let color = '#D00000'
-                            let classification = '極度恐懼'
-                            if (value >= 75) { emoji = '🤑'; color = '#00B900'; classification = '極度貪婪' }
-                            else if (value >= 55) { emoji = '😏'; color = '#7CB900'; classification = '貪婪' }
-                            else if (value >= 45) { emoji = '😐'; color = '#FFB800'; classification = '中立' }
-                            else if (value >= 25) { emoji = '😰'; color = '#FF6600'; classification = '恐懼' }
 
-                            const flexMsg = {
-                                type: "flex",
-                                altText: `恐懼貪婪指數: ${fg.value}`,
-                                contents: {
-                                    type: "bubble",
-                                    size: "kilo",
-                                    body: {
-                                        type: "box",
-                                        layout: "vertical",
-                                        contents: [
-                                            {
-                                                type: "box",
-                                                layout: "horizontal",
-                                                contents: [
-                                                    { type: "text", text: "恐懼貪婪指數", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
-                                                    { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
-                                                ]
-                                            },
-                                            { type: "separator", margin: "lg", color: "#f0f0f0" },
-                                            {
-                                                type: "box",
-                                                layout: "horizontal",
-                                                margin: "xl",
-                                                contents: [
-                                                    {
-                                                        type: "box",
-                                                        layout: "vertical",
-                                                        contents: [
-                                                            { type: "text", text: emoji, size: "3xl", align: "center" },
-                                                            { type: "text", text: classification, size: "sm", color: "#666666", align: "center", margin: "sm" }
-                                                        ],
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        type: "text",
-                                                        text: fg.value,
-                                                        size: "4xl",
-                                                        weight: "bold",
-                                                        color: color,
-                                                        align: "center",
-                                                        gravity: "center",
-                                                        flex: 1
-                                                    }
-                                                ]
-                                            },
-                                            { type: "text", text: "0 = 極度恐慌 | 100 = 極度貪婪", size: "xxs", color: "#888888", margin: "xl", align: "center" }
-                                        ]
-                                    },
-                                    footer: {
-                                        type: "box",
-                                        layout: "vertical",
-                                        spacing: "sm",
-                                        contents: [
-                                            { type: "button", style: "primary", height: "sm", action: { type: "uri", label: "註冊 OKX 交易所", uri: "https://www.okx.com/join/CRYPTOTW" }, color: "#1F1AD9" },
-                                            { type: "button", style: "primary", height: "sm", action: { type: "message", label: "加入 Pro 會員", text: "加入會員" }, color: "#000000" }
-                                        ]
-                                    }
-                                }
-                            }
-                            await replyMessage(replyToken, [flexMsg])
-                        } else {
-                            await replyMessage(replyToken, [{ type: "text", text: "⚠️ 無法取得恐慌指數，請稍後再試。" }])
-                        }
-                    } catch (e) {
-                        console.error('FGI Error:', e)
-                        await replyMessage(replyToken, [{ type: "text", text: "⚠️ 無法取得恐慌指數，請稍後再試。" }])
-                    }
-                    continue
-                }
+                // C. Currency Converter & Rates - 自然語言版本
+                // 支援: #TWD 1000, USD 5000, 1000美金, 換1000u, #TWD (純查匯率)
+                const currencyParsed = parseCurrencyAmount(originalText)
+                const isRateOnlyQuery = /^[#@$]?(TWD|USD|USDT|\u5339\u7387|\u532f\u7387)$/i.test(text)
 
-                // C. Currency Converter & Rates (#TWD, @TWD, $TWD, etc.)
-                const currencyMatch = text.match(/^[#@$](TWD|USD|USDT)(\s+(\d+(\.\d+)?))?$/)
-
-                if (currencyMatch) {
-                    const type = currencyMatch[1] // TWD, USD, USDT
-                    const amountStr = currencyMatch[3] // 1000, 100 or undefined
-                    const amount = amountStr ? parseFloat(amountStr) : null
-
+                if (currencyParsed || isRateOnlyQuery) {
                     const [maxData, bitoData, forexRate] = await Promise.all([
                         fetchMaxTicker(),
                         fetchBitoOrderBook(),
@@ -1406,21 +1620,19 @@ export async function POST(req: NextRequest) {
                     if (maxData && forexRate) {
                         let calcResult = undefined
 
-                        // For Calculation, primarily use MAX data as reference (Top Liquidity)
-                        // Or we can mention "Avg" but let's stick to MAX for simplicity in the result text string
                         const maxBuyRef = parseFloat(maxData.sell)
                         const maxSellRef = parseFloat(maxData.buy)
 
-                        if (amount) {
+                        if (currencyParsed) {
                             // Calculator Logic
-                            if (type === 'TWD') {
+                            if (currencyParsed.type === 'TWD') {
                                 // TWD -> USDT (Buy U at Ask Price)
-                                const result = (amount / maxBuyRef).toFixed(2)
-                                calcResult = `${amount.toLocaleString()} TWD\n≈ ${parseFloat(result).toLocaleString()} USDT`
+                                const result = (currencyParsed.amount / maxBuyRef).toFixed(2)
+                                calcResult = `${currencyParsed.amount.toLocaleString()} TWD\n≈ ${parseFloat(result).toLocaleString()} USDT`
                             } else {
                                 // USD/USDT -> TWD (Sell U at Bid Price)
-                                const result = (amount * maxSellRef).toFixed(0)
-                                calcResult = `${amount.toLocaleString()} USDT\n≈ ${parseInt(result).toLocaleString()} TWD`
+                                const result = (currencyParsed.amount * maxSellRef).toFixed(0)
+                                calcResult = `${currencyParsed.amount.toLocaleString()} USDT\n≈ ${parseInt(result).toLocaleString()} TWD`
                             }
                         }
 
@@ -1429,26 +1641,56 @@ export async function POST(req: NextRequest) {
                     } else {
                         await replyMessage(replyToken, [{ type: "text", text: "⚠️ 目前無法取得匯率資訊，請稍後再試。" }])
                     }
-                    continue // Skip other checks
+                    continue
                 }
 
-                // D. Crypto Price Check (#BTC, @BTC, $BTC)
-                const cryptoMatch = text.match(/^[#@$]([A-Z0-9]{2,10})$/)
+                // D. Crypto Price Check - 自然語言版本
+                // 支援: BTC, #BTC, 比特幣, ETH價格, 現在SOL
+                const coinSymbol = parseCoinSymbol(originalText)
 
-                if (cryptoMatch) {
-                    const symbol = cryptoMatch[1]
-                    // Skip if it matched currency codes already handled (though 'continue' handles it)
-                    if (['TWD', 'USD', 'USDT', 'HOT', 'TOP', 'RANK'].includes(symbol)) return
+                if (coinSymbol) {
+                    // Skip currency codes
+                    if (['TWD', 'USD', 'USDT', 'HOT', 'TOP', 'RANK'].includes(coinSymbol)) continue
 
-                    const ticker = await fetchCryptoTicker(symbol)
+                    const ticker = await fetchCryptoTicker(coinSymbol)
 
                     if (ticker) {
-                        const flexMsg = createPriceCard(ticker)
-                        await replyMessage(replyToken, [flexMsg])
+                        const priceCard = createPriceCard(ticker)
+
+                        // v1 僅對 BTC 顯示市場狀態
+                        if (coinSymbol === 'BTC') {
+                            const lineUserId = event.source.userId
+                            const [isPro, marketState] = await Promise.all([
+                                lineUserId ? checkIsProUser(lineUserId) : Promise.resolve(false),
+                                getMarketState('BTC')
+                            ])
+                            const stateCard = createMarketStateCard(marketState, isPro)
+                            await replyMessage(replyToken, [priceCard, stateCard])
+                        } else {
+                            await replyMessage(replyToken, [priceCard])
+                        }
                     } else {
                         await replyMessage(replyToken, [{
                             type: "text",
-                            text: `⚠️ 找不到代幣 "${symbol}" 或 OKX 尚未上架。`
+                            text: `⚠️ 找不到代幣 "${coinSymbol}" 或 OKX 尚未上架。`
+                        }])
+                    }
+                    continue
+                }
+
+                // ===== E. 低頻柔性引導 (Fallback) =====
+                // 每個用戶每 6 小時最多收到一次提示
+                const userId = event.source.userId
+                if (userId && originalText.length >= 2 && originalText.length <= 20) {
+                    const now = Date.now()
+                    const lastHintTime = fallbackHintCache.get(userId) || 0
+                    const SIX_HOURS = 6 * 60 * 60 * 1000
+
+                    if (now - lastHintTime > SIX_HOURS) {
+                        fallbackHintCache.set(userId, now)
+                        await replyMessage(replyToken, [{
+                            type: "text",
+                            text: "💡 我可以幫你查「幣價 / 匯率」\n\n例如：\n• BTC、比特幣、ETH\n• USD 1000、1萬美金"
                         }])
                     }
                 }
