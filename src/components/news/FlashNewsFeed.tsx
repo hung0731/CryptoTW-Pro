@@ -168,7 +168,7 @@ export function FlashNewsFeed() {
             <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-4">
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
-                    <h3 className="text-sm font-bold text-blue-200">今日重點</h3>
+                    <h3 className="text-sm font-bold text-blue-200">AI 懶人包</h3>
                 </div>
                 {contextLoading ? (
                     <Skeleton className="h-4 w-3/4 bg-neutral-800" />
