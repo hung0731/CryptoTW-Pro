@@ -64,13 +64,13 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
     const biasStyle = BiasConfig[data.bias] || BiasConfig['中性']
 
     return (
-        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-4 transition-all duration-300">
+        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-white/5 rounded-xl p-4 transition-all duration-300">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🧠</span>
                 <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-bold text-white tracking-wider">AI 速覽</span>
-                    <span className="text-[10px] text-neutral-400">全局決策</span>
+                    <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
+                    <span className="text-[10px] text-blue-300/70">全局決策</span>
                 </div>
             </div>
 

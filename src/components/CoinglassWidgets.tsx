@@ -1104,14 +1104,14 @@ export function WhaleAiSummaryCard() {
     if (!fetchedSummary) return null
 
     return (
-        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-4 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-white/5 rounded-xl p-4 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-3">
                 <div className="bg-blue-500/20 p-1.5 rounded-lg">
                     <Users className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-bold text-white tracking-wider">AI 速覽</span>
-                    <span className="text-[10px] text-neutral-400">巨鯨動向</span>
+                    <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
+                    <span className="text-[10px] text-blue-300/70">巨鯨動向</span>
                 </div>
             </div>
 
@@ -1240,14 +1240,14 @@ export function DerivativesAiSummaryCard() {
     }
 
     return (
-        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-4 overflow-hidden mb-5">
+        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-white/5 rounded-xl p-4 overflow-hidden mb-5">
             {/* AI Context Card */}
             <div>
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-bold text-white tracking-wider">AI 速覽</span>
-                        <span className="text-[10px] text-neutral-400">合約情緒</span>
+                        <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
+                        <span className="text-[10px] text-blue-300/70">合約情緒</span>
                     </div>
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed font-medium">
