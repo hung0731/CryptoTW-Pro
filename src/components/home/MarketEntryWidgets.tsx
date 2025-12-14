@@ -131,6 +131,6 @@ export function MarketEntryWidgets() {
                 ))}
             </div>
         </div>
+
     )
 }
-```

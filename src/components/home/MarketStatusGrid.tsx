@@ -94,8 +94,8 @@ export function MarketStatusGrid() {
                     <p>判斷市場目前的大趨勢狀態。</p>
                     <ul className="list-disc pl-4 mt-2 space-y-1">
                         <li><strong>穩定</strong>：比特幣 24H 漲跌幅 &lt; 2% 且振幅小。適合區間操作。</li>
-                        <li><strong>震盪</strong>：振幅放大 (>3%) 但無明確方向。小心多空雙巴。</li>
-                        <li><strong>壓力中</strong>：24H 跌幅顯著 (>3%)。建議觀望或保守操作。</li>
+                        <li><strong>震盪</strong>：振幅放大 ({'>'}3%) 但無明確方向。小心多空雙巴。</li>
+                        <li><strong>壓力中</strong>：24H 跌幅顯著 ({'>'}3%)。建議觀望或保守操作。</li>
                     </ul>
                 </>
             )
@@ -104,8 +104,8 @@ export function MarketStatusGrid() {
                     <p>監測市場槓桿過熱程度，透過資金費率 (Funding Rate) 與清算量判斷。</p>
                     <ul className="list-disc pl-4 mt-2 space-y-1">
                         <li><strong>冷靜</strong>：費率正常，無大規模清算。</li>
-                        <li><strong>偏熱</strong>：費率上升 (>0.03%) 或出現中型清算。多頭車重。</li>
-                        <li><strong>過熱</strong>：費率極高 (>0.08%) 或爆倉量大。隨時可能插針去槓桿。</li>
+                        <li><strong>偏熱</strong>：費率上升 ({'>'}0.03%) 或出現中型清算。多頭車重。</li>
+                        <li><strong>過熱</strong>：費率極高 ({'>'}0.08%) 或爆倉量大。隨時可能插針去槓桿。</li>
                     </ul>
                 </>
             )
@@ -123,8 +123,8 @@ export function MarketStatusGrid() {
                 <>
                     <p>觀察頂級交易員 (Top Traders) 的多空持倉比例。</p>
                     <ul className="list-disc pl-4 mt-2 space-y-1">
-                        <li><strong>偏多</strong>：大戶多單佔比 > 52%。</li>
-                        <li><strong>偏空</strong>：大戶空單佔比 > 52%。</li>
+                        <li><strong>偏多</strong>：大戶多單佔比 {'>'} 52%。</li>
+                        <li><strong>偏空</strong>：大戶空單佔比 {'>'} 52%。</li>
                         <li><strong>觀望</strong>：多空勢均力敵。</li>
                     </ul>
                 </>
