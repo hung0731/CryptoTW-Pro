@@ -804,6 +804,13 @@ const HELP_COMMAND_FLEX_MESSAGE = {
     contents: {
         type: "bubble",
         size: "kilo",
+        hero: {
+            type: "image",
+            url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://cryptotw.pro'}/flex_banner.png`,
+            size: "full",
+            aspectRatio: "20:9",
+            aspectMode: "cover"
+        },
         body: {
             type: "box",
             layout: "vertical",
