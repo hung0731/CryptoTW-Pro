@@ -81,10 +81,7 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
             <div className="mb-3">
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
-                        <span className="text-[10px] text-blue-300/70">市場重點</span>
-                    </div>
+                    <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed font-medium">
                     {contextText}

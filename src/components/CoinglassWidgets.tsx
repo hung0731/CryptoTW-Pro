@@ -793,30 +793,65 @@ export function LiquidationSummary({ data }: { data?: DashboardData['liquidation
 export function LongShortSummary({ data }: { data?: DashboardData['longShort'] }) {
     if (!data?.global) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
 
+    const longRate = data.global.longRate
+    const shortRate = data.global.shortRate
+    const ratio = longRate / shortRate
+
+    let sentiment = '中性'
+    let sentimentColor = 'text-neutral-400'
+    let sentimentBg = 'bg-neutral-800'
+
+    if (ratio >= 2.0) {
+        sentiment = '多頭極度擁擠 (偏空)'
+        sentimentColor = 'text-red-400'
+        sentimentBg = 'bg-red-500/20'
+    } else if (ratio >= 1.2) {
+        sentiment = '多頭偏多 (注意)'
+        sentimentColor = 'text-yellow-400'
+        sentimentBg = 'bg-yellow-500/20'
+    } else if (ratio <= 0.5) {
+        sentiment = '空頭擁擠 (偏多)'
+        sentimentColor = 'text-green-400'
+        sentimentBg = 'bg-green-500/20'
+    }
+
     return (
         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
-            <div className="flex items-center gap-2 mb-2">
-                <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
-                <span className="text-xs font-bold text-white">多空比</span>
-                <ExplainTooltip
-                    term="多空比"
-                    definition="BTC 全網帳戶多空比例。"
-                    explanation={
-                        <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>全網多空比</strong>：代表散戶情緒。</li>
-                            <li><strong>過高</strong>：通常是反指標。</li>
-                        </ul>
-                    }
-                />
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
+                    <span className="text-xs font-bold text-white">多空比</span>
+                    <ExplainTooltip
+                        term="多空比"
+                        definition="BTC 全網帳戶多空比例。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>全網多空比</strong>：代表散戶情緒。</li>
+                                <li><strong>過高</strong>：通常是反指標。</li>
+                            </ul>
+                        }
+                    />
+                </div>
+                <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", sentimentBg, sentimentColor)}>
+                    {sentiment}
+                </span>
             </div>
             <div className="mt-2">
-                <div className="h-4 bg-neutral-800 rounded-full overflow-hidden flex mb-2">
-                    <div className="bg-green-500/60 h-full" style={{ width: `${data.global.longRate}%` }} />
-                    <div className="bg-red-500/60 h-full" style={{ width: `${data.global.shortRate}%` }} />
+                <div className="h-4 bg-neutral-800 rounded-full overflow-hidden flex mb-2 relative">
+                    <div className="bg-green-500/60 h-full transition-all duration-500" style={{ width: `${longRate}%` }} />
+                    <div className="bg-red-500/60 h-full transition-all duration-500" style={{ width: `${shortRate}%` }} />
+                    {/* Center Marker */}
+                    <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-black/20 z-10" />
                 </div>
                 <div className="flex justify-between text-xs font-mono font-bold">
-                    <span className="text-green-500">{data.global.longRate.toFixed(0)}%</span>
-                    <span className="text-red-500">{data.global.shortRate.toFixed(0)}%</span>
+                    <div className="flex flex-col">
+                        <span className="text-green-500">{longRate.toFixed(1)}%</span>
+                        <span className="text-[9px] text-neutral-500 font-normal">多單</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <span className="text-red-500">{shortRate.toFixed(1)}%</span>
+                        <span className="text-[9px] text-neutral-500 font-normal">空單</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1109,10 +1144,7 @@ export function WhaleAiSummaryCard() {
                 <div className="bg-blue-500/20 p-1.5 rounded-lg">
                     <Users className="w-4 h-4 text-blue-400" />
                 </div>
-                <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
-                    <span className="text-[10px] text-blue-300/70">巨鯨動向</span>
-                </div>
+                <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
             </div>
 
             <p className="text-xs text-neutral-300 leading-relaxed font-medium relative z-10">
@@ -1245,10 +1277,7 @@ export function DerivativesAiSummaryCard() {
             <div>
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
-                        <span className="text-[10px] text-blue-300/70">合約情緒</span>
-                    </div>
+                    <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed font-medium">
                     {summary}

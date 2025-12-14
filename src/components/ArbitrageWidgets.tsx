@@ -88,11 +88,17 @@ export function ArbitrageView() {
     return (
         <div className="space-y-4">
             {/* 1. Risk Warning (Fixed) */}
-            <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3 flex items-start gap-3">
-                <AlertTriangle className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-                <div className="text-xs text-orange-200/80 leading-relaxed">
-                    <strong className="text-orange-300 block mb-0.5">⚠️ 風險提示</strong>
-                    資金費率與價差變動快，需考慮滑價、轉帳時間與風控。此數據僅供尋找對沖機會，非投資建議。
+            {/* 1. Risk Warning (Red Alert) */}
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div className="text-xs text-red-200/80 leading-relaxed">
+                    <strong className="text-red-400 block mb-1 text-sm">⚠️ 適合熟悉對沖與保證金機制者，新手不建議直接操作</strong>
+                    <ul className="list-disc pl-3 space-y-0.5 text-[11px] text-red-200/70 mt-1">
+                        <li><strong>資金費率快速反轉</strong>：年化收益為即時推算，不代表長期回報。</li>
+                        <li><strong>槓桿方向錯誤</strong>：操作失誤可能導致單邊虧損。</li>
+                        <li><strong>流動性不足</strong>：小幣種可能面臨滑價或無法平倉。</li>
+                        <li><strong>強平風險</strong>：若保證金監控不當，可能面臨強制平倉。</li>
+                    </ul>
                 </div>
             </div>
 

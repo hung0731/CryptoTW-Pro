@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart, Calendar, RefreshCcw } from 'lucide-react'
+import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart, Calendar, RefreshCcw, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLiff } from '@/components/LiffProvider'
@@ -83,9 +83,9 @@ function CryptoPricePrediction() {
                 <Link
                     href={`https://polymarket.com/event/${data?.slug || 'what-price-will-bitcoin-hit-in-2025'}`}
                     target="_blank"
-                    className="text-[10px] text-neutral-500 hover:text-white transition-colors"
+                    className="text-[10px] text-blue-400/80 hover:text-blue-300 transition-colors flex items-center gap-1"
                 >
-                    Polymarket →
+                    資訊來源 Polymarket <ExternalLink className="w-2.5 h-2.5" />
                 </Link>
             </div>
 

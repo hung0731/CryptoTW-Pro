@@ -9,9 +9,9 @@ import {
     Bell, Settings, ChevronRight, Calendar
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { PromoBanner } from '@/components/PromoBanner'
 import { QuickActions } from '@/components/QuickActions'
-import { HomeRouterWidget } from '@/components/HomeRouterWidgets'
+import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
+import { MarketStatusGrid } from '@/components/home/MarketStatusGrid'
 
 export default function HomePage() {
     const { profile, isLoading: isAuthLoading } = useLiff()
@@ -78,16 +78,14 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* ===== 1. Market Router (The Core) ===== */}
-                <HomeRouterWidget />
+                {/* ===== 1. Flash News Feed (AI Context) ===== */}
+                <FlashNewsFeed />
 
-                {/* ===== 2. Quick Actions ===== */}
+                {/* ===== 2. Market Status Grid ===== */}
+                <MarketStatusGrid />
+
+                {/* ===== 3. Quick Actions ===== */}
                 <QuickActions />
-
-
-
-                {/* ===== 4. OKX Promo ===== */}
-                <PromoBanner affiliateLink="https://www.okx.com/join/CRYPTOTW" />
 
             </div>
 

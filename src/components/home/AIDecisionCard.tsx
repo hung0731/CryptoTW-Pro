@@ -68,10 +68,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🧠</span>
-                <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
-                    <span className="text-[10px] text-blue-300/70">全局決策</span>
-                </div>
+                <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
             </div>
 
             {/* Main Conclusion */}
