@@ -878,32 +878,60 @@ export function WhaleAlertFeed() {
     }, [])
 
     // Logic Layer: Filtering & Insight Generation
-    // Filter noise: Only show > $500k (to be safe, user asked for $5M but start lower to ensure data)
-    // Actually user said > $5M. Let's try mixed. 
-    // We will show > $1M.
+    // Filter noise: Only show > $1M as main view (User requested >$1M display condition)
     const filteredAlerts = alerts.filter(a => Math.abs(a.position_value_usd || 0) >= 1000000)
 
-    // Generate Insight
-    let insight = "本時段觀察：市場多空觀望中"
+    // Generate Context Insight (More narrative structure)
+    let contextTitle = "市場脈絡"
+    let contextText = "巨鯨都在睡覺，市場無顯著大額異動。"
+    let contextEmoji = "💤"
+
     if (filteredAlerts.length > 0) {
         const longCount = filteredAlerts.filter(a => a.position_size > 0).length
         const shortCount = filteredAlerts.filter(a => a.position_size < 0).length
-        const openCount = filteredAlerts.filter(a => a.position_action === 1).length
 
-        // Find dominant symbol
-        const symbolCounts: Record<string, number> = {}
-        filteredAlerts.forEach(a => symbolCounts[a.symbol] = (symbolCounts[a.symbol] || 0) + 1)
-        const topSymbol = Object.entries(symbolCounts).sort((a, b) => b[1] - a[1])[0][0]
+        // Calculate Buy/Sell pressure
+        // Buy: Long Open + Short Close
+        // Sell: Short Open + Long Close
+        let buyVol = 0
+        let sellVol = 0
 
-        const action = openCount > filteredAlerts.length / 2 ? "積極建倉" : "減倉觀望"
-        const bias = longCount > shortCount ? "多頭主導" : shortCount > longCount ? "空頭主導" : "多空拉鋸"
+        const symbolStats: Record<string, { buys: number, sells: number }> = {}
 
-        insight = `本時段觀察：${topSymbol} 巨鯨${action}，整體${bias}。`
+        filteredAlerts.forEach(a => {
+            const isLong = a.position_size > 0
+            const isOpen = a.position_action === 1
+            const val = Math.abs(a.position_value_usd || 0)
+            const sym = a.symbol
+
+            if (!symbolStats[sym]) symbolStats[sym] = { buys: 0, sells: 0 }
+
+            if ((isLong && isOpen) || (!isLong && !isOpen)) {
+                buyVol += val
+                symbolStats[sym].buys += val
+            } else {
+                sellVol += val
+                symbolStats[sym].sells += val
+            }
+        })
+
+        // Find dominant logic
+        const topSymbol = Object.keys(symbolStats).sort((a, b) => (symbolStats[b].buys + symbolStats[b].sells) - (symbolStats[a].buys + symbolStats[a].sells))[0]
+
+        const bias = buyVol > sellVol * 1.2 ? "多頭主導" : sellVol > buyVol * 1.2 ? "空頭主導" : "多空拉鋸"
+        contextEmoji = buyVol > sellVol * 1.2 ? "🐂" : sellVol > buyVol * 1.2 ? "🐻" : "⚖️"
+
+        // Narrative construction
+        // Example: BTC 巨鯨偏觀望，ETH 與 SOL 出現主動佈局，多頭仍佔優勢。
+        const topSymStat = symbolStats[topSymbol]
+        const topAction = topSymStat.buys > topSymStat.sells ? "出現主動佈局" : "遭大額拋售"
+
+        contextText = `${topSymbol} 巨鯨${topAction}，整體市場${bias}。`
     }
 
     if (loading) return <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
 
-    // Since mock data or API might return empty list initially
+    // Empty State
     if (!alerts || alerts.length === 0) {
         return (
             <div className="bg-neutral-900/50 rounded-xl p-4 text-center border border-dashed border-white/10">
@@ -914,69 +942,88 @@ export function WhaleAlertFeed() {
     }
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2 relative">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <Radar className="w-3.5 h-3.5 text-purple-400" />
-                    <span className="text-xs font-bold text-white">巨鯨快訊</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 border border-white/5">
-                        &gt; $1M
-                    </span>
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden relative group">
+            {/* Key Context Card (The "Soul" of the page) */}
+            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-3">
+                <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm">{contextEmoji}</span>
+                    <h3 className="text-xs font-bold text-blue-200">市場脈絡 (巨鯨)</h3>
                 </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-500/10 rounded-full border border-green-500/20">
-                    <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[9px] text-green-400 font-mono">LIVE</span>
-                </div>
-            </div>
-
-            {/* Key Insight Header */}
-            <div className="mb-2 px-2 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <p className="text-[10px] text-blue-300 font-medium flex items-center gap-1.5">
-                    <Star className="w-3 h-3 fill-blue-300 text-blue-300" />
-                    {insight}
+                <p className="text-xs text-neutral-300 leading-relaxed font-medium">
+                    {contextText}
                 </p>
             </div>
 
-            <div className="space-y-1 max-h-[200px] overflow-y-auto">
-                {filteredAlerts.slice(0, 10).map((alert, i) => {
+            {/* List Header */}
+            <div className="flex items-center justify-between px-3 py-2 bg-neutral-900/50">
+                <div className="flex items-center gap-2">
+                    <Radar className="w-3.5 h-3.5 text-neutral-500" />
+                    <span className="text-xs font-bold text-neutral-400">巨鯨快訊</span>
+                    <span className="text-[9px] font-mono text-neutral-600 border-l border-white/10 pl-2">
+                        ≥ $1M｜近 60 分鐘
+                    </span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]" />
+                    <span className="text-[9px] text-green-500 font-bold font-mono">LIVE</span>
+                </div>
+            </div>
+
+            {/* List Content */}
+            <div className="max-h-[240px] overflow-y-auto custom-scrollbar">
+                {filteredAlerts.length === 0 && (
+                    <div className="text-center py-6 text-xs text-neutral-500 font-mono">
+                        無 {'>'}$1M 巨鯨操作
+                    </div>
+                )}
+
+                {filteredAlerts.slice(0, 20).map((alert, i) => {
                     const positionSize = alert.position_size || 0
                     const isLong = positionSize > 0
-                    const positionValue = alert.position_value_usd || 0
+                    const positionValue = Math.abs(alert.position_value_usd || 0)
                     const isOpen = alert.position_action === 1 // 1=開倉, 2=平倉
+
+                    // Logic for semantic colors
+                    // Buy Pressure (Long Open / Short Close) = Green
+                    // Sell Pressure (Short Open / Long Close) = Red
+                    const isBuyPressure = (isLong && isOpen) || (!isLong && !isOpen)
+                    const actionColor = isBuyPressure ? "text-green-400" : "text-red-400"
+                    const actionBg = isBuyPressure ? "bg-green-500/10" : "bg-red-500/10"
+
                     const formatAmt = positionValue >= 1000000 ? `$${(positionValue / 1000000).toFixed(1)}M` : `$${(positionValue / 1000).toFixed(0)}K`
 
                     return (
-                        <div key={i} className="flex items-center justify-between text-[11px] hover:bg-white/5 p-1 rounded transition-colors group">
-                            <div className="flex items-center gap-1.5">
-                                <span className={cn(
-                                    "w-1 h-3 rounded-full",
-                                    isLong ? "bg-green-500" : "bg-red-500"
-                                )} />
-                                <span className="font-medium text-white group-hover:text-blue-300 transition-colors">{alert.symbol}</span>
-                                <span className={cn(
-                                    "font-mono",
-                                    isLong ? "text-green-400" : "text-red-400"
-                                )}>
-                                    {isLong ? '↑' : '↓'}
-                                </span>
-                                <span className="text-neutral-500 text-[9px]">
-                                    {isOpen ? '開' : '平'}
-                                </span>
-                            </div>
+                        <div key={i} className="flex items-center justify-between text-[11px] px-3 py-2 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
                             <div className="flex items-center gap-2">
-                                <span className="font-mono text-white font-bold">{formatAmt}</span>
-                                <span className="text-neutral-600 text-[10px]">
+                                {/* Symbol */}
+                                <span className={cn(
+                                    "font-bold w-10 text-left",
+                                    isLong ? "text-white" : "text-white"
+                                )}>{alert.symbol}</span>
+
+                                {/* Action Badge */}
+                                <div className={cn(
+                                    "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono",
+                                    actionBg, actionColor
+                                )}>
+                                    <span>{isLong ? (isOpen ? '↑' : '↓') : (isOpen ? '↓' : '↑')}</span>
+                                    <span className="font-bold">
+                                        {isLong ? '多・開倉' : '多・平倉'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <span className={cn("font-mono font-bold", isBuyPressure ? "text-white" : "text-white")}>
+                                    {formatAmt}
+                                </span>
+                                <span className="text-neutral-600 text-[10px] w-[30px] text-right">
                                     {new Date(alert.create_time).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
                         </div>
                     )
                 })}
-                {filteredAlerts.length === 0 && (
-                    <div className="text-center py-4 text-xs text-neutral-500">
-                        當前無大額訊號
-                    </div>
-                )}
             </div>
         </div>
     )
@@ -1007,13 +1054,12 @@ export function WhalePositionsList() {
     const data = fetchedPositions || []
     const summaryText = fetchedSummary
 
-    // Helper: shorten address to first 5 + last 5 chars
+    // Helper: shorten address
     const shortenAddress = (addr: string) => {
         if (!addr || addr.length < 12) return addr
         return `${addr.slice(0, 5)}...${addr.slice(-5)}`
     }
 
-    // Helper: format USD amount
     const formatUsd = (val: number) => {
         if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`
         if (val >= 1000) return `$${(val / 1000).toFixed(0)}K`
@@ -1032,20 +1078,27 @@ export function WhalePositionsList() {
     }
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2">
-            <div className="flex items-center gap-2 mb-2">
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2 h-full flex flex-col">
+            <div className="flex items-center gap-2 mb-2 px-1">
                 <Users className="w-3.5 h-3.5 text-blue-400" />
                 <span className="text-xs font-bold text-white">Top 20 巨鯨持倉</span>
             </div>
 
-            {/* AI Summary */}
+            {/* AI Summary - "Analysis Conclusion" Style */}
             {summaryText && (
-                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 mb-2">
-                    <p className="text-xs font-medium text-purple-300 leading-relaxed">{summaryText}</p>
+                <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 mb-2 shrink-0">
+                    <div className="flex items-center gap-1.5 mb-1.5 opacity-80">
+                        <span className="text-[10px] font-bold text-purple-300 bg-purple-500/10 px-1 rounded border border-purple-500/20">
+                            🧠 巨鯨結構摘要
+                        </span>
+                    </div>
+                    <p className="text-xs text-neutral-300 leading-relaxed font-medium">
+                        {summaryText}
+                    </p>
                 </div>
             )}
 
-            <div className="space-y-1 max-h-[320px] overflow-y-auto">
+            <div className="space-y-0.5 overflow-y-auto custom-scrollbar flex-1 min-h-0">
                 {data.slice(0, 20).map((pos, i) => {
                     const addr = pos.user || 'Unknown'
                     const symbol = pos.symbol || 'BTC'
@@ -1053,15 +1106,18 @@ export function WhalePositionsList() {
                     const isLong = (pos.position_size || 0) > 0
 
                     return (
-                        <div key={i} className="flex items-center justify-between text-[11px] hover:bg-white/5 p-1 rounded transition-colors">
+                        <div key={i} className="flex items-center justify-between text-[11px] hover:bg-white/5 px-2 py-1.5 rounded transition-colors group">
                             <div className="flex items-center gap-2">
-                                <span className="text-neutral-700 font-mono w-4 text-[10px]">{i + 1}</span>
-                                <span className="font-mono text-neutral-600 text-[10px]">{shortenAddress(addr)}</span>
+                                <span className="text-neutral-800 font-mono w-4 text-[10px] group-hover:text-neutral-500 transition-colors">{i + 1}</span>
+                                <span className="font-mono text-neutral-700 text-[10px] group-hover:text-neutral-500 transition-colors">{shortenAddress(addr)}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="font-medium text-white">{symbol}</span>
                                 <span className={cn(
-                                    "font-mono font-bold",
+                                    "font-medium",
+                                    symbol === 'BTC' ? 'text-orange-300' : symbol === 'ETH' ? 'text-blue-300' : 'text-neutral-300'
+                                )}>{symbol}</span>
+                                <span className={cn(
+                                    "font-mono font-bold w-[70px] text-right",
                                     isLong ? "text-green-400" : "text-red-400"
                                 )}>
                                     {isLong ? '↑' : '↓'} {formatUsd(Math.abs(positionValue))}
