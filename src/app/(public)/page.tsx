@@ -196,27 +196,37 @@ export default function HomePage() {
                     <AIMarketPulse report={marketReport} />
                 )}
 
-                {/* ===== 3. Market Sentiment (Human) ===== */}
+                {/* ===== 3. Market Sentiment (Human) - 市場體感 ===== */}
                 <section>
                     <h2 className="text-sm font-medium text-neutral-500 mb-3">市場體感</h2>
                     <MarketFeelingCard signals={signals} loading={signalsLoading} />
                 </section>
 
-                {/* ===== 4. On-Chain Indicators (Data) ===== */}
+                {/* ===== 4. Core Data (Short-term) - 核心數據 ===== */}
                 <section>
-                    <h2 className="text-sm font-medium text-neutral-500 mb-3">鏈上指標</h2>
-                    <IndicatorsGrid compact />
-                </section>
-
-                {/* ===== 4. Core Data - 專業數據 ===== */}
-                <section>
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">核心數據</h2>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <h2 className="text-sm font-medium text-neutral-500 mb-3">核心數據 (短線)</h2>
+                    {/* Replaced old grid with consolidated summaries */}
+                    <div className="grid grid-cols-3 gap-2 h-24">
                         <LiquidationSummary />
                         <FundingSummary />
                         <LongShortSummary />
+                    </div>
+                </section>
+
+                {/* ===== 5. On-Chain Indicators (Background) - 鏈上指標 ===== */}
+                <section className="opacity-80 hover:opacity-100 transition-opacity">
+                    <h2 className="text-sm font-medium text-neutral-600 mb-3 flex items-center gap-2">
+                        鏈上指標 (長線參考)
+                        <span className="text-[10px] bg-neutral-800 px-1.5 py-0.5 rounded text-neutral-500">Background</span>
+                    </h2>
+                    <IndicatorsGrid compact />
+                </section>
+                {/* ===== 4. Core Data - 專業數據 ===== */}
+                <section>
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-medium text-neutral-500">財經日曆</h2>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
                         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 h-full">
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">

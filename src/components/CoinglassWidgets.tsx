@@ -1138,49 +1138,69 @@ export function WhalePositionsList() {
                 <Users className="w-3.5 h-3.5 text-blue-400" />
                 <span className="text-xs font-bold text-white">Top 20 巨鯨持倉</span>
             </div>
+            {/* ... */}
+        </div>
+    )
+}
 
-            {/* AI Summary - "Analysis Conclusion" Style */}
-            {summaryText && (
-                <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 mb-2 shrink-0">
-                    <div className="flex items-center gap-1.5 mb-1.5 opacity-80">
-                        <span className="text-[10px] font-bold text-purple-300 bg-purple-500/10 px-1 rounded border border-purple-500/20">
-                            🧠 巨鯨結構摘要
-                        </span>
-                    </div>
-                    <p className="text-xs text-neutral-300 leading-relaxed font-medium">
-                        {summaryText}
-                    </p>
-                </div>
-            )}
+export function DerivativesTacticalPin() {
+    const [hint, setHint] = useState<string>("數據分析中...")
+    const [loading, setLoading] = useState(true)
 
-            <div className="space-y-0.5 overflow-y-auto custom-scrollbar flex-1 min-h-0">
-                {data.slice(0, 20).map((pos, i) => {
-                    const addr = pos.user || 'Unknown'
-                    const symbol = pos.symbol || 'BTC'
-                    const positionValue = pos.position_value_usd || 0
-                    const isLong = (pos.position_size || 0) > 0
+    useEffect(() => {
+        const analyze = async () => {
+            try {
+                const [fundRes, liqRes, lsRes] = await Promise.all([
+                    fetch('/api/coinglass/funding-rate'),
+                    fetch('/api/coinglass/liquidation?symbol=BTC&limit=1'),
+                    fetch('/api/coinglass/long-short?symbol=BTC')
+                ])
 
-                    return (
-                        <div key={i} className="flex items-center justify-between text-[11px] hover:bg-white/5 px-2 py-1.5 rounded transition-colors group">
-                            <div className="flex items-center gap-2">
-                                <span className="text-neutral-800 font-mono w-4 text-[10px] group-hover:text-neutral-500 transition-colors">{i + 1}</span>
-                                <span className="font-mono text-neutral-700 text-[10px] group-hover:text-neutral-500 transition-colors">{shortenAddress(addr)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className={cn(
-                                    "font-medium",
-                                    symbol === 'BTC' ? 'text-orange-300' : symbol === 'ETH' ? 'text-blue-300' : 'text-neutral-300'
-                                )}>{symbol}</span>
-                                <span className={cn(
-                                    "font-mono font-bold w-[70px] text-right",
-                                    isLong ? "text-green-400" : "text-red-400"
-                                )}>
-                                    {isLong ? '↑' : '↓'} {formatUsd(Math.abs(positionValue))}
-                                </span>
-                            </div>
-                        </div>
-                    )
-                })}
+                const fundData = await fundRes.json()
+                const liqData = await liqRes.json()
+                const lsData = await lsRes.json()
+
+                const funding = fundData.fundingRates?.extremePositive?.[0]?.rate || 0
+                const longLiq = liqData.liquidations?.summary?.longLiquidated || 0
+                const shortLiq = liqData.liquidations?.summary?.shortLiquidated || 0
+                const lsRatio = lsData.longShort?.global?.longShortRatio || 1
+
+                let signals = []
+
+                // 1. Funding Logic
+                if (funding > 0.0005) signals.push("費率偏高")
+                else if (funding < -0.0001) signals.push("費率負值")
+
+                // 2. Liquidation Logic (Contrarian)
+                if (longLiq > shortLiq * 1.5) signals.push("多單爆倉集中 (短線見底機率增)")
+                else if (shortLiq > longLiq * 1.5) signals.push("空單爆倉集中 (短線見頂機率增)")
+
+                // 3. LS Ratio Logic
+                if (lsRatio > 2.5) signals.push("散戶過度看多")
+                else if (lsRatio < 0.5) signals.push("散戶過度看空")
+
+                if (signals.length === 0) {
+                    setHint("市場情緒中性，留意區間突破。")
+                } else {
+                    setHint(`${signals.join("、")}，${signals.includes("費率偏高") || signals.includes("散戶過度看多") ? "多單需留意回撤" : "短線雖有波動但結構未壞"}。`)
+                }
+
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        analyze()
+    }, [])
+
+    if (loading) return <Skeleton className="h-16 w-full bg-neutral-900/50 rounded-lg mb-4" />
+
+    return (
+        <div className="bg-gradient-to-r from-orange-950/40 to-red-950/40 border-l-2 border-orange-500 rounded-r-lg p-3 mb-4 flex items-start gap-3">
+            <span className="text-lg">📌</span>
+            <div>
+                <h3 className="text-xs font-bold text-orange-200 mb-0.5">短線戰術提示</h3>
+                <p className="text-xs text-neutral-300 leading-relaxed font-medium">
+                    {hint}
+                </p>
             </div>
         </div>
     )

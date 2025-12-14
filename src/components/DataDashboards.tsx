@@ -7,7 +7,8 @@ import {
     LongShortRatio,
     WhaleAlertFeed,
     WhaleAiSummaryCard,
-    IndicatorsGrid
+    IndicatorsGrid,
+    DerivativesTacticalPin
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-react'
@@ -20,6 +21,8 @@ import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-re
 export function DerivativesView() {
     return (
         <div className="space-y-5">
+            <DerivativesTacticalPin />
+
             {/* Section: 資金費率 */}
             <section>
                 <div className="flex items-center gap-2 mb-3">
