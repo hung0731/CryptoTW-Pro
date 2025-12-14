@@ -72,7 +72,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🧠</span>
-                <span className="text-xs font-bold text-neutral-400 tracking-wider">AI 市場判讀</span>
+                <span className="text-xs font-bold text-neutral-400 tracking-wider">今日判讀</span>
             </div>
 
             {/* Main Conclusion */}
@@ -107,7 +107,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
                 <div className="flex items-start gap-2">
                     <span className="text-base">🧭</span>
                     <div>
-                        <span className="text-xs text-neutral-500 block mb-0.5">操作建議</span>
+                        <span className="text-xs text-neutral-500 block mb-0.5">建議做法</span>
                         <span className="text-sm text-white font-medium">{data.action}</span>
                     </div>
                 </div>
@@ -138,7 +138,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="flex items-center gap-1 text-xs text-neutral-500 hover:text-white transition-colors"
             >
-                為什麼？
+                看原因
                 {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
 

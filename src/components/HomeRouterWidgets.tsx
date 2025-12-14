@@ -107,7 +107,7 @@ export function HomeRouterWidget() {
                     {/* Header Status */}
                     <div className="flex items-center gap-2 mb-2">
                         <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <h2 className="text-xs font-bold text-neutral-400 tracking-wider">市場總覽</h2>
+                        <h2 className="text-xs font-bold text-neutral-400 tracking-wider">籌碼快照</h2>
                     </div>
 
                     {/* Headline */}
@@ -155,7 +155,7 @@ export function HomeRouterWidget() {
                         {/* Removed red background, kept red border for alert meaning, but base is neutral */}
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div>
-                            <h3 className="text-xs font-bold text-red-400 uppercase tracking-wider">異常監測｜{data.anomaly.title}</h3>
+                            <h3 className="text-xs font-bold text-red-400 uppercase tracking-wider">異常警報｜{data.anomaly.title}</h3>
                         </div>
 
                         <p className="text-sm text-white font-medium mb-3">
@@ -226,7 +226,7 @@ export function HomeRouterWidget() {
             {data.focusToday && data.focusToday.length > 0 && (
                 <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
                     <h3 className="text-xs font-bold text-neutral-500 mb-3 flex items-center gap-1.5">
-                        <Zap className="w-3 h-3" /> 今日關注指標
+                        <Zap className="w-3 h-3" /> 今日留意
                     </h3>
                     <div className="space-y-0 divide-y divide-white/5">
                         {data.focusToday.map((item, i) => (

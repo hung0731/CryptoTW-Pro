@@ -13,8 +13,14 @@ interface QuickAction {
 const actions: QuickAction[] = [
     {
         icon: <BarChart3 className="w-4 h-4" />,
-        label: '數據',
+        label: '籌碼',
         href: '/prediction',
+        color: 'text-neutral-400'
+    },
+    {
+        icon: <Calendar className="w-4 h-4" />,
+        label: '日曆',
+        href: '/calendar',
         color: 'text-neutral-400'
     },
     {
@@ -25,14 +31,8 @@ const actions: QuickAction[] = [
     },
     {
         icon: <Crown className="w-4 h-4" />,
-        label: '大客戶',
+        label: 'VIP',
         href: '/join',
-        color: 'text-neutral-400'
-    },
-    {
-        icon: <TrendingUp className="w-4 h-4" />,
-        label: '預測',
-        href: '/prediction',
         color: 'text-neutral-400'
     }
 ]

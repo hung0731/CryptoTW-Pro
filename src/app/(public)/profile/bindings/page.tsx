@@ -164,7 +164,7 @@ export default function BindingsPage() {
                 {/* Info */}
                 <div className="bg-neutral-900/30 rounded-xl p-4 border border-white/5">
                     <p className="text-xs text-neutral-500 leading-relaxed">
-                        💡 綁定交易所可以解鎖大客戶專屬優惠，享受最高返佣。每個交易所只能綁定一個帳戶。
+                        💡 綁定交易所可以解鎖 VIP 專屬優惠，享受最高返佣。每個交易所只能綁定一個帳戶。
                     </p>
                 </div>
 

@@ -275,7 +275,7 @@ function DataPageContent() {
                         </TabsTrigger>
                         <TabsTrigger value="derivatives" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
                             <Flame className="w-3.5 h-3.5 text-orange-400" />
-                            數據
+                            合約
                         </TabsTrigger>
                         <TabsTrigger value="smartmoney" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
                             <Radar className="w-3.5 h-3.5 text-purple-400" />
@@ -283,7 +283,7 @@ function DataPageContent() {
                         </TabsTrigger>
                         <TabsTrigger value="arbitrage" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
                             <RefreshCcw className="w-3.5 h-3.5 text-green-400" />
-                            套利
+                            費率
                         </TabsTrigger>
                     </TabsList>
                 </div>
@@ -416,7 +416,7 @@ function DataPageContent() {
                     {/* Section: 預測市場 */}
                     <section>
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-sm font-medium text-neutral-500">預測市場 (Polymarket)</h2>
+                            <h2 className="text-sm font-medium text-neutral-500">預測市場</h2>
                         </div>
                         {predictLoading ? (
                             <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />

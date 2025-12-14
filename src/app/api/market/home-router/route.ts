@@ -164,9 +164,9 @@ export async function GET() {
                     actionHint,
                     actionColor,
                     dimensions: [
-                        { name: '合約面', status: derivStatus, color: derivStatus === '過熱' ? 'red' : derivStatus === '偏空' ? 'green' : 'neutral' },
-                        { name: '巨鯨面', status: whaleStatus, color: whaleStatus.includes('多') ? 'red' : whaleStatus.includes('空') ? 'green' : 'neutral' },
-                        { name: '情緒面', status: sentimentLabel, color: sentimentLabel.includes('貪婪') ? 'red' : sentimentLabel.includes('恐懼') ? 'green' : 'neutral' }
+                        { name: '合約', status: derivStatus, color: derivStatus === '過熱' ? 'red' : derivStatus === '偏空' ? 'green' : 'neutral' },
+                        { name: '大戶', status: whaleStatus, color: whaleStatus.includes('多') ? 'red' : whaleStatus.includes('空') ? 'green' : 'neutral' },
+                        { name: '情緒', status: sentimentLabel, color: sentimentLabel.includes('貪婪') ? 'red' : sentimentLabel.includes('恐懼') ? 'green' : 'neutral' }
                     ]
                 },
                 anomaly: primaryAnomaly,

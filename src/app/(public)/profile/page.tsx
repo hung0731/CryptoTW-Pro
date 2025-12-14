@@ -91,7 +91,7 @@ export default function ProfilePage() {
                 if ((dbUser?.membership_status as string) === 'vip') {
                     return (
                         <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 px-2 py-0.5 text-xs">
-                            大客戶
+                            VIP
                         </Badge>
                     )
                 }
@@ -136,7 +136,7 @@ export default function ProfilePage() {
                     <div className="bg-neutral-900/50 rounded-2xl border border-white/5 divide-y divide-white/5">
                         <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
                         <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
-                        <MenuLink icon={Crown} label="大客戶計劃" href="/join" />
+                        <MenuLink icon={Crown} label="VIP 計劃" href="/join" />
                     </div>
                 </section>
 
