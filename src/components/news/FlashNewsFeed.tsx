@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { ChevronDown, ChevronUp, ExternalLink, Newspaper, Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronUp, ExternalLink, Newspaper, Sparkles, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NewsFlashItem } from '@/lib/coinglass'
 import { format } from 'date-fns'
@@ -16,6 +16,24 @@ interface MarketContext {
         reason: string
         impact: '高' | '中' | '低'
     }[]
+}
+
+// Helper: Get relative time in Chinese
+function getRelativeTime(dateInput: string | number | Date): string {
+    const date = new Date(dateInput)
+    if (isNaN(date.getTime())) return ''
+
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return '剛剛'
+    if (diffMins < 60) return `${diffMins} 分鐘前`
+    if (diffHours < 24) return `${diffHours} 小時前`
+    if (diffDays < 7) return `${diffDays} 天前`
+    return format(date, 'MM/dd')
 }
 
 export function FlashNewsFeed() {
@@ -114,22 +132,19 @@ export function FlashNewsFeed() {
                     <Skeleton className="h-3 w-3/4 bg-neutral-700" />
                 </div>
 
-                {/* List Header Skeleton */}
-                <div className="flex items-center justify-between px-3 py-2 bg-neutral-900/50">
-                    <Skeleton className="h-3 w-24 bg-neutral-700" />
-                    <Skeleton className="h-3 w-12 bg-neutral-700" />
-                </div>
-
-                {/* News Items Skeleton */}
-                <div className="p-3 space-y-4">
+                {/* Timeline Skeleton */}
+                <div className="p-4 space-y-4">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <Skeleton className="h-3 w-16 bg-neutral-700" />
-                                <Skeleton className="h-3 w-10 bg-neutral-700" />
+                        <div key={i} className="flex gap-3">
+                            <div className="flex flex-col items-center">
+                                <Skeleton className="w-2 h-2 rounded-full bg-neutral-700" />
+                                <Skeleton className="w-0.5 h-16 bg-neutral-800" />
                             </div>
-                            <Skeleton className="h-4 w-full bg-neutral-700" />
-                            <Skeleton className="h-3 w-5/6 bg-neutral-700" />
+                            <div className="flex-1 space-y-2">
+                                <Skeleton className="h-3 w-20 bg-neutral-700" />
+                                <Skeleton className="h-4 w-full bg-neutral-700" />
+                                <Skeleton className="h-3 w-3/4 bg-neutral-700" />
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -149,11 +164,11 @@ export function FlashNewsFeed() {
     return (
         <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden relative">
 
-            {/* AI Context Card (Same style as Whale page) */}
+            {/* AI Context Card */}
             <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-4">
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
-                    <h3 className="text-sm font-bold text-blue-200">市場脈絡 (快訊)</h3>
+                    <h3 className="text-sm font-bold text-blue-200">今日重點</h3>
                 </div>
                 {contextLoading ? (
                     <Skeleton className="h-4 w-3/4 bg-neutral-800" />
@@ -165,111 +180,120 @@ export function FlashNewsFeed() {
             </div>
 
             {/* List Header */}
-            <div className="flex items-center justify-between px-3 py-2 bg-neutral-900/50">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-black/30">
                 <div className="flex items-center gap-2">
-                    <Newspaper className="w-3.5 h-3.5 text-neutral-500" />
-                    <span className="text-xs font-bold text-neutral-400">幣圈快訊</span>
-                    <span className="text-[9px] font-mono text-neutral-600 border-l border-white/10 pl-2">
-                        即時更新
-                    </span>
+                    <Clock className="w-3.5 h-3.5 text-neutral-500" />
+                    <span className="text-xs font-bold text-neutral-400">即時快訊</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]" />
                     <span className="text-[9px] text-green-500 font-bold font-mono">LIVE</span>
                 </div>
             </div>
 
-            {/* News List - Full Height */}
-            <div className="max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar">
+            {/* Timeline News List */}
+            <div className="max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
                 {news.length === 0 && (
                     <div className="text-center py-6 text-xs text-neutral-500">
                         暫無快訊
                     </div>
                 )}
 
-                {news.slice(0, 30).map((item) => {
-                    let timeStr = '--:--'
-                    try {
-                        const date = new Date(item.createTime)
-                        if (!isNaN(date.getTime())) {
-                            timeStr = format(date, 'HH:mm')
-                        }
-                    } catch (e) {
-                        console.error('Date parsing error', e)
-                    }
+                <div className="relative">
+                    {news.slice(0, 30).map((item, index) => {
+                        const relativeTime = getRelativeTime(item.createTime)
+                        const plainContent = item.content ? item.content.replace(/<[^>]+>/g, '') : ''
+                        const isExpanded = expandedIds.has(item.id)
+                        const isFirst = index === 0
 
-                    const plainContent = item.content ? item.content.replace(/<[^>]+>/g, '') : ''
-                    const isExpanded = expandedIds.has(item.id)
-
-                    return (
-                        <div
-                            key={item.id}
-                            className="px-3 py-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors"
-                        >
-                            {/* Header: Source & Time */}
-                            <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2">
-                                    <span className={cn(
-                                        "font-bold text-xs",
-                                        item.highlight ? "text-amber-400" : "text-neutral-400"
-                                    )}>
-                                        {item.source || 'News'}
-                                    </span>
-                                    {item.highlight && (
-                                        <Badge variant="default" className="h-4 px-1 py-0 text-[9px] font-normal bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border-none">
-                                            重點
-                                        </Badge>
-                                    )}
-                                </div>
-                                <span className="text-[10px] font-mono text-neutral-600">
-                                    {timeStr}
-                                </span>
-                            </div>
-
-                            {/* Title */}
-                            <h4
-                                onClick={() => toggleExpand(item.id)}
-                                className={cn(
-                                    "text-sm font-medium leading-snug cursor-pointer transition-colors mb-1",
-                                    item.highlight ? "text-amber-100 hover:text-amber-200" : "text-neutral-200 hover:text-blue-400"
-                                )}
+                        return (
+                            <div
+                                key={item.id}
+                                className="relative flex gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
                             >
-                                {item.title}
-                            </h4>
-
-                            {/* Content Preview or Full */}
-                            {isExpanded ? (
-                                <div className="mt-2 space-y-2">
-                                    <div
-                                        className="prose prose-invert prose-sm max-w-none text-neutral-400 text-xs leading-relaxed"
-                                        dangerouslySetInnerHTML={{ __html: item.content }}
-                                    />
-                                    {item.images && item.images.length > 0 && (
-                                        <div className="flex gap-2 overflow-x-auto pb-2">
-                                            {item.images.slice(0, 2).map((img, idx) => (
-                                                <img key={idx} src={img} alt="News" className="h-24 w-auto rounded-lg border border-white/10" />
-                                            ))}
-                                        </div>
-                                    )}
-                                    <button
-                                        onClick={() => toggleExpand(item.id)}
-                                        className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-white transition-colors"
-                                    >
-                                        收起 <ChevronUp className="w-3 h-3" />
-                                    </button>
+                                {/* Timeline */}
+                                <div className="flex flex-col items-center pt-1.5">
+                                    {/* Dot */}
+                                    <div className={cn(
+                                        "w-2 h-2 rounded-full shrink-0 z-10",
+                                        isFirst ? "bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.5)]" :
+                                            item.highlight ? "bg-amber-500" : "bg-neutral-600"
+                                    )} />
+                                    {/* Line */}
+                                    <div className="w-0.5 flex-1 bg-neutral-800 mt-1" />
                                 </div>
-                            ) : (
-                                <p
-                                    onClick={() => toggleExpand(item.id)}
-                                    className="text-xs text-neutral-500 line-clamp-2 cursor-pointer hover:text-neutral-400 transition-colors"
-                                >
-                                    {plainContent}
-                                </p>
-                            )}
-                        </div>
-                    )
-                })}
+
+                                {/* Content */}
+                                <div className="flex-1 min-w-0 pb-2">
+                                    {/* Time & Source */}
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className={cn(
+                                            "text-[10px] font-medium",
+                                            isFirst ? "text-green-400" : "text-neutral-500"
+                                        )}>
+                                            {relativeTime}
+                                        </span>
+                                        <span className="text-[10px] text-neutral-600">·</span>
+                                        <span className={cn(
+                                            "text-[10px] font-bold",
+                                            item.highlight ? "text-amber-400" : "text-neutral-500"
+                                        )}>
+                                            {item.source || 'News'}
+                                        </span>
+                                        {item.highlight && (
+                                            <Badge variant="default" className="h-3.5 px-1 py-0 text-[8px] font-bold bg-amber-500/20 text-amber-400 border-none">
+                                                HOT
+                                            </Badge>
+                                        )}
+                                    </div>
+
+                                    {/* Title */}
+                                    <h4
+                                        onClick={() => toggleExpand(item.id)}
+                                        className={cn(
+                                            "text-sm font-medium leading-snug cursor-pointer transition-colors",
+                                            item.highlight ? "text-amber-100 hover:text-amber-50" : "text-neutral-200 hover:text-white"
+                                        )}
+                                    >
+                                        {item.title}
+                                    </h4>
+
+                                    {/* Content Preview or Full */}
+                                    {isExpanded ? (
+                                        <div className="mt-2 space-y-2">
+                                            <div
+                                                className="prose prose-invert prose-sm max-w-none text-neutral-400 text-xs leading-relaxed"
+                                                dangerouslySetInnerHTML={{ __html: item.content }}
+                                            />
+                                            {item.images && item.images.length > 0 && (
+                                                <div className="flex gap-2 overflow-x-auto pb-2">
+                                                    {item.images.slice(0, 2).map((img, idx) => (
+                                                        <img key={idx} src={img} alt="News" className="h-24 w-auto rounded-lg border border-white/10" />
+                                                    ))}
+                                                </div>
+                                            )}
+                                            <button
+                                                onClick={() => toggleExpand(item.id)}
+                                                className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-white transition-colors"
+                                            >
+                                                收起 <ChevronUp className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <p
+                                            onClick={() => toggleExpand(item.id)}
+                                            className="text-xs text-neutral-500 line-clamp-2 cursor-pointer hover:text-neutral-400 transition-colors mt-1"
+                                        >
+                                            {plainContent}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
             </div>
         </div>
     )
 }
+
