@@ -2,6 +2,7 @@ import { LiffProvider } from "@/components/LiffProvider";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import { RouteHandler } from "@/components/RouteHandler";
 import { Suspense } from "react";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function PublicLayout({
     children,
@@ -13,10 +14,11 @@ export default function PublicLayout({
             <Suspense fallback={null}>
                 <RouteHandler />
             </Suspense>
-            <div className="w-full max-w-[480px] mx-auto min-h-screen relative shadow-2xl shadow-black bg-background">
+            <div className="w-full max-w-[480px] mx-auto min-h-screen relative shadow-2xl shadow-black bg-background pb-20">
                 <AnnouncementBanner />
                 {children}
             </div>
+            <BottomNav />
         </LiffProvider>
     );
 }
