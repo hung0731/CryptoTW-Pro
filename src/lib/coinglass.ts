@@ -199,12 +199,16 @@ export interface OpenInterest {
     h24Change: number
 }
 
-// Exchange Balance Types
-export interface ExchangeBalance {
-    exchangeName: string
-    balance: number
-    changeH24: number
-    changeH24Percent: number
+// News Flash Types
+export interface NewsFlashItem {
+    id: string
+    title: string
+    content: string
+    url: string
+    source: string // "Coinglass", "Binance", etc.
+    createTime: number // Timestamp
+    highlight: boolean
+    images?: string[]
 }
 
 // ============================================
@@ -227,3 +231,4 @@ export interface ExchangeBalance {
 // - /api/hyperliquid/whale-alert (Whale Alerts)
 // - /api/futures/liquidation-heatmap (Heatmap)
 // - /api/spot/exchange-balance-list (Exchange Balance)
+// - /api/newsflash/list (Crypto News) [NEW]

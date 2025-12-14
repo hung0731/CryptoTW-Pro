@@ -26,16 +26,24 @@ export async function GET(request: Request) {
                 const marginList = data[0]?.stablecoin_margin_list || []
                 if (marginList.length === 0) return null
 
-                // Calculate average funding rate
-                const rates = marginList.map((e: any) => e.funding_rate).filter((r: any) => r !== undefined)
-                const avgRate = rates.length > 0
-                    ? rates.reduce((a: number, b: number) => a + b, 0) / rates.length
-                    : 0
+                // Filter for Binance (User Request)
+                const binanceData = marginList.find((e: any) => e.exchange === 'Binance')
+
+                // Fallback to average if Binance not found (rare for top tokens, but safe)
+                let finalRate = 0
+                if (binanceData) {
+                    finalRate = binanceData.funding_rate
+                } else {
+                    const rates = marginList.map((e: any) => e.funding_rate).filter((r: any) => r !== undefined)
+                    if (rates.length > 0) {
+                        finalRate = rates.reduce((a: number, b: number) => a + b, 0) / rates.length
+                    }
+                }
 
                 return {
                     symbol: sym,
-                    rate: avgRate,
-                    annualizedRate: avgRate * 3 * 365 * 100,
+                    rate: finalRate,
+                    annualizedRate: finalRate * 3 * 365 * 100,
                     exchanges: marginList.slice(0, 3).map((e: any) => ({
                         name: e.exchange || 'Unknown',
                         rate: e.funding_rate

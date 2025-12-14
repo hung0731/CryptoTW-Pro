@@ -14,16 +14,24 @@ export async function getDerivativesData() {
         coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTC', timeType: 'h4', limit: 1 })
     ])
 
-    // 1. Process Funding Rate (Avg of top exchanges)
+    // 1. Process Funding Rate (Binance specific)
     let fundingRate = 0
     if (fundingData && fundingData.length > 0 && fundingData[0]?.stablecoin_margin_list) {
         const list = fundingData[0].stablecoin_margin_list
-        const validRates = list
-            .map((e: any) => e.funding_rate)
-            .filter((r: unknown) => typeof r === 'number')
+        // Filter for Binance
+        const binanceData = list.find((e: any) => e.exchange === 'Binance')
 
-        if (validRates.length > 0) {
-            fundingRate = validRates.reduce((a: number, b: number) => a + b, 0) / validRates.length
+        if (binanceData) {
+            fundingRate = binanceData.funding_rate
+        } else {
+            // Fallback to Average
+            const validRates = list
+                .map((e: any) => e.funding_rate)
+                .filter((r: unknown) => typeof r === 'number')
+
+            if (validRates.length > 0) {
+                fundingRate = validRates.reduce((a: number, b: number) => a + b, 0) / validRates.length
+            }
         }
     }
 
