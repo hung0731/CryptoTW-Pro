@@ -973,7 +973,42 @@ export function WhaleAlertFeed() {
         contextText = `${narrative}。近一小時整體${bias}，多空比約 ${ratio}。`
     }
 
-    if (loading) return <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
+    // Loading Skeleton
+    if (loading) {
+        return (
+            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden animate-pulse">
+                {/* AI Context Skeleton */}
+                <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border-b border-white/5 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Skeleton className="w-5 h-5 rounded bg-neutral-700" />
+                        <Skeleton className="h-4 w-28 bg-neutral-700" />
+                    </div>
+                    <Skeleton className="h-3 w-full bg-neutral-700 mb-2" />
+                    <Skeleton className="h-3 w-3/4 bg-neutral-700" />
+                </div>
+
+                {/* List Header Skeleton */}
+                <div className="flex items-center justify-between px-3 py-2 bg-neutral-900/50">
+                    <Skeleton className="h-3 w-24 bg-neutral-700" />
+                    <Skeleton className="h-3 w-12 bg-neutral-700" />
+                </div>
+
+                {/* Whale Items Skeleton */}
+                <div className="p-0">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="flex items-center justify-between px-3 py-3 border-b border-white/5">
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="w-10 h-4 bg-neutral-700" />
+                                <Skeleton className="w-16 h-5 rounded bg-neutral-700" />
+                            </div>
+                            <Skeleton className="w-14 h-4 bg-neutral-700" />
+                            <Skeleton className="w-10 h-3 bg-neutral-700" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
+    }
 
     // Empty State
     if (!alerts || alerts.length === 0) {
@@ -1192,7 +1227,22 @@ export function DerivativesAiSummaryCard() {
         fetchSummary()
     }, [])
 
-    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl mb-4" />
+    // Loading Skeleton
+    if (loading) {
+        return (
+            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden mb-5 animate-pulse">
+                <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Skeleton className="w-5 h-5 rounded bg-neutral-700" />
+                        <Skeleton className="h-4 w-28 bg-neutral-700" />
+                    </div>
+                    <Skeleton className="h-3 w-full bg-neutral-700 mb-2" />
+                    <Skeleton className="h-3 w-3/4 bg-neutral-700" />
+                </div>
+            </div>
+        )
+    }
+
     if (!summary) return null
 
     // Determine emoji based on content

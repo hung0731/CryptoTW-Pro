@@ -108,7 +108,39 @@ export function FlashNewsFeed() {
     const { emoji: contextEmoji, text: contextText } = getContextDisplay()
 
     if (loading && news.length === 0) {
-        return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+        return (
+            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden animate-pulse">
+                {/* AI Context Skeleton */}
+                <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border-b border-white/5 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Skeleton className="w-5 h-5 rounded bg-neutral-700" />
+                        <Skeleton className="h-4 w-28 bg-neutral-700" />
+                    </div>
+                    <Skeleton className="h-3 w-full bg-neutral-700 mb-2" />
+                    <Skeleton className="h-3 w-3/4 bg-neutral-700" />
+                </div>
+
+                {/* List Header Skeleton */}
+                <div className="flex items-center justify-between px-3 py-2 bg-neutral-900/50">
+                    <Skeleton className="h-3 w-24 bg-neutral-700" />
+                    <Skeleton className="h-3 w-12 bg-neutral-700" />
+                </div>
+
+                {/* News Items Skeleton */}
+                <div className="p-3 space-y-4">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Skeleton className="h-3 w-16 bg-neutral-700" />
+                                <Skeleton className="h-3 w-10 bg-neutral-700" />
+                            </div>
+                            <Skeleton className="h-4 w-full bg-neutral-700" />
+                            <Skeleton className="h-3 w-5/6 bg-neutral-700" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
     }
 
     if (error) {

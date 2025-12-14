@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { ChevronRight, Activity, Shield, Newspaper, TrendingUp, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface Theme {
     title: string
@@ -34,16 +35,45 @@ const SentimentEmoji = {
     '中性': '⚖️',
 }
 
+// Loading Skeleton component
+function MarketContextSkeleton() {
+    return (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden animate-pulse">
+            {/* AI Context Card Skeleton */}
+            <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border-b border-white/5 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                    <Skeleton className="w-5 h-5 rounded bg-neutral-700" />
+                    <Skeleton className="h-4 w-28 bg-neutral-700" />
+                </div>
+                <Skeleton className="h-3 w-full bg-neutral-700 mb-2" />
+                <Skeleton className="h-3 w-3/4 bg-neutral-700" />
+            </div>
+
+            {/* Theme List Skeleton */}
+            <div className="px-3 py-2 space-y-2">
+                {[1, 2].map(i => (
+                    <div key={i} className="flex items-center justify-between py-2 px-2">
+                        <div className="flex items-center gap-2">
+                            <Skeleton className="w-4 h-3 bg-neutral-700" />
+                            <Skeleton className="h-3 w-32 bg-neutral-700" />
+                        </div>
+                        <Skeleton className="h-3 w-16 bg-neutral-700" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
 export function MarketContextCard({ data, isLoading }: MarketContextProps) {
     const router = useRouter()
 
     if (isLoading) {
-        return <div className="animate-pulse h-24 bg-neutral-900/50 rounded-xl" />
+        return <MarketContextSkeleton />
     }
 
     if (!data) return null
 
-    // Generate context text from themes
     const getContextText = () => {
         if (data.themes.length === 0) {
             return `市場情緒${data.sentiment}，暫無明顯主線。`
@@ -59,7 +89,7 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
 
     return (
         <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden">
-            {/* AI Context Card (Same style as Whale page) */}
+            {/* AI Context Card */}
             <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-4">
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
