@@ -154,3 +154,38 @@ Note: emoji 必須根據 sentiment 選擇，例如：
         return null
     }
 }
+
+export async function generateDerivativesSummary(data: any): Promise<string | null> {
+    if (!genAI) return null
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+        const prompt = `
+你是一個加密貨幣衍生品交易專家。
+請根據以下「合約數據」生成一段簡短的「短線快照分析」。
+
+【輸入數據】
+1. 資金費率 (Funding Rate): ${JSON.stringify(data.fundingRates?.extremePositive?.[0] || {}, null, 2)} (正值=多頭付費)
+2. 爆倉數據 (Liquidation): 多單爆倉 ${data.liquidations?.summary?.longLiquidatedFormatted || '0'}, 空單爆倉 ${data.liquidations?.summary?.shortLiquidatedFormatted || '0'}
+3. 多空比 (Long/Short): ${data.longShort?.global?.longShortRatio || '未知'} (散戶情緒)
+
+【輸出要求】
+1. **長度限制**：50-80 字 (繁體中文)
+2. **語氣**：戰術性、簡潔、直接 (像交易室裡的對話)
+3. **內容**：
+   - 判斷當前多空擁擠度
+   - 識別潛在風險 (如軋空、殺多)
+   - 給出一個明確的「短線傾向」(例如：偏向回調接多、偏向高空、觀望)
+
+【範例】
+「費率飆升顯示多頭過熱，且大戶多空比下降，暗示主力正在出貨。即使價格硬撐，短線追高風險極大，偏向反彈找空點。」
+「空單爆倉量巨大，顯示燃料已被清空。費率回歸中性，結構轉強，短線適合回調接多。」
+
+請直接輸出分析內容，不要標題。
+`
+        const result = await model.generateContent(prompt)
+        return result.response.text().trim()
+    } catch (e) {
+        console.error('Gemini Derivatives Summary Error:', e)
+        return null
+    }
+}

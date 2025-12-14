@@ -122,7 +122,7 @@ export function TopCoinCards() {
     }
 
     return (
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="grid grid-cols-3 gap-2 pb-2">
             {coins.map((coin) => {
                 const isUp = coin.change24h >= 0
                 const color = isUp ? '#22c55e' : '#ef4444' // green-500 : red-500
@@ -134,7 +134,7 @@ export function TopCoinCards() {
                     <div
                         key={coin.symbol}
                         className={cn(
-                            "rounded-xl p-3 min-w-[100px] shrink-0 border transition-all flex flex-col justify-between h-[80px]",
+                            "rounded-xl p-3 w-full border transition-all flex flex-col justify-between h-[80px]",
                             bgColor, borderColor
                         )}
                     >

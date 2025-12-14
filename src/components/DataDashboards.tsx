@@ -6,9 +6,9 @@ import {
     FundingRateRankings,
     LongShortRatio,
     WhaleAlertFeed,
-    WhaleAiSummaryCard,
+    // WhaleAiSummaryCard, // Removed as per request (redundant)
     IndicatorsGrid,
-    DerivativesTacticalPin
+    DerivativesAiSummaryCard
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-react'
@@ -21,7 +21,7 @@ import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-re
 export function DerivativesView() {
     return (
         <div className="space-y-5">
-            <DerivativesTacticalPin />
+            <DerivativesAiSummaryCard />
 
             {/* Section: 資金費率 */}
             <section>
@@ -102,7 +102,6 @@ export function SmartMoneyView() {
                     />
                 </div>
                 <div className="space-y-3">
-                    <WhaleAiSummaryCard />
                     <WhaleAlertFeed />
                 </div>
             </section>

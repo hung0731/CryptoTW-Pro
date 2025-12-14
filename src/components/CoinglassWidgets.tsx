@@ -1143,64 +1143,50 @@ export function WhalePositionsList() {
     )
 }
 
-export function DerivativesTacticalPin() {
-    const [hint, setHint] = useState<string>("數據分析中...")
+export function DerivativesAiSummaryCard() {
+    const [summary, setSummary] = useState<string>('')
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const analyze = async () => {
+        const fetchSummary = async () => {
             try {
-                const [fundRes, liqRes, lsRes] = await Promise.all([
-                    fetch('/api/coinglass/funding-rate'),
-                    fetch('/api/coinglass/liquidation?symbol=BTC&limit=1'),
-                    fetch('/api/coinglass/long-short?symbol=BTC')
-                ])
-
-                const fundData = await fundRes.json()
-                const liqData = await liqRes.json()
-                const lsData = await lsRes.json()
-
-                const funding = fundData.fundingRates?.extremePositive?.[0]?.rate || 0
-                const longLiq = liqData.liquidations?.summary?.longLiquidated || 0
-                const shortLiq = liqData.liquidations?.summary?.shortLiquidated || 0
-                const lsRatio = lsData.longShort?.global?.longShortRatio || 1
-
-                let signals = []
-
-                // 1. Funding Logic
-                if (funding > 0.0005) signals.push("費率偏高")
-                else if (funding < -0.0001) signals.push("費率負值")
-
-                // 2. Liquidation Logic (Contrarian)
-                if (longLiq > shortLiq * 1.5) signals.push("多單爆倉集中 (短線見底機率增)")
-                else if (shortLiq > longLiq * 1.5) signals.push("空單爆倉集中 (短線見頂機率增)")
-
-                // 3. LS Ratio Logic
-                if (lsRatio > 2.5) signals.push("散戶過度看多")
-                else if (lsRatio < 0.5) signals.push("散戶過度看空")
-
-                if (signals.length === 0) {
-                    setHint("市場情緒中性，留意區間突破。")
-                } else {
-                    setHint(`${signals.join("、")}，${signals.includes("費率偏高") || signals.includes("散戶過度看多") ? "多單需留意回撤" : "短線雖有波動但結構未壞"}。`)
+                const res = await fetch('/api/market/derivatives')
+                const data = await res.json()
+                if (data.summary) {
+                    setSummary(data.summary)
                 }
-
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
+            } catch (e) {
+                console.error('Failed to fetch derivatives summary', e)
+            } finally {
+                setLoading(false)
+            }
         }
-        analyze()
+        fetchSummary()
     }, [])
 
-    if (loading) return <Skeleton className="h-16 w-full bg-neutral-900/50 rounded-lg mb-4" />
+    if (loading) return <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-lg mb-4" />
+    if (!summary) return null
 
     return (
-        <div className="bg-gradient-to-r from-orange-950/40 to-red-950/40 border-l-2 border-orange-500 rounded-r-lg p-3 mb-4 flex items-start gap-3">
-            <span className="text-lg">📌</span>
-            <div>
-                <h3 className="text-xs font-bold text-orange-200 mb-0.5">短線戰術提示</h3>
-                <p className="text-xs text-neutral-300 leading-relaxed font-medium">
-                    {hint}
-                </p>
+        <div className="bg-gradient-to-r from-blue-900/10 to-purple-900/10 border border-blue-500/20 rounded-lg p-3 mb-5 relative overflow-hidden group">
+            {/* Background Decor */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+
+            <div className="flex items-start gap-3 relative z-10">
+                <div className="p-1.5 shrink-0">
+                    <span className="text-lg">⚡️</span>
+                </div>
+                <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <h3 className="text-xs font-bold text-blue-200">AI 短線戰術總結</h3>
+                        <span className="text-[10px] bg-blue-500/10 px-1.5 py-0.5 rounded text-blue-300 border border-blue-500/10 font-mono">
+                            Gemini
+                        </span>
+                    </div>
+                    <p className="text-xs text-neutral-300 leading-relaxed font-medium tracking-wide">
+                        {summary}
+                    </p>
+                </div>
             </div>
         </div>
     )
