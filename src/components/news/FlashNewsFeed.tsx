@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { NewsFlashItem } from '@/lib/coinglass'
 import { format } from 'date-fns'
 import { Skeleton } from '@/components/ui/skeleton'
+import DOMPurify from 'isomorphic-dompurify'
 
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
@@ -263,7 +264,7 @@ export function FlashNewsFeed() {
                                         <div className="mt-2 space-y-2">
                                             <div
                                                 className="prose prose-invert prose-sm max-w-none text-neutral-400 text-xs leading-relaxed"
-                                                dangerouslySetInnerHTML={{ __html: item.content }}
+                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
                                             />
                                             {item.images && item.images.length > 0 && (
                                                 <div className="flex gap-2 overflow-x-auto pb-2">

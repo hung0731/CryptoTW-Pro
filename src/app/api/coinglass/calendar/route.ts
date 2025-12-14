@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { enrichMacroEvent, MACRO_EVENTS } from '@/lib/macro-knowledge-base'
+import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 600 // Cache for 10 minutes (matching API update freq)
@@ -7,7 +8,11 @@ export const revalidate = 600 // Cache for 10 minutes (matching API update freq)
 const API_KEY = process.env.COINGLASS_API_KEY
 const BASE_URL = 'https://open-api-v4.coinglass.com/api/calendar/economic-data'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    // Rate limit: 30 requests per minute per IP
+    const rateLimited = simpleApiRateLimit(req, 'cg-calendar', 30, 60)
+    if (rateLimited) return rateLimited
+
     try {
         if (!API_KEY) {
             console.warn('COINGLASS_API_KEY is missing, returning mock/empty data')

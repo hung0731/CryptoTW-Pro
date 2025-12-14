@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
+import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 300 // 5 min cache
@@ -38,7 +39,11 @@ interface IndicatorData {
     }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    // Rate limit: 30 requests per minute per IP
+    const rateLimited = simpleApiRateLimit(req, 'cg-indicators', 30, 60)
+    if (rateLimited) return rateLimited
+
     try {
         const [ahr999Res, bubbleRes, puellRes, peakRes] = await Promise.all([
             coinglassV4Request<any[]>('/api/index/ahr999', {}),

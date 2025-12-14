@@ -1,12 +1,17 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
+import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 300
 
 const TOP_TOKENS = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'BNB', 'SUI', 'ADA', 'AVAX', 'LINK']
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+    // Rate limit: 60 requests per minute per IP
+    const rateLimited = simpleApiRateLimit(request, 'cg-funding', 60, 60)
+    if (rateLimited) return rateLimited
+
     const { searchParams } = new URL(request.url)
     const symbolParam = searchParams.get('symbol')
 

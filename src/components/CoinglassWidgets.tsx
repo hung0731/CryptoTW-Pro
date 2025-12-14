@@ -707,102 +707,71 @@ export function EconomicCalendar() {
 }
 
 // ============================================
-// Summary Components for Homepage
+// Summary Card Components (Props-based for aggregated API)
 // ============================================
 
-export function FundingSummary() {
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+interface DashboardData {
+    funding?: { rate: number; ratePercent: string; status: string }
+    liquidation?: { longFormatted: string; shortFormatted: string; signal: { type: string; text: string } }
+    longShort?: { global: { longRate: number; shortRate: number }; signal: { type: string; text: string } }
+    openInterest?: { formatted: string; change24h: number }
+}
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/coinglass/funding-rate')
-                const json = await res.json()
-                setData(json.fundingRates)
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
-        }
-        fetchData()
-    }, [])
+export function FundingSummary({ data }: { data?: DashboardData['funding'] }) {
+    if (!data) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
 
-    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
-    if (!data) return null
-
-    // Get top 2 extreme
-    const topPositive = data.extremePositive?.[0]
-    const topNegative = data.extremeNegative?.[0]
+    const isHigh = data.status === 'high'
+    const isNegative = data.status === 'negative'
 
     return (
         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
             <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-3.5 h-3.5 text-yellow-400" />
-                <span className="text-xs font-bold text-white">資金費率</span>
+                <span className="text-xs font-bold text-white">BTC 費率</span>
                 <ExplainTooltip
-                    term="資金費率 (Funding Rate)"
-                    definition="確保合約價格貼近現貨價格的機制。正費率代表多頭付費給空頭。"
+                    term="BTC 資金費率"
+                    definition="Binance BTC 永續合約的資金費率。"
                     explanation={
                         <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>費率飆升 (&gt;0.05%)</strong>：多頭過度擁擠，主力可能砸盤殺多。</li>
-                            <li><strong>費率轉負</strong>：空頭擁擠，可能出現軋空 (Short Squeeze) 上漲。</li>
+                            <li><strong>正費率</strong>：多頭付費給空頭，情緒偏多。</li>
+                            <li><strong>負費率</strong>：空頭付費給多頭，情緒偏空。</li>
                         </ul>
                     }
                 />
             </div>
-            <div className="space-y-2">
-                {topPositive && (
-                    <div className="flex justify-between items-center bg-red-500/10 rounded px-2 py-1">
-                        <span className="text-xs text-white font-medium">{topPositive.symbol}</span>
-                        <span className="text-xs font-mono text-red-400 font-bold">
-                            +{(topPositive.rate * 100).toFixed(3)}%
-                        </span>
-                    </div>
-                )}
-                {topNegative && (
-                    <div className="flex justify-between items-center bg-green-500/10 rounded px-2 py-1">
-                        <span className="text-xs text-white font-medium">{topNegative.symbol}</span>
-                        <span className="text-xs font-mono text-green-400 font-bold">
-                            {(topNegative.rate * 100).toFixed(3)}%
-                        </span>
-                    </div>
-                )}
+            <div className="text-center py-2">
+                <span className={cn(
+                    "text-xl font-bold font-mono",
+                    isHigh ? "text-red-400" : isNegative ? "text-green-400" : "text-white"
+                )}>
+                    {data.rate >= 0 ? '+' : ''}{data.ratePercent}%
+                </span>
+                <div className={cn(
+                    "text-[10px] mt-1",
+                    isHigh ? "text-red-400" : isNegative ? "text-green-400" : "text-neutral-500"
+                )}>
+                    {isHigh ? '偏高' : isNegative ? '負費率' : '正常'}
+                </div>
             </div>
         </div>
     )
 }
 
-export function LiquidationSummary() {
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/coinglass/liquidation?symbol=BTC&limit=1')
-                const json = await res.json()
-                setData(json.liquidations)
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
-        }
-        fetchData()
-    }, [])
-
-    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
-    if (!data) return null
+export function LiquidationSummary({ data }: { data?: DashboardData['liquidation'] }) {
+    if (!data) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
 
     return (
         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
             <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-3.5 h-3.5 text-orange-400" />
-                <span className="text-xs font-bold text-white">爆倉 (24H)</span>
+                <span className="text-xs font-bold text-white">24H 爆倉</span>
                 <ExplainTooltip
-                    term="爆倉數據 (Liquidation)"
-                    definition="過去24小時內被迫強制平倉的總金額。"
+                    term="爆倉數據"
+                    definition="過去24小時被強制平倉的總金額。"
                     explanation={
                         <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>爆量</strong>：代表市場劇烈波動，去槓桿化剛發生，短期趨勢可能延續或反轉。</li>
-                            <li><strong>多單爆倉大</strong>：市場殺多，容易見底。</li>
-                            <li><strong>空單爆倉大</strong>：市場軋空，容易見頂。</li>
+                            <li><strong>多單爆倉大</strong>：市場殺多，可能見底。</li>
+                            <li><strong>空單爆倉大</strong>：市場軋空，可能見頂。</li>
                         </ul>
                     }
                 />
@@ -810,105 +779,54 @@ export function LiquidationSummary() {
             <div className="grid grid-cols-2 gap-2 mt-1">
                 <div className="text-center bg-red-500/10 rounded py-1.5">
                     <span className="text-[9px] text-neutral-400 block mb-0.5">多單</span>
-                    <span className="text-xs font-mono text-red-400 font-bold block">{data.summary?.longLiquidatedFormatted || '$0'}</span>
+                    <span className="text-xs font-mono text-red-400 font-bold block">{data.longFormatted}</span>
                 </div>
                 <div className="text-center bg-green-500/10 rounded py-1.5">
                     <span className="text-[9px] text-neutral-400 block mb-0.5">空單</span>
-                    <span className="text-xs font-mono text-green-400 font-bold block">{data.summary?.shortLiquidatedFormatted || '$0'}</span>
+                    <span className="text-xs font-mono text-green-400 font-bold block">{data.shortFormatted}</span>
                 </div>
             </div>
         </div>
     )
 }
 
-export function LongShortSummary() {
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/coinglass/long-short?symbol=BTC')
-                const json = await res.json()
-                setData(json.longShort)
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
-        }
-        fetchData()
-    }, [])
-
-    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
-    if (!data || !data.global) return null
+export function LongShortSummary({ data }: { data?: DashboardData['longShort'] }) {
+    if (!data?.global) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
 
     return (
         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
             <div className="flex items-center gap-2 mb-2">
                 <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
-                <span className="text-xs font-bold text-white">BTC 多空比</span>
+                <span className="text-xs font-bold text-white">多空比</span>
                 <ExplainTooltip
-                    term="多空比 (Long/Short Ratio)"
-                    definition="市場上做多帳戶與做空帳戶的數量比例。"
+                    term="多空比"
+                    definition="BTC 全網帳戶多空比例。"
                     explanation={
                         <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>全網多空比</strong>：代表散戶情緒，過高通常是反指標 (散戶都在做多)。</li>
-                            <li><strong>大戶多空比</strong>：代表聰明錢動向，更具參考價值。</li>
-                            <li><strong>背離訊號</strong>：若全網極度看多，但價格下跌，代表主力正在出貨。</li>
+                            <li><strong>全網多空比</strong>：代表散戶情緒。</li>
+                            <li><strong>過高</strong>：通常是反指標。</li>
                         </ul>
                     }
                 />
             </div>
-
-            <div className="mt-3">
+            <div className="mt-2">
                 <div className="h-4 bg-neutral-800 rounded-full overflow-hidden flex mb-2">
-                    <div
-                        className="bg-green-500/60 h-full"
-                        style={{ width: `${data.global.longRate}%` }}
-                    />
-                    <div
-                        className="bg-red-500/60 h-full"
-                        style={{ width: `${data.global.shortRate}%` }}
-                    />
+                    <div className="bg-green-500/60 h-full" style={{ width: `${data.global.longRate}%` }} />
+                    <div className="bg-red-500/60 h-full" style={{ width: `${data.global.shortRate}%` }} />
                 </div>
                 <div className="flex justify-between text-xs font-mono font-bold">
-                    <span className="text-green-500">{data.global.longRate.toFixed(0)}% 多</span>
-                    <span className="text-red-500">{data.global.shortRate.toFixed(0)}% 空</span>
+                    <span className="text-green-500">{data.global.longRate.toFixed(0)}%</span>
+                    <span className="text-red-500">{data.global.shortRate.toFixed(0)}%</span>
                 </div>
             </div>
         </div>
     )
 }
 
-// Open Interest Card Component
-export function OpenInterestCard() {
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+export function OpenInterestCard({ data }: { data?: DashboardData['openInterest'] }) {
+    if (!data) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/coinglass/derivatives')
-                const json = await res.json()
-                if (json.derivatives) {
-                    setData(json.derivatives)
-                }
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
-        }
-        fetchData()
-    }, [])
-
-    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
-    if (!data) return null
-
-    const oi = data.metrics?.openInterest || 0
-    const oiChange = data.metrics?.oiChange24h || 0
-    const isPositive = oiChange >= 0
-
-    const formatOI = (val: number) => {
-        if (val >= 1e9) return `$${(val / 1e9).toFixed(2)}B`
-        if (val >= 1e6) return `$${(val / 1e6).toFixed(1)}M`
-        return `$${val.toLocaleString()}`
-    }
+    const isPositive = data.change24h >= 0
 
     return (
         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
@@ -916,30 +834,26 @@ export function OpenInterestCard() {
                 <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
                 <span className="text-xs font-bold text-white">未平倉</span>
                 <ExplainTooltip
-                    term="未平倉合約 (Open Interest)"
+                    term="未平倉合約 (OI)"
                     definition="當前未平倉的合約總價值。"
                     explanation={
                         <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>OI 上升</strong>：新資金流入，趨勢可能延續。</li>
-                            <li><strong>OI 下降</strong>：資金撤離，趨勢可能結束。</li>
+                            <li><strong>OI 上升</strong>：新資金流入。</li>
+                            <li><strong>OI 下降</strong>：資金撤離。</li>
                         </ul>
                     }
                 />
             </div>
             <div className="space-y-1">
-                <div className="text-lg font-bold font-mono text-white">
-                    {formatOI(oi)}
-                </div>
-                <div className={cn(
-                    "text-xs font-mono",
-                    isPositive ? "text-green-400" : "text-red-400"
-                )}>
-                    24H: {isPositive ? '+' : ''}{oiChange.toFixed(2)}%
+                <div className="text-lg font-bold font-mono text-white">{data.formatted}</div>
+                <div className={cn("text-xs font-mono", isPositive ? "text-green-400" : "text-red-400")}>
+                    24H: {isPositive ? '+' : ''}{data.change24h.toFixed(2)}%
                 </div>
             </div>
         </div>
     )
 }
+
 
 // ============================================
 // Whale Watch Components

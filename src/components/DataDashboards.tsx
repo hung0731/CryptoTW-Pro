@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     LiquidationWaterfall,
     FundingRateRankings,
@@ -16,35 +16,56 @@ import {
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // ============================================
 // Aggregated Dashboard Views (for /prediction)
-// Card-based layout for key metrics
+// Single API call → distribute to cards
 // ============================================
 
 export function DerivativesView() {
+    const [dashboard, setDashboard] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchDashboard = async () => {
+            try {
+                const res = await fetch('/api/coinglass/dashboard')
+                const json = await res.json()
+                setDashboard(json.dashboard)
+            } catch (e) {
+                console.error('Dashboard fetch error:', e)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchDashboard()
+        const interval = setInterval(fetchDashboard, 120000) // Refresh every 2 min
+        return () => clearInterval(interval)
+    }, [])
+
     return (
         <div className="space-y-5">
             {/* AI Summary */}
             <DerivativesAiSummaryCard />
 
-            {/* Key Metrics Grid - 4 Cards */}
+            {/* Key Metrics Grid - 4 Cards (Single API) */}
             <section>
                 <h2 className="text-xs font-bold text-neutral-500 mb-3 flex items-center gap-1.5">
                     <BarChart3 className="w-3 h-3" /> 關鍵指標
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
                     {/* BTC Funding Rate */}
-                    <FundingSummary />
+                    <FundingSummary data={dashboard?.funding} />
 
                     {/* 24H Liquidation */}
-                    <LiquidationSummary />
+                    <LiquidationSummary data={dashboard?.liquidation} />
 
                     {/* Long/Short Ratio */}
-                    <LongShortSummary />
+                    <LongShortSummary data={dashboard?.longShort} />
 
                     {/* Open Interest */}
-                    <OpenInterestCard />
+                    <OpenInterestCard data={dashboard?.openInterest} />
                 </div>
             </section>
 

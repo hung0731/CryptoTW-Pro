@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { NewsFlashItem, getCoinglassApiKey } from '@/lib/coinglass'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
+import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -30,7 +31,11 @@ function mapToNewsFlashItem(item: CoinglassNewsItem, index: number): NewsFlashIt
     }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    // Rate limit: 60 requests per minute per IP
+    const rateLimited = simpleApiRateLimit(req, 'cg-news', 60, 60)
+    if (rateLimited) return rateLimited
+
     try {
         // Check cache first
         const cached = getCache<NewsFlashItem[]>(CACHE_KEY)

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 import { getInviteeDetail, parseOkxData } from '@/lib/okx-affiliate'
+import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 // Default verification rules (fallback if DB config unavailable)
 const DEFAULT_CONFIG = {
@@ -29,6 +30,10 @@ async function getVerificationConfig(supabase: ReturnType<typeof createAdminClie
 }
 
 export async function POST(req: NextRequest) {
+    // Rate limit: 5 binding requests per minute per IP (prevent abuse)
+    const rateLimited = simpleApiRateLimit(req, 'binding', 5, 60)
+    if (rateLimited) return rateLimited
+
     try {
         const supabase = createAdminClient()
         const { lineUserId, exchange, uid } = await req.json()
