@@ -38,10 +38,10 @@ export async function GET(req: NextRequest) {
             fetchSafe(coinglassV4Request<any[]>('/api/futures/fundingRate/ohlc-history', { symbol: 'BTC', interval: '1d', limit: 1 }), 'Funding'),
 
             // Leverage: 24H Liquidation
-            fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1d', limit: 1 }), 'Liquidation 24H'),
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1d', limit: 1, exchange_list: 'Binance' }), 'Liquidation 24H'),
 
             // Volatility: 1H Liquidation
-            fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1h', limit: 1 }), 'Liquidation 1H'),
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1h', limit: 1, exchange_list: 'Binance' }), 'Liquidation 1H'),
 
             // Sentiment: Fear & Greed
             fetchSafe(coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }), 'FearGreed'),

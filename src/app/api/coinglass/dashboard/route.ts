@@ -27,8 +27,9 @@ export async function GET(req: NextRequest) {
             // BTC Funding Rate (Binance)
             coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }),
             // 24H Liquidation (aggregated across all exchanges)
+            // Fix: Add exchange_list as it seems required now
             coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', {
-                symbol: 'BTC', interval: '1d', limit: 1
+                symbol: 'BTC', interval: '1d', limit: 1, exchange_list: 'Binance'
             }),
             // Global Long/Short
             coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
@@ -40,17 +41,17 @@ export async function GET(req: NextRequest) {
             }),
             // Open Interest (aggregated)
             coinglassV4Request<any[]>('/api/futures/open-interest/ohlc-aggregated-history', {
-                symbol: 'BTC', interval: '1d', limit: 2
+                symbol: 'BTC', interval: '1d', limit: 2, exchange_list: 'Binance'
             })
         ])
 
         // Debug log
         console.log('[Dashboard] Raw API responses:', {
-            fundingData: JSON.stringify(fundingData?.[0]).slice(0, 200),
-            liquidationData: JSON.stringify(liquidationData?.[0]).slice(0, 200),
-            longShortGlobal: JSON.stringify(longShortGlobal?.[0]).slice(0, 200),
-            longShortTop: JSON.stringify(longShortTop?.[0]).slice(0, 200),
-            oiData: JSON.stringify(oiData?.[0]).slice(0, 200)
+            fundingData: JSON.stringify(fundingData?.[0] || {}).slice(0, 200),
+            liquidationData: JSON.stringify(liquidationData?.[0] || {}).slice(0, 200),
+            longShortGlobal: JSON.stringify(longShortGlobal?.[0] || {}).slice(0, 200),
+            longShortTop: JSON.stringify(longShortTop?.[0] || {}).slice(0, 200),
+            oiData: JSON.stringify(oiData?.[0] || {}).slice(0, 200)
         })
 
         // Process Funding Rate
