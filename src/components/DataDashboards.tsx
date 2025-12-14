@@ -9,7 +9,6 @@ import {
     IndicatorsGrid,
     DerivativesAiSummaryCard,
     // New compact card components
-    FundingSummary,
     LiquidationSummary,
     LongShortSummary,
     OpenInterestCard
@@ -49,15 +48,12 @@ export function DerivativesView() {
             {/* AI Summary */}
             <DerivativesAiSummaryCard />
 
-            {/* Key Metrics Grid - 4 Cards (Single API) */}
+            {/* Key Metrics Grid - 3 Cards (Single API) */}
             <section>
                 <h2 className="text-xs font-bold text-neutral-500 mb-3 flex items-center gap-1.5">
                     <BarChart3 className="w-3 h-3" /> 關鍵指標
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
-                    {/* BTC Funding Rate */}
-                    <FundingSummary data={dashboard?.funding} />
-
+                <div className="grid grid-cols-3 gap-3">
                     {/* 24H Liquidation */}
                     <LiquidationSummary data={dashboard?.liquidation} />
 

@@ -23,11 +23,13 @@ export async function GET(req: NextRequest) {
         }
 
         // Parallel fetch all data
-        const [fundingData, liquidationData, longShortGlobal, longShortTop] = await Promise.all([
+        const [fundingData, liquidationData, longShortGlobal, longShortTop, oiData] = await Promise.all([
             // BTC Funding Rate (Binance)
             coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }),
-            // 24H Liquidation
-            coinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: 'BTC', interval: '1d', limit: 1 }),
+            // 24H Liquidation (aggregated across all exchanges)
+            coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', {
+                symbol: 'BTC', interval: '1d', limit: 1
+            }),
             // Global Long/Short
             coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
                 symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1
@@ -35,40 +37,78 @@ export async function GET(req: NextRequest) {
             // Top Accounts Long/Short
             coinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', {
                 symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1
+            }),
+            // Open Interest (aggregated)
+            coinglassV4Request<any[]>('/api/futures/open-interest/ohlc-aggregated-history', {
+                symbol: 'BTC', interval: '1d', limit: 2
             })
         ])
 
+        // Debug log
+        console.log('[Dashboard] Raw API responses:', {
+            fundingData: JSON.stringify(fundingData?.[0]).slice(0, 200),
+            liquidationData: JSON.stringify(liquidationData?.[0]).slice(0, 200),
+            longShortGlobal: JSON.stringify(longShortGlobal?.[0]).slice(0, 200),
+            longShortTop: JSON.stringify(longShortTop?.[0]).slice(0, 200),
+            oiData: JSON.stringify(oiData?.[0]).slice(0, 200)
+        })
+
         // Process Funding Rate
+        // API returns rate as decimal (e.g., 0.0001 = 0.01%)
         let btcFundingRate = 0
         if (fundingData && fundingData.length > 0) {
-            const marginList = fundingData[0]?.stablecoin_margin_list || []
-            const binanceData = marginList.find((e: any) => e.exchange === 'Binance')
+            // Try different possible structures
+            const marginList = fundingData[0]?.stablecoin_margin_list ||
+                fundingData[0]?.uMarginList ||
+                fundingData[0]?.marginList || []
+            const binanceData = marginList.find((e: any) =>
+                e.exchange === 'Binance' || e.exchangeName === 'Binance'
+            )
             if (binanceData) {
-                btcFundingRate = binanceData.funding_rate
+                btcFundingRate = binanceData.funding_rate || binanceData.fundingRate || 0
             }
         }
 
         // Process Liquidation
+        // API returns: longLiquidationUsd, shortLiquidationUsd or long_liquidation_usd, short_liquidation_usd
         const liqData = liquidationData?.[0] || {}
-        const longLiq = liqData.longLiquidationUsd || 0
-        const shortLiq = liqData.shortLiquidationUsd || 0
+        const longLiq = liqData.longLiquidationUsd || liqData.long_liquidation_usd ||
+            liqData.longLiquidation || liqData.buyVolUsd || 0
+        const shortLiq = liqData.shortLiquidationUsd || liqData.short_liquidation_usd ||
+            liqData.shortLiquidation || liqData.sellVolUsd || 0
 
         // Process Long/Short
+        // API returns: longRate, shortRate or longRatio, shortRatio (as decimal 0-1 or percentage)
         const formatRate = (rate: number) => rate <= 1 ? rate * 100 : rate
         const globalLS = longShortGlobal?.[0] || null
         const topLS = longShortTop?.[0] || null
 
-        const globalLongRate = globalLS?.longRate ? formatRate(globalLS.longRate) : 50
-        const globalShortRate = globalLS?.shortRate ? formatRate(globalLS.shortRate) : 50
-        const topLongRate = topLS?.longRate ? formatRate(topLS.longRate) : 50
-        const topShortRate = topLS?.shortRate ? formatRate(topLS.shortRate) : 50
+        const globalLongRate = globalLS?.longRate || globalLS?.longRatio ?
+            formatRate(globalLS.longRate || globalLS.longRatio) : 50
+        const globalShortRate = globalLS?.shortRate || globalLS?.shortRatio ?
+            formatRate(globalLS.shortRate || globalLS.shortRatio) : 50
+        const topLongRate = topLS?.longRate || topLS?.longRatio ?
+            formatRate(topLS.longRate || topLS.longRatio) : 50
+        const topShortRate = topLS?.shortRate || topLS?.shortRatio ?
+            formatRate(topLS.shortRate || topLS.shortRatio) : 50
+
+        // Process OI
+        let oiValue = 0
+        let oiChange = 0
+        if (oiData && oiData.length >= 1) {
+            const current = oiData[0]?.openInterest || oiData[0]?.open_interest || oiData[0]?.o || 0
+            const previous = oiData.length >= 2 ?
+                (oiData[1]?.openInterest || oiData[1]?.open_interest || oiData[1]?.o || current) : current
+            oiValue = current
+            oiChange = previous > 0 ? ((current - previous) / previous) * 100 : 0
+        }
 
         // Construct dashboard object
         const dashboard = {
-            // BTC Funding Rate
+            // BTC Funding Rate (note: rate is already in decimal form, e.g., 0.0001 = 0.01%)
             funding: {
                 rate: btcFundingRate,
-                ratePercent: (btcFundingRate * 100).toFixed(4),
+                ratePercent: (btcFundingRate * 100).toFixed(4), // Convert to percentage
                 status: btcFundingRate > 0.0005 ? 'high' : btcFundingRate < 0 ? 'negative' : 'normal'
             },
 
@@ -87,36 +127,19 @@ export async function GET(req: NextRequest) {
             longShort: {
                 global: { longRate: globalLongRate, shortRate: globalShortRate },
                 topAccounts: { longRate: topLongRate, shortRate: topShortRate },
-                signal: getLSSignal(globalLongRate, topLongRate)
+                signal: getLSSignal(globalLongRate, topLongRate),
+                // Top trader ratio for AI Decision
+                topTraderRatio: topLongRate > 0 ? topLongRate / (100 - topLongRate) : 1
             },
 
-            // Open Interest (placeholder - will fetch from derivatives API)
+            // Open Interest
             openInterest: {
-                value: 0,
-                change24h: 0,
-                formatted: '$0'
+                value: oiValue,
+                change24h: oiChange,
+                formatted: formatUsd(oiValue)
             },
 
             lastUpdated: new Date().toISOString()
-        }
-
-        // Try to get OI data
-        try {
-            const oiData = await coinglassV4Request<any>('/api/futures/open-interest/aggregated-history', {
-                symbol: 'BTC', interval: '1d', limit: 2
-            })
-            if (oiData && oiData.length >= 1) {
-                const current = oiData[0]?.open_interest || 0
-                const previous = oiData[1]?.open_interest || current
-                const change = previous > 0 ? ((current - previous) / previous) * 100 : 0
-                dashboard.openInterest = {
-                    value: current,
-                    change24h: change,
-                    formatted: formatUsd(current)
-                }
-            }
-        } catch (e) {
-            console.error('OI fetch error:', e)
         }
 
         // Cache result
