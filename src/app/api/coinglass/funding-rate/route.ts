@@ -46,6 +46,15 @@ export async function GET(request: Request) {
 
         const processed = results.filter(item => item !== null)
 
+        // If no data fetched (API failure or empty)
+        if (processed.length === 0) {
+            console.warn('Funding Rate API returned empty')
+            return NextResponse.json(
+                { error: '資料存取失敗 (API Empty)' },
+                { status: 503 }
+            )
+        }
+
         // Sort: extreme positive first, then extreme negative
         const extremePositive = [...processed]
             .filter(p => p!.rate > 0.0001) // Slightly lower threshold as we have fewer tokens
@@ -68,10 +77,10 @@ export async function GET(request: Request) {
         })
     } catch (error) {
         console.error('Funding rate API error:', error)
-        return NextResponse.json({
-            error: 'Internal server error',
-            fundingRates: getDemoData()
-        })
+        return NextResponse.json(
+            { error: '資料存取失敗 (Server Error)' },
+            { status: 500 }
+        )
     }
 }
 

@@ -201,15 +201,25 @@ export function LiquidationWaterfall() {
 export function FundingRateRankings() {
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const res = await fetch('/api/coinglass/funding-rate')
                 const json = await res.json()
-                setData(json.fundingRates)
-            } catch (e) { console.error(e) }
-            finally { setLoading(false) }
+
+                if (json.error) {
+                    setError('資料存取失敗')
+                } else {
+                    setData(json.fundingRates)
+                }
+            } catch (e) {
+                console.error(e)
+                setError('資料存取失敗')
+            } finally {
+                setLoading(false)
+            }
         }
         fetchData()
     }, [])
@@ -222,12 +232,20 @@ export function FundingRateRankings() {
         )
     }
 
+    if (error) {
+        return (
+            <div className="bg-red-900/10 border border-red-500/20 rounded-xl p-4 flex flex-col items-center justify-center h-40">
+                <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
+                <p className="text-sm font-medium text-red-300">{error}</p>
+                <p className="text-xs text-red-500/70 mt-1">請稍後再試或檢查 API 設定</p>
+            </div>
+        )
+    }
+
     if (!data) return null
 
     return (
         <div className="space-y-4">
-            {/* Removed header as requested */}
-
             {/* Grid Layout for compact view */}
             <div className="grid grid-cols-2 gap-3">
                 {/* Extreme Positive (Bearish Signal) */}
@@ -235,6 +253,11 @@ export function FundingRateRankings() {
                     <div className="flex items-center gap-1 mb-2 pb-2 border-b border-white/5">
                         <TrendingUp className="w-3 h-3 text-red-400" />
                         <span className="text-xs font-bold text-red-400">極度看多</span>
+                        <ExplainTooltip
+                            term="極度看多 (高費率)"
+                            definition="多頭情緒過熱，需支付高額資金費。"
+                            explanation={<div>通常暗示市場過熱，可能有回調風險。</div>}
+                        />
                     </div>
                     <div className="space-y-0.5">
                         {(data.extremePositive || []).slice(0, 8).map((item: any, i: number) => (
@@ -256,6 +279,11 @@ export function FundingRateRankings() {
                     <div className="flex items-center gap-1 mb-2 pb-2 border-b border-white/5">
                         <TrendingDown className="w-3 h-3 text-green-400" />
                         <span className="text-xs font-bold text-green-400">極度看空</span>
+                        <ExplainTooltip
+                            term="極度看空 (負費率)"
+                            definition="空頭情緒過熱，需支付資金費給多頭。"
+                            explanation={<div>通常暗示市場過度恐慌，可能有軋空反彈。</div>}
+                        />
                     </div>
                     <div className="space-y-0.5">
                         {(data.extremeNegative || []).slice(0, 8).map((item: any, i: number) => (

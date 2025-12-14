@@ -64,28 +64,33 @@ ${JSON.stringify(top20, null, 2)}
     }
 }
 
+export async function getWhaleData() {
+    const [alerts, positions] = await Promise.all([
+        coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}),
+        coinglassV4Request<WhalePosition[]>('/api/hyperliquid/whale-position', {})
+    ])
+
+    // Get top 20 positions sorted by position value
+    const top20Positions = (positions || [])
+        .sort((a, b) => Math.abs(b.position_value_usd) - Math.abs(a.position_value_usd))
+        .slice(0, 20)
+
+    // Generate AI summary if needed (optional for router, but good for caching)
+    // For router, maybe we skip summary to save time? Or reuse it?
+    // Let's generate it.
+    const summary = await generateWhaleSummary(top20Positions)
+
+    return {
+        alerts: alerts || [],
+        positions: top20Positions,
+        summary: summary
+    }
+}
+
 export async function GET() {
     try {
-        const [alerts, positions] = await Promise.all([
-            coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}),
-            coinglassV4Request<WhalePosition[]>('/api/hyperliquid/whale-position', {})
-        ])
-
-        // Get top 20 positions sorted by position value
-        const top20Positions = (positions || [])
-            .sort((a, b) => Math.abs(b.position_value_usd) - Math.abs(a.position_value_usd))
-            .slice(0, 20)
-
-        // Generate AI summary
-        const summary = await generateWhaleSummary(top20Positions)
-
-        return NextResponse.json({
-            whales: {
-                alerts: alerts || [],
-                positions: top20Positions,
-                summary: summary
-            }
-        })
+        const data = await getWhaleData()
+        return NextResponse.json({ whales: data })
     } catch (error) {
         console.error('Whale Watch API Error:', error)
         return NextResponse.json({ error: 'Failed to fetch whale data' }, { status: 500 })
