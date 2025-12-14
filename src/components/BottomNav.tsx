@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Home, Bell, BarChart2, Calendar, User } from 'lucide-react'
+import { Home, Newspaper, BarChart2, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -18,9 +18,9 @@ export function BottomNav() {
         },
         {
             label: '快訊',
-            icon: Bell,
-            href: '/alerts',
-            active: pathname === '/alerts'
+            icon: Newspaper,
+            href: '/news',
+            active: pathname === '/news'
         },
         {
             label: '數據',
