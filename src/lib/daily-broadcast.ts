@@ -188,216 +188,141 @@ function getSuggestionFallback(stance: Stance): string {
 
 // ============================================
 // Step 3: Create Flex Message
+// (Based on CryptoTW Pro Flex 規範 - 參考 Currency Card)
 // ============================================
 
 export function createDailyBroadcastFlex(content: DailyBroadcastContent): FlexMessage {
-    const bodyContents: (FlexBox | FlexText | FlexSeparator)[] = []
-
-    // Header: 今日市場判斷
-    bodyContents.push({
-        type: 'box',
-        layout: 'horizontal',
-        contents: [
-            {
-                type: 'text',
-                text: '📊 今日市場判斷',
-                weight: 'bold',
-                size: 'sm',
-                color: '#ffffff'
-            },
-            {
-                type: 'text',
-                text: content.judgment.stance,
-                weight: 'bold',
-                size: 'sm',
-                color: getStanceColor(content.judgment.stance),
-                align: 'end'
-            }
-        ]
-    })
-
-    // Reasons
-    bodyContents.push({
-        type: 'box',
-        layout: 'vertical',
-        margin: 'md',
-        spacing: 'xs',
-        contents: content.judgment.reasons.map(reason => ({
-            type: 'text',
-            text: `• ${reason}`,
-            size: 'xs',
-            color: '#b0b0b0',
-            wrap: true
-        })) as FlexText[]
-    })
-
-    // Suggestion
-    bodyContents.push({
-        type: 'box',
-        layout: 'vertical',
-        margin: 'md',
-        contents: [
-            {
-                type: 'text',
-                text: '建議：',
-                size: 'xs',
-                color: '#888888',
-                weight: 'bold'
-            },
-            {
-                type: 'text',
-                text: content.judgment.suggestion,
-                size: 'xs',
-                color: '#ffffff',
-                wrap: true,
-                margin: 'xs'
-            }
-        ]
-    })
-
-    // Optional: 心態提醒
-    if (content.mindset) {
-        bodyContents.push({
-            type: 'separator',
-            margin: 'lg',
-            color: '#333333'
-        })
-        bodyContents.push({
-            type: 'box',
-            layout: 'vertical',
-            margin: 'md',
-            contents: [
-                {
-                    type: 'text',
-                    text: '🧠 心態提醒',
-                    size: 'xs',
-                    color: '#888888',
-                    weight: 'bold'
-                },
-                {
-                    type: 'text',
-                    text: content.mindset,
-                    size: 'xs',
-                    color: '#b0b0b0',
-                    wrap: true,
-                    margin: 'sm'
-                }
-            ]
-        })
-    }
-
-    // Optional: 市場變因
-    if (content.marketFactor) {
-        bodyContents.push({
-            type: 'separator',
-            margin: 'lg',
-            color: '#333333'
-        })
-        bodyContents.push({
-            type: 'box',
-            layout: 'vertical',
-            margin: 'md',
-            contents: [
-                {
-                    type: 'text',
-                    text: '⚠ 市場變因',
-                    size: 'xs',
-                    color: '#FF9900',
-                    weight: 'bold'
-                },
-                {
-                    type: 'text',
-                    text: content.marketFactor,
-                    size: 'xs',
-                    color: '#b0b0b0',
-                    wrap: true,
-                    margin: 'sm'
-                }
-            ]
-        })
-    }
-
-    // Footer: Branding
-    bodyContents.push({
-        type: 'separator',
-        margin: 'lg',
-        color: '#333333'
-    })
-
-    // BTC Price Change Reference
-    if (content.btcPriceChange) {
-        const pc = content.btcPriceChange
-        const formatChange = (n: number) => (n >= 0 ? '+' : '') + n.toFixed(1) + '%'
-        bodyContents.push({
-            type: 'box',
-            layout: 'vertical',
-            margin: 'md',
-            contents: [
-                {
-                    type: 'text',
-                    text: '⏱ BTC 價格變化（參考）',
-                    size: 'xxs',
-                    color: '#666666',
-                    margin: 'none'
-                },
-                {
-                    type: 'text',
-                    text: `1H：${formatChange(pc.h1)}   4H：${formatChange(pc.h4)}`,
-                    size: 'xxs',
-                    color: '#888888',
-                    margin: 'xs'
-                },
-                {
-                    type: 'text',
-                    text: `12H：${formatChange(pc.h12)}  24H：${formatChange(pc.h24)}`,
-                    size: 'xxs',
-                    color: '#888888',
-                    margin: 'xs'
-                }
-            ]
-        })
-        bodyContents.push({
-            type: 'separator',
-            margin: 'md',
-            color: '#333333'
-        })
-    }
-
-    bodyContents.push({
-        type: 'text',
-        text: '— CryptoTW Pro',
-        size: 'xxs',
-        color: '#555555',
-        align: 'end',
-        margin: 'md'
-    })
-
-    const bubble: FlexBubble = {
-        type: 'bubble',
-        size: 'mega',
-        styles: {
-            body: {
-                backgroundColor: '#1a1a1a'
-            }
-        },
-        body: {
-            type: 'box',
-            layout: 'vertical',
-            paddingAll: 'lg',
-            contents: bodyContents as any
-        }
-    }
+    const stanceColor = getStanceColor(content.judgment.stance)
+    const formatChange = (n: number) => (n >= 0 ? '+' : '') + n.toFixed(1) + '%'
+    const getChangeColor = (n: number) => n >= 0 ? '#00B900' : '#D00000'
 
     return {
         type: 'flex',
-        altText: `📊 今日市場判斷：${content.judgment.stance}`,
-        contents: bubble
+        altText: `幣圈日報：${content.judgment.stance}`,
+        contents: {
+            type: 'bubble',
+            size: 'kilo',
+            header: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    {
+                        type: 'box',
+                        layout: 'horizontal',
+                        contents: [
+                            {
+                                type: 'text',
+                                text: '幣圈日報',
+                                weight: 'bold',
+                                size: 'lg',
+                                color: '#1F1AD9',
+                                flex: 1
+                            },
+                            {
+                                type: 'text',
+                                text: '加密台灣 Pro',
+                                size: 'xxs',
+                                color: '#888888',
+                                align: 'end',
+                                gravity: 'center'
+                            }
+                        ]
+                    },
+                    {
+                        type: 'text',
+                        text: content.judgment.stance,
+                        weight: 'bold',
+                        size: 'xl',
+                        color: stanceColor,
+                        margin: 'sm'
+                    }
+                ]
+            },
+            body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    // 判斷理由
+                    ...content.judgment.reasons.map(reason => ({
+                        type: 'text' as const,
+                        text: `• ${reason}`,
+                        size: 'sm' as const,
+                        color: '#555555',
+                        wrap: true,
+                        margin: 'sm' as const
+                    })),
+
+                    { type: 'separator', margin: 'md', color: '#f0f0f0' },
+
+                    // 建議
+                    {
+                        type: 'box',
+                        layout: 'horizontal',
+                        margin: 'md',
+                        contents: [
+                            { type: 'text', text: '建議', size: 'sm', color: '#888888', flex: 1 },
+                            { type: 'text', text: content.judgment.suggestion, size: 'sm', color: '#111111', flex: 3, wrap: true, align: 'end' }
+                        ]
+                    },
+
+                    // 心態提醒 (if exists)
+                    ...(content.mindset ? [
+                        { type: 'separator' as const, margin: 'md' as const, color: '#f0f0f0' },
+                        {
+                            type: 'box' as const,
+                            layout: 'vertical' as const,
+                            margin: 'md' as const,
+                            contents: [
+                                { type: 'text' as const, text: '🧠 心態提醒', size: 'xs' as const, color: '#888888' },
+                                { type: 'text' as const, text: content.mindset, size: 'sm' as const, color: '#555555', wrap: true, margin: 'sm' as const }
+                            ]
+                        }
+                    ] : []),
+
+                    { type: 'separator', margin: 'md', color: '#f0f0f0' },
+
+                    // BTC 價格變化 (if exists)
+                    ...(content.btcPriceChange ? [
+                        {
+                            type: 'box' as const,
+                            layout: 'vertical' as const,
+                            margin: 'md' as const,
+                            contents: [
+                                { type: 'text' as const, text: 'BTC 價格變化', size: 'xs' as const, color: '#888888' },
+                                {
+                                    type: 'box' as const,
+                                    layout: 'horizontal' as const,
+                                    margin: 'sm' as const,
+                                    contents: [
+                                        { type: 'text' as const, text: '1H', size: 'xs' as const, color: '#888888', flex: 1 },
+                                        { type: 'text' as const, text: '4H', size: 'xs' as const, color: '#888888', flex: 1 },
+                                        { type: 'text' as const, text: '12H', size: 'xs' as const, color: '#888888', flex: 1 },
+                                        { type: 'text' as const, text: '24H', size: 'xs' as const, color: '#888888', flex: 1 }
+                                    ]
+                                },
+                                {
+                                    type: 'box' as const,
+                                    layout: 'horizontal' as const,
+                                    margin: 'xs' as const,
+                                    contents: [
+                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h1), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h1), weight: 'bold' as const, flex: 1 },
+                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h4), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h4), weight: 'bold' as const, flex: 1 },
+                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h12), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h12), weight: 'bold' as const, flex: 1 },
+                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h24), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h24), weight: 'bold' as const, flex: 1 }
+                                    ]
+                                }
+                            ]
+                        }
+                    ] : [])
+                ] as any
+            }
+        }
     }
 }
 
 function getStanceColor(stance: Stance): string {
-    if (stance.includes('多')) return '#00C853'  // Green
-    if (stance.includes('空')) return '#FF5252'  // Red
+    if (stance.includes('多')) return '#00B900'  // Green (same as up)
+    if (stance.includes('空')) return '#D00000'  // Red (same as down)
     return '#888888'  // Neutral gray
 }
 
