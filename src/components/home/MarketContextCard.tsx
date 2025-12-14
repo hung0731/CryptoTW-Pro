@@ -76,7 +76,7 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
     const contextText = data.summary || `市場整體呈現${data.sentiment}態勢。`
 
     return (
-        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-4 overflow-hidden">
             {/* AI Context Card */}
             <div className="mb-3">
                 <div className="flex items-center gap-2 mb-2">
@@ -121,6 +121,15 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
                     ))}
                 </div>
             )}
+
+            {/* Branding Footer */}
+            <div className="mt-2 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-neutral-500">
+                <div className="flex items-center gap-1.5">
+                    <Newspaper className="w-3 h-3" />
+                    <span>幣圈快訊</span>
+                </div>
+                <span>加密台灣 Pro</span>
+            </div>
         </div>
     )
 }

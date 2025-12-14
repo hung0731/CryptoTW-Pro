@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp, TrendingDown, Minus, Newspaper } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -64,7 +64,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
     const biasStyle = BiasConfig[data.bias] || BiasConfig['中性']
 
     return (
-        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 transition-all duration-300">
+        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-4 transition-all duration-300">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🧠</span>
@@ -149,6 +149,15 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
                     </p>
                 </div>
             )}
+
+            {/* Branding Footer */}
+            <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-neutral-500">
+                <div className="flex items-center gap-1.5">
+                    <Newspaper className="w-3 h-3" />
+                    <span>幣圈快訊</span>
+                </div>
+                <span>加密台灣 Pro</span>
+            </div>
         </div>
     )
 }

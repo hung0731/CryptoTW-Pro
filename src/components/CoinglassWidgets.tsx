@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge, Calendar as CalendarIcon, ArrowLeftRight, Radar, Users, ChevronDown, ChevronUp, Star, Info, AlertCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge, Calendar as CalendarIcon, ArrowLeftRight, Radar, Users, ChevronDown, ChevronUp, Star, Info, AlertCircle, Newspaper } from 'lucide-react'
 import { ExplainTooltip } from './ExplainTooltip'
 
 // ============================================
@@ -1104,7 +1104,7 @@ export function WhaleAiSummaryCard() {
     if (!fetchedSummary) return null
 
     return (
-        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-4 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-3">
                 <div className="bg-blue-500/20 p-1.5 rounded-lg">
                     <Users className="w-4 h-4 text-blue-400" />
@@ -1118,6 +1118,15 @@ export function WhaleAiSummaryCard() {
             <p className="text-xs text-neutral-300 leading-relaxed font-medium relative z-10">
                 {fetchedSummary}
             </p>
+
+            {/* Branding Footer */}
+            <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-neutral-500 relative z-10">
+                <div className="flex items-center gap-1.5">
+                    <Newspaper className="w-3 h-3" />
+                    <span>幣圈快訊</span>
+                </div>
+                <span>加密台灣 Pro</span>
+            </div>
         </div>
     )
 }
@@ -1231,7 +1240,7 @@ export function DerivativesAiSummaryCard() {
     }
 
     return (
-        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 overflow-hidden mb-5">
+        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-xl p-4 overflow-hidden mb-5">
             {/* AI Context Card */}
             <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -1244,6 +1253,15 @@ export function DerivativesAiSummaryCard() {
                 <p className="text-xs text-neutral-300 leading-relaxed font-medium">
                     {summary}
                 </p>
+            </div>
+
+            {/* Branding Footer */}
+            <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-neutral-500">
+                <div className="flex items-center gap-1.5">
+                    <Newspaper className="w-3 h-3" />
+                    <span>幣圈快訊</span>
+                </div>
+                <span>加密台灣 Pro</span>
             </div>
         </div>
     )
