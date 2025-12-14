@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
             fetchSafe(coinglassV4Request<any[]>('/api/index/bitcoin/price/history', { symbol: 'BTC', interval: '1h', limit: 2 }), 'OHLC 1H'),
 
             // Leverage: BTC Funding Rate
-            fetchSafe(coinglassV4Request<any[]>('/api/futures/fundingRate/ohlc-history', { symbol: 'BTC', interval: '1d', limit: 1 }), 'Funding'),
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/funding-rate/ohlc-history', { symbol: 'BTC', interval: '1d', limit: 1 }), 'Funding'),
 
             // Leverage: 24H Liquidation
             fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1d', limit: 1, exchange_list: 'Binance' }), 'Liquidation 24H'),
@@ -46,8 +46,8 @@ export async function GET(req: NextRequest) {
             // Sentiment: Fear & Greed
             fetchSafe(coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }), 'FearGreed'),
 
-            // Whale: Long/Short
-            fetchSafe(coinglassV4Request<any[]>('/api/futures/top-long-short-position-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }), 'WhaleRatio')
+            // Whale: Long/Short Account Ratio (V4 standard)
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }), 'WhaleRatio')
         ])
 
         // --- 1. Market Regime (市場狀態) ---
