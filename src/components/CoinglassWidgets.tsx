@@ -863,11 +863,19 @@ export function WhaleAlertFeed() {
             try {
                 const res = await fetch('/api/market/whales')
                 const json = await res.json()
-                console.log('Whale API Response:', json) // Debug
-                if (json.whales?.alerts && json.whales.alerts.length > 0) {
+                console.log('🐋 Whale API Response:', json)
+                console.log('🐋 Alerts array:', json.whales?.alerts)
+                console.log('🐋 Positions array:', json.whales?.positions)
+
+                if (json.whales?.alerts && Array.isArray(json.whales.alerts) && json.whales.alerts.length > 0) {
+                    console.log('🐋 Setting alerts:', json.whales.alerts.length, 'items')
                     setAlerts(json.whales.alerts)
+                } else {
+                    console.log('🐋 No alerts to set')
                 }
-            } catch (e) { console.error('Whale API Error:', e) }
+            } catch (e) {
+                console.error('🐋 Whale API Error:', e)
+            }
             finally { setLoading(false) }
         }
         fetchAlerts()
