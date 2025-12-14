@@ -297,24 +297,45 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                             type: "box",
                             layout: "horizontal",
                             contents: [
-                                { type: "text", text: "📈 交易市場狀態", weight: "bold", size: "md", color: "#1F1AD9", flex: 1 },
-                                { type: "text", text: "Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                                { type: "text", text: "交易市場狀態", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                                { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
                             ]
                         },
-                        { type: "separator", margin: "md", color: "#f0f0f0" },
+                        { type: "separator", margin: "lg", color: "#f0f0f0" },
                         {
                             type: "box",
                             layout: "vertical",
                             margin: "md",
                             spacing: "sm",
                             contents: [
-                                { type: "text", text: "資金費率：🔓", size: "sm", color: "#888888" },
-                                { type: "text", text: "多空比：🔓", size: "sm", color: "#888888" },
-                                { type: "text", text: "清算壓力：🔓", size: "sm", color: "#888888" }
+                                {
+                                    type: "box",
+                                    layout: "horizontal",
+                                    contents: [
+                                        { type: "text", text: "資金費率", size: "sm", color: "#555555", flex: 1 },
+                                        { type: "text", text: "🔓", size: "sm", color: "#888888", align: "end" }
+                                    ]
+                                },
+                                {
+                                    type: "box",
+                                    layout: "horizontal",
+                                    contents: [
+                                        { type: "text", text: "多空比", size: "sm", color: "#555555", flex: 1 },
+                                        { type: "text", text: "🔓", size: "sm", color: "#888888", align: "end" }
+                                    ]
+                                },
+                                {
+                                    type: "box",
+                                    layout: "horizontal",
+                                    contents: [
+                                        { type: "text", text: "清算壓力", size: "sm", color: "#555555", flex: 1 },
+                                        { type: "text", text: "🔓", size: "sm", color: "#888888", align: "end" }
+                                    ]
+                                }
                             ]
                         },
                         { type: "separator", margin: "md", color: "#f0f0f0" },
-                        { type: "text", text: "🔓 解鎖查看市場狀態", size: "xs", color: "#1F1AD9", margin: "md", align: "center" }
+                        { type: "text", text: "解鎖查看目前市場偏多還是偏空", size: "xs", color: "#888888", margin: "md", wrap: true }
                     ]
                 },
                 footer: {
@@ -350,8 +371,16 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                     type: "box",
                     layout: "vertical",
                     contents: [
-                        { type: "text", text: "📈 交易市場狀態", weight: "bold", size: "md", color: "#1F1AD9" },
-                        { type: "text", text: "⚠️ 暫時無法取得數據", size: "sm", color: "#888888", margin: "md" }
+                        {
+                            type: "box",
+                            layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "交易市場狀態", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                                { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                            ]
+                        },
+                        { type: "separator", margin: "lg", color: "#f0f0f0" },
+                        { type: "text", text: "暫時無法取得數據", size: "sm", color: "#888888", margin: "md" }
                     ]
                 }
             }
@@ -377,11 +406,11 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "📈 交易市場狀態", weight: "bold", size: "md", color: "#1F1AD9", flex: 1 },
-                            { type: "text", text: "Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                            { type: "text", text: "交易市場狀態", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                            { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
                         ]
                     },
-                    { type: "separator", margin: "md", color: "#f0f0f0" },
+                    { type: "separator", margin: "lg", color: "#f0f0f0" },
                     {
                         type: "box",
                         layout: "vertical",
@@ -415,7 +444,7 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                         ]
                     },
                     { type: "separator", margin: "md", color: "#f0f0f0" },
-                    { type: "text", text: `⏱ ${timeText}`, size: "xxs", color: "#888888", margin: "sm", align: "end" }
+                    { type: "text", text: timeText, size: "xxs", color: "#888888", margin: "sm", align: "end" }
                 ]
             }
         }
@@ -1608,7 +1637,8 @@ export async function POST(req: NextRequest) {
                 // C. Currency Converter & Rates - 自然語言版本
                 // 支援: #TWD 1000, USD 5000, 1000美金, 換1000u, #TWD (純查匯率)
                 const currencyParsed = parseCurrencyAmount(originalText)
-                const isRateOnlyQuery = /^[#@$]?(TWD|USD|USDT|\u5339\u7387|\u532f\u7387)$/i.test(text)
+                // 純查匯率（不帶金額）
+                const isRateOnlyQuery = /^[#@$]?(TWD|USD|USDT)$/i.test(text) || originalText === '匯率' || originalText === '匯率查詢'
 
                 if (currencyParsed || isRateOnlyQuery) {
                     const [maxData, bitoData, forexRate] = await Promise.all([
