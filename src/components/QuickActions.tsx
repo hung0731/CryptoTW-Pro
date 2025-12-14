@@ -17,12 +17,7 @@ const actions: QuickAction[] = [
         href: '/prediction',
         color: 'text-neutral-400'
     },
-    {
-        icon: <Calendar className="w-4 h-4" />,
-        label: '日曆',
-        href: '/calendar',
-        color: 'text-neutral-400'
-    },
+
     {
         icon: <Bell className="w-4 h-4" />,
         label: '提醒',

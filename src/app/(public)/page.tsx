@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { BottomNav } from '@/components/BottomNav'
 import { useLiff } from '@/components/LiffProvider'
 import {
-    Bell, Settings, ChevronRight, Calendar
+    Bell, Settings, ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
@@ -78,14 +78,14 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* ===== 1. Flash News Feed (Protagonist) ===== */}
-                <FlashNewsFeed compact />
-
-                {/* ===== 2. Market Status (Dashboard) ===== */}
+                {/* ===== 1. Market Status (Dashboard) ===== */}
                 <MarketStatusGrid />
 
-                {/* ===== 3. Market Tools (Entry) ===== */}
+                {/* ===== 2. Market Tools (Entry) ===== */}
                 <MarketEntryWidgets />
+
+                {/* ===== 3. Flash News Feed (Protagonist?) -> Moved to bottom ===== */}
+                <FlashNewsFeed compact />
 
             </div>
 

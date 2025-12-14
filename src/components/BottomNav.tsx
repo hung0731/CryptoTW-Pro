@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Home, Newspaper, BarChart2, Calendar, User } from 'lucide-react'
+import { Home, Newspaper, BarChart2, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -28,12 +28,7 @@ export function BottomNav() {
             href: '/prediction',
             active: pathname === '/prediction'
         },
-        {
-            label: '日曆',
-            icon: Calendar,
-            href: '/calendar',
-            active: pathname === '/calendar'
-        },
+
         {
             label: '我的',
             icon: User,

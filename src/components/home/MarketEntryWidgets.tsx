@@ -75,9 +75,9 @@ export function MarketEntryWidgets() {
 
     if (loading) {
         return (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
                 {[1, 2, 3, 4].map(i => (
-                    <Skeleton key={i} className="h-20 w-full bg-neutral-900/50 rounded-xl" />
+                    <Skeleton key={i} className="h-28 w-36 flex-none bg-neutral-900/50 rounded-xl" />
                 ))}
             </div>
         )
@@ -86,23 +86,22 @@ export function MarketEntryWidgets() {
     return (
         <div className="space-y-3">
             <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider px-1">市場工具</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
                 {tools.map((tool, i) => (
                     <div
                         key={i}
                         className={cn(
-                            "relative rounded-xl border transition-all overflow-hidden group hover:bg-neutral-900/50",
+                            "flex-none w-36 h-28 relative rounded-xl border transition-all overflow-hidden group hover:bg-neutral-900/50 snap-center",
                             tool.active
                                 ? "bg-neutral-900/80 border-blue-500/30 hover:border-blue-500/50"
                                 : "bg-neutral-900/30 border-white/5"
                         )}
                     >
-                        <Link href={tool.href} className="block p-4 h-full w-full">
-                            <div className="flex items-center justify-between mb-1.5 pr-4"> {/* pr-4 for icon space */}
-                                <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors">
+                        <Link href={tool.href} className="block p-4 h-full w-full flex flex-col justify-between">
+                            <div className="flex items-center justify-between pr-4">
+                                <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors whitespace-nowrap">
                                     {tool.title}
                                 </span>
-                                {/* Arrow mainly for cues */}
                                 <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
                             </div>
 
@@ -116,11 +115,11 @@ export function MarketEntryWidgets() {
                             </div>
                         </Link>
 
-                        {/* Help Icon - Absolute positioned, high z-index */}
+                        {/* Help Icon - Absolute positioned */}
                         <HelpDrawer
                             title={tool.title}
                             content={getExplanation(tool.title)}
-                            className="absolute top-2 right-2 z-20 opacity-40 hover:opacity-100" // Low opacity default to avoid distraction
+                            className="absolute top-2 right-2 z-20 opacity-40 hover:opacity-100"
                         />
 
                         {/* Active Indicator Pulse */}

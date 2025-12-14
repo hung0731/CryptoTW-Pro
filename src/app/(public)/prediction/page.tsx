@@ -18,7 +18,7 @@ import {
     WhalePositionsList,
     ExchangeTransparency,
     LongShortRatio,
-    EconomicCalendar
+
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 
@@ -201,25 +201,18 @@ function DataPageContent() {
     const [markets, setMarkets] = useState<any[]>([])
     const [predictLoading, setPredictLoading] = useState(true)
 
-    // Calendar Snapshot for Overview
-    const [calendarEvents, setCalendarEvents] = useState<any[]>([])
+
 
     const fetchMarketData = async () => {
         setMarketLoading(true)
         try {
-            const [marketRes, calendarRes] = await Promise.all([
-                fetch('/api/market').then(r => r.json()),
-                fetch('/api/coinglass/calendar').then(r => r.json())
+            const [marketRes] = await Promise.all([
+                fetch('/api/market').then(r => r.json())
             ])
 
             if (marketRes.market) setMarketData(marketRes.market)
             if (marketRes.fearGreed) setFearGreed(marketRes.fearGreed)
             if (marketRes.global) setGlobalData(marketRes.global)
-
-            if (calendarRes.calendar?.events) {
-                // Get today's high importance events
-                setCalendarEvents(calendarRes.calendar.events.filter((e: any) => e.importance >= 2).slice(0, 3))
-            }
         } catch (e) {
             console.error(e)
         } finally {
@@ -326,32 +319,7 @@ function DataPageContent() {
                         </section>
                     )}
 
-                    {/* Section: 今日重點 */}
-                    {calendarEvents.length > 0 && (
-                        <section>
-                            <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-sm font-medium text-neutral-500">今日重點事件</h2>
-                                <Link href="/calendar" className="text-[10px] text-neutral-500 hover:text-white transition-colors">完整日曆 →</Link>
-                            </div>
-                            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
-                                <div className="space-y-2">
-                                    {calendarEvents.map((e, i) => (
-                                        <div key={i} className="flex items-center justify-between text-xs">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-neutral-500 font-mono">{e.time}</span>
-                                                <span className="text-neutral-300">{e.country} {e.event}</span>
-                                            </div>
-                                            <div className="flex gap-0.5">
-                                                {[...Array(e.importance)].map((_, idx) => (
-                                                    <div key={idx} className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </section>
-                    )}
+
 
                     {/* Section: 漲跌榜 */}
                     <section>

@@ -78,9 +78,9 @@ export async function GET(req: NextRequest) {
         // API returns: longLiquidationUsd, shortLiquidationUsd or long_liquidation_usd, short_liquidation_usd
         const liqData = liquidationData?.[0] || {}
         const longLiq = liqData.longLiquidationUsd || liqData.long_liquidation_usd ||
-            liqData.longLiquidation || liqData.buyVolUsd || 0
+            liqData.longLiquidation || liqData.buyVolUsd || liqData.aggregated_long_liquidation_usd || 0
         const shortLiq = liqData.shortLiquidationUsd || liqData.short_liquidation_usd ||
-            liqData.shortLiquidation || liqData.sellVolUsd || 0
+            liqData.shortLiquidation || liqData.sellVolUsd || liqData.aggregated_short_liquidation_usd || 0
 
         // Process Long/Short
         // API returns: longRate, shortRate or longRatio, shortRatio (as decimal 0-1 or percentage)
