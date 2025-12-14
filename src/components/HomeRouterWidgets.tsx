@@ -66,24 +66,24 @@ export function HomeRouterWidget() {
     return (
         <div className="space-y-6">
 
-            {/* 1. Market Mainline (Control Center) */}
-            <div className="bg-gradient-to-b from-neutral-800/80 to-neutral-900/80 border border-white/10 rounded-2xl p-5 shadow-lg backdrop-blur-sm relative overflow-hidden">
-                {/* Background decorative elements */}
+            {/* 1. Market Mainline (Control Center) - Highlighted Border */}
+            <div className="bg-neutral-900/50 border border-blue-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                {/* Background decorative elements - Subtle */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
 
                 <div className="relative z-10">
                     {/* Header Status */}
                     <div className="flex items-center gap-2 mb-2">
                         <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <h2 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">MARKET MAINLINE</h2>
+                        <h2 className="text-xs font-bold text-neutral-400 tracking-wider">市場總覽</h2>
                     </div>
 
                     {/* Headline */}
-                    <h1 className="text-xl font-bold text-white mb-3 leading-snug">
+                    <h1 className="text-lg font-bold text-white mb-3 leading-snug">
                         {data.mainline.headline}
                     </h1>
 
-                    {/* Action Hint (The Core Value) */}
+                    {/* Action Hint */}
                     <div className={cn(
                         "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg mb-6 border text-xs font-bold shadow-sm",
                         data.mainline.actionColor === 'red' ? "bg-red-500/10 border-red-500/20 text-red-400" :
@@ -99,11 +99,8 @@ export function HomeRouterWidget() {
                             <Link
                                 key={i}
                                 href={dim.name === '合約面' ? '/derivatives' : dim.name === '巨鯨面' ? '/smart-money' : '/prediction'}
-                                className="group bg-white/5 border border-white/5 rounded-xl p-2.5 hover:bg-white/10 hover:border-white/20 transition-all text-center flex flex-col items-center justify-center h-16 relative overflow-hidden"
+                                className="group bg-neutral-900 border border-white/5 rounded-xl p-2.5 hover:bg-white/10 hover:border-white/20 transition-all text-center flex flex-col items-center justify-center h-16 relative overflow-hidden"
                             >
-                                {/* Hover Effect */}
-                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
                                 <span className="text-[10px] text-neutral-500 mb-0.5">{dim.name}</span>
                                 <span className={cn(
                                     "text-sm font-bold",
@@ -119,14 +116,11 @@ export function HomeRouterWidget() {
                 </div>
             </div>
 
-            {/* 2. Anomaly Alert (Single Critical) - Only show if exists */}
+            {/* 2. Anomaly Alert (Single Critical) - Standard Background */}
             {data.anomaly && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="bg-red-950/20 border border-red-500/30 rounded-xl p-4 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-2 opacity-50">
-                            <AlertTriangle className="w-12 h-12 text-red-500/10" />
-                        </div>
-
+                    <div className="bg-neutral-900/50 border border-red-500/30 rounded-xl p-4 relative overflow-hidden">
+                        {/* Removed red background, kept red border for alert meaning, but base is neutral */}
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div>
                             <h3 className="text-xs font-bold text-red-400 uppercase tracking-wider">異常監測｜{data.anomaly.title}</h3>
@@ -136,8 +130,8 @@ export function HomeRouterWidget() {
                             {data.anomaly.message}
                         </p>
 
-                        {/* Context & Risk */}
-                        <div className="bg-red-500/5 rounded-lg p-2.5 mb-3 space-y-1">
+                        {/* Context & Risk - Subtle bg */}
+                        <div className="bg-neutral-900 rounded-lg p-2.5 mb-3 space-y-1 border border-white/5">
                             <div className="flex items-start gap-2 text-[11px]">
                                 <span className="text-neutral-500 shrink-0">原因：</span>
                                 <span className="text-neutral-300">{data.anomaly.reason}</span>
@@ -150,7 +144,7 @@ export function HomeRouterWidget() {
 
                         <Link
                             href={data.anomaly.link}
-                            className="flex items-center justify-center w-full py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-xs font-bold text-red-400 transition-all"
+                            className="flex items-center justify-center w-full py-2 bg-neutral-800 hover:bg-neutral-700 border border-white/5 rounded-lg text-xs font-bold text-neutral-300 transition-all"
                         >
                             查看圖表確認 <ArrowRight className="w-3 h-3 ml-1" />
                         </Link>
@@ -158,13 +152,13 @@ export function HomeRouterWidget() {
                 </div>
             )}
 
-            {/* 3. Cross Module References (Interpretation) */}
+            {/* 3. Cross Module References - Standard Background */}
             <div className="space-y-3">
                 {data.crossRefs.map((ref, i) => (
                     <Link
                         key={i}
                         href={ref.link}
-                        className="block bg-neutral-900/30 border border-white/5 rounded-xl p-3 pl-4 hover:bg-white/5 hover:border-white/10 transition-all group"
+                        className="block bg-neutral-900/50 border border-white/5 rounded-xl p-3 pl-4 hover:border-white/20 transition-all group"
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
@@ -187,9 +181,9 @@ export function HomeRouterWidget() {
                 ))}
             </div>
 
-            {/* 4. Focus Today (Navigation List) */}
+            {/* 4. Focus Today - Standard Background */}
             {data.focusToday && data.focusToday.length > 0 && (
-                <div className="bg-neutral-900/20 border border-white/5 rounded-xl p-4">
+                <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
                     <h3 className="text-xs font-bold text-neutral-500 mb-3 flex items-center gap-1.5">
                         <Zap className="w-3 h-3" /> 今日關注指標
                     </h3>

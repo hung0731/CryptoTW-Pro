@@ -127,8 +127,9 @@ export function TopCoinCards() {
                 const isUp = coin.change24h >= 0
                 const color = isUp ? '#22c55e' : '#ef4444' // green-500 : red-500
                 const textColor = isUp ? 'text-green-400' : 'text-red-400'
-                const bgColor = isUp ? 'bg-green-500/10' : 'bg-red-500/10'
-                const borderColor = isUp ? 'border-green-500/20' : 'border-red-500/20'
+                // Unified Background
+                const bgColor = 'bg-neutral-900/50'
+                const borderColor = 'border-white/5'
 
                 return (
                     <div
@@ -144,7 +145,7 @@ export function TopCoinCards() {
                         </div>
 
                         <div className="flex items-end gap-1">
-                            <span className={cn("text-xl font-bold font-mono tracking-tighter leading-none", textColor)}>
+                            <span className={cn("text-lg font-bold font-mono tracking-tighter leading-none", textColor)}>
                                 {isUp ? '+' : ''}{coin.change24h.toFixed(1)}%
                             </span>
                         </div>
