@@ -1128,34 +1128,35 @@ export function IndicatorsGrid({ compact = false }: { compact?: boolean }) {
         },
     ]
 
+
     if (compact) {
-        // Compact version for homepage - 2x2 grid
+        // Compact version for homepage - single column, unified style
         return (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
                 {indicators.map((ind, i) => (
                     <div
                         key={i}
-                        className={cn(
-                            "rounded-xl p-3 border transition-all",
-                            colorMap[ind.color] || 'bg-neutral-900/30 border-white/5'
-                        )}
+                        className="bg-neutral-900/50 rounded-xl border border-white/5 p-3"
                     >
-                        <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] text-neutral-400 truncate flex-1">{ind.name}</span>
-                            <ExplainTooltip {...ind.tooltip} />
-                        </div>
-                        <div className="flex items-end justify-between">
-                            <span className="text-xl font-bold font-mono">{ind.value}</span>
-                            <span className={cn(
-                                "text-[10px] px-1.5 py-0.5 rounded font-medium",
-                                ind.color === 'green' && 'bg-green-500/20 text-green-400',
-                                ind.color === 'blue' && 'bg-blue-500/20 text-blue-400',
-                                ind.color === 'yellow' && 'bg-yellow-500/20 text-yellow-400',
-                                ind.color === 'orange' && 'bg-orange-500/20 text-orange-400',
-                                ind.color === 'red' && 'bg-red-500/20 text-red-400',
-                            )}>
-                                {ind.signal}
-                            </span>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-neutral-400">{ind.name}</span>
+                                <ExplainTooltip {...ind.tooltip} />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg font-bold font-mono text-white">{ind.value}</span>
+                                <span className={cn(
+                                    "text-[10px] px-1.5 py-0.5 rounded font-medium",
+                                    ind.color === 'green' && 'text-green-400',
+                                    ind.color === 'blue' && 'text-blue-400',
+                                    ind.color === 'yellow' && 'text-yellow-400',
+                                    ind.color === 'orange' && 'text-orange-400',
+                                    ind.color === 'red' && 'text-red-400',
+                                    !ind.color && 'text-neutral-400'
+                                )}>
+                                    {ind.signal}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 ))}

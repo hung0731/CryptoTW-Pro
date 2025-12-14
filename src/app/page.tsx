@@ -181,15 +181,13 @@ export default function HomePage() {
                     )}
                 </section>
 
-                {/* ===== NEW: Market Signals - 市場體感 ===== */}
+                {/* ===== Market Signals - 市場體感 ===== */}
                 <section>
                     <h2 className="text-sm font-medium text-neutral-500 mb-3">市場體感</h2>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="space-y-2">
                         <MarketFeelingCard signals={signals} loading={signalsLoading} />
-                        <div className="grid grid-cols-2 gap-3">
-                            <WhaleStatusCard signals={signals} loading={signalsLoading} />
-                            <LiquidationPressureCard signals={signals} loading={signalsLoading} />
-                        </div>
+                        <WhaleStatusCard signals={signals} loading={signalsLoading} />
+                        <LiquidationPressureCard signals={signals} loading={signalsLoading} />
                     </div>
                 </section>
 

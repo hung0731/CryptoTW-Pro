@@ -1241,7 +1241,7 @@ function createPriceCard(data: any) {
                         type: "separator",
                         color: "#f0f0f0"
                     },
-                    // 24h 區間（位置感）
+                    // 24h 區間
                     {
                         type: "box",
                         layout: "horizontal",
@@ -1251,6 +1251,7 @@ function createPriceCard(data: any) {
                         ],
                         margin: "md"
                     },
+                    // 目前位置
                     {
                         type: "box",
                         layout: "horizontal",
@@ -1261,12 +1262,12 @@ function createPriceCard(data: any) {
                         margin: "sm"
                     },
                     { type: "separator", margin: "md", color: "#f0f0f0" },
-                    // 教學提示
+                    // 時間戳記
                     {
                         type: "text",
-                        text: "💬 你也可以直接輸入：ETH、SOL、DOGE",
+                        text: "⏱ 剛剛更新",
                         size: "xxs",
-                        color: "#888888",
+                        color: "#cccccc",
                         margin: "md"
                     }
                 ],
@@ -1438,7 +1439,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
                     { type: "separator", margin: "sm", color: "#f0f0f0" },
 
-                    // MAX（即時掛單）
+                    // MAX
                     {
                         type: "box",
                         layout: "horizontal",
@@ -1450,7 +1451,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         margin: "md"
                     },
 
-                    // BitoPro（即時掛單）
+                    // BitoPro
                     {
                         type: "box",
                         layout: "horizontal",
@@ -1464,23 +1465,21 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // 銀行匯率（背景參考）
+                    // 銀行匯率 + 溢價
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "銀行美元（參考）", size: "xs", color: "#888888", flex: 2 },
-                            { type: "text", text: `${forexRate} TWD`, size: "xs", color: "#888888", align: "end", flex: 2 }
+                            { type: "text", text: "銀行美元（參考）", size: "xs", color: "#aaaaaa", flex: 2 },
+                            { type: "text", text: `${forexRate} TWD`, size: "xs", color: "#aaaaaa", align: "end", flex: 2 }
                         ],
                         margin: "md"
                     },
-
-                    // 溢價
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "MAX 溢價", size: "xs", color: "#888888", flex: 2 },
+                            { type: "text", text: "MAX 溢價", size: "xs", color: "#aaaaaa", flex: 2 },
                             { type: "text", text: `${premium >= 0 ? '+' : ''}${premium.toFixed(2)}%`, size: "xs", color: premium >= 0 ? "#ff8800" : "#00B900", weight: "bold", align: "end", flex: 2 }
                         ],
                         margin: "xs"
@@ -1488,39 +1487,22 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // 買入成本 / 賣出回收比較
+                    // 系統結論（淺灰色）
                     {
                         type: "text",
-                        text: `目前買入成本較低：${bestBuyExchange}`,
+                        text: `買入成本較低：${bestBuyExchange}｜賣出回收較高：${bestSellExchange}`,
                         size: "xs",
-                        color: "#555555",
+                        color: "#aaaaaa",
                         margin: "md"
                     },
-                    {
-                        type: "text",
-                        text: `目前賣出回收較高：${bestSellExchange}`,
-                        size: "xs",
-                        color: "#555555",
-                        margin: "xs"
-                    },
 
-                    { type: "separator", margin: "md", color: "#f0f0f0" },
-
-                    // 說明
+                    // 時間戳記
                     {
                         type: "text",
-                        text: "銀行匯率為參考值，實際交易以交易所掛單為準",
+                        text: "⏱ 剛剛更新",
                         size: "xxs",
-                        color: "#aaaaaa",
-                        margin: "md",
-                        wrap: true
-                    },
-                    {
-                        type: "text",
-                        text: "💬 試試：USD 1000、USD 5000",
-                        size: "xxs",
-                        color: "#888888",
-                        margin: "sm"
+                        color: "#cccccc",
+                        margin: "md"
                     }
                 ],
                 paddingTop: "10px"
