@@ -84,37 +84,7 @@ export default function HomePage() {
                 {/* ===== 2. Quick Actions ===== */}
                 <QuickActions />
 
-                {/* ===== 3. Secondary Tools ===== */}
 
-                {/* Calendar Preview (Keep as it's useful for "Today") */}
-                <section>
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-neutral-500">今日焦點</h2>
-                        <Link href="/calendar" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-0.5">
-                            查看全部 <ChevronRight className="w-3 h-3" />
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3">
-                        {/* We can re-use a Calendar Widget here or just link. For now, keep it simple or re-add the calendar fetch logic if needed. 
-                            Since I removed the fetch logic from top-level component, I should probably creating a self-fetching CalendarWidget or just remove it for this iteration to strictly follow "Router" concept.
-                            Let's keep it clean. Just QuickActions leading to pages.
-                         */}
-                        <Link href="/calendar">
-                            <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4 flex items-center justify-between hover:bg-white/5 transition-all group">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                        <Calendar className="w-5 h-5 text-blue-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-white">財經日曆</p>
-                                        <p className="text-xs text-neutral-500">查看今日重大事件</p>
-                                    </div>
-                                </div>
-                                <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:translate-x-1 transition-transform" />
-                            </div>
-                        </Link>
-                    </div>
-                </section>
 
                 {/* ===== 4. OKX Promo ===== */}
                 <PromoBanner affiliateLink="https://www.okx.com/join/CRYPTOTW" />
