@@ -22,8 +22,8 @@ export async function getDerivativesData() {
     // Fetch key metrics (BTC only as market proxy)
     const [fundingData, liqData, lsData] = await Promise.all([
         coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }),
-        coinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: 'BTC', timeType: 'h4', limit: 1 }),
-        coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTC', timeType: 'h4', limit: 1 })
+        coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1d', limit: 1, exchange_list: 'Binance' }),
+        coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTCUSDT', exchange: 'Binance', interval: '1h', limit: 1 })
     ])
 
     // 1. Process Funding Rate (Binance specific)
@@ -45,14 +45,14 @@ export async function getDerivativesData() {
         }
     }
 
-    // 2. Process Liquidation (Latest 4h)
+    // 2. Process Liquidation (Latest 1d)
     const latestLiq = liqData && liqData.length > 0 ? liqData[0] : null
-    const longLiq = latestLiq?.longVolUsd || 0
-    const shortLiq = latestLiq?.shortVolUsd || 0
+    const longLiq = latestLiq?.aggregated_long_liquidation_usd || latestLiq?.longLiquidation || 0
+    const shortLiq = latestLiq?.aggregated_short_liquidation_usd || latestLiq?.shortLiquidation || 0
 
     // 3. Process Long/Short Ratio
     const latestLS = lsData && lsData.length > 0 ? lsData[0] : null
-    const lsRatio = latestLS?.longShortRatio || 0
+    const lsRatio = latestLS?.global_account_long_short_ratio || latestLS?.longShortRatio || 0
 
     // Format for AI
     const aiInput = {

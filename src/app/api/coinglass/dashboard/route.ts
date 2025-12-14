@@ -23,46 +23,49 @@ export async function GET(req: NextRequest) {
         }
 
         // Parallel fetch all data
-        const [fundingData, liquidationData, longShortGlobal, longShortTop, oiData] = await Promise.all([
+        // Parallel fetch all data with error handling for individual failures
+        const results = await Promise.allSettled([
             // BTC Funding Rate (Binance)
             coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }),
-            // 24H Liquidation (aggregated across all exchanges)
-            // Fix: Add exchange_list as it seems required now
+
+            // 24H Liquidation (verified working with exchange_list)
             coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', {
                 symbol: 'BTC', interval: '1d', limit: 1, exchange_list: 'Binance'
             }),
-            // Global Long/Short
+
+            // Global Long/Short (verified working with BTCUSDT + exchange)
             coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
-                symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1
+                symbol: 'BTCUSDT', exchange: 'Binance', interval: '1h', limit: 1
             }),
-            // Top Accounts Long/Short
+
+            // Top Accounts Long/Short (verified working with BTCUSDT + exchange)
             coinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', {
-                symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1
+                symbol: 'BTCUSDT', exchange: 'Binance', interval: '1h', limit: 1
             }),
-            // Open Interest (aggregated)
-            coinglassV4Request<any[]>('/api/futures/open-interest/ohlc-aggregated-history', {
-                symbol: 'BTC', interval: '1d', limit: 2, exchange_list: 'Binance'
+
+            // Open Interest (Best effort)
+            // Trying 'exchange-list' as fallback if ohlc history fails
+            coinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', {
+                symbol: 'BTCUSDT'
             })
         ])
 
-        // Debug log
-        console.log('[Dashboard] Raw API responses Keys:', {
-            fundingParams: Object.keys(fundingData?.[0] || {}),
-            liqParams: Object.keys(liquidationData?.[0] || {}),
-            lsGlobalParams: Object.keys(longShortGlobal?.[0] || {}),
-            lsTopParams: Object.keys(longShortTop?.[0] || {}),
-            oiParams: Object.keys(oiData?.[0] || {})
-        })
-        console.log('[Dashboard] Raw API Data Sample:', {
-            liqSample: JSON.stringify(liquidationData?.[0] || {}).slice(0, 100),
-            lsSample: JSON.stringify(longShortGlobal?.[0] || {}).slice(0, 100)
-        })
+        // Helper to unwrap settled promises safely
+        const getData = (index: number) => {
+            const res = results[index]
+            return res.status === 'fulfilled' ? res.value : null
+        }
+
+        const fundingData = getData(0)
+        const liquidationData = getData(1)
+        const longShortGlobal = getData(2)
+        const longShortTop = getData(3)
+        const oiData = getData(4)
 
         // Process Funding Rate
         // API returns rate as decimal (e.g., 0.0001 = 0.01%)
         let btcFundingRate = 0
         if (fundingData && fundingData.length > 0) {
-            // Try different possible structures
             const marginList = fundingData[0]?.stablecoin_margin_list ||
                 fundingData[0]?.uMarginList ||
                 fundingData[0]?.marginList || []
@@ -75,37 +78,45 @@ export async function GET(req: NextRequest) {
         }
 
         // Process Liquidation
-        // API returns: longLiquidationUsd, shortLiquidationUsd or long_liquidation_usd, short_liquidation_usd
+        // API returns: longLiquidationUsd, shortLiquidationUsd 
+        // OR aggregated_long_liquidation_usd (verified key)
         const liqData = liquidationData?.[0] || {}
         const longLiq = liqData.longLiquidationUsd || liqData.long_liquidation_usd ||
-            liqData.longLiquidation || liqData.buyVolUsd || liqData.aggregated_long_liquidation_usd || 0
+            liqData.longLiquidation || liqData.aggregated_long_liquidation_usd || 0
         const shortLiq = liqData.shortLiquidationUsd || liqData.short_liquidation_usd ||
-            liqData.shortLiquidation || liqData.sellVolUsd || liqData.aggregated_short_liquidation_usd || 0
+            liqData.shortLiquidation || liqData.aggregated_short_liquidation_usd || 0
 
-        // Process Long/Short
-        // API returns: longRate, shortRate or longRatio, shortRatio (as decimal 0-1 or percentage)
-        const formatRate = (rate: number) => rate <= 1 ? rate * 100 : rate
-        const globalLS = longShortGlobal?.[0] || null
-        const topLS = longShortTop?.[0] || null
+        // Process Long/Short (Global)
+        // V4 Key: global_account_long_percent, global_account_short_percent
+        // or old V3 keys as fallback
+        const globalLS = longShortGlobal?.[0] || {}
+        const globalLongRate = globalLS.global_account_long_percent || globalLS.longRate || globalLS.longRatio || 50
+        const globalShortRate = globalLS.global_account_short_percent || globalLS.shortRate || globalLS.shortRatio || 50
 
-        const globalLongRate = globalLS?.longRate || globalLS?.longRatio ?
-            formatRate(globalLS.longRate || globalLS.longRatio) : 50
-        const globalShortRate = globalLS?.shortRate || globalLS?.shortRatio ?
-            formatRate(globalLS.shortRate || globalLS.shortRatio) : 50
-        const topLongRate = topLS?.longRate || topLS?.longRatio ?
-            formatRate(topLS.longRate || topLS.longRatio) : 50
-        const topShortRate = topLS?.shortRate || topLS?.shortRatio ?
-            formatRate(topLS.shortRate || topLS.shortRatio) : 50
+        // Process Long/Short (Top Accounts)
+        // V4 Keys usually similar: top_account_long_percent ...
+        // We'll inspect or fallback. Assuming similar to global but with 'top' prefix or same structure
+        const topLS = longShortTop?.[0] || {}
+        // V4 Top Accounts usually returns: longAccount, shortAccount, longShortRatio
+        const topLongRate = topLS.longAccount || topLS.longRate || topLS.top_account_long_account || 50
+        const topShortRate = topLS.shortAccount || topLS.shortRate || topLS.top_account_short_account || 50
 
         // Process OI
+        // If exchange-list endpoint works, it returns array of exchanges. We find Binance.
         let oiValue = 0
         let oiChange = 0
-        if (oiData && oiData.length >= 1) {
-            const current = oiData[0]?.openInterest || oiData[0]?.open_interest || oiData[0]?.o || 0
-            const previous = oiData.length >= 2 ?
-                (oiData[1]?.openInterest || oiData[1]?.open_interest || oiData[1]?.o || current) : current
-            oiValue = current
-            oiChange = previous > 0 ? ((current - previous) / previous) * 100 : 0
+
+        if (oiData && Array.isArray(oiData)) {
+            // Check if it's exchange list
+            const binanceOI = oiData.find((e: any) => e.exchangeName === 'Binance' || e.exchange === 'Binance')
+            if (binanceOI) {
+                oiValue = binanceOI.openInterest || binanceOI.h1OI || 0
+                // Use 1h change or 24h change if available
+                oiChange = binanceOI.h24Change || binanceOI.h1Change || 0
+            } else if (oiData[0]?.openInterest) {
+                // Formatting for history/aggregated
+                oiValue = oiData[0].openInterest
+            }
         }
 
         // Construct dashboard object

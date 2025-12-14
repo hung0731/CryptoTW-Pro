@@ -1,39 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { coinglassV4Request } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-    try {
-        // Test LS with 'timeType' (V3 style) vs 'interval' (V4 style)
-        // Test OI with and without exchange_list
-        const [lsV4, lsV3, oiV4, oiNoEx] = await Promise.all([
-            coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
-                symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1
-            }),
-            coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
-                symbol: 'BTC', exchange: 'Binance', timeType: 'h1', limit: 1
-            }),
-            coinglassV4Request<any[]>('/api/futures/open-interest/ohlc-aggregated-history', {
-                symbol: 'BTC', interval: '1d', limit: 2, exchange_list: 'Binance'
-            }),
-            coinglassV4Request<any[]>('/api/futures/open-interest/ohlc-aggregated-history', {
-                symbol: 'BTC', interval: '1d', limit: 2
-            })
-        ])
+    const apiKey = process.env.COINGLASS_API_KEY
+    const headers = { 'CG-API-KEY': apiKey || '', 'Accept': 'application/json' }
 
-        return NextResponse.json({
-            lsV4: lsV4 ? 'Matches' : 'Null',
-            lsV3: lsV3 ? 'Matches' : 'Null',
-            oiV4: oiV4 ? 'Matches' : 'Null',
-            oiNoEx: oiNoEx ? 'Matches' : 'Null',
+    // Testing OI exchange-list variants
+    const tests = [
+        {
+            name: 'OI_ExList_Kebab',
+            url: 'https://open-api-v4.coinglass.com/api/futures/open-interest/exchange-list?symbol=BTCUSDT'
+        },
+        {
+            name: 'OI_ExList_Camel',
+            url: 'https://open-api-v4.coinglass.com/api/futures/openInterest/exchange-list?symbol=BTCUSDT'
+        },
+        // Also re-verify Liquidation with BTCUSDT just in case
+        {
+            name: 'Liq_ExList_Verify',
+            url: 'https://open-api-v4.coinglass.com/api/futures/liquidation/aggregated-history?symbol=BTCUSDT&interval=1d&limit=1&exchange_list=Binance'
+        }
+    ]
 
-            lsV4Sample: lsV4?.[0],
-            lsV3Sample: lsV3?.[0],
-            oiV4Sample: oiV4?.[0],
-            oiNoExSample: oiNoEx?.[0]
-        })
-    } catch (e: any) {
-        return NextResponse.json({ error: e.toString() }, { status: 500 })
+    const results: any = {}
+
+    for (const test of tests) {
+        try {
+            const res = await fetch(test.url, { headers, cache: 'no-store' })
+            const text = await res.text()
+            let json = null
+            try { json = JSON.parse(text) } catch { }
+
+            results[test.name] = {
+                status: res.status,
+                msg: json?.msg || json?.message || 'none',
+                dataSample: Array.isArray(json?.data) ? json.data[0] : (json?.data || 'null_or_empty')
+            }
+        } catch (e: any) {
+            results[test.name] = { error: e.toString() }
+        }
     }
+
+    return NextResponse.json(results)
 }

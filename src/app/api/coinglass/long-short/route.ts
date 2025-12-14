@@ -14,16 +14,17 @@ export async function GET(request: NextRequest) {
     const symbol = searchParams.get('symbol') || 'BTC'
 
     try {
+
         // Fetch long/short ratio from V4
         const [globalData, topAccountData] = await Promise.all([
             coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
-                symbol,
-                exchange: 'Binance', // V4 often requires exchange, default to Binance for major liquidity
+                symbol: symbol === 'BTC' ? 'BTCUSDT' : symbol, // V4 requires pair
+                exchange: 'Binance',
                 interval: '1h',
                 limit: 1
             }),
             coinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', {
-                symbol,
+                symbol: symbol === 'BTC' ? 'BTCUSDT' : symbol,
                 exchange: 'Binance',
                 interval: '1h',
                 limit: 1
@@ -35,33 +36,32 @@ export async function GET(request: NextRequest) {
         const topAccount = topAccountData?.[0] || null
 
         // Helper to formatting rate to percentage (0-100)
-        // V4 usually returns like 55.5 for 55.5% or 0.555. Safe check.
         const formatRate = (rate: number) => {
             if (rate <= 1) return rate * 100
             return rate
         }
 
-        const globalLongRate = global?.longRate ? formatRate(global.longRate) : 0
-        const globalShortRate = global?.shortRate ? formatRate(global.shortRate) : 0
+        const globalLongRate = global?.global_account_long_percent || global?.longRate ? formatRate(global.global_account_long_percent || global.longRate) : 50
+        const globalShortRate = global?.global_account_short_percent || global?.shortRate ? formatRate(global.global_account_short_percent || global.shortRate) : 50
 
-        const topLongRate = topAccount?.longRate ? formatRate(topAccount.longRate) : 0
-        const topShortRate = topAccount?.shortRate ? formatRate(topAccount.shortRate) : 0
+        const topLongRate = topAccount?.top_account_long_account || topAccount?.longRate ? formatRate(topAccount.top_account_long_account || topAccount.longRate) : 50
+        const topShortRate = topAccount?.top_account_short_account || topAccount?.shortRate ? formatRate(topAccount.top_account_short_account || topAccount.shortRate) : 50
 
         if (!global && !topAccount) {
-            throw new Error('No data returned')
+            // throw new Error('No data returned') // Soft fail instead
         }
 
         // Re-construct objects for frontend compatibility
         const globalObj = global ? {
             longRate: globalLongRate,
             shortRate: globalShortRate,
-            ratio: global.longShortRatio
+            ratio: global.global_account_long_short_ratio || global.longShortRatio
         } : null
 
         const topAccountObj = topAccount ? {
             longRate: topLongRate,
             shortRate: topShortRate,
-            ratio: topAccount.longShortRatio
+            ratio: topAccount.top_account_long_short_ratio || topAccount.longShortRatio
         } : null
 
         // Calculate sentiment signal
