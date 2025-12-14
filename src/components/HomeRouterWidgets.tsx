@@ -6,9 +6,25 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, Activity, Anchor, BarChart2, Info, ChevronRight, Zap, RefreshCcw } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { AIDecisionCard } from '@/components/home/AIDecisionCard'
 import { MarketContextCard } from '@/components/home/MarketContextCard'
 
+// AI Decision type (from backend)
+interface AIDecisionData {
+    conclusion: string
+    bias: '偏多' | '偏空' | '震盪' | '中性'
+    risk_level: '低' | '中' | '中高' | '高'
+    action: string
+    reasoning: string
+    tags?: {
+        btc: string
+        alt: string
+        sentiment: string
+    }
+}
+
 interface RouterData {
+    aiDecision?: AIDecisionData  // NEW: First screen
     mainline: {
         headline: string
         actionHint: string
@@ -16,7 +32,7 @@ interface RouterData {
         dimensions: {
             name: string
             status: string
-            color: string // 'red' | 'green' | 'yellow' | 'neutral'
+            color: string
         }[]
     }
     anomaly: {
@@ -74,9 +90,12 @@ export function HomeRouterWidget() {
     if (!data) return null
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
 
-            {/* 0. Market Context Brief (AI) - Top Priority */}
+            {/* 0. AI Decision Card (First Screen - Conclusion First) */}
+            <AIDecisionCard data={data.aiDecision || null} isLoading={loading} />
+
+            {/* 1. Market Context (News Highlights) - Collapsed by default */}
             <MarketContextCard data={data.marketContext || null} isLoading={loading} />
 
             {/* 1. Market Mainline (Control Center) - Highlighted Border */}

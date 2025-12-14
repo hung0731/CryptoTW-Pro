@@ -270,3 +270,99 @@ ${JSON.stringify(newsItems.slice(0, 40).map(n => ({
         return null
     }
 }
+
+// ============================================
+// AI Decision Generator (Decision-First UX)
+// ============================================
+
+export interface AIDecision {
+    conclusion: string       // "震盪偏空｜短線風險上升"
+    bias: '偏多' | '偏空' | '震盪' | '中性'
+    risk_level: '低' | '中' | '中高' | '高'
+    action: string           // "降低槓桿 / 等待確認"
+    reasoning: string        // 展開後的詳細分析
+    tags: {
+        btc: string
+        alt: string
+        sentiment: string
+    }
+}
+
+export async function generateAIDecision(
+    marketData: {
+        fundingRate: number
+        longShortRatio: number
+        totalLiquidation: number
+        sentimentScore: number
+        whaleStatus: string
+    },
+    newsHighlights: string[] = []
+): Promise<AIDecision | null> {
+    if (!genAI) return null
+
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+
+        const prompt = `
+你是一個加密貨幣市場分析 AI，專門幫用戶做「決策判讀」。
+你的任務不是給數據，而是給出「結論」—— 告訴用戶：「現在市場怎麼樣？我該怎麼做？」
+
+【嚴重警告】
+❌ 禁止：投資建議、買入賣出、目標價、止損
+✅ 必須：狀態描述、風險提示、觀察重點
+
+【輸入數據】
+1. 資金費率 (Funding Rate): ${(marketData.fundingRate * 100).toFixed(4)}%
+   - > 0.05% = 多頭過熱
+   - < -0.03% = 空頭擁擠
+   
+2. 多空比 (Long/Short): ${marketData.longShortRatio.toFixed(2)}
+   - > 1.2 = 散戶偏多
+   - < 0.8 = 散戶偏空
+   
+3. 4H 爆倉量: $${(marketData.totalLiquidation / 1000000).toFixed(1)}M
+   - > 100M = 劇烈波動
+   
+4. 情緒指數: ${marketData.sentimentScore}/100
+   - > 75 = 貪婪
+   - < 25 = 恐懼
+   
+5. 巨鯨狀態: ${marketData.whaleStatus}
+
+6. 近期新聞重點:
+${newsHighlights.slice(0, 3).map(n => `- ${n}`).join('\n') || '無特別消息'}
+
+【輸出格式】(Strict JSON)
+{
+  "conclusion": "10-15字，市場狀態一句話 (例：震盪偏空｜短線風險上升)",
+  "bias": "偏多" | "偏空" | "震盪" | "中性",
+  "risk_level": "低" | "中" | "中高" | "高",
+  "action": "10-20字，操作建議 (例：降低槓桿，等待方向確認)",
+  "reasoning": "50-80字，解釋為什麼這樣判斷，提到具體數據",
+  "tags": {
+    "btc": "4字狀態 (例：整理中)",
+    "alt": "4字狀態 (例：偏弱)",
+    "sentiment": "4字狀態 (例：修復中)"
+  }
+}
+
+請直接輸出 JSON，不要 Markdown。
+`
+
+        const result = await model.generateContent(prompt)
+        const text = result.response.text()
+
+        const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
+
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[1] || jsonMatch[0])
+        }
+
+        return JSON.parse(text)
+
+    } catch (e) {
+        console.error('Gemini AI Decision Error:', e)
+        return null
+    }
+}
+

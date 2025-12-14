@@ -4,7 +4,7 @@ import { getDerivativesData } from '../derivatives/route'
 import { getWhaleData } from '../whales/route'
 import { supabase } from '@/lib/supabase'
 import { cachedCoinglassV4Request } from '@/lib/coinglass'
-import { generateMarketContextBrief, MarketContextBrief } from '@/lib/gemini'
+import { generateMarketContextBrief, generateAIDecision, MarketContextBrief, AIDecision } from '@/lib/gemini'
 import { getCache, setCache } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
@@ -19,40 +19,57 @@ export async function GET() {
             supabase.from('market_reports').select('*').order('created_at', { ascending: false }).limit(1)
         ])
 
-        // --- New Market Context Logic (Cached) ---
+        // --- Market Context + AI Decision Logic ---
         let marketContext: MarketContextBrief | null = getCache('market_context_brief')
+        let aiDecision: AIDecision | null = getCache('ai_decision')
 
-        if (!marketContext) {
-            // Fetch raw news for AI (Cached request)
-            const news = await cachedCoinglassV4Request<any[]>('/api/newsflash/list', {
-                limit: 40, lang: 'zh-tw'
-            }, 300)
+        // Fetch news for both AI models
+        const news = await cachedCoinglassV4Request<any[]>('/api/newsflash/list', {
+            limit: 40, lang: 'zh-tw'
+        }, 300)
 
-            // Generate Context (only use news, no market metrics)
-            if (news && Array.isArray(news)) {
-                marketContext = await generateMarketContextBrief(news)
-                if (marketContext) {
-                    setCache('market_context_brief', marketContext, 1800) // Cache for 30 mins
-                }
+        // Generate Market Context (for news highlights)
+        if (!marketContext && news && Array.isArray(news)) {
+            marketContext = await generateMarketContextBrief(news)
+            if (marketContext) {
+                setCache('market_context_brief', marketContext, 1800) // 30 mins
             }
         }
-        // ----------------------------------------
 
+        // Generate AI Decision (main conclusion - first screen)
         const sentimentReport = sentimentRes?.data?.[0]
+        const fundingRate = derivatives?.metrics?.fundingRate || 0
+        const lsRatio = derivatives?.metrics?.lsRatio || 1
+        const totalLiq = (derivatives?.metrics?.longLiq || 0) + (derivatives?.metrics?.shortLiq || 0)
+        const sentimentScore = sentimentReport?.sentiment_score || 50
+        const whaleStatus = sentimentReport?.metadata?.market_structure?.bias || '中性'
+
+        if (!aiDecision) {
+            const newsHighlights = marketContext?.highlights?.slice(0, 3).map(h => h.title) || []
+
+            aiDecision = await generateAIDecision({
+                fundingRate,
+                longShortRatio: lsRatio,
+                totalLiquidation: totalLiq,
+                sentimentScore,
+                whaleStatus
+            }, newsHighlights)
+
+            if (aiDecision) {
+                setCache('ai_decision', aiDecision, 900) // 15 mins cache
+            }
+        }
+        // -----------------------------------------
 
         // 1. Build Mainline Status
         const headline = sentimentReport?.summary || "數據整合中..."
 
         // Dimensions & Status
-        const fundingRate = derivatives?.metrics?.fundingRate || 0
-        const sentimentScore = sentimentReport?.sentiment_score || 50
         const sentimentLabel = sentimentReport?.sentiment || "中性"
 
         let derivStatus = '中性'
         if (fundingRate > 0.0003) derivStatus = '過熱'
         else if (fundingRate < -0.0003) derivStatus = '偏空'
-
-        const whaleStatus = sentimentReport?.metadata?.market_structure?.bias || '中性'
 
         // Action Hint Logic
         let actionHint = "🟡 偏觀察｜多看少做" // Default
@@ -75,7 +92,6 @@ export async function GET() {
         // Priority 1: High Liquidation (Volatility)
         const longLiq = derivatives?.metrics?.longLiq || 0
         const shortLiq = derivatives?.metrics?.shortLiq || 0
-        const totalLiq = longLiq + shortLiq
 
         if (totalLiq > 100000000) { // > 100M
             const type = longLiq > shortLiq ? '多單爆倉' : '空單爆倉'
@@ -142,6 +158,7 @@ export async function GET() {
 
         return NextResponse.json({
             router: {
+                aiDecision, // NEW: First screen decision card
                 mainline: {
                     headline,
                     actionHint,
@@ -152,10 +169,10 @@ export async function GET() {
                         { name: '情緒面', status: sentimentLabel, color: sentimentLabel.includes('貪婪') ? 'red' : sentimentLabel.includes('恐懼') ? 'green' : 'neutral' }
                     ]
                 },
-                anomaly: primaryAnomaly, // Single object or null
+                anomaly: primaryAnomaly,
                 crossRefs,
                 focusToday,
-                marketContext // New field
+                marketContext
             }
         })
 
