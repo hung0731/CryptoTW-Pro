@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { NewsFlashItem, getCoinglassApiKey } from '@/lib/coinglass'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 60 // Cache for 1 min
+export const revalidate = 60
+
+const CACHE_KEY = 'coinglass_news'
 
 // Map Coinglass API response to our NewsFlashItem interface
 interface CoinglassNewsItem {
@@ -19,7 +22,7 @@ function mapToNewsFlashItem(item: CoinglassNewsItem, index: number): NewsFlashIt
         id: `news-${item.newsflash_release_time}-${index}`,
         title: item.newsflash_title,
         content: item.newsflash_content,
-        url: '#', // API doesn't provide article URL
+        url: '#',
         source: item.source_name,
         createTime: item.newsflash_release_time,
         highlight: false,
@@ -29,6 +32,15 @@ function mapToNewsFlashItem(item: CoinglassNewsItem, index: number): NewsFlashIt
 
 export async function GET() {
     try {
+        // Check cache first
+        const cached = getCache<NewsFlashItem[]>(CACHE_KEY)
+        if (cached) {
+            console.log('[Cache HIT] coinglass_news')
+            return NextResponse.json({ news: cached })
+        }
+
+        console.log('[Cache MISS] coinglass_news - fetching fresh data')
+
         const apiKey = getCoinglassApiKey()
 
         if (!apiKey) {
@@ -51,21 +63,21 @@ export async function GET() {
 
         const json = await response.json()
 
-        // V4 API returns { code: '0', data: [...] }
         if (json.code !== '0' || !Array.isArray(json.data)) {
             console.warn('Coinglass News API returned error:', json.msg)
             throw new Error(json.msg || 'Invalid response')
         }
 
-        // Map API response to our interface
         const news: NewsFlashItem[] = json.data.map(mapToNewsFlashItem)
+
+        // Cache for 1 minute
+        setCache(CACHE_KEY, news, CacheTTL.FAST)
 
         return NextResponse.json({ news })
 
     } catch (error) {
         console.error('News API Error:', error)
 
-        // Fallback mock data
         const now = Date.now()
         const mockNews: NewsFlashItem[] = [
             {

@@ -2,11 +2,23 @@
 import { NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { generateDerivativesSummary } from '@/lib/gemini'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 300 // Cache for 5 mins
 
+const CACHE_KEY = 'derivatives_data'
+
 export async function getDerivativesData() {
+    // Check cache first
+    const cached = getCache<any>(CACHE_KEY)
+    if (cached) {
+        console.log('[Cache HIT] derivatives_data')
+        return cached
+    }
+
+    console.log('[Cache MISS] derivatives_data - fetching fresh data')
+
     // Fetch key metrics (BTC only as market proxy)
     const [fundingData, liqData, lsData] = await Promise.all([
         coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }),
@@ -18,13 +30,11 @@ export async function getDerivativesData() {
     let fundingRate = 0
     if (fundingData && fundingData.length > 0 && fundingData[0]?.stablecoin_margin_list) {
         const list = fundingData[0].stablecoin_margin_list
-        // Filter for Binance
         const binanceData = list.find((e: any) => e.exchange === 'Binance')
 
         if (binanceData) {
             fundingRate = binanceData.funding_rate
         } else {
-            // Fallback to Average
             const validRates = list
                 .map((e: any) => e.funding_rate)
                 .filter((r: unknown) => typeof r === 'number')
@@ -47,7 +57,7 @@ export async function getDerivativesData() {
     // Format for AI
     const aiInput = {
         fundingRates: {
-            extremePositive: [{ rate: fundingRate }] // Simplified structure to match prompt expectation
+            extremePositive: [{ rate: fundingRate }]
         },
         liquidations: {
             summary: {
@@ -64,10 +74,15 @@ export async function getDerivativesData() {
 
     const summary = await generateDerivativesSummary(aiInput)
 
-    return {
+    const result = {
         summary,
         metrics: { fundingRate, longLiq, shortLiq, lsRatio }
     }
+
+    // Cache result for 5 minutes
+    setCache(CACHE_KEY, result, CacheTTL.MEDIUM)
+
+    return result
 }
 
 export async function GET() {

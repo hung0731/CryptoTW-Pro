@@ -1,27 +1,31 @@
 import { NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { getCache, setCache } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null
 
+const CACHE_KEY = 'whales_data'
+const CACHE_TTL = 120 // 2 minutes
+
 // Coinglass Whale Position response type
 interface WhalePosition {
-    user: string                  // User address
-    symbol: string                // Token symbol
-    position_size: number         // Position size (positive: long, negative: short)
-    entry_price: number           // Entry price
-    mark_price: number            // Current mark price
-    liq_price: number             // Liquidation price
-    leverage: number              // Leverage
-    margin_balance: number        // Margin balance (USD)
-    position_value_usd: number    // Position value (USD)
-    unrealized_pnl: number        // Unrealized PnL (USD)
-    funding_fee: number           // Funding fee (USD)
-    margin_mode: string           // Margin mode (cross / isolated)
-    create_time: number           // Entry time (timestamp in ms)
-    update_time: number           // Last updated time
+    user: string
+    symbol: string
+    position_size: number
+    entry_price: number
+    mark_price: number
+    liq_price: number
+    leverage: number
+    margin_balance: number
+    position_value_usd: number
+    unrealized_pnl: number
+    funding_fee: number
+    margin_mode: string
+    create_time: number
+    update_time: number
 }
 
 async function generateWhaleSummary(positions: WhalePosition[]): Promise<string | null> {
@@ -30,7 +34,6 @@ async function generateWhaleSummary(positions: WhalePosition[]): Promise<string 
     try {
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
 
-        // Prepare simplified data for AI
         const top20 = positions.slice(0, 20).map((p, i) => ({
             rank: i + 1,
             symbol: p.symbol,
@@ -66,26 +69,36 @@ ${JSON.stringify(top20, null, 2)}
 }
 
 export async function getWhaleData() {
+    // Check cache first
+    const cached = getCache<any>(CACHE_KEY)
+    if (cached) {
+        console.log('[Cache HIT] whales_data')
+        return cached
+    }
+
+    console.log('[Cache MISS] whales_data - fetching fresh data')
+
     const [alerts, positions] = await Promise.all([
         coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}),
         coinglassV4Request<WhalePosition[]>('/api/hyperliquid/whale-position', {})
     ])
 
-    // Get top 20 positions sorted by position value
     const top20Positions = (positions || [])
         .sort((a, b) => Math.abs(b.position_value_usd) - Math.abs(a.position_value_usd))
         .slice(0, 20)
 
-    // Generate AI summary if needed (optional for router, but good for caching)
-    // For router, maybe we skip summary to save time? Or reuse it?
-    // Let's generate it.
     const summary = await generateWhaleSummary(top20Positions)
 
-    return {
+    const result = {
         alerts: alerts || [],
         positions: top20Positions,
         summary: summary
     }
+
+    // Cache for 2 minutes
+    setCache(CACHE_KEY, result, CACHE_TTL)
+
+    return result
 }
 
 export async function GET() {

@@ -153,8 +153,8 @@ export function FlashNewsFeed() {
                 </div>
             </div>
 
-            {/* News List */}
-            <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+            {/* News List - Full Height */}
+            <div className="max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar">
                 {news.length === 0 && (
                     <div className="text-center py-6 text-xs text-neutral-500">
                         暫無快訊

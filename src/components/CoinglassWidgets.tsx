@@ -1013,8 +1013,8 @@ export function WhaleAlertFeed() {
                 </div>
             </div>
 
-            {/* List Content */}
-            <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+            {/* List Content - Full Height */}
+            <div className="max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar">
                 {filteredAlerts.length === 0 && (
                     <div className="text-center py-6 text-xs text-neutral-500 font-mono">
                         無 {'>'}$1M 巨鯨操作
