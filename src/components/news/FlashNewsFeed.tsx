@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Scale } from 'lucide-react'
+import { Sparkles, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
@@ -14,9 +15,6 @@ interface MarketContext {
         impact: '高' | '中' | '低'
     }[]
 }
-
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
 
 export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
     const [marketContext, setMarketContext] = useState<MarketContext | null>(null)
@@ -42,130 +40,100 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
         return () => clearInterval(interval)
     }, [])
 
-    // Loading state
     if (loading) {
         return (
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl overflow-hidden animate-pulse">
-                {/* AI Header Skeleton */}
-                <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border-b border-white/5 p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Skeleton className="w-6 h-6 rounded bg-neutral-700" />
-                        <Skeleton className="h-4 w-24 bg-neutral-700" />
+            <div className="space-y-3">
+                <div className="h-4 w-24 bg-neutral-900/50 rounded animate-pulse" />
+                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-4 animate-pulse">
+                    <div className="h-20 bg-neutral-800/50 rounded-lg" />
+                    <div className="space-y-2">
+                        <div className="h-12 bg-neutral-800/50 rounded-lg" />
+                        <div className="h-12 bg-neutral-800/50 rounded-lg" />
                     </div>
-                    <Skeleton className="h-4 w-full bg-neutral-700" />
-                </div>
-
-                {/* List Skeleton */}
-                <div className="p-4 space-y-3">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-start gap-3">
-                            <Skeleton className="w-6 h-6 rounded bg-neutral-700 shrink-0" />
-                            <div className="flex-1 space-y-2">
-                                <Skeleton className="h-4 w-full bg-neutral-700" />
-                                <Skeleton className="h-3 w-1/2 bg-neutral-700" />
-                            </div>
-                            <Skeleton className="w-8 h-6 rounded bg-neutral-700" />
-                        </div>
-                    ))}
                 </div>
             </div>
         )
     }
 
-    // Get sentiment display
-    const getSentimentEmoji = (sentiment: string) => {
-        const map: Record<string, string> = {
-            '樂觀': '🚀',
-            '保守': '🛡️',
-            '恐慌': '⚠️',
-            '中性': '⚖️'
-        }
-        return map[sentiment] || '📊'
-    }
-
-    const getImpactColor = (impact: string) => {
-        if (impact === '高') return 'text-red-400 border-red-400/30 bg-red-500/10'
-        if (impact === '中') return 'text-yellow-400 border-yellow-400/30 bg-yellow-500/10'
-        return 'text-blue-400 border-blue-400/30 bg-blue-500/10'
-    }
-
     const displayItems = compact ? marketContext?.highlights?.slice(0, 3) : marketContext?.highlights?.slice(0, 10)
 
     return (
-
         <div className="space-y-3">
-            {/* Section Header */}
+            {/* Unified Section Header */}
             <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider px-1">AI 市場快訊</h3>
 
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
-                {/* AI Header - Professional Report Style */}
-                <div className="bg-neutral-900/50 border-b border-white/5 p-4 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 pointer-events-none" />
+            {/* Main Card Container - Matches MarketEntryWidgets style */}
+            <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden backdrop-blur-sm transition-all hover:bg-neutral-900/40">
 
-                    <div className="flex items-center gap-2 mb-3 relative z-10">
-                        <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/10 text-blue-400">
-                            <Scale className="w-3 h-3" />
-                        </div>
-                        <h3 className="text-sm font-bold text-blue-100">AI 重點摘要</h3>
-                        {marketContext?.sentiment && (
-                            <div className="flex items-center gap-1.5 ml-auto bg-white/5 px-2 py-1 rounded text-xs border border-white/5">
-                                <span>{getSentimentEmoji(marketContext.sentiment)}</span>
-                                <span className="text-neutral-300">情緒{marketContext.sentiment}</span>
+                {/* 1. AI Summary Section - Clean & Flat */}
+                <div className="p-4 relative">
+                    {/* Decorative subtle glow - very low opacity */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] -mr-10 -mt-10 pointer-events-none" />
+
+                    <div className="flex items-start gap-3 relative z-10">
+                        <div className="shrink-0 mt-1">
+                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                <Sparkles className="w-4 h-4 text-blue-400" />
                             </div>
-                        )}
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-bold text-neutral-200">AI 重點摘要</h4>
+                                {marketContext?.sentiment && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-neutral-400">
+                                        情緒{marketContext.sentiment}
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-sm text-neutral-400 leading-relaxed text-justify">
+                                {marketContext?.summary || '正在分析市場數據中...'}
+                            </p>
+                        </div>
                     </div>
-                    <p className="text-sm text-neutral-300 leading-relaxed font-medium relative z-10">
-                        {marketContext?.summary || '正在分析市場動態...'}
-                    </p>
                 </div>
 
-                {/* AI Ranked News List */}
+                {/* Divider - Matches standard borders */}
+                <div className="h-px bg-white/5 w-full" />
+
+                {/* 2. News List - Minimalist Dashboard Style */}
                 <div className="divide-y divide-white/5">
                     {displayItems?.map((item, index) => (
-                        <div
-                            key={index}
-                            className="flex items-start gap-3 p-3.5 hover:bg-white/5 transition-colors group"
-                        >
-                            {/* Rank Number - Cleaner */}
-                            <span className={cn(
-                                "shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold mt-0.5 font-mono",
-                                index < 3 ? "bg-blue-500/10 text-blue-400" : "bg-neutral-800 text-neutral-600"
-                            )}>
-                                0{index + 1}
+                        <div key={index} className="p-4 flex gap-3 group hover:bg-white/[0.02] transition-colors cursor-default">
+                            {/* Rank - Monospace, muted */}
+                            <span className="shrink-0 font-mono text-xs text-neutral-600 pt-0.5">
+                                {String(index + 1).padStart(2, '0')}
                             </span>
 
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-medium text-neutral-200 leading-tight mb-1.5 group-hover:text-blue-200 transition-colors">
+                            <div className="space-y-1">
+                                <h5 className="text-sm font-medium text-neutral-300 group-hover:text-blue-100 transition-colors line-clamp-2">
                                     {item.title}
-                                </h4>
+                                </h5>
                                 <div className="flex items-center gap-2">
                                     <span className={cn(
-                                        "text-[10px] px-1.5 py-0.5 rounded border",
-                                        getImpactColor(item.impact)
-                                    )}>
-                                        影響{item.impact}
-                                    </span>
-                                    <p className="text-xs text-neutral-500 truncate">
+                                        "w-1.5 h-1.5 rounded-full",
+                                        item.impact === '高' ? "bg-red-500" :
+                                            item.impact === '中' ? "bg-yellow-500" : "bg-blue-500"
+                                    )} />
+                                    <span className="text-xs text-neutral-500 line-clamp-1">
                                         {item.reason}
-                                    </p>
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     )) || (
                             <div className="p-8 text-center text-neutral-500 text-sm">
-                                暫無 AI 分析結果
+                                暫無相關數據
                             </div>
                         )}
                 </div>
 
-                {/* Compact Footer */}
+                {/* Footer Link */}
                 {compact && (
                     <Link
                         href="/news"
-                        className="flex items-center justify-center gap-1.5 p-3 text-xs font-medium text-neutral-500 hover:text-white hover:bg-white/5 transition-all border-t border-white/5"
+                        className="flex items-center justify-center py-3 text-xs font-medium text-neutral-500 hover:text-white hover:bg-white/5 transition-colors border-t border-white/5"
                     >
-                        完整報告 <ArrowRight className="w-3.5 h-3.5" />
+                        完整報告 <ArrowRight className="w-3 h-3 ml-1" />
                     </Link>
                 )}
             </div>
