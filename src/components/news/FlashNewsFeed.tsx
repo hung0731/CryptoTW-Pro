@@ -91,11 +91,21 @@ export function FlashNewsFeed() {
             </div>
 
             {news.map((item) => {
-                const date = new Date(item.createTime)
-                const timeStr = format(date, 'HH:mm')
-                const isExpanded = expandedIds.has(item.id)
+                let timeStr = '--:--'
+                try {
+                    const date = new Date(item.createTime)
+                    // check if valid date
+                    if (!isNaN(date.getTime())) {
+                        timeStr = format(date, 'HH:mm')
+                    }
+                } catch (e) {
+                    console.error('Date parsing error', e)
+                }
+
                 // Strip HTML tags for collapsed view
-                const plainContent = item.content.replace(/<[^>]+>/g, '')
+                const plainContent = item.content ? item.content.replace(/<[^>]+>/g, '') : ''
+
+                const isExpanded = expandedIds.has(item.id)
 
                 return (
                     <div key={item.id} className="relative pl-8 pb-8 group">
