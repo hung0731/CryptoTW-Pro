@@ -151,12 +151,12 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
             )}
 
             {/* Branding Footer */}
-            <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-neutral-500">
-                <div className="flex items-center gap-1.5">
-                    <Newspaper className="w-3 h-3" />
-                    <span>幣圈快訊</span>
+            <div className="mt-4 border-t border-white/5 flex items-center justify-between text-[11px] bg-blue-950/20 -mx-4 -mb-4 px-4 py-2.5">
+                <div className="flex items-center gap-2 text-neutral-400">
+                    <Newspaper className="w-3.5 h-3.5 text-blue-400" />
+                    <span className="font-medium">全局決策</span>
                 </div>
-                <span>加密台灣 Pro</span>
+                <span className="text-blue-300 font-bold tracking-wide">加密台灣 Pro</span>
             </div>
         </div>
     )
