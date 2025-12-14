@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart, Calendar } from 'lucide-react'
+import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart, Calendar, RefreshCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLiff } from '@/components/LiffProvider'
@@ -173,10 +173,22 @@ function CryptoPricePrediction() {
 }
 
 import { DerivativesView, SmartMoneyView } from '@/components/DataDashboards'
+import { ArbitrageView } from '@/components/ArbitrageWidgets'
+import { useSearchParams } from 'next/navigation'
 
 export default function DataPage() {
     const { profile } = useLiff()
+    const searchParams = useSearchParams()
+
+    // Default to 'overview', or 'arbitrage' if specified in URL
     const [activeTab, setActiveTab] = useState('overview')
+
+    useEffect(() => {
+        const tabParam = searchParams.get('tab')
+        if (tabParam && ['overview', 'derivatives', 'smartmoney', 'arbitrage'].includes(tabParam)) {
+            setActiveTab(tabParam)
+        }
+    }, [searchParams])
 
     // Market Data State
     const [marketData, setMarketData] = useState<{ gainers: any[], losers: any[] } | null>(null)
@@ -252,21 +264,25 @@ export default function DataPage() {
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
             <PageHeader />
 
-            <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
+            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
                 {/* 3-Tab Structure */}
                 <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
-                    <TabsList className="w-full grid grid-cols-3 h-auto p-1 bg-neutral-900/50 rounded-lg">
-                        <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5">
+                    <TabsList className="w-full grid grid-cols-4 h-auto p-1 bg-neutral-900/50 rounded-lg">
+                        <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
                             <Gauge className="w-3.5 h-3.5" />
-                            市場總覽
+                            總覽
                         </TabsTrigger>
-                        <TabsTrigger value="derivatives" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5">
+                        <TabsTrigger value="derivatives" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
                             <Flame className="w-3.5 h-3.5 text-orange-400" />
-                            合約數據
+                            數據
                         </TabsTrigger>
-                        <TabsTrigger value="smartmoney" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5">
+                        <TabsTrigger value="smartmoney" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
                             <Radar className="w-3.5 h-3.5 text-purple-400" />
-                            聰明錢
+                            巨鯨
+                        </TabsTrigger>
+                        <TabsTrigger value="arbitrage" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[10px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
+                            <RefreshCcw className="w-3.5 h-3.5 text-green-400" />
+                            套利
                         </TabsTrigger>
                     </TabsList>
                 </div>
@@ -442,9 +458,15 @@ export default function DataPage() {
                     <SmartMoneyView />
                 </TabsContent>
 
+                {/* TAB 4: Arbitrage */}
+                <TabsContent value="arbitrage" className="p-4 min-h-[50vh]">
+                    <ArbitrageView />
+                </TabsContent>
+
             </Tabs>
 
             <BottomNav />
         </main>
     )
 }
+

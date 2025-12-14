@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, Activity, Anchor, BarChart2, Info, ChevronRight, Zap } from 'lucide-react'
+import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, Activity, Anchor, BarChart2, Info, ChevronRight, Zap, RefreshCcw } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -143,10 +143,19 @@ export function HomeRouterWidget() {
                         </div>
 
                         <Link
-                            href={data.anomaly.link}
-                            className="flex items-center justify-center w-full py-2 bg-neutral-800 hover:bg-neutral-700 border border-white/5 rounded-lg text-xs font-bold text-neutral-300 transition-all"
+                            href={data.anomaly.type === 'funding_rate' ? '/prediction?tab=arbitrage' : data.anomaly.link}
+                            className={cn(
+                                "flex items-center justify-center w-full py-2 border rounded-lg text-xs font-bold transition-all",
+                                data.anomaly.type === 'funding_rate'
+                                    ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
+                                    : "bg-neutral-800 hover:bg-neutral-700 border-white/5 text-neutral-300"
+                            )}
                         >
-                            查看圖表確認 <ArrowRight className="w-3 h-3 ml-1" />
+                            {data.anomaly.type === 'funding_rate' ? (
+                                <>查看套利機會 <RefreshCcw className="w-3 h-3 ml-1" /></>
+                            ) : (
+                                <>查看圖表確認 <ArrowRight className="w-3 h-3 ml-1" /></>
+                            )}
                         </Link>
                     </div>
                 </div>
