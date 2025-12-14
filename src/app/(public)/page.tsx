@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useLiff } from '@/components/LiffProvider'
 import {
     TrendingUp, BarChart3, Calendar, Users,
-    ChevronRight, Gauge, DollarSign, Bitcoin, Bell, Settings, Flame
+    ChevronRight, Bell, Settings, Flame
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AIMarketPulse } from '@/components/AIMarketPulse'
@@ -69,13 +69,30 @@ export default function HomePage() {
         fetchData()
     }, [])
 
-    // Fear & Greed color
-    const getFearGreedColor = (value: number) => {
-        if (value <= 25) return 'text-red-500'
-        if (value <= 45) return 'text-orange-500'
-        if (value <= 55) return 'text-yellow-500'
-        if (value <= 75) return 'text-lime-500'
-        return 'text-green-500'
+    // Helper for Market Anchor
+    const getMarketAnchor = (signals: MarketSignals | null) => {
+        if (!signals) return { text: "📌 市場狀態：數據分析中...", color: "text-neutral-500" }
+
+        const feeling = signals.market_feeling || "中性"
+        let status = ""
+        let advice = ""
+
+        if (feeling.includes("多") || feeling.includes("貪婪")) {
+            status = "偏多主導"
+            advice = "適合等待回調"
+            if (feeling.includes("謹慎")) advice = "留意高位風險"
+        } else if (feeling.includes("空") || feeling.includes("恐慌")) {
+            status = "偏空調整"
+            advice = "反彈尋找賣點"
+        } else {
+            status = "震盪整理"
+            advice = "多空拉鋸中"
+        }
+
+        return {
+            text: `📌 今日市場：${status}｜${advice}`,
+            color: feeling.includes("多") ? "text-green-400" : feeling.includes("空") ? "text-red-400" : "text-blue-300"
+        }
     }
 
     if (isAuthLoading) {
@@ -83,6 +100,8 @@ export default function HomePage() {
             <img src="/logo.svg" className="h-8 w-auto opacity-50 animate-pulse" />
         </div>
     }
+
+    const anchor = getMarketAnchor(signals)
 
     return (
         <main className="min-h-screen font-sans bg-black text-white pb-24">
@@ -121,18 +140,29 @@ export default function HomePage() {
                     </div>
                 </div>
 
+                {/* Anchor Pin - One Line Judgment */}
+                {!loading && (
+                    <div className="bg-neutral-900/80 border border-white/10 rounded-lg p-3 flex items-center justify-center shadow-lg backdrop-blur-sm relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                        <span className={cn("text-sm font-bold relative z-10 text-center tracking-wide", anchor.color)}>
+                            {anchor.text}
+                        </span>
+                    </div>
+                )}
+
                 {/* Quick Actions */}
                 <QuickActions />
 
-                {/* ===== 1. Top Coins - 第一眼看價格 ===== */}
+                {/* ===== 1. Top Coins - 市場溫度計 ===== */}
                 <section>
-                    <h2 className="text-sm font-medium text-neutral-500 mb-3">熱門幣種</h2>
                     <TopCoinCards />
                 </section>
 
                 {/* ===== USDT/TWD 匯率 ===== */}
                 <section>
-                    <h2 className="text-sm font-medium text-neutral-500 mb-3">台幣匯率</h2>
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-sm font-medium text-neutral-500">台幣匯率</h2>
+                    </div>
                     <UsdtRateCard />
                 </section>
 
@@ -141,60 +171,13 @@ export default function HomePage() {
                     <AIMarketPulse report={marketReport} />
                 )}
 
-                {/* ===== 3. Market Stats - 快速指標 ===== */}
-                <section>
-                    <h2 className="text-sm font-medium text-neutral-500 mb-3">市場概況</h2>
-                    {loading ? (
-                        <div className="grid grid-cols-3 gap-2">
-                            <Skeleton className="h-20 bg-neutral-900/50" />
-                            <Skeleton className="h-20 bg-neutral-900/50" />
-                            <Skeleton className="h-20 bg-neutral-900/50" />
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-3 gap-2">
-                            {fearGreed && (
-                                <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                        <Gauge className="w-3 h-3 text-neutral-500" />
-                                        <span className="text-[10px] text-neutral-500">恐懼貪婪</span>
-                                    </div>
-                                    <div className={`text-xl font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
-                                        {fearGreed.value}
-                                    </div>
-                                    <div className="text-[10px] text-neutral-500">{fearGreed.classification}</div>
-                                </div>
-                            )}
-                            {globalData && (
-                                <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                        <DollarSign className="w-3 h-3 text-neutral-500" />
-                                        <span className="text-[10px] text-neutral-500">總市值</span>
-                                    </div>
-                                    <div className="text-lg font-bold font-mono text-white">${globalData.totalMarketCap}</div>
-                                    <div className="text-[10px] text-neutral-500">24h ${globalData.totalVolume}</div>
-                                </div>
-                            )}
-                            {globalData && (
-                                <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                        <Bitcoin className="w-3 h-3 text-orange-500" />
-                                        <span className="text-[10px] text-neutral-500">BTC 市佔</span>
-                                    </div>
-                                    <div className="text-lg font-bold font-mono text-orange-400">{globalData.btcDominance}%</div>
-                                    <div className="text-[10px] text-neutral-500">${globalData.btcMarketCap}</div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </section>
-
-                {/* ===== Market Signals - 市場體感 ===== */}
+                {/* ===== 3. Market Sentiment (Human) ===== */}
                 <section>
                     <h2 className="text-sm font-medium text-neutral-500 mb-3">市場體感</h2>
                     <MarketFeelingCard signals={signals} loading={signalsLoading} />
                 </section>
 
-                {/* ===== NEW: Bitcoin Indicators - 鏈上指標 ===== */}
+                {/* ===== 4. On-Chain Indicators (Data) ===== */}
                 <section>
                     <h2 className="text-sm font-medium text-neutral-500 mb-3">鏈上指標</h2>
                     <IndicatorsGrid compact />

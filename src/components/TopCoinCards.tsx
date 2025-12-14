@@ -125,23 +125,28 @@ export function TopCoinCards() {
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {coins.map((coin) => {
                 const isUp = coin.change24h >= 0
-                const color = isUp ? '#22c55e' : '#ef4444'
+                const color = isUp ? '#22c55e' : '#ef4444' // green-500 : red-500
                 const textColor = isUp ? 'text-green-400' : 'text-red-400'
+                const bgColor = isUp ? 'bg-green-500/10' : 'bg-red-500/10'
+                const borderColor = isUp ? 'border-green-500/20' : 'border-red-500/20'
 
                 return (
                     <div
                         key={coin.symbol}
-                        className="bg-neutral-900/50 border border-white/5 rounded-xl p-3 min-w-[110px] shrink-0"
+                        className={cn(
+                            "rounded-xl p-3 min-w-[100px] shrink-0 border transition-all flex flex-col justify-between h-[80px]",
+                            bgColor, borderColor
+                        )}
                     >
-                        <div className="text-xs text-neutral-400 mb-1">{coin.name}</div>
-                        <div className={cn("text-lg font-bold font-mono", textColor)}>
-                            {formatPrice(coin.price)}
-                        </div>
-                        <div className="flex items-center justify-between mt-1">
-                            <span className={cn("text-[10px] font-mono", textColor)}>
-                                {isUp ? '+' : ''}{coin.change24h.toFixed(2)}%
-                            </span>
+                        <div className="flex justify-between items-start">
+                            <span className="text-[10px] font-bold text-white opacity-80">{coin.symbol}</span>
                             <Sparkline data={coin.sparkline} color={color} />
+                        </div>
+
+                        <div className="flex items-end gap-1">
+                            <span className={cn("text-xl font-bold font-mono tracking-tighter leading-none", textColor)}>
+                                {isUp ? '+' : ''}{coin.change24h.toFixed(1)}%
+                            </span>
                         </div>
                     </div>
                 )
