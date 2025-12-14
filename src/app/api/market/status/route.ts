@@ -229,7 +229,7 @@ export async function GET(req: NextRequest) {
             volatility: { label: volatility, code: volatilityCode, value: volatility }
         }
 
-        setCache(CACHE_KEY, data, CacheTTL.SHORT) // 1 min
+        setCache(CACHE_KEY, data, CacheTTL.FAST) // 1 min
 
         return NextResponse.json({ status: data })
 
