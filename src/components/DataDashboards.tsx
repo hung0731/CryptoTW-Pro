@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import {
     LiquidationWaterfall,
-    FundingRateRankings,
     LongShortRatio,
     WhaleAlertFeed,
     IndicatorsGrid,
@@ -48,12 +47,12 @@ export function DerivativesView() {
             {/* AI Summary */}
             <DerivativesAiSummaryCard />
 
-            {/* Key Metrics Grid - 3 Cards (Single API) */}
+            {/* Key Metrics Grid - 3 Cards (Single API) -> Single Column */}
             <section>
                 <h2 className="text-xs font-bold text-neutral-500 mb-3 flex items-center gap-1.5">
                     <BarChart3 className="w-3 h-3" /> 關鍵指標
                 </h2>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                     {/* 24H Liquidation */}
                     <LiquidationSummary data={dashboard?.liquidation} />
 
@@ -81,24 +80,6 @@ export function DerivativesView() {
                     />
                 </div>
                 <LongShortRatio />
-            </section>
-
-            {/* Funding Rate Rankings - Compact */}
-            <section>
-                <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-sm font-medium text-neutral-500">費率排行</h2>
-                    <ExplainTooltip
-                        term="資金費率"
-                        definition="永續合約中，多空雙方定期互付的持倉成本。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>正費率</strong>：多頭付錢給空頭，代表情緒偏多。</li>
-                                <li><strong>負費率</strong>：空頭付錢給多頭，代表情緒偏空。</li>
-                            </ul>
-                        }
-                    />
-                </div>
-                <FundingRateRankings />
             </section>
         </div>
     )

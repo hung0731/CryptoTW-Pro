@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { ChevronRight, Bell } from 'lucide-react'
+import { HelpDrawer } from '@/components/ui/HelpDrawer'
 
 interface ToolStatus {
     title: string
@@ -17,8 +18,46 @@ export function MarketEntryWidgets() {
     const [tools, setTools] = useState<ToolStatus[]>([])
     const [loading, setLoading] = useState(true)
 
+    // Explanations for each tool
+    const getExplanation = (title: string) => {
+        switch (title) {
+            case '合約市場': return (
+                <>
+                    <p>提供期貨合約的即時數據面板。</p>
+                    <p className="mt-2 text-neutral-400">當顯示<strong>「槓桿情緒：偏熱」</strong>時，代表市場過度槓桿化，可能會出現插針或回調。</p>
+                </>
+            )
+            case '巨鯨動態': return (
+                <>
+                    <p>監控大戶與頂級交易員的資金流向。</p>
+                    <p className="mt-2 text-neutral-400">當顯示<strong>「出現單邊押注」</strong>或<strong>「🔔」</strong>時，代表主力正在集中做多或做空。</p>
+                </>
+            )
+            case '資金費率': return (
+                <>
+                    <p>查看各大交易所的永續合約資金費率。</p>
+                    <p className="mt-2 text-neutral-400"><strong>正費率過高</strong>代表多頭過擠（看空訊號）；<strong>負費率</strong>代表空頭過擠（軋空訊號）。</p>
+                </>
+            )
+            case '市場預期': return (
+                <>
+                    <p>來自 Polymarket 的預測市場數據。</p>
+                    <p className="mt-2 text-neutral-400">反映真實資金對未來事件（如降息、選舉）的機率判斷，通常比民調更準確。</p>
+                </>
+            )
+            case '異常警報': return (
+                <>
+                    <p>AI 自動偵測的市場異常事件。</p>
+                    <p className="mt-2 text-neutral-400">包含：價格劇烈波動、大額爆倉、巨鯨轉帳等。每日必看。</p>
+                </>
+            )
+            default: return 'No description.'
+        }
+    }
+
     useEffect(() => {
         const fetchStatus = async () => {
+
             try {
                 const res = await fetch('/api/market/status')
                 const json = await res.json()
@@ -49,41 +88,49 @@ export function MarketEntryWidgets() {
             <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider px-1">市場工具</h3>
             <div className="grid grid-cols-2 gap-3">
                 {tools.map((tool, i) => (
-                    <Link
+                    <div
                         key={i}
-                        href={tool.href}
                         className={cn(
-                            "flex flex-col justify-center p-4 rounded-xl border transition-all relative overflow-hidden group",
-                            // Alert/Active style vs Neutral style
+                            "relative rounded-xl border transition-all overflow-hidden group hover:bg-neutral-900/50",
                             tool.active
                                 ? "bg-neutral-900/80 border-blue-500/30 hover:border-blue-500/50"
-                                : "bg-neutral-900/30 border-white/5 hover:bg-neutral-900/50"
+                                : "bg-neutral-900/30 border-white/5"
                         )}
                     >
-                        {/* Active Indicator (optional subtle glow or icon) */}
+                        <Link href={tool.href} className="block p-4 h-full w-full">
+                            <div className="flex items-center justify-between mb-1.5 pr-4"> {/* pr-4 for icon space */}
+                                <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors">
+                                    {tool.title}
+                                </span>
+                                {/* Arrow mainly for cues */}
+                                <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
+                            </div>
+
+                            <div className={cn(
+                                "text-xs font-medium truncate",
+                                tool.active ? "text-blue-300" : "text-neutral-500"
+                            )}>
+                                {/* Add Bell icon if active alert */}
+                                {tool.active && tool.title === '巨鯨動態' && '🔔 '}
+                                {tool.status}
+                            </div>
+                        </Link>
+
+                        {/* Help Icon - Absolute positioned, high z-index */}
+                        <HelpDrawer
+                            title={tool.title}
+                            content={getExplanation(tool.title)}
+                            className="absolute top-2 right-2 z-20 opacity-40 hover:opacity-100" // Low opacity default to avoid distraction
+                        />
+
+                        {/* Active Indicator Pulse */}
                         {tool.active && tool.title === '異常警報' && (
-                            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                            <div className="absolute top-2 right-8 w-2 h-2 rounded-full bg-red-500 animate-pulse pointer-events-none" />
                         )}
-
-                        <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors">
-                                {tool.title}
-                            </span>
-                            {/* Arrow mainly for cues */}
-                            <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
-                        </div>
-
-                        <div className={cn(
-                            "text-xs font-medium truncate",
-                            tool.active ? "text-blue-300" : "text-neutral-500"
-                        )}>
-                            {/* Add Bell icon if active alert */}
-                            {tool.active && tool.title === '巨鯨動態' && '🔔 '}
-                            {tool.status}
-                        </div>
-                    </Link>
+                    </div>
                 ))}
             </div>
         </div>
     )
 }
+```

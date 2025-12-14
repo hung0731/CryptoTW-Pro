@@ -46,12 +46,16 @@ export async function GET(req: NextRequest) {
         ])
 
         // Debug log
-        console.log('[Dashboard] Raw API responses:', {
-            fundingData: JSON.stringify(fundingData?.[0] || {}).slice(0, 200),
-            liquidationData: JSON.stringify(liquidationData?.[0] || {}).slice(0, 200),
-            longShortGlobal: JSON.stringify(longShortGlobal?.[0] || {}).slice(0, 200),
-            longShortTop: JSON.stringify(longShortTop?.[0] || {}).slice(0, 200),
-            oiData: JSON.stringify(oiData?.[0] || {}).slice(0, 200)
+        console.log('[Dashboard] Raw API responses Keys:', {
+            fundingParams: Object.keys(fundingData?.[0] || {}),
+            liqParams: Object.keys(liquidationData?.[0] || {}),
+            lsGlobalParams: Object.keys(longShortGlobal?.[0] || {}),
+            lsTopParams: Object.keys(longShortTop?.[0] || {}),
+            oiParams: Object.keys(oiData?.[0] || {})
+        })
+        console.log('[Dashboard] Raw API Data Sample:', {
+            liqSample: JSON.stringify(liquidationData?.[0] || {}).slice(0, 100),
+            lsSample: JSON.stringify(longShortGlobal?.[0] || {}).slice(0, 100)
         })
 
         // Process Funding Rate
