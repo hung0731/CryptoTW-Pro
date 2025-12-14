@@ -125,7 +125,14 @@ export default function ProfilePage() {
 
                         <div className="space-y-1.5 flex-1">
                             <h2 className="text-xl font-bold text-white tracking-tight">{profile?.displayName}</h2>
-                            {getMembershipBadge()}
+                            <div className="flex items-center gap-2">
+                                {getMembershipBadge()}
+                                {(dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime') && (
+                                    <span className="text-[10px] text-neutral-500">
+                                        已解鎖全部功能
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </section>

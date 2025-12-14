@@ -393,3 +393,81 @@ export async function generateAIDecision(
     }
 }
 
+// ============================================
+// Daily Broadcast Polish (AI cannot change stance)
+// ============================================
+
+interface StanceDecision {
+    stance: string
+    rawReasons: string[]
+    metrics: {
+        fundingRate: number
+        longShortRatio: number
+        liquidationBias: string
+        liquidationTotal: number
+        oiChange24h: number
+        btcPriceChange24h: number
+    }
+}
+
+export async function generateDailyBroadcastPolish(
+    decision: StanceDecision
+): Promise<{ reasons: string[], suggestion: string, mindset?: string } | null> {
+    if (!genAI) return null
+
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+
+        const prompt = `你是一個加密市場風控分析師。
+
+系統已透過規則判斷今日市場立場為：「${decision.stance}」
+
+⚠️ 此結論不可更改，你只能用專業、冷靜、像風控的語氣來解釋這個結論。
+
+【原始判斷理由】
+${decision.rawReasons.map(r => `• ${r}`).join('\n')}
+
+【市場數據】
+• 費率：${decision.metrics.fundingRate}%
+• 多空比：${decision.metrics.longShortRatio}% 做多
+• 爆倉偏向：${decision.metrics.liquidationBias}
+• 24H 爆倉總額：$${(decision.metrics.liquidationTotal / 1_000_000).toFixed(1)}M
+• OI 24H 變化：${decision.metrics.oiChange24h > 0 ? '+' : ''}${decision.metrics.oiChange24h}%
+• BTC 24H 變化：${decision.metrics.btcPriceChange24h > 0 ? '+' : ''}${decision.metrics.btcPriceChange24h}%
+
+【輸出要求】JSON 格式
+{
+  "reasons": ["潤色後的理由1", "潤色後的理由2"],  // 2-3 條，每條 15-25 字，專業但白話
+  "suggestion": "一句話建議行為",  // 15-25 字，克制、不煽動
+  "mindset": "心態提醒（可選）"  // 20-30 字，像資深交易員對朋友的提醒，可為 null
+}
+
+【排版規範】
+• 中英文之間加空格（如：BTC 價格）
+• 數字與中文之間加空格（如：超過 10 億）
+• 數字與單位不加空格（如：10%、100萬）
+• 中文用全形標點（，、。）
+• 專有名詞用官方寫法（OKX, Binance, SEC）
+
+【語氣規範】
+- 冷靜、克制、像交易室風控備註
+- 禁止預測具體價格
+- 禁止使用「建議買入/賣出」
+- 允許使用「留意」「觀察」「不急於」等詞
+
+輸出純 JSON，不要有其他文字。`
+
+        const result = await model.generateContent(prompt)
+        const text = result.response.text().trim()
+
+        const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[1] || jsonMatch[0])
+        }
+
+        return JSON.parse(text)
+    } catch (e) {
+        console.error('[Daily Broadcast] AI Polish Error:', e)
+        return null
+    }
+}

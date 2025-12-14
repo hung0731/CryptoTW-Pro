@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLiff } from '@/components/LiffProvider'
 import { useToast } from '@/hooks/use-toast'
@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Check, ExternalLink, Loader2, ChevronRight, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import GlobalLoader from '@/components/GlobalLoader'
+import { trackEvent } from '@/lib/analytics'
 
 export default function JoinPage() {
     const { dbUser, profile, isLoading } = useLiff()
@@ -22,6 +23,15 @@ export default function JoinPage() {
     const [submitted, setSubmitted] = useState(false)
     const [responseMessage, setResponseMessage] = useState('')
     const [autoVerified, setAutoVerified] = useState(false)
+    const hasTrackedView = useRef(false)
+
+    // Track join_view on first render
+    useEffect(() => {
+        if (!hasTrackedView.current) {
+            trackEvent('join_view')
+            hasTrackedView.current = true
+        }
+    }, [])
 
     // Check if user is already Pro
     useEffect(() => {
@@ -63,6 +73,8 @@ export default function JoinPage() {
                 setAutoVerified(data.autoVerified || false)
 
                 if (data.autoVerified) {
+                    // Track successful Pro completion
+                    trackEvent('pro_complete')
                     // Auto redirect after success
                     setTimeout(() => router.push('/'), 3000)
                 }
@@ -131,21 +143,41 @@ export default function JoinPage() {
                 {/* Subtle gradient background */}
                 <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent" />
 
-                <div className="relative px-6 pt-16 pb-12">
-                    {/* Logo */}
-                    <div className="flex justify-center mb-8">
-                        <img src="/logo.svg" alt="CryptoTW" className="h-8 w-auto" />
+                <div className="relative px-6 pt-12 pb-8">
+                    {/* Back to Home */}
+                    <Link href="/" className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300 mb-6">
+                        ← 返回首頁
+                    </Link>
+
+                    {/* Time Estimate Badge */}
+                    <div className="flex justify-center mb-6">
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                            約 3 分鐘完成
+                        </span>
                     </div>
 
                     {/* Main Title */}
-                    <h1 className="text-4xl font-bold text-center mb-4 tracking-tight">
-                        解鎖 Pro 權限
+                    <h1 className="text-2xl font-bold text-center mb-3 tracking-tight">
+                        免費解鎖 Pro｜3 分鐘完成
                     </h1>
 
-                    <p className="text-neutral-400 text-center max-w-sm mx-auto leading-relaxed">
-                        透過 OKX 推薦碼註冊，即可永久免費使用全部 Pro 功能
+                    <p className="text-neutral-400 text-center text-sm max-w-xs mx-auto leading-relaxed">
+                        不影響交易，OKX 通過驗證後永久免費享有 Pro 會員權益
                     </p>
                 </div>
+            </section>
+
+            {/* Progress Indicator */}
+            <section className="px-6 pb-4">
+                <div className="flex items-center justify-between gap-2">
+                    {[1, 2, 3, 4].map((step) => (
+                        <div key={step} className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
+                            <div className="h-full w-0 bg-white rounded-full transition-all duration-500" />
+                        </div>
+                    ))}
+                </div>
+                <p className="text-center text-[10px] text-neutral-600 mt-2">完成以下 4 步驟</p>
             </section>
 
             {/* Requirements Section */}
@@ -163,17 +195,22 @@ export default function JoinPage() {
                         <div className="flex-1">
                             <h3 className="font-bold text-white mb-1">使用推薦碼註冊 OKX</h3>
                             <p className="text-sm text-neutral-500 mb-3">
-                                透過專屬連結註冊，確保邀請碼為 <span className="text-white font-mono">CTW20</span>
+                                確保邀請碼為 <span className="text-white font-mono bg-white/10 px-1.5 py-0.5 rounded">CTW20</span>
                             </p>
                             <a
                                 href="https://www.okx.com/join/CTW20"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-neutral-300 transition-colors"
+                                onClick={() => trackEvent('join_click')}
+                                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-white text-black font-bold text-sm rounded-xl hover:bg-neutral-200 transition-colors"
                             >
                                 前往 OKX 註冊
                                 <ExternalLink className="h-3.5 w-3.5" />
                             </a>
+                            {/* Partner Badge */}
+                            <p className="text-[10px] text-neutral-600 mt-2">
+                                🤝 OKX 官方聯盟合作夥伴
+                            </p>
                         </div>
                     </div>
 
@@ -263,26 +300,36 @@ export default function JoinPage() {
             </section>
 
             {/* Pro Benefits Section */}
-            <section className="px-6 pb-12">
-                <div className="border-t border-white/5 pt-8">
+            <section className="px-6 pb-8">
+                <div className="border-t border-white/5 pt-6">
                     <h2 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <Sparkles className="h-4 w-4" />
-                        Pro 會員專屬
+                        解鎖後你可以...
                     </h2>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    {/* Top 3 Highlighted Features */}
+                    <div className="space-y-3 mb-4">
                         {[
-                            '即時市場快訊',
-                            'AI 市場分析',
-                            '鏈上數據追蹤',
-                            '財經日曆預警',
-                            '巨鯨動態監控',
-                            'VIP 交流群'
-                        ].map((benefit, i) => (
-                            <div key={i} className="flex items-center gap-2 text-sm text-neutral-400">
-                                <Check className="h-4 w-4 text-white shrink-0" />
-                                {benefit}
+                            { emoji: '🤖', title: 'AI 即時盤勢分析', desc: '每日判斷方向，不再猜盤' },
+                            { emoji: '🐋', title: '巨鯨動態追蹤', desc: '大戶進出場一目瞭然' },
+                            { emoji: '📊', title: '合約數據儀表板', desc: '爆倉、費率、多空比一站掌握' },
+                        ].map((f, i) => (
+                            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                <span className="text-xl">{f.emoji}</span>
+                                <div>
+                                    <h4 className="text-sm font-bold text-white">{f.title}</h4>
+                                    <p className="text-xs text-neutral-500">{f.desc}</p>
+                                </div>
                             </div>
+                        ))}
+                    </div>
+
+                    {/* Additional Features */}
+                    <div className="flex flex-wrap gap-2">
+                        {['財經日曆', '價格提醒', 'VIP 社群'].map((name, i) => (
+                            <span key={i} className="text-xs text-neutral-500 bg-white/5 px-2.5 py-1 rounded-full">
+                                + {name}
+                            </span>
                         ))}
                     </div>
                 </div>

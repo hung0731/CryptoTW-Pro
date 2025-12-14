@@ -1528,6 +1528,24 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
+                // B5. Daily Broadcast Test (日報)
+                if (originalText === '日報' || originalText === '今日判斷' || originalText === '市場判斷') {
+                    const { generateDailyBroadcast, createDailyBroadcastFlex } = await import('@/lib/daily-broadcast')
+                    const { fetchDailyBroadcastMetrics } = await import('@/lib/daily-broadcast-data')
+
+                    // Fetch real Coinglass data
+                    const realMetrics = await fetchDailyBroadcastMetrics()
+
+                    const content = await generateDailyBroadcast(realMetrics)
+                    // Add BTC price changes
+                    content.btcPriceChange = realMetrics.btcPriceChanges
+
+                    const dailyFlex = createDailyBroadcastFlex(content)
+                    await replyMessage(replyToken, [dailyFlex])
+                    continue
+                }
+
+
 
                 // C. Currency Converter & Rates - 自然語言版本
                 // 支援: #TWD 1000, USD 5000, 1000美金, 換1000u, #TWD (純查匯率)

@@ -6,15 +6,22 @@ import { PageHeader } from '@/components/PageHeader'
 import { BottomNav } from '@/components/BottomNav'
 import { useLiff } from '@/components/LiffProvider'
 import {
-    Bell, Settings, ChevronRight
+    Bell, Settings, ChevronRight, Sparkles
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { MarketStatusGrid } from '@/components/home/MarketStatusGrid'
 import { MarketEntryWidgets } from '@/components/home/MarketEntryWidgets'
+import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
 
 export default function HomePage() {
-    const { profile, isLoading: isAuthLoading } = useLiff()
+    const { profile, dbUser, isLoading: isAuthLoading } = useLiff()
+
+    // Check if user is Pro
+    const isPro = dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime'
+
+    // Welcome modal for new Pro users
+    const { showWelcome, closeWelcome } = useWelcomeModal(isPro)
 
     // Greeting Logic
     const getGreeting = () => {
@@ -44,6 +51,9 @@ export default function HomePage() {
     return (
         <main className="min-h-screen font-sans bg-black text-white pb-24">
             <PageHeader showLogo />
+
+            {/* Welcome Modal for new Pro users */}
+            <WelcomeModal isOpen={showWelcome} onClose={closeWelcome} />
 
             <div className="mt-4 px-4 space-y-6">
 
@@ -77,6 +87,22 @@ export default function HomePage() {
                         </Link>
                     </div>
                 </div>
+
+                {/* ===== Unlock CTA (Non-Pro Users) ===== */}
+                {!isPro && (
+                    <Link href="/join" className="block">
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-white" />
+                                <span className="text-sm font-medium text-white">解鎖完整 Pro 功能</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-neutral-400">
+                                <span>免費</span>
+                                <ChevronRight className="w-3.5 h-3.5" />
+                            </div>
+                        </div>
+                    </Link>
+                )}
 
                 {/* ===== 1. Market Status (Dashboard) ===== */}
                 <MarketStatusGrid />
