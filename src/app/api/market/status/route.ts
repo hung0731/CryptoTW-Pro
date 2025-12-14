@@ -29,7 +29,9 @@ export async function GET(req: NextRequest) {
 
         const [tickerData, fundingData, liquidation24h, liquidation1h, fearGreed, whaleGlobal] = await Promise.all([
             // Regime: Use Ticker for Price Change & High/Low
-            fetchSafe(coinglassV4Request<any[]>('/api/futures/ticker', { symbol: 'BTC' }), 'Ticker'),
+            // V4 Ticker usually requires exchange. Trying 'Binance' + 'BTCUSDT' if standard ticker fails.
+            // Or use price-change-percent endpoint if available. Let's try standard ticker with valid params.
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/ticker', { symbol: 'BTCUSDT', exchange: 'Binance' }), 'Ticker'),
 
             // Leverage: BTC Funding Rate (Exchange List is widely supported)
             fetchSafe(coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }), 'Funding'),
@@ -44,7 +46,7 @@ export async function GET(req: NextRequest) {
             fetchSafe(coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }), 'FearGreed'),
 
             // Whale: Global L/S might be safer than Top
-            fetchSafe(coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }), 'WhaleRatio')
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTCUSDT', exchange: 'Binance', interval: '1h', limit: 1 }), 'WhaleRatio')
         ])
 
         // --- 1. Market Regime (市場狀態) ---
@@ -97,8 +99,8 @@ export async function GET(req: NextRequest) {
         if (liquidation24h && liquidation24h.length > 0) {
             const l = liquidation24h[0]
             // Aggregated history provides buyVolUsd/sellVolUsd
-            const longLiq = l.buyVolUsd || l.longLiquidation || 0
-            const shortLiq = l.sellVolUsd || l.shortLiquidation || 0
+            const longLiq = l.aggregated_long_liquidation_usd || l.buyVolUsd || l.longLiquidation || 0
+            const shortLiq = l.aggregated_short_liquidation_usd || l.sellVolUsd || l.shortLiquidation || 0
             liq24hVal = longLiq + shortLiq
         }
 
@@ -140,12 +142,18 @@ export async function GET(req: NextRequest) {
 
         if (whaleGlobal && whaleGlobal.length > 0) {
             const w = whaleGlobal[0]
-            const longRatio = w.longAccount || w.longRatio || 50 // global long ratio
+            const longRatio = w.global_account_long_short_ratio || w.longAccount || w.longRatio || 1
+            // Convert to percentage approximation if it's a ratio (e.g. 1.5)
+            // If ratio > 1, longs > 50%. Long% = Ratio / (Ratio + 1)
+            const calculatedLong = (longRatio / (longRatio + 1)) * 100
 
-            if (longRatio > 52) {
+            // Or use direct percentage if available
+            const longPct = w.global_account_long_percent || calculatedLong
+
+            if (longPct > 52) {
                 whale = '偏多'
                 whaleCode = 'bullish'
-            } else if (longRatio < 48) {
+            } else if (longPct < 48) {
                 whale = '偏空'
                 whaleCode = 'bearish'
             } else {
@@ -163,8 +171,8 @@ export async function GET(req: NextRequest) {
         // 1H Liq
         if (liquidation1h && liquidation1h.length > 0) {
             const l = liquidation1h[0]
-            const longLiq = l.buyVolUsd || l.longLiquidation || 0
-            const shortLiq = l.sellVolUsd || l.shortLiquidation || 0
+            const longLiq = l.aggregated_long_liquidation_usd || l.buyVolUsd || l.longLiquidation || 0
+            const shortLiq = l.aggregated_short_liquidation_usd || l.sellVolUsd || l.shortLiquidation || 0
             liq1hVal = longLiq + shortLiq
         }
 
