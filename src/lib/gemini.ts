@@ -201,9 +201,9 @@ export interface MarketContextBrief {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
     summary: string // AI 對市場的一句話總結
     highlights: Array<{
-        title: string    // 新聞標題
-        reason: string   // 為何這是重大新聞
-        impact: '高' | '中' | '低'
+        title: string       // 新聞標題 (8-14字)
+        bias: '偏多' | '偏空' | '中性'  // 盤勢影響
+        impact_note: string // 一句話影響判斷 (10-20字)
     }>
 }
 
@@ -216,35 +216,38 @@ export async function generateMarketContextBrief(
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
         const prompt = `
-你是 CryptoTW 編輯，整理幣圈快訊成「台灣交易員早報」。
+你是 CryptoTW 的「盤勢影響分析師」，不是新聞編輯。
+你的任務是判斷每則快訊對「BTC 盤勢」的影響。
 
-【任務】精選最多 10 則重要新聞，按影響力排序。不足時不硬湊。
+【核心角色轉換】
+❌ 你不是在整理新聞
+✅ 你是在判斷「這對盤勢是偏多還是偏空」
 
-【優先順序】爆倉/清算 > 價格波動 > 監管/央行 > ETF/機構 > 遭駭 > 其他
+【任務】精選最多 5 則「對盤勢有影響」的事件，按影響力排序。
 
-【標題】8-14字，用強烈動詞（突破/失守/暴漲/崩跌/被爆/驚傳）
-【說明】25-40字，必須含：多空偏向 或 風險價位 或 觀察變數
-❌禁用：「顯示市場情緒」「反映投資者信心」等教科書語句
+【每則輸出格式】
+- title：8-14 字，用動詞開頭（突破/失守/暴跌/飆升/清算）
+- bias：判斷這則事件對 BTC 盤勢的影響 → "偏多" | "偏空" | "中性"
+- impact_note：10-20 字，直接說這對盤有什麼影響
+  範例：「短線情緒轉弱，回調壓力增加」
+  範例：「多頭動能不減，支撐判斷」
+  範例：「利多出盡，注意獲利了結」
 
-【影響力】
-🔴高：BTC漲跌>3%、爆倉>1億、ETF異動>3億、SEC決策、央行利率、交易所遭駭
-🟡中：機構買賣、巨鯨>500BTC、名人表態、ETF 1-3億
-🔵低：融資<5000萬、小幣、技術更新
+【判斷邏輯】
+偏多：ETF 大額流入、機構買入、巨鯨吸籌、清算空單、監管利好
+偏空：ETF 流出、機構出貨、巨鯨拋售、清算多單、監管打壓
+中性：技術更新、無明確方向
 
-【強制要求排版】中英文、中文與數字、數字與單位之間加空格；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
-【加權】優先亞洲時段、台灣常用所（幣安/OKX/MAX）、主流幣
-
-【排除】廣告、重複、純報告、小幣空投
+【排除】廣告、重複、小幣空投、純報告
 
 【輸入】
-${JSON.stringify(newsItems.slice(0, 40).map(n => ({
+${JSON.stringify(newsItems.slice(0, 30).map(n => ({
             t: n.newsflash_title || n.title,
-            c: (n.newsflash_content || n.content || '').slice(0, 150)
+            c: (n.newsflash_content || n.content || '').slice(0, 100)
         })))}
 
-【輸出】JSON格式，繁體中文
-{"sentiment":"樂觀|保守|恐慌|中性","summary":"30-50字總結","highlights":[{"title":"8-14字","reason":"25-40字含判斷","impact":"高|中|低"}]}
-`
+【輸出】JSON 格式，繁體中文
+{"sentiment":"樂觀|保守|恐慌|中性","summary":"20-40字，對今日盤勢的總體判斷","highlights":[{"title":"8-14字","bias":"偏多|偏空|中性","impact_note":"10-20字影響判斷"}]}`
 
         const result = await model.generateContent(prompt)
         const text = result.response.text()
@@ -313,35 +316,35 @@ export async function generateAIDecision(
 ✅必須：狀態描述、風險提示、結構判讀
 
 【輸入數據】
-1. 費率: ${(marketData.fundingRate * 100).toFixed(4)}% (>0.05%多頭過熱, <-0.03%空頭擁擠)
-2. 散戶多空比: ${marketData.longShortRatio.toFixed(2)} (>1.2散戶偏多, <0.8散戶偏空)
-3. 頂級交易員多空比: ${marketData.topTraderRatio?.toFixed(2) || '未知'}
-4. 4H爆倉: $${(marketData.totalLiquidation / 1000000).toFixed(1)}M (多:${(longLiq / 1000000).toFixed(1)}M 空:${(shortLiq / 1000000).toFixed(1)}M) → ${liqDominant}被清
-5. OI變化: ${marketData.oiChange ? (marketData.oiChange > 0 ? '+' : '') + marketData.oiChange.toFixed(1) + '%' : '未知'}
-6. 情緒指數: ${marketData.sentimentScore}/100
-7. 巨鯨: ${marketData.whaleStatus}
-8. 新聞: ${newsHighlights.slice(0, 2).join('；') || '無'}
+        1. 費率: ${(marketData.fundingRate * 100).toFixed(4)}% (> 0.05 % 多頭過熱, <-0.03% 空頭擁擠)
+        2. 散戶多空比: ${marketData.longShortRatio.toFixed(2)} (> 1.2散戶偏多, <0.8散戶偏空)
+        3. 頂級交易員多空比: ${marketData.topTraderRatio?.toFixed(2) || '未知'}
+        4. 4H爆倉: $${(marketData.totalLiquidation / 1000000).toFixed(1)} M(多: ${(longLiq / 1000000).toFixed(1)}M 空:${(shortLiq / 1000000).toFixed(1)}M) → ${liqDominant} 被清
+    5. OI變化: ${marketData.oiChange ? (marketData.oiChange > 0 ? '+' : '') + marketData.oiChange.toFixed(1) + '%' : '未知'}
+    6. 情緒指數: ${marketData.sentimentScore}/100
+    7. 巨鯨: ${marketData.whaleStatus}
+    8. 新聞: ${newsHighlights.slice(0, 2).join('；') || '無'}
 
 【判讀規則】
-- 費率高+未爆倉 = 潛在擁擠
-- 費率高+多單開始爆 = 過熱回調風險
-- 價漲+OI增 = 追價盤進場（危險）
-- 價漲+OI減 = 空頭回補（健康）
-- 單邊爆倉明顯多 = 該方向燃料已消耗
-- 散戶與頂級交易員方向背離 = 潛在反轉風險
+    - 費率高 + 未爆倉 = 潛在擁擠
+        - 費率高 + 多單開始爆 = 過熱回調風險
+            - 價漲 + OI增 = 追價盤進場（危險）
+    - 價漲 + OI減 = 空頭回補（健康）
+    - 單邊爆倉明顯多 = 該方向燃料已消耗
+        - 散戶與頂級交易員方向背離 = 潛在反轉風險
 
 【action 必須是以下其一】
-- 追價風險高，等待回調
-- 反彈找空點
-- 回調接多
-- 結構混亂，觀望
-- 順勢偏多/偏空
+    - 追價風險高，等待回調
+        - 反彈找空點
+        - 回調接多
+        - 結構混亂，觀望
+            - 順勢偏多 / 偏空
 
 【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
 
 【輸出】JSON，繁體中文
-{"conclusion":"10-15字狀態","bias":"偏多|偏空|震盪|中性","risk_level":"低|中|中高|高","action":"上述選項之一","reasoning":"50-80字，提到具體數據","tags":{"btc":"4字","alt":"4字","sentiment":"4字"}}
-`
+    { "conclusion": "10-15字狀態", "bias": "偏多|偏空|震盪|中性", "risk_level": "低|中|中高|高", "action": "上述選項之一", "reasoning": "50-80字，提到具體數據", "tags": { "btc": "4字", "alt": "4字", "sentiment": "4字" } }
+    `
 
         const result = await model.generateContent(prompt)
         const text = result.response.text()
