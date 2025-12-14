@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 import { generateMarketContextBrief, generateAIDecision } from '@/lib/gemini'
 import { getCache, setCache, CacheTTL, clearCache } from '@/lib/cache'
+import { coinglassV4Request, getCoinglassApiKey } from '@/lib/coinglass'
 
 // Admin API: Manage AI-generated content
 // GET - View current AI cache status
@@ -50,41 +51,72 @@ export async function POST(req: NextRequest) {
         const { action, type } = await req.json()
 
         if (action === 'regenerate') {
-            // Fetch fresh news from Coinglass
-            const newsRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/coinglass/news`)
-            const newsJson = await newsRes.json()
-            const newsItems = newsJson.news || []
+            // Fetch fresh news directly from Coinglass API
+            let newsItems: any[] = []
+            const apiKey = getCoinglassApiKey()
+            if (apiKey) {
+                try {
+                    const res = await fetch('https://open-api-v4.coinglass.com/api/newsflash/list?language=zh-tw', {
+                        headers: { 'CG-API-KEY': apiKey }
+                    })
+                    const json = await res.json()
+                    if (json.code === '0' && Array.isArray(json.data)) {
+                        newsItems = json.data
+                    }
+                } catch (e) {
+                    console.error('News fetch error:', e)
+                }
+            }
 
             if (type === 'market_context' || type === 'all') {
                 // Regenerate market context
                 const result = await generateMarketContextBrief(newsItems)
                 if (result) {
-                    setCache('market_context', result, CacheTTL.SLOW) // 30 min
+                    setCache('market_context', result, CacheTTL.SLOW) // 15 min
                 }
             }
 
             if (type === 'ai_decision' || type === 'all') {
-                // Regenerate AI decision (needs dashboard data)
-                const dashboardRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/coinglass/dashboard`)
-                const dashboardJson = await dashboardRes.json()
-                const dashboard = dashboardJson.dashboard
+                // Get dashboard data directly
+                const [fundingData, liquidationData, longShortData] = await Promise.all([
+                    coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }).catch(() => []),
+                    coinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: 'BTC', interval: '1d', limit: 1 }).catch(() => []),
+                    coinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', {
+                        symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1
+                    }).catch(() => [])
+                ])
 
-                if (dashboard) {
-                    const marketData = {
-                        fundingRate: dashboard.funding?.rate || 0,
-                        longShortRatio: (dashboard.longShort?.global?.longRate || 50) / (dashboard.longShort?.global?.shortRate || 50),
-                        totalLiquidation: dashboard.liquidation?.total || 0,
-                        sentimentScore: 50,
-                        whaleStatus: '觀望中'
-                    }
+                // Extract funding rate
+                let fundingRate = 0
+                if (fundingData && fundingData.length > 0) {
+                    const marginList = fundingData[0]?.stablecoin_margin_list || []
+                    const binance = marginList.find((e: any) => e.exchange === 'Binance')
+                    fundingRate = binance?.funding_rate || 0
+                }
 
-                    const marketContext = getCache<{ highlights?: { title: string }[] }>('market_context')
-                    const newsHighlights = marketContext?.highlights?.slice(0, 3).map(h => h.title) || []
+                // Extract liquidation
+                const liq = liquidationData?.[0] || {}
+                const totalLiq = (liq.longLiquidationUsd || 0) + (liq.shortLiquidationUsd || 0)
 
-                    const result = await generateAIDecision(marketData, newsHighlights)
-                    if (result) {
-                        setCache('ai_decision', result, CacheTTL.MEDIUM) // 5 min
-                    }
+                // Extract long/short
+                const ls = longShortData?.[0] || {}
+                const longRate = ls.longRate || 50
+                const shortRate = ls.shortRate || 50
+
+                const marketData = {
+                    fundingRate,
+                    longShortRatio: longRate / (shortRate || 1),
+                    totalLiquidation: totalLiq,
+                    sentimentScore: 50,
+                    whaleStatus: '觀望中'
+                }
+
+                const marketContext = getCache<{ highlights?: { title: string }[] }>('market_context')
+                const newsHighlights = marketContext?.highlights?.slice(0, 3).map(h => h.title) || []
+
+                const result = await generateAIDecision(marketData, newsHighlights)
+                if (result) {
+                    setCache('ai_decision', result, CacheTTL.MEDIUM) // 5 min
                 }
             }
 
