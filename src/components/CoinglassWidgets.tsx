@@ -874,65 +874,60 @@ export function WhaleAlertFeed() {
         return () => clearInterval(interval)
     }, [])
 
-    if (loading) return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+    if (loading) return <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
 
     // Since mock data or API might return empty list initially
     if (!alerts || alerts.length === 0) {
         return (
-            <div className="bg-neutral-900/50 rounded-xl p-8 text-center border border-dashed border-white/10">
-                <Radar className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-                <p className="text-sm text-neutral-500">暫無巨鯨快訊</p>
+            <div className="bg-neutral-900/50 rounded-xl p-4 text-center border border-dashed border-white/10">
+                <Radar className="w-5 h-5 text-neutral-600 mx-auto mb-1" />
+                <p className="text-xs text-neutral-500">暫無巨鯨快訊</p>
             </div>
         )
     }
 
     return (
-        <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
-            <div className="p-3 border-b border-white/5 bg-neutral-900/50 flex items-center justify-between">
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2">
+            <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                    <Radar className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm font-bold text-white">巨鯨快訊 ({'>'} $1M)</span>
+                    <Radar className="w-3.5 h-3.5 text-purple-400" />
+                    <span className="text-xs font-bold text-white">巨鯨快訊</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 rounded-full border border-green-500/20">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[10px] text-green-400 font-mono">LIVE</span>
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-500/10 rounded-full border border-green-500/20">
+                    <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[9px] text-green-400 font-mono">LIVE</span>
                 </div>
             </div>
-            <div className="divide-y divide-white/5 max-h-[400px] overflow-y-auto">
-                {alerts.map((alert, i) => (
-                    <div key={i} className="p-3 hover:bg-white/5 transition-colors flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                            <div className={cn(
-                                "w-2 h-8 rounded-full",
-                                alert.side === 'LONG' || alert.side === 'BUY' ? "bg-green-500" : "bg-red-500"
-                            )} />
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-bold text-white">{alert.symbol}</span>
-                                    <span className={cn(
-                                        "text-[10px] px-1.5 rounded border font-mono",
-                                        alert.side === 'LONG' || alert.side === 'BUY'
-                                            ? "text-green-400 border-green-500/30 bg-green-500/10"
-                                            : "text-red-400 border-red-500/30 bg-red-500/10"
-                                    )}>
-                                        {alert.side === 'BUY' ? 'LONG' : (alert.side === 'SELL' ? 'SHORT' : alert.side)}
-                                    </span>
-                                </div>
-                                <span className="text-xs text-neutral-400 font-mono">
-                                    Price: {alert.price ? `$${parseFloat(alert.price).toLocaleString()}` : '--'}
+            <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                {alerts.slice(0, 10).map((alert, i) => {
+                    const isLong = alert.side === 'LONG' || alert.side === 'BUY'
+                    const amount = parseInt(alert.amount || alert.volUsd || '0')
+                    const formatAmt = amount >= 1000000 ? `$${(amount / 1000000).toFixed(1)}M` : `$${(amount / 1000).toFixed(0)}K`
+
+                    return (
+                        <div key={i} className="flex items-center justify-between text-[11px]">
+                            <div className="flex items-center gap-1.5">
+                                <span className={cn(
+                                    "w-1 h-3 rounded-full",
+                                    isLong ? "bg-green-500" : "bg-red-500"
+                                )} />
+                                <span className="font-medium text-white">{alert.symbol}</span>
+                                <span className={cn(
+                                    "font-mono",
+                                    isLong ? "text-green-400" : "text-red-400"
+                                )}>
+                                    {isLong ? '↑' : '↓'}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="font-mono text-white">{formatAmt}</span>
+                                <span className="text-neutral-500 text-[10px]">
+                                    {new Date(alert.createTime || alert.time).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
                         </div>
-                        <div className="text-right">
-                            <div className="text-sm font-mono font-bold text-white">
-                                ${parseInt(alert.amount || alert.volUsd || '0').toLocaleString()}
-                            </div>
-                            <div className="text-[10px] text-neutral-500">
-                                {new Date(alert.createTime || alert.time).toLocaleTimeString()}
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
         </div>
     )
@@ -988,7 +983,7 @@ export function WhalePositionsList() {
         <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2">
             <div className="flex items-center gap-2 mb-2">
                 <Users className="w-3.5 h-3.5 text-blue-400" />
-                <span className="text-xs font-bold text-white">Top 20 巨鯨持倉</span>
+                <span className="text-xs font-bold text-white">Hyperliquid 7D Top 20</span>
             </div>
 
             {/* AI Summary */}
@@ -1000,10 +995,9 @@ export function WhalePositionsList() {
 
             <div className="space-y-1 max-h-[320px] overflow-y-auto">
                 {positions.slice(0, 20).map((pos, i) => {
-                    const addr = pos.address || pos.user || 'Unknown'
-                    const symbol = pos.symbol || pos.coin || 'BTC'
-                    const amount = parseFloat(pos.amount || pos.szi || '0')
-                    const isLong = pos.side === 'LONG' || pos.side === 'BUY' || amount > 0
+                    const addr = pos.ethAddress || pos.user || 'Unknown'
+                    const accountValue = parseFloat(pos.accountValue || '0')
+                    const isProfitable = accountValue > 0
 
                     return (
                         <div key={i} className="flex items-center justify-between text-[11px]">
@@ -1011,15 +1005,12 @@ export function WhalePositionsList() {
                                 <span className="text-neutral-600 font-mono w-4">{i + 1}</span>
                                 <span className="font-mono text-neutral-400">{shortenAddress(addr)}</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="font-medium text-white">{symbol}</span>
-                                <span className={cn(
-                                    "font-mono",
-                                    isLong ? "text-green-400" : "text-red-400"
-                                )}>
-                                    {isLong ? '↑' : '↓'} {formatUsd(Math.abs(amount))}
-                                </span>
-                            </div>
+                            <span className={cn(
+                                "font-mono",
+                                isProfitable ? "text-green-400" : "text-red-400"
+                            )}>
+                                {isProfitable ? '+' : ''}{formatUsd(accountValue)}
+                            </span>
                         </div>
                     )
                 })}

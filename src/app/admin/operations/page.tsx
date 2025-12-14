@@ -46,6 +46,41 @@ function TriggerSummaryButton() {
     )
 }
 
+// --- 1b. Whale AI Trigger ---
+function TriggerWhaleAIButton() {
+    const [isLoading, setIsLoading] = useState(false)
+    const { toast } = useToast()
+
+    const handleTrigger = async () => {
+        setIsLoading(true)
+        try {
+            const res = await fetch('/api/market/whales')
+            const data = await res.json()
+            if (data.whales?.summary) {
+                toast({ title: '巨鯨 AI 分析已更新', description: data.whales.summary.slice(0, 50) + '...' })
+            } else {
+                toast({ title: '更新完成', description: '巨鯨數據已刷新' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', description: '更新失敗', variant: 'destructive' })
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    return (
+        <Button
+            onClick={handleTrigger}
+            disabled={isLoading}
+            variant="outline"
+            className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+        >
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+            更新巨鯨 AI 分析
+        </Button>
+    )
+}
+
 // --- 2. Rich Menu Manager ---
 function RichMenuManager() {
     const [loading, setLoading] = useState(false)
@@ -254,8 +289,9 @@ export default function OperationsPage() {
                             手動觸發 AI 分析並更新首頁數據。
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-3">
                         <TriggerSummaryButton />
+                        <TriggerWhaleAIButton />
                     </CardContent>
                 </Card>
 

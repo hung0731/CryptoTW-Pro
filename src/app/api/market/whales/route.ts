@@ -6,6 +6,24 @@ export const dynamic = 'force-dynamic'
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null
 
+// Hyperliquid Leaderboard API (7D window)
+async function fetchHyperliquidLeaderboard(): Promise<any[]> {
+    try {
+        const res = await fetch('https://api.hyperliquid.xyz/info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'leaderboard', timeWindow: '7d' })
+        })
+        if (!res.ok) return []
+        const data = await res.json()
+        // Return top 20 from 7-day leaderboard
+        return (data.leaderboardRows || data || []).slice(0, 20)
+    } catch (e) {
+        console.error('Hyperliquid Leaderboard Error:', e)
+        return []
+    }
+}
+
 async function generateWhaleSummary(positions: any[]): Promise<string | null> {
     if (!genAI || !positions || positions.length === 0) return null
 
@@ -15,13 +33,13 @@ async function generateWhaleSummary(positions: any[]): Promise<string | null> {
         // Prepare simplified data for AI
         const top20 = positions.slice(0, 20).map((p, i) => ({
             rank: i + 1,
-            symbol: p.symbol || p.coin,
-            side: p.side || (parseFloat(p.szi || '0') > 0 ? 'LONG' : 'SHORT'),
-            size: parseFloat(p.amount || p.szi || '0')
+            address: p.ethAddress || p.user || 'Unknown',
+            pnl: p.accountValue || p.pnl || 0,
+            windowPerformance: p.windowPerformances || []
         }))
 
         const prompt = `
-你是加密貨幣分析師。根據以下 Hyperliquid 前 20 名巨鯨持倉數據，用 1-2 句話總結他們的動態。
+你是加密貨幣分析師。根據以下 Hyperliquid All-Time Leaderboard 前 20 名數據，用 1-2 句話總結他們的動態。
 
 【數據】
 ${JSON.stringify(top20, null, 2)}
@@ -29,7 +47,7 @@ ${JSON.stringify(top20, null, 2)}
 【要求】
 1. 用繁體中文
 2. 精簡摘要（30-50字）
-3. 重點：多空分佈、重倉幣種、整體傾向
+3. 重點：整體盈虧狀況、頂級交易者表現
 4. 不要給投資建議
 
 【輸出】
@@ -45,21 +63,19 @@ ${JSON.stringify(top20, null, 2)}
 
 export async function GET() {
     try {
-        const [alerts, positions] = await Promise.all([
+        // Fetch Hyperliquid Leaderboard (top 20 all-time)
+        const [alerts, leaderboard] = await Promise.all([
             coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}),
-            coinglassV4Request<any[]>('/api/hyperliquid/whale-position', {})
+            fetchHyperliquidLeaderboard()
         ])
 
-        // Get top 20 positions
-        const top20Positions = (positions || []).slice(0, 20)
-
         // Generate AI summary
-        const summary = await generateWhaleSummary(top20Positions)
+        const summary = await generateWhaleSummary(leaderboard)
 
         return NextResponse.json({
             whales: {
                 alerts: alerts || [],
-                positions: top20Positions,
+                positions: leaderboard,
                 summary: summary
             }
         })
