@@ -1465,7 +1465,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // 銀行匯率 + 溢價
+                    // 銀行匯率
                     {
                         type: "box",
                         layout: "horizontal",
@@ -1475,25 +1475,23 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         ],
                         margin: "md"
                     },
-                    {
-                        type: "box",
-                        layout: "horizontal",
-                        contents: [
-                            { type: "text", text: "MAX 溢價", size: "xs", color: "#aaaaaa", flex: 2 },
-                            { type: "text", text: `${premium >= 0 ? '+' : ''}${premium.toFixed(2)}%`, size: "xs", color: premium >= 0 ? "#ff8800" : "#00B900", weight: "bold", align: "end", flex: 2 }
-                        ],
-                        margin: "xs"
-                    },
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // 系統結論（淺灰色）
+                    // 結論
                     {
                         type: "text",
-                        text: `買入成本較低：${bestBuyExchange}｜賣出回收較高：${bestSellExchange}`,
+                        text: `買入較低：${bestBuyExchange}`,
                         size: "xs",
                         color: "#aaaaaa",
                         margin: "md"
+                    },
+                    {
+                        type: "text",
+                        text: `賣出較高：${bestSellExchange}`,
+                        size: "xs",
+                        color: "#aaaaaa",
+                        margin: "xs"
                     },
 
                     // 時間戳記
