@@ -98,53 +98,48 @@ export function HomeRouterWidget() {
             {/* 1. Market Context (News Highlights) - Collapsed by default */}
             <MarketContextCard data={data.marketContext || null} isLoading={loading} />
 
-            {/* 1. Market Mainline (Control Center) - Highlighted Border */}
-            <div className="bg-neutral-900/50 border border-blue-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                {/* Background decorative elements - Subtle */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+            {/* 1. Market Mainline (Control Center) */}
+            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
+                {/* Header Status */}
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span className="text-xs font-bold text-neutral-400 tracking-wider">籌碼快照</span>
+                </div>
 
-                <div className="relative z-10">
-                    {/* Header Status */}
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <h2 className="text-xs font-bold text-neutral-400 tracking-wider">籌碼快照</h2>
-                    </div>
+                {/* Headline */}
+                <h1 className="text-base font-bold text-white mb-3 leading-snug">
+                    {data.mainline.headline}
+                </h1>
 
-                    {/* Headline */}
-                    <h1 className="text-lg font-bold text-white mb-3 leading-snug">
-                        {data.mainline.headline}
-                    </h1>
+                {/* Action Hint */}
+                <div className={cn(
+                    "inline-flex items-center gap-2 px-2.5 py-1 rounded-md mb-4 border text-xs font-bold",
+                    data.mainline.actionColor === 'red' ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                        data.mainline.actionColor === 'green' ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                            "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+                )}>
+                    {data.mainline.actionHint}
+                </div>
 
-                    {/* Action Hint */}
-                    <div className={cn(
-                        "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg mb-6 border text-xs font-bold shadow-sm",
-                        data.mainline.actionColor === 'red' ? "bg-red-500/10 border-red-500/20 text-red-400" :
-                            data.mainline.actionColor === 'green' ? "bg-green-500/10 border-green-500/20 text-green-400" :
-                                "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
-                    )}>
-                        {data.mainline.actionHint}
-                    </div>
-
-                    {/* Navigation Indexes (Clickable) */}
-                    <div className="grid grid-cols-3 gap-2">
-                        {data.mainline.dimensions.map((dim, i) => (
-                            <Link
-                                key={i}
-                                href={dim.name === '合約面' ? '/prediction?tab=derivatives' : dim.name === '巨鯨面' ? '/prediction?tab=smartmoney' : '/prediction'}
-                                className="group bg-neutral-900 border border-white/5 rounded-xl p-2.5 hover:bg-white/10 hover:border-white/20 transition-all text-center flex flex-col items-center justify-center h-16 relative overflow-hidden"
-                            >
-                                <span className="text-[10px] text-neutral-500 mb-0.5">{dim.name}</span>
-                                <span className={cn(
-                                    "text-sm font-bold",
-                                    dim.color === 'red' ? "text-red-400" :
-                                        dim.color === 'green' ? "text-green-400" :
-                                            dim.color === 'yellow' ? "text-yellow-400" : "text-neutral-200"
-                                )}>
-                                    {dim.status}
-                                </span>
-                            </Link>
-                        ))}
-                    </div>
+                {/* Navigation Indexes (Clickable) */}
+                <div className="grid grid-cols-3 gap-2">
+                    {data.mainline.dimensions.map((dim, i) => (
+                        <Link
+                            key={i}
+                            href={dim.name === '合約' ? '/prediction?tab=derivatives' : dim.name === '大戶' ? '/prediction?tab=smartmoney' : '/prediction'}
+                            className="group bg-neutral-900 border border-white/5 rounded-lg p-2 hover:bg-white/5 hover:border-white/10 transition-all text-center flex flex-col items-center justify-center h-16"
+                        >
+                            <span className="text-[10px] text-neutral-500 mb-0.5">{dim.name}面</span>
+                            <span className={cn(
+                                "text-sm font-bold",
+                                dim.color === 'red' ? "text-red-400" :
+                                    dim.color === 'green' ? "text-green-400" :
+                                        dim.color === 'yellow' ? "text-yellow-400" : "text-neutral-200"
+                            )}>
+                                {dim.status}
+                            </span>
+                        </Link>
+                    ))}
                 </div>
             </div>
 

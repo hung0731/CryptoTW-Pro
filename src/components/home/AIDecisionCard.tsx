@@ -64,27 +64,26 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
     const biasStyle = BiasConfig[data.bias] || BiasConfig['中性']
 
     return (
-        <div className={cn(
-            "rounded-2xl p-5 border transition-all duration-300",
-            riskStyle.bg,
-            riskStyle.border
-        )}>
+        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 transition-all duration-300">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🧠</span>
-                <span className="text-xs font-bold text-neutral-400 tracking-wider">今日判讀</span>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-bold text-white tracking-wider">AI 速覽</span>
+                    <span className="text-[10px] text-neutral-400">全局決策</span>
+                </div>
             </div>
 
             {/* Main Conclusion */}
-            <h1 className="text-xl font-bold text-white mb-4 leading-snug">
+            <h1 className="text-base font-bold text-white mb-3 leading-snug">
                 {data.conclusion}
             </h1>
 
             {/* Status Tags */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-3">
                 {/* Bias Tag */}
                 <div className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-sm",
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md font-bold text-xs",
                     biasStyle.bg, biasStyle.color
                 )}>
                     {biasStyle.icon}
@@ -93,7 +92,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
 
                 {/* Risk Level */}
                 <div className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-sm",
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium text-xs",
                     "bg-neutral-800/50 border border-white/10"
                 )}>
                     <span>{riskStyle.icon}</span>
@@ -103,29 +102,29 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
             </div>
 
             {/* Action Recommendation */}
-            <div className="bg-neutral-900/50 rounded-xl p-3 mb-4 border border-white/5">
+            <div className="bg-neutral-900/50 rounded-lg p-3 mb-3 border border-white/5">
                 <div className="flex items-start gap-2">
-                    <span className="text-base">🧭</span>
+                    <span className="text-sm">🧭</span>
                     <div>
-                        <span className="text-xs text-neutral-500 block mb-0.5">建議做法</span>
-                        <span className="text-sm text-white font-medium">{data.action}</span>
+                        <span className="text-[10px] text-neutral-500 block mb-0.5">建議做法</span>
+                        <span className="text-xs text-white font-medium">{data.action}</span>
                     </div>
                 </div>
             </div>
 
             {/* Mini Tags (if available) */}
             {data.tags && (
-                <div className="flex items-center gap-3 mb-4 text-xs">
+                <div className="flex items-center gap-3 mb-3 text-[10px]">
                     <div className="flex items-center gap-1">
                         <span className="text-neutral-500">BTC:</span>
                         <span className="text-neutral-300">{data.tags.btc}</span>
                     </div>
-                    <div className="w-px h-3 bg-white/10" />
+                    <div className="w-px h-2.5 bg-white/10" />
                     <div className="flex items-center gap-1">
                         <span className="text-neutral-500">Alt:</span>
                         <span className="text-neutral-300">{data.tags.alt}</span>
                     </div>
-                    <div className="w-px h-3 bg-white/10" />
+                    <div className="w-px h-2.5 bg-white/10" />
                     <div className="flex items-center gap-1">
                         <span className="text-neutral-500">情緒:</span>
                         <span className="text-neutral-300">{data.tags.sentiment}</span>
@@ -136,16 +135,16 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
             {/* Expand Toggle */}
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-1 text-xs text-neutral-500 hover:text-white transition-colors"
+                className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-white transition-colors w-full justify-center pt-2 border-t border-white/5"
             >
-                看原因
+                {isExpanded ? '收起詳細分析' : '查看詳細分析'}
                 {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
 
             {/* Expanded Reasoning */}
             {isExpanded && (
-                <div className="mt-4 pt-4 border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <p className="text-xs text-neutral-400 leading-relaxed whitespace-pre-line">
+                <div className="mt-3 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <p className="text-xs text-neutral-400 leading-relaxed whitespace-pre-line bg-neutral-900/30 p-3 rounded-lg">
                         {data.reasoning}
                     </p>
                 </div>

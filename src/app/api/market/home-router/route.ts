@@ -151,7 +151,6 @@ export async function GET() {
 
         // 4. Focus Today (Nav List)
         const focusToday = [
-            { name: '資金費率', status: derivStatus, link: '/prediction?tab=derivatives' },
             { name: 'BTC 巨鯨流向', status: whaleStatus, link: '/prediction?tab=smartmoney' },
             { name: '財經日曆', status: '今日事件', link: '/calendar' }
         ]

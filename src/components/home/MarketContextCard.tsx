@@ -76,12 +76,15 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
     const contextText = data.summary || `市場整體呈現${data.sentiment}態勢。`
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden">
+        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 overflow-hidden">
             {/* AI Context Card */}
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-4">
+            <div className="mb-3">
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
-                    <h3 className="text-sm font-bold text-blue-200">AI 懶人包</h3>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-bold text-white tracking-wider">AI 速覽</span>
+                        <span className="text-[10px] text-neutral-400">市場重點</span>
+                    </div>
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed font-medium">
                     {contextText}

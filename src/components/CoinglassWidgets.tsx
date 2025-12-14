@@ -1104,17 +1104,15 @@ export function WhaleAiSummaryCard() {
     if (!fetchedSummary) return null
 
     return (
-        <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-xl p-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-[50px] rounded-full pointer-events-none -mt-10 -mr-10"></div>
-
+        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-3">
-                <div className="bg-purple-500/20 p-1.5 rounded-lg">
-                    <Users className="w-4 h-4 text-purple-400" />
+                <div className="bg-blue-500/20 p-1.5 rounded-lg">
+                    <Users className="w-4 h-4 text-blue-400" />
                 </div>
-                <h2 className="text-sm font-bold text-white">AI 巨鯨速覽</h2>
-                <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/20">
-                    Smart Money Analysis
-                </span>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-bold text-white tracking-wider">AI 速覽</span>
+                    <span className="text-[10px] text-neutral-400">巨鯨動向</span>
+                </div>
             </div>
 
             <p className="text-xs text-neutral-300 leading-relaxed font-medium relative z-10">
@@ -1233,12 +1231,15 @@ export function DerivativesAiSummaryCard() {
     }
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden mb-5">
-            {/* AI Context Card (Same style as Whale page) */}
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 p-4">
+        <div className="bg-neutral-900/50 border border-[#211FFF] rounded-xl p-4 overflow-hidden mb-5">
+            {/* AI Context Card */}
+            <div>
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
-                    <h3 className="text-sm font-bold text-blue-200">市場脈絡 (合約)</h3>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-bold text-white tracking-wider">AI 速覽</span>
+                        <span className="text-[10px] text-neutral-400">合約情緒</span>
+                    </div>
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed font-medium">
                     {summary}
