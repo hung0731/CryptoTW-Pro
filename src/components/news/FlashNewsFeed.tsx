@@ -22,7 +22,8 @@ export function FlashNewsFeed() {
     useEffect(() => {
         const fetchContext = async () => {
             try {
-                const res = await fetch('/api/market-context')
+                // Add timestamp to bypass browser cache
+                const res = await fetch(`/api/market-context?t=${Date.now()}`)
                 const json = await res.json()
                 if (json.context) {
                     setMarketContext(json.context)

@@ -88,10 +88,10 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
                 </p>
             </div>
 
-            {/* Highlights List */}
+            {/* Highlights List - Show top 3 on homepage */}
             {data.highlights && data.highlights.length > 0 && (
                 <div className="px-3 py-2 space-y-1">
-                    {data.highlights.slice(0, 4).map((item, idx) => (
+                    {data.highlights.slice(0, 3).map((item, idx) => (
                         <div
                             key={idx}
                             className="flex items-start justify-between py-2 px-2 -mx-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors group"
