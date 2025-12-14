@@ -95,19 +95,16 @@ export function MarketStatusGrid() {
     ]
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
             {cards.map((card, i) => (
                 <div
                     key={i}
                     className={cn(
-                        "flex flex-col items-center justify-center p-2.5 rounded-lg border transition-all h-20",
-                        getStyle(card.code),
-                        // Last item spans 2 cols if on mobile (grid-cols-2) to center it or fill row? 
-                        // Actually standard grid is fine.
-                        i === 4 ? "col-span-2 md:col-span-1" : ""
+                        "flex-none w-28 flex flex-col items-center justify-center p-3 rounded-xl border transition-all h-24 snap-center",
+                        getStyle(card.code)
                     )}
                 >
-                    <span className="text-[10px] opacity-70 mb-1">{card.title}</span>
+                    <span className="text-[10px] opacity-70 mb-1.5 font-medium">{card.title}</span>
                     <span className="text-sm font-bold tracking-wide">{card.value}</span>
                 </div>
             ))}

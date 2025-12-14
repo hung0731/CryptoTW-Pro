@@ -229,9 +229,64 @@ export async function GET(req: NextRequest) {
             volatility: { label: volatility, code: volatilityCode, value: volatility }
         }
 
-        setCache(CACHE_KEY, data, CacheTTL.FAST) // 1 min
+        // --- Market Tools Status (入口組件狀態) ---
+        // 1. Contracts (合約市場): Reuse Leverage Status
+        // Logic: Same as leverage card (Cool/Warm/Hot)
+        const toolContracts = {
+            title: '合約市場',
+            status: leverage === '冷靜' ? '狀態穩定' : `槓桿情緒：${leverage}`, // If normal, say Stable. If hot, warn.
+            active: leverage !== '冷靜',
+            href: '/market'
+        }
 
-        return NextResponse.json({ status: data })
+        // 2. Whales (巨鯨動態)
+        // Logic: Use Whale Bias. If 'Watch' -> '無明顯單邊'. If Bull/Bear -> '出現單邊押注'.
+        // Or if we had alert count, use that. Let's use bias for now.
+        const toolWhales = {
+            title: '巨鯨動態',
+            status: whale === '觀望' ? '近 1 小時：無明顯單邊' : `大戶傾向：${whale}`,
+            active: whale !== '觀望',
+            href: '/market/whales' // Assuming this route exists or /market
+        }
+
+        // 3. Funding (資金費率)
+        // Logic: Use max funding rate or avg. We have `frVal` (avg). 
+        // If frVal > 0.03% -> '部分幣種出現異常'. Else '整體偏中性'.
+        const toolFunding = {
+            title: '資金費率',
+            status: frVal > 0.03 ? '部分幣種費率偏高' : '整體偏中性',
+            active: frVal > 0.03,
+            href: '/market/funding' // or /market?tab=funding
+        }
+
+        // 4. Prediction (市場預期 - Polymarket)
+        // Logic: Mock for now as we don't have real-time poly diff.
+        // Randomly set active occasionally or keep dry.
+        const toolPrediction = {
+            title: '市場預期',
+            status: '降息機率未變', // Hardcoded for safety until real data
+            active: false,
+            href: '/prediction'
+        }
+
+        // 5. Alerts (異常警報)
+        // Logic: Count high volatility items or mock. 
+        // Let's use volatility code. If High -> '今日 2 則' (mock count using amp). 
+        // If Low -> '目前無'.
+        const alertCount = volatilityCode === 'high' ? 2 : (volatilityCode === 'medium' ? 1 : 0)
+        const toolAlerts = {
+            title: '異常警報',
+            status: alertCount > 0 ? `今日 ${alertCount} 則` : '目前無',
+            active: alertCount > 0,
+            href: '/alerts' // or /market/alerts
+        }
+
+        const tools = [toolContracts, toolWhales, toolFunding, toolPrediction, toolAlerts]
+
+        const responseData = { status: data, tools }
+        setCache(CACHE_KEY, responseData, CacheTTL.FAST) // 1 min
+
+        return NextResponse.json(responseData)
 
     } catch (e) {
         console.error('Market Status API Error:', e)

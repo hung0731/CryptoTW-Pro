@@ -15,7 +15,10 @@ interface MarketContext {
     }[]
 }
 
-export function FlashNewsFeed() {
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+
+export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
     const [marketContext, setMarketContext] = useState<MarketContext | null>(null)
     const [loading, setLoading] = useState(true)
 
@@ -54,7 +57,7 @@ export function FlashNewsFeed() {
 
                 {/* List Skeleton */}
                 <div className="p-4 space-y-3">
-                    {[1, 2, 3, 4, 5].map(i => (
+                    {[1, 2, 3].map(i => (
                         <div key={i} className="flex items-start gap-3">
                             <Skeleton className="w-6 h-6 rounded bg-neutral-700 shrink-0" />
                             <div className="flex-1 space-y-2">
@@ -86,6 +89,8 @@ export function FlashNewsFeed() {
         return 'text-blue-400 border-blue-400/30 bg-blue-500/10'
     }
 
+    const displayItems = compact ? marketContext?.highlights?.slice(0, 3) : marketContext?.highlights?.slice(0, 10)
+
     return (
         <div className="bg-neutral-900/50 border border-white/5 rounded-xl overflow-hidden">
             {/* AI Header */}
@@ -104,7 +109,7 @@ export function FlashNewsFeed() {
 
             {/* AI Ranked News List */}
             <div className="divide-y divide-white/5">
-                {marketContext?.highlights?.slice(0, 10).map((item, index) => (
+                {displayItems?.map((item, index) => (
                     <div
                         key={index}
                         className="flex items-start gap-3 p-4 hover:bg-white/5 transition-colors"
@@ -141,6 +146,16 @@ export function FlashNewsFeed() {
                         </div>
                     )}
             </div>
+
+            {/* Compact Footer */}
+            {compact && (
+                <Link
+                    href="/news"
+                    className="flex items-center justify-center gap-1.5 p-3 text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition-all border-t border-white/5"
+                >
+                    查看完整 AI 速覽 <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            )}
         </div>
     )
 }

@@ -9,9 +9,9 @@ import {
     Bell, Settings, ChevronRight, Calendar
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { QuickActions } from '@/components/QuickActions'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { MarketStatusGrid } from '@/components/home/MarketStatusGrid'
+import { MarketEntryWidgets } from '@/components/home/MarketEntryWidgets'
 
 export default function HomePage() {
     const { profile, isLoading: isAuthLoading } = useLiff()
@@ -78,14 +78,14 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* ===== 1. Flash News Feed (AI Context) ===== */}
-                <FlashNewsFeed />
+                {/* ===== 1. Flash News Feed (Protagonist) ===== */}
+                <FlashNewsFeed compact />
 
-                {/* ===== 2. Market Status Grid ===== */}
+                {/* ===== 2. Market Status (Dashboard) ===== */}
                 <MarketStatusGrid />
 
-                {/* ===== 3. Quick Actions ===== */}
-                <QuickActions />
+                {/* ===== 3. Market Tools (Entry) ===== */}
+                <MarketEntryWidgets />
 
             </div>
 
