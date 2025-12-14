@@ -131,8 +131,15 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    @apply bg-black;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   h1,

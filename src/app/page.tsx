@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AIMarketPulse } from '@/components/AIMarketPulse'
-import { MarketContextCard } from '@/components/MarketContextCard'
 import { TopCoinCards } from '@/components/TopCoinCards'
 import { PromoBanner } from '@/components/PromoBanner'
 import { QuickActions } from '@/components/QuickActions'
@@ -130,18 +129,9 @@ export default function HomePage() {
                     <TopCoinCards />
                 </section>
 
-                {/* ===== 2. AI Market Intelligence - 雙核心引擎 ===== */}
+                {/* ===== 2. AI Market Intelligence ===== */}
                 {marketReport && (
-                    <div className="space-y-4">
-                        {/* 2a. Market Context (News/RSS) */}
-                        <MarketContextCard
-                            context={marketReport.market_context}
-                            updatedAt={marketReport.created_at}
-                        />
-
-                        {/* 2b. Technical Analysis (Price/Data) */}
-                        <AIMarketPulse report={marketReport} />
-                    </div>
+                    <AIMarketPulse report={marketReport} />
                 )}
 
                 {/* ===== 3. Market Stats - 快速指標 ===== */}

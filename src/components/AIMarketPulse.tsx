@@ -21,14 +21,14 @@ export function AIMarketPulse({ report }: AIMarketPulseProps) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm font-medium text-white">AI 市場解讀 (技術面)</span>
+                    <span className="text-sm font-medium text-white">AI 市場懶人包</span>
                     <ExplainTooltip
-                        term="AI 市場解讀"
-                        definition="結合價格行為 (PA)、期貨籌碼與鏈上數據的綜合分析。"
+                        term="AI 市場懶人包"
+                        definition="結合價格、期貨籌碼與市場新聞的每日重點快覽。"
                         explanation={
                             <ul className="list-disc pl-4 space-y-1">
                                 <li><strong>客觀中立</strong>：AI 僅描述市場結構，不帶個人情緒。</li>
-                                <li><strong>新聞整合</strong>：分析內容已納入最新市場新聞脈絡。</li>
+                                <li><strong>每日更新</strong>：彙整當日重要市場變化。</li>
                                 <li><strong>非財務建議</strong>：此報告僅供輔助判斷，投資請自負風險。</li>
                             </ul>
                         }
