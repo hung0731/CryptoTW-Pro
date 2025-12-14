@@ -1442,7 +1442,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "", flex: 2 },
+                            { type: "filler" },
                             { type: "text", text: `${maxBuyRef}`, size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
                             { type: "text", text: `${maxSellRef}`, size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
                         ],
@@ -1465,7 +1465,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "", flex: 2 },
+                            { type: "filler" },
                             { type: "text", text: bitoBuyRef ? `${bitoBuyRef}` : '--', size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
                             { type: "text", text: bitoSellRef ? `${bitoSellRef}` : '--', size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
                         ],
