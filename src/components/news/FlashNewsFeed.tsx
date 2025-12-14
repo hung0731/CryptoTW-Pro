@@ -10,11 +10,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
-    themes: {
+    summary: string
+    highlights: {
         title: string
-        summary: string
-        watch: 'contracts' | 'whales' | 'macro' | 'sentiment' | 'etf'
-        why_it_matters: string
+        reason: string
+        impact: '高' | '中' | '低'
     }[]
 }
 
@@ -92,16 +92,10 @@ export function FlashNewsFeed() {
 
         const emoji = sentimentEmoji[marketContext.sentiment] || '📊'
 
-        if (marketContext.themes.length === 0) {
-            return { emoji, text: `市場情緒${marketContext.sentiment}，暫無明顯主線。` }
-        }
-
-        const mainThemes = marketContext.themes.slice(0, 2)
-        const themeTexts = mainThemes.map(t => t.summary).join(' ')
-
+        // Use the summary from AI response
         return {
             emoji,
-            text: themeTexts || `市場整體呈現${marketContext.sentiment}態勢。`
+            text: marketContext.summary || `市場整體呈現${marketContext.sentiment}態勢。`
         }
     }
 

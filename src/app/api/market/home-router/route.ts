@@ -25,27 +25,15 @@ export async function GET() {
         if (!marketContext) {
             // Fetch raw news for AI (Cached request)
             const news = await cachedCoinglassV4Request<any[]>('/api/newsflash/list', {
-                limit: 30, lang: 'en'
+                limit: 40, lang: 'zh-tw'
             }, 300)
 
-            // Prepare metrics for AI
-            const aiMetrics = {
-                fundingRate: derivatives?.metrics?.fundingRate,
-                longShortRatio: derivatives?.metrics?.lsRatio,
-                liquidations: derivatives?.metrics ? derivatives.metrics.longLiq + derivatives.metrics.shortLiq : 0,
-                whaleBias: whales?.summary
-            }
-
-            // Generate Context (expensive)
+            // Generate Context (only use news, no market metrics)
             if (news && Array.isArray(news)) {
-                marketContext = await generateMarketContextBrief(news, aiMetrics)
+                marketContext = await generateMarketContextBrief(news)
                 if (marketContext) {
                     setCache('market_context_brief', marketContext, 1800) // Cache for 30 mins
                 }
-            } else {
-                // Fallback mock context if no news (e.g. API key invalid)
-                // This ensures the UI component still renders something useful or stays hidden
-                // For now, let's return null so it hides, OR return a system status
             }
         }
         // ----------------------------------------
