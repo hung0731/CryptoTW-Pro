@@ -107,6 +107,10 @@ ${rssTitles || '無新聞數據'}
    - highlights: Array of { theme: "主題 (含關鍵名詞)", impact: "影響層面" } (2-4 個)
 
 【JSON 範例】
+Note: emoji 必須根據 sentiment 選擇，例如：
+- 偏多/樂觀: 🚀 📈 💪 🔥 ✨
+- 偏空/風險: 🔻 ⚠️ 🌧️ 📉 💨
+- 震盪/中性: 📊 ⚖️ 🔄 ⏳ 🎢
 {
   "emoji": "📊",
   "sentiment": "中性",

@@ -15,8 +15,9 @@ import { AIMarketPulse } from '@/components/AIMarketPulse'
 import { TopCoinCards } from '@/components/TopCoinCards'
 import { PromoBanner } from '@/components/PromoBanner'
 import { QuickActions } from '@/components/QuickActions'
-import { MarketFeelingCard, WhaleStatusCard, LiquidationPressureCard } from '@/components/MarketSignalCards'
+import { MarketFeelingCard } from '@/components/MarketSignalCards'
 import { LiquidationSummary, FundingSummary, LongShortSummary, IndicatorsGrid } from '@/components/CoinglassWidgets'
+import { UsdtRateCard } from '@/components/UsdtRateCard'
 import type { MarketSignals } from '@/lib/signal-engine'
 
 export default function HomePage() {
@@ -129,6 +130,12 @@ export default function HomePage() {
                     <TopCoinCards />
                 </section>
 
+                {/* ===== USDT/TWD 匯率 ===== */}
+                <section>
+                    <h2 className="text-sm font-medium text-neutral-500 mb-3">台幣匯率</h2>
+                    <UsdtRateCard />
+                </section>
+
                 {/* ===== 2. AI Market Intelligence ===== */}
                 {marketReport && (
                     <AIMarketPulse report={marketReport} />
@@ -184,11 +191,7 @@ export default function HomePage() {
                 {/* ===== Market Signals - 市場體感 ===== */}
                 <section>
                     <h2 className="text-sm font-medium text-neutral-500 mb-3">市場體感</h2>
-                    <div className="space-y-2">
-                        <MarketFeelingCard signals={signals} loading={signalsLoading} />
-                        <WhaleStatusCard signals={signals} loading={signalsLoading} />
-                        <LiquidationPressureCard signals={signals} loading={signalsLoading} />
-                    </div>
+                    <MarketFeelingCard signals={signals} loading={signalsLoading} />
                 </section>
 
                 {/* ===== NEW: Bitcoin Indicators - 鏈上指標 ===== */}
