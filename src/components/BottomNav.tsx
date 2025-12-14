@@ -63,9 +63,10 @@ export function BottomNav() {
                             <item.icon
                                 className={cn(
                                     "w-5 h-5 transition-all duration-200",
-                                    item.active && "fill-current"
+                                    // Removed fill-current as it breaks line-based icons like BarChart2
+                                    item.active && "drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"
                                 )}
-                                strokeWidth={item.active ? 0 : 2}
+                                strokeWidth={item.active ? 2.5 : 1.5}
                             />
                         </div>
                         <span className="text-[10px] font-medium">{item.label}</span>

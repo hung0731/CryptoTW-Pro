@@ -80,30 +80,14 @@ export async function GET() {
         // Process and Enrich Data
         const enrichedEvents = rawEvents
             .map((event: any) => {
-                // 0. Strict Country Filter: Only US events
-                // Coinglass usually uses 'US' for country_code or 'United States' for country_name
-                const isUS = event.country_code === 'US' || event.country_name === 'United States'
-                if (!isUS) return null
-
-                // 1. Filter: specific country (User focused on USD, maybe generic global S-Tier)
-                // Actually, our knowledge base keywords are English, so we match directly.
+                // 0. Strict Country Filter: DISABLED (Show all countries)
+                // const isUS = event.country_code === 'US' || event.country_name === 'United States'
+                // if (!isUS) return null
 
                 const enrichment = enrichMacroEvent(event.calendar_name)
 
-                // If not in our allowlist (knowledge base), check if it's high importance USD, 
-                // but user said "Strict Allowlist". So we prioritize our list.
-                // We will keep Non-Allowlist events ONLY if they are High Importance (3) AND USD,
-                // but we won't give them the "Why Important" badge unless generic.
-
-                if (!enrichment) {
-                    // Strict filtering: If not in our S/A tier list, execute strict drop?
-                    // User said: "Red Tier (Others) -> Don't show".
-                    // So we effectively DROP everything not in our list?
-                    // BUT, we should double check if we missed something important like 'GDP'.
-                    // Our list covers FOMC, CPI, PCE, NFP, Unemployment, GDP, PMI.
-                    // Let's drop everything else to be clean "CryptoTW Pro".
-                    return null
-                }
+                // 1. Strict Allowlist: DISABLED (Show all events)
+                // if (!enrichment) return null
 
                 // Transform to frontend format
                 return {
@@ -113,30 +97,29 @@ export async function GET() {
                         hour12: false,
                         hour: '2-digit',
                         minute: '2-digit',
-                        timeZone: 'Asia/Taipei' // Display in Taipei time? Or UTC? 
-                        // Usually raw timestamp is UTC. Coinglass timestamp is likely ms epoch.
+                        timeZone: 'Asia/Taipei'
                     }),
                     timestamp: event.publish_timestamp,
                     currency: event.country_code, // e.g. 'US' or 'USD'
                     country: event.country_name,
-                    title: enrichment.titleTW, // Use our standardized TW title
+                    title: enrichment?.titleTW || event.calendar_name, // Fallback to English name
                     originalTitle: event.calendar_name,
                     importance: event.importance_level,
                     actual: event.published_value,
                     forecast: event.forecast_value,
                     previous: event.previous_value,
 
-                    // Enriched content
-                    tier: enrichment.tier,
-                    whyImportant: enrichment.whyImportant,
-                    cryptoReaction: enrichment.cryptoReaction,
+                    // Enriched content (Optional)
+                    tier: enrichment?.tier || (event.importance_level >= 3 ? 'A' : 'C'), // Map importance to tier if unknown
+                    whyImportant: enrichment?.whyImportant,
+                    cryptoReaction: enrichment?.cryptoReaction,
 
                     // Frontend helper
-                    isKey: enrichment.tier === 'S'
+                    isKey: enrichment?.tier === 'S' || event.importance_level >= 3 // Highlight High Impact events
                 }
             })
-            .filter((e: any) => e !== null) // Remove filtered out events
-            .sort((a: any, b: any) => a.timestamp - b.timestamp) // Sort by time
+            .filter((e: any) => e !== null)
+            .sort((a: any, b: any) => a.timestamp - b.timestamp)
 
         return NextResponse.json({
             calendar: {
