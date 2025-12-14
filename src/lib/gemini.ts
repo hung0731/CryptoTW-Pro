@@ -194,3 +194,86 @@ export async function generateDerivativesSummary(data: any): Promise<string | nu
         return null
     }
 }
+
+export interface MarketContextBrief {
+    sentiment: '樂觀' | '保守' | '恐慌' | '中性'
+    themes: Array<{
+        title: string
+        summary: string
+        watch: 'contracts' | 'whales' | 'macro' | 'sentiment' | 'etf'
+        why_it_matters: string
+        related_news_ids?: string[] // Optional for debugging
+    }>
+}
+
+export async function generateMarketContextBrief(
+    newsItems: any[],
+    marketMetrics: any
+): Promise<MarketContextBrief | null> {
+    if (!genAI) return null
+
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+
+        // Construct the prompt based on "Anti-News" principles
+        const prompt = `
+你是一個「市場語境翻譯器」。你的任務不是摘要新聞，而是將零散的資訊聚類，定義出當前的「市場狀態」。
+
+【目標】
+告訴用戶：這些新聞合在一起，代表市場現在「處於什麼狀態」？
+
+【輸入資料】
+1. 過去 24h 快訊：
+${JSON.stringify(newsItems.slice(0, 30).map(n => ({ id: n.id, title: n.title, content: n.content })), null, 2)}
+
+2. 市場關鍵數據：
+${JSON.stringify(marketMetrics, null, 2)}
+
+【重度限制：反新聞化】
+❌ 禁止寫：「某某新聞指出...」、「根據報導...」、「發生了...事件」
+✅ 必須寫：「市場目前呈現＿＿＿狀態」、「資金面顯示＿＿＿傾向」、「結構上存在＿＿＿壓力」
+
+【輸出要求】
+1. **聚類 (Clustering)**：找出 2-3 個最重要的市場主線 (噪音請忽略)。
+2. **抽象化 (Abstraction)**：將事件轉化為「狀態描述」。
+3. **導航 (Navigation)**：每一段必須對應一個功能模組 (watch)。
+
+【功能模組對照表 (watch)】
+- contracts: 合約、期權、費率、爆倉、槓桿、波動率
+- whales: 巨鯨、主力、大戶、機構流向、鏈上異動
+- macro: 聯準會、CPI、降息、美股、監管、ETF 流量
+- sentiment: 如果是單純的情緒、Meme 幣熱潮、社群共識
+
+【JSON 輸出格式 (Strict)】
+{
+  "sentiment": "樂觀" | "保守" | "恐慌" | "中性",
+  "themes": [
+    {
+      "title": "4-8字，描述狀態 (例：衍生品風險集中)",
+      "summary": "20-30字，解釋狀態與成因 (例：年末期權到期與費率分歧，顯示多空雙方防禦心態升高。)",
+      "watch": "contracts",
+      "why_it_matters": "10-15字，為什麼要看數據 (例：影響短線波動與槓桿風險)"
+    }
+  ]
+}
+
+請直接輸出 JSON，不要 Markdown 或其他廢話。
+`
+
+        const result = await model.generateContent(prompt)
+        const text = result.response.text()
+
+        // Clean markdown if present
+        const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/)
+
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[1] || jsonMatch[0])
+        }
+
+        return JSON.parse(text)
+
+    } catch (e) {
+        console.error('Gemini Market Context Brief Error:', e)
+        return null
+    }
+}

@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import { getDerivativesData } from '../derivatives/route'
 import { getWhaleData } from '../whales/route'
 import { supabase } from '@/lib/supabase'
+import { cachedCoinglassV4Request } from '@/lib/coinglass'
+import { generateMarketContextBrief, MarketContextBrief } from '@/lib/gemini'
+import { getCache, setCache } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60 // 1 min cache
@@ -16,6 +19,37 @@ export async function GET() {
             supabase.from('market_reports').select('*').order('created_at', { ascending: false }).limit(1)
         ])
 
+        // --- New Market Context Logic (Cached) ---
+        let marketContext: MarketContextBrief | null = getCache('market_context_brief')
+
+        if (!marketContext) {
+            // Fetch raw news for AI (Cached request)
+            const news = await cachedCoinglassV4Request<any[]>('/api/newsflash/list', {
+                limit: 30, lang: 'en'
+            }, 300)
+
+            // Prepare metrics for AI
+            const aiMetrics = {
+                fundingRate: derivatives?.metrics?.fundingRate,
+                longShortRatio: derivatives?.metrics?.lsRatio,
+                liquidations: derivatives?.metrics ? derivatives.metrics.longLiq + derivatives.metrics.shortLiq : 0,
+                whaleBias: whales?.summary
+            }
+
+            // Generate Context (expensive)
+            if (news && Array.isArray(news)) {
+                marketContext = await generateMarketContextBrief(news, aiMetrics)
+                if (marketContext) {
+                    setCache('market_context_brief', marketContext, 1800) // Cache for 30 mins
+                }
+            } else {
+                // Fallback mock context if no news (e.g. API key invalid)
+                // This ensures the UI component still renders something useful or stays hidden
+                // For now, let's return null so it hides, OR return a system status
+            }
+        }
+        // ----------------------------------------
+
         const sentimentReport = sentimentRes?.data?.[0]
 
         // 1. Build Mainline Status
@@ -23,7 +57,6 @@ export async function GET() {
 
         // Dimensions & Status
         const fundingRate = derivatives?.metrics?.fundingRate || 0
-        const lsRatio = derivatives?.metrics?.lsRatio || 1
         const sentimentScore = sentimentReport?.sentiment_score || 50
         const sentimentLabel = sentimentReport?.sentiment || "中性"
 
@@ -91,16 +124,9 @@ export async function GET() {
             }
         }
 
-        // Priority 3: Whale Divergence
-        // (Simplified for now, can be complex in future)
-
         // 3. Build Cross Refs (Source + Implication)
         const crossRefs = []
         if (whales?.summary) {
-            // Simplified logic to extract implication (or use generic based on status)
-            // Ideally AI should generate this "Source | Implication" string.
-            // For MVP we format the existing summary.
-            const summaryText = whales.summary.length > 20 ? whales.summary.slice(0, 20) + "..." : whales.summary
             crossRefs.push({
                 source: '巨鯨動態',
                 implication: whaleStatus === '偏多' ? '大戶持續吸籌，支撐轉強' : whaleStatus === '偏空' ? '大戶正在派發，壓力沈重' : '大戶持倉觀望，方向不明',
@@ -140,7 +166,8 @@ export async function GET() {
                 },
                 anomaly: primaryAnomaly, // Single object or null
                 crossRefs,
-                focusToday
+                focusToday,
+                marketContext // New field
             }
         })
 

@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, Activity, Anchor, BarChart2, Info, ChevronRight, Zap, RefreshCcw } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { MarketContextCard } from '@/components/home/MarketContextCard'
 
 interface RouterData {
     mainline: {
@@ -37,6 +38,15 @@ interface RouterData {
         link: string
         statusColor?: string
     }[]
+    marketContext?: {
+        sentiment: '樂觀' | '保守' | '恐慌' | '中性'
+        themes: {
+            title: string
+            summary: string
+            watch: 'contracts' | 'whales' | 'macro' | 'sentiment' | 'etf'
+            why_it_matters: string
+        }[]
+    }
 }
 
 export function HomeRouterWidget() {
@@ -65,6 +75,9 @@ export function HomeRouterWidget() {
 
     return (
         <div className="space-y-6">
+
+            {/* 0. Market Context Brief (AI) - Top Priority */}
+            <MarketContextCard data={data.marketContext || null} isLoading={loading} />
 
             {/* 1. Market Mainline (Control Center) - Highlighted Border */}
             <div className="bg-neutral-900/50 border border-blue-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden">
