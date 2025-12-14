@@ -17,30 +17,37 @@ export async function GET(req: NextRequest) {
         const cached = getCache(CACHE_KEY)
         if (cached) return NextResponse.json({ status: cached, cached: true })
 
-        // 1. Fetch all necessary data in parallel
+        // 1. Fetch all necessary data with error handling (Fail-safe)
+        const fetchSafe = async (fn: Promise<any>, name: string) => {
+            try {
+                return await fn
+            } catch (error) {
+                console.error(`[MarketStatus] Error fetching ${name}:`, error)
+                return [] // Return empty array on failure
+            }
+        }
+
         const [ohlc1d, ohlc1h, funding, liquidation24h, liquidation1h, fearGreed, whaleRatio] = await Promise.all([
-            // Regime: BTC 1D OHLC (Price Change & Amp) - using CoinGlass or generic price API
-            // Coinglass price history
-            coinglassV4Request<any[]>('/api/index/bitcoin/price/history', { symbol: 'BTC', interval: '1d', limit: 2 }),
+            // Regime: BTC 1D OHLC
+            fetchSafe(coinglassV4Request<any[]>('/api/index/bitcoin/price/history', { symbol: 'BTC', interval: '1d', limit: 2 }), 'OHLC 1D'),
 
             // Volatility: BTC 1H OHLC
-            coinglassV4Request<any[]>('/api/index/bitcoin/price/history', { symbol: 'BTC', interval: '1h', limit: 2 }),
+            fetchSafe(coinglassV4Request<any[]>('/api/index/bitcoin/price/history', { symbol: 'BTC', interval: '1h', limit: 2 }), 'OHLC 1H'),
 
             // Leverage: BTC Funding Rate
-            coinglassV4Request<any[]>('/api/futures/fundingRate/ohlc-history', { symbol: 'BTC', interval: '1d', limit: 1 }),
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/fundingRate/ohlc-history', { symbol: 'BTC', interval: '1d', limit: 1 }), 'Funding'),
 
             // Leverage: 24H Liquidation
-            coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1d', limit: 1 }),
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1d', limit: 1 }), 'Liquidation 24H'),
 
             // Volatility: 1H Liquidation
-            coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1h', limit: 1 }),
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1h', limit: 1 }), 'Liquidation 1H'),
 
             // Sentiment: Fear & Greed
-            coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }),
+            fetchSafe(coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }), 'FearGreed'),
 
-            // Whale: Long/Short Position Ratio (Proxy for Whale Bias if specific whale alert stats unavailable)
-            // Or use Top Accounts Long/Short Ratio
-            coinglassV4Request<any[]>('/api/futures/top-long-short-position-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 })
+            // Whale: Long/Short
+            fetchSafe(coinglassV4Request<any[]>('/api/futures/top-long-short-position-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }), 'WhaleRatio')
         ])
 
         // --- 1. Market Regime (市場狀態) ---

@@ -131,14 +131,6 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
                                 {item.reason}
                             </p>
                         </div>
-
-                        {/* Impact Badge */}
-                        <span className={cn(
-                            "shrink-0 px-2 py-0.5 text-xs font-bold rounded border",
-                            getImpactColor(item.impact)
-                        )}>
-                            {item.impact}
-                        </span>
                     </div>
                 )) || (
                         <div className="p-8 text-center text-neutral-500 text-sm">
