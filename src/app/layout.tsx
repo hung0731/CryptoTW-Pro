@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
-import { LiffProvider } from "@/components/LiffProvider";
-import AnnouncementBanner from "@/components/AnnouncementBanner";
-import { RouteHandler } from "@/components/RouteHandler"; // New Import
 import { Toaster } from "@/components/ui/toaster";
-import { Suspense } from "react"; // Required for useSearchParams
 
 const notoSansTC = Noto_Sans_TC({
   subsets: ["latin"],
@@ -29,14 +25,8 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className={`${notoSansTC.variable} font-sans antialiased`}>
-        <LiffProvider liffId={process.env.NEXT_PUBLIC_LIFF_ID || ""}>
-          <Suspense fallback={null}>
-            <RouteHandler />
-          </Suspense>
-          <AnnouncementBanner />
-          {children}
-          <Toaster />
-        </LiffProvider>
+        {children}
+        <Toaster />
       </body>
     </html>
   );

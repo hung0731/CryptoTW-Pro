@@ -114,7 +114,7 @@ export async function coinglassV4Request<T>(
         const data = await response.json()
 
         if (data.code !== '0') {
-            console.error(`Coinglass V4 API error: ${data.msg}`)
+            console.error(`Coinglass V4 API error [${endpoint}]: ${data.msg}`)
             return null
         }
 

@@ -5,7 +5,6 @@ import {
     LiquidationWaterfall,
     FundingRateRankings,
     LongShortRatio,
-    ExchangeTransparency,
     WhaleAlertFeed,
     WhalePositionsList,
     IndicatorsGrid
@@ -82,23 +81,6 @@ export function DerivativesView() {
 export function SmartMoneyView() {
     return (
         <div className="space-y-5">
-            {/* Section: 交易所資金流向 */}
-            <section>
-                <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-sm font-medium text-neutral-500">交易所資金流向</h2>
-                    <ExplainTooltip
-                        term="交易所流向 (Netflow)"
-                        definition="追蹤比特幣進出中心化交易所 (CEX) 的資金。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>流入</strong>：大額轉入交易所，通常為了賣出變現 (賣壓)。</li>
-                                <li><strong>流出</strong>：提幣至冷錢包，代表長期持有意願強。</li>
-                            </ul>
-                        }
-                    />
-                </div>
-                <ExchangeTransparency />
-            </section>
 
             {/* Section: 巨鯨動態 - Grid Layout */}
             <section>

@@ -50,7 +50,7 @@ export async function getMarketSnapshot() {
         // 全球多空比 (5 min cache)
         cachedCoinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM),
         // 大戶多空比 (5 min cache) - 目前 API 故障
-        cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM),
+        cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM).catch(() => null),
         // 持倉量 (1 min cache - changes faster)
         cachedCoinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: 'BTC' }, CacheTTL.FAST),
         // 爆倉 (1 min cache)

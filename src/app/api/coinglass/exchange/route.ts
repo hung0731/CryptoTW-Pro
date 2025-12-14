@@ -10,10 +10,12 @@ export async function GET(request: Request) {
 
     try {
         // V4 endpoint for exchange balance
-        const data = await coinglassV4Request<any[]>(
-            '/api/spot/exchange-balance-list',
-            { symbol }
-        )
+        // TODO: Fix API endpoint (currently returning 404)
+        // const data = await coinglassV4Request<any[]>(
+        //     '/api/spot/exchange-balance-list',
+        //     { symbol }
+        // )
+        const data: any[] = []
 
         if (!data || data.length === 0) {
             return NextResponse.json({
