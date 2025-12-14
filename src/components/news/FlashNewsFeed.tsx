@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Sparkles, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 interface MarketContext {
@@ -70,21 +70,9 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
                     {/* Decorative subtle glow - very low opacity */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] -mr-10 -mt-10 pointer-events-none" />
 
-                    <div className="flex items-start gap-3 relative z-10">
-                        <div className="shrink-0 mt-1">
-                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                                <Sparkles className="w-4 h-4 text-blue-400" />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                                <h4 className="text-sm font-bold text-neutral-200">AI 重點摘要</h4>
-                                {marketContext?.sentiment && (
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-neutral-400">
-                                        情緒{marketContext.sentiment}
-                                    </span>
-                                )}
-                            </div>
+                    <div className="relative z-10 space-y-3">
+                        <div>
+                            <h4 className="text-sm font-bold text-neutral-200 mb-2">AI 重點摘要</h4>
                             <p className="text-sm text-neutral-400 leading-relaxed text-justify">
                                 {marketContext?.summary || '正在分析市場數據中...'}
                             </p>
@@ -109,11 +97,6 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
                                     {item.title}
                                 </h5>
                                 <div className="flex items-center gap-2">
-                                    <span className={cn(
-                                        "w-1.5 h-1.5 rounded-full",
-                                        item.impact === '高' ? "bg-red-500" :
-                                            item.impact === '中' ? "bg-yellow-500" : "bg-blue-500"
-                                    )} />
                                     <span className="text-xs text-neutral-500 line-clamp-1">
                                         {item.reason}
                                     </span>

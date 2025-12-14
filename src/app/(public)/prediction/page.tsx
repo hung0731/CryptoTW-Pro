@@ -60,9 +60,9 @@ function CryptoPricePrediction() {
                     <button
                         onClick={() => setActiveToken('btc')}
                         className={cn(
-                            "px-2 py-1 rounded-md text-xs font-medium transition-all",
+                            "px-2 py-1 rounded-lg text-xs font-medium transition-all",
                             activeToken === 'btc'
-                                ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                                ? "bg-white/10 text-white border border-white/20"
                                 : "bg-black/30 text-neutral-500 border border-white/5 hover:bg-white/5"
                         )}
                     >
@@ -71,9 +71,9 @@ function CryptoPricePrediction() {
                     <button
                         onClick={() => setActiveToken('eth')}
                         className={cn(
-                            "px-2 py-1 rounded-md text-xs font-medium transition-all",
+                            "px-2 py-1 rounded-lg text-xs font-medium transition-all",
                             activeToken === 'eth'
-                                ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                                ? "bg-white/10 text-white border border-white/20"
                                 : "bg-black/30 text-neutral-500 border border-white/5 hover:bg-white/5"
                         )}
                     >

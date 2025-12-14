@@ -117,7 +117,7 @@ export default function ProfilePage() {
 
                 {/* Profile Card */}
                 <section>
-                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-neutral-900/50 border border-white/5">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-neutral-900/50 border border-white/5">
                         <Avatar className="h-16 w-16 ring-2 ring-white/10 shadow-lg">
                             <AvatarImage src={profile?.pictureUrl} />
                             <AvatarFallback><User className="h-8 w-8 text-neutral-500" /></AvatarFallback>
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                 {/* Quick Actions */}
                 <section>
                     <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">設定</h2>
-                    <div className="bg-neutral-900/50 rounded-2xl border border-white/5 divide-y divide-white/5">
+                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 divide-y divide-white/5">
                         <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
                         <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
                         <MenuLink icon={Crown} label="VIP 計劃" href="/join" />
@@ -143,7 +143,7 @@ export default function ProfilePage() {
                 {/* More */}
                 <section>
                     <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">更多</h2>
-                    <div className="bg-neutral-900/50 rounded-2xl border border-white/5 divide-y divide-white/5">
+                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 divide-y divide-white/5">
                         <MenuLink icon={Bookmark} label="我的收藏" href="/bookmarks" badge="即將推出" />
                         <MenuLink icon={HelpCircle} label="幫助中心" href="https://line.me/R/ti/p/@cryptotw" external />
                     </div>
@@ -153,7 +153,7 @@ export default function ProfilePage() {
                 <section>
                     <Button
                         variant="outline"
-                        className="w-full border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl py-6"
+                        className="w-full border-white/10 bg-neutral-900/50 text-neutral-400 hover:bg-white/5 hover:text-neutral-300 rounded-xl py-6"
                         onClick={() => {
                             window.location.href = '/'
                         }}

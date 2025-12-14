@@ -250,7 +250,67 @@ export async function GET(req: NextRequest) {
 
         const tools = [toolContracts, toolWhales, toolFunding, toolPrediction, toolAlerts]
 
-        const responseData = { status: data, tools }
+        // --- Generate AI Conclusion (一句話結論) ---
+        // Logic: Combine signals from all 5 indicators to give actionable advice
+        const generateConclusion = () => {
+            // Count signals
+            const bullishSignals = [
+                sentimentCode === 'fear', // Fear = buy signal (contrarian)
+                whaleCode === 'bullish',
+                leverageCode === 'cool', // Cool leverage = room to go up
+            ].filter(Boolean).length
+
+            const bearishSignals = [
+                sentimentCode === 'greed', // Greed = danger
+                whaleCode === 'bearish',
+                leverageCode === 'overheated', // Overheated = correction likely
+            ].filter(Boolean).length
+
+            const cautionSignals = [
+                regimeCode === 'pressure',
+                volatilityCode === 'high',
+            ].filter(Boolean).length
+
+            // Determine bias
+            let bias: '偏多' | '偏空' | '觀望' = '觀望'
+            let action = '保持觀望，等待明確訊號'
+            let emoji = '⚖️'
+
+            if (bullishSignals >= 2 && cautionSignals === 0) {
+                bias = '偏多'
+                action = '可考慮逢低布局多單'
+                emoji = '🟢'
+            } else if (bearishSignals >= 2 || cautionSignals >= 1) {
+                bias = '偏空'
+                action = '建議減倉或觀望，注意風控'
+                emoji = '🔴'
+            } else if (bullishSignals === 1 && bearishSignals === 0) {
+                bias = '偏多'
+                action = '謹慎看多，輕倉試探'
+                emoji = '🟡'
+            }
+
+            // Build reasoning (Secondary info)
+            const reasons: string[] = []
+            if (sentimentCode === 'fear') reasons.push('市場恐慌 (反向機會)')
+            if (sentimentCode === 'greed') reasons.push('市場貪婪 (小心回調)')
+            if (leverageCode === 'overheated') reasons.push('槓桿過熱')
+            if (leverageCode === 'cool') reasons.push('槓桿冷靜')
+            if (whaleCode === 'bullish') reasons.push('大戶偏多')
+            if (whaleCode === 'bearish') reasons.push('大戶偏空')
+            if (volatilityCode === 'high') reasons.push('波動劇烈')
+
+            return {
+                bias,
+                action,
+                emoji,
+                reasoning: reasons.slice(0, 3).join('、') || '綜合指標中性'
+            }
+        }
+
+        const conclusion = generateConclusion()
+
+        const responseData = { status: data, tools, conclusion }
         setCache(CACHE_KEY, responseData, CacheTTL.FAST) // 1 min
 
         return NextResponse.json(responseData)
