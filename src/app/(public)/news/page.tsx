@@ -2,7 +2,7 @@
 
 import { PageHeader } from '@/components/PageHeader'
 import { BottomNav } from '@/components/BottomNav'
-import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
+import { FullNewsFeed } from '@/components/news/FullNewsFeed'
 
 export default function NewsPage() {
     return (
@@ -11,9 +11,9 @@ export default function NewsPage() {
 
             <div className="p-4 space-y-5">
 
-                {/* Section: News Feed (with built-in AI Context) */}
+                {/* Section: Full News Feed */}
                 <section>
-                    <FlashNewsFeed />
+                    <FullNewsFeed />
                 </section>
 
             </div>
