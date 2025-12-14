@@ -40,11 +40,11 @@ interface RouterData {
     }[]
     marketContext?: {
         sentiment: '樂觀' | '保守' | '恐慌' | '中性'
-        themes: {
+        summary: string
+        highlights: {
             title: string
-            summary: string
-            watch: 'contracts' | 'whales' | 'macro' | 'sentiment' | 'etf'
-            why_it_matters: string
+            reason: string
+            impact: '高' | '中' | '低'
         }[]
     }
 }

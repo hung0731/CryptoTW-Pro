@@ -5,27 +5,19 @@ import { ChevronRight, Activity, Shield, Newspaper, TrendingUp, Sparkles } from 
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface Theme {
+interface Highlight {
     title: string
-    summary: string
-    watch: 'contracts' | 'whales' | 'macro' | 'sentiment' | 'etf'
-    why_it_matters: string
+    reason: string
+    impact: '高' | '中' | '低'
 }
 
 interface MarketContextProps {
     data: {
         sentiment: '樂觀' | '保守' | '恐慌' | '中性'
-        themes: Theme[]
+        summary: string
+        highlights: Highlight[]
     } | null
     isLoading?: boolean
-}
-
-const WatchMap = {
-    contracts: { label: '合約數據', url: '/prediction?tab=derivatives', icon: Activity },
-    whales: { label: '巨鯨動向', url: '/prediction?tab=smartmoney', icon: Shield },
-    macro: { label: '宏觀日曆', url: '/calendar', icon: Newspaper },
-    sentiment: { label: '市場數據', url: '/prediction', icon: TrendingUp },
-    etf: { label: 'ETF 流量', url: '/calendar', icon: TrendingUp }
 }
 
 const SentimentEmoji = {
@@ -33,6 +25,12 @@ const SentimentEmoji = {
     '保守': '🛡️',
     '恐慌': '🔻',
     '中性': '⚖️',
+}
+
+const ImpactColor = {
+    '高': 'text-red-400 bg-red-500/10 border-red-500/20',
+    '中': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+    '低': 'text-neutral-400 bg-neutral-500/10 border-neutral-500/20',
 }
 
 // Loading Skeleton component
@@ -49,7 +47,7 @@ function MarketContextSkeleton() {
                 <Skeleton className="h-3 w-3/4 bg-neutral-700" />
             </div>
 
-            {/* Theme List Skeleton */}
+            {/* Highlights List Skeleton */}
             <div className="px-3 py-2 space-y-2">
                 {[1, 2].map(i => (
                     <div key={i} className="flex items-center justify-between py-2 px-2">
@@ -74,18 +72,8 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
 
     if (!data) return null
 
-    const getContextText = () => {
-        if (data.themes.length === 0) {
-            return `市場情緒${data.sentiment}，暫無明顯主線。`
-        }
-
-        const mainThemes = data.themes.slice(0, 2)
-        const themeTexts = mainThemes.map(t => t.summary).join(' ')
-        return themeTexts || `市場整體呈現${data.sentiment}態勢。`
-    }
-
     const contextEmoji = SentimentEmoji[data.sentiment] || '📊'
-    const contextText = getContextText()
+    const contextText = data.summary || `市場整體呈現${data.sentiment}態勢。`
 
     return (
         <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden">
@@ -100,33 +88,37 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
                 </p>
             </div>
 
-            {/* Theme List */}
-            {data.themes.length > 0 && (
-                <div className="px-3 py-2 space-y-2">
-                    {data.themes.slice(0, 3).map((theme, idx) => {
-                        const WatchConfig = WatchMap[theme.watch] || WatchMap.sentiment
-
-                        return (
-                            <div
-                                key={idx}
-                                onClick={() => router.push(WatchConfig.url)}
-                                className="flex items-center justify-between py-2 px-2 -mx-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors group"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-neutral-600 font-mono w-4">{idx + 1}</span>
-                                    <span className="text-xs text-neutral-300 group-hover:text-white transition-colors">
-                                        {theme.title}
+            {/* Highlights List */}
+            {data.highlights && data.highlights.length > 0 && (
+                <div className="px-3 py-2 space-y-1">
+                    {data.highlights.slice(0, 4).map((item, idx) => (
+                        <div
+                            key={idx}
+                            className="flex items-start justify-between py-2 px-2 -mx-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors group"
+                            onClick={() => router.push('/news')}
+                        >
+                            <div className="flex items-start gap-2 flex-1 min-w-0">
+                                <span className="text-[10px] text-neutral-600 font-mono w-4 pt-0.5">{idx + 1}</span>
+                                <div className="flex-1 min-w-0">
+                                    <span className="text-xs text-neutral-300 group-hover:text-white transition-colors line-clamp-2">
+                                        {item.title}
                                     </span>
-                                </div>
-                                <div className="flex items-center gap-1 text-[10px] text-neutral-500 group-hover:text-blue-400 transition-colors">
-                                    {WatchConfig.label}
-                                    <ChevronRight className="w-3 h-3" />
+                                    <p className="text-[10px] text-neutral-500 mt-0.5 line-clamp-1">
+                                        {item.reason}
+                                    </p>
                                 </div>
                             </div>
-                        )
-                    })}
+                            <div className={cn(
+                                "text-[9px] px-1.5 py-0.5 rounded border shrink-0 ml-2",
+                                ImpactColor[item.impact] || ImpactColor['低']
+                            )}>
+                                {item.impact}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>
     )
 }
+
