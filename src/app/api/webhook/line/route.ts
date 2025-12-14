@@ -1348,11 +1348,11 @@ async function fetchForexRate() {
 
 // Create Currency Converter Flex Message
 function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calcResult?: string) {
-    // MAX Data
+    // MAX Data (即時掛單)
     const maxBuyRef = parseFloat(maxData.sell) // User Buys (Ask)
     const maxSellRef = parseFloat(maxData.buy) // User Sells (Bid)
 
-    // Bito Data
+    // Bito Data (即時掛單)
     let bitoBuyRef = 0
     let bitoSellRef = 0
     if (bitoData && bitoData.asks && bitoData.bids) {
@@ -1362,16 +1362,17 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
     const premium = ((maxBuyRef - forexRate) / forexRate) * 100
 
-    // ===== 溢價解讀 =====
-    let premiumNote = ''
-    if (premium >= 2) {
-        premiumNote = '📌 相較銀行匯率偏高'
-    } else if (premium >= 0.5) {
-        premiumNote = '📌 相較銀行匯率略高'
-    } else if (premium >= -0.5) {
-        premiumNote = '📌 與銀行匯率相近'
-    } else {
-        premiumNote = '📌 相較銀行匯率偏低'
+    // ===== 買入成本 / 賣出回收比較 =====
+    // 買入成本較低 = Ask 價格較低
+    // 賣出回收較高 = Bid 價格較高
+    let bestBuyExchange = 'MAX'
+    let bestSellExchange = 'MAX'
+
+    if (bitoBuyRef > 0 && bitoBuyRef < maxBuyRef) {
+        bestBuyExchange = 'BitoPro'
+    }
+    if (bitoSellRef > 0 && bitoSellRef > maxSellRef) {
+        bestSellExchange = 'BitoPro'
     }
 
     // Header Content
@@ -1424,48 +1425,37 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                 type: "box",
                 layout: "vertical",
                 contents: [
-                    { type: "separator", color: "#f0f0f0" },
-
-                    // MAX Exchange Row（角色標籤：參考價）
+                    // 表頭：買 U / 賣 U
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "MAX", size: "md", color: "#111111", weight: "bold", flex: 1 },
-                            { type: "text", text: "參考價", size: "xxs", color: "#888888", flex: 1, align: "end", gravity: "center" },
-                            { type: "text", text: "買U", size: "xs", color: "#aaaaaa", align: "end", flex: 1 },
-                            { type: "text", text: "賣U", size: "xs", color: "#aaaaaa", align: "end", flex: 1 }
-                        ],
-                        margin: "md"
+                            { type: "text", text: "即時掛單", size: "xs", color: "#888888", flex: 2 },
+                            { type: "text", text: "買 U", size: "xs", color: "#D00000", align: "end", flex: 1 },
+                            { type: "text", text: "賣 U", size: "xs", color: "#00B900", align: "end", flex: 1 }
+                        ]
                     },
+
+                    { type: "separator", margin: "sm", color: "#f0f0f0" },
+
+                    // MAX（即時掛單）
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "filler" },
+                            { type: "text", text: "MAX", size: "md", color: "#111111", weight: "bold", flex: 2 },
                             { type: "text", text: `${maxBuyRef}`, size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
                             { type: "text", text: `${maxSellRef}`, size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
                         ],
-                        margin: "sm"
-                    },
-
-                    { type: "separator", margin: "md", color: "#f0f0f0" },
-
-                    // BitoPro Exchange Row（角色標籤：即時掛單）
-                    {
-                        type: "box",
-                        layout: "horizontal",
-                        contents: [
-                            { type: "text", text: "BitoPro", size: "md", color: "#111111", weight: "bold", flex: 1 },
-                            { type: "text", text: "即時掛單", size: "xxs", color: "#888888", flex: 1, align: "end", gravity: "center" }
-                        ],
                         margin: "md"
                     },
+
+                    // BitoPro（即時掛單）
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "filler" },
+                            { type: "text", text: "BitoPro", size: "md", color: "#111111", weight: "bold", flex: 2 },
                             { type: "text", text: bitoBuyRef ? `${bitoBuyRef}` : '--', size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
                             { type: "text", text: bitoSellRef ? `${bitoSellRef}` : '--', size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
                         ],
@@ -1474,43 +1464,54 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // Bank Rate Row（角色標籤：傳統匯率）
+                    // 銀行匯率（背景參考）
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "銀行美金", size: "sm", color: "#555555", flex: 1 },
-                            { type: "text", text: "傳統匯率", size: "xxs", color: "#888888", flex: 1, align: "end", gravity: "center" },
-                            { type: "text", text: `${forexRate} TWD`, size: "sm", color: "#111111", align: "end", flex: 1 }
+                            { type: "text", text: "銀行美元（參考）", size: "xs", color: "#888888", flex: 2 },
+                            { type: "text", text: `${forexRate} TWD`, size: "xs", color: "#888888", align: "end", flex: 2 }
                         ],
                         margin: "md"
                     },
-                    // 溢價 + 解讀
+
+                    // 溢價
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "MAX 溢價", size: "sm", color: "#555555", flex: 1 },
-                            { type: "text", text: `+${premium.toFixed(2)}%`, size: "sm", color: "#ff8800", weight: "bold", align: "end", flex: 2 }
+                            { type: "text", text: "MAX 溢價", size: "xs", color: "#888888", flex: 2 },
+                            { type: "text", text: `${premium >= 0 ? '+' : ''}${premium.toFixed(2)}%`, size: "xs", color: premium >= 0 ? "#ff8800" : "#00B900", weight: "bold", align: "end", flex: 2 }
                         ],
-                        margin: "sm"
-                    },
-                    {
-                        type: "text",
-                        text: premiumNote,
-                        size: "xxs",
-                        color: "#888888",
                         margin: "xs"
                     },
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // 價差提示 + 教學
+                    // 買入成本 / 賣出回收比較
                     {
                         type: "text",
-                        text: "💡 不同平台報價存在價差，實際成交以交易所為準",
+                        text: `目前買入成本較低：${bestBuyExchange}`,
+                        size: "xs",
+                        color: "#555555",
+                        margin: "md"
+                    },
+                    {
+                        type: "text",
+                        text: `目前賣出回收較高：${bestSellExchange}`,
+                        size: "xs",
+                        color: "#555555",
+                        margin: "xs"
+                    },
+
+                    { type: "separator", margin: "md", color: "#f0f0f0" },
+
+                    // 說明
+                    {
+                        type: "text",
+                        text: "銀行匯率為參考值，實際交易以交易所掛單為準",
                         size: "xxs",
-                        color: "#888888",
+                        color: "#aaaaaa",
                         margin: "md",
                         wrap: true
                     },
