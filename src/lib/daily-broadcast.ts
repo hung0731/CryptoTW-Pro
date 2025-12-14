@@ -229,27 +229,46 @@ export function createDailyBroadcastFlex(content: DailyBroadcastContent): FlexMe
                         ]
                     },
                     {
-                        type: 'text',
-                        text: content.judgment.stance,
-                        weight: 'bold',
-                        size: 'xl',
-                        color: stanceColor,
-                        margin: 'sm'
+                        type: 'box',
+                        layout: 'horizontal',
+                        margin: 'sm',
+                        contents: [
+                            {
+                                type: 'text',
+                                text: content.judgment.stance,
+                                weight: 'bold',
+                                size: 'xl',
+                                color: stanceColor
+                            },
+                            // BTC 24H in header
+                            ...(content.btcPriceChange ? [{
+                                type: 'text' as const,
+                                text: `BTC ${formatChange(content.btcPriceChange.h24)}`,
+                                size: 'sm' as const,
+                                color: getChangeColor(content.btcPriceChange.h24),
+                                weight: 'bold' as const,
+                                align: 'end' as const,
+                                gravity: 'center' as const
+                            }] : [])
+                        ]
                     }
-                ]
+                ],
+                paddingBottom: '10px'
             },
             body: {
                 type: 'box',
                 layout: 'vertical',
                 contents: [
-                    // 判斷理由
+                    { type: 'separator', color: '#f0f0f0' },
+
+                    // 判斷理由 (emoji already included from AI)
                     ...content.judgment.reasons.map(reason => ({
                         type: 'text' as const,
-                        text: `• ${reason}`,
+                        text: reason,  // AI already adds emoji prefix
                         size: 'sm' as const,
                         color: '#555555',
                         wrap: true,
-                        margin: 'sm' as const
+                        margin: 'md' as const
                     })),
 
                     { type: 'separator', margin: 'md', color: '#f0f0f0' },
@@ -260,7 +279,7 @@ export function createDailyBroadcastFlex(content: DailyBroadcastContent): FlexMe
                         layout: 'horizontal',
                         margin: 'md',
                         contents: [
-                            { type: 'text', text: '建議', size: 'sm', color: '#888888', flex: 1 },
+                            { type: 'text', text: '💡 建議', size: 'sm', color: '#888888', flex: 1 },
                             { type: 'text', text: content.judgment.suggestion, size: 'sm', color: '#111111', flex: 3, wrap: true, align: 'end' }
                         ]
                     },
@@ -270,51 +289,59 @@ export function createDailyBroadcastFlex(content: DailyBroadcastContent): FlexMe
                         { type: 'separator' as const, margin: 'md' as const, color: '#f0f0f0' },
                         {
                             type: 'box' as const,
-                            layout: 'vertical' as const,
+                            layout: 'horizontal' as const,
                             margin: 'md' as const,
                             contents: [
-                                { type: 'text' as const, text: '🧠 心態提醒', size: 'xs' as const, color: '#888888' },
-                                { type: 'text' as const, text: content.mindset, size: 'sm' as const, color: '#555555', wrap: true, margin: 'sm' as const }
+                                { type: 'text' as const, text: '🧠 心態', size: 'sm' as const, color: '#888888', flex: 1 },
+                                { type: 'text' as const, text: content.mindset, size: 'sm' as const, color: '#555555', wrap: true, flex: 3, align: 'end' as const }
                             ]
                         }
                     ] : []),
 
                     { type: 'separator', margin: 'md', color: '#f0f0f0' },
 
-                    // BTC 價格變化 (if exists)
-                    ...(content.btcPriceChange ? [
-                        {
-                            type: 'box' as const,
-                            layout: 'vertical' as const,
-                            margin: 'md' as const,
-                            contents: [
-                                { type: 'text' as const, text: 'BTC 價格變化', size: 'xs' as const, color: '#888888' },
-                                {
-                                    type: 'box' as const,
-                                    layout: 'horizontal' as const,
-                                    margin: 'sm' as const,
-                                    contents: [
-                                        { type: 'text' as const, text: '1H', size: 'xs' as const, color: '#888888', flex: 1 },
-                                        { type: 'text' as const, text: '4H', size: 'xs' as const, color: '#888888', flex: 1 },
-                                        { type: 'text' as const, text: '12H', size: 'xs' as const, color: '#888888', flex: 1 },
-                                        { type: 'text' as const, text: '24H', size: 'xs' as const, color: '#888888', flex: 1 }
-                                    ]
-                                },
-                                {
-                                    type: 'box' as const,
-                                    layout: 'horizontal' as const,
-                                    margin: 'xs' as const,
-                                    contents: [
-                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h1), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h1), weight: 'bold' as const, flex: 1 },
-                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h4), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h4), weight: 'bold' as const, flex: 1 },
-                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h12), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h12), weight: 'bold' as const, flex: 1 },
-                                        { type: 'text' as const, text: formatChange(content.btcPriceChange.h24), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h24), weight: 'bold' as const, flex: 1 }
-                                    ]
-                                }
-                            ]
-                        }
-                    ] : [])
+                    // BTC 價格變化表格
+                    ...(content.btcPriceChange ? [{
+                        type: 'box' as const,
+                        layout: 'horizontal' as const,
+                        margin: 'md' as const,
+                        contents: [
+                            { type: 'text' as const, text: '1H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const },
+                            { type: 'text' as const, text: '4H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const },
+                            { type: 'text' as const, text: '12H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const },
+                            { type: 'text' as const, text: '24H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const }
+                        ]
+                    },
+                    {
+                        type: 'box' as const,
+                        layout: 'horizontal' as const,
+                        margin: 'xs' as const,
+                        contents: [
+                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h1), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h1), weight: 'bold' as const, flex: 1, align: 'center' as const },
+                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h4), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h4), weight: 'bold' as const, flex: 1, align: 'center' as const },
+                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h12), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h12), weight: 'bold' as const, flex: 1, align: 'center' as const },
+                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h24), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h24), weight: 'bold' as const, flex: 1, align: 'center' as const }
+                        ]
+                    }] : [])
                 ] as any
+            },
+            footer: {
+                type: 'box',
+                layout: 'horizontal',
+                spacing: 'sm',
+                contents: [
+                    {
+                        type: 'button',
+                        style: 'primary',
+                        height: 'sm',
+                        action: {
+                            type: 'uri',
+                            label: '查看完整數據',
+                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/prediction`
+                        },
+                        color: '#1F1AD9'
+                    }
+                ]
             }
         }
     }
