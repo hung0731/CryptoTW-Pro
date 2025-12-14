@@ -13,7 +13,7 @@ interface QuickAction {
 const actions: QuickAction[] = [
     {
         icon: <BarChart3 className="w-4 h-4" />,
-        label: '籌碼',
+        label: '數據',
         href: '/prediction',
         color: 'text-neutral-400'
     },

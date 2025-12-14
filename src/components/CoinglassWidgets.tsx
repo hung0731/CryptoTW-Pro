@@ -878,6 +878,69 @@ export function LongShortSummary() {
     )
 }
 
+// Open Interest Card Component
+export function OpenInterestCard() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/derivatives')
+                const json = await res.json()
+                if (json.derivatives) {
+                    setData(json.derivatives)
+                }
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
+    if (!data) return null
+
+    const oi = data.metrics?.openInterest || 0
+    const oiChange = data.metrics?.oiChange24h || 0
+    const isPositive = oiChange >= 0
+
+    const formatOI = (val: number) => {
+        if (val >= 1e9) return `$${(val / 1e9).toFixed(2)}B`
+        if (val >= 1e6) return `$${(val / 1e6).toFixed(1)}M`
+        return `$${val.toLocaleString()}`
+    }
+
+    return (
+        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+            <div className="flex items-center gap-2 mb-2">
+                <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
+                <span className="text-xs font-bold text-white">未平倉</span>
+                <ExplainTooltip
+                    term="未平倉合約 (Open Interest)"
+                    definition="當前未平倉的合約總價值。"
+                    explanation={
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li><strong>OI 上升</strong>：新資金流入，趨勢可能延續。</li>
+                            <li><strong>OI 下降</strong>：資金撤離，趨勢可能結束。</li>
+                        </ul>
+                    }
+                />
+            </div>
+            <div className="space-y-1">
+                <div className="text-lg font-bold font-mono text-white">
+                    {formatOI(oi)}
+                </div>
+                <div className={cn(
+                    "text-xs font-mono",
+                    isPositive ? "text-green-400" : "text-red-400"
+                )}>
+                    24H: {isPositive ? '+' : ''}{oiChange.toFixed(2)}%
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // ============================================
 // Whale Watch Components
 // ============================================

@@ -6,76 +6,82 @@ import {
     FundingRateRankings,
     LongShortRatio,
     WhaleAlertFeed,
-    // WhaleAiSummaryCard, // Removed as per request (redundant)
     IndicatorsGrid,
-    DerivativesAiSummaryCard
+    DerivativesAiSummaryCard,
+    // New compact card components
+    FundingSummary,
+    LiquidationSummary,
+    LongShortSummary,
+    OpenInterestCard
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-react'
 
 // ============================================
 // Aggregated Dashboard Views (for /prediction)
-// Unified with homepage design style
+// Card-based layout for key metrics
 // ============================================
 
 export function DerivativesView() {
     return (
         <div className="space-y-5">
+            {/* AI Summary */}
             <DerivativesAiSummaryCard />
 
-            {/* Section: 資金費率 */}
+            {/* Key Metrics Grid - 4 Cards */}
             <section>
-                <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-sm font-medium text-neutral-500">資金費率熱力</h2>
-                    <ExplainTooltip
-                        term="資金費率 (Funding Rate)"
-                        definition="永續合約中，多空雙方定期互付的持倉成本。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>正費率</strong>：多頭付錢給空頭，代表情緒偏多。</li>
-                                <li><strong>負費率</strong>：空頭付錢給多頭，代表情緒偏空。</li>
-                                <li><strong>費率過高</strong>：通常預示反轉。</li>
-                            </ul>
-                        }
-                    />
+                <h2 className="text-xs font-bold text-neutral-500 mb-3 flex items-center gap-1.5">
+                    <BarChart3 className="w-3 h-3" /> 關鍵指標
+                </h2>
+                <div className="grid grid-cols-2 gap-3">
+                    {/* BTC Funding Rate */}
+                    <FundingSummary />
+
+                    {/* 24H Liquidation */}
+                    <LiquidationSummary />
+
+                    {/* Long/Short Ratio */}
+                    <LongShortSummary />
+
+                    {/* Open Interest */}
+                    <OpenInterestCard />
                 </div>
-                <FundingRateRankings />
             </section>
 
-            {/* Section: 爆倉趨勢 */}
+            {/* Detailed Long/Short Analysis */}
             <section>
                 <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-sm font-medium text-neutral-500">爆倉趨勢</h2>
+                    <h2 className="text-sm font-medium text-neutral-500">多空分析</h2>
                     <ExplainTooltip
-                        term="爆倉趨勢 (Liquidation)"
-                        definition="統計多空雙方被強制平倉的金額與方向。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>連環爆倉</strong>：一方大量爆倉時，價格往反方向更劇烈波動。</li>
-                                <li><strong>反轉訊號</strong>：異常巨大的爆倉柱，往往代表短期底部或頂部。</li>
-                            </ul>
-                        }
-                    />
-                </div>
-                <LiquidationWaterfall />
-            </section>
-
-            {/* Section: 多空情緒 */}
-            <section>
-                <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-sm font-medium text-neutral-500">多空情緒分析</h2>
-                    <ExplainTooltip
-                        term="多空比 (Long/Short Ratio)"
+                        term="多空比"
                         definition="散戶 vs 大戶的多空持倉博弈。"
                         explanation={
                             <ul className="list-disc pl-4 space-y-1">
                                 <li><strong>散戶指標</strong>：全網多空比高於 2.0 代表散戶過度看多 (反指標)。</li>
-                                <li><strong>聰明錢</strong>：大戶多空比代表主力動向，若與散戶背離，聽大戶的。</li>
+                                <li><strong>聰明錢</strong>：大戶多空比代表主力動向。</li>
                             </ul>
                         }
                     />
                 </div>
                 <LongShortRatio />
+            </section>
+
+            {/* Funding Rate Rankings - Compact */}
+            <section>
+                <div className="flex items-center gap-2 mb-3">
+                    <h2 className="text-sm font-medium text-neutral-500">費率排行</h2>
+                    <ExplainTooltip
+                        term="資金費率"
+                        definition="永續合約中，多空雙方定期互付的持倉成本。"
+                        explanation={
+                            <ul className="list-disc pl-4 space-y-1">
+                                <li><strong>正費率</strong>：多頭付錢給空頭，代表情緒偏多。</li>
+                                <li><strong>負費率</strong>：空頭付錢給多頭，代表情緒偏空。</li>
+                            </ul>
+                        }
+                    />
+                </div>
+                <FundingRateRankings />
             </section>
         </div>
     )

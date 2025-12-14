@@ -23,7 +23,7 @@ export function BottomNav() {
             active: pathname === '/news'
         },
         {
-            label: '籌碼',
+            label: '數據',
             icon: BarChart2,
             href: '/prediction',
             active: pathname === '/prediction'
