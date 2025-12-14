@@ -1192,29 +1192,30 @@ export function DerivativesAiSummaryCard() {
         fetchSummary()
     }, [])
 
-    if (loading) return <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-lg mb-4" />
+    if (loading) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl mb-4" />
     if (!summary) return null
 
-    return (
-        <div className="bg-gradient-to-r from-blue-900/10 to-purple-900/10 border border-blue-500/20 rounded-lg p-3 mb-5 relative overflow-hidden group">
-            {/* Background Decor */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+    // Determine emoji based on content
+    let contextEmoji = '⚡️'
+    if (summary.includes('多頭') || summary.includes('偏多') || summary.includes('接多')) {
+        contextEmoji = '🐂'
+    } else if (summary.includes('空頭') || summary.includes('偏空') || summary.includes('找空')) {
+        contextEmoji = '🐻'
+    } else if (summary.includes('震盪') || summary.includes('觀望')) {
+        contextEmoji = '⚖️'
+    }
 
-            <div className="flex items-start gap-3 relative z-10">
-                <div className="p-1.5 shrink-0">
-                    <span className="text-lg">⚡️</span>
+    return (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden mb-5">
+            {/* AI Context Card (Same style as Whale page) */}
+            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">{contextEmoji}</span>
+                    <h3 className="text-sm font-bold text-blue-200">市場脈絡 (合約)</h3>
                 </div>
-                <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                        <h3 className="text-xs font-bold text-blue-200">AI 短線戰術總結</h3>
-                        <span className="text-[10px] bg-blue-500/10 px-1.5 py-0.5 rounded text-blue-300 border border-blue-500/10 font-mono">
-                            Gemini
-                        </span>
-                    </div>
-                    <p className="text-xs text-neutral-300 leading-relaxed font-medium tracking-wide">
-                        {summary}
-                    </p>
-                </div>
+                <p className="text-xs text-neutral-300 leading-relaxed font-medium">
+                    {summary}
+                </p>
             </div>
         </div>
     )

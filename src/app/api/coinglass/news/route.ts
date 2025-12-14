@@ -36,7 +36,7 @@ export async function GET() {
             throw new Error('API Key missing')
         }
 
-        const url = 'https://open-api-v4.coinglass.com/api/newsflash/list'
+        const url = 'https://open-api-v4.coinglass.com/api/newsflash/list?language=zh-tw'
         const options = {
             method: 'GET',
             headers: { 'CG-API-KEY': apiKey }
