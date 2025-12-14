@@ -70,9 +70,6 @@ export async function GET() {
             coinglassV4Request<WhalePosition[]>('/api/hyperliquid/whale-position', {})
         ])
 
-        console.log('Whale API - Alerts count:', alerts?.length || 0)
-        console.log('Whale API - Positions count:', positions?.length || 0)
-
         // Get top 20 positions sorted by position value
         const top20Positions = (positions || [])
             .sort((a, b) => Math.abs(b.position_value_usd) - Math.abs(a.position_value_usd))
@@ -81,17 +78,13 @@ export async function GET() {
         // Generate AI summary
         const summary = await generateWhaleSummary(top20Positions)
 
-        const response = {
+        return NextResponse.json({
             whales: {
                 alerts: alerts || [],
                 positions: top20Positions,
                 summary: summary
             }
-        }
-
-        console.log('Whale API Response - Alerts:', response.whales.alerts.length, 'Positions:', response.whales.positions.length)
-
-        return NextResponse.json(response)
+        })
     } catch (error) {
         console.error('Whale Watch API Error:', error)
         return NextResponse.json({ error: 'Failed to fetch whale data' }, { status: 500 })
