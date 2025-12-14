@@ -43,10 +43,9 @@ export async function GET(req: NextRequest) {
                 symbol: 'BTCUSDT', exchange: 'Binance', interval: '1h', limit: 1
             }),
 
-            // Open Interest (Best effort)
-            // Trying 'exchange-list' as fallback if ohlc history fails
+            // Open Interest - Use exchange-list endpoint (returns all exchanges)
             coinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', {
-                symbol: 'BTCUSDT'
+                symbol: 'BTC'
             })
         ])
 
@@ -101,22 +100,16 @@ export async function GET(req: NextRequest) {
         const topLongRate = topLS.longAccount || topLS.longRate || topLS.top_account_long_account || 50
         const topShortRate = topLS.shortAccount || topLS.shortRate || topLS.top_account_short_account || 50
 
-        // Process OI
-        // If exchange-list endpoint works, it returns array of exchanges. We find Binance.
+        // Process OI from exchange-list
+        // Returns: [{ exchange: "All", open_interest_usd, open_interest_change_percent_24h, ... }]
         let oiValue = 0
         let oiChange = 0
 
-        if (oiData && Array.isArray(oiData)) {
-            // Check if it's exchange list
-            const binanceOI = oiData.find((e: any) => e.exchangeName === 'Binance' || e.exchange === 'Binance')
-            if (binanceOI) {
-                oiValue = binanceOI.openInterest || binanceOI.h1OI || 0
-                // Use 1h change or 24h change if available
-                oiChange = binanceOI.h24Change || binanceOI.h1Change || 0
-            } else if (oiData[0]?.openInterest) {
-                // Formatting for history/aggregated
-                oiValue = oiData[0].openInterest
-            }
+        if (oiData && Array.isArray(oiData) && oiData.length > 0) {
+            // Find "All" aggregate or use first entry
+            const allData = oiData.find((e: any) => e.exchange === 'All') || oiData[0]
+            oiValue = allData.open_interest_usd || 0
+            oiChange = allData.open_interest_change_percent_24h || 0
         }
 
         // Construct dashboard object
@@ -152,7 +145,8 @@ export async function GET(req: NextRequest) {
             openInterest: {
                 value: oiValue,
                 change24h: oiChange,
-                formatted: formatUsd(oiValue)
+                formatted: oiValue > 0 ? formatUsd(oiValue) : '—',
+                available: oiValue > 0
             },
 
             lastUpdated: new Date().toISOString()

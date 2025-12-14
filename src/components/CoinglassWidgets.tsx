@@ -714,7 +714,7 @@ interface DashboardData {
     funding?: { rate: number; ratePercent: string; status: string }
     liquidation?: { longFormatted: string; shortFormatted: string; signal: { type: string; text: string } }
     longShort?: { global: { longRate: number; shortRate: number }; signal: { type: string; text: string } }
-    openInterest?: { formatted: string; change24h: number }
+    openInterest?: { value: number; formatted: string; change24h: number }
 }
 
 export function FundingSummary({ data }: { data?: DashboardData['funding'] }) {
@@ -862,6 +862,7 @@ export function OpenInterestCard({ data }: { data?: DashboardData['openInterest'
     if (!data) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
 
     const isPositive = data.change24h >= 0
+    const hasData = data.value > 0
 
     return (
         <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
@@ -881,9 +882,14 @@ export function OpenInterestCard({ data }: { data?: DashboardData['openInterest'
             </div>
             <div className="space-y-1">
                 <div className="text-lg font-bold font-mono text-white">{data.formatted}</div>
-                <div className={cn("text-xs font-mono", isPositive ? "text-green-400" : "text-red-400")}>
-                    24H: {isPositive ? '+' : ''}{data.change24h.toFixed(2)}%
-                </div>
+                {hasData && (
+                    <div className={cn("text-xs font-mono", isPositive ? "text-green-400" : "text-red-400")}>
+                        24H: {isPositive ? '+' : ''}{data.change24h.toFixed(2)}%
+                    </div>
+                )}
+                {!hasData && (
+                    <div className="text-xs text-neutral-500">暫無數據</div>
+                )}
             </div>
         </div>
     )
