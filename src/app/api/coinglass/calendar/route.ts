@@ -28,14 +28,16 @@ export async function GET() {
         const now = Date.now()
         const dayMs = 86400000
 
-        // Define 15-day chunks
+        // Define 15-day chunks (past 30 days + future 90 days)
         const chunks = [
             { start: -30, end: -15 },
             { start: -15, end: 0 },
             { start: 0, end: 15 },
             { start: 15, end: 30 },
             { start: 30, end: 45 },
-            { start: 45, end: 60 }
+            { start: 45, end: 60 },
+            { start: 60, end: 75 },
+            { start: 75, end: 90 }
         ]
 
         const fetchChunk = async (startOffset: number, endOffset: number) => {

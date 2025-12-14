@@ -940,6 +940,7 @@ export function WhaleAlertFeed() {
 
 export function WhalePositionsList() {
     const [positions, setPositions] = useState<any[]>([])
+    const [summary, setSummary] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -950,65 +951,80 @@ export function WhalePositionsList() {
                 if (json.whales?.positions) {
                     setPositions(json.whales.positions)
                 }
+                if (json.whales?.summary) {
+                    setSummary(json.whales.summary)
+                }
             } catch (e) { console.error(e) }
             finally { setLoading(false) }
         }
         fetchData()
     }, [])
 
-    if (loading) return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+    // Helper: shorten address to first 5 + last 5 chars
+    const shortenAddress = (addr: string) => {
+        if (!addr || addr.length < 12) return addr
+        return `${addr.slice(0, 5)}...${addr.slice(-5)}`
+    }
+
+    // Helper: format USD amount
+    const formatUsd = (val: number) => {
+        if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`
+        if (val >= 1000) return `$${(val / 1000).toFixed(0)}K`
+        return `$${val.toFixed(0)}`
+    }
+
+    if (loading) return <Skeleton className="h-48 w-full bg-neutral-900/50 rounded-xl" />
 
     if (!positions || positions.length === 0) {
         return (
-            <div className="bg-neutral-900/50 rounded-xl p-8 text-center border border-dashed border-white/10">
-                <Users className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-                <p className="text-sm text-neutral-500">暫無持倉數據</p>
+            <div className="bg-neutral-900/50 rounded-xl p-6 text-center border border-dashed border-white/10">
+                <Users className="w-6 h-6 text-neutral-600 mx-auto mb-2" />
+                <p className="text-xs text-neutral-500">暫無持倉數據</p>
             </div>
         )
     }
 
     return (
-        <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
-            <div className="p-3 border-b border-white/5 bg-neutral-900/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-blue-400" />
-                    <span className="text-sm font-bold text-white">Top 巨鯨持倉</span>
-                </div>
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2">
+            <div className="flex items-center gap-2 mb-2">
+                <Users className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-xs font-bold text-white">Top 20 巨鯨持倉</span>
             </div>
-            <div className="divide-y divide-white/5">
-                {positions.map((pos, i) => (
-                    <div key={i} className="p-3 hover:bg-white/5 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-mono text-neutral-400 border border-white/10">
-                                    {i + 1}
-                                </div>
-                                <span className="text-xs font-mono text-neutral-300">
-                                    {pos.address || pos.user || 'Unknown'}
-                                </span>
-                            </div>
-                            <span className="text-xs font-mono font-bold text-blue-400">
-                                Leverage: x{pos.leverage || '1'}
-                            </span>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-2 mt-2 bg-black/20 rounded p-2">
-                            <div>
-                                <span className="text-[10px] text-neutral-500 block">Symbol</span>
-                                <span className="text-xs font-bold text-white">{pos.symbol || pos.coin}</span>
+            {/* AI Summary */}
+            {summary && (
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-2 mb-2">
+                    <p className="text-[11px] text-purple-300">{summary}</p>
+                </div>
+            )}
+
+            <div className="space-y-1 max-h-[320px] overflow-y-auto">
+                {positions.slice(0, 20).map((pos, i) => {
+                    const addr = pos.address || pos.user || 'Unknown'
+                    const symbol = pos.symbol || pos.coin || 'BTC'
+                    const amount = parseFloat(pos.amount || pos.szi || '0')
+                    const isLong = pos.side === 'LONG' || pos.side === 'BUY' || amount > 0
+
+                    return (
+                        <div key={i} className="flex items-center justify-between text-[11px]">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-neutral-600 font-mono w-4">{i + 1}</span>
+                                <span className="font-mono text-neutral-400">{shortenAddress(addr)}</span>
                             </div>
-                            <div className="text-right">
-                                <span className="text-[10px] text-neutral-500 block">Size (USD)</span>
-                                <span className="text-xs font-mono text-white">
-                                    ${parseFloat(pos.amount || pos.szi || '0').toLocaleString()}
+                            <div className="flex items-center gap-1.5">
+                                <span className="font-medium text-white">{symbol}</span>
+                                <span className={cn(
+                                    "font-mono",
+                                    isLong ? "text-green-400" : "text-red-400"
+                                )}>
+                                    {isLong ? '↑' : '↓'} {formatUsd(Math.abs(amount))}
                                 </span>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
         </div>
-
     )
 }
 
