@@ -172,11 +172,12 @@ function CryptoPricePrediction() {
     )
 }
 
+import { Suspense } from 'react'
 import { DerivativesView, SmartMoneyView } from '@/components/DataDashboards'
 import { ArbitrageView } from '@/components/ArbitrageWidgets'
 import { useSearchParams } from 'next/navigation'
 
-export default function DataPage() {
+function DataPageContent() {
     const { profile } = useLiff()
     const searchParams = useSearchParams()
 
@@ -467,6 +468,14 @@ export default function DataPage() {
 
             <BottomNav />
         </main>
+    )
+}
+
+export default function DataPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <DataPageContent />
+        </Suspense>
     )
 }
 

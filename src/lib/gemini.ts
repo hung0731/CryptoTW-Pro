@@ -93,16 +93,21 @@ ${rssTitles || '無新聞數據'}
 
 【輸出格式】(Strict JSON)
 
-1. **headline**: 15-20 字標題，描述當前市場主要結構狀態
-2. **analysis**: 80-100 字，整合「技術面」與「消息面」。解釋價格行為背後可能的新聞驅動因素，**需提到具體影響事件的項目或人物**。
-3. **whale_summary**: 巨鯨動態摘要
-4. **market_structure**: (技術面)
+**sentiment_score**: 0-100 分 (請嚴格依照以下權重自行計算)
+   - 消息面 (RSS) 40%: 新聞偏多或偏空
+   - 價格動能 (Momentum) 30%: 技術指標趨勢
+   - 市場波動 (Volatility) 30%: 恐慌程度
+**sentiment**: 根據分數標記 (>=75 貪婪/偏多, <=25 恐懼/偏空, 其他為中性/震盪)
+**headline**: 15-20 字標題，描述當前市場主要結構狀態
+**analysis**: 80-100 字，整合「技術面」與「消息面」。解釋價格行為背後可能的新聞驅動因素，**需提到具體影響事件的項目或人物**。
+**whale_summary**: 巨鯨動態摘要
+**market_structure**: (技術面)
    - bias: 直接使用 signals.market_feeling
    - focus_zone: 關注區間
    - invalidation_zone: 失效區間
    - resistance_zone: 壓力區間
-5. **risk_note**: 結構風險提示
-6. **market_context**: (消息面 - 獨立區塊)
+**risk_note**: 結構風險提示
+**market_context**: (消息面 - 獨立區塊)
    - summary: 1-2 句市場關注焦點總結，需包含關鍵詞 (如：Base 鏈、川普政策)。
    - highlights: Array of { theme: "主題 (含關鍵名詞)", impact: "影響層面" } (2-4 個)
 

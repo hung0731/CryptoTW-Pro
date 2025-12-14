@@ -131,6 +131,14 @@
     @apply border-border outline-ring/50;
   }
 
+  /* Force User Request: DISABLE ALL ANIMATIONS */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
   html {
     @apply bg-black;
   }
