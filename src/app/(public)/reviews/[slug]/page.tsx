@@ -149,7 +149,7 @@ export default function ReviewDetailPage() {
                                         <span className="text-[10px] font-bold text-neutral-400">{review.chartConfig?.symbol || 'CRYPTO'}/USDT 走勢圖</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 opacity-80">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.5)]"></span>
+                                        <img src="/logo.svg" alt="CryptoTW" className="w-3.5 h-3.5" />
                                         <span className="text-[10px] font-bold text-neutral-500">加密台灣 Pro</span>
                                     </div>
                                 </div>
@@ -211,7 +211,7 @@ export default function ReviewDetailPage() {
                                         <span className="text-[10px] font-bold text-neutral-400">{review.chartConfig?.symbol || 'CRYPTO'}/Data 資金流向</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 opacity-80">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.5)]"></span>
+                                        <img src="/logo.svg" alt="CryptoTW" className="w-3.5 h-3.5" />
                                         <span className="text-[10px] font-bold text-neutral-500">加密台灣 Pro</span>
                                     </div>
                                 </div>
@@ -270,7 +270,7 @@ export default function ReviewDetailPage() {
                                         <span className="text-[10px] font-bold text-neutral-400">{review.chartConfig?.symbol || 'CRYPTO'}/Data 持倉數據</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 opacity-80">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.5)]"></span>
+                                        <img src="/logo.svg" alt="CryptoTW" className="w-3.5 h-3.5" />
                                         <span className="text-[10px] font-bold text-neutral-500">加密台灣 Pro</span>
                                     </div>
                                 </div>
@@ -453,94 +453,94 @@ export default function ReviewDetailPage() {
                             還有 {review.timeline.length - 3} 個節點... 點擊展開
                         </button>
                     )}
-                </div>
-            </section>
 
-            {/* 7. Future Signals (The Checklist Tool) */}
-            <section className="p-6 space-y-5">
-                <div className="bg-amber-950/10 border border-amber-500/20 rounded-xl p-6">
-                    <h2 className="text-sm font-bold text-amber-500 flex items-center gap-2 uppercase tracking-wider mb-4">
-                        <AlertTriangle className="w-4 h-4" />
-                        未來預警訊號
-                    </h2>
-                    <p className="text-xs text-amber-500/60 mb-4">
-                        以下訊號通常在價格崩跌前 24-72 小時出現。
-                    </p>
+                </section>
 
-                    <div className="space-y-3">
-                        {review.actionableChecklist.map((item, idx) => (
-                            <div key={idx} className="flex items-start gap-3 p-3 bg-neutral-900/30 rounded border border-white/5 group hover:bg-neutral-900/50 transition-colors">
-                                <div className="mt-1 w-3 h-3 rounded-full border border-neutral-600 flex items-center justify-center group-hover:border-neutral-400 transition-colors bg-transparent">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-600 group-hover:bg-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h3 className="text-xs font-bold text-neutral-300 group-hover:text-white transition-colors">
-                                        {item.label}
-                                    </h3>
-                                    <p className="text-[11px] text-neutral-500 leading-relaxed group-hover:text-neutral-400">
-                                        {item.desc}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Historical Comparison */}
-            {review.historicalComparison && (
-                <section className="p-6 space-y-5 border-b border-white/5">
-                    <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
-                        <GitCompare className="w-4 h-4" />
-                        歷史對照
-                    </h2>
-                    <div className="bg-neutral-900/30 rounded-xl p-5 border border-white/5 flex flex-col gap-3">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-blue-400 px-2 py-1 bg-blue-500/10 rounded border border-blue-500/20">
-                                對照：{review.historicalComparison.event}
-                            </span>
-                        </div>
-                        <p className="text-sm text-neutral-300 leading-relaxed pl-1">
-                            {review.historicalComparison.similarity}
+                {/* 7. Future Signals (The Checklist Tool) */}
+                <section className="p-6 space-y-5">
+                    <div className="bg-amber-950/10 border border-amber-500/20 rounded-xl p-6">
+                        <h2 className="text-sm font-bold text-amber-500 flex items-center gap-2 uppercase tracking-wider mb-4">
+                            <AlertTriangle className="w-4 h-4" />
+                            未來預警訊號
+                        </h2>
+                        <p className="text-xs text-amber-500/60 mb-4">
+                            以下訊號通常在價格崩跌前 24-72 小時出現。
                         </p>
-                    </div>
-                </section>
-            )}
 
-            {/* Footer Quote */}
-            <div className="px-6 pb-12 text-center border-t border-white/5 pt-8">
-                <p className="text-[10px] text-neutral-600 font-mono italic">
-                    "History doesn't repeat itself, but it often rhymes."
-                </p>
-            </div>
-
-            {/* Related CTA - Learning Path Style */}
-            {relatedReviews.length > 0 && (
-                <section className="p-6 pt-0">
-                    <div className="h-px bg-white/5 mb-6" />
-                    <h3 className="text-xs font-bold text-neutral-500 mb-4 flex items-center gap-2">
-                        <BookOpen className="w-3.5 h-3.5" />
-                        相關學習路徑
-                    </h3>
-                    <div className="space-y-3">
-                        {relatedReviews.map((r, i) => (
-                            <Link href={`/reviews/${r.slug}`} key={r.id}>
-                                <div className="flex items-center gap-4 p-3 rounded-lg bg-neutral-900/30 border border-white/5 hover:bg-neutral-800 transition-colors group">
-                                    <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                                        {i + 1}
+                        <div className="space-y-3">
+                            {review.actionableChecklist.map((item, idx) => (
+                                <div key={idx} className="flex items-start gap-3 p-3 bg-neutral-900/30 rounded border border-white/5 group hover:bg-neutral-900/50 transition-colors">
+                                    <div className="mt-1 w-3 h-3 rounded-full border border-neutral-600 flex items-center justify-center group-hover:border-neutral-400 transition-colors bg-transparent">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-neutral-600 group-hover:bg-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="text-xs font-bold text-neutral-300 group-hover:text-white transition-colors">{r.title.split('：')[0]}</div>
-                                        <div className="text-[10px] text-neutral-600 mt-0.5">{r.title.split('：')[1] || r.summary.slice(0, 20) + '...'}</div>
+                                    <div className="space-y-1">
+                                        <h3 className="text-xs font-bold text-neutral-300 group-hover:text-white transition-colors">
+                                            {item.label}
+                                        </h3>
+                                        <p className="text-[11px] text-neutral-500 leading-relaxed group-hover:text-neutral-400">
+                                            {item.desc}
+                                        </p>
                                     </div>
-                                    <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
                                 </div>
-                            </Link>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </section>
-            )}
-        </article>
+
+                {/* Historical Comparison */}
+                {review.historicalComparison && (
+                    <section className="p-6 space-y-5 border-b border-white/5">
+                        <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
+                            <GitCompare className="w-4 h-4" />
+                            歷史對照
+                        </h2>
+                        <div className="bg-neutral-900/30 rounded-xl p-5 border border-white/5 flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-blue-400 px-2 py-1 bg-blue-500/10 rounded border border-blue-500/20">
+                                    對照：{review.historicalComparison.event}
+                                </span>
+                            </div>
+                            <p className="text-sm text-neutral-300 leading-relaxed pl-1">
+                                {review.historicalComparison.similarity}
+                            </p>
+                        </div>
+                    </section>
+                )}
+
+                {/* Footer Quote */}
+                <div className="px-6 pb-12 text-center border-t border-white/5 pt-8">
+                    <p className="text-[10px] text-neutral-600 font-mono italic">
+                        "History doesn't repeat itself, but it often rhymes."
+                    </p>
+                </div>
+
+                {/* Related CTA - Learning Path Style */}
+                {relatedReviews.length > 0 && (
+                    <section className="p-6 pt-0">
+                        <div className="h-px bg-white/5 mb-6" />
+                        <h3 className="text-xs font-bold text-neutral-500 mb-4 flex items-center gap-2">
+                            <BookOpen className="w-3.5 h-3.5" />
+                            相關學習路徑
+                        </h3>
+                        <div className="space-y-3">
+                            {relatedReviews.map((r, i) => (
+                                <Link href={`/reviews/${r.slug}`} key={r.id}>
+                                    <div className="flex items-center gap-4 p-3 rounded-lg bg-neutral-900/30 border border-white/5 hover:bg-neutral-800 transition-colors group">
+                                        <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                            {i + 1}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-xs font-bold text-neutral-300 group-hover:text-white transition-colors">{r.title.split('：')[0]}</div>
+                                            <div className="text-[10px] text-neutral-600 mt-0.5">{r.title.split('：')[1] || r.summary.slice(0, 20) + '...'}</div>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+            </article>
         </main >
     );
 }

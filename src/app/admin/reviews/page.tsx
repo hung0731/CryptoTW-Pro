@@ -4,6 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit, Eye } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
+
 export default async function ReviewsAdminPage() {
     const supabase = createAdminClient();
 
