@@ -3,17 +3,24 @@ export type MarketEventImportance = 'S' | 'A' | 'B';
 export type MarketState = '極恐' | '過熱' | '修復' | '崩跌' | '觀望';
 export type MetricType = 'fearGreed' | 'etfFlow' | 'oi' | 'funding' | 'price' | 'stablecoin';
 
+export type TimelineRiskLevel = 'high' | 'medium' | 'low';
+
 export interface TimelineItem {
     date: string; // YYYY-MM-DD
     title: string;
     description: string;
     marketImpact: string;
     riskState: string;
+    riskLevel: TimelineRiskLevel; // New V2
 }
 
 export interface ChartDef {
     url: string;
-    caption: string; // Must start with "圖表解讀："
+    caption: string;
+    interpretation?: { // New V2
+        whatItMeans: string;
+        whatToWatch: string;
+    };
 }
 
 export interface MarketEvent {
@@ -34,6 +41,9 @@ export interface MarketEvent {
     updatedAt: string;
     eventStartAt: string;
     eventEndAt: string;
+
+    // Usage Guide (New V2)
+    usageGuide: string[];
 
     // 1. One Sentence Summary
     summary: string;
@@ -111,6 +121,12 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventStartAt: '2024-01-01',
         eventEndAt: '2024-01-25',
 
+        usageGuide: [
+            '當重大利好消息落地，價格卻不漲反跌時',
+            '當市場過度擁擠導致資金費率異常偏高時',
+            '當機構資金流向與價格走勢出現背離時'
+        ],
+
         summary: '當比特幣現貨 ETF 獲准上市時，市場真正改變的是「機構資金的長期配置通道」，而不是短期的價格投機波動。',
 
         context: {
@@ -143,21 +159,24 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 title: 'SEC 正式批准',
                 description: '監管不確定性消除，但市場並未出現預期中的單邊上漲，顯示價格已提前反應該預期 (Priced-in)。',
                 marketImpact: '利多落地但漲幅受限，部分投機資金開始尋求出場。',
-                riskState: '預期兌現，波動風險上升'
+                riskState: '預期兌現，波動風險上升',
+                riskLevel: 'medium'
             },
             {
                 date: '2024-01-11',
                 title: '交易與贖回潮啟動',
                 description: 'ETF 開始交易，GBTC 出現顯著折價收斂與贖回潮，市場焦點從「買入」轉向「消化賣壓」。',
                 marketImpact: '淨流出大於淨流入，市場開始修正過度樂觀的短期預期。',
-                riskState: '賣壓確認，趨勢反轉'
+                riskState: '賣壓確認，趨勢反轉',
+                riskLevel: 'high'
             },
             {
                 date: '2024-01-23',
                 title: '供需重新平衡',
                 description: '隨著灰度賣壓逐漸被其他 ETF 買盤吸收，價格在 $38,500 附近獲得支撐，波動率開始收斂。',
                 marketImpact: '短期投機籌碼清洗完畢，市場回歸長期資金主導的緩步上行。',
-                riskState: '籌碼沉澱，底部浮現'
+                riskState: '籌碼沉澱，底部浮現',
+                riskLevel: 'low'
             }
         ],
 
@@ -168,15 +187,27 @@ export const REVIEWS_DATA: MarketEvent[] = [
         charts: {
             main: {
                 url: '',
-                caption: '圖表解讀：價格在批准前已提前兩個月上漲，批准當下形成「利多出盡」的高點，隨後展開為期兩週的 20% 回調。'
+                caption: '圖表解讀：價格在批准前已提前兩個月上漲，批准當下形成「利多出盡」的高點，隨後展開為期兩週的 20% 回調。',
+                interpretation: {
+                    whatItMeans: '價格提前兩個月反應預期，正式批准成為「利多出盡」的賣點。',
+                    whatToWatch: '當價格已大幅領先消息面時，好消息落地往往是短期高點。'
+                }
             },
             flow: {
                 url: '',
-                caption: '圖表解讀：即便價格下跌（上圖），ETF 淨流入（下圖綠柱）依然持續累積，顯示結構性需求未減。'
+                caption: '圖表解讀：即便價格下跌（上圖），ETF 淨流入（下圖綠柱）依然持續累積，顯示結構性需求未減。',
+                interpretation: {
+                    whatItMeans: '價格下跌但淨流入持續增加，代表賣壓來自存量（GBTC），買盤來自增量。',
+                    whatToWatch: '價格下跌但資金淨流入不減反增，通常是左側佈局的最佳信號。'
+                }
             },
             oi: {
                 url: '',
-                caption: '圖表解讀：回調過程中，合約持倉量 (OI) 顯著下降，代表過度擁擠的槓桿多單被清洗出場。'
+                caption: '圖表解讀：回調過程中，合約持倉量 (OI) 顯著下降，代表過度擁擠的槓桿多單被清洗出場。',
+                interpretation: {
+                    whatItMeans: 'OI 的快速下降伴隨價格下跌，是典型的多頭去槓桿過程。',
+                    whatToWatch: '當 OI 還在高位但價格滯漲時，需警惕即將到來的多殺多。'
+                }
             }
         },
 
@@ -220,6 +251,12 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventStartAt: '2022-11-02',
         eventEndAt: '2022-11-15',
 
+        usageGuide: [
+            '當交易所傳出資產負債表疑慮時',
+            '當市場出現大型機構流動性枯竭傳言時',
+            '當公鏈代幣與其生態系項目出現異常連動下跌時'
+        ],
+
         summary: '當 FTX 宣佈破產時，市場真正面對的不是單純的資產跌價，而是中心化信任機制的全面崩潰與流動性真空。',
 
         context: {
@@ -252,21 +289,24 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 title: '資產負債表疑慮',
                 description: '媒體揭露 Alameda Research 資產高度依賴流動性差的 FTT 代幣，市場開始質疑其償付能力。',
                 marketImpact: '敏感資金開始從 FTX 撤出，但市場整體反應尚未擴大。',
-                riskState: '償付風險浮現'
+                riskState: '償付風險浮現',
+                riskLevel: 'medium'
             },
             {
                 date: '2022-11-06',
                 title: '公開清倉引發擠兌',
                 description: '幣安 (Binance) 宣佈清倉 FTT 持倉，引發用戶恐慌性提幣，導致交易所流動性迅速耗盡。',
                 marketImpact: 'FTT 價格與 FTX 儲備形成死亡螺旋，市場信心開始崩潰。',
-                riskState: '流動性斷裂'
+                riskState: '流動性斷裂',
+                riskLevel: 'high'
             },
             {
                 date: '2022-11-08',
                 title: '暫停提幣與系統性崩潰',
                 description: 'FTX 停止處理提幣請求，隨後宣佈破產重組，比特幣跌破波段前低。',
                 marketImpact: '信任完全崩塌，系統性風險蔓延至借貸平台與做市商。',
-                riskState: '信用緊縮擴散'
+                riskState: '信用緊縮擴散',
+                riskLevel: 'high'
             }
         ],
 
@@ -277,11 +317,19 @@ export const REVIEWS_DATA: MarketEvent[] = [
         charts: {
             main: {
                 url: '',
-                caption: '圖表解讀：FTT 價格在數日內從 $22 垂直崩跌至 $1，這種走勢反映的不是估值修正，而是市場對其價值基礎的「信心真空」。'
+                caption: '圖表解讀：FTT 價格在數日內從 $22 垂直崩跌至 $1，這種走勢反映的不是估值修正，而是市場對其價值基礎的「信心真空」。',
+                interpretation: {
+                    whatItMeans: '垂直崩跌與價格幾近歸零，代表其價值基礎（信任）已完全瓦解。',
+                    whatToWatch: '當平台幣作為核心資產開始出現流動性危機時，應假設其價值可能歸零。'
+                }
             },
             oi: {
                 url: '',
-                caption: '圖表解讀：相關資產（如 Solana）同步暴跌，顯示流動性危機正透過機構資產負債表向外傳導。'
+                caption: '圖表解讀：相關資產（如 Solana）同步暴跌，顯示流動性危機正透過機構資產負債表向外傳導。',
+                interpretation: {
+                    whatItMeans: '關鍵資產崩盤通常伴隨關聯生態系（Solana）的無差別拋售。',
+                    whatToWatch: '在系統性危機中，與源頭高度關聯的優質資產也會遭遇錯殺（這可能是機會）。'
+                }
             }
         },
 
@@ -325,6 +373,12 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventStartAt: '2022-05-07',
         eventEndAt: '2022-05-13',
 
+        usageGuide: [
+            '當算法穩定幣出現微幅脫鉤時',
+            '當高收益類定存產品 (Anchor) 資金外逃時',
+            '當治理代幣與穩定幣價格出現反向死亡螺旋時'
+        ],
+
         summary: '當算法穩定幣 UST 脫鉤時，市場學到的是：缺乏足額儲備支撐的金融工具，在本質上無法抵抗系統性的信心崩潰。',
 
         context: {
@@ -357,21 +411,24 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 title: '掛鉤鬆動',
                 description: '巨額資金在 Curve 池拋售 UST，導致價格微幅低於 $1，市場開始測試機制韌性。',
                 marketImpact: '套利機器人啟動，LFG 基金會開始動用比特幣儲備護盤。',
-                riskState: '錨定機制受壓'
+                riskState: '錨定機制受壓',
+                riskLevel: 'medium'
             },
             {
                 date: '2022-05-09',
                 title: '信心潰散與死亡螺旋',
                 description: 'UST 跌破 0.95，觸發恐慌性拋售，LUNA 機制無限增發試圖吸收賣壓。',
                 marketImpact: 'LUNA 供應量呈指數級暴增，價格直線崩跌，機制完全失控。',
-                riskState: '機制失效確'
+                riskState: '機制失效確',
+                riskLevel: 'high'
             },
             {
                 date: '2022-05-12',
                 title: '價值歸零',
                 description: 'LUNA 跌破 $0.01，主要交易所陸續暫停交易。',
                 marketImpact: '生態系資金全數蒸發，持有 LUNA 的大型投資機構面臨破產清算。',
-                riskState: '資產價值毀滅'
+                riskState: '資產價值毀滅',
+                riskLevel: 'high'
             }
         ],
 
@@ -382,11 +439,19 @@ export const REVIEWS_DATA: MarketEvent[] = [
         charts: {
             main: {
                 url: '',
-                caption: '圖表解讀：UST 價格脫鉤後一路向南，反映了市場對算法機制信心的徹底喪失。'
+                caption: '圖表解讀：UST 價格脫鉤後一路向南，反映了市場對算法機制信心的徹底喪失。',
+                interpretation: {
+                    whatItMeans: '脫鉤一旦突破心理防線 ($0.95)，信心崩潰將呈現非線性的加速。',
+                    whatToWatch: '對於錨定資產，微幅脫鉤 ($0.98) 往往是最後的逃生窗口。'
+                }
             },
             flow: {
                 url: '',
-                caption: '圖表解讀：LUNA 的供應量 (Supply) 呈垂直指數級增長，這是機制為了挽救 UST 而無限制印鈔的結果，最終導致惡性通膨與歸零。'
+                caption: '圖表解讀：LUNA 的供應量 (Supply) 呈垂直指數級增長，這是機制為了挽救 UST 而無限制印鈔的結果，最終導致惡性通膨與歸零。',
+                interpretation: {
+                    whatItMeans: '指數級的供應量增發是「死亡螺旋」最直接的鏈上證據。',
+                    whatToWatch: '當代幣供應量開始異常激增時，即使價格看似便宜也不應抄底。'
+                }
             }
         },
 
@@ -430,6 +495,12 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventStartAt: '2020-03-12',
         eventEndAt: '2020-03-13',
 
+        usageGuide: [
+            '當全球宏觀市場出現熔斷級恐慌時',
+            '當比特幣與美股呈現高度正相關時',
+            '當流動性危機導致所有資產無差別拋售時'
+        ],
+
         summary: '當全市場面臨流動性枯竭時，比特幣的避險屬性暫時失效，轉而表現為與風險資產高度正相關的變現需求。',
 
         context: {
@@ -462,21 +533,24 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 title: '全球市場熔斷',
                 description: '美股開盤即觸發熔斷機制，投資者恐慌情緒蔓延，拋售潮湧現。',
                 marketImpact: '加密貨幣市場跟隨傳統金融市場暴跌，避險敘事暫時失效。',
-                riskState: '相關性驟升，現金為王'
+                riskState: '相關性驟升，現金為王',
+                riskLevel: 'high'
             },
             {
                 date: '2020-03-12 (晚間)',
                 title: '連鎖爆倉與流動性失靈',
                 description: '價格跌破關鍵技術支撐，BitMEX 等交易所發生大規模連鎖清算，買盤掛單消失。',
                 marketImpact: '價格在數小時內腰斬至 $3,800，市場陷入極度恐慌。',
-                riskState: '流動性枯竭'
+                riskState: '流動性枯竭',
+                riskLevel: 'high'
             },
             {
                 date: '2020-03-13',
                 title: 'V 型反轉與籌碼換手',
                 description: '市場在極度絕望後，長期買盤開始介入承接，波動率維持極高水位。',
                 marketImpact: '槓桿籌碼被徹底清洗，市場完成了從投機者到長期持有者的籌碼轉移。',
-                riskState: '恐慌落底，長期買點'
+                riskState: '恐慌落底，長期買點',
+                riskLevel: 'low'
             }
         ],
 
@@ -487,11 +561,19 @@ export const REVIEWS_DATA: MarketEvent[] = [
         charts: {
             main: {
                 url: '',
-                caption: '圖表解讀：單日 50% 的跌幅歷史罕見，長下影線顯示了極端恐慌後的即時買盤介入，形成了典型的 V 型反轉結構。'
+                caption: '圖表解讀：單日 50% 的跌幅歷史罕見，長下影線顯示了極端恐慌後的即時買盤介入，形成了典型的 V 型反轉結構。',
+                interpretation: {
+                    whatItMeans: '極長下影線 + 歷史天量，代表賣壓雖然巨大但已被買盤全數承接。',
+                    whatToWatch: 'V 型反轉的即時性確認了市場的有效流動性與長期信心。'
+                }
             },
             oi: {
                 url: '',
-                caption: '圖表解讀：持倉量 (OI) 瞬間蒸發，這是一次徹底的「去槓桿化」過程，市場重新回歸現貨主導的健康狀態。'
+                caption: '圖表解讀：持倉量 (OI) 瞬間蒸發，這是一次徹底的「去槓桿化」過程，市場重新回歸現貨主導的健康狀態。',
+                interpretation: {
+                    whatItMeans: '持倉量的大幅重置通常意味著市場底部，因為強制賣壓已耗盡。',
+                    whatToWatch: '當 OI 降至歷史低點且費率為負時，通常是反轉的前兆。'
+                }
             }
         },
 
