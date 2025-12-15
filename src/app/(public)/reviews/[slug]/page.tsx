@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getReviewBySlug, getRelatedReviews, REVIEWS_DATA } from '@/lib/reviews-data';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Share2, Clock, MapPin, Activity, AlertTriangle, Lightbulb, BookOpen } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, Clock, MapPin, Activity, AlertTriangle, Lightbulb, BookOpen, CheckCircle, XCircle, GitCompare, ListChecks, TrendingUp, BarChart3, AlertOctagon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function ReviewDetailPage() {
@@ -85,7 +85,51 @@ export default function ReviewDetailPage() {
                     </div>
                 </section>
 
-                {/* 2. Market State Snapshot (Status Adjectives) */}
+                {/* 2. Visual Evidence (Main Chart & Flow) */}
+                {(review.charts.main || review.charts.flow) && (
+                    <section className="p-6 space-y-6 border-b border-white/5">
+                        <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
+                            <TrendingUp className="w-4 h-4" />
+                            關鍵視覺證據
+                        </h2>
+
+                        {/* Main Chart: Price Action */}
+                        {review.charts.main && (
+                            <div className="space-y-2">
+                                <div className="aspect-video w-full bg-neutral-900 rounded-lg border border-white/5 flex items-center justify-center overflow-hidden relative">
+                                    <div className="absolute inset-0 bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+                                    <span className="text-neutral-600 text-xs font-mono">Main Chart: {review.charts.main.url.split('/').pop()}</span>
+                                    {/* <img src={review.charts.main.url} className="w-full h-full object-cover" /> */}
+                                </div>
+                                <div className="bg-neutral-900/50 border-l-2 border-white/20 pl-3 py-2 rounded-r-lg">
+                                    <p className="text-xs text-neutral-300 leading-relaxed">
+                                        <span className="text-white font-bold mr-1">圖表解讀：</span>
+                                        {review.charts.main.caption.replace('圖表解讀：', '')}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Flow Chart: The Soul */}
+                        {review.charts.flow && (
+                            <div className="space-y-2">
+                                <div className="aspect-video w-full bg-neutral-900 rounded-lg border border-white/5 flex items-center justify-center overflow-hidden relative">
+                                    <div className="absolute inset-0 bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+                                    <span className="text-neutral-600 text-xs font-mono">Flow Chart: {review.charts.flow.url.split('/').pop()}</span>
+                                    {/* <img src={review.charts.flow.url} className="w-full h-full object-cover" /> */}
+                                </div>
+                                <div className="bg-green-950/10 border-l-2 border-green-500/30 pl-3 py-2 rounded-r-lg">
+                                    <p className="text-xs text-neutral-300 leading-relaxed">
+                                        <span className="text-green-400 font-bold mr-1">圖表解讀：</span>
+                                        {review.charts.flow.caption.replace('圖表解讀：', '')}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </section>
+                )}
+
+                {/* 3. Market State Snapshot */}
                 <section className="p-6 space-y-4 border-b border-white/5">
                     <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                         <Clock className="w-4 h-4" />
@@ -93,13 +137,10 @@ export default function ReviewDetailPage() {
                     </h2>
 
                     <div className="grid grid-cols-1 gap-2">
-                        {/* BTC */}
                         <div className="bg-neutral-900/40 rounded-lg p-3 border border-white/5 flex items-center justify-between">
                             <span className="text-xs text-neutral-500">BTC 價格狀態</span>
                             <span className="text-xs font-medium text-white text-right">{review.initialState.price}</span>
                         </div>
-
-                        {/* F&G */}
                         <div className="bg-neutral-900/40 rounded-lg p-3 border border-white/5 flex items-center justify-between">
                             <span className="text-xs text-neutral-500">情緒 (恐懼/貪婪)</span>
                             <span className={cn(
@@ -108,40 +149,50 @@ export default function ReviewDetailPage() {
                                     review.initialState.fearGreed.includes('恐懼') ? "text-green-400" : "text-yellow-400"
                             )}>{review.initialState.fearGreed}</span>
                         </div>
-
-                        {/* Optional Metrics */}
-                        {review.initialState.etfFlow && (
-                            <div className="bg-neutral-900/40 rounded-lg p-3 border border-white/5 flex items-center justify-between">
-                                <span className="text-xs text-neutral-500">ETF 資金</span>
-                                <span className="text-xs font-medium text-white text-right">{review.initialState.etfFlow}</span>
-                            </div>
-                        )}
-                        {review.initialState.oi && (
-                            <div className="bg-neutral-900/40 rounded-lg p-3 border border-white/5 flex items-center justify-between">
-                                <span className="text-xs text-neutral-500">合約持倉 (OI)</span>
-                                <span className="text-xs font-medium text-white text-right">{review.initialState.oi}</span>
-                            </div>
-                        )}
                         {review.initialState.funding && (
                             <div className="bg-neutral-900/40 rounded-lg p-3 border border-white/5 flex items-center justify-between">
                                 <span className="text-xs text-neutral-500">資金費率</span>
                                 <span className="text-xs font-medium text-white text-right">{review.initialState.funding}</span>
                             </div>
                         )}
-                        {review.initialState.stablecoin && (
-                            <div className="bg-neutral-900/40 rounded-lg p-3 border border-white/5 flex items-center justify-between">
-                                <span className="text-xs text-neutral-500">穩定幣流動性</span>
-                                <span className="text-xs font-medium text-white text-right">{review.initialState.stablecoin}</span>
-                            </div>
-                        )}
                     </div>
                 </section>
 
-                {/* 3. Timeline (Risk Focus) */}
+                {/* 4. Cognitive Mismatch (New Module) */}
+                {review.misconceptions && (
+                    <section className="p-6 space-y-4 border-b border-white/5">
+                        <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
+                            <AlertOctagon className="w-4 h-4" />
+                            市場認知誤區
+                        </h2>
+                        <div className="grid grid-cols-1 gap-3">
+                            {review.misconceptions.map((m, idx) => (
+                                <div key={idx} className="bg-neutral-900/30 rounded-xl border border-white/5 overflow-hidden">
+                                    <div className="flex items-start gap-3 p-3 bg-red-950/10 border-b border-white/5">
+                                        <XCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider block">常見誤判</span>
+                                            <p className="text-xs text-neutral-300 font-medium">{m.myth}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3 p-3 bg-green-950/10">
+                                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <span className="text-[10px] text-green-400 font-bold uppercase tracking-wider block">實際真相</span>
+                                            <p className="text-xs text-neutral-300 font-medium">{m.fact}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* 5. Timeline (Risk Focus) */}
                 <section className="p-6 space-y-6 border-b border-white/5 relative overflow-hidden">
                     <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider relative z-10">
                         <Activity className="w-4 h-4" />
-                        事件演變與風險狀態
+                        事件演變與風險釋放
                     </h2>
 
                     <div className="absolute left-[39px] top-16 bottom-10 w-0.5 bg-neutral-800 z-0"></div>
@@ -173,28 +224,84 @@ export default function ReviewDetailPage() {
                                             {item.marketImpact}
                                         </p>
                                     </div>
+
+                                    {/* Feature: OI Chart or other specific timeline charts could be injected here if we had timeline-attached charts */}
                                 </div>
                             </div>
                         ))}
                     </div>
+
+                    {/* OI Chart specifically placed after timeline or as part of summary */}
+                    {review.charts.oi && (
+                        <div className="mt-6 space-y-2 bg-neutral-900/20 p-4 rounded-xl border border-white/5 mx-4 relative z-10">
+                            <div className="aspect-[21/9] w-full bg-neutral-900 rounded-lg border border-white/5 flex items-center justify-center overflow-hidden relative">
+                                <div className="absolute inset-0 bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+                                <span className="text-neutral-600 text-xs font-mono">OI Chart: {review.charts.oi.url.split('/').pop()}</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <BarChart3 className="w-3.5 h-3.5 text-neutral-500 mt-0.5" />
+                                <p className="text-xs text-neutral-400 leading-relaxed">
+                                    <span className="text-neutral-300 font-bold mr-1">圖表解讀：</span>
+                                    {review.charts.oi.caption.replace('圖表解讀：', '')}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </section>
 
-                {/* 5. Key Takeaways (Lessons) */}
+                {/* 6. Historical Comparison (New Module) */}
+                {review.historicalComparison && (
+                    <section className="p-6 space-y-4 border-b border-white/5">
+                        <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
+                            <GitCompare className="w-4 h-4" />
+                            歷史相似案例
+                        </h2>
+                        <div className="bg-neutral-900/30 rounded-xl p-4 border border-white/5 flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-white bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">
+                                    對照：{review.historicalComparison.event}
+                                </span>
+                            </div>
+                            <p className="text-sm text-neutral-300 leading-relaxed">
+                                {review.historicalComparison.similarity}
+                            </p>
+                        </div>
+                    </section>
+                )}
+
+                {/* 7. Actionable Checklist (New Module - Replaces Takeaways) */}
                 <section className="p-6 space-y-4">
                     <h2 className="text-sm font-bold text-amber-500 flex items-center gap-2 uppercase tracking-wider">
-                        <Lightbulb className="w-4 h-4" />
-                        這次市場教會我們什麼？
+                        <ListChecks className="w-4 h-4" />
+                        下次遇到，該檢查什麼？
                     </h2>
 
-                    <div className="bg-amber-950/10 border border-amber-500/20 rounded-xl p-5 space-y-4">
-                        <ul className="space-y-3">
-                            {review.takeaways.map((point, idx) => (
-                                <li key={idx} className="flex gap-3 text-sm text-neutral-200 leading-relaxed">
-                                    <span className="text-amber-500 mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-                                    {point}
-                                </li>
-                            ))}
-                        </ul>
+                    <div className="space-y-3">
+                        {review.actionableChecklist.map((item, idx) => (
+                            <div key={idx} className={cn(
+                                "flex gap-3 p-4 rounded-xl border",
+                                item.type === 'alert'
+                                    ? "bg-red-950/10 border-red-500/20"
+                                    : "bg-neutral-900/30 border-white/10"
+                            )}>
+                                {item.type === 'alert' ? (
+                                    <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                ) : (
+                                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                                )}
+                                <div>
+                                    <h3 className={cn(
+                                        "text-xs font-bold mb-1",
+                                        item.type === 'alert' ? "text-red-400" : "text-green-400"
+                                    )}>
+                                        {item.label}
+                                    </h3>
+                                    <p className="text-sm text-neutral-300 leading-relaxed">
+                                        {item.desc}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </section>
 

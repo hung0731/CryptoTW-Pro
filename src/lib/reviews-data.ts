@@ -6,9 +6,14 @@ export type MetricType = 'fearGreed' | 'etfFlow' | 'oi' | 'funding' | 'price' | 
 export interface TimelineItem {
     date: string; // YYYY-MM-DD
     title: string;
-    description: string; // "發生了什麼"
-    marketImpact: string; // "市場行為改變了什麼"
-    riskState: string; // "這代表的風險狀態"
+    description: string;
+    marketImpact: string;
+    riskState: string;
+}
+
+export interface ChartDef {
+    url: string;
+    caption: string; // Must start with "圖表解讀："
 }
 
 export interface MarketEvent {
@@ -31,20 +36,19 @@ export interface MarketEvent {
     eventEndAt: string;
 
     // 1. One Sentence Summary
-    summary: string; // "當...發生時，市場真正改變的是...，而不是..."
+    summary: string;
 
     // 2. Context
     context: {
-        what: string; // 事件是什麼
-        narrative: string; // 當時主流敘事
-        realImpact: string; // 真正影響市場的是什麼
+        what: string;
+        narrative: string;
+        realImpact: string;
     };
 
-    // 3. Market State Snapshot (Descriptive)
+    // 3. Market State Snapshot
     initialState: {
-        price: string; // 形容狀態 (e.g., 高位震盪)
-        fearGreed: string; // 形容狀態 (e.g., 極度貪婪 - 偏高)
-        // Dynamic Key Metrics (Optional)
+        price: string;
+        fearGreed: string;
         etfFlow?: string;
         oi?: string;
         funding?: string;
@@ -52,91 +56,151 @@ export interface MarketEvent {
         stablecoin?: string;
     };
 
-    // 4. Timeline
-    timeline: TimelineItem[];
-
-    // 5. Charts
-    chartImages?: {
-        url: string;
-        caption: string; // "這張圖顯示...，代表..."
+    // 4. Misconceptions (New Module)
+    misconceptions: {
+        myth: string;
+        fact: string;
     }[];
 
-    // 6. Key Takeaways
-    takeaways: string[]; // 3-5 points
+    // 5. Timeline
+    timeline: TimelineItem[];
+
+    // 6. Charts (Structured)
+    charts: {
+        main?: ChartDef;      // 價格 x 事件區間 (The "Evidence")
+        flow?: ChartDef;      // 資金流 (The "Soul")
+        sentiment?: ChartDef; // 情緒
+        oi?: ChartDef;        // 持倉量
+        stablecoin?: ChartDef;// 穩定幣
+    };
+
+    // 7. Analysis Modules (New)
+    historicalComparison: {
+        event: string;
+        similarity: string;
+    };
+
+    actionableChecklist: {
+        label: string;
+        desc: string;
+        type: 'check' | 'alert';
+    }[];
 }
 
 export const REVIEWS_DATA: MarketEvent[] = [
     {
         id: 'review-etf-2024',
         slug: 'bitcoin-etf-launch-2024',
-        title: '2024 比特幣 ETF 上線：買消息賣事實的經典教案',
+        title: '2024 比特幣 ETF 上線：預期兌現後的結構性調整',
         year: 2024,
         importance: 'S',
         featuredRank: 1,
-        tags: ['ETF', '機構進場', '買消息賣事實'],
+        tags: ['ETF', '機構資金', '市場結構'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['etfFlow', 'price', 'funding'],
-        readingMinutes: 6,
+        readingMinutes: 8,
         isProOnly: false,
         publishedAt: '2025-12-15',
         updatedAt: '2025-12-15',
         eventStartAt: '2024-01-01',
         eventEndAt: '2024-01-25',
 
-        summary: '當比特幣現貨 ETF 上線時，市場真正改變的是「機構資金的進場通道」，而不是價格短期的單邊上漲。',
+        summary: '當比特幣現貨 ETF 獲准上市時，市場真正改變的是「機構資金的長期配置通道」，而不是短期的價格投機波動。',
 
         context: {
-            what: '美國 SEC 歷史性批准 11 檔比特幣現貨 ETF，宣告比特幣正式進入傳統金融市場。',
-            narrative: '市場普遍認為 ETF 通過將帶來數百億美元的即時買盤，幣價將立刻噴發。',
-            realImpact: '長期結構確實改變，但短期市場早已提前定價（Priced-in），反而形成了巨大的獲利了結賣壓。'
+            what: '美國證券交易委員會 (SEC) 批准 11 檔比特幣現貨 ETF，標誌著加密資產正式納入傳統金融監管框架。',
+            narrative: '當時市場主流敘事普遍預期，合規渠道開啟將帶來數百億美元的即時買盤，推動價格立即大幅上漲。',
+            realImpact: '此事件確認了資產類別的合法性，但市場明顯忽略了利多落地後的獲利了結賣壓 (GBTC)，以及機構建倉的漸進性質。'
         },
 
         initialState: {
-            price: '高位橫盤，動能減弱',
-            fearGreed: '極度貪婪 (76) - 情緒過熱',
-            funding: '正費率偏高，多頭過於擁擠',
-            etfFlow: 'GBTC 解鎖預期強烈'
+            price: '價格處於預期兌現的高位區間，動能開始鈍化',
+            fearGreed: '極度貪婪 (76) - 市場情緒處於高溫區',
+            funding: '資金費率正向偏高，衍生品槓桿過度擁擠',
+            etfFlow: '市場高度關注灰度 (GBTC) 的潛在解鎖拋壓'
         },
+
+        misconceptions: [
+            {
+                myth: 'ETF 通過當日價格理應暴漲',
+                fact: '資金流向數據顯示，即便淨流入為正，早期的獲利了結賣壓與衍生品去槓桿效應，共同主導了短期價格修正。'
+            },
+            {
+                myth: '價格回調意味著 ETF 產品失敗',
+                fact: '機構資金的進入是「流量 (Flow)」概念而非「存量」，價格回調期間，貝萊德等主流 ETF 仍持續保持淨流入，顯示結構性需求未減。'
+            }
+        ],
 
         timeline: [
             {
                 date: '2024-01-10',
                 title: 'SEC 正式批准',
-                description: 'SEC 宣佈批准所有現貨 ETF 申請，社群情緒達到最高點。',
-                marketImpact: '利多落地，但價格並未如預期暴漲，反而出現上下插針。',
-                riskState: '預期兌現，追高風險極大'
+                description: '監管不確定性消除，但市場並未出現預期中的單邊上漲，顯示價格已提前反應該預期 (Priced-in)。',
+                marketImpact: '利多落地但漲幅受限，部分投機資金開始尋求出場。',
+                riskState: '預期兌現，波動風險上升'
             },
             {
                 date: '2024-01-11',
-                title: '交易首日與灰度拋壓',
-                description: 'ETF 開始交易，GBTC 高額管理費導致用戶大量贖回（拋售）。',
-                marketImpact: '淨流出大於淨流入，市場開始意識到「拋壓大於買盤」。',
+                title: '交易與贖回潮啟動',
+                description: 'ETF 開始交易，GBTC 出現顯著折價收斂與贖回潮，市場焦點從「買入」轉向「消化賣壓」。',
+                marketImpact: '淨流出大於淨流入，市場開始修正過度樂觀的短期預期。',
                 riskState: '賣壓確認，趨勢反轉'
             },
             {
                 date: '2024-01-23',
-                title: '恐慌修復與觸底',
-                description: '比特幣回調至 $38,500，灰度拋壓開始減緩，其他 ETF 流入趨於穩定。',
-                marketImpact: '短期投機籌碼清洗完畢，長期資金開始緩步建倉。',
-                riskState: '風險釋放，底部浮現'
+                title: '供需重新平衡',
+                description: '隨著灰度賣壓逐漸被其他 ETF 買盤吸收，價格在 $38,500 附近獲得支撐，波動率開始收斂。',
+                marketImpact: '短期投機籌碼清洗完畢，市場回歸長期資金主導的緩步上行。',
+                riskState: '籌碼沉澱，底部浮現'
             }
         ],
 
-        takeaways: [
-            '利多落地 ≠ 價格上漲，往往是短期頂部訊號（Sell the news）。',
-            '當全市場都在期待同一件事時，風險通常大於機會。',
-            '機構資金的影響是長期的「流量（Flow）」，而非單日的「存量（Stock）」。',
-            '這類狀態再出現時，應關注「預期是否過度飽和」而非消息本身。'
+        charts: {
+            main: {
+                url: '/images/reviews/etf-price-action.png',
+                caption: '圖表解讀：價格在批准前已提前兩個月上漲，批准當下形成「利多出盡」的高點，隨後展開為期兩週的 20% 回調。'
+            },
+            flow: {
+                url: '/images/reviews/etf-flow-grayscale.png',
+                caption: '圖表解讀：即便價格下跌（上圖），ETF 淨流入（下圖綠柱）依然持續累積，顯示下跌僅是情緒面的釋放，而非資金面的撤退。'
+            },
+            oi: {
+                url: '/images/reviews/etf-oi-flush.png',
+                caption: '圖表解讀：回調過程中，合約持倉量 (OI) 顯著下降，顯示過度擁擠的槓桿多單被市場機制清洗出場。'
+            }
+        },
+
+        historicalComparison: {
+            event: '2021 Coinbase 直接上市 (IPO)',
+            similarity: '兩者皆為幣圈歷史性的合規里程碑，且都在上市當天見到短期價格頂部，隨後市場經歷了數週的估值修正與情緒冷卻。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '確認資金流向本質',
+                desc: '下跌時需區分是「資金撤退」還是「情緒釋放」，若 ETF 淨流入持續為正，則結構未破壞。'
+            },
+            {
+                type: 'check',
+                label: '過熱情緒監測',
+                desc: '當重大事件前 F&G 指標長期維持 >75，需警惕市場對利多的過度定價。'
+            },
+            {
+                type: 'alert',
+                label: '區分價格與價值',
+                desc: '價格反映的是短期供需與情緒，資金流向反映的才是長期的實質需求。'
+            }
         ]
     },
     {
         id: 'review-ftx-2022',
         slug: 'ftx-collapse-2022',
-        title: '2022 FTX 倒閉：信任崩塌與槓桿總清算',
+        title: '2022 FTX 倒閉：中心化信任機制的崩潰',
         year: 2022,
         importance: 'S',
         featuredRank: 2,
-        tags: ['交易所倒閉', '信任危機', '流動性'],
+        tags: ['系統性風險', '信任危機', '流動性'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'stablecoin', 'fearGreed'],
         readingMinutes: 8,
@@ -146,60 +210,98 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventStartAt: '2022-11-02',
         eventEndAt: '2022-11-15',
 
-        summary: '當 FTX 倒閉時，市場不是單純的資產跌價，而是流動性與信任基礎的直接消失。',
+        summary: '當 FTX 宣佈破產時，市場真正面對的不是單純的資產跌價，而是中心化信任機制的全面崩潰與流動性真空。',
 
         context: {
-            what: '全球第二大交易所 FTX 因挪用用戶資產與 FTT 價格崩盤而宣告破產。',
-            narrative: '初期市場以為只是「謠言」或「FUD」，認為 SBF 大到不能倒。',
-            realImpact: '揭露了中心化機構的不透明槓桿，引發了全行業的信用緊縮 (Credit Crunch)。'
+            what: '全球流動性第二大的加密貨幣交易所 FTX 因資產挪用與流動性枯竭宣告破產。',
+            narrative: '事件初期，市場普遍認為 FTX 具備「大到不能倒」的系統重要性，並將流動性問題視為短期謠言。',
+            realImpact: '該事件揭露了不透明的內部槓桿操作，引發了全產業的信用緊縮 (Credit Crunch) 與償付能力危機。'
         },
 
         initialState: {
-            price: '熊市底部震盪，波動率極低',
-            fearGreed: '恐懼 (30) - 市場脆弱',
-            stablecoin: '流動性持續收縮',
-            funding: '中性偏低，無明顯方向'
+            price: '市場處於長期熊市的低波動區間，看似平穩',
+            fearGreed: '恐懼 (30) - 投資人信心尚未建立',
+            stablecoin: '鏈上數據顯示穩定幣流動性持續收縮',
+            funding: '資金費率中性偏低，無明顯方向性押注'
         },
+
+        misconceptions: [
+            {
+                myth: '大到不能倒 (Too Big To Fail)',
+                fact: '在缺乏央行最後貸款人角色的加密市場，任何挪用用戶資產的機構，無論規模多大，都可能面臨瞬間的流動性枯竭。'
+            },
+            {
+                myth: '流動性問題不影響比特幣核心價值',
+                fact: '當流動性危機爆發，機構為換取現金 (Cash) 應對贖回，往往會無差別拋售包括比特幣在內的所有流動資產。'
+            }
+        ],
 
         timeline: [
             {
                 date: '2022-11-02',
-                title: '資產負債表洩露',
-                description: 'CoinDesk 揭露 Alameda 資產主要由流動性極差的 FTT 構成。',
-                marketImpact: '市場開始質疑 FTX 的償付能力，聰明錢開始撤出。',
-                riskState: '潛在償付危機'
+                title: '資產負債表疑慮',
+                description: '媒體揭露 Alameda Research 資產高度依賴流動性差的 FTT 代幣，市場開始質疑其償付能力。',
+                marketImpact: '敏感資金開始從 FTX 撤出，但市場整體反應尚未擴大。',
+                riskState: '償付風險浮現'
             },
             {
                 date: '2022-11-06',
-                title: '幣安清倉與擠兌',
-                description: 'CZ 宣佈清倉 FTT，引發散戶恐慌性提幣。',
-                marketImpact: '流動性快速枯竭，FTT 價格與 FTX 儲備形成死亡螺旋。',
-                riskState: '流動性危機爆發'
+                title: '公開清倉引發擠兌',
+                description: '幣安 (Binance) 宣佈清倉 FTT 持倉，引發用戶恐慌性提幣，導致交易所流動性迅速耗盡。',
+                marketImpact: 'FTT 價格與 FTX 儲備形成死亡螺旋，市場信心開始崩潰。',
+                riskState: '流動性斷裂'
             },
             {
                 date: '2022-11-08',
-                title: '暫停提幣',
-                description: 'FTX 停止處理提幣請求，幣安放棄收購。',
-                marketImpact: '信任完全崩塌，恐慌蔓延至整個加密貨幣市場，BTC 跌破前低。',
-                riskState: '系統性崩潰（無底洞）'
+                title: '暫停提幣與系統性崩潰',
+                description: 'FTX 停止處理提幣請求，隨後宣佈破產重組，比特幣跌破波段前低。',
+                marketImpact: '信任完全崩塌，系統性風險蔓延至借貸平台與做市商。',
+                riskState: '信用緊縮擴散'
             }
         ],
 
-        takeaways: [
-            'Not your keys, not your coins 是永恆的真理。',
-            '當交易所平台幣成為主要資產儲備時，死亡螺旋幾乎是必然。',
-            '流動性危機發生時，相關資產（如 Solana）會被無差別拋售以換取現金。',
-            '低波動率不代表低風險，有時是暴風雨前的寧靜。'
+        charts: {
+            main: {
+                url: '/images/reviews/ftt-crash.png',
+                caption: '圖表解讀：FTT 價格在數日內從 $22 垂直崩跌至 $1，這種走勢反映的不是估值修正，而是市場對其價值基礎的「信心真空」。'
+            },
+            oi: {
+                url: '/images/reviews/ftx-contagion.png',
+                caption: '圖表解讀：相關資產（如 Solana）同步暴跌，顯示流動性危機正透過機構資產負債表向外傳導。'
+            }
+        },
+
+        historicalComparison: {
+            event: '2014 Mt.Gox 倒閉',
+            similarity: '兩者皆為當時佔據主導地位的交易所，且崩潰原因均涉及資產管理不善與不透明運作，皆導致了市場需要漫長的時間重建信任基礎。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '落實資產隔離',
+                desc: '中心化交易所僅具備交易媒合功能，不應被視為無風險的資產存放處。Not your keys, not your coins.'
+            },
+            {
+                type: 'check',
+                label: '檢視平台資產構成',
+                desc: '若交易所資產負債表高度依賴自身發行的代幣，其抗風險能力將在市場下跌時顯著轉弱。'
+            },
+            {
+                type: 'check',
+                label: '流動性警訊',
+                desc: '當大型機構開始異常轉移資金或提幣延遲發生時，應優先考量保全本金，而非賭注反彈。'
+            }
         ]
     },
     {
         id: 'review-luna-2022',
         slug: 'luna-ust-collapse-2022',
-        title: '2022 LUNA/UST 死亡螺旋：算法穩定幣的殞落',
+        title: '2022 LUNA/UST 崩潰：算法穩定幣的機制失效',
         year: 2022,
         importance: 'S',
         featuredRank: 3,
-        tags: ['穩定幣', '死亡螺旋', '系統性風險'],
+        tags: ['算法穩定幣', '機制風險', '死亡螺旋'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'stablecoin', 'fearGreed'],
         readingMinutes: 7,
@@ -209,56 +311,94 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventStartAt: '2022-05-07',
         eventEndAt: '2022-05-13',
 
-        summary: '當 LUNA/UST 崩潰時，市場真正學到的是「沒有儲備支撐的演算法穩定幣」本質上就是龐氏結構。',
+        summary: '當算法穩定幣 UST 脫鉤時，市場學到的是：缺乏足額儲備支撐的金融工具，在本質上無法抵抗系統性的信心崩潰。',
 
         context: {
-            what: '市值 400 億美元的公鏈生態系在三天內價格歸零。',
-            narrative: '當時市場迷信 Do Kwon 的狂妄與 Anchor Protocol 的 20% 無風險收益。',
-            realImpact: '摧毀了市場對「去中心化穩定幣」的信心，並引發了後續 3AC 等機構的連鎖清算。'
+            what: '曾為市值前十大資產的 Terra 生態系，因算法穩定幣 UST 脫鉤導致雙代幣機制崩潰，資產價值在數日內歸零。',
+            narrative: '當時市場盛行「算穩新範式」敘事，並高度依賴 Anchor Protocol 提供的 20% 固定收益率。',
+            realImpact: '事件證明了非超額抵押機制的脆弱性，並引發了後續三箭資本 (3AC) 等機構的連鎖清算。'
         },
 
         initialState: {
-            price: 'BTC $35,000 關鍵支撐位',
-            fearGreed: '恐懼 (28) - 信心不足',
-            stablecoin: 'UST 市值虛高，背離真實需求',
-            funding: '多頭仍抱有幻想'
+            price: 'BTC 位於 $35,000 關鍵支撐位，市場結構轉弱',
+            fearGreed: '恐懼 (28) - 避險情緒濃厚',
+            stablecoin: 'UST 市值持續背離真實交易需求',
+            funding: '多頭仍對抄底抱有不切實際的期待'
         },
+
+        misconceptions: [
+            {
+                myth: '20% APY 可以長期持續',
+                fact: '若收益率遠高於市場平均且缺乏透明的利潤來源，該模型通常依賴後金補前金，本質上具備龐氏特徵。'
+            },
+            {
+                myth: '演算法會自動修復掛鉤',
+                fact: '算法機制在極端市場恐慌下往往失效，一旦進入死亡螺旋，數學模型無法抵抗人性拋售。'
+            }
+        ],
 
         timeline: [
             {
                 date: '2022-05-07',
-                title: 'UST 輕微脫鉤',
-                description: '巨鯨在 Curve 池拋售 UST，導致價格微幅低於 $1。',
-                marketImpact: '套利機器人開始運作，LFG 基金會消耗儲備護盤。',
+                title: '掛鉤鬆動',
+                description: '巨額資金在 Curve 池拋售 UST，導致價格微幅低於 $1，市場開始測試機制韌性。',
+                marketImpact: '套利機器人啟動，LFG 基金會開始動用比特幣儲備護盤。',
                 riskState: '錨定機制受壓'
             },
             {
                 date: '2022-05-09',
-                title: '信心崩潰與死亡螺旋',
-                description: 'UST 跌破 0.95，觸發恐慌性拋售，LUNA 機制無限增發。',
-                marketImpact: 'LUNA 供應量指數級暴增，價格直線跳水。',
-                riskState: '機制失效，歸零確認'
+                title: '信心潰散與死亡螺旋',
+                description: 'UST 跌破 0.95，觸發恐慌性拋售，LUNA 機制無限增發試圖吸收賣壓。',
+                marketImpact: 'LUNA 供應量呈指數級暴增，價格直線崩跌，機制完全失控。',
+                riskState: '機制失效確'
             },
             {
                 date: '2022-05-12',
-                title: '系統性歸零',
-                description: 'LUNA 跌破 $0.01，交易所陸續下架。',
-                marketImpact: '生態系內的資金全數蒸發，連帶影響持有 LUNA 的大型機構 (3AC)。',
+                title: '價值歸零',
+                description: 'LUNA 跌破 $0.01，主要交易所陸續暫停交易。',
+                marketImpact: '生態系資金全數蒸發，持有 LUNA 的大型投資機構面臨破產清算。',
                 riskState: '資產價值毀滅'
             }
         ],
 
-        takeaways: [
-            '高收益 (APY > 15%) 若無真實可持續的收入來源，就是龐氏騙局。',
-            '穩定幣的價值建立在「信心」與「流動性」，而非演算法。',
-            '當一個資產進入「死亡螺旋」機制時，不要試圖抄底。',
-            '系統性風險會傳染：LUNA 倒閉是後來 Celsius 和 FTX 倒閉的導火線。'
+        charts: {
+            main: {
+                url: '/images/reviews/ust-depeg.png',
+                caption: '圖表解讀：UST 價格脫鉤後一路向南，反映了市場對算法機制信心的徹底喪失。'
+            },
+            flow: {
+                url: '/images/reviews/luna-supply.png',
+                caption: '圖表解讀：LUNA 的供應量 (Supply) 呈垂直指數級增長，這是機制為了挽救 UST 而無限制印鈔的結果，最終導致惡性通膨與歸零。'
+            }
+        },
+
+        historicalComparison: {
+            event: '2008 雷曼兄弟倒閉',
+            similarity: '兩者皆涉及高槓桿、結構複雜的金融產品崩潰，且投資人皆因「市場規模極大」而忽視了底層資產質量的脆弱性。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '檢視收益來源',
+                desc: '面對超額收益產品，應優先質疑其利潤來源的可持續性。If you don\'t know where the yield comes from, you are the yield.'
+            },
+            {
+                type: 'check',
+                label: '理解穩定幣儲備',
+                desc: '持有穩定幣前，應檢視其背後支撐資產是法幣現金還是波動性資產。'
+            },
+            {
+                type: 'alert',
+                label: '迴避機制性崩潰',
+                desc: '當資產陷入機制性死亡螺旋時，技術分析失效，不應嘗試抄底。'
+            }
         ]
     },
     {
         id: 'review-covid-2020',
         slug: 'covid-crash-2020',
-        title: '2020 COVID 312 黑天鵝：流動性的極致考驗',
+        title: '2020 COVID 312 黑天鵝：流動性危機的極致考驗',
         year: 2020,
         importance: 'S',
         featuredRank: 4,
@@ -272,55 +412,92 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventStartAt: '2020-03-12',
         eventEndAt: '2020-03-13',
 
-        summary: '當 312 黑天鵝發生時，市場真正面對的是「現金為王」的全面變現需求，所有資產相關性趨近於 1。',
+        summary: '當全市場面臨流動性枯竭時，比特幣的避險屬性暫時失效，轉而表現為與風險資產高度正相關的變現需求。',
 
         context: {
-            what: '受 COVID-19 疫情爆發影響，全球金融市場恐慌性崩盤，比特幣單日跌幅超過 50%。',
-            narrative: '初期認為比特幣是「數位黃金」可以避險。',
-            realImpact: '證明在極端流動性危機下，比特幣首先被視為風險資產拋售以換取美元現金。'
+            what: '受 COVID-19 疫情引發的全球金融恐慌影響，各類資產遭無差別拋售，比特幣單日跌幅逾 50%。',
+            narrative: '事件前，傳統敘事將比特幣視為數位黃金，認為其具備對抗傳統市場波動的避險屬性。',
+            realImpact: '極端行情證明，在流動性危機當下，「現金為王」是唯一邏輯，加密資產成為獲取美元流動性的提款機。'
         },
 
         initialState: {
-            price: '$7,900 弱勢震盪',
-            fearGreed: '恐懼 (40) -> 極度恐懼',
-            oi: '歷史高位，槓桿過重',
-            funding: '正費率，市場仍偏多'
+            price: '$7,900 區間弱勢震盪',
+            fearGreed: '恐懼 (40) 轉向極度恐懼 - 信心快速流失',
+            funding: '正費率突然轉負，多頭措手不及',
+            etfFlow: undefined // N/A
         },
+
+        misconceptions: [
+            {
+                myth: '比特幣是避險資產，股災理應上漲',
+                fact: '在流動性危機初期，投資人恐慌性拋售所有可變現資產以換取美元，此時資產相關性趨近於 1。'
+            },
+            {
+                myth: '價格腰斬反映了基本面惡化',
+                fact: '當日的價格崩跌很大程度上是由合約市場連鎖爆倉引發的強制平倉 (Liquidation Cascade)，導致短期的流動性真空，而非基本面質變。'
+            }
+        ],
 
         timeline: [
             {
                 date: '2020-03-12',
-                title: '全球股市熔斷',
-                description: '美股開盤即熔斷，投資者恐慌拋售所有可變現資產。',
-                marketImpact: '加密貨幣市場跟隨美股暴跌，避險屬性失效。',
+                title: '全球市場熔斷',
+                description: '美股開盤即觸發熔斷機制，投資者恐慌情緒蔓延，拋售潮湧現。',
+                marketImpact: '加密貨幣市場跟隨傳統金融市場暴跌，避險敘事暫時失效。',
                 riskState: '相關性驟升，現金為王'
             },
             {
                 date: '2020-03-12 (晚間)',
-                title: 'BitMEX 連鎖爆倉',
-                description: '價格跌破關鍵支撐，BitMEX 發生連鎖清算，多單踩踏。',
-                marketImpact: '買盤完全消失，價格在幾小時內腰斬至 $3,800。',
+                title: '連鎖爆倉與流動性失靈',
+                description: '價格跌破關鍵技術支撐，BitMEX 等交易所發生大規模連鎖清算，買盤掛單消失。',
+                marketImpact: '價格在數小時內腰斬至 $3,800，市場陷入極度恐慌。',
                 riskState: '流動性枯竭'
             },
             {
                 date: '2020-03-13',
-                title: 'V 型反轉',
-                description: '市場極度絕望後，長期買盤開始介入，波動率極大。',
-                marketImpact: '槓桿清洗完畢，開啟了後續長達一年的牛市。',
-                riskState: '絕望中見底'
+                title: 'V 型反轉與籌碼換手',
+                description: '市場在極度絕望後，長期買盤開始介入承接，波動率維持極高水位。',
+                marketImpact: '槓桿籌碼被徹底清洗，市場完成了從投機者到長期持有者的籌碼轉移。',
+                riskState: '恐慌落底，長期買點'
             }
         ],
 
-        takeaways: [
-            '在極端流動性危機中，比特幣暫時不具備避險功能。',
-            '合約市場的連鎖爆倉會將價格打壓至遠低於合理價值的水平。',
-            '最大的財富轉移往往發生在眾人最絕望的時候（312 底部）。',
-            '觀察「連鎖爆倉」是否停止，是判斷底部的關鍵信號。'
+        charts: {
+            main: {
+                url: '/images/reviews/312-price.png',
+                caption: '圖表解讀：單日 50% 的跌幅歷史罕見，長下影線顯示了極端恐慌後的即時買盤介入，形成了典型的 V 型反轉結構。'
+            },
+            oi: {
+                url: '/images/reviews/312-oi.png',
+                caption: '圖表解讀：持倉量 (OI) 瞬間蒸發，這是一次徹底的「去槓桿化」過程，市場重新回歸現貨主導的健康狀態。'
+            }
+        },
+
+        historicalComparison: {
+            event: '2008 金融海嘯',
+            similarity: '兩者都經歷了流動性枯竭與無差別拋售潮，且隨後都迎來了央行大規模貨幣寬鬆政策 (QE) 導致的資產價格結構性上漲。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '辨識流動性危機',
+                desc: '當系統性風險發生時，持有現金 (USD/USDT) 等待恐慌情緒釋放是最佳策略。'
+            },
+            {
+                type: 'check',
+                label: '觀察爆倉數據',
+                desc: '歷史級別的單日爆倉量 (清洗槓桿) 往往意味著短期底部的接近。'
+            },
+            {
+                type: 'check',
+                label: '逆向思維',
+                desc: '如果你相信資產的長期價值，像 312 這種非基本面因素導致的流動性崩盤，是十年一遇的戰略性買點。'
+            }
         ]
     }
 ];
 
-// Helper functions for content retrieval
 export const getFeaturedReviews = () => {
     return REVIEWS_DATA.filter(r => r.featuredRank !== undefined).sort((a, b) => (a.featuredRank || 99) - (b.featuredRank || 99));
 };
