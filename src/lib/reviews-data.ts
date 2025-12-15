@@ -586,17 +586,548 @@ export const REVIEWS_DATA: MarketEvent[] = [
             {
                 type: 'alert',
                 label: '辨識流動性危機',
-                desc: '當系統性風險發生時，持有現金 (USD/USDT) 等待恐慌情緒釋放是最佳策略。'
+                desc: '當系統性風險發生時，持有現金等待恐慌情緒釋放是最佳策略。'
             },
             {
                 type: 'check',
                 label: '觀察爆倉數據',
-                desc: '歷史級別的單日爆倉量 (清洗槓桿) 往往意味著短期底部的接近。'
+                desc: '歷史級別的單日爆倉量往往意味著短期底部的接近。'
             },
             {
                 type: 'check',
                 label: '逆向思維',
-                desc: '如果你相信資產的長期價值，像 312 這種非基本面因素導致的流動性崩盤，是十年一遇的戰略性買點。'
+                desc: '非基本面因素導致的流動性崩盤，是十年一遇的戰略性買點。'
+            }
+        ]
+    },
+    {
+        id: 'review-mtgox-2014',
+        slug: 'mtgox-collapse-2014',
+        title: '2014 Mt.Gox 倒閉：第一次大規模交易所信用毀滅',
+        year: 2014,
+        importance: 'S',
+        featuredRank: 5,
+        tags: ['交易所風險', '資產遺失', '信任崩潰'],
+        marketStates: ['崩跌', '極恐'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 6,
+        isProOnly: false,
+        publishedAt: '2025-12-15',
+        updatedAt: '2025-12-15',
+        eventStartAt: '2014-02-07',
+        eventEndAt: '2014-02-28',
+
+        usageGuide: [
+            '當交易所提幣延遲或出現異常時',
+            '當市場傳出交易所資產遺失傳言時',
+            '當單一交易所佔據過高市場份額時'
+        ],
+
+        summary: '當佔據 70% 市場份額的交易所遺失 85 萬枚比特幣時，市場學到的是：不是你的私鑰，就不是你的幣。',
+
+        context: {
+            what: '曾處理全球 70% 比特幣交易的 Mt.Gox 因遺失 85 萬枚 BTC 宣佈破產。',
+            narrative: '2013 年底比特幣首次突破 $1,000，市場普遍相信交易所是「安全的託管者」。',
+            realImpact: '事件揭露了中心化託管的致命風險，確立了「Not your keys, not your coins」這一原則。'
+        },
+
+        initialState: {
+            price: '$850 區間，市場處於牛市頂部回調階段',
+            fearGreed: '高度恐慌 - 提幣困難引發信心危機'
+        },
+
+        misconceptions: [
+            {
+                myth: '大型交易所不會倒閉',
+                fact: '市場份額無法保證運營安全，缺乏審計與儲備證明的機構本質上是黑箱。'
+            },
+            {
+                myth: '資產會被追討回來',
+                fact: '加密資產一旦轉移，追回極度困難。Mt.Gox 債權人歷經 10 年才開始獲得部分補償。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2014-02-07',
+                title: '提幣暫停',
+                description: 'Mt.Gox 以「技術問題」為由暫停比特幣提幣，用戶開始恐慌。',
+                marketImpact: '市場開始質疑交易所償付能力，價格開始下跌。',
+                riskState: '信任動搖',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2014-02-24',
+                title: '網站關閉',
+                description: 'Mt.Gox 網站突然無法訪問，內部文件流出顯示 74 萬枚 BTC 遺失。',
+                marketImpact: '市場陷入恐慌，價格快速下跌 25%。',
+                riskState: '信任崩潰',
+                riskLevel: 'high'
+            },
+            {
+                date: '2014-02-28',
+                title: '正式申請破產',
+                description: 'Mt.Gox 在日本提交破產保護申請，承認資產不足以償還用戶。',
+                marketImpact: '市場進入長期熊市，信任重建需時數年。',
+                riskState: '產業信用危機',
+                riskLevel: 'high'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '價格在事件期間從 $850 跌至 $400 區間，隨後進入長達兩年的熊市。',
+                interpretation: {
+                    whatItMeans: '交易所信任崩潰不僅影響短期價格，更會改變整個市場的風險偏好。',
+                    whatToWatch: '當主流交易所出現提幣延遲時，應優先考慮資產安全而非價格波動。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2022 FTX 倒閉',
+            similarity: '兩者都是當時市場份額最大的交易所，且崩潰原因均涉及資產管理不當，導致用戶資金損失。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '分散交易所風險',
+                desc: '不要將大量資產長期存放在單一交易所。'
+            },
+            {
+                type: 'check',
+                label: '使用自託管錢包',
+                desc: '大額資產應存放在自己控制私鑰的冷錢包中。'
+            },
+            {
+                type: 'check',
+                label: '檢視儲備證明',
+                desc: '選擇有公開審計與儲備證明的交易所。'
+            }
+        ]
+    },
+    {
+        id: 'review-dao-2016',
+        slug: 'the-dao-hack-2016',
+        title: '2016 The DAO 事件：以太坊硬分叉與「不可竄改」的重新定義',
+        year: 2016,
+        importance: 'S',
+        featuredRank: 6,
+        tags: ['智能合約', '治理分歧', '硬分叉'],
+        marketStates: ['崩跌', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 7,
+        isProOnly: false,
+        publishedAt: '2025-12-15',
+        updatedAt: '2025-12-15',
+        eventStartAt: '2016-06-17',
+        eventEndAt: '2016-07-20',
+
+        usageGuide: [
+            '當新型智能合約協議出現安全漏洞時',
+            '當社群面臨是否介入逆轉交易的辯論時',
+            '當鏈上治理出現重大分歧時'
+        ],
+
+        summary: '當 The DAO 被駭客盜取 360 萬枚 ETH 時，以太坊社群選擇硬分叉逆轉交易，這重新定義了「不可竄改」的邊界。',
+
+        context: {
+            what: '史上最大的群眾募資項目 The DAO 因智能合約漏洞被盜取約 5,000 萬美元的以太幣。',
+            narrative: '市場當時相信智能合約是「程式碼即法律」，無需人為干預。',
+            realImpact: '事件導致以太坊硬分叉，分裂為 ETH 與 ETC，開創了社群可投票逆轉交易的先例。'
+        },
+
+        initialState: {
+            price: 'ETH 約 $20，剛完成大型群募',
+            fearGreed: '極度恐慌 - 項目資金被盜'
+        },
+
+        misconceptions: [
+            {
+                myth: '程式碼即法律，不應人為干預',
+                fact: '當漏洞造成系統性傷害時，社群可透過治理機制選擇介入。但這也開啟了「誰有權決定」的永恆辯論。'
+            },
+            {
+                myth: '硬分叉後以太坊會失去公信力',
+                fact: '以太坊選擇逆轉並持續發展，最終成為 DeFi 與 NFT 的核心基礎設施。歷史證明實用性勝過純粹主義。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2016-06-17',
+                title: '漏洞遭利用',
+                description: '攻擊者利用遞歸調用漏洞，在數小時內從 The DAO 提取約 360 萬枚 ETH。',
+                marketImpact: 'ETH 價格暴跌 30%，市場信心受創。',
+                riskState: '安全事件',
+                riskLevel: 'high'
+            },
+            {
+                date: '2016-07-15',
+                title: '社群投票硬分叉',
+                description: '以太坊社群投票決定進行硬分叉，將被盜資金歸還原持有者。',
+                marketImpact: '市場分裂為支持與反對陣營，不確定性升高。',
+                riskState: '治理分歧',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2016-07-20',
+                title: '硬分叉執行',
+                description: '以太坊成功硬分叉，被盜 ETH 歸還。反對分叉者繼續維護舊鏈，形成 ETC。',
+                marketImpact: '資金追回後市場逐步恢復信心，ETH 長期持續發展。',
+                riskState: '危機解除',
+                riskLevel: 'low'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'ETH',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: 'ETH 價格在被駭後暴跌，但在硬分叉確認後逐步回穩。',
+                interpretation: {
+                    whatItMeans: '社群治理能力是區塊鏈價值的一部分，危機處理得當可恢復信心。',
+                    whatToWatch: '當新協議出現安全事件時，觀察社群的回應速度與共識凝聚能力。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2017 Parity 錢包漏洞',
+            similarity: '兩者都是智能合約漏洞導致的資金損失，但 Parity 事件未獲得硬分叉救濟，顯示社群對介入的態度會隨情境改變。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '檢視合約審計',
+                desc: '參與新協議前，確認其已通過多家安全機構審計。'
+            },
+            {
+                type: 'check',
+                label: '評估治理機制',
+                desc: '了解協議的治理結構，危機時誰有權做決定。'
+            },
+            {
+                type: 'check',
+                label: '分散協議風險',
+                desc: '不要將所有資產集中在單一協議中。'
+            }
+        ]
+    },
+    {
+        id: 'review-ico-2017',
+        slug: 'ico-mania-2017',
+        title: '2017 ICO 狂潮：散戶風險教育的起點',
+        year: 2017,
+        importance: 'A',
+        tags: ['ICO', '散戶狂熱', '熊市前兆'],
+        marketStates: ['過熱', '崩跌'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-15',
+        updatedAt: '2025-12-15',
+        eventStartAt: '2017-06-01',
+        eventEndAt: '2018-01-15',
+
+        usageGuide: [
+            '當新幣發行速度遠超市場資金承接能力時',
+            '當「萬物皆可代幣化」成為主流敘事時'
+        ],
+
+        summary: '當任何項目都能透過 ICO 募集數百萬美元時，市場過熱的訊號已非常明確。',
+
+        context: {
+            what: '2017 年 ICO 狂潮見證了超過 50 億美元透過代幣發行募集，多數項目最終歸零。',
+            narrative: '白皮書即正義，任何聽起來有區塊鏈概念的項目都能輕易募資。',
+            realImpact: '這次泡沫教育了一整代散戶投資者，也催生了監管對證券型代幣的關注。'
+        },
+
+        initialState: {
+            price: 'ETH 從年初 $8 飆升至 $1,400',
+            fearGreed: '極度貪婪 - 散戶蜂擁進場'
+        },
+
+        misconceptions: [
+            {
+                myth: '白皮書代表真實的商業計畫',
+                fact: '多數 ICO 項目僅有概念，缺乏可執行的產品或團隊，最終 80% 以上歸零。'
+            },
+            {
+                myth: '早期參與必定獲利',
+                fact: '熊市來臨時，絕大多數代幣跌幅超過 90%，早期投資者若未及時出場同樣虧損慘重。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2017-06-01',
+                title: 'ICO 加速',
+                description: '大量項目透過以太坊發行代幣，募資金額屢創新高。',
+                marketImpact: 'ETH 需求激增，價格飆升。',
+                riskState: '泡沫形成',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2017-12-17',
+                title: 'BTC 觸頂 $20K',
+                description: '比特幣創下歷史新高，散戶恐慌性 FOMO 進場。',
+                marketImpact: '市場情緒達到極端貪婪，反轉風險極高。',
+                riskState: '極度過熱',
+                riskLevel: 'high'
+            },
+            {
+                date: '2018-01-15',
+                title: '熊市開始',
+                description: '市場開始長達一年的持續下跌，多數 ICO 代幣歸零。',
+                marketImpact: '總市值蒸發超過 80%，產業進入寒冬。',
+                riskState: '泡沫破裂',
+                riskLevel: 'high'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'ETH',
+            daysBuffer: 30
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: 'ETH 從 $8 漲至 $1,400 後崩跌至 $80，完成完整泡沫週期。',
+                interpretation: {
+                    whatItMeans: '當散戶開始相信「不可能虧錢」時，往往是頂部訊號。',
+                    whatToWatch: '監測新幣發行速度與散戶進場指標。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2000 年網際網路泡沫',
+            similarity: '兩者都是新技術引發的過度投機，最終只有少數優質項目存活。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '審視項目基本面',
+                desc: '白皮書不等於產品，評估團隊背景與實際進展。'
+            },
+            {
+                type: 'check',
+                label: '控制部位大小',
+                desc: '高風險資產僅配置可承受損失的比例。'
+            }
+        ]
+    },
+    {
+        id: 'review-china-ban-2021',
+        slug: 'china-crypto-ban-2021',
+        title: '2021 中國全面禁令：算力遷徙與供給端重塑',
+        year: 2021,
+        importance: 'A',
+        tags: ['監管政策', '算力遷徙', '供給衝擊'],
+        marketStates: ['崩跌', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-15',
+        updatedAt: '2025-12-15',
+        eventStartAt: '2021-05-21',
+        eventEndAt: '2021-07-20',
+
+        usageGuide: [
+            '當主要產區出現監管打擊礦業消息時',
+            '當全網算力出現大幅下降時'
+        ],
+
+        summary: '當中國禁止加密挖礦時，全網算力暴跌 50%，但比特幣網絡在數月內完成算力遷徙與自我修復。',
+
+        context: {
+            what: '中國政府全面禁止加密貨幣挖礦與交易，導致全網算力暴跌並引發價格下跌。',
+            narrative: '市場恐慌認為礦業禁令將削弱比特幣基礎設施。',
+            realImpact: '算力向北美與中亞遷徙，最終使網絡更加去中心化，長期利多。'
+        },
+
+        initialState: {
+            price: 'BTC 從 $64,000 高點回落至 $30,000 區間',
+            fearGreed: '恐懼 (25) - 監管不確定性籠罩'
+        },
+
+        misconceptions: [
+            {
+                myth: '中國禁令會摧毀比特幣網絡',
+                fact: '比特幣協議透過難度調整機制自動適應算力變化，網絡從未中斷運行。'
+            },
+            {
+                myth: '算力下降意味著安全性永久降低',
+                fact: '算力在 6 個月內恢復至禁令前水平，且分佈更加去中心化。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2021-05-21',
+                title: '政策風向轉變',
+                description: '國務院金融委聲明打擊比特幣挖礦與交易，市場開始恐慌。',
+                marketImpact: '價格單日下跌超過 10%，礦工開始尋求出路。',
+                riskState: '政策風險升溫',
+                riskLevel: 'high'
+            },
+            {
+                date: '2021-06-20',
+                title: '算力暴跌',
+                description: '全網算力從高峰下跌超過 50%，難度調整幅度創歷史紀錄。',
+                marketImpact: '短期網絡確認時間延長，但協議自動調適。',
+                riskState: '供給端衝擊',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2021-07-20',
+                title: '算力遷徙完成',
+                description: '北美礦場開始上線，算力開始回升，網絡恢復正常。',
+                marketImpact: '市場信心恢復，價格開始反彈。',
+                riskState: '危機解除',
+                riskLevel: 'low'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: 'BTC 價格從 $64,000 跌至 $29,000 後反彈，禁令成為長期利多。',
+                interpretation: {
+                    whatItMeans: '比特幣網絡的抗審查性在極端壓力測試下得到驗證。',
+                    whatToWatch: '監管衝擊往往是短期恐慌，長期應觀察網絡基本面恢復情況。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2017 年中國 ICO 禁令',
+            similarity: '兩次禁令都造成短期恐慌與價格下跌，但長期均未阻止加密市場發展。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '區分短期恐慌與長期影響',
+                desc: '監管消息發佈後，觀察網絡基本面是否受損，而非只看價格。'
+            },
+            {
+                type: 'alert',
+                label: '理解比特幣抗審查性',
+                desc: '單一國家禁令無法終結去中心化網絡。'
+            }
+        ]
+    },
+    {
+        id: 'review-merge-2022',
+        slug: 'ethereum-merge-2022',
+        title: '2022 以太坊 The Merge：共識機制轉換的歷史時刻',
+        year: 2022,
+        importance: 'A',
+        tags: ['以太坊', '共識機制', 'PoS'],
+        marketStates: ['觀望', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-15',
+        updatedAt: '2025-12-15',
+        eventStartAt: '2022-09-06',
+        eventEndAt: '2022-09-15',
+
+        usageGuide: [
+            '當區塊鏈進行重大技術升級時',
+            '當「買消息賣事實」模式可能適用時'
+        ],
+
+        summary: '當以太坊成功從 PoW 轉換至 PoS 時，它完成了加密史上最大規模的在線升級，但價格並未如預期大漲。',
+
+        context: {
+            what: '以太坊完成從工作量證明 (PoW) 到權益證明 (PoS) 的轉換，減少約 99.95% 能源消耗。',
+            narrative: '市場預期技術升級將推動 ETH 價格大漲。',
+            realImpact: 'Merge 成功執行驗證了以太坊核心開發能力，但價格受宏觀熊市壓制，呈現利多出盡。'
+        },
+
+        initialState: {
+            price: 'ETH 約 $1,600，處於熊市反彈階段',
+            fearGreed: '中性 (45) - 觀望氣氛濃厚'
+        },
+
+        misconceptions: [
+            {
+                myth: 'Merge 會讓 ETH 價格立即暴漲',
+                fact: '技術升級的價值需要時間體現，且市場已提前定價。Merge 後價格反而下跌 20%。'
+            },
+            {
+                myth: 'PoS 轉換會導致網絡不穩定',
+                fact: '轉換過程完美執行，無任何交易中斷或資產損失。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2022-09-06',
+                title: 'Bellatrix 升級',
+                description: '信標鏈完成升級，為 Merge 做最後準備。',
+                marketImpact: '市場預期升溫，ETH 價格小幅上漲。',
+                riskState: '升級前夕',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2022-09-15',
+                title: 'Merge 完成',
+                description: '以太坊成功轉換至 PoS，區塊生產切換至驗證者節點。',
+                marketImpact: '技術成功但價格下跌，典型利多出盡。',
+                riskState: '預期兌現',
+                riskLevel: 'low'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'ETH',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: 'ETH 在 Merge 前反彈至 $1,700，完成後反而下跌至 $1,200。',
+                interpretation: {
+                    whatItMeans: '技術升級的成功不等於價格上漲，市場已提前定價。',
+                    whatToWatch: '重大事件前的價格走勢往往已反映預期。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '比特幣減半事件',
+            similarity: '兩者都是預先已知的供給端變化，市場往往提前定價，事件發生時呈現利多出盡。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '區分技術價值與價格表現',
+                desc: '長期基本面改善不等於短期價格上漲。'
+            },
+            {
+                type: 'alert',
+                label: '警惕利多出盡',
+                desc: '當市場對已知事件過度期待時，事件發生可能是賣點。'
             }
         ]
     }

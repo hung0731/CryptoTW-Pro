@@ -23,11 +23,11 @@ interface EvidenceCardProps {
 function getChartIcon(type: string) {
     switch (type) {
         case 'price':
-            return <TrendingUp className="w-4 h-4 text-neutral-400" />
+            return <TrendingUp className="w-4 h-4 text-neutral-500" />
         case 'flow':
-            return <Activity className="w-4 h-4 text-neutral-400" />
+            return <Activity className="w-4 h-4 text-neutral-500" />
         default:
-            return <BarChart2 className="w-4 h-4 text-neutral-400" />
+            return <BarChart2 className="w-4 h-4 text-neutral-500" />
     }
 }
 
@@ -47,14 +47,14 @@ export function EvidenceCard({
     const displayTitle = `${symbol}/USDT ${cleanTitle}`
 
     return (
-        <div className="rounded-xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: '#0E0E0F' }}>
+        <div className="rounded-lg border border-white/5 overflow-hidden" style={{ backgroundColor: '#0E0E0F' }}>
             {/* Unified Header (Title + Brand) */}
             <div className="px-3.5 py-2.5 border-b border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     {getChartIcon(chartType)}
-                    <span className="text-sm font-medium text-neutral-200">{displayTitle}</span>
+                    <span className="text-sm text-neutral-300">{displayTitle}</span>
                 </div>
-                <span className="text-[10px] text-neutral-500">加密台灣 Pro</span>
+                <span className="text-[10px] text-neutral-600">加密台灣 Pro</span>
             </div>
             {/* Chart Area */}
             <div className="aspect-video w-full relative" style={{ backgroundColor: '#0B0B0C' }}>
@@ -70,14 +70,14 @@ export function EvidenceCard({
             {/* Evidence Interpretation (Narrative Style) */}
             <div className="px-3.5 py-3 border-t border-white/5" style={{ backgroundColor: '#101012' }}>
                 {interpretation ? (
-                    <p className="text-xs text-neutral-300 leading-relaxed">
-                        {interpretation.whatItMeans}
+                    <div className="space-y-2">
+                        <p className="text-xs text-neutral-400 leading-relaxed">{interpretation.whatItMeans}</p>
                         {interpretation.whatToWatch && (
-                            <span className="text-amber-400/70 block mt-2">{interpretation.whatToWatch}</span>
+                            <p className="text-xs text-neutral-500 leading-relaxed">{interpretation.whatToWatch}</p>
                         )}
-                    </p>
+                    </div>
                 ) : caption ? (
-                    <p className="text-xs text-neutral-300 leading-relaxed">{caption.replace('圖表解讀：', '')}</p>
+                    <p className="text-xs text-neutral-400 leading-relaxed">{caption.replace('圖表解讀：', '')}</p>
                 ) : null}
             </div>
         </div>

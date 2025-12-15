@@ -1,90 +1,227 @@
-# CryptoTW Alpha - Market Review Writing SOP
+# CryptoTW Alpha - Market Review Writing SOP v1.1
 
-This guide defines the standard for creating "S-Class" Market Review content. The goal is to transform articles from simple "reports" into "professional research tools" that offer high information density with intuitive navigation.
-
-## 1. Core Philosophy: "Research Tool, Not Just An Article"
-- **User Intent**: Users come to verify facts, check impact, and learn lessons—fast.
-- **Visual Hierarchy**: 
-  - **top 5 seconds**: Must convey the core conclusion.
-  - **top 30 seconds**: Must show the magnitude (charts).
-  - **Deep Dive**: Collapsible details for researchers.
-- **Differentiation**: We don't just retell history; we provide the **toolkit** to spot it happening again.
+> **定位**：這不是一般的內容規範，而是把 Market Review 定義成「可操作的研究介面」。
+> 我們做的不是媒體，是**市場基礎建設**——把幣圈的集體失憶，變成可重播的研究記憶庫。
 
 ---
 
-## 2. Structural Template (The "S-Class" Layout)
+## 1. Core Philosophy: 研究工具，不是文章
 
-### A. Quick Guide Card (The "Executive Summary")
-*Placement: Top of page, below title.*
-*   **Format**: Dark/High-contrast info card.
-*   **Content**: 3 bullet points maximum.
-    *   **Nature**: What actually broke? (e.g., "Not a hack, but a liquidity crisis").
-    *   **Mechanism**: How did it break? (e.g., "Collateral mismatch").
-    *   **Root Cause**: The one sentence takeaway.
+### 我們不是
+- ❌ 新聞（不追速度）
+- ❌ 教學（不講基礎）
+- ❌ 投顧（不給買賣建議）
 
-### B. Analytical Charts (The "Evidence")
-*Placement: Immediately after key context, before the full narrative.*
-*   **Requirement**: Never show a chart without a "How to read" guide.
-*   **Labeling**: 
-    *   Title: "Price & Liquidity Dynamics".
-    *   Caption: "Note how Open Interest (yellow) vanished 48h before Price (green) crashed."
-*   **Data**: Always correlate **Price** with **Volume/OI/Flow** to show hidden risks.
+### 我們是
+- ✅ 用來**對照、驗證、回想、預警**的工具
+- ✅ 讓用戶在下次類似事件發生時，能在 60 秒內校正認知
 
-### C. Collapsible Timeline (The "Focus")
-*Placement: Middle section.*
-*   **Behavior**:
-    *   Show only **3-5 Critical Nodes** by default (The "Turning points").
-    *   "Expand for Full Timeline" button for the daily noise.
-*   **Content**: Focus on *structural breaks* (e.g., "Peg lost", "Withdrawals halted"), not just news headlines.
-
-### D. Warning Signals Module (The "Tool")
-*Placement: Bottom 1/3, replacing generic "Conclusion".*
-*   **Format**: A checklist titled "If this happens again...".
-*   **Content**: Observable on-chain or market signals that preceded the event.
-    *   [ ] Stablecoin de-pegging > 1% for > 4h
-    *   [ ] Exchange reserve outflows > 20% in 24h
-    *   [ ] Funding rates purely negative despite flat price
+### 視覺階層（手機優先）
+| 時間 | 用戶應獲得 |
+|------|------------|
+| 5 秒 | 核心結論（三段式決策卡）|
+| 30 秒 | 事件規模（圖表證據）|
+| 2 分鐘 | 完整脈絡（時間軸 + 前情校正）|
 
 ---
 
-## 3. Writing Style & Tone
-*   **Persona**: Senior On-chain Analyst / Institutional Researcher.
-*   **Tone**: Objective, precise, slightly cynical about "official statements", obsessed with "on-chain truth".
-*   **Banned Words**: "Shocking", "Unbelievable", "To the moon", "Scam" (unless quoting). Use "Insolvent", "Illiquid", "Misappropriation".
-*   **Language**: Traditional Chinese (Taiwan/profesional usage).
-    *   Use `Volatility` -> 波動率
-    *   Use `Liquidity` -> 流動性
-    *   Use `Collateral` -> 抵押品
-    *   Use `drawdown` -> 回撤
+## 2. 事件分級對照表（Event Level Mapping）
+
+> **為什麼需要這個？** AI / 編輯不知道 A / B / C 級事件要寫多深，不然每篇都寫成 S 級會拖垮產能。
+
+| 等級 | 圖表數 | Timeline 節點 | Future Signals | 誤解卡 | 範例事件 |
+|------|--------|---------------|----------------|--------|----------|
+| **S** | 2–3 | 5（可展開）| 必須 | 必須 | LUNA 崩盤、FTX 破產 |
+| **A** | 1–2 | 3 | 必須 | 必須 | ETF 通過、減半事件 |
+| **B** | 1 | 2 | 建議 | 建議 | 單一交易所出事 |
+| **C** | 0–1 | 1 | 建議 | 建議 | 小型閃崩、短期波動 |
 
 ---
 
-## 4. API & Data Strategy
-To support this content, use the following approved data sources:
+## 3. 資訊密度上限規則（Content Density Rules）
 
-| Data Type | Source | API Endpoint | Notes |
-|-----------|--------|--------------|-------|
-| **Price** | Binance | `/api/v3/klines` | 1d interval for history. |
-| **OI** | Coinglass | `v3/openInterest/ohlc-aggregated-history` | Use `code:0` response. Map `c` (Close) to OI. Time is in **seconds**. |
-| **Liquidation** | Coinglass | `v3/liquidation/history` | If available. |
-| **Flow** | Coinglass | `/api/etf/bitcoin/flow-history` | For ETF specific events. |
+> **硬規則**：每一個 Section 在手機畫面中，不得超過 **1.5 個螢幕高度**（不含可展開內容）
+
+| 區塊 | 上限規則 |
+|------|----------|
+| 三段式決策卡 | ≤ 3 行描述 |
+| 圖表解讀 | ≤ 2 段（短段落，非列點）|
+| 時間軸預設 | ≤ 5 nodes（其餘可展開）|
+| 誤解卡 | ≤ 3 組（誤解 + 實際）|
+| 未來警訊 | ≤ 5 條 |
 
 ---
 
-## 5. Prompts for AI Generation
-When asking AI to generate review content, use this structure:
+## 4. S-Class 結構模板
+
+### A. 三段式決策卡（Quick Guide）
+*位置：標題下方，10 秒內看完*
+
+```
+🧠 市場目前在做什麼？
+   [1 句話描述狀態]
+
+⚠️ 現在最大的風險是什麼？
+   [1 句話指出風險]
+
+✅ 現在比較合理的行為是？
+   [1 句話行動建議，風控導向]
+```
+
+### B. 圖表證據卡（Evidence Cards）
+*位置：決策卡下方*
+
+- **Header 格式**：`[Icon] BTC/USDT 價格走勢        加密台灣 Pro`
+- **解讀格式**：短段落旁白（非列點），≤ 2 段
+- **必須能回答**：「這張圖證明了什麼？」
+
+### C. 前情校正區（Context Block）
+*位置：圖表後*
+
+三段結構：
+1. **市場主流敘事**：當時大家「以為」發生了什麼
+2. **實際市場結構**：當時市場「實際」長什麼樣（價格 + 情緒 + 關鍵指標）
+3. **關鍵錯位**：敘事與結構的落差
+
+### D. 時間軸（Timeline）
+*位置：中段*
+
+- 預設顯示 3–5 個關鍵節點
+- 聚焦「結構性斷裂」（如：錨定失守、提款暫停），不是新聞標題
+- 可展開完整時間軸
+
+### E. 未來警訊模組（Warning Signals）
+*位置：底部 1/3*
+
+格式：
+```
+❗ 下一次需要注意的不是價格，而是：
+• 流動性是否再次快速收縮
+• 價格反彈是否缺乏量能支持
+• 風險指標是否領先價格轉弱
+```
+
+---
+
+## 5. 禁止內容清單（Hard No Content）
+
+### 禁用詞彙
+| ❌ 不要用 | ✅ 改成 |
+|----------|---------|
+| 震驚、不可思議 | 超出預期 |
+| 恐慌、瘋狂、貪婪 | 風險偏好上升／流動性下降 |
+| To the moon | 價格創新高 |
+| Scam（除非引用）| 資金不當挪用 |
+| $XXX 目標價 | — 不提 |
+
+### 禁止內容類型
+- ❌ 價格目標（$XXX）
+- ❌ 「當時只要做 X 就能賺 Y」
+- ❌ 事後諸葛式的假設推論
+- ❌ 任何暗示買賣操作的語句
+
+### 英文標註規則
+- ❌ 不要再出現括號英文：(Systemic Factor)、(Volatility)
+- ✅ 全面使用中文：系統性風險、波動率、信用緊縮
+
+---
+
+## 6. 機器可讀訊號規則（Machine-Readable Signal Rules）
+
+> **為什麼？** Future Signals 是未來最大資產，必須工程化以支援自動警報、歷史比對、訂閱推播。
+
+### 訊號必須滿足
+```
+✅ 可量化（有數字）
+✅ 有時間窗（24h / 1w）
+✅ 有閾值（> 15%）
+```
+
+### 範例對照
+| ❌ 不合格 | ✅ 合格 |
+|----------|---------|
+| 市場開始不穩定 | 交易所淨流出 > 15% / 24h |
+| 資金在撤離 | BTC 交易所餘額 7 日下降 > 5% |
+| 槓桿過高 | 合約未平倉量 / 現貨市值比 > 3% |
+| 情緒轉弱 | 恐懼貪婪指數 < 25 連續 3 日 |
+
+---
+
+## 7. 寫作風格
+
+### 人設
+- 資深鏈上分析師 / 機構級研究員
+- 對「官方聲明」保持懷疑
+- 執著於「鏈上真相」
+
+### 語調
+- 客觀、精準、數據導向
+- 不煽情、不追熱點
+- 專業但不學術
+
+### 翻譯對照
+| 英文 | 中文（台灣專業用法）|
+|------|---------------------|
+| Volatility | 波動率 |
+| Liquidity | 流動性 |
+| Collateral | 抵押品 |
+| Drawdown | 回撤 |
+| Leverage | 槓桿 |
+| Insolvency | 資不抵債 |
+
+---
+
+## 8. API & 資料策略
+
+| 資料類型 | 來源 | API Endpoint | 備註 |
+|----------|------|--------------|------|
+| **價格** | Binance | `/api/v3/klines` | 1d interval |
+| **OI** | Coinglass | `v3/openInterest/ohlc-aggregated-history` | 時間為秒 |
+| **清算** | Coinglass | `v3/liquidation/history` | 視情況使用 |
+| **ETF Flow** | Coinglass | `/api/etf/bitcoin/flow-history` | ETF 事件專用 |
+
+我們強烈要求使用正確的數據，如果 Coinglass v4 api 沒有存取失敗的話，可以使用 v3 api、v2 api。
+---
+
+## 9. AI 生成提示詞模板
 
 ```markdown
 Role: Senior Crypto Market Analyst
-Task: Write a "Market Event Review" for [Event Name].
-Structure:
-1. **Quick Summary**: 3 bullet points on the structural failure.
-2. **Chart Context**: 1 sentence explaining what the data proves (e.g., "Price lagged behind capital flight").
-3. **Timeline**: Highlight 3 timestamps where the point of no return was crossed.
-4. **Future Signals**: List 3 concrete, observable signals that would indicate a repeat of this event.
+Task: Write a "Market Event Review" for [事件名稱].
 
-Constraint:
-- Tone: Institutional, objective.
-- Focus: Mechanics of failure (Liquidity/Leverage), not drama.
-- Output: JSON compatible with our Review schema.
+Structure:
+1. **三段式決策卡**: 🧠/⚠️/✅ 各一句
+2. **圖表證據**: 1 句說明這張圖證明了什麼
+3. **時間軸**: 3 個結構性斷裂點
+4. **未來警訊**: 3 條可量化 + 有閾值的訊號
+
+Constraints:
+- 語調：機構級、客觀
+- 焦點：失敗機制（流動性/槓桿），不要戲劇化
+- 輸出：符合 Review JSON Schema
+- 禁止：價格目標、買賣建議、括號英文
 ```
+
+---
+
+## 10. 發布前自我檢查表（Final Checklist）
+
+```markdown
+Before Publishing:
+- [ ] 三段式決策卡是否都在「機制層」而非「情緒層」
+- [ ] 每張圖是否都能回答「它證明了什麼」
+- [ ] 是否避免用價格當結論
+- [ ] Future Signals 是否可被數據驗證（有閾值 + 時間窗）
+- [ ] 手機版是否能在 60 秒內看完整體結論
+- [ ] 是否有任何括號英文殘留
+- [ ] 是否有任何買賣建議語句
+```
+
+---
+
+## 附錄：版本歷史
+
+| 版本 | 日期 | 變更內容 |
+|------|------|----------|
+| v1.0 | 2024-12 | 初版 |
+| v1.1 | 2024-12 | 新增：事件分級、密度規則、禁止清單、機器訊號規則、發布檢查表 |

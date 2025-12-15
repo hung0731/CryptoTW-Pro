@@ -40,10 +40,7 @@ export default function ReviewDetailPage() {
                 {/* Hero Section */}
                 <div className="p-5 pb-4 space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="outline" className={cn(
-                            "border-0 px-2 py-0.5",
-                            review.importance === 'S' ? "bg-red-900/30 text-red-500" : "bg-blue-900/30 text-blue-500"
-                        )}>
+                        <Badge variant="outline" className="border-0 px-2 py-0.5 bg-neutral-800 text-neutral-400">
                             {review.importance} 級事件
                         </Badge>
                         <span className="text-xs text-neutral-500 font-mono">{review.year}</span>
@@ -168,13 +165,13 @@ export default function ReviewDetailPage() {
                                 <div key={idx} className="rounded-lg p-3.5" style={{ backgroundColor: '#0F0F10' }}>
                                     {/* 誤解 */}
                                     <div className="flex gap-3 mb-2">
-                                        <div className="w-0.5 bg-red-500/20 rounded-full flex-shrink-0" />
+                                        <div className="w-0.5 bg-neutral-700 rounded-full flex-shrink-0" />
                                         <p className="text-xs text-neutral-500 leading-relaxed">{m.myth}</p>
                                     </div>
                                     {/* 實際情況 */}
                                     <div className="flex gap-3">
-                                        <div className="w-0.5 bg-green-500/20 rounded-full flex-shrink-0" />
-                                        <p className="text-sm text-neutral-200 leading-relaxed">{m.fact}</p>
+                                        <div className="w-0.5 bg-neutral-500 rounded-full flex-shrink-0" />
+                                        <p className="text-sm text-neutral-300 leading-relaxed">{m.fact}</p>
                                     </div>
                                 </div>
                             ))}
@@ -230,8 +227,8 @@ export default function ReviewDetailPage() {
                                     <div className="mb-1 flex items-center gap-2">
                                         {item.riskLevel && (
                                             <span className={cn(
-                                                "text-[9px] font-bold",
-                                                item.riskLevel === 'high' ? "text-amber-400" :
+                                                "text-[9px]",
+                                                item.riskLevel === 'high' ? "text-neutral-300" :
                                                     item.riskLevel === 'medium' ? "text-neutral-400" :
                                                         "text-neutral-600"
                                             )}>
@@ -265,15 +262,15 @@ export default function ReviewDetailPage() {
 
                 {/* 7. 未來警訊 */}
                 <section className="p-4 space-y-3">
-                    <div className="border-l-2 border-amber-500/30 pl-4 py-2" style={{ backgroundColor: '#0F0F10' }}>
-                        <h2 className="text-sm font-medium text-amber-500/80 mb-3">
-                            ❗ 下一次需要注意的不是價格，而是：
+                    <div className="border-l border-neutral-700 pl-4 py-2" style={{ backgroundColor: '#0F0F10' }}>
+                        <h2 className="text-[10px] font-medium text-neutral-500 uppercase tracking-widest mb-3">
+                            下一次需要注意的不是價格，而是：
                         </h2>
                         <div className="space-y-2">
                             {review.actionableChecklist.map((item, idx) => (
-                                <p key={idx} className="text-xs text-neutral-300 leading-relaxed">
+                                <p key={idx} className="text-xs text-neutral-400 leading-relaxed">
                                     • {item.label}
-                                    {item.desc && <span className="text-neutral-500 ml-1">— {item.desc}</span>}
+                                    {item.desc && <span className="text-neutral-600 ml-1">— {item.desc}</span>}
                                 </p>
                             ))}
                         </div>
