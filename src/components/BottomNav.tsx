@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Home, Newspaper, BarChart2, User } from 'lucide-react'
+import { Home, Newspaper, BarChart2, User, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -28,7 +28,12 @@ export function BottomNav() {
             href: '/prediction',
             active: pathname === '/prediction'
         },
-
+        {
+            label: '復盤',
+            icon: BookOpen,
+            href: '/reviews',
+            active: pathname.startsWith('/reviews')
+        },
         {
             label: '我的',
             icon: User,

@@ -264,20 +264,44 @@ function DataPageContent() {
             <PageHeader />
 
             <Tabs defaultValue="market" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                {/* 3-Tab Structure: 市場狀態 / 衍生品風險 / 策略工具 */}
-                <div className="sticky top-14 z-30 bg-black/80 backdrop-blur-xl border-b border-white/5 px-4 pt-2 pb-0">
-                    <TabsList className="w-full grid grid-cols-3 h-auto p-1 bg-neutral-900/50 rounded-lg">
-                        <TabsTrigger value="market" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
-                            <Gauge className="w-3.5 h-3.5" />
-                            市場狀態
+                {/* 3-Tab Navigation - Premium Design with Quantity Hints */}
+                <div className="sticky top-14 z-30 bg-gradient-to-b from-black via-black/95 to-black/90 backdrop-blur-xl border-b border-white/[0.06] px-4 pt-3 pb-2">
+                    <TabsList className="w-full grid grid-cols-3 h-auto p-1.5 bg-neutral-900/60 rounded-xl border border-white/[0.04]">
+                        <TabsTrigger
+                            value="market"
+                            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-neutral-800 data-[state=active]:to-neutral-800/80 data-[state=active]:text-white data-[state=active]:shadow-lg text-neutral-500 rounded-lg text-[11px] font-semibold transition-all duration-200 py-2 flex flex-col items-center justify-center gap-0.5 px-0"
+                        >
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 rounded-md bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                                    <Gauge className="w-3 h-3" />
+                                </div>
+                                <span>市場狀態</span>
+                            </div>
+                            <span className="text-[8px] text-neutral-600 font-normal">5 指標 · 時間軸</span>
                         </TabsTrigger>
-                        <TabsTrigger value="derivatives" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
-                            <Flame className="w-3.5 h-3.5 text-orange-400" />
-                            衍生品風險
+                        <TabsTrigger
+                            value="derivatives"
+                            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-neutral-800 data-[state=active]:to-neutral-800/80 data-[state=active]:text-white data-[state=active]:shadow-lg text-neutral-500 rounded-lg text-[11px] font-semibold transition-all duration-200 py-2 flex flex-col items-center justify-center gap-0.5 px-0"
+                        >
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 rounded-md bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
+                                    <Flame className="w-3 h-3 text-orange-400" />
+                                </div>
+                                <span>衍生品風險</span>
+                            </div>
+                            <span className="text-[8px] text-neutral-600 font-normal">8 指標 · 即時</span>
                         </TabsTrigger>
-                        <TabsTrigger value="strategies" className="data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-md text-[11px] font-medium transition-all py-2 flex items-center justify-center gap-1.5 px-0">
-                            <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
-                            策略工具
+                        <TabsTrigger
+                            value="strategies"
+                            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-neutral-800 data-[state=active]:to-neutral-800/80 data-[state=active]:text-white data-[state=active]:shadow-lg text-neutral-500 rounded-lg text-[11px] font-semibold transition-all duration-200 py-2 flex flex-col items-center justify-center gap-0.5 px-0"
+                        >
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-4 h-4 rounded-md bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
+                                    <BarChart3 className="w-3 h-3 text-blue-400" />
+                                </div>
+                                <span>策略工具</span>
+                            </div>
+                            <span className="text-[8px] text-neutral-600 font-normal">進階 · 需經驗</span>
                         </TabsTrigger>
                     </TabsList>
                 </div>
@@ -287,75 +311,199 @@ function DataPageContent() {
                 {/* TAB 1: 市場狀態 (Market State) */}
                 {/* 目的：回答「現在市場在什麼階段？」 */}
                 {/* ============================================ */}
-                <TabsContent value="market" className="space-y-6 p-4 min-h-[50vh]">
+                <TabsContent value="market" className="space-y-8 p-4 min-h-[50vh]">
 
-                    {/* Section 1: 📊 今日市場狀態 - A 級時間軸指標 */}
-                    <section>
-                        <h2 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                            📊 今日市場狀態
-                        </h2>
-                        <div className="grid grid-cols-1 gap-3">
-                            {/* A級：恐懼貪婪指數 */}
+                    {/* ─────────────────────────────────────────── */}
+                    {/* Section 1: 今日市場狀態 - A 級核心指標 */}
+                    {/* ─────────────────────────────────────────── */}
+                    <section className="space-y-4">
+                        {/* Section Header */}
+                        <div className="flex items-center gap-3">
+                            <div className="w-1 h-5 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
+                            <h2 className="text-base font-bold text-white tracking-tight">今日市場狀態</h2>
+                        </div>
+
+                        {/* A級 Card Grid */}
+                        <div className="space-y-3">
+                            {/* 恐懼貪婪指數 - Hero Card */}
                             {fearGreed && (
-                                <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-4">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xl">😱</span>
-                                            <span className="text-sm font-bold text-white">恐懼貪婪指數</span>
-                                            <ExplainTooltip
-                                                term={INDICATOR_KNOWLEDGE.fearGreed.term}
-                                                definition={INDICATOR_KNOWLEDGE.fearGreed.definition}
-                                                explanation={INDICATOR_KNOWLEDGE.fearGreed.interpretation}
-                                                timeline={INDICATOR_KNOWLEDGE.fearGreed.timeline}
-                                            />
+                                <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-neutral-900/80 via-neutral-900/60 to-neutral-900/40 backdrop-blur-sm">
+                                    {/* Subtle glow effect */}
+                                    <div className={cn(
+                                        "absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-20",
+                                        parseInt(fearGreed.value) >= 75 ? "bg-red-500" :
+                                            parseInt(fearGreed.value) >= 55 ? "bg-yellow-500" :
+                                                parseInt(fearGreed.value) <= 25 ? "bg-green-500" :
+                                                    parseInt(fearGreed.value) <= 45 ? "bg-blue-500" :
+                                                        "bg-neutral-500"
+                                    )} />
+
+                                    <div className="relative p-5">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                                                    <span className="text-2xl">😱</span>
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-semibold text-white">恐懼貪婪指數</span>
+                                                        <ExplainTooltip
+                                                            term={INDICATOR_KNOWLEDGE.fearGreed.term}
+                                                            definition={INDICATOR_KNOWLEDGE.fearGreed.definition}
+                                                            explanation={INDICATOR_KNOWLEDGE.fearGreed.interpretation}
+                                                            timeline={INDICATOR_KNOWLEDGE.fearGreed.timeline}
+                                                        />
+                                                    </div>
+                                                    <span className="text-[11px] text-neutral-500">市場情緒風向標</span>
+                                                </div>
+                                            </div>
+                                            <span className={cn(
+                                                "text-[11px] px-2.5 py-1 rounded-full font-medium border",
+                                                parseInt(fearGreed.value) >= 75 ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                                    parseInt(fearGreed.value) >= 55 ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" :
+                                                        parseInt(fearGreed.value) <= 25 ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                                                            parseInt(fearGreed.value) <= 45 ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                                                "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"
+                                            )}>
+                                                {fearGreed.classification}
+                                            </span>
                                         </div>
-                                        <span className={cn(
-                                            "text-[10px] px-2 py-0.5 rounded font-medium",
-                                            parseInt(fearGreed.value) >= 75 ? "bg-red-500/20 text-red-400" :
-                                                parseInt(fearGreed.value) >= 55 ? "bg-yellow-500/20 text-yellow-400" :
-                                                    parseInt(fearGreed.value) <= 25 ? "bg-green-500/20 text-green-400" :
-                                                        parseInt(fearGreed.value) <= 45 ? "bg-blue-500/20 text-blue-400" :
-                                                            "bg-neutral-500/20 text-neutral-400"
-                                        )}>
-                                            {fearGreed.classification}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-baseline gap-3">
-                                        <span className={`text-3xl font-bold font-mono ${getFearGreedColor(parseInt(fearGreed.value))}`}>
-                                            {fearGreed.value}
-                                        </span>
-                                        <span className="text-xs text-neutral-500">市場情緒指數</span>
+
+                                        <div className="flex items-end gap-4">
+                                            <span className={cn(
+                                                "text-5xl font-bold font-mono tracking-tighter",
+                                                getFearGreedColor(parseInt(fearGreed.value))
+                                            )}>
+                                                {fearGreed.value}
+                                            </span>
+                                            <div className="flex-1 mb-2">
+                                                {/* Progress bar */}
+                                                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={cn(
+                                                            "h-full rounded-full transition-all duration-500",
+                                                            parseInt(fearGreed.value) >= 75 ? "bg-gradient-to-r from-red-600 to-red-400" :
+                                                                parseInt(fearGreed.value) >= 55 ? "bg-gradient-to-r from-yellow-600 to-yellow-400" :
+                                                                    parseInt(fearGreed.value) <= 25 ? "bg-gradient-to-r from-green-600 to-green-400" :
+                                                                        parseInt(fearGreed.value) <= 45 ? "bg-gradient-to-r from-blue-600 to-blue-400" :
+                                                                            "bg-gradient-to-r from-neutral-600 to-neutral-400"
+                                                        )}
+                                                        style={{ width: `${fearGreed.value}%` }}
+                                                    />
+                                                </div>
+                                                <div className="flex justify-between mt-1.5 text-[9px] text-neutral-600 font-medium">
+                                                    <span>極度恐懼</span>
+                                                    <span>極度貪婪</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* A級：ETF 資金流 */}
+                            {/* ETF 資金流 */}
                             <ETFFlowCard />
 
-                            {/* A級：穩定幣市值 */}
+                            {/* 穩定幣市值 */}
                             <StablecoinCard />
                         </div>
                     </section>
 
-                    {/* Section 2: 🧠 機構與週期 - B 級輔助指標 */}
-                    <section>
-                        <h2 className="text-xs font-medium text-neutral-500 mb-3 flex items-center gap-2">
-                            🧠 機構與週期確認
-                            <span className="text-[10px] text-neutral-600">（補充資訊）</span>
-                        </h2>
+                    {/* ─────────────────────────────────────────── */}
+                    {/* Section 2: 機構與週期確認 - B 級輔助指標 */}
+                    {/* ─────────────────────────────────────────── */}
+                    <section className="space-y-4">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1 h-4 bg-neutral-700 rounded-full" />
+                                <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">機構與週期確認</h2>
+                            </div>
+                            <span className="text-[10px] text-neutral-600 bg-neutral-800/50 px-2 py-0.5 rounded-full">輔助指標</span>
+                        </div>
+
+                        {/* B級 Cards - 2 Column */}
                         <div className="grid grid-cols-2 gap-3">
                             <BubbleIndexCard />
                             <CoinbasePremiumCard />
                         </div>
                     </section>
 
-                    {/* Section 3: 🐋 主力動向 - 從獨立 Tab 併入 */}
-                    <section>
-                        <h2 className="text-xs font-medium text-neutral-500 mb-3 flex items-center gap-2">
-                            🐋 主力動向
-                            <span className="text-[10px] text-neutral-600">（狀態佐證）</span>
-                        </h2>
+                    {/* ─────────────────────────────────────────── */}
+                    {/* Section 3: 主力動向 - 狀態佐證 */}
+                    {/* ─────────────────────────────────────────── */}
+                    <section className="space-y-4">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1 h-4 bg-purple-500/50 rounded-full" />
+                                <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">主力動向</h2>
+                            </div>
+                            <span className="text-[10px] text-neutral-600 bg-neutral-800/50 px-2 py-0.5 rounded-full">即時監控</span>
+                        </div>
+
+
                         <WhaleAlertFeed />
+                    </section>
+
+                    {/* ─────────────────────────────────────────── */}
+                    {/* Section 4: 深入觀察入口 - 增加可探索感 */}
+                    {/* ─────────────────────────────────────────── */}
+                    <section className="pt-4 border-t border-white/[0.04]">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="text-neutral-600 text-xs">🔍</span>
+                            <span className="text-[11px] text-neutral-500 font-medium">深入觀察</span>
+                            <span className="text-[10px] text-neutral-700">（選看）</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-2">
+                            {/* 入口 1: 時間軸 */}
+                            <button className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] transition-all duration-200 text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                        <span className="text-sm">📈</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">市場狀態時間軸</span>
+                                        <p className="text-[10px] text-neutral-600">查看各指標的歷史判斷順序</p>
+                                    </div>
+                                </div>
+                                <span className="text-neutral-700 group-hover:text-neutral-500 transition-colors text-xs">→</span>
+                            </button>
+
+                            {/* 入口 2: 判斷依據 */}
+                            <button className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] transition-all duration-200 text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                                        <span className="text-sm">🧠</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">為什麼是這個判斷？</span>
+                                        <p className="text-[10px] text-neutral-600">了解多項指標如何綜合評估</p>
+                                    </div>
+                                </div>
+                                <span className="text-neutral-700 group-hover:text-neutral-500 transition-colors text-xs">→</span>
+                            </button>
+
+                            {/* 入口 3: 歷史相似 (Linked to Market Reviews) */}
+                            <Link href="/reviews?tab=featured" className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] transition-all duration-200 text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                        <span className="text-sm">📓</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">市場復盤資料庫</span>
+                                        <p className="text-[10px] text-neutral-600">查看相似歷史案例與經驗教訓</p>
+                                    </div>
+                                </div>
+                                <span className="text-neutral-700 group-hover:text-neutral-500 transition-colors text-xs">→</span>
+                            </Link>
+                        </div>
+
+                        {/* 底部補充說明 */}
+                        <p className="text-[10px] text-neutral-700 text-center mt-4">
+                            以上為基於多項指標與歷史數據的綜合判斷
+                        </p>
                     </section>
 
                 </TabsContent>
@@ -372,41 +520,61 @@ function DataPageContent() {
                 {/* TAB 3: 策略工具 (Strategies) */}
                 {/* 給進階用戶，非主線 */}
                 {/* ============================================ */}
-                <TabsContent value="strategies" className="space-y-6 p-4 min-h-[50vh]">
-                    {/* 套利工具 */}
-                    <section>
-                        <div className="flex items-center gap-2 mb-3">
-                            <h2 className="text-sm font-bold text-white">💰 費率套利</h2>
-                            <span className="text-[10px] text-neutral-600 bg-neutral-800 px-1.5 py-0.5 rounded">需經驗</span>
+                <TabsContent value="strategies" className="space-y-8 p-4 min-h-[50vh]">
+
+                    {/* ─────────────────────────────────────────── */}
+                    {/* Section 1: 費率套利 */}
+                    {/* ─────────────────────────────────────────── */}
+                    <section className="space-y-4">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1 h-5 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full" />
+                                <h2 className="text-base font-bold text-white tracking-tight">費率套利</h2>
+                            </div>
+                            <span className="text-[10px] text-amber-400/80 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full font-medium">
+                                ⚠️ 需經驗
+                            </span>
                         </div>
                         <ArbitrageView />
                     </section>
 
-                    {/* 預測市場 */}
-                    <section>
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-sm font-bold text-white">🎰 預測市場</h2>
-                                <span className="text-[10px] text-neutral-600 bg-neutral-800 px-1.5 py-0.5 rounded">娛樂</span>
+                    {/* ─────────────────────────────────────────── */}
+                    {/* Section 2: 預測市場 */}
+                    {/* ─────────────────────────────────────────── */}
+                    <section className="space-y-4">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1 h-4 bg-neutral-700 rounded-full" />
+                                <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">預測市場</h2>
                             </div>
+                            <span className="text-[10px] text-neutral-600 bg-neutral-800/50 px-2 py-0.5 rounded-full">娛樂參考</span>
                         </div>
+
                         {predictLoading ? (
                             <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
                         ) : (
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 {markets.slice(0, 3).map((market) => (
                                     <Link href={`https://polymarket.com/event/${market.slug}`} target="_blank" key={market.id}>
-                                        <div className="group bg-neutral-900/50 border border-white/5 rounded-xl p-3 hover:bg-white/5 transition-all">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                {market.icon && <img src={market.icon} className="w-4 h-4 rounded-full" />}
-                                                <h3 className="text-xs font-medium text-neutral-200 line-clamp-1 group-hover:text-white transition-colors">{market.question}</h3>
+                                        <div className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-gradient-to-br from-neutral-900/60 to-neutral-900/30 p-4 hover:border-white/10 transition-all duration-300">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                {market.icon && <img src={market.icon} className="w-5 h-5 rounded-full ring-1 ring-white/10" />}
+                                                <h3 className="text-sm font-medium text-neutral-200 line-clamp-1 group-hover:text-white transition-colors">{market.question}</h3>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-1.5">
+                                            <div className="grid grid-cols-2 gap-2">
                                                 {(market.outcomes || []).slice(0, 2).map((outcome: any, idx: number) => (
-                                                    <div key={idx} className="relative h-5 bg-black/40 rounded overflow-hidden flex items-center px-2 border border-white/5">
-                                                        <div className={`absolute inset-0 opacity-20 ${idx === 0 ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${outcome.probability * 100}%` }} />
-                                                        <div className="relative z-10 flex items-center justify-between w-full text-[10px]">
-                                                            <span className="font-medium text-neutral-300">{outcome.name}</span>
+                                                    <div key={idx} className="relative h-7 bg-black/30 rounded-lg overflow-hidden flex items-center px-3 border border-white/[0.04]">
+                                                        <div
+                                                            className={cn(
+                                                                "absolute inset-0 opacity-15",
+                                                                idx === 0 ? "bg-gradient-to-r from-green-500 to-emerald-500" : "bg-gradient-to-r from-red-500 to-rose-500"
+                                                            )}
+                                                            style={{ width: `${outcome.probability * 100}%` }}
+                                                        />
+                                                        <div className="relative z-10 flex items-center justify-between w-full text-[11px]">
+                                                            <span className="font-medium text-neutral-400">{outcome.name}</span>
                                                             <span className="font-mono font-bold text-white">{(outcome.probability * 100).toFixed(0)}%</span>
                                                         </div>
                                                     </div>
