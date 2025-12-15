@@ -36,7 +36,7 @@ export default function ReviewDetailPage() {
 
             <article className="max-w-3xl mx-auto">
                 {/* Hero Section */}
-                <div className="p-6 pb-4 space-y-4">
+                <div className="p-5 pb-4 space-y-4">
                     <div className="flex items-center gap-2 mb-2">
                         <Badge variant="outline" className={cn(
                             "border-0 px-2 py-0.5",
@@ -59,7 +59,7 @@ export default function ReviewDetailPage() {
                 </div>
 
                 {/* 1. Quick Guide Card (Executive Summary) */}
-                <section className="px-6 mb-6">
+                <section className="px-5 mb-5">
                     <div className="bg-neutral-900/60 rounded-xl p-5 border border-white/10 shadow-sm relative overflow-hidden group">
                         <h2 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <Lightbulb className="w-3.5 h-3.5" />
@@ -94,7 +94,7 @@ export default function ReviewDetailPage() {
 
                 {/* 1.5 Usage Guide (New Tool Layer) */}
                 {review.usageGuide && (
-                    <section className="px-6 mb-8">
+                    <section className="px-5 mb-6">
                         <div className="bg-neutral-900/30 rounded-lg p-4 border border-white/5 flex gap-3 items-start">
                             <div className="bg-neutral-800 p-1.5 rounded text-neutral-400 mt-0.5">
                                 <BookOpen className="w-3.5 h-3.5" />
@@ -116,7 +116,7 @@ export default function ReviewDetailPage() {
 
                 {/* 2. Visual Evidence (Review Charts) - MOVED UP */}
                 {(review.charts.main || review.charts.flow) && (
-                    <section className="p-6 space-y-6 border-t border-b border-white/5 bg-neutral-950/30">
+                    <section className="p-5 space-y-4 border-t border-b border-white/5 bg-neutral-950/30">
                         <div className="flex items-center justify-between">
                             <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                                 <BarChart3 className="w-4 h-4" />
@@ -128,29 +128,24 @@ export default function ReviewDetailPage() {
                         {/* Main Chart */}
                         {review.charts.main && (
                             <div className="space-y-3">
-                                <div className="aspect-video w-full bg-neutral-900/50 rounded-xl border border-white/5 flex items-center justify-center p-2 relative">
-                                    <ReviewChart
-                                        type="price"
-                                        symbol={review.chartConfig?.symbol || 'BTC'}
-                                        daysBuffer={review.chartConfig?.daysBuffer}
-                                        eventStart={review.eventStartAt}
-                                        eventEnd={review.eventEndAt}
-                                        reviewSlug={review.slug}
-                                    />
-                                    <div className="absolute top-2 left-3 pointer-events-none">
-                                        <Badge variant="secondary" className="bg-black/60 text-[10px] border-white/10 backdrop-blur text-white">Price & Volatility</Badge>
+                                <div className="rounded-xl border border-white/5 overflow-hidden bg-neutral-900/30">
+                                    <div className="aspect-video w-full relative">
+                                        <ReviewChart
+                                            type="price"
+                                            symbol={review.chartConfig?.symbol || 'BTC'}
+                                            daysBuffer={review.chartConfig?.daysBuffer}
+                                            eventStart={review.eventStartAt}
+                                            eventEnd={review.eventEndAt}
+                                            reviewSlug={review.slug}
+                                        />
                                     </div>
-                                </div>
-                                <div className="flex items-center justify-between mt-2 px-1">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                                            <span className="text-[9px] font-bold text-purple-400">{review.chartConfig?.symbol?.[0] || 'C'}</span>
+                                    <div className="bg-neutral-900 border-t border-white/5 px-3 py-2.5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider">Price & Volatility</span>
+                                            <span className="text-[10px] text-neutral-700">|</span>
+                                            <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'}/USDT</span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-neutral-400">{review.chartConfig?.symbol || 'CRYPTO'}/USDT 走勢圖</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 opacity-80">
-                                        <img src="/logo.svg" alt="CryptoTW" className="w-3.5 h-3.5" />
-                                        <span className="text-[10px] font-bold text-neutral-500">加密台灣 Pro</span>
+                                        <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
                                     </div>
                                 </div>
 
@@ -188,31 +183,26 @@ export default function ReviewDetailPage() {
                         {/* Flow Chart */}
                         {review.charts.flow && (
                             <div className="space-y-3">
-                                <div className="aspect-video w-full bg-neutral-900/50 rounded-xl border border-white/5 flex items-center justify-center p-2 relative">
-                                    <ReviewChart
-                                        type={review.slug.includes('etf') || review.slug.includes('luna') ? 'flow' : 'oi'}
-                                        symbol={review.chartConfig?.symbol || 'BTC'}
-                                        daysBuffer={review.chartConfig?.daysBuffer}
-                                        eventStart={review.eventStartAt}
-                                        eventEnd={review.eventEndAt}
-                                        reviewSlug={review.slug}
-                                    />
-                                    <div className="absolute top-2 left-3 pointer-events-none">
-                                        <Badge variant="secondary" className="bg-black/60 text-[10px] border-white/10 backdrop-blur text-white">
-                                            {review.slug.includes('luna') ? 'Supply Inflation' : 'Net Flow / OI'}
-                                        </Badge>
+                                <div className="rounded-xl border border-white/5 overflow-hidden bg-neutral-900/30">
+                                    <div className="aspect-video w-full relative">
+                                        <ReviewChart
+                                            type={review.slug.includes('etf') || review.slug.includes('luna') ? 'flow' : 'oi'}
+                                            symbol={review.chartConfig?.symbol || 'BTC'}
+                                            daysBuffer={review.chartConfig?.daysBuffer}
+                                            eventStart={review.eventStartAt}
+                                            eventEnd={review.eventEndAt}
+                                            reviewSlug={review.slug}
+                                        />
                                     </div>
-                                </div>
-                                <div className="flex items-center justify-between mt-2 px-1">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                                            <span className="text-[9px] font-bold text-purple-400">{review.chartConfig?.symbol?.[0] || 'C'}</span>
+                                    <div className="bg-neutral-900 border-t border-white/5 px-3 py-2.5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider">
+                                                {review.slug.includes('luna') ? 'Supply Inflation' : 'Net Flow / OI'}
+                                            </span>
+                                            <span className="text-[10px] text-neutral-700">|</span>
+                                            <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'} 資金流向</span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-neutral-400">{review.chartConfig?.symbol || 'CRYPTO'}/Data 資金流向</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 opacity-80">
-                                        <img src="/logo.svg" alt="CryptoTW" className="w-3.5 h-3.5" />
-                                        <span className="text-[10px] font-bold text-neutral-500">加密台灣 Pro</span>
+                                        <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
                                     </div>
                                 </div>
                                 {review.charts.flow.interpretation ? (
@@ -249,29 +239,24 @@ export default function ReviewDetailPage() {
                         {/* OI Chart (Fallback Position if not flow) */}
                         {(!review.charts.flow && review.charts.oi) && (
                             <div className="space-y-3">
-                                <div className="aspect-video w-full bg-neutral-900/50 rounded-xl border border-white/5 flex items-center justify-center p-2 relative">
-                                    <ReviewChart
-                                        type="oi"
-                                        symbol={review.chartConfig?.symbol || 'BTC'}
-                                        daysBuffer={review.chartConfig?.daysBuffer}
-                                        eventStart={review.eventStartAt}
-                                        eventEnd={review.eventEndAt}
-                                        reviewSlug={review.slug}
-                                    />
-                                    <div className="absolute top-2 left-3 pointer-events-none">
-                                        <Badge variant="secondary" className="bg-black/60 text-[10px] border-white/10 backdrop-blur text-white">Open Interest</Badge>
+                                <div className="rounded-xl border border-white/5 overflow-hidden bg-neutral-900/30">
+                                    <div className="aspect-video w-full relative">
+                                        <ReviewChart
+                                            type="oi"
+                                            symbol={review.chartConfig?.symbol || 'BTC'}
+                                            daysBuffer={review.chartConfig?.daysBuffer}
+                                            eventStart={review.eventStartAt}
+                                            eventEnd={review.eventEndAt}
+                                            reviewSlug={review.slug}
+                                        />
                                     </div>
-                                </div>
-                                <div className="flex items-center justify-between mt-2 px-1">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                                            <span className="text-[9px] font-bold text-purple-400">{review.chartConfig?.symbol?.[0] || 'C'}</span>
+                                    <div className="bg-neutral-900 border-t border-white/5 px-3 py-2.5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider">Open Interest</span>
+                                            <span className="text-[10px] text-neutral-700">|</span>
+                                            <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'} 持倉數據</span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-neutral-400">{review.chartConfig?.symbol || 'CRYPTO'}/Data 持倉數據</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 opacity-80">
-                                        <img src="/logo.svg" alt="CryptoTW" className="w-3.5 h-3.5" />
-                                        <span className="text-[10px] font-bold text-neutral-500">加密台灣 Pro</span>
+                                        <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
                                     </div>
                                 </div>
                                 {review.charts.oi.interpretation ? (
@@ -308,26 +293,26 @@ export default function ReviewDetailPage() {
                 )}
 
                 {/* 3. Context (The Setup) */}
-                <section className="p-6 space-y-5 border-b border-white/5">
+                <section className="p-5 space-y-4 border-b border-white/5">
                     <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                         <BookOpen className="w-4 h-4" />
                         事件脈絡
                     </h2>
                     <div className="bg-neutral-900/30 rounded-xl p-5 border border-white/5 space-y-5">
                         <div className="grid grid-cols-[100px_1fr] gap-4">
-                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider pt-1">Market Narrative</span>
+                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider pt-1">市場敘事</span>
                             <p className="text-sm text-neutral-400 leading-relaxed">{review.context.narrative}</p>
                         </div>
                         <div className="h-px bg-white/5" />
                         <div className="grid grid-cols-[100px_1fr] gap-4">
-                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider pt-1">The Reality</span>
+                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider pt-1">事實真相</span>
                             <p className="text-sm text-neutral-200 leading-relaxed">{review.context.what}</p>
                         </div>
                     </div>
                 </section>
 
                 {/* 4. Market State (Condensed) */}
-                <section className="p-6 space-y-4 border-b border-white/5">
+                <section className="p-5 space-y-4 border-b border-white/5">
                     <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                         <Clock className="w-4 h-4" />
                         市場背景
@@ -352,7 +337,7 @@ export default function ReviewDetailPage() {
 
                 {/* 5. Misconceptions */}
                 {review.misconceptions && (
-                    <section className="p-6 space-y-4 border-b border-white/5">
+                    <section className="p-5 space-y-4 border-b border-white/5">
                         <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                             <AlertOctagon className="w-4 h-4" />
                             常見誤解
@@ -375,7 +360,7 @@ export default function ReviewDetailPage() {
                 )}
 
                 {/* 6. Timeline (Collapsible) */}
-                <section className="p-6 space-y-6 border-b border-white/5 relative">
+                <section className="p-5 space-y-5 border-b border-white/5 relative">
                     <div className="flex items-center justify-between z-10 relative">
                         <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                             <ListChecks className="w-4 h-4" />
@@ -457,7 +442,7 @@ export default function ReviewDetailPage() {
                 </section>
 
                 {/* 7. Future Signals (The Checklist Tool) */}
-                <section className="p-6 space-y-5">
+                <section className="p-5 space-y-4">
                     <div className="bg-amber-950/10 border border-amber-500/20 rounded-xl p-6">
                         <h2 className="text-sm font-bold text-amber-500 flex items-center gap-2 uppercase tracking-wider mb-4">
                             <AlertTriangle className="w-4 h-4" />
@@ -489,7 +474,7 @@ export default function ReviewDetailPage() {
 
                 {/* Historical Comparison */}
                 {review.historicalComparison && (
-                    <section className="p-6 space-y-5 border-b border-white/5">
+                    <section className="p-5 space-y-4 border-b border-white/5">
                         <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                             <GitCompare className="w-4 h-4" />
                             歷史對照
@@ -516,7 +501,7 @@ export default function ReviewDetailPage() {
 
                 {/* Related CTA - Learning Path Style */}
                 {relatedReviews.length > 0 && (
-                    <section className="p-6 pt-0">
+                    <section className="p-5 pt-0">
                         <div className="h-px bg-white/5 mb-6" />
                         <h3 className="text-xs font-bold text-neutral-500 mb-4 flex items-center gap-2">
                             <BookOpen className="w-3.5 h-3.5" />

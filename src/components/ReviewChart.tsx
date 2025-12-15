@@ -97,10 +97,13 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     return (
         <div className={`w-full h-full relative ${className}`}>
             {/* Watermark */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 select-none">
-                <span className="text-4xl font-black text-white/5 whitespace-nowrap tracking-widest uppercase">
-                    加密台灣 Pro
-                </span>
+            {/* Watermark */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 select-none opacity-[0.03]">
+                <img
+                    src="/logo.svg"
+                    alt="CryptoTW Watermark"
+                    className="w-48 h-48 grayscale"
+                />
             </div>
 
             <ResponsiveContainer width="100%" height="100%" className="relative z-10">

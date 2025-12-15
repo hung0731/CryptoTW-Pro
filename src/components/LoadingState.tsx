@@ -111,9 +111,12 @@ export function LoadingSpinner({ size = 'sm' }: { size?: 'sm' | 'md' | 'lg' }) {
 export function PageLoading() {
     return (
         <div className="min-h-screen bg-black flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <img src="/logo.svg" alt="" className="h-6 w-auto opacity-50 animate-pulse" />
-                <LoadingSpinner size="md" />
+            <div className="flex flex-col items-center justify-center">
+                <img
+                    src="/logo.svg"
+                    alt="Loading..."
+                    className="w-12 h-12 opacity-80 animate-pulse"
+                />
             </div>
         </div>
     )
