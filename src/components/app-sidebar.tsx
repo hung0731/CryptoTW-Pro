@@ -33,12 +33,6 @@ const menuSections = [
     ]
   },
   {
-    label: "內容管理",
-    items: [
-      { title: "市場事件復盤", url: "/admin/reviews", icon: Newspaper },
-    ]
-  },
-  {
     label: "OKX 管理",
     items: [
       { title: "用戶管理", url: "/admin/users", icon: Users },

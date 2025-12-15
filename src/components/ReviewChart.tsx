@@ -125,13 +125,8 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             tickFormatter={(str) => str.slice(5)} // MM-DD
                         />
                         <YAxis
-                            orientation="right"
                             domain={['auto', 'auto']}
-                            tick={{ fontSize: 9, fill: '#525252' }}
-                            tickLine={false}
-                            axisLine={false}
-                            width={50}
-                            tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(0)}K` : `$${v.toFixed(0)}`}
+                            hide={true}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
@@ -152,15 +147,6 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             axisLine={false}
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
-                        />
-                        <YAxis
-                            orientation="right"
-                            domain={['auto', 'auto']}
-                            tick={{ fontSize: 9, fill: '#525252' }}
-                            tickLine={false}
-                            axisLine={false}
-                            width={50}
-                            tickFormatter={(v) => v >= 1000000 ? `$${(v / 1000000).toFixed(0)}M` : `$${(v / 1000).toFixed(0)}K`}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
                         <Bar
@@ -191,15 +177,6 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             axisLine={false}
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
-                        />
-                        <YAxis
-                            orientation="right"
-                            domain={['auto', 'auto']}
-                            tick={{ fontSize: 9, fill: '#525252' }}
-                            tickLine={false}
-                            axisLine={false}
-                            width={50}
-                            tickFormatter={(v) => v >= 1000000000 ? `$${(v / 1000000000).toFixed(0)}B` : `$${(v / 1000000).toFixed(0)}M`}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
                         <Area

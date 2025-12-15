@@ -93,6 +93,9 @@ export async function coinglassV4Request<T>(
     }
 
     try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5s timeout
+
         const url = new URL(`${COINGLASS_V4_URL}${endpoint}`)
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
@@ -103,8 +106,11 @@ export async function coinglassV4Request<T>(
         const response = await fetch(url.toString(), {
             headers: getCoinglassV4Headers(),
             next: { revalidate: 60 },
+            signal: controller.signal,
             ...options,
         })
+
+        clearTimeout(timeoutId)
 
         if (!response.ok) {
             console.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`)

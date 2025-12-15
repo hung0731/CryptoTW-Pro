@@ -122,42 +122,69 @@ export default function ReviewsPage() {
                         </SheetContent>
                     </Sheet>
                 </div>
+            </div>
 
-                {/* P0: Scenario Entry */}
-                {!selectedTag && !selectedYear && (
-                    <div className="space-y-3 mb-2">
-                        <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-wider pl-1">我想找...</span>
-                        <div className="grid grid-cols-2 gap-2">
-                            {SCENARIOS.map((s, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => applyScenario(s.filter.tag)}
-                                    className="text-left p-3 rounded-lg bg-neutral-900/50 border border-white/5 hover:bg-neutral-800 transition-colors"
-                                >
-                                    <h4 className="text-xs text-neutral-300 font-medium mb-0.5">{s.label}</h4>
-                                </button>
-                            ))}
+            {/* P0: Compare Banner (New) */}
+            <div className="px-4 mb-6">
+                <Link href="/reviews/compare" className="block">
+                    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-r from-neutral-900 to-neutral-900/50 p-4 hover:border-white/20 transition-all group">
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <TrendingUp className="w-24 h-24 rotate-12" />
+                        </div>
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div className="space-y-1">
+                                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4 text-blue-400" />
+                                    歷史事件對照
+                                    <span className="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/20">Beta</span>
+                                </h3>
+                                <p className="text-xs text-neutral-400">
+                                    疊加兩段歷史走勢，發現驚人的相似性
+                                </p>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                                <ChevronRight className="w-4 h-4 text-neutral-400" />
+                            </div>
                         </div>
                     </div>
-                )}
-
-                {/* Active Filters Display */}
-                {(selectedTag || selectedYear) && (
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Filtered by:</span>
-                        {selectedTag && (
-                            <Badge variant="secondary" onClick={() => setSelectedTag(null)} className="cursor-pointer bg-white text-black hover:bg-neutral-200 text-[10px] h-5 px-2">
-                                #{selectedTag} <span className="ml-1 text-xs">×</span>
-                            </Badge>
-                        )}
-                        {selectedYear && (
-                            <Badge variant="secondary" onClick={() => setSelectedYear(null)} className="cursor-pointer bg-white text-black hover:bg-neutral-200 text-[10px] h-5 px-2">
-                                {selectedYear} <span className="ml-1 text-xs">×</span>
-                            </Badge>
-                        )}
-                    </div>
-                )}
+                </Link>
             </div>
+
+            {/* P0: Scenario Entry */}
+            {!selectedTag && !selectedYear && (
+                <div className="space-y-3 mb-2">
+                    <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-wider pl-1">我想找...</span>
+                    <div className="grid grid-cols-2 gap-2">
+                        {SCENARIOS.map((s, i) => (
+                            <button
+                                key={i}
+                                onClick={() => applyScenario(s.filter.tag)}
+                                className="text-left p-3 rounded-lg bg-neutral-900/50 border border-white/5 hover:bg-neutral-800 transition-colors"
+                            >
+                                <h4 className="text-xs text-neutral-300 font-medium mb-0.5">{s.label}</h4>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Active Filters Display */}
+            {(selectedTag || selectedYear) && (
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Filtered by:</span>
+                    {selectedTag && (
+                        <Badge variant="secondary" onClick={() => setSelectedTag(null)} className="cursor-pointer bg-white text-black hover:bg-neutral-200 text-[10px] h-5 px-2">
+                            #{selectedTag} <span className="ml-1 text-xs">×</span>
+                        </Badge>
+                    )}
+                    {selectedYear && (
+                        <Badge variant="secondary" onClick={() => setSelectedYear(null)} className="cursor-pointer bg-white text-black hover:bg-neutral-200 text-[10px] h-5 px-2">
+                            {selectedYear} <span className="ml-1 text-xs">×</span>
+                        </Badge>
+                    )}
+                </div>
+            )}
+
 
             <div className="p-4 space-y-8">
 
@@ -220,7 +247,7 @@ export default function ReviewsPage() {
                     </div>
                 </section>
             </div>
-        </main>
+        </main >
     );
 }
 

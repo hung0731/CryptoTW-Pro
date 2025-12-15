@@ -161,7 +161,7 @@ export default function ReviewDetailPage() {
                             市場常見誤解
                         </h2>
                         <div className="space-y-2">
-                            {review.misconceptions.slice(0, 2).map((m, idx) => (
+                            {review.misconceptions.map((m, idx) => (
                                 <div key={idx} className="rounded-lg p-3.5" style={{ backgroundColor: '#0F0F10' }}>
                                     {/* 誤解 */}
                                     <div className="flex gap-3 mb-2">
@@ -261,19 +261,19 @@ export default function ReviewDetailPage() {
                 </section>
 
                 {/* 7. 未來警訊 */}
-                <section className="p-4 space-y-3 border-b border-white/5">
-                    <h2 className="text-sm font-medium text-neutral-400">
-                        未來風險觀察點
-                    </h2>
-                    <div className="space-y-2.5">
-                        {review.actionableChecklist.slice(0, 3).map((item, idx) => (
-                            <div key={idx} className="rounded-lg p-3" style={{ backgroundColor: '#0F0F10' }}>
-                                <p className="text-xs text-neutral-300 font-medium mb-1">{item.label}</p>
-                                {item.desc && (
-                                    <p className="text-xs text-neutral-500 leading-relaxed">{item.desc}</p>
-                                )}
-                            </div>
-                        ))}
+                <section className="p-4 space-y-3">
+                    <div className="border-l border-neutral-700 pl-4 py-2" style={{ backgroundColor: '#0F0F10' }}>
+                        <h2 className="text-[10px] font-medium text-neutral-500 uppercase tracking-widest mb-3">
+                            下一次需要注意的不是價格，而是：
+                        </h2>
+                        <div className="space-y-2">
+                            {review.actionableChecklist.map((item, idx) => (
+                                <p key={idx} className="text-xs text-neutral-400 leading-relaxed">
+                                    • {item.label}
+                                    {item.desc && <span className="text-neutral-600 ml-1">— {item.desc}</span>}
+                                </p>
+                            ))}
+                        </div>
                     </div>
                 </section>
 
@@ -293,31 +293,6 @@ export default function ReviewDetailPage() {
                             <p className="text-sm text-neutral-300 leading-relaxed pl-1">
                                 {review.historicalComparison.similarity}
                             </p>
-                            {/* Memorable Closing - Event Specific */}
-                            {review.slug.includes('mtgox') && (
-                                <p className="text-xs text-neutral-500 mt-3 pl-1 italic border-l border-neutral-700 py-1">
-                                    Mt.Gox 定義了「不是你的私鑰，就不是你的資產」這條加密市場的原則。
-                                </p>
-                            )}
-                            {review.slug.includes('ftx') && (
-                                <p className="text-xs text-neutral-500 mt-3 pl-1 italic border-l border-neutral-700 py-1">
-                                    FTX 證明了：無論規模多大，缺乏透明度的中心化機構都可能瞬間崩潰。
-                                </p>
-                            )}
-                            {review.slug.includes('luna') && (
-                                <p className="text-xs text-neutral-500 mt-3 pl-1 italic border-l border-neutral-700 py-1">
-                                    LUNA 教會市場：演算法無法對抗人性，當恐慌開始，數學公式就失效了。
-                                </p>
-                            )}
-                            {/* CTA to Historical Compare */}
-                            <Link
-                                href={`/reviews/compare?a=${review.slug}`}
-                                className="mt-4 flex items-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors group"
-                            >
-                                <GitCompare className="w-3.5 h-3.5" />
-                                <span>與其他重大事件做歷史對照</span>
-                                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                            </Link>
                         </div>
                     </section>
                 )}
