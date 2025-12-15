@@ -54,6 +54,15 @@ export async function middleware(request: NextRequest) {
             loginUrl.searchParams.set('error', 'unauthorized')
             return NextResponse.redirect(loginUrl)
         }
+
+        // RBAC: Check for admin role
+        // Prioritize app_metadata (secure) over user_metadata
+        const role = user.app_metadata?.role || user.user_metadata?.role || 'user'
+        if (role !== 'admin' && role !== 'super_admin') {
+            // Log unauthorized access attempt if needed
+            console.warn(`Unauthorized admin access attempt by ${user.id} (${user.email})`) // optional
+            return NextResponse.redirect(new URL('/', request.url))
+        }
     }
 
     return response

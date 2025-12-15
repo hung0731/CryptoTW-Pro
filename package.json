@@ -44,7 +44,6 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
-    "dotenv": "^17.2.3",
     "isomorphic-dompurify": "^2.34.0",
     "jsonwebtoken": "^9.0.3",
     "lexical": "^0.39.0",
