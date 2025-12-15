@@ -15,6 +15,11 @@ const notoSansTC = Noto_Sans_TC({
 export const metadata: Metadata = {
   title: "加密台灣 Pro",
   description: "Crypto Market Insights & Exclusive Airdrops",
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  }
 };
 
 export default function RootLayout({

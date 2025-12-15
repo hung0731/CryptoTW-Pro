@@ -16,122 +16,133 @@ interface ToolStatus {
     href: string
 }
 
-export function MarketEntryWidgets() {
-    const [tools, setTools] = useState<ToolStatus[]>([])
-    const [loading, setLoading] = useState(true)
+// Default initial tools
+const defaultTools: ToolStatus[] = [
+    { title: '合約市場', status: '載入中...', active: false, href: '/market' },
+    { title: '巨鯨動態', status: '載入中...', active: false, href: '/market/whales' },
+    { title: '資金費率', status: '載入中...', active: false, href: '/market/funding' },
+    { title: '市場預期', status: '載入中...', active: false, href: '/prediction' },
+    { title: '異常警報', status: '載入中...', active: false, href: '/alerts' }
+]
 
-    // Explanations for each tool
-    const getExplanation = (title: string) => {
-        switch (title) {
-            case '合約市場': return (
-                <>
-                    <p>提供期貨合約的即時數據面板。</p>
-                    <p className="mt-2 text-neutral-400">當顯示<strong>「槓桿情緒：偏熱」</strong>時，代表市場過度槓桿化，可能會出現插針或回調。</p>
-                </>
-            )
-            case '巨鯨動態': return (
-                <>
-                    <p>監控大戶與頂級交易員的資金流向。</p>
-                    <p className="mt-2 text-neutral-400">當顯示<strong>「出現單邊押注」</strong>或<strong>「🔔」</strong>時，代表主力正在集中做多或做空。</p>
-                </>
-            )
-            case '資金費率': return (
-                <>
-                    <p>{INDICATOR_KNOWLEDGE.fundingRate.definition}</p>
-                    <p className="mt-2 text-neutral-400">{INDICATOR_KNOWLEDGE.fundingRate.interpretation}</p>
-                </>
-            )
-            case '市場預期': return (
-                <>
-                    <p>來自 Polymarket 的預測市場數據。</p>
-                    <p className="mt-2 text-neutral-400">反映真實資金對未來事件（如降息、選舉）的機率判斷，通常比民調更準確。</p>
-                </>
-            )
-            case '異常警報': return (
-                <>
-                    <p>AI 自動偵測的市場異常事件。</p>
-                    <p className="mt-2 text-neutral-400">包含：價格劇烈波動、大額爆倉、巨鯨轉帳等。每日必看。</p>
-                </>
-            )
-            default: return 'No description.'
-        }
-    }
+const [tools, setTools] = useState<ToolStatus[]>(defaultTools)
+const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        const fetchStatus = async () => {
-
-            try {
-                const res = await fetch('/api/market/status')
-                const json = await res.json()
-                if (json.tools) {
-                    setTools(json.tools)
-                }
-            } catch (e) {
-                console.error(e)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchStatus()
-    }, [])
-
-    if (loading) {
-        return (
-            <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-                {[1, 2, 3, 4].map(i => (
-                    <Skeleton key={i} className="h-28 w-36 flex-none bg-neutral-900/50 rounded-xl" />
-                ))}
-            </div>
+// Explanations for each tool
+const getExplanation = (title: string) => {
+    switch (title) {
+        case '合約市場': return (
+            <>
+                <p>提供期貨合約的即時數據面板。</p>
+                <p className="mt-2 text-neutral-400">當顯示<strong>「槓桿情緒：偏熱」</strong>時，代表市場過度槓桿化，可能會出現插針或回調。</p>
+            </>
         )
+        case '巨鯨動態': return (
+            <>
+                <p>監控大戶與頂級交易員的資金流向。</p>
+                <p className="mt-2 text-neutral-400">當顯示<strong>「出現單邊押注」</strong>或<strong>「🔔」</strong>時，代表主力正在集中做多或做空。</p>
+            </>
+        )
+        case '資金費率': return (
+            <>
+                <p>{INDICATOR_KNOWLEDGE.fundingRate.definition}</p>
+                <p className="mt-2 text-neutral-400">{INDICATOR_KNOWLEDGE.fundingRate.interpretation}</p>
+            </>
+        )
+        case '市場預期': return (
+            <>
+                <p>來自 Polymarket 的預測市場數據。</p>
+                <p className="mt-2 text-neutral-400">反映真實資金對未來事件（如降息、選舉）的機率判斷，通常比民調更準確。</p>
+            </>
+        )
+        case '異常警報': return (
+            <>
+                <p>AI 自動偵測的市場異常事件。</p>
+                <p className="mt-2 text-neutral-400">包含：價格劇烈波動、大額爆倉、巨鯨轉帳等。每日必看。</p>
+            </>
+        )
+        default: return 'No description.'
     }
+}
 
+useEffect(() => {
+    const fetchStatus = async () => {
+        try {
+            const res = await fetch('/api/market/status')
+            if (!res.ok) throw new Error('API Fail')
+            const json = await res.json()
+            if (json.tools && json.tools.length > 0) {
+                setTools(json.tools)
+            }
+        } catch (e) {
+            console.error(e)
+            // On error, keep defaults but update status to '暫無數據'
+            setTools(prev => prev.map(t => ({ ...t, status: t.status === '載入中...' ? '暫無數據' : t.status })))
+        } finally {
+            setLoading(false)
+        }
+    }
+    fetchStatus()
+}, [])
+
+// Only show skeleton on initial mount if really needed, but defaults are better
+if (loading && tools[0].status === '載入中...') {
     return (
-        <div className="space-y-3">
-            <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider px-1">市場工具</h3>
-            <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
-                {tools.map((tool, i) => (
-                    <div
-                        key={i}
-                        className={cn(
-                            "flex-none w-36 h-28 relative rounded-xl border transition-all overflow-hidden group hover:bg-neutral-900/50 snap-center",
-                            tool.active
-                                ? "bg-neutral-900/80 border-blue-500/30 hover:border-blue-500/50"
-                                : "bg-neutral-900/30 border-white/5"
-                        )}
-                    >
-                        <Link href={tool.href} className="block p-4 h-full w-full flex flex-col justify-between">
-                            <div className="flex items-center justify-between pr-4">
-                                <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors whitespace-nowrap">
-                                    {tool.title}
-                                </span>
-                                <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
-                            </div>
-
-                            <div className={cn(
-                                "text-xs font-medium truncate",
-                                tool.active ? "text-blue-300" : "text-neutral-500"
-                            )}>
-                                {/* Add Bell icon if active alert */}
-                                {tool.active && tool.title === '巨鯨動態' && '🔔 '}
-                                {tool.status}
-                            </div>
-                        </Link>
-
-                        {/* Help Icon - Absolute positioned */}
-                        <HelpDrawer
-                            title={tool.title}
-                            content={getExplanation(tool.title)}
-                            className="absolute top-2 right-2 z-20 opacity-40 hover:opacity-100"
-                        />
-
-                        {/* Active Indicator Pulse */}
-                        {tool.active && tool.title === '異常警報' && (
-                            <div className="absolute top-2 right-8 w-2 h-2 rounded-full bg-red-500 animate-pulse pointer-events-none" />
-                        )}
-                    </div>
-                ))}
-            </div>
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+            {[1, 2, 3, 4].map(i => (
+                <Skeleton key={i} className="h-28 w-36 flex-none bg-neutral-900/50 rounded-xl" />
+            ))}
         </div>
-
     )
+}
+
+return (
+    <div className="space-y-3">
+        <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider px-1">市場工具</h3>
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
+            {tools.map((tool, i) => (
+                <div
+                    key={i}
+                    className={cn(
+                        "flex-none w-36 h-28 relative rounded-xl border transition-all overflow-hidden group hover:bg-neutral-900/50 snap-center",
+                        tool.active
+                            ? "bg-neutral-900/80 border-blue-500/30 hover:border-blue-500/50"
+                            : "bg-neutral-900/30 border-white/5"
+                    )}
+                >
+                    <Link href={tool.href} className="block p-4 h-full w-full flex flex-col justify-between">
+                        <div className="flex items-center justify-between pr-4">
+                            <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors whitespace-nowrap">
+                                {tool.title}
+                            </span>
+                            <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
+                        </div>
+
+                        <div className={cn(
+                            "text-xs font-medium truncate",
+                            tool.active ? "text-blue-300" : "text-neutral-500"
+                        )}>
+                            {/* Add Bell icon if active alert */}
+                            {tool.active && tool.title === '巨鯨動態' && '🔔 '}
+                            {tool.status}
+                        </div>
+                    </Link>
+
+                    {/* Help Icon - Absolute positioned */}
+                    <HelpDrawer
+                        title={tool.title}
+                        content={getExplanation(tool.title)}
+                        className="absolute top-2 right-2 z-20 opacity-40 hover:opacity-100"
+                    />
+
+                    {/* Active Indicator Pulse */}
+                    {tool.active && tool.title === '異常警報' && (
+                        <div className="absolute top-2 right-8 w-2 h-2 rounded-full bg-red-500 animate-pulse pointer-events-none" />
+                    )}
+                </div>
+            ))}
+        </div>
+    </div>
+
+)
 }

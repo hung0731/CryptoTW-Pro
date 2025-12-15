@@ -170,6 +170,19 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 fillOpacity={0.05}
                             />
                         )}
+                        <ReferenceLine
+                            x={eventStart}
+                            stroke="#ffffff"
+                            strokeOpacity={0.3}
+                            strokeDasharray="3 3"
+                            label={{
+                                value: 'D0',
+                                position: 'insideTop',
+                                fill: '#ffffff',
+                                fontSize: 10,
+                                opacity: 0.5
+                            }}
+                        />
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                         <XAxis
                             dataKey="date"

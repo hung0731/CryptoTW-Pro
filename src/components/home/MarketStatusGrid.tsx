@@ -35,26 +35,30 @@ export function MarketStatusGrid() {
         const fetchStatus = async () => {
             try {
                 const res = await fetch('/api/market/status')
+                if (!res.ok) throw new Error('API Error')
                 const json = await res.json()
-                if (json.status) {
-                    setData(json.status)
-                }
-                if (json.conclusion) {
-                    setConclusion(json.conclusion)
-                }
+                if (json.status) setData(json.status)
+                if (json.conclusion) setConclusion(json.conclusion)
             } catch (e) {
                 console.error(e)
+                // Fallback data if API fails
+                setData({
+                    regime: { label: '讀取中', code: 'stable', value: '--' },
+                    leverage: { label: '讀取中', code: 'cool', value: '--' },
+                    sentiment: { label: '讀取中', code: 'neutral', value: '--' },
+                    whale: { label: '讀取中', code: 'watch', value: '--' },
+                    volatility: { label: '讀取中', code: 'low', value: '--' }
+                })
             } finally {
                 setLoading(false)
             }
         }
         fetchStatus()
-        // Refresh every minute
         const interval = setInterval(fetchStatus, 60000)
         return () => clearInterval(interval)
     }, [])
 
-    if (loading) {
+    if (loading && !data) { // show skeleton only on first load
         return (
             <div className="space-y-3">
                 <Skeleton className="h-12 w-full bg-neutral-900/50 rounded-xl" />
@@ -67,7 +71,14 @@ export function MarketStatusGrid() {
         )
     }
 
-    if (!data) return null
+    // Default Fallback (Safe Guard)
+    const displayData = data || {
+        regime: { label: '暫無', code: 'stable', value: '--' },
+        leverage: { label: '暫無', code: 'cool', value: '--' },
+        sentiment: { label: '暫無', code: 'neutral', value: '--' },
+        whale: { label: '暫無', code: 'watch', value: '--' },
+        volatility: { label: '暫無', code: 'low', value: '--' }
+    }
 
     // Helper to get color style based on code
     const getStyle = (code: string) => {
@@ -167,11 +178,11 @@ export function MarketStatusGrid() {
     }
 
     const cards = [
-        { title: '市場狀態', ...data.regime, type: 'regime' },
-        { title: '槓桿情緒', ...data.leverage, type: 'leverage' },
-        { title: '市場情緒', ...data.sentiment, type: 'sentiment' },
-        { title: '大戶動向', ...data.whale, type: 'whale' },
-        { title: '短線波動', ...data.volatility, type: 'volatility' }
+        { title: '市場狀態', ...displayData.regime, type: 'regime' },
+        { title: '槓桿情緒', ...displayData.leverage, type: 'leverage' },
+        { title: '市場情緒', ...displayData.sentiment, type: 'sentiment' },
+        { title: '大戶動向', ...displayData.whale, type: 'whale' },
+        { title: '短線波動', ...displayData.volatility, type: 'volatility' }
     ]
 
     return (
