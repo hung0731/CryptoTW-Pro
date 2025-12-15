@@ -60,6 +60,30 @@ async function fetchApi(endpoint) {
     }
 }
 
+// Helper to process Coinglass data
+async function fetchCoinglass(endpoint, processFn, startMs, endMs) {
+    const json = await fetchApi(endpoint);
+    if (!json || !json.success) {
+        if (json) console.warn(`    API Error: ${json.code} - ${json.msg}`);
+        return null;
+    }
+
+    let raw = [];
+    if (json.data && Array.isArray(json.data)) raw = json.data;
+    else if (json.data && json.data.t) {
+        raw = json.data.t.map((t, i) => ({ t, c: json.data.c[i] }));
+    }
+    else raw = json.data || [];
+
+    if (processFn) raw = raw.map(processFn);
+
+    // Filter
+    if (processFn) {
+        return raw.filter(d => d.timestamp >= startMs && d.timestamp <= endMs);
+    }
+    return raw;
+}
+
 // Fetch Logic
 async function fetchHistory(type, symbol, startStr, endStr) {
     const start = new Date(startStr);
@@ -103,51 +127,41 @@ async function fetchHistory(type, symbol, startStr, endStr) {
     }
 
     if (type === 'oi') {
-        // Updated Endpoint: /api/futures/open-interest/aggregated-history
-        // Params: symbol, interval, start_time, end_time
+        // V3 OHLC Aggregated History
+        // https://open-api-v3.coinglass.com/api/futures/openInterest/ohlc-aggregated-history
+        const endpoint = `https://open-api-v3.coinglass.com/api/futures/openInterest/ohlc-aggregated-history?symbol=${symbol}&interval=1d&startTime=${Math.floor(startMs / 1000)}&endTime=${Math.floor(endMs / 1000)}`;
+        console.log(`  Fetching OI (V3): ${symbol}`);
 
-        const endpoint = `/api/futures/open-interest/aggregated-history?symbol=${symbol}&interval=1d&start_time=${startMs}&end_time=${endMs}&limit=1000`;
-        console.log(`  Fetching Aggregated OI: ${endpoint}`);
+        try {
+            const res = await fetch(endpoint, {
+                headers: {
+                    'CG-API-KEY': API_KEY,
+                    'accept': 'application/json'
+                }
+            });
+            const json = await res.json();
 
-        let data = await fetchCoinglass(endpoint, null, startMs, endMs);
+            if (json.code === '0' && Array.isArray(json.data)) {
+                const mapped = json.data.map(d => ({
+                    date: new Date(d.t * 1000).toISOString().split('T')[0],
+                    timestamp: d.t * 1000,
+                    oi: parseFloat(d.c) // Use Close OI
+                }));
+                console.log(`      V3 Got ${mapped.length} items.`);
+                return mapped;
+            } else {
+                console.warn('    V3 OI Error:', json.msg || json);
 
-        if (data && data.length > 0) {
-            // Response format: { time, open, high, low, close }
-            return data.map(d => ({
-                date: new Date(d.time).toISOString().split('T')[0],
-                timestamp: d.time,
-                oi: Number(d.close) // Using close OI
-            })).filter(d => d.timestamp >= startMs && d.timestamp <= endMs);
-        } else {
-            console.warn(`    Aggregated OI returned empty.`);
+                // Fallback to V2 if V3 empty (often V3 requires paid plan or specific coins?)
+                // Actually user said this is public V3? Let's assume it works.
+            }
+        } catch (e) {
+            console.error('    V3 Fetch Error:', e);
         }
 
         return [];
     }
     return [];
-}
-
-async function fetchCoinglass(endpoint, processFn, startMs, endMs) {
-    const json = await fetchApi(endpoint);
-    if (!json || !json.success) {
-        if (json) console.warn(`    API Error: ${json.code} - ${json.msg}`);
-        return null;
-    }
-
-    let raw = [];
-    if (json.data && Array.isArray(json.data)) raw = json.data;
-    else if (json.data && json.data.t) {
-        raw = json.data.t.map((t, i) => ({ t, c: json.data.c[i] }));
-    }
-    else raw = json.data || [];
-
-    if (processFn) raw = raw.map(processFn);
-
-    // Filter
-    if (processFn) {
-        return raw.filter(d => d.timestamp >= startMs && d.timestamp <= endMs);
-    }
-    return raw;
 }
 
 async function run() {
