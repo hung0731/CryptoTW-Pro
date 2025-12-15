@@ -31,14 +31,21 @@ export interface StanceDecision {
     metrics: MarketMetrics
 }
 
+export interface IndicatorCard {
+    icon: string        // 💰 / 👥 / 💥
+    name: string        // 資金費率 / 多空比 / 爆倉
+    status: string      // 歸零 / 50:50 / 0 變化
+    note: string        // 解釋一句話
+}
+
 export interface DailyBroadcastContent {
     judgment: {
         stance: Stance
-        reasons: string[]
-        suggestion: string
+        oneLiner: string      // 市場一句話（最顯眼）
+        suggestion: string    // 操作建議
     }
+    indicatorCards: IndicatorCard[]  // 三個指標卡片
     mindset?: string
-    marketFactor?: string
     // BTC Price Change Reference
     btcPriceChange?: {
         h1: number
@@ -153,9 +160,16 @@ export function decideStance(metrics: MarketMetrics): StanceDecision {
 // Step 2: AI Polish (Gemini)
 // ============================================
 
+export interface PolishResult {
+    oneLiner: string
+    indicatorCards: IndicatorCard[]
+    suggestion: string
+    mindset?: string
+}
+
 export async function polishWithAI(
     decision: StanceDecision
-): Promise<{ reasons: string[], suggestion: string, mindset?: string }> {
+): Promise<PolishResult> {
     // Dynamic import to avoid circular dependency
     const { generateDailyBroadcastPolish } = await import('./gemini')
 
@@ -168,19 +182,54 @@ export async function polishWithAI(
         console.error('[Daily Broadcast] AI polish failed:', e)
     }
 
-    // Fallback: Use raw reasons if AI fails
+    // Fallback: Use raw reasons to construct indicator cards
     return {
-        reasons: decision.rawReasons,
+        oneLiner: getOneLinerFallback(decision.stance),
+        indicatorCards: getIndicatorCardsFallback(decision),
         suggestion: getSuggestionFallback(decision.stance),
         mindset: undefined
     }
 }
 
+function getOneLinerFallback(stance: Stance): string {
+    switch (stance) {
+        case '偏多': return '多頭動能回升，關注突破確認'
+        case '偏多觀望': return '市場偏強但需等待確認信號'
+        case '中性': return '市場缺乏共識，整體進入觀望期'
+        case '偏空觀望': return '短線結構偏弱，風險略升'
+        case '偏空': return '空頭壓力增加，留意下探風險'
+    }
+}
+
+function getIndicatorCardsFallback(decision: StanceDecision): IndicatorCard[] {
+    const m = decision.metrics
+    return [
+        {
+            icon: '💰',
+            name: '資金費率',
+            status: Math.abs(m.fundingRate) < 0.01 ? '趨近零' : m.fundingRate > 0 ? '偏高' : '轉負',
+            note: '多空成本趨近，槓桿意願低'
+        },
+        {
+            icon: '👥',
+            name: '多空比',
+            status: `${Math.round(m.longShortRatio)} / ${Math.round(100 - m.longShortRatio)}`,
+            note: '散戶情緒中性'
+        },
+        {
+            icon: '💥',
+            name: '爆倉 / OI',
+            status: m.liquidationTotal > 100_000_000 ? `${(m.liquidationTotal / 1_000_000).toFixed(0)}M` : '極度清淡',
+            note: '槓桿活動低迷'
+        }
+    ]
+}
+
 function getSuggestionFallback(stance: Stance): string {
     switch (stance) {
-        case '偏多': return '順勢操作，但留意過熱風險'
+        case '偏多': return '順勢操作，留意過熱風險'
         case '偏多觀望': return '不追高，等回踩再觀察'
-        case '中性': return '觀望為主，等待明確信號'
+        case '中性': return '保持觀望，不追價、不重倉'
         case '偏空觀望': return '減倉觀望，不急著抄底'
         case '偏空': return '以保護資金為優先'
     }
@@ -188,164 +237,11 @@ function getSuggestionFallback(stance: Stance): string {
 
 // ============================================
 // Step 3: Create Flex Message
-// (Based on CryptoTW Pro Flex 規範 - 參考 Currency Card)
+// 新版交易型 UX 設計
+// 閱讀順序：一句話 → 掃描條 → 指標卡 → 操作建議 → 心態提醒
 // ============================================
 
-export function createDailyBroadcastFlex(content: DailyBroadcastContent): FlexMessage {
-    const stanceColor = getStanceColor(content.judgment.stance)
-    const formatChange = (n: number) => (n >= 0 ? '+' : '') + n.toFixed(1) + '%'
-    const getChangeColor = (n: number) => n >= 0 ? '#00B900' : '#D00000'
-
-    return {
-        type: 'flex',
-        altText: `幣圈日報：${content.judgment.stance}`,
-        contents: {
-            type: 'bubble',
-            size: 'kilo',
-            header: {
-                type: 'box',
-                layout: 'vertical',
-                contents: [
-                    {
-                        type: 'box',
-                        layout: 'horizontal',
-                        contents: [
-                            {
-                                type: 'text',
-                                text: '幣圈日報',
-                                weight: 'bold',
-                                size: 'lg',
-                                color: '#1F1AD9',
-                                flex: 1
-                            },
-                            {
-                                type: 'text',
-                                text: '加密台灣 Pro',
-                                size: 'xxs',
-                                color: '#888888',
-                                align: 'end',
-                                gravity: 'center'
-                            }
-                        ]
-                    },
-                    {
-                        type: 'box',
-                        layout: 'horizontal',
-                        margin: 'sm',
-                        contents: [
-                            {
-                                type: 'text',
-                                text: content.judgment.stance,
-                                weight: 'bold',
-                                size: 'xl',
-                                color: stanceColor
-                            },
-                            // BTC 24H in header
-                            ...(content.btcPriceChange ? [{
-                                type: 'text' as const,
-                                text: `BTC ${formatChange(content.btcPriceChange.h24)}`,
-                                size: 'sm' as const,
-                                color: getChangeColor(content.btcPriceChange.h24),
-                                weight: 'bold' as const,
-                                align: 'end' as const,
-                                gravity: 'center' as const
-                            }] : [])
-                        ]
-                    }
-                ],
-                paddingBottom: '10px'
-            },
-            body: {
-                type: 'box',
-                layout: 'vertical',
-                contents: [
-                    { type: 'separator', color: '#f0f0f0' },
-
-                    // 判斷理由 (emoji already included from AI)
-                    ...content.judgment.reasons.map(reason => ({
-                        type: 'text' as const,
-                        text: reason,  // AI already adds emoji prefix
-                        size: 'sm' as const,
-                        color: '#555555',
-                        wrap: true,
-                        margin: 'md' as const
-                    })),
-
-                    { type: 'separator', margin: 'md', color: '#f0f0f0' },
-
-                    // 建議
-                    {
-                        type: 'box',
-                        layout: 'horizontal',
-                        margin: 'md',
-                        contents: [
-                            { type: 'text', text: '💡 建議', size: 'sm', color: '#888888', flex: 1 },
-                            { type: 'text', text: content.judgment.suggestion, size: 'sm', color: '#111111', flex: 3, wrap: true, align: 'end' }
-                        ]
-                    },
-
-                    // 心態提醒 (if exists)
-                    ...(content.mindset ? [
-                        { type: 'separator' as const, margin: 'md' as const, color: '#f0f0f0' },
-                        {
-                            type: 'box' as const,
-                            layout: 'horizontal' as const,
-                            margin: 'md' as const,
-                            contents: [
-                                { type: 'text' as const, text: '🧠 心態', size: 'sm' as const, color: '#888888', flex: 1 },
-                                { type: 'text' as const, text: content.mindset, size: 'sm' as const, color: '#555555', wrap: true, flex: 3, align: 'end' as const }
-                            ]
-                        }
-                    ] : []),
-
-                    { type: 'separator', margin: 'md', color: '#f0f0f0' },
-
-                    // BTC 價格變化表格
-                    ...(content.btcPriceChange ? [{
-                        type: 'box' as const,
-                        layout: 'horizontal' as const,
-                        margin: 'md' as const,
-                        contents: [
-                            { type: 'text' as const, text: '1H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const },
-                            { type: 'text' as const, text: '4H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const },
-                            { type: 'text' as const, text: '12H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const },
-                            { type: 'text' as const, text: '24H', size: 'xs' as const, color: '#888888', flex: 1, align: 'center' as const }
-                        ]
-                    },
-                    {
-                        type: 'box' as const,
-                        layout: 'horizontal' as const,
-                        margin: 'xs' as const,
-                        contents: [
-                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h1), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h1), weight: 'bold' as const, flex: 1, align: 'center' as const },
-                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h4), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h4), weight: 'bold' as const, flex: 1, align: 'center' as const },
-                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h12), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h12), weight: 'bold' as const, flex: 1, align: 'center' as const },
-                            { type: 'text' as const, text: formatChange(content.btcPriceChange.h24), size: 'sm' as const, color: getChangeColor(content.btcPriceChange.h24), weight: 'bold' as const, flex: 1, align: 'center' as const }
-                        ]
-                    }] : [])
-                ] as any
-            },
-            footer: {
-                type: 'box',
-                layout: 'horizontal',
-                spacing: 'sm',
-                contents: [
-                    {
-                        type: 'button',
-                        style: 'primary',
-                        height: 'sm',
-                        action: {
-                            type: 'uri',
-                            label: '查看完整數據',
-                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/prediction`
-                        },
-                        color: '#1F1AD9'
-                    }
-                ]
-            }
-        }
-    }
-}
+s
 
 function getStanceColor(stance: Stance): string {
     if (stance.includes('多')) return '#00B900'  // Green (same as up)
@@ -362,18 +258,17 @@ export async function generateDailyBroadcast(metrics: MarketMetrics): Promise<Da
     const decision = decideStance(metrics)
     console.log(`[Daily Broadcast] Stance: ${decision.stance}`, decision.rawReasons)
 
-    // Step 2: AI polish
+    // Step 2: AI polish（生成 oneLiner, indicatorCards, suggestion, mindset）
     const polished = await polishWithAI(decision)
 
     // Step 3: Construct content
     return {
         judgment: {
             stance: decision.stance,
-            reasons: polished.reasons,
+            oneLiner: polished.oneLiner,
             suggestion: polished.suggestion
         },
-        mindset: polished.mindset,
-        marketFactor: undefined  // Will be added when significant events detected
+        indicatorCards: polished.indicatorCards,
+        mindset: polished.mindset
     }
 }
-

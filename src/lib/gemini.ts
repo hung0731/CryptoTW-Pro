@@ -410,58 +410,110 @@ interface StanceDecision {
     }
 }
 
+/**
+ * 指標卡片結構（用於日報 UX）
+ */
+export interface IndicatorCard {
+    icon: string        // 💰 / 👥 / 💥
+    name: string        // 資金費率 / 多空比 / 爆倉
+    status: string      // 歸零 / 50:50 / 0 變化
+    note: string        // 解釋一句話
+}
+
+/**
+ * 日報 AI 潤色結果
+ */
+export interface DailyBroadcastPolishResult {
+    oneLiner: string           // 市場一句話（最顯眼）
+    indicatorCards: IndicatorCard[]  // 三個指標卡片
+    suggestion: string         // 操作建議
+    mindset?: string           // 心態提醒
+}
+
 export async function generateDailyBroadcastPolish(
     decision: StanceDecision
-): Promise<{ reasons: string[], suggestion: string, mindset?: string } | null> {
+): Promise<DailyBroadcastPolishResult | null> {
     if (!genAI) return null
 
     try {
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
-        const prompt = `你是一個加密市場風控分析師。
+        // 格式化費率顯示
+        const fundingDisplay = Math.abs(decision.metrics.fundingRate) < 0.01
+            ? '趨近零'
+            : decision.metrics.fundingRate > 0.05
+                ? '偏高'
+                : decision.metrics.fundingRate < -0.03
+                    ? '轉負'
+                    : '正常'
+
+        // 格式化多空比顯示
+        const lsRatio = decision.metrics.longShortRatio
+        const lsDisplay = lsRatio > 55 ? `${Math.round(lsRatio)} / ${Math.round(100 - lsRatio)}` : lsRatio < 45 ? `${Math.round(lsRatio)} / ${Math.round(100 - lsRatio)}` : '50 / 50'
+
+        // 格式化爆倉/OI 顯示
+        const liqTotal = decision.metrics.liquidationTotal
+        const oiChange = decision.metrics.oiChange24h
+        const liqOiDisplay = liqTotal > 100_000_000
+            ? `${(liqTotal / 1_000_000).toFixed(0)}M 清算`
+            : oiChange > 5 || oiChange < -5
+                ? `OI ${oiChange > 0 ? '+' : ''}${oiChange.toFixed(1)}%`
+                : '極度清淡'
+
+        const prompt = `你是一個加密市場風控分析師，專為交易型 App 日報設計內容。
 
 系統已透過規則判斷今日市場立場為：「${decision.stance}」
 
 ⚠️ 此結論不可更改，你只能用專業、冷靜、像風控的語氣來解釋這個結論。
 
-【原始判斷理由】
-${decision.rawReasons.map(r => `• ${r}`).join('\n')}
-
 【市場數據】
-• 費率：${decision.metrics.fundingRate}%
-• 多空比：${decision.metrics.longShortRatio}% 做多
+• 費率：${decision.metrics.fundingRate.toFixed(4)}%（${fundingDisplay}）
+• 多空比：${decision.metrics.longShortRatio.toFixed(0)}% 做多
 • 爆倉偏向：${decision.metrics.liquidationBias}
 • 24H 爆倉總額：$${(decision.metrics.liquidationTotal / 1_000_000).toFixed(1)}M
-• OI 24H 變化：${decision.metrics.oiChange24h > 0 ? '+' : ''}${decision.metrics.oiChange24h}%
-• BTC 24H 變化：${decision.metrics.btcPriceChange24h > 0 ? '+' : ''}${decision.metrics.btcPriceChange24h}%
+• OI 24H 變化：${decision.metrics.oiChange24h > 0 ? '+' : ''}${decision.metrics.oiChange24h.toFixed(1)}%
+• BTC 24H 變化：${decision.metrics.btcPriceChange24h > 0 ? '+' : ''}${decision.metrics.btcPriceChange24h.toFixed(1)}%
 
-【輸出要求】JSON 格式
+【任務】生成交易型日報卡片內容
+
+【輸出格式】JSON，繁體中文
 {
-  "reasons": ["📊 潤色後的理由1", "📈 潤色後的理由2"],  // 2-3 條，每條前面加一個代表性 emoji，15-25 字，專業但白話
-  "suggestion": "一句話建議行為",  // 15-25 字，克制、不煽動
-  "mindset": "心態提醒（可選）"  // 20-30 字，像資深交易員對朋友的提醒，可為 null
+  "oneLiner": "市場一句話",
+  "indicatorCards": [
+    { "icon": "💰", "name": "資金費率", "status": "${fundingDisplay}", "note": "..." },
+    { "icon": "👥", "name": "多空比", "status": "${lsDisplay}", "note": "..." },
+    { "icon": "💥", "name": "爆倉 / OI", "status": "${liqOiDisplay}", "note": "..." }
+  ],
+  "suggestion": "一句話操作建議",
+  "mindset": "心態提醒（可選）"
 }
 
-【Emoji 選擇指引】
-• 費率相關 → 💰
-• 多空比/散戶 → 👥
-• 爆倉 → 💥
-• OI/資金 → 📊
-• 價格趨勢 → 📈 或 📉
-• 風險提醒 → ⚠️
+【欄位要求】
+• oneLiner: 10-18 字，這張卡片存在的理由，是用戶在 3 秒內要看到的核心結論
+  - 範例（中性）：「市場缺乏共識，整體進入觀望期」
+  - 範例（偏多）：「多頭動能回升，關注突破確認」
+  - 範例（偏空）：「短線結構偏弱，留意下探風險」
+
+• indicatorCards: 三個指標卡片，每個包含：
+  - icon: 使用提供的 emoji
+  - name: 使用提供的名稱
+  - status: 使用提供的狀態（可微調文字）
+  - note: 8-15 字，解釋這個狀態代表什麼
+
+• suggestion: 10-18 字，像交易室白板的指令
+  - 範例：「保持觀望，不追價、不重倉」
+  - 範例：「順勢偏多，回調可留意」
+  - ❌ 禁止：「建議買入」「建議賣出」
+
+• mindset: 15-25 字，資深交易員對朋友的心理提醒（可為 null）
+  - 範例：「沒有方向時，耐心比判斷更重要」
+  - 範例：「趨勢確認前，控制倉位優先」
 
 【排版規範】
 • 中英文之間加空格（如：BTC 價格）
 • 數字與中文之間加空格（如：超過 10 億）
 • 數字與單位不加空格（如：10%、100萬）
 • 中文用全形標點（，、。）
-• 專有名詞用官方寫法（OKX, Binance, SEC）
-
-【語氣規範】
-- 冷靜、克制、像交易室風控備註
-- 禁止預測具體價格
-- 禁止使用「建議買入/賣出」
-- 允許使用「留意」「觀察」「不急於」等詞
 
 輸出純 JSON，不要有其他文字。`
 
