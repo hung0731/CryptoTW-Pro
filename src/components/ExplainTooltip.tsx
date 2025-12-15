@@ -35,7 +35,7 @@ interface ExplainTooltipProps {
 }
 
 /**
- * ExplainTooltip - 雙層決策時間軸
+ * ExplainTooltip - 雙層決策時間軸（水平滑動式）
  * 
  * 📘 L1: 這是什麼（定義）
  * 💡 L2: 如何解讀（交易意義）
@@ -69,7 +69,7 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                 {explanation && (
                     <div className="px-6 mt-6">
                         <div className="bg-white/5 rounded-2xl p-5 border border-white/5">
-                            <h4 className="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-emerald-400 mb-3">
                                 💡 如何解讀？
                             </h4>
                             <div className="text-sm text-neutral-300 leading-relaxed">
@@ -79,12 +79,12 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                     </div>
                 )}
 
-                {/* 雙層決策時間軸 */}
+                {/* 水平決策時間軸 */}
                 {timeline && timeline.cards.length > 0 && (
-                    <div className="px-6 mt-6">
+                    <div className="mt-6">
                         <button
                             onClick={() => setShowTimeline(!showTimeline)}
-                            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/8 rounded-xl border border-white/5 transition-colors"
+                            className="w-full flex items-center justify-between px-6 py-3 hover:bg-white/5 transition-colors"
                         >
                             <span className="flex items-center gap-2 text-sm font-medium text-neutral-400">
                                 <Clock className="w-4 h-4" />
@@ -97,60 +97,56 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                             )}
                         </button>
 
-                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showTimeline ? 'max-h-[1200px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
-                            <div className="relative pl-6">
-                                {/* 時間軸線 */}
-                                <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-white/10" />
-
-                                <div className="space-y-4">
+                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showTimeline ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                            {/* 水平滑動容器 */}
+                            <div className="overflow-x-auto pb-4 pt-2 scrollbar-hide">
+                                <div className="flex gap-3 px-6" style={{ width: 'max-content' }}>
                                     {timeline.cards.map((card, index) => (
-                                        <div key={index} className="relative">
-                                            {/* 時間點 */}
-                                            <div className="absolute -left-6 top-1 w-4 h-4 flex items-center justify-center">
-                                                <span className="text-sm">{card.icon}</span>
+                                        <div
+                                            key={index}
+                                            className={`flex-none w-56 rounded-xl overflow-hidden ${card.type === 'lesson'
+                                                    ? 'bg-blue-500/10 border-2 border-blue-500/30'
+                                                    : 'bg-white/5 border border-white/10'
+                                                }`}
+                                        >
+                                            {/* 頂部：時間 + 圖示 */}
+                                            <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-black/20">
+                                                <span className="text-xs text-neutral-500 font-mono">
+                                                    {card.time || '總結'}
+                                                </span>
+                                                <span className="text-base">{card.icon}</span>
                                             </div>
 
-                                            {/* 卡片內容 */}
-                                            <div className={`rounded-xl overflow-hidden ${card.type === 'lesson'
-                                                    ? 'bg-blue-500/10 border border-blue-500/20'
-                                                    : 'bg-white/5 border border-white/5'
-                                                }`}>
-                                                {/* 上半部：市場狀態（灰字，客觀） */}
-                                                <div className="p-3 border-b border-white/5">
-                                                    {card.time && (
-                                                        <div className="text-xs text-neutral-500 mb-1">
-                                                            🕒 {card.time}
-                                                        </div>
-                                                    )}
-                                                    <div className="text-xs text-neutral-400">
-                                                        市場狀態：
-                                                    </div>
-                                                    <div className="text-sm text-neutral-300 mt-0.5">
-                                                        {card.marketState}
-                                                    </div>
+                                            {/* 市場狀態 */}
+                                            <div className="px-3 py-2 border-b border-white/5">
+                                                <div className="text-[10px] text-neutral-500 mb-1">市場狀態</div>
+                                                <div className="text-xs text-neutral-300 leading-relaxed">
+                                                    {card.marketState}
+                                                </div>
+                                            </div>
+
+                                            {/* 當下該做的事 */}
+                                            <div className="px-3 py-2 bg-white/3">
+                                                <div className="text-[10px] text-emerald-400/80 mb-1">當下該做</div>
+                                                <div className={`text-xs font-medium leading-relaxed ${card.type === 'lesson' ? 'text-blue-300' : 'text-white'
+                                                    }`}>
+                                                    {card.action}
                                                 </div>
 
-                                                {/* 下半部：當下該做的事（白字，主角） */}
-                                                <div className="p-3 bg-white/3">
-                                                    <div className="text-xs text-emerald-400/80">
-                                                        當下該做的事：
+                                                {card.ifIgnored && (
+                                                    <div className="text-[10px] text-red-400/60 mt-1.5 italic">
+                                                        ⚠ {card.ifIgnored}
                                                     </div>
-                                                    <div className={`text-sm font-medium mt-0.5 ${card.type === 'lesson' ? 'text-blue-400' : 'text-white'
-                                                        }`}>
-                                                        {card.action}
-                                                    </div>
-
-                                                    {/* 如果忽略（小字，可選） */}
-                                                    {card.ifIgnored && (
-                                                        <div className="text-xs text-red-400/60 mt-2 italic">
-                                                            ⚠️ 如果忽略：{card.ifIgnored}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+
+                            {/* 滑動提示 */}
+                            <div className="text-center text-[10px] text-neutral-600 pb-2">
+                                ← 左右滑動查看完整時間軸 →
                             </div>
                         </div>
                     </div>
