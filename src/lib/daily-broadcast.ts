@@ -241,7 +241,198 @@ function getSuggestionFallback(stance: Stance): string {
 // 閱讀順序：一句話 → 掃描條 → 指標卡 → 操作建議 → 心態提醒
 // ============================================
 
-s
+export function createDailyBroadcastFlex(content: DailyBroadcastContent): FlexMessage {
+    const stanceColor = getStanceColor(content.judgment.stance)
+    const formatChange = (n: number) => (n >= 0 ? '+' : '') + n.toFixed(1) + '%'
+    const getChangeColor = (n: number) => n >= 0 ? '#00B900' : '#D00000'
+
+    // 建構指標卡片 Flex 元素
+    const indicatorCardElements: any[] = content.indicatorCards.flatMap((card, i) => [
+        // 分隔線（第一個除外）
+        ...(i > 0 ? [{ type: 'separator' as const, margin: 'md' as const, color: '#f0f0f0' }] : []),
+        // 指標卡片
+        {
+            type: 'box' as const,
+            layout: 'vertical' as const,
+            margin: i > 0 ? 'md' as const : 'none' as const,
+            contents: [
+                // 第一行：icon + name + status
+                {
+                    type: 'box' as const,
+                    layout: 'horizontal' as const,
+                    contents: [
+                        {
+                            type: 'text' as const,
+                            text: `${card.icon} ${card.name}`,
+                            size: 'sm' as const,
+                            color: '#555555',
+                            flex: 2
+                        },
+                        {
+                            type: 'text' as const,
+                            text: card.status,
+                            size: 'sm' as const,
+                            color: '#111111',
+                            weight: 'bold' as const,
+                            align: 'end' as const,
+                            flex: 2
+                        }
+                    ]
+                },
+                // 第二行：note（解釋）
+                {
+                    type: 'text' as const,
+                    text: card.note,
+                    size: 'xs' as const,
+                    color: '#888888',
+                    margin: 'xs' as const
+                }
+            ]
+        }
+    ])
+
+    return {
+        type: 'flex',
+        altText: `幣圈日報：${content.judgment.stance}`,
+        contents: {
+            type: 'bubble',
+            size: 'kilo',
+            header: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    // 頂部：📘 幣圈日報｜{stance} + BTC 24H
+                    {
+                        type: 'box',
+                        layout: 'horizontal',
+                        contents: [
+                            {
+                                type: 'text',
+                                text: `📘 幣圈日報｜${content.judgment.stance}`,
+                                weight: 'bold',
+                                size: 'md',
+                                color: stanceColor,
+                                flex: 2
+                            },
+                            // BTC 24H 變化
+                            ...(content.btcPriceChange ? [{
+                                type: 'text' as const,
+                                text: `BTC 24H ${formatChange(content.btcPriceChange.h24)}`,
+                                size: 'xs' as const,
+                                color: getChangeColor(content.btcPriceChange.h24),
+                                weight: 'bold' as const,
+                                align: 'end' as const,
+                                gravity: 'center' as const,
+                                flex: 1
+                            }] : [])
+                        ]
+                    },
+                    // 市場一句話（最大最顯眼）
+                    {
+                        type: 'text',
+                        text: content.judgment.oneLiner,
+                        weight: 'bold',
+                        size: 'lg',
+                        color: '#111111',
+                        wrap: true,
+                        margin: 'md'
+                    }
+                ],
+                paddingBottom: '10px'
+            },
+            body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    // 時間掃描條（1H/4H/12H/24H）
+                    ...(content.btcPriceChange ? [
+                        {
+                            type: 'box' as const,
+                            layout: 'horizontal' as const,
+                            contents: [
+                                { type: 'text' as const, text: '1H', size: 'xxs' as const, color: '#888888', flex: 1, align: 'center' as const },
+                                { type: 'text' as const, text: '4H', size: 'xxs' as const, color: '#888888', flex: 1, align: 'center' as const },
+                                { type: 'text' as const, text: '12H', size: 'xxs' as const, color: '#888888', flex: 1, align: 'center' as const },
+                                { type: 'text' as const, text: '24H', size: 'xxs' as const, color: '#888888', flex: 1, align: 'center' as const }
+                            ]
+                        },
+                        {
+                            type: 'box' as const,
+                            layout: 'horizontal' as const,
+                            margin: 'xs' as const,
+                            contents: [
+                                { type: 'text' as const, text: formatChange(content.btcPriceChange.h1), size: 'xs' as const, color: getChangeColor(content.btcPriceChange.h1), weight: 'bold' as const, flex: 1, align: 'center' as const },
+                                { type: 'text' as const, text: formatChange(content.btcPriceChange.h4), size: 'xs' as const, color: getChangeColor(content.btcPriceChange.h4), weight: 'bold' as const, flex: 1, align: 'center' as const },
+                                { type: 'text' as const, text: formatChange(content.btcPriceChange.h12), size: 'xs' as const, color: getChangeColor(content.btcPriceChange.h12), weight: 'bold' as const, flex: 1, align: 'center' as const },
+                                { type: 'text' as const, text: formatChange(content.btcPriceChange.h24), size: 'xs' as const, color: getChangeColor(content.btcPriceChange.h24), weight: 'bold' as const, flex: 1, align: 'center' as const }
+                            ]
+                        },
+                        { type: 'separator' as const, margin: 'md' as const, color: '#f0f0f0' }
+                    ] : []),
+
+                    // 三個指標卡片
+                    ...indicatorCardElements,
+
+                    { type: 'separator', margin: 'md', color: '#f0f0f0' },
+
+                    // 🧭 操作建議（行動卡片）
+                    {
+                        type: 'box',
+                        layout: 'vertical',
+                        margin: 'md',
+                        backgroundColor: '#F8F8F8',
+                        cornerRadius: '6px',
+                        paddingAll: '12px',
+                        contents: [
+                            {
+                                type: 'text',
+                                text: '🧭 操作建議',
+                                size: 'xs',
+                                color: '#888888'
+                            },
+                            {
+                                type: 'text',
+                                text: content.judgment.suggestion,
+                                size: 'md',
+                                color: '#111111',
+                                weight: 'bold',
+                                margin: 'xs'
+                            }
+                        ]
+                    },
+
+                    // 🧠 心態提醒（淡灰小字，底部）
+                    ...(content.mindset ? [{
+                        type: 'text' as const,
+                        text: `🧠 ${content.mindset}`,
+                        size: 'xxs' as const,
+                        color: '#AAAAAA',
+                        wrap: true,
+                        margin: 'md' as const
+                    }] : [])
+                ] as any
+            },
+            footer: {
+                type: 'box',
+                layout: 'horizontal',
+                spacing: 'sm',
+                contents: [
+                    {
+                        type: 'button',
+                        style: 'primary',
+                        height: 'sm',
+                        action: {
+                            type: 'uri',
+                            label: '查看完整數據',
+                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/prediction`
+                        },
+                        color: '#1F1AD9'
+                    }
+                ]
+            }
+        }
+    }
+}
 
 function getStanceColor(stance: Stance): string {
     if (stance.includes('多')) return '#00B900'  // Green (same as up)

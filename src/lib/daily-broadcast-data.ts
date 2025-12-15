@@ -40,7 +40,16 @@ export async function fetchDailyBroadcastMetrics(): Promise<DailyBroadcastMetric
         fetchBtcPriceChanges()
     ])
 
-    return {
+    // Debug logging
+    console.log('[Daily Broadcast] Raw API data:', {
+        funding: fundingData,
+        lsr: lsrData,
+        liquidation: liqData,
+        oi: oiData,
+        price: priceData
+    })
+
+    const result = {
         fundingRate: fundingData?.rate ?? 0,
         longShortRatio: lsrData?.longRate ?? 50,
         liquidationBias: liqData?.bias ?? 'neutral',
@@ -49,6 +58,10 @@ export async function fetchDailyBroadcastMetrics(): Promise<DailyBroadcastMetric
         btcPriceChange24h: priceData?.h24 ?? 0,
         btcPriceChanges: priceData ?? { h1: 0, h4: 0, h12: 0, h24: 0 }
     }
+
+    console.log('[Daily Broadcast] Final metrics:', result)
+
+    return result
 }
 
 // =============================================
