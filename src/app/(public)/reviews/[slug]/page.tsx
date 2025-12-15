@@ -66,29 +66,20 @@ export default function ReviewDetailPage() {
                             快速導讀
                         </h2>
                         <p className="text-[10px] text-neutral-500 mb-3 pl-5">給已經忘記細節的人 30 秒回顧</p>
-                        <ul className="space-y-3">
-                            <li className="flex items-start gap-3">
-                                <span className="w-1 h-1 rounded-full bg-neutral-500 mt-2 flex-shrink-0"></span>
-                                <div>
-                                    <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">事件本質 Nature</span>
-                                    <p className="text-sm text-neutral-300 leading-relaxed font-medium">{review.context.what.split('。')[0]}。</p>
-                                </div>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <span className="w-1 h-1 rounded-full bg-neutral-500 mt-2 flex-shrink-0"></span>
-                                <div>
-                                    <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">核心機制 Mechanism</span>
-                                    <p className="text-sm text-neutral-300 leading-relaxed font-medium">{review.summary}</p>
-                                </div>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <span className="w-1 h-1 rounded-full bg-neutral-500 mt-2 flex-shrink-0"></span>
-                                <div>
-                                    <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">關鍵根源 Root Cause</span>
-                                    <p className="text-sm text-neutral-300 leading-relaxed font-bold">{review.context.realImpact}</p>
-                                </div>
-                            </li>
-                        </ul>
+                        <div className="space-y-4">
+                            <div>
+                                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">事件本質</span>
+                                <p className="text-sm text-neutral-300 leading-relaxed font-medium">{review.context.what.split('。')[0]}。</p>
+                            </div>
+                            <div>
+                                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">核心機制</span>
+                                <p className="text-sm text-neutral-300 leading-relaxed font-medium">{review.summary}</p>
+                            </div>
+                            <div>
+                                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">關鍵根源</span>
+                                <p className="text-sm text-neutral-300 leading-relaxed font-bold">{review.context.realImpact}</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -155,13 +146,13 @@ export default function ReviewDetailPage() {
                                             <TrendingUp className="w-4 h-4 text-blue-400" />
                                             <span className="text-blue-400 font-bold text-xs">圖表解讀</span>
                                         </div>
-                                        <div className="grid gap-3 pl-2 border-l-2 border-blue-500/20 ml-1.5 py-1">
+                                        <div className="space-y-4">
                                             <div>
-                                                <span className="text-[10px] text-blue-300/70 uppercase tracking-wider block mb-0.5">當下反應 What it means</span>
+                                                <span className="text-[10px] text-blue-300/70 uppercase tracking-wider block mb-0.5">當下反應</span>
                                                 <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.main.interpretation.whatItMeans}</p>
                                             </div>
                                             <div>
-                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號 What to watch</span>
+                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號</span>
                                                 <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.main.interpretation.whatToWatch}</p>
                                             </div>
                                         </div>
@@ -211,13 +202,13 @@ export default function ReviewDetailPage() {
                                             <Activity className="w-4 h-4 text-green-400" />
                                             <span className="text-green-400 font-bold text-xs">流動性解讀</span>
                                         </div>
-                                        <div className="grid gap-3 pl-2 border-l-2 border-green-500/20 ml-1.5 py-1">
+                                        <div className="space-y-4">
                                             <div>
-                                                <span className="text-[10px] text-green-300/70 uppercase tracking-wider block mb-0.5">當下反應 What it means</span>
+                                                <span className="text-[10px] text-green-300/70 uppercase tracking-wider block mb-0.5">當下反應</span>
                                                 <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.flow.interpretation.whatItMeans}</p>
                                             </div>
                                             <div>
-                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號 What to watch</span>
+                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號</span>
                                                 <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.flow.interpretation.whatToWatch}</p>
                                             </div>
                                         </div>
@@ -265,13 +256,13 @@ export default function ReviewDetailPage() {
                                             <Activity className="w-4 h-4 text-yellow-400" />
                                             <span className="text-yellow-400 font-bold text-xs">持倉量解讀</span>
                                         </div>
-                                        <div className="grid gap-3 pl-2 border-l-2 border-yellow-500/20 ml-1.5 py-1">
+                                        <div className="space-y-4">
                                             <div>
-                                                <span className="text-[10px] text-yellow-300/70 uppercase tracking-wider block mb-0.5">當下反應 What it means</span>
+                                                <span className="text-[10px] text-yellow-300/70 uppercase tracking-wider block mb-0.5">當下反應</span>
                                                 <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.oi.interpretation.whatItMeans}</p>
                                             </div>
                                             <div>
-                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號 What to watch</span>
+                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號</span>
                                                 <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.oi.interpretation.whatToWatch}</p>
                                             </div>
                                         </div>
