@@ -58,7 +58,6 @@ export function EconomicCalendar() {
                 <div key={date} className="space-y-3">
                     {/* Date Header */}
                     <div className="flex items-center gap-3 pb-2 border-b border-white/10 sticky top-0 bg-black/90 backdrop-blur z-10 pt-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                         <h3 className="text-base font-bold text-white font-mono tracking-tight">{date}</h3>
                     </div>
 

@@ -14,7 +14,7 @@ export default function PublicLayout({
             <Suspense fallback={null}>
                 <RouteHandler />
             </Suspense>
-            <div className="w-full max-w-[480px] mx-auto min-h-screen relative shadow-2xl shadow-black bg-background pb-20">
+            <div className="w-full max-w-[480px] mx-auto min-h-screen relative shadow-2xl shadow-black bg-background pb-20 overflow-x-hidden">
                 <AnnouncementBanner />
                 {children}
             </div>

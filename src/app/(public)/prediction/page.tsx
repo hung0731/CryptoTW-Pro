@@ -319,7 +319,6 @@ function DataPageContent() {
                     <section className="space-y-4">
                         {/* Section Header */}
                         <div className="flex items-center gap-3">
-                            <div className="w-1 h-5 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
                             <h2 className="text-base font-bold text-white tracking-tight">今日市場狀態</h2>
                         </div>
 
@@ -413,10 +412,8 @@ function DataPageContent() {
                     {/* Section 2: 機構與週期確認 - B 級輔助指標 */}
                     {/* ─────────────────────────────────────────── */}
                     <section className="space-y-4">
-                        {/* Section Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-1 h-4 bg-neutral-700 rounded-full" />
                                 <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">機構與週期確認</h2>
                             </div>
                             <span className="text-[10px] text-neutral-600 bg-neutral-800/50 px-2 py-0.5 rounded-full">輔助指標</span>
@@ -433,10 +430,8 @@ function DataPageContent() {
                     {/* Section 3: 主力動向 - 狀態佐證 */}
                     {/* ─────────────────────────────────────────── */}
                     <section className="space-y-4">
-                        {/* Section Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-1 h-4 bg-purple-500/50 rounded-full" />
                                 <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">主力動向</h2>
                             </div>
                             <span className="text-[10px] text-neutral-600 bg-neutral-800/50 px-2 py-0.5 rounded-full">即時監控</span>
@@ -529,7 +524,6 @@ function DataPageContent() {
                         {/* Section Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-1 h-5 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full" />
                                 <h2 className="text-base font-bold text-white tracking-tight">費率套利</h2>
                             </div>
                             <span className="text-[10px] text-amber-400/80 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full font-medium">
@@ -546,7 +540,6 @@ function DataPageContent() {
                         {/* Section Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-1 h-4 bg-neutral-700 rounded-full" />
                                 <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">預測市場</h2>
                             </div>
                             <span className="text-[10px] text-neutral-600 bg-neutral-800/50 px-2 py-0.5 rounded-full">娛樂參考</span>

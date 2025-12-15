@@ -154,8 +154,8 @@ export default function ComparePage() {
                             )}
                             <div className="absolute bottom-6 left-4 right-4 z-20 pointer-events-none">
                                 <div className="bg-black/60 backdrop-blur-md border border-white/5 p-3 rounded-xl shadow-xl">
-                                    <p className="text-[11px] text-neutral-200 leading-relaxed font-medium">
-                                        <span className="text-blue-400 font-bold mr-1">▌</span>
+                                    <p className="text-[11px] text-neutral-200 leading-relaxed font-medium pl-1">
+                                        <span className="text-[9px] text-blue-400 font-mono mr-1">BASE</span>
                                         {leftEvent?.summary}
                                     </p>
                                 </div>
@@ -184,8 +184,8 @@ export default function ComparePage() {
                             )}
                             <div className="absolute bottom-6 left-4 right-4 z-20 pointer-events-none">
                                 <div className="bg-black/60 backdrop-blur-md border border-white/5 p-3 rounded-xl shadow-xl">
-                                    <p className="text-[11px] text-neutral-200 leading-relaxed font-medium">
-                                        <span className="text-amber-400 font-bold mr-1">▌</span>
+                                    <p className="text-[11px] text-neutral-200 leading-relaxed font-medium pl-1">
+                                        <span className="text-[9px] text-amber-400 font-mono mr-1">COMPARE</span>
                                         {rightEvent?.summary}
                                     </p>
                                 </div>

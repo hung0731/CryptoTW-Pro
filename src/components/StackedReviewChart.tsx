@@ -5,9 +5,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend
 } from 'recharts'
-import { AlertCircle, Zap } from 'lucide-react'
+import { AlertCircle, Zap, Info } from 'lucide-react'
 import { REVIEWS_DATA } from '@/lib/reviews-data'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
+
+// 1. Define Visual Domains (Clamps)
+const PCT_DOMAIN = [-80, 80]
+const DD_DOMAIN = [-100, 0]
 
 interface StackedReviewChartProps {
     leftSlug: string
@@ -18,7 +22,13 @@ interface StackedReviewChartProps {
 export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: StackedReviewChartProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    const [viewType, setViewType] = useState<'pct' | 'dd'>('pct') // New toggle state
+    const [viewType, setViewType] = useState<'pct' | 'dd'>('pct')
+
+    // Helper: Soft Clamp
+    const clamp = (val: number | null, min: number, max: number) => {
+        if (val === null) return null
+        return Math.max(min, Math.min(max, val))
+    }
 
     useEffect(() => {
         const loadData = () => {
@@ -57,9 +67,6 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             const rightSeries = processHistory(rightHistory, rightInfo.eventStartAt, 'right')
 
             // Merge logic
-            // We want a unified T-axis from min(T) to max(T) of interest
-            // Usually -30 to +60 or whatever available.
-            // Let's create a map by T
             const mergedMap = new Map<number, any>()
 
             // Populate Map
@@ -72,31 +79,18 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 mergedMap.set(item.t, { ...existing, ...item })
             })
 
-            // Filter Range (e.g. -30 ~ +30 standard, or focus window)
-            // Use standard -30 to +30 for now unless focus window passed?
-            // Actually user might want to see full range.
-            // Let's default to -30 to +30 like ReviewChart
-            const rangeMin = -30
-            const rangeMax = 60 // Extended range for stacked
-
             const sortedData = Array.from(mergedMap.values())
                 .filter(d => {
-                    // If focusWindow provided, filter strict? Or just show range?
-                    // Let's stick to a reasonable window
+                    // Default range -45 to +60
                     return d.t >= -45 && d.t <= 60
                 })
                 .sort((a, b) => a.t - b.t)
 
-            // Normalize Price to % change from T=0?
-            // User likely wants to compare *trend* not absolute price ($100k vs $800).
-            // Normalizing to % relative to T0 is best practice for stacking.
-            // Find T0 price for each
+            // Normalize Price to % change from T=0
             const leftT0 = leftSeries.find((d: any) => d.t === 0)?.leftPrice || leftSeries.find((d: any) => d.t === 1)?.leftPrice || leftSeries[0].leftPrice
             const rightT0 = rightSeries.find((d: any) => d.t === 0)?.rightPrice || rightSeries.find((d: any) => d.t === 1)?.rightPrice || rightSeries[0].rightPrice
 
-            // Calculate Peaks for Drawdown (assuming starting from max before T=0 is not needed, usually DD from local peak in window)
-            // But for event study, DD usually means decline from T0 or peak within window.
-            // Let's implement DD from Peak-to-Date (Rolling Max).
+            // Calculate Peaks for Drawdown (Peak-to-Date)
             let leftMax = -Infinity
             let rightMax = -Infinity
 
@@ -104,18 +98,27 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 if (d.leftPrice) leftMax = Math.max(leftMax, d.leftPrice)
                 if (d.rightPrice) rightMax = Math.max(rightMax, d.rightPrice)
 
+                // 2. Compute Original Values
                 const leftPct = d.leftPrice ? ((d.leftPrice - leftT0) / leftT0) * 100 : null
                 const rightPct = d.rightPrice ? ((d.rightPrice - rightT0) / rightT0) * 100 : null
-
                 const leftDD = d.leftPrice ? ((d.leftPrice - leftMax) / leftMax) * 100 : null
                 const rightDD = d.rightPrice ? ((d.rightPrice - rightMax) / rightMax) * 100 : null
 
+                // 3. Compute Display Values (Clamped)
+                // We compute clamps for BOTH modes here to keep logic separate or compute on fly?
+                // Better compute here.
+                const leftPctDisplay = clamp(leftPct, PCT_DOMAIN[0], PCT_DOMAIN[1])
+                const rightPctDisplay = clamp(rightPct, PCT_DOMAIN[0], PCT_DOMAIN[1])
+                const leftDDDisplay = clamp(leftDD, DD_DOMAIN[0], DD_DOMAIN[1])
+                const rightDDDisplay = clamp(rightDD, DD_DOMAIN[0], DD_DOMAIN[1])
+
                 return {
                     ...d,
-                    leftPct,
-                    rightPct,
-                    leftDD,
-                    rightDD
+                    leftPct, rightPct,
+                    leftDD, rightDD,
+                    // Clamped values for rendering
+                    leftPctDisplay, rightPctDisplay,
+                    leftDDDisplay, rightDDDisplay
                 }
             })
 
@@ -134,23 +137,30 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-neutral-950/90 border border-white/10 p-4 rounded-lg shadow-2xl text-xs backdrop-blur-md min-w-[200px]">
+                <div className="bg-neutral-950/90 border border-white/10 p-4 rounded-lg shadow-2xl text-xs backdrop-blur-md min-w-[240px]">
                     <p className="text-neutral-400 mb-2 font-mono flex items-center gap-2 border-b border-white/5 pb-2">
                         <span className="text-white font-bold">D{label >= 0 ? `+${label}` : label}</span>
                         <span>(事件日)</span>
                     </p>
                     {payload.map((p: any, i: number) => {
-                        const val = Number(p.value)
-                        // Mock context based on value
+                        // Determine which real value to pick based on viewType
+                        const realKey = viewType === 'pct'
+                            ? (p.dataKey === 'leftPctDisplay' ? 'leftPct' : 'rightPct')
+                            : (p.dataKey === 'leftDDDisplay' ? 'leftDD' : 'rightDD')
+
+                        // We access the real value from payload[0].payload (the full data object)
+                        const realVal = p.payload[realKey]
+                        const isClamped = realVal !== p.value // p.value is the clamped display value
+
+                        // Context logic
                         let context = ''
-                        if (val < -20) context = '市場恐慌加劇'
-                        else if (val < -10) context = '信心脆弱'
-                        else if (val > 10) context = '反彈強勁'
-                        else if (val > 0) context = '震盪回穩'
+                        if (realVal < -20) context = '恐慌加劇'
+                        else if (realVal < -10) context = '信心脆弱'
+                        else if (realVal > 10) context = '反彈強勁'
                         else context = '盤整中'
 
                         return (
-                            <div key={i} className="mb-2 last:mb-0">
+                            <div key={i} className="mb-3 last:mb-0">
                                 <div className="flex items-center justify-between gap-4 mb-0.5">
                                     <div className="flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
@@ -158,15 +168,20 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                                             {p.name.includes('基準') ? '基準' : '對照'}
                                         </span>
                                     </div>
-                                    <span className={`font-mono font-bold text-sm ${val >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        {val > 0 ? '+' : ''}{val.toFixed(2)}%
-                                    </span>
+                                    <div className="text-right">
+                                        <span className={`font-mono font-bold text-sm ${realVal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                            {realVal > 0 ? '+' : ''}{Number(realVal).toFixed(2)}%
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-end">
-                                    <span className="text-[10px] text-neutral-500 italic">
-                                        {context}
-                                    </span>
-                                </div>
+
+                                {/* Warning if Clamped */}
+                                {isClamped && (
+                                    <div className="flex items-center justify-end gap-1 mb-1 text-amber-500">
+                                        <AlertCircle className="w-3 h-3" />
+                                        <span className="text-[10px]">極端值已截斷 ({p.value > 0 ? '+' : ''}{p.value}%)</span>
+                                    </div>
+                                )}
                             </div>
                         )
                     })}
@@ -177,9 +192,9 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
     }
 
     return (
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative group">
             {/* View Type Toggle */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-20 flex bg-neutral-900/80 backdrop-blur rounded-lg p-0.5 border border-white/10">
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-20 flex bg-neutral-900/80 backdrop-blur rounded-lg p-0.5 border border-white/10 shadow-lg">
                 <button
                     onClick={() => setViewType('pct')}
                     className={`px-3 py-1 rounded text-[10px] transition-all font-medium ${viewType === 'pct' ? 'bg-white/10 text-white shadow-sm' : 'text-neutral-500 hover:text-neutral-300'}`}
@@ -195,16 +210,10 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 </button>
             </div>
 
-            {/* D0 Event Pulse Marker (Visual only, on top of graph) */}
-            <div className="absolute top-8 bottom-8 left-[calc(30%)] -translate-x-1/2 z-10 pointer-events-none hidden md:block" style={{ left: 'calc(45px + (100% - 60px) * (2000 / 6300))' /* Manual approx or ignore for SVG */ }}>
-                {/* This is hard to calculate in absolute div without knowing scale. Recharts ReferenceLine is better. */}
-            </div>
-
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
+                <LineChart data={data} margin={{ top: 20, right: 20, bottom: 35, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
 
-                    {/* Enhanced D0 Line */}
                     <ReferenceLine
                         x={0}
                         stroke="#ef4444"
@@ -234,13 +243,16 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(val) => `${val}%`}
-                        domain={['auto', 'auto']}
+                        // 5. Apply Visual Domain
+                        domain={viewType === 'pct' ? PCT_DOMAIN : DD_DOMAIN}
+                        allowDataOverflow={true} // Important: Force clip at domain
                     />
                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
-                    <Legend iconType="circle" />
+                    <Legend iconType="circle" verticalAlign="top" height={36} wrapperStyle={{ top: -10, right: 0 }} />
                     <Line
                         type="monotone"
-                        dataKey={viewType === 'pct' ? 'leftPct' : 'leftDD'}
+                        // 7. Use Display Values
+                        dataKey={viewType === 'pct' ? 'leftPctDisplay' : 'leftDDDisplay'}
                         name="基準 (左)"
                         stroke={getLeftColor()}
                         strokeWidth={2}
@@ -250,7 +262,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                     />
                     <Line
                         type="monotone"
-                        dataKey={viewType === 'pct' ? 'rightPct' : 'rightDD'}
+                        dataKey={viewType === 'pct' ? 'rightPctDisplay' : 'rightDDDisplay'}
                         name="對照 (右)"
                         stroke={getRightColor()}
                         strokeWidth={2}
@@ -260,6 +272,14 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                     />
                 </LineChart>
             </ResponsiveContainer>
+
+            {/* 8. Disclaimer (Bottom Left inside chart area) */}
+            <div className="absolute bottom-1 left-2 z-10 hidden md:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Info className="w-3 h-3 text-neutral-600" />
+                <span className="text-[9px] text-neutral-600">
+                    圖表顯示範圍已優化以利比較，極端值仍保留於詳細資訊中
+                </span>
+            </div>
         </div>
     )
 }

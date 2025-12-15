@@ -73,7 +73,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
 
             {/* Main Conclusion */}
             <h1 className="text-base font-bold text-white mb-3 leading-snug">
-                {data.conclusion}
+                {data.conclusion.replace(/｜/g, ' ')}
             </h1>
 
             {/* Status Tags */}

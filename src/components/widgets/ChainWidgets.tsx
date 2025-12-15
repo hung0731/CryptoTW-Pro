@@ -167,7 +167,7 @@ export function WhaleAlertFeed() {
                     <Radar className="w-3.5 h-3.5 text-neutral-500" />
                     <span className="text-xs font-bold text-neutral-400">巨鯨快訊</span>
                     <span className="text-[9px] font-mono text-neutral-600 border-l border-white/10 pl-2">
-                        ≥ $1M｜近 60 分鐘
+                        ≥ $1M 近 60 分鐘
                     </span>
                 </div>
                 <div className="flex items-center gap-1">

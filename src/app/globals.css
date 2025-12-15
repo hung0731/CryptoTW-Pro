@@ -141,10 +141,13 @@
 
   html {
     @apply bg-black;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground font-sans;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   h1,
@@ -154,5 +157,28 @@
   h5,
   h6 {
     @apply font-sans font-bold tracking-tight;
+  }
+}
+
+/* Mobile Optimization Utilities */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area padding for notched phones */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* Prevent text overflow */
+  .break-anywhere {
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 }

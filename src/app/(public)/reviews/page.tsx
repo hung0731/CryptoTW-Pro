@@ -270,15 +270,9 @@ function ReviewCard({ review }: { review: MarketEvent }) {
 
                 {/* Header Meta: Grade | Type */}
                 <div className="flex items-center gap-2 mb-1.5">
-                    <Badge variant="outline" className={cn(
-                        "text-[9px] px-1.5 py-0 border h-4 font-mono",
-                        review.importance === 'S' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                            review.importance === 'A' ? "bg-orange-500/10 text-orange-500 border-orange-500/20" :
-                                "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                    )}>
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 border h-4 font-mono bg-neutral-800 text-neutral-300 border-neutral-700">
                         {review.importance} 級
                     </Badge>
-                    <span className="text-[10px] text-neutral-500">|</span>
                     <span className="text-[10px] text-neutral-400">{review.tags[0]}</span>
 
                     <span className="ml-auto text-[10px] font-mono text-neutral-600">{review.year}</span>
