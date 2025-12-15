@@ -95,8 +95,15 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     if (!data || data.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">暫無數據</div>
 
     return (
-        <div className={`w-full h-full ${className}`}>
-            <ResponsiveContainer width="100%" height="100%">
+        <div className={`w-full h-full relative ${className}`}>
+            {/* Watermark */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 select-none">
+                <span className="text-4xl font-black text-white/5 whitespace-nowrap tracking-widest uppercase">
+                    加密台灣 Pro
+                </span>
+            </div>
+
+            <ResponsiveContainer width="100%" height="100%" className="relative z-10">
                 {type === 'price' || type === 'supply' ? (
                     <AreaChart data={data}>
                         <defs>
