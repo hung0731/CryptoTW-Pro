@@ -4,6 +4,40 @@ import { detectAlerts, MarketStateRecord } from '@/lib/alert-engine'
 // LINE Notification temporarily disabled
 // import { sendAlertNotifications } from '@/lib/notification-service'
 
+// ============================================
+// Enum Mappers (Signal Engine uses Chinese, DB uses English)
+// ============================================
+
+function mapLeverageStatus(status: string): 'normal' | 'heated' | 'overheated' {
+    switch (status) {
+        case '過熱': return 'overheated'
+        case '升溫': return 'heated'
+        case '降溫': return 'normal'  // DB doesn't have 'cooling', use 'normal'
+        case '正常':
+        default: return 'normal'
+    }
+}
+
+function mapWhaleStatus(status: string): 'long' | 'neutral' | 'hedge' | 'exit' {
+    switch (status) {
+        case '偏多': return 'long'
+        case '偏空': return 'hedge'
+        case '撤退':
+        case '出場': return 'exit'
+        case '中性':
+        default: return 'neutral'
+    }
+}
+
+function mapLiquidationPressure(pressure: string): 'upper' | 'lower' | 'balanced' {
+    switch (pressure) {
+        case '上方': return 'upper'
+        case '下方': return 'lower'
+        case '均衡':
+        default: return 'balanced'
+    }
+}
+
 export async function runAlertCheck() {
     const supabase = createAdminClient()
 
@@ -71,9 +105,9 @@ export async function runAlertCheck() {
     // Always insert new state for history tracking (Analytics/AI Interpretation needs history)
     const { error: insertError } = await supabase.from('market_states').insert({
         market: 'BTC',
-        leverage_state: signals.leverage_status, // Map signal engine Enum to DB Enum string (ensure they match)
-        whale_state: signals.whale_status,
-        liquidation_pressure: signals.liquidation_pressure,
+        leverage_state: mapLeverageStatus(signals.leverage_status),
+        whale_state: mapWhaleStatus(signals.whale_status),
+        liquidation_pressure: mapLiquidationPressure(signals.liquidation_pressure),
         price: currentPrice,
         funding_rate: currentFunding,
         open_interest: currentOI,

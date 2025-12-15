@@ -53,8 +53,8 @@ export async function getMarketSnapshot() {
         cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM).catch(() => null),
         // 持倉量 (1 min cache - changes faster)
         cachedCoinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: 'BTC' }, CacheTTL.FAST),
-        // 爆倉 (1 min cache)
-        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: 'BTC', interval: '1h', limit: 1 }, CacheTTL.FAST),
+        // 爆倉 (1 min cache) - 使用 exchange 參數
+        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.FAST),
         // 主動買賣比 (1 min cache)
         cachedCoinglassV4Request<any>('/api/futures/taker-buy-sell-volume/exchange-list', { symbol: 'BTC', range: '1h' }, CacheTTL.FAST),
         // BTC ETF 資金流 (15 min cache - daily data)

@@ -94,13 +94,18 @@ async function fetchLongShortRatio(): Promise<{ longRate: number } | null> {
     try {
         const data = await cachedCoinglassV4Request<any>(
             '/api/futures/global-long-short-account-ratio/history',
-            { symbol: 'BTC', interval: '1h', limit: 1 },
+            { symbol: 'BTC', exchange: 'Binance', interval: '1h', limit: 1 },
             CacheTTL.FAST
         )
 
         if (data && Array.isArray(data) && data.length > 0) {
             const latest = data[data.length - 1]
-            return { longRate: latest.longRate || latest.longAccount || 50 }
+            // Handle both percentage format (50.5) and ratio format (0.505)
+            let longRate = latest.longRate || latest.longAccount || 50
+            if (longRate <= 1) {
+                longRate = longRate * 100 // Convert ratio to percentage
+            }
+            return { longRate }
         }
         return null
     } catch (e) {
@@ -111,31 +116,30 @@ async function fetchLongShortRatio(): Promise<{ longRate: number } | null> {
 
 async function fetchLiquidations(): Promise<{ bias: 'long' | 'short' | 'neutral', totalUsd: number } | null> {
     try {
-        const data = await cachedCoinglassV4Request<any>(
-            '/api/futures/liquidation/aggregated-history',
-            { symbol: 'BTC', interval: '1h', limit: 24 },
+        // Use coin-list endpoint which doesn't require exchange_list
+        const data = await cachedCoinglassV4Request<any[]>(
+            '/api/futures/liquidation/coin-list',
+            {},
             CacheTTL.FAST
         )
 
         if (data && Array.isArray(data)) {
-            let longLiq = 0
-            let shortLiq = 0
+            // Find BTC data
+            const btcData = data.find((item: any) => item.symbol === 'BTC')
+            if (btcData) {
+                const longLiq = btcData.long_liquidation_usd_24h || btcData.longLiquidationUsd24h || 0
+                const shortLiq = btcData.short_liquidation_usd_24h || btcData.shortLiquidationUsd24h || 0
+                const total = longLiq + shortLiq
 
-            data.forEach((item: any) => {
-                longLiq += item.longVolUsd || item.sellVolUsd || 0
-                shortLiq += item.shortVolUsd || item.buyVolUsd || 0
-            })
+                let bias: 'long' | 'short' | 'neutral' = 'neutral'
+                if (total > 0) {
+                    const longPct = longLiq / total
+                    if (longPct > 0.6) bias = 'long'
+                    else if (longPct < 0.4) bias = 'short'
+                }
 
-            const total = longLiq + shortLiq
-            let bias: 'long' | 'short' | 'neutral' = 'neutral'
-
-            if (total > 0) {
-                const longPct = longLiq / total
-                if (longPct > 0.6) bias = 'long'
-                else if (longPct < 0.4) bias = 'short'
+                return { bias, totalUsd: total }
             }
-
-            return { bias, totalUsd: total }
         }
         return null
     } catch (e) {
@@ -146,25 +150,24 @@ async function fetchLiquidations(): Promise<{ bias: 'long' | 'short' | 'neutral'
 
 async function fetchOpenInterestChange(): Promise<{ change24h: number } | null> {
     try {
-        const data = await cachedCoinglassV4Request<any>(
-            '/api/futures/openInterest/exchange-list',
-            { symbol: 'BTC' },
+        // Use coin-list endpoint for OI
+        const data = await cachedCoinglassV4Request<any[]>(
+            '/api/futures/openInterest/coin-list',
+            {},
             CacheTTL.FAST
         )
 
         if (data && Array.isArray(data)) {
-            // Find "All" aggregate or Binance
-            const aggregate = data.find((e: any) => e.exchangeName === 'All' || e.exchange === 'All')
-            const binance = data.find((e: any) => e.exchangeName === 'Binance')
-            const target = aggregate || binance
-
-            if (target) {
-                return {
-                    change24h: target.open_interest_change_percent_24h ||
-                        target.h24Change ||
-                        target.openInterestChange24hPercent ||
-                        0
-                }
+            // Find BTC data
+            const btcData = data.find((item: any) => item.symbol === 'BTC')
+            if (btcData) {
+                // Try various field names
+                const change = btcData.open_interest_change_percent_24h ||
+                    btcData.openInterestChange24hPercent ||
+                    btcData.h24Change ||
+                    btcData.oiChange24h ||
+                    0
+                return { change24h: change }
             }
         }
         return null
