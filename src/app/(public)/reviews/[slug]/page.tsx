@@ -58,26 +58,37 @@ export default function ReviewDetailPage() {
                     </div>
                 </div>
 
-                {/* 1. Quick Guide Card (Executive Summary) */}
+                {/* 1. 三段式決策卡 (10-Second Market Positioning Card) */}
                 <section className="px-5 mb-5">
-                    <div className="bg-neutral-900/60 rounded-xl p-5 border border-white/10 shadow-sm relative overflow-hidden group">
-                        <h2 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                    <div className="bg-neutral-900/60 rounded-xl p-4 border border-white/10 shadow-sm">
+                        <h2 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <Lightbulb className="w-3.5 h-3.5" />
-                            快速導讀
+                            市場解讀
                         </h2>
-                        <p className="text-[10px] text-neutral-500 mb-3 pl-5">給已經忘記細節的人 30 秒回顧</p>
                         <div className="space-y-4">
-                            <div>
-                                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">事件本質</span>
-                                <p className="text-sm text-neutral-300 leading-relaxed font-medium">{review.context.what.split('。')[0]}。</p>
+                            {/* 🧠 市場目前在做什麼？ */}
+                            <div className="flex items-start gap-3">
+                                <span className="text-lg leading-none mt-0.5">🧠</span>
+                                <div>
+                                    <span className="text-[10px] text-neutral-500 font-bold block mb-0.5">市場目前在做什麼？</span>
+                                    <p className="text-sm text-neutral-200 leading-snug font-medium">{review.context.what.split('。')[0]}。</p>
+                                </div>
                             </div>
-                            <div>
-                                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">核心機制</span>
-                                <p className="text-sm text-neutral-300 leading-relaxed font-medium">{review.summary}</p>
+                            {/* ⚠ 現在最大的風險是什麼？ */}
+                            <div className="flex items-start gap-3">
+                                <span className="text-lg leading-none mt-0.5">⚠️</span>
+                                <div>
+                                    <span className="text-[10px] text-neutral-500 font-bold block mb-0.5">現在最大的風險是什麼？</span>
+                                    <p className="text-sm text-amber-400/90 leading-snug font-medium">{review.context.realImpact}</p>
+                                </div>
                             </div>
-                            <div>
-                                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide block mb-0.5">關鍵根源</span>
-                                <p className="text-sm text-neutral-300 leading-relaxed font-bold">{review.context.realImpact}</p>
+                            {/* ✅ 現在比較合理的行為是？ */}
+                            <div className="flex items-start gap-3">
+                                <span className="text-lg leading-none mt-0.5">✅</span>
+                                <div>
+                                    <span className="text-[10px] text-neutral-500 font-bold block mb-0.5">現在比較合理的行為是？</span>
+                                    <p className="text-sm text-green-400/90 leading-snug font-medium">{review.summary}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -105,223 +116,170 @@ export default function ReviewDetailPage() {
                     </section>
                 )}
 
-                {/* 2. Visual Evidence (Review Charts) - MOVED UP */}
+                {/* 2. 數據證據 Evidence Cards */}
                 {(review.charts.main || review.charts.flow) && (
-                    <section className="p-5 space-y-4 border-t border-b border-white/5 bg-neutral-950/30">
+                    <section className="p-5 space-y-4 border-t border-b border-white/5">
                         <div className="flex items-center justify-between">
                             <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                                 <BarChart3 className="w-4 h-4" />
-                                數據復盤
+                                數據證據
                             </h2>
-                            <span className="text-[10px] text-neutral-600 bg-neutral-900 border border-white/5 px-2 py-0.5 rounded">早於新聞的鏈上真相</span>
                         </div>
 
-                        {/* Main Chart */}
+                        {/* Evidence Card 1: Price */}
                         {review.charts.main && (
-                            <div className="space-y-3">
-                                <div className="rounded-xl border border-white/5 overflow-hidden bg-neutral-900/30">
-                                    <div className="aspect-video w-full relative">
-                                        <ReviewChart
-                                            type="price"
-                                            symbol={review.chartConfig?.symbol || 'BTC'}
-                                            daysBuffer={review.chartConfig?.daysBuffer}
-                                            eventStart={review.eventStartAt}
-                                            eventEnd={review.eventEndAt}
-                                            reviewSlug={review.slug}
-                                        />
-                                    </div>
-                                    <div className="bg-neutral-900 border-t border-white/5 px-3 py-2.5 flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider">Price & Volatility</span>
-                                            <span className="text-[10px] text-neutral-700">|</span>
-                                            <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'}/USDT</span>
-                                        </div>
-                                        <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
-                                    </div>
+                            <div className="rounded-xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: '#0E0E0F' }}>
+                                {/* Chart Title */}
+                                <div className="px-4 py-2.5 border-b border-white/[0.06]">
+                                    <span className="text-xs font-bold text-neutral-400">📈 價格走勢</span>
                                 </div>
-
-                                {review.charts.main.interpretation ? (
-                                    <div className="bg-blue-950/10 border border-blue-500/10 p-3 rounded-lg space-y-2">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <TrendingUp className="w-4 h-4 text-blue-400" />
-                                            <span className="text-blue-400 font-bold text-xs">圖表解讀</span>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <span className="text-[10px] text-blue-300/70 uppercase tracking-wider block mb-0.5">當下反應</span>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.main.interpretation.whatItMeans}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號</span>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.main.interpretation.whatToWatch}</p>
-                                            </div>
-                                        </div>
+                                {/* Chart Area */}
+                                <div className="aspect-video w-full relative" style={{ backgroundColor: '#0B0B0C' }}>
+                                    <ReviewChart
+                                        type="price"
+                                        symbol={review.chartConfig?.symbol || 'BTC'}
+                                        daysBuffer={review.chartConfig?.daysBuffer}
+                                        eventStart={review.eventStartAt}
+                                        eventEnd={review.eventEndAt}
+                                        reviewSlug={review.slug}
+                                    />
+                                </div>
+                                {/* Footer (integrated) */}
+                                <div className="px-4 py-2 border-t border-white/[0.06] flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'}/USDT</span>
+                                    <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
+                                </div>
+                                {/* Interpretation (inside card) */}
+                                <div className="px-4 py-3 border-t border-white/[0.06]" style={{ backgroundColor: '#101012' }}>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-[10px] font-bold text-neutral-400">🔍 證據解讀</span>
                                     </div>
-                                ) : (
-                                    <div className="bg-blue-950/10 border border-blue-500/10 p-3 rounded-lg flex items-start gap-2">
-                                        <TrendingUp className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <span className="text-blue-400 font-bold text-xs block mb-0.5">圖表解讀</span>
-                                            <p className="text-xs text-neutral-300 leading-relaxed">
-                                                {review.charts.main.caption.replace('圖表解讀：', '')}
-                                            </p>
+                                    {review.charts.main.interpretation ? (
+                                        <div className="space-y-1.5">
+                                            <p className="text-xs text-neutral-300 leading-relaxed">• {review.charts.main.interpretation.whatItMeans}</p>
+                                            <p className="text-xs text-amber-400/80 leading-relaxed">🧠 {review.charts.main.interpretation.whatToWatch}</p>
                                         </div>
-                                    </div>
-                                )}
+                                    ) : (
+                                        <p className="text-xs text-neutral-300 leading-relaxed">• {review.charts.main.caption.replace('圖表解讀：', '')}</p>
+                                    )}
+                                </div>
                             </div>
                         )}
 
-                        {/* Flow Chart */}
+                        {/* Evidence Card 2: Flow/OI */}
                         {review.charts.flow && (
-                            <div className="space-y-3">
-                                <div className="rounded-xl border border-white/5 overflow-hidden bg-neutral-900/30">
-                                    <div className="aspect-video w-full relative">
-                                        <ReviewChart
-                                            type={review.slug.includes('etf') || review.slug.includes('luna') ? 'flow' : 'oi'}
-                                            symbol={review.chartConfig?.symbol || 'BTC'}
-                                            daysBuffer={review.chartConfig?.daysBuffer}
-                                            eventStart={review.eventStartAt}
-                                            eventEnd={review.eventEndAt}
-                                            reviewSlug={review.slug}
-                                        />
-                                    </div>
-                                    <div className="bg-neutral-900 border-t border-white/5 px-3 py-2.5 flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider">
-                                                {review.slug.includes('luna') ? 'Supply Inflation' : 'Net Flow / OI'}
-                                            </span>
-                                            <span className="text-[10px] text-neutral-700">|</span>
-                                            <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'} 資金流向</span>
-                                        </div>
-                                        <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
-                                    </div>
+                            <div className="rounded-xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: '#0E0E0F' }}>
+                                {/* Chart Title */}
+                                <div className="px-4 py-2.5 border-b border-white/[0.06]">
+                                    <span className="text-xs font-bold text-neutral-400">
+                                        {review.slug.includes('luna') ? '📊 供應量變化' : '📊 資金流向'}
+                                    </span>
                                 </div>
-                                {review.charts.flow.interpretation ? (
-                                    <div className="bg-green-950/10 border border-green-500/10 p-3 rounded-lg space-y-2">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <Activity className="w-4 h-4 text-green-400" />
-                                            <span className="text-green-400 font-bold text-xs">流動性解讀</span>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <span className="text-[10px] text-green-300/70 uppercase tracking-wider block mb-0.5">當下反應</span>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.flow.interpretation.whatItMeans}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號</span>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.flow.interpretation.whatToWatch}</p>
-                                            </div>
-                                        </div>
+                                {/* Chart Area */}
+                                <div className="aspect-video w-full relative" style={{ backgroundColor: '#0B0B0C' }}>
+                                    <ReviewChart
+                                        type={review.slug.includes('etf') || review.slug.includes('luna') ? 'flow' : 'oi'}
+                                        symbol={review.chartConfig?.symbol || 'BTC'}
+                                        daysBuffer={review.chartConfig?.daysBuffer}
+                                        eventStart={review.eventStartAt}
+                                        eventEnd={review.eventEndAt}
+                                        reviewSlug={review.slug}
+                                    />
+                                </div>
+                                {/* Footer (integrated) */}
+                                <div className="px-4 py-2 border-t border-white/[0.06] flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'}</span>
+                                    <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
+                                </div>
+                                {/* Interpretation (inside card) */}
+                                <div className="px-4 py-3 border-t border-white/[0.06]" style={{ backgroundColor: '#101012' }}>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-[10px] font-bold text-neutral-400">🔍 證據解讀</span>
                                     </div>
-                                ) : (
-                                    <div className="bg-green-950/10 border border-green-500/10 p-3 rounded-lg flex items-start gap-2">
-                                        <Activity className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <span className="text-green-400 font-bold text-xs block mb-0.5">流動性解讀</span>
-                                            <p className="text-xs text-neutral-300 leading-relaxed">
-                                                {review.charts.flow.caption.replace('圖表解讀：', '')}
-                                            </p>
+                                    {review.charts.flow.interpretation ? (
+                                        <div className="space-y-1.5">
+                                            <p className="text-xs text-neutral-300 leading-relaxed">• {review.charts.flow.interpretation.whatItMeans}</p>
+                                            <p className="text-xs text-amber-400/80 leading-relaxed">🧠 {review.charts.flow.interpretation.whatToWatch}</p>
                                         </div>
-                                    </div>
-                                )}
+                                    ) : (
+                                        <p className="text-xs text-neutral-300 leading-relaxed">• {review.charts.flow.caption.replace('圖表解讀：', '')}</p>
+                                    )}
+                                </div>
                             </div>
                         )}
 
-                        {/* OI Chart (Fallback Position if not flow) */}
+                        {/* Evidence Card 3: OI (Fallback) */}
                         {(!review.charts.flow && review.charts.oi) && (
-                            <div className="space-y-3">
-                                <div className="rounded-xl border border-white/5 overflow-hidden bg-neutral-900/30">
-                                    <div className="aspect-video w-full relative">
-                                        <ReviewChart
-                                            type="oi"
-                                            symbol={review.chartConfig?.symbol || 'BTC'}
-                                            daysBuffer={review.chartConfig?.daysBuffer}
-                                            eventStart={review.eventStartAt}
-                                            eventEnd={review.eventEndAt}
-                                            reviewSlug={review.slug}
-                                        />
-                                    </div>
-                                    <div className="bg-neutral-900 border-t border-white/5 px-3 py-2.5 flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider">Open Interest</span>
-                                            <span className="text-[10px] text-neutral-700">|</span>
-                                            <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'} 持倉數據</span>
-                                        </div>
-                                        <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
-                                    </div>
+                            <div className="rounded-xl border border-white/[0.08] overflow-hidden" style={{ backgroundColor: '#0E0E0F' }}>
+                                {/* Chart Title */}
+                                <div className="px-4 py-2.5 border-b border-white/[0.06]">
+                                    <span className="text-xs font-bold text-neutral-400">📊 持倉量變化</span>
                                 </div>
-                                {review.charts.oi.interpretation ? (
-                                    <div className="bg-yellow-950/10 border border-yellow-500/10 p-3 rounded-lg space-y-2">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <Activity className="w-4 h-4 text-yellow-400" />
-                                            <span className="text-yellow-400 font-bold text-xs">持倉量解讀</span>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <span className="text-[10px] text-yellow-300/70 uppercase tracking-wider block mb-0.5">當下反應</span>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.oi.interpretation.whatItMeans}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-[10px] text-amber-500/70 uppercase tracking-wider block mb-0.5">未來訊號</span>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">{review.charts.oi.interpretation.whatToWatch}</p>
-                                            </div>
-                                        </div>
+                                {/* Chart Area */}
+                                <div className="aspect-video w-full relative" style={{ backgroundColor: '#0B0B0C' }}>
+                                    <ReviewChart
+                                        type="oi"
+                                        symbol={review.chartConfig?.symbol || 'BTC'}
+                                        daysBuffer={review.chartConfig?.daysBuffer}
+                                        eventStart={review.eventStartAt}
+                                        eventEnd={review.eventEndAt}
+                                        reviewSlug={review.slug}
+                                    />
+                                </div>
+                                {/* Footer (integrated) */}
+                                <div className="px-4 py-2 border-t border-white/[0.06] flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-neutral-500">{review.chartConfig?.symbol || 'CRYPTO'}</span>
+                                    <span className="text-[10px] font-bold text-neutral-600">加密台灣 Pro</span>
+                                </div>
+                                {/* Interpretation (inside card) */}
+                                <div className="px-4 py-3 border-t border-white/[0.06]" style={{ backgroundColor: '#101012' }}>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-[10px] font-bold text-neutral-400">🔍 證據解讀</span>
                                     </div>
-                                ) : (
-                                    <div className="bg-yellow-950/10 border border-yellow-500/10 p-3 rounded-lg flex items-start gap-2">
-                                        <Activity className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <span className="text-yellow-400 font-bold text-xs block mb-0.5">持倉量解讀</span>
-                                            <p className="text-xs text-neutral-300 leading-relaxed">
-                                                {review.charts.oi.caption.replace('圖表解讀：', '')}
-                                            </p>
+                                    {review.charts.oi.interpretation ? (
+                                        <div className="space-y-1.5">
+                                            <p className="text-xs text-neutral-300 leading-relaxed">• {review.charts.oi.interpretation.whatItMeans}</p>
+                                            <p className="text-xs text-amber-400/80 leading-relaxed">🧠 {review.charts.oi.interpretation.whatToWatch}</p>
                                         </div>
-                                    </div>
-                                )}
+                                    ) : (
+                                        <p className="text-xs text-neutral-300 leading-relaxed">• {review.charts.oi.caption.replace('圖表解讀：', '')}</p>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </section>
                 )}
 
-                {/* 3. Context (The Setup) */}
+                {/* 3. 前情校正 Context Block (Merged) */}
                 <section className="p-5 space-y-4 border-b border-white/5">
                     <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
                         <BookOpen className="w-4 h-4" />
-                        事件脈絡
+                        🧭 事件前情與市場狀態校正
                     </h2>
-                    <div className="bg-neutral-900/30 rounded-xl p-5 border border-white/5 space-y-5">
-                        <div className="grid grid-cols-[100px_1fr] gap-4">
-                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider pt-1">市場敘事</span>
-                            <p className="text-sm text-neutral-400 leading-relaxed">{review.context.narrative}</p>
+                    <div className="space-y-4">
+                        {/* 市場主流敘事 */}
+                        <div className="bg-neutral-900/30 rounded-lg p-4 border border-white/5">
+                            <span className="text-[10px] text-neutral-500 font-bold block mb-1.5">市場主流敘事</span>
+                            <p className="text-xs text-neutral-500 mb-2">當時大家「以為」發生了什麼</p>
+                            <p className="text-sm text-neutral-300 leading-relaxed">{review.context.narrative}</p>
                         </div>
-                        <div className="h-px bg-white/5" />
-                        <div className="grid grid-cols-[100px_1fr] gap-4">
-                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider pt-1">事實真相</span>
-                            <p className="text-sm text-neutral-200 leading-relaxed">{review.context.what}</p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* 4. Market State (Condensed) */}
-                <section className="p-5 space-y-4 border-b border-white/5">
-                    <h2 className="text-sm font-bold text-neutral-400 flex items-center gap-2 uppercase tracking-wider">
-                        <Clock className="w-4 h-4" />
-                        市場背景
-                    </h2>
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                        <div className="bg-neutral-900/30 rounded-lg p-3 border border-white/5 min-w-[140px]">
-                            <span className="text-[10px] text-neutral-500 uppercase block mb-1">Price</span>
-                            <div className="text-sm font-bold text-white">{review.initialState.price}</div>
-                        </div>
-                        <div className="bg-neutral-900/30 rounded-lg p-3 border border-white/5 min-w-[140px]">
-                            <span className="text-[10px] text-neutral-500 uppercase block mb-1">Sentiment</span>
-                            <div className={cn("text-sm font-bold", review.initialState.fearGreed.includes('貪婪') ? "text-red-400" : "text-green-400")}>
-                                {review.initialState.fearGreed}
+                        {/* 實際市場結構 */}
+                        <div className="bg-neutral-900/30 rounded-lg p-4 border border-white/5">
+                            <span className="text-[10px] text-neutral-500 font-bold block mb-1.5">實際市場結構</span>
+                            <p className="text-xs text-neutral-500 mb-2">當時市場「實際」長什麼樣</p>
+                            <div className="flex gap-2 flex-wrap mb-3">
+                                <span className="text-xs bg-neutral-800 text-neutral-300 px-2 py-1 rounded border border-white/5">{review.initialState.price}</span>
+                                <span className={cn("text-xs px-2 py-1 rounded border border-white/5", review.initialState.fearGreed.includes('貪婪') ? "bg-red-900/30 text-red-400" : "bg-green-900/30 text-green-400")}>{review.initialState.fearGreed}</span>
+                                {(review.initialState.oi || review.initialState.funding) && (
+                                    <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-1 rounded border border-white/5">{review.initialState.oi || review.initialState.funding}</span>
+                                )}
                             </div>
                         </div>
-                        <div className="bg-neutral-900/30 rounded-lg p-3 border border-white/5 min-w-[200px] flex-1">
-                            <span className="text-[10px] text-neutral-500 uppercase block mb-1">Key Metrics</span>
-                            <div className="text-xs text-neutral-300 truncate">{review.initialState.oi || review.initialState.funding}</div>
+                        {/* 關鍵錯位 */}
+                        <div className="bg-amber-950/10 rounded-lg p-4 border border-amber-500/20">
+                            <span className="text-[10px] text-amber-500/80 font-bold block mb-1.5">關鍵錯位</span>
+                            <p className="text-xs text-amber-500/60 mb-2">敘事與結構的落差</p>
+                            <p className="text-sm text-amber-300 leading-relaxed font-medium">{review.context.what}</p>
                         </div>
                     </div>
                 </section>
