@@ -65,6 +65,12 @@ export interface MarketEvent {
     // 5. Timeline
     timeline: TimelineItem[];
 
+    // Chart Configuration
+    chartConfig?: {
+        symbol: string;
+        daysBuffer?: number;
+    };
+
     // 6. Charts (Structured)
     charts: {
         main?: ChartDef;      // 價格 x 事件區間 (The "Evidence")
@@ -155,18 +161,22 @@ export const REVIEWS_DATA: MarketEvent[] = [
             }
         ],
 
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 10
+        },
         charts: {
             main: {
-                url: '/images/reviews/etf-price-action.png',
+                url: '',
                 caption: '圖表解讀：價格在批准前已提前兩個月上漲，批准當下形成「利多出盡」的高點，隨後展開為期兩週的 20% 回調。'
             },
             flow: {
-                url: '/images/reviews/etf-flow-grayscale.png',
-                caption: '圖表解讀：即便價格下跌（上圖），ETF 淨流入（下圖綠柱）依然持續累積，顯示下跌僅是情緒面的釋放，而非資金面的撤退。'
+                url: '',
+                caption: '圖表解讀：即便價格下跌（上圖），ETF 淨流入（下圖綠柱）依然持續累積，顯示結構性需求未減。'
             },
             oi: {
-                url: '/images/reviews/etf-oi-flush.png',
-                caption: '圖表解讀：回調過程中，合約持倉量 (OI) 顯著下降，顯示過度擁擠的槓桿多單被市場機制清洗出場。'
+                url: '',
+                caption: '圖表解讀：回調過程中，合約持倉量 (OI) 顯著下降，代表過度擁擠的槓桿多單被清洗出場。'
             }
         },
 
@@ -260,13 +270,17 @@ export const REVIEWS_DATA: MarketEvent[] = [
             }
         ],
 
+        chartConfig: {
+            symbol: 'FTT',
+            daysBuffer: 7
+        },
         charts: {
             main: {
-                url: '/images/reviews/ftt-crash.png',
+                url: '',
                 caption: '圖表解讀：FTT 價格在數日內從 $22 垂直崩跌至 $1，這種走勢反映的不是估值修正，而是市場對其價值基礎的「信心真空」。'
             },
             oi: {
-                url: '/images/reviews/ftx-contagion.png',
+                url: '',
                 caption: '圖表解讀：相關資產（如 Solana）同步暴跌，顯示流動性危機正透過機構資產負債表向外傳導。'
             }
         },
@@ -361,13 +375,17 @@ export const REVIEWS_DATA: MarketEvent[] = [
             }
         ],
 
+        chartConfig: {
+            symbol: 'LUNA',
+            daysBuffer: 5
+        },
         charts: {
             main: {
-                url: '/images/reviews/ust-depeg.png',
+                url: '',
                 caption: '圖表解讀：UST 價格脫鉤後一路向南，反映了市場對算法機制信心的徹底喪失。'
             },
             flow: {
-                url: '/images/reviews/luna-supply.png',
+                url: '',
                 caption: '圖表解讀：LUNA 的供應量 (Supply) 呈垂直指數級增長，這是機制為了挽救 UST 而無限制印鈔的結果，最終導致惡性通膨與歸零。'
             }
         },
@@ -462,13 +480,17 @@ export const REVIEWS_DATA: MarketEvent[] = [
             }
         ],
 
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 10
+        },
         charts: {
             main: {
-                url: '/images/reviews/312-price.png',
+                url: '',
                 caption: '圖表解讀：單日 50% 的跌幅歷史罕見，長下影線顯示了極端恐慌後的即時買盤介入，形成了典型的 V 型反轉結構。'
             },
             oi: {
-                url: '/images/reviews/312-oi.png',
+                url: '',
                 caption: '圖表解讀：持倉量 (OI) 瞬間蒸發，這是一次徹底的「去槓桿化」過程，市場重新回歸現貨主導的健康狀態。'
             }
         },
