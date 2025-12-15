@@ -35,6 +35,45 @@ const REVIEWS_CONFIG = [
         start: '2020-03-12',
         end: '2020-03-13',
         types: ['price', 'oi']
+    },
+    // NEW: 5 additional reviews
+    {
+        slug: 'mtgox-collapse-2014',
+        symbol: 'BTC',
+        start: '2014-02-07',
+        end: '2014-02-28',
+        types: ['price'],
+        useCoinGecko: true // Use CoinGecko for historical data
+    },
+    {
+        slug: 'the-dao-hack-2016',
+        symbol: 'ETH',
+        start: '2016-06-17',
+        end: '2016-07-20',
+        types: ['price'],
+        useCoinGecko: true
+    },
+    {
+        slug: 'ico-mania-2017',
+        symbol: 'ETH',
+        start: '2017-06-01',
+        end: '2018-01-15',
+        types: ['price'],
+        useCoinGecko: true
+    },
+    {
+        slug: 'china-crypto-ban-2021',
+        symbol: 'BTC',
+        start: '2021-05-21',
+        end: '2021-07-20',
+        types: ['price', 'oi']
+    },
+    {
+        slug: 'ethereum-merge-2022',
+        symbol: 'ETH',
+        start: '2022-09-06',
+        end: '2022-09-15',
+        types: ['price']
     }
 ];
 
@@ -82,6 +121,67 @@ async function fetchCoinglass(endpoint, processFn, startMs, endMs) {
         return raw.filter(d => d.timestamp >= startMs && d.timestamp <= endMs);
     }
     return raw;
+}
+
+// CoinGecko Historical Price Fetch (for pre-2019 data)
+async function fetchCoinGeckoPrice(coinId, startStr, endStr, bufferDays = 15) {
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+
+    // Buffer days
+    const bufferedStart = new Date(start);
+    bufferedStart.setDate(start.getDate() - bufferDays);
+    const bufferedEnd = new Date(end);
+    bufferedEnd.setDate(end.getDate() + bufferDays);
+
+    const fromTs = Math.floor(bufferedStart.getTime() / 1000);
+    const toTs = Math.floor(bufferedEnd.getTime() / 1000);
+
+    // CoinGecko free API - market_chart/range
+    const endpoint = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart/range?vs_currency=usd&from=${fromTs}&to=${toTs}`;
+
+    console.log(`  Fetching Price (CoinGecko) for ${coinId}...`);
+
+    try {
+        const res = await fetch(endpoint, {
+            headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'CryptoTW-Alpha/1.0'
+            }
+        });
+
+        if (!res.ok) {
+            console.warn(`    CoinGecko Error: ${res.status} ${res.statusText}`);
+            return [];
+        }
+
+        const json = await res.json();
+        if (!json.prices || !Array.isArray(json.prices)) {
+            console.warn('    CoinGecko invalid data:', JSON.stringify(json).slice(0, 100));
+            return [];
+        }
+
+        // CoinGecko returns [timestamp, price] pairs
+        const data = json.prices.map(([timestamp, price]) => ({
+            date: new Date(timestamp).toISOString().split('T')[0],
+            timestamp,
+            price
+        }));
+
+        // Deduplicate by date (CoinGecko returns hourly for shorter ranges)
+        const seen = new Set();
+        const deduped = data.filter(d => {
+            if (seen.has(d.date)) return false;
+            seen.add(d.date);
+            return true;
+        });
+
+        console.log(`    -> Got ${deduped.length} days of data.`);
+        return deduped;
+    } catch (e) {
+        console.error(`    CoinGecko Fetch Error: ${e.message}`);
+        return [];
+    }
 }
 
 // Fetch Logic
@@ -168,12 +268,18 @@ async function run() {
     console.log("Starting History Fetch...");
     const output = {};
 
+    // CoinGecko coin IDs mapping
+    const coinGeckoIds = {
+        'BTC': 'bitcoin',
+        'ETH': 'ethereum'
+    };
+
     for (const conf of REVIEWS_CONFIG) {
         console.log(`\nProcessing ${conf.slug}...`);
         output[conf.slug] = {};
 
         for (const type of conf.types) {
-            // LUNA Flow Special Case
+            // LUNA Flow Special Case (Supply mock)
             if (conf.slug === 'luna-ust-collapse-2022' && type === 'flow') {
                 console.log(`  Generating Mock Supply Data for LUNA...`);
                 const sDate = new Date('2022-05-01');
@@ -192,6 +298,17 @@ async function run() {
                 continue;
             }
 
+            // Use CoinGecko for pre-2019 data (useCoinGecko flag)
+            if (conf.useCoinGecko && type === 'price') {
+                const coinId = coinGeckoIds[conf.symbol] || conf.symbol.toLowerCase();
+                const data = await fetchCoinGeckoPrice(coinId, conf.start, conf.end);
+                output[conf.slug][type] = data || [];
+                // Add delay to avoid rate limiting
+                await new Promise(r => setTimeout(r, 1200));
+                continue;
+            }
+
+            // Default: use Binance/Coinglass
             const data = await fetchHistory(type, conf.symbol, conf.start, conf.end);
             output[conf.slug][type] = data || [];
             console.log(`    -> Got ${data ? data.length : 0} items.`);
