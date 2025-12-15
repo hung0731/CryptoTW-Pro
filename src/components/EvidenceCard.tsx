@@ -79,6 +79,12 @@ export function EvidenceCard({
                 ) : caption ? (
                     <p className="text-xs text-neutral-400 leading-relaxed">{caption.replace('圖表解讀：', '')}</p>
                 ) : null}
+                {/* No-OI Disclaimer for pre-2019 events */}
+                {chartType === 'price' && (reviewSlug.includes('mtgox') || reviewSlug.includes('dao') || reviewSlug.includes('ico')) && (
+                    <p className="text-[10px] text-neutral-600 mt-2 pt-2 border-t border-white/5">
+                        本事件發生於衍生品市場尚未成熟階段，價格本身即為主要風險反映。
+                    </p>
+                )}
             </div>
         </div>
     )
