@@ -239,6 +239,287 @@ export const INDICATOR_KNOWLEDGE: Record<string, IndicatorKnowledge> = {
             if (changePercent < -5) return '下降'
             return '穩定'
         }
+    },
+
+    // ============================================
+    // 新增指標（P1）
+    // ============================================
+
+    etfFlow: {
+        id: 'etfFlow',
+        term: 'ETF 資金流',
+        emoji: '🏛️',
+        definition: '比特幣現貨 ETF 的每日資金流入/流出，反映機構資金動向。',
+        interpretation: '關鍵不是「今天流入多少」，而是「資金是持續流入，還是事件型湧入」。持續流入 = 機構佈局；事件型湧入 = 炒作風險。',
+        thresholds: {
+            normal: [-200_000_000, 200_000_000],
+            elevated: 500_000_000,
+            extreme: 1_000_000_000
+        },
+        timeline: {
+            id: 'etf-2024',
+            title: '2024 年 ETF 里程碑',
+            cards: [
+                { type: 'event', time: '01/11', icon: '📈', marketState: 'BTC ETF 正式上線，單日湧入', action: '觀望，這是事件型資金', ifIgnored: '典型「買消息，賣事實」' },
+                { type: 'risk', time: '01/12', icon: '⚠️', marketState: '事件型資金退潮，價格反轉', action: '確認是否有持續流入', ifIgnored: '可能被套在高點' },
+                { type: 'reversal', time: '02-03月', icon: '🟢', marketState: '資金開始持續流入，非事件型', action: '這才是機構佈局訊號', ifIgnored: '錯過真正的機構進場' },
+                { type: 'anomaly', time: '11/06', icon: '🚀', marketState: '川普當選，再次事件型湧入', action: '事件後觀察是否延續', ifIgnored: '事件型也可能延續成趨勢' },
+                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：區分「事件型」vs「持續型」資金流', action: '持續流入才是真正的機構佈局' }
+            ]
+        },
+        riskHints: {
+            low: '資金正常',
+            medium: '流動加速',
+            high: '大額異動'
+        },
+        getRiskLevel: (value: number): RiskLevel => {
+            if (Math.abs(value) > 1_000_000_000) return 'high'
+            if (Math.abs(value) > 500_000_000) return 'medium'
+            return 'low'
+        },
+        getStatusLabel: (value: number): string => {
+            if (value > 500_000_000) return '大量流入'
+            if (value > 100_000_000) return '淨流入'
+            if (value < -500_000_000) return '大量流出'
+            if (value < -100_000_000) return '淨流出'
+            return '持平'
+        }
+    },
+
+    fearGreed: {
+        id: 'fearGreed',
+        term: '恐懼貪婪指數',
+        emoji: '😱',
+        definition: '綜合多項指標計算的市場情緒指數，0-100 分。',
+        interpretation: '極端情緒 = 風險正在轉移。不是抄底/逃頂工具，而是提醒你「風險已經集中在某一方」。',
+        thresholds: {
+            normal: [40, 60],
+            elevated: 75,
+            extreme: 90
+        },
+        timeline: {
+            id: 'fear-greed-cycle',
+            title: '恐懼貪婪週期案例',
+            cards: [
+                { type: 'reversal', time: '2022/06', icon: '😱', marketState: '指數跌至 6，極度恐懼', action: '風險正從空頭轉移到多頭', ifIgnored: '不代表立刻反彈' },
+                { type: 'event', time: '2024/01', icon: '😐', marketState: '指數回升至 50，中性', action: '風險較均衡，可正常操作', ifIgnored: '這是相對安全的環境' },
+                { type: 'anomaly', time: '2024/03', icon: '🤑', marketState: '指數飆至 90，極度貪婪', action: '風險正集中在多頭身上', ifIgnored: '多頭承擔大部分回調風險' },
+                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：極端情緒 = 風險轉移訊號', action: '問自己：現在「誰在承擔風險」？' }
+            ]
+        },
+        riskHints: {
+            low: '情緒中性',
+            medium: '情緒偏熱',
+            high: '情緒極端'
+        },
+        getRiskLevel: (value: number): RiskLevel => {
+            if (value > 80 || value < 20) return 'high'
+            if (value > 65 || value < 35) return 'medium'
+            return 'low'
+        },
+        getStatusLabel: (value: number): string => {
+            if (value >= 75) return '極度貪婪'
+            if (value >= 55) return '貪婪'
+            if (value <= 25) return '極度恐懼'
+            if (value <= 45) return '恐懼'
+            return '中性'
+        }
+    },
+
+    stablecoinMarketCap: {
+        id: 'stablecoinMarketCap',
+        term: '穩定幣市值',
+        emoji: '💵',
+        definition: '穩定幣（USDT、USDC 等）總市值，代表場外觀望資金。',
+        interpretation: '乾火藥增加 ≠ 立刻上漲，但代表「有得漲」。這是潛力指標，不是進場訊號。',
+        thresholds: {
+            normal: [-2, 2],
+            elevated: 5,
+            extreme: 10
+        },
+        timeline: {
+            id: 'stablecoin-2022-2024',
+            title: '穩定幣市值變化週期',
+            cards: [
+                { type: 'event', time: '2022/05', icon: '💥', marketState: 'UST 崩盤，穩定幣市值暴跌', action: '乾火藥減少，潛力下降', ifIgnored: '沒有資金 = 難以上漲' },
+                { type: 'risk', time: '2022/11', icon: '⚠️', marketState: 'FTX 倒閉，穩定幣進一步流出', action: '持續觀察，等待止跌', ifIgnored: '不急著抄底' },
+                { type: 'reversal', time: '2023/10', icon: '🟢', marketState: '穩定幣市值止跌回升', action: '乾火藥回來了，「有得漲」', ifIgnored: '這是潛力開始累積' },
+                { type: 'anomaly', time: '2024/03', icon: '🚀', marketState: '穩定幣市值創新高', action: '子彈充足，趨勢有支撐', ifIgnored: '不代表立刻漲，但有底氣' },
+                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：乾火藥 = 「有得漲」，不是「馬上漲」', action: '用來判斷趨勢潛力，不是進場時機' }
+            ]
+        },
+        riskHints: {
+            low: '資金穩定',
+            medium: '資金波動',
+            high: '資金異動'
+        },
+        getRiskLevel: (changePercent: number): RiskLevel => {
+            if (Math.abs(changePercent) > 10) return 'high'
+            if (Math.abs(changePercent) > 5) return 'medium'
+            return 'low'
+        },
+        getStatusLabel: (changePercent: number): string => {
+            if (changePercent > 5) return '資金進場'
+            if (changePercent > 2) return '微幅增加'
+            if (changePercent < -5) return '資金撤離'
+            if (changePercent < -2) return '微幅減少'
+            return '穩定'
+        }
+    },
+
+    coinbasePremium: {
+        id: 'coinbasePremium',
+        term: 'Coinbase 溢價',
+        emoji: '🇺🇸',
+        definition: 'Coinbase 與其他交易所的價差，反映美國機構買盤強度。',
+        interpretation: '用來確認「美國機構是否跟進當前行情」。搭配 ETF 資金流使用效果更佳。',
+        thresholds: {
+            normal: [-0.1, 0.1],
+            elevated: 0.3,
+            extreme: 0.5
+        },
+        timeline: {
+            id: 'coinbase-premium-cases',
+            title: 'Coinbase 溢價解讀',
+            cards: [
+                { type: 'reversal', time: '2024/01', icon: '🇺🇸', marketState: 'ETF 上線前，溢價轉正', action: '搭配 ETF 流入確認機構態度', ifIgnored: '單獨看容易誤判' },
+                { type: 'risk', time: '2024/03', icon: '⚠️', marketState: '高點附近，溢價收窄', action: '美國買盤減弱，需警惕', ifIgnored: '行情可能由亞洲接手' },
+                { type: 'event', time: '2024/11', icon: '🚀', marketState: '川普當選，溢價與 ETF 同步飆升', action: '雙重確認，美國機構主導', ifIgnored: '這是強趨勢訊號' },
+                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：用來確認「美國機構是否跟進」', action: '搭配 ETF 資金流一起看' }
+            ]
+        },
+        riskHints: {
+            low: '溢價中性',
+            medium: '溢價顯著',
+            high: '溢價極端'
+        },
+        getRiskLevel: (value: number): RiskLevel => {
+            if (Math.abs(value) > 0.5) return 'high'
+            if (Math.abs(value) > 0.3) return 'medium'
+            return 'low'
+        },
+        getStatusLabel: (value: number): string => {
+            if (value > 0.3) return '機構強買'
+            if (value > 0.1) return '美國需求'
+            if (value < -0.3) return '機構賣壓'
+            if (value < -0.1) return '亞洲主導'
+            return '中性'
+        }
+    },
+
+    bubbleIndex: {
+        id: 'bubbleIndex',
+        term: '週期風險指標',
+        emoji: '🫧',
+        definition: '基於價格、挖礦難度、交易量等計算的長線週期指標。',
+        interpretation: '用來判斷「目前週期風險偏低或偏高」，不是預測頂底。',
+        thresholds: {
+            normal: [0, 1],
+            elevated: 2,
+            extreme: 4
+        },
+        timeline: {
+            id: 'bubble-index-cycle',
+            title: '週期風險判斷',
+            cards: [
+                { type: 'reversal', time: '2022/11', icon: '🟢', marketState: '指數 < 0.45，風險偏低', action: '長線定投風險較低', ifIgnored: '這是相對安全的佈局區' },
+                { type: 'event', time: '2024/03', icon: '🟡', marketState: '指數升至 1.5，風險升高', action: '不追價，控制倉位', ifIgnored: '追高承擔更多風險' },
+                { type: 'anomaly', time: '高點區', icon: '🔴', marketState: '若指數 > 4，風險偏高', action: '考慮減少曝險', ifIgnored: '高風險不代表馬上跌' },
+                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：判斷「風險偏低或偏高」', action: '用於長線配置，不是短線進出' }
+            ]
+        },
+        riskHints: {
+            low: '估值合理',
+            medium: '估值偏高',
+            high: '估值過熱'
+        },
+        getRiskLevel: (value: number): RiskLevel => {
+            if (value > 4) return 'high'
+            if (value > 1) return 'medium'
+            return 'low'
+        },
+        getStatusLabel: (value: number): string => {
+            if (value > 4) return '過熱'
+            if (value > 1) return '謹慎'
+            if (value < 0.45) return '低估'
+            return '正常'
+        }
+    },
+
+    takerBuySell: {
+        id: 'takerBuySell',
+        term: '主動買賣比',
+        emoji: '🛒',
+        definition: '主動買單 vs 主動賣單的比例，反映真實買賣意願。',
+        interpretation: '微觀行為確認工具。適合在築底或情緒轉折時輔助判斷，不適合單獨使用。',
+        thresholds: {
+            normal: [0.9, 1.1],
+            elevated: 1.2,
+            extreme: 1.5
+        },
+        timeline: {
+            id: 'taker-volume-cases',
+            title: '主動買賣判讀',
+            cards: [
+                { type: 'reversal', time: '築底階段', icon: '🛒', marketState: '主動買單持續 > 賣單', action: '搭配其他指標確認築底', ifIgnored: '單獨看容易誤判' },
+                { type: 'anomaly', time: '高點階段', icon: '🔴', marketState: '價格創新高但買盤減弱', action: '量價背離，提高警覺', ifIgnored: '可能是頂部訊號' },
+                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：用於「確認」而非「判斷」', action: '搭配其他指標使用' }
+            ]
+        },
+        riskHints: {
+            low: '買賣均衡',
+            medium: '單向加速',
+            high: '極端偏向'
+        },
+        getRiskLevel: (ratio: number): RiskLevel => {
+            if (ratio > 1.5 || ratio < 0.7) return 'high'
+            if (ratio > 1.2 || ratio < 0.8) return 'medium'
+            return 'low'
+        },
+        getStatusLabel: (ratio: number): string => {
+            if (ratio > 1.3) return '買方強勢'
+            if (ratio > 1.1) return '買方偏強'
+            if (ratio < 0.7) return '賣方強勢'
+            if (ratio < 0.9) return '賣方偏強'
+            return '均衡'
+        }
+    },
+
+    liquidationHeatmap: {
+        id: 'liquidationHeatmap',
+        term: '爆倉熱力圖',
+        emoji: '🔥',
+        definition: '顯示各價位的潛在爆倉金額，預測連環清算觸發點。',
+        interpretation: '用來理解「為什麼某個價位一碰就炸」。事件放大器，不是進場參考。',
+        thresholds: {
+            normal: [0, 100_000_000],
+            elevated: 200_000_000,
+            extreme: 500_000_000
+        },
+        timeline: {
+            id: 'heatmap-usage',
+            title: '爆倉熱力圖用法',
+            cards: [
+                { type: 'risk', time: '密集區上方', icon: '⚠️', marketState: '大量空單爆倉位聚集', action: '理解為什麼價格可能被拉上去', ifIgnored: '不是進場參考' },
+                { type: 'event', time: '密集區下方', icon: '💥', marketState: '大量多單爆倉位聚集', action: '理解為什麼一跌就連環爆', ifIgnored: '不要抄底' },
+                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：用來「解釋事件」，不是「預測進場」', action: '看完就好，不要照著操作' }
+            ]
+        },
+        riskHints: {
+            low: '清算壓力小',
+            medium: '清算壓力中',
+            high: '清算壓力大'
+        },
+        getRiskLevel: (value: number): RiskLevel => {
+            if (value > 500_000_000) return 'high'
+            if (value > 200_000_000) return 'medium'
+            return 'low'
+        },
+        getStatusLabel: (value: number): string => {
+            if (value > 500_000_000) return '高密集'
+            if (value > 200_000_000) return '中密集'
+            return '分散'
+        }
     }
 }
 

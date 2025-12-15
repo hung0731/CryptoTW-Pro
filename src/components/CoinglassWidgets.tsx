@@ -1506,3 +1506,212 @@ export function IndicatorsGrid({ compact = false }: { compact?: boolean }) {
         </div>
     )
 }
+
+// ============================================
+// ETF Flow Card (P1)
+// ============================================
+export function ETFFlowCard() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/etf-flow')
+                const json = await res.json()
+                if (!json.error) setData(json)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return <Skeleton className="h-28 w-full bg-neutral-900/50 rounded-xl" />
+    }
+
+    if (!data?.latest) return null
+
+    const flow = data.latest.flowUsd
+    const isPositive = flow > 0
+    const flowDisplay = Math.abs(flow) >= 1_000_000_000
+        ? `$${(Math.abs(flow) / 1_000_000_000).toFixed(2)}B`
+        : `$${(Math.abs(flow) / 1_000_000).toFixed(0)}M`
+
+    const flow7dDisplay = Math.abs(data.flow7d) >= 1_000_000_000
+        ? `$${(Math.abs(data.flow7d) / 1_000_000_000).toFixed(2)}B`
+        : `$${(Math.abs(data.flow7d) / 1_000_000).toFixed(0)}M`
+
+    return (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="text-base">🏛️</span>
+                    <span className="text-xs font-bold text-white">ETF 資金流</span>
+                    <ExplainTooltip
+                        term={INDICATOR_KNOWLEDGE.etfFlow.term}
+                        definition={INDICATOR_KNOWLEDGE.etfFlow.definition}
+                        explanation={INDICATOR_KNOWLEDGE.etfFlow.interpretation}
+                        timeline={INDICATOR_KNOWLEDGE.etfFlow.timeline}
+                    />
+                </div>
+                <span className={cn(
+                    "text-[10px] px-1.5 py-0.5 rounded font-medium",
+                    isPositive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                )}>
+                    {isPositive ? '流入' : '流出'}
+                </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+                <span className={cn(
+                    "text-xl font-bold font-mono",
+                    isPositive ? "text-green-400" : "text-red-400"
+                )}>
+                    {isPositive ? '+' : '-'}{flowDisplay}
+                </span>
+                <span className="text-xs text-neutral-500">今日</span>
+            </div>
+            <div className="mt-2 flex items-center gap-3 text-[10px] text-neutral-400">
+                <span>7D: <span className={data.flow7d > 0 ? 'text-green-400' : 'text-red-400'}>{data.flow7d > 0 ? '+' : ''}{flow7dDisplay}</span></span>
+                <span className="text-neutral-600">|</span>
+                <span>BTC ${data.latest.priceUsd?.toLocaleString()}</span>
+            </div>
+        </div>
+    )
+}
+
+// ============================================
+// Bubble Index Card (P1)
+// ============================================
+export function BubbleIndexCard() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/bubble-index')
+                const json = await res.json()
+                if (!json.error) setData(json)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return <Skeleton className="h-28 w-full bg-neutral-900/50 rounded-xl" />
+    }
+
+    if (!data?.latest) return null
+
+    const bubbleIndex = data.latest.bubbleIndex
+    const getColor = () => {
+        if (bubbleIndex > 4) return { text: 'text-red-400', bg: 'bg-red-500/20', label: '風險偏高' }
+        if (bubbleIndex > 1) return { text: 'text-yellow-400', bg: 'bg-yellow-500/20', label: '風險升高' }
+        if (bubbleIndex < 0.45) return { text: 'text-green-400', bg: 'bg-green-500/20', label: '風險偏低' }
+        return { text: 'text-neutral-400', bg: 'bg-neutral-500/20', label: '風險中等' }
+    }
+    const style = getColor()
+
+    return (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="text-base">🫧</span>
+                    <span className="text-xs font-bold text-white">週期風險</span>
+                    <ExplainTooltip
+                        term={INDICATOR_KNOWLEDGE.bubbleIndex.term}
+                        definition={INDICATOR_KNOWLEDGE.bubbleIndex.definition}
+                        explanation={INDICATOR_KNOWLEDGE.bubbleIndex.interpretation}
+                        timeline={INDICATOR_KNOWLEDGE.bubbleIndex.timeline}
+                    />
+                </div>
+                <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", style.bg, style.text)}>
+                    {style.label}
+                </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+                <span className={cn("text-xl font-bold font-mono", style.text)}>
+                    {bubbleIndex.toFixed(2)}
+                </span>
+                <span className="text-xs text-neutral-500">週期指標</span>
+            </div>
+            <div className="mt-2 text-[10px] text-neutral-400">
+                <span>BTC ${data.latest.price?.toLocaleString()}</span>
+                <span className="mx-2 text-neutral-600">|</span>
+                <span>{data.latest.date}</span>
+            </div>
+        </div>
+    )
+}
+
+// ============================================
+// Taker Buy/Sell Card (P1)
+// ============================================
+export function TakerVolumeCard() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/taker-volume')
+                const json = await res.json()
+                if (!json.error) setData(json)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return <Skeleton className="h-28 w-full bg-neutral-900/50 rounded-xl" />
+    }
+
+    if (!data) return null
+
+    const ratio = data.ratio
+    const getColor = () => {
+        if (ratio > 1.2) return { text: 'text-green-400', bg: 'bg-green-500/20', label: '買方強勢' }
+        if (ratio > 1.05) return { text: 'text-green-400/80', bg: 'bg-green-500/10', label: '買方偏強' }
+        if (ratio < 0.8) return { text: 'text-red-400', bg: 'bg-red-500/20', label: '賣方強勢' }
+        if (ratio < 0.95) return { text: 'text-red-400/80', bg: 'bg-red-500/10', label: '賣方偏強' }
+        return { text: 'text-neutral-400', bg: 'bg-neutral-500/20', label: '均衡' }
+    }
+    const style = getColor()
+
+    const buyDisplay = (data.totalBuyUsd / 1_000_000).toFixed(0)
+    const sellDisplay = (data.totalSellUsd / 1_000_000).toFixed(0)
+
+    return (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="text-base">🛒</span>
+                    <span className="text-xs font-bold text-white">主動買賣比</span>
+                    <ExplainTooltip
+                        term={INDICATOR_KNOWLEDGE.takerBuySell.term}
+                        definition={INDICATOR_KNOWLEDGE.takerBuySell.definition}
+                        explanation={INDICATOR_KNOWLEDGE.takerBuySell.interpretation}
+                        timeline={INDICATOR_KNOWLEDGE.takerBuySell.timeline}
+                    />
+                </div>
+                <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", style.bg, style.text)}>
+                    {style.label}
+                </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+                <span className={cn("text-xl font-bold font-mono", style.text)}>
+                    {ratio.toFixed(2)}
+                </span>
+                <span className="text-xs text-neutral-500">4H</span>
+            </div>
+            <div className="mt-2 flex items-center gap-3 text-[10px]">
+                <span className="text-green-400/80">買 ${buyDisplay}M</span>
+                <span className="text-neutral-600">vs</span>
+                <span className="text-red-400/80">賣 ${sellDisplay}M</span>
+            </div>
+        </div>
+    )
+}

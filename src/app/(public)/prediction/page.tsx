@@ -18,7 +18,9 @@ import {
     WhalePositionsList,
     ExchangeTransparency,
     LongShortRatio,
-
+    ETFFlowCard,
+    BubbleIndexCard,
+    TakerVolumeCard,
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 
@@ -319,6 +321,17 @@ function DataPageContent() {
                         </section>
                     )}
 
+                    {/* Section: 機構與週期指標 */}
+                    <section>
+                        <h2 className="text-sm font-medium text-neutral-500 mb-3">機構與週期指標</h2>
+                        <div className="grid grid-cols-1 gap-3">
+                            <ETFFlowCard />
+                            <div className="grid grid-cols-2 gap-3">
+                                <BubbleIndexCard />
+                                <TakerVolumeCard />
+                            </div>
+                        </div>
+                    </section>
 
 
                     {/* Section: 漲跌榜 */}
