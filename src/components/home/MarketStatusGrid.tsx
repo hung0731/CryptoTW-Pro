@@ -187,23 +187,6 @@ export function MarketStatusGrid() {
 
     return (
         <div className="space-y-3">
-            {/* AI Conclusion - One Line (P0) */}
-            {conclusion && (
-                <div className="group bg-neutral-900/30 border border-white/5 rounded-xl p-3 transition-all hover:bg-neutral-900/40">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <span className="text-lg">{conclusion.emoji}</span>
-                            <span className="text-sm font-bold text-white">今日判斷：{conclusion.bias}</span>
-                        </div>
-                        <span className="text-xs text-neutral-400">{conclusion.action}</span>
-                    </div>
-                    {/* Secondary info - hover reveal */}
-                    <p className="text-xs text-neutral-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity h-0 group-hover:h-auto overflow-hidden">
-                        依據：{conclusion.reasoning}
-                    </p>
-                </div>
-            )}
-
             {/* Status Cards */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x">
                 {cards.map((card, i) => (

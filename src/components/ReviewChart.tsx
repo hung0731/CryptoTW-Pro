@@ -21,9 +21,10 @@ interface ReviewChartProps {
     className?: string;
     reviewSlug?: string; // New prop to identify which review's data to pick
     focusWindow?: [number, number];
+    isPercentage?: boolean;
 }
 
-export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow }: ReviewChartProps) {
+export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false }: ReviewChartProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
@@ -83,7 +84,29 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     return daysDiff >= -30 && daysDiff <= 30
                 })
 
-                setData(filteredData)
+                if (isPercentage && type === 'price' && filteredData.length > 0) {
+                    // Normalize to Percentage Change from D0 (eventStart)
+                    const startTimestamp = new Date(eventStart).getTime()
+                    // Find D0 item
+                    let baseItem = filteredData.find((item: any) => new Date(item.date).getTime() === startTimestamp)
+                    if (!baseItem) {
+                        // Fallback to first item if D0 not in range (should rarely happen if eventStart inside ranges)
+                        // But filteredData is -30 to +30, so D0 is inside.
+                        // But if date doesn't match exactly... find closest?
+                        const dates = filteredData.map((d: any) => Math.abs(new Date(d.date).getTime() - startTimestamp))
+                        const minIdx = dates.indexOf(Math.min(...dates))
+                        baseItem = filteredData[minIdx]
+                    }
+                    const basePrice = baseItem?.price || 1
+
+                    const pctData = filteredData.map((item: any) => ({
+                        ...item,
+                        percentage: ((item.price - basePrice) / basePrice) * 100
+                    }))
+                    setData(pctData)
+                } else {
+                    setData(filteredData)
+                }
             } catch (e) {
                 console.error('Error loading static chart data', e)
             } finally {
@@ -108,11 +131,22 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                 <div className="bg-neutral-900/90 border border-white/10 p-2 rounded shadow-xl text-xs">
                     <p className="text-neutral-400 mb-1">{label}</p>
                     <p className="text-white font-mono font-bold">
-                        {type === 'price' && `$${Number(payload[0].value).toLocaleString()}`}
+                        {type === 'price' && (
+                            isPercentage
+                                ? <span className={payload[0].payload.percentage >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                    {payload[0].payload.percentage > 0 ? '+' : ''}{Number(payload[0].payload.percentage).toFixed(2)}%
+                                </span>
+                                : `$${Number(payload[0].value).toLocaleString()}`
+                        )}
                         {type === 'flow' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
                         {type === 'oi' && `$${(Number(payload[0].value) / 1000000).toFixed(0)}M`}
                         {type === 'supply' && `${Number(payload[0].value).toLocaleString()}`}
                     </p>
+                    {isPercentage && type === 'price' && (
+                        <p className="text-neutral-500 text-[10px] mt-1">
+                            ${Number(payload[0].payload.price).toLocaleString()}
+                        </p>
+                    )}
                 </div>
             )
         }
@@ -194,12 +228,21 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         />
                         <YAxis
                             domain={['auto', 'auto']}
-                            hide={true}
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => {
+                                if (isPercentage && type === 'price') return `${value.toFixed(0)}%`
+                                if (value >= 1000) return `${(value / 1000).toFixed(0)}k`
+                                return value
+                            }}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
-                            dataKey="price"
+                            dataKey={isPercentage && type === 'price' ? "percentage" : "price"}
                             stroke="#3b82f6"
                             strokeWidth={2}
                             fill={`url(#${gradientId})`}
@@ -208,6 +251,14 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                 ) : type === 'flow' ? (
                     <BarChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                        />
                         <XAxis
                             dataKey="date"
                             tick={{ fontSize: 10, fill: '#525252' }}
@@ -246,7 +297,16 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 fillOpacity={0.05}
                             />
                         )}
+
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                        />
                         <XAxis
                             dataKey="date"
                             tick={{ fontSize: 10, fill: '#525252' }}

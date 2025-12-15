@@ -210,6 +210,11 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 </button>
             </div>
 
+            {/* Watermark (Center Logo) */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none opacity-10">
+                <img src="/logo.svg" alt="Watermark" className="w-48 h-48" />
+            </div>
+
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 20, right: 20, bottom: 35, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
@@ -271,7 +276,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                     )}
 
                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
-                    <Legend iconType="circle" verticalAlign="top" height={36} wrapperStyle={{ top: -10, right: 0 }} />
+
                     <Line
                         type="monotone"
                         // 7. Use Display Values

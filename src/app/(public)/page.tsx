@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { MarketStatusGrid } from '@/components/home/MarketStatusGrid'
 import { MarketEntryWidgets } from '@/components/home/MarketEntryWidgets'
+import { DecisionHero } from '@/components/home/DecisionHero'
+import { SimilarHistoryCard } from '@/components/home/SimilarHistoryCard'
 import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
 
 export default function HomePage() {
@@ -103,6 +105,12 @@ export default function HomePage() {
                         </div>
                     </Link>
                 )}
+
+                {/* ===== 0. Decision Hero (P0) ===== */}
+                <DecisionHero />
+
+                {/* ===== 0.5. Similar History (P1) ===== */}
+                <SimilarHistoryCard />
 
                 {/* ===== 1. Market Status (Dashboard) ===== */}
                 <MarketStatusGrid />

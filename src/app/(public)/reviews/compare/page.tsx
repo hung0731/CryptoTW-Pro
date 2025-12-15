@@ -204,50 +204,67 @@ export default function ComparePage() {
                     </div>
                 </div>
 
-                {/* View Mode Toggle */}
+                {/* View Mode Toggle (Global Analysis Syntax) */}
                 <div className="flex bg-neutral-900 p-0.5 rounded-lg border border-white/10">
                     <button
                         onClick={() => setViewMode('split')}
                         className={cn(
-                            "p-2 rounded-md transition-all flex items-center gap-1.5",
+                            "px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5",
                             viewMode === 'split' ? "bg-neutral-800 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-300"
                         )}
                     >
-                        <Columns className="w-4 h-4" />
-                        <span className="text-[10px] font-medium hidden sm:inline">左右</span>
+                        <Columns className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-medium">左右</span>
                     </button>
                     <button
                         onClick={() => setViewMode('stacked')}
                         className={cn(
-                            "p-2 rounded-md transition-all flex items-center gap-1.5",
+                            "px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5",
                             viewMode === 'stacked' ? "bg-neutral-800 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-300"
                         )}
                     >
-                        <Layers className="w-4 h-4" />
-                        <span className="text-[10px] font-medium hidden sm:inline">堆疊</span>
+                        <Layers className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-medium">堆疊</span>
                     </button>
+                </div>
+            </div>
+
+            {/* Control Bar (Strict Data Selection: 50/50) */}
+            <div className="sticky top-[60px] z-30 bg-black/95 border-b border-white/5">
+                <div className="grid grid-cols-2 divide-x divide-white/10">
+                    {/* Left Selector (Autonomous) */}
+                    <div className="p-3 flex justify-start pl-4 md:pl-6">
+                        <EventSelector selectedSlug={leftSlug} onSelect={setLeftSlug} side="left" />
+                    </div>
+
+                    {/* Right Selector (Autonomous) */}
+                    <div className="p-3 flex justify-end pr-4 md:pr-6">
+                        <EventSelector selectedSlug={rightSlug} onSelect={setRightSlug} side="right" />
+                    </div>
                 </div>
             </div>
 
             {/* Content Area */}
             {viewMode === 'split' ? (
                 /* Split View (Grid) */
-                <div className="grid grid-cols-1 md:grid-cols-2 h-[50vh] divide-y md:divide-y-0 md:divide-x divide-white/10">
+                <div className="grid grid-cols-1 md:grid-cols-2 h-[40vh] divide-y md:divide-y-0 md:divide-x divide-white/10">
                     {/* Left Panel */}
-                    <section className="relative flex flex-col h-[25vh] md:h-[50vh] overflow-hidden bg-[#0B0B0C]">
-                        <div className="absolute top-4 left-4 z-30">
-                            <EventSelector selectedSlug={leftSlug} onSelect={setLeftSlug} side="left" />
-                        </div>
-                        <div className="flex-1 relative w-full h-full min-h-0 pt-12">
+                    <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
+                        <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
+                            {/* Watermark (Center Logo) */}
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none opacity-10">
+                                <img src="/logo.svg" alt="Watermark" className="w-32 h-32" />
+                            </div>
+
                             {leftEvent && (
                                 <ReviewChart
                                     type="price"
-                                    symbol={leftEvent.chartConfig?.symbol || 'BTC'}
-                                    eventStart={leftEvent.eventStartAt}
+                                    symbol={leftEvent.slug.toUpperCase()}
+                                    eventStart={leftEvent.reactionStartAt}
                                     eventEnd={leftEvent.eventEndAt}
                                     reviewSlug={leftEvent.slug}
-                                    daysBuffer={leftEvent.chartConfig?.daysBuffer}
                                     focusWindow={leftEvent.focusWindow}
+                                    isPercentage={true}
                                     className="w-full h-full"
                                 />
                             )}
@@ -255,20 +272,22 @@ export default function ComparePage() {
                     </section>
 
                     {/* Right Panel */}
-                    <section className="relative flex flex-col h-[25vh] md:h-[50vh] overflow-hidden bg-[#0B0B0C]">
-                        <div className="absolute top-4 left-4 z-30">
-                            <EventSelector selectedSlug={rightSlug} onSelect={setRightSlug} side="right" />
-                        </div>
-                        <div className="flex-1 relative w-full h-full min-h-0 pt-12">
+                    <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
+                        <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
+                            {/* Watermark (Center Logo) */}
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none opacity-10">
+                                <img src="/logo.svg" alt="Watermark" className="w-32 h-32" />
+                            </div>
+
                             {rightEvent && (
                                 <ReviewChart
                                     type="price"
-                                    symbol={rightEvent.chartConfig?.symbol || 'BTC'}
-                                    eventStart={rightEvent.eventStartAt}
+                                    symbol={rightEvent.slug.toUpperCase()}
+                                    eventStart={rightEvent.reactionStartAt}
                                     eventEnd={rightEvent.eventEndAt}
                                     reviewSlug={rightEvent.slug}
-                                    daysBuffer={rightEvent.chartConfig?.daysBuffer}
                                     focusWindow={rightEvent.focusWindow}
+                                    isPercentage={true}
                                     className="w-full h-full"
                                 />
                             )}
@@ -277,16 +296,8 @@ export default function ComparePage() {
                 </div>
             ) : (
                 /* Stacked View (Full Overlay) */
-                <div className="relative w-full h-[50vh] max-h-[400px] bg-[#0B0B0C]">
-                    {/* Controls Positioned Absolute */}
-                    <div className="absolute top-4 left-4 z-30 flex flex-col gap-2">
-                        <EventSelector selectedSlug={leftSlug} onSelect={setLeftSlug} side="left" />
-                    </div>
-                    <div className="absolute top-4 right-4 z-30 flex flex-col gap-2 items-end">
-                        <EventSelector selectedSlug={rightSlug} onSelect={setRightSlug} side="right" />
-                    </div>
-
-                    <div className="w-full h-full pt-16 pb-4 px-4">
+                <div className="relative w-full h-[40vh] bg-[#0B0B0C]">
+                    <div className="w-full h-full pt-4 pb-4 px-4">
                         <StackedReviewChart
                             leftSlug={leftSlug}
                             rightSlug={rightSlug}
@@ -298,11 +309,12 @@ export default function ComparePage() {
             {/* Unified Event Summary Section - Below Charts */}
             <div className="p-4 space-y-4 bg-black">
                 {/* Event Summaries */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Event Summaries */}
+                <div className="flex flex-col gap-3">
                     {/* Base Event Summary */}
                     <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 bg-blue-500/10 rounded">基準</span>
+                            <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 bg-neutral-800 rounded border border-white/5">基準</span>
                             <span className="text-xs font-bold text-white">{leftEvent?.title}</span>
                         </div>
                         <p className="text-xs text-neutral-400 leading-relaxed">
@@ -313,7 +325,7 @@ export default function ComparePage() {
                     {/* Compare Event Summary */}
                     <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] text-amber-400 font-bold px-2 py-0.5 bg-amber-500/10 rounded">對照</span>
+                            <span className="text-[10px] text-amber-400 font-bold px-2 py-0.5 bg-neutral-800 rounded border border-white/5">對照</span>
                             <span className="text-xs font-bold text-white">{rightEvent?.title}</span>
                         </div>
                         <p className="text-xs text-neutral-400 leading-relaxed">

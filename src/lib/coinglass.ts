@@ -56,7 +56,7 @@ export async function coinglassRequest<T>(
         }
 
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5s timeout (Fail fast)
 
         try {
             const response = await fetch(url.toString(), {
@@ -113,7 +113,7 @@ export async function coinglassV4Request<T>(
         }
 
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5s timeout (Fail fast)
 
         try {
             const response = await fetch(url.toString(), {
