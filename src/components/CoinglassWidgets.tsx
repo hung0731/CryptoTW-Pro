@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Flame, DollarSign, BarChart3, Gauge, Calendar as CalendarIcon, ArrowLeftRight, Radar, Users, ChevronDown, ChevronUp, Star, Info, AlertCircle, Newspaper } from 'lucide-react'
 import { ExplainTooltip } from './ExplainTooltip'
+import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 
 // ============================================
 // Bull/Bear Index Component
@@ -729,14 +730,10 @@ export function FundingSummary({ data }: { data?: DashboardData['funding'] }) {
                 <DollarSign className="w-3.5 h-3.5 text-yellow-400" />
                 <span className="text-xs font-bold text-white">BTC 費率</span>
                 <ExplainTooltip
-                    term="BTC 資金費率"
-                    definition="Binance BTC 永續合約的資金費率。"
-                    explanation={
-                        <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>正費率</strong>：多頭付費給空頭，情緒偏多。</li>
-                            <li><strong>負費率</strong>：空頭付費給多頭，情緒偏空。</li>
-                        </ul>
-                    }
+                    term={INDICATOR_KNOWLEDGE.fundingRate.term}
+                    definition={INDICATOR_KNOWLEDGE.fundingRate.definition}
+                    explanation={INDICATOR_KNOWLEDGE.fundingRate.interpretation}
+                    timeline={INDICATOR_KNOWLEDGE.fundingRate.timeline}
                 />
             </div>
             <div className="text-center py-2">
@@ -766,14 +763,10 @@ export function LiquidationSummary({ data }: { data?: DashboardData['liquidation
                 <Flame className="w-3.5 h-3.5 text-orange-400" />
                 <span className="text-xs font-bold text-white">24H 爆倉</span>
                 <ExplainTooltip
-                    term="爆倉數據"
-                    definition="過去 24 小時被強制平倉的總金額。"
-                    explanation={
-                        <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>多單爆倉大</strong>：市場殺多，可能見底。</li>
-                            <li><strong>空單爆倉大</strong>：市場軋空，可能見頂。</li>
-                        </ul>
-                    }
+                    term={INDICATOR_KNOWLEDGE.liquidation.term}
+                    definition={INDICATOR_KNOWLEDGE.liquidation.definition}
+                    explanation={INDICATOR_KNOWLEDGE.liquidation.interpretation}
+                    timeline={INDICATOR_KNOWLEDGE.liquidation.timeline}
                 />
             </div>
             <div className="grid grid-cols-2 gap-2 mt-1">
@@ -822,14 +815,10 @@ export function LongShortSummary({ data }: { data?: DashboardData['longShort'] }
                     <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
                     <span className="text-xs font-bold text-white">多空比</span>
                     <ExplainTooltip
-                        term="多空比"
-                        definition="BTC 全網帳戶多空比例。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>全網多空比</strong>：代表散戶情緒。</li>
-                                <li><strong>過高</strong>：通常是反指標。</li>
-                            </ul>
-                        }
+                        term={INDICATOR_KNOWLEDGE.longShortRatio.term}
+                        definition={INDICATOR_KNOWLEDGE.longShortRatio.definition}
+                        explanation={INDICATOR_KNOWLEDGE.longShortRatio.interpretation}
+                        timeline={INDICATOR_KNOWLEDGE.longShortRatio.timeline}
                     />
                 </div>
                 <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", sentimentBg, sentimentColor)}>
@@ -870,14 +859,10 @@ export function OpenInterestCard({ data }: { data?: DashboardData['openInterest'
                 <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
                 <span className="text-xs font-bold text-white">未平倉</span>
                 <ExplainTooltip
-                    term="未平倉合約 (OI)"
-                    definition="當前未平倉的合約總價值。"
-                    explanation={
-                        <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>OI 上升</strong>：新資金流入。</li>
-                            <li><strong>OI 下降</strong>：資金撤離。</li>
-                        </ul>
-                    }
+                    term={INDICATOR_KNOWLEDGE.openInterest.term}
+                    definition={INDICATOR_KNOWLEDGE.openInterest.definition}
+                    explanation={INDICATOR_KNOWLEDGE.openInterest.interpretation}
+                    timeline={INDICATOR_KNOWLEDGE.openInterest.timeline}
                 />
             </div>
             <div className="space-y-1">

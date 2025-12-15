@@ -6,6 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { ChevronRight, Bell } from 'lucide-react'
 import { HelpDrawer } from '@/components/ui/HelpDrawer'
+import { ExplainTooltip } from '@/components/ExplainTooltip'
+import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 
 interface ToolStatus {
     title: string
@@ -35,8 +37,8 @@ export function MarketEntryWidgets() {
             )
             case '資金費率': return (
                 <>
-                    <p>查看各大交易所的永續合約資金費率。</p>
-                    <p className="mt-2 text-neutral-400"><strong>正費率過高</strong>代表多頭過擠（看空訊號）；<strong>負費率</strong>代表空頭過擠（軋空訊號）。</p>
+                    <p>{INDICATOR_KNOWLEDGE.fundingRate.definition}</p>
+                    <p className="mt-2 text-neutral-400">{INDICATOR_KNOWLEDGE.fundingRate.interpretation}</p>
                 </>
             )
             case '市場預期': return (

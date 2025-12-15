@@ -13,6 +13,7 @@ import {
     OpenInterestCard
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
+import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -69,14 +70,10 @@ export function DerivativesView() {
                 <div className="flex items-center gap-2 mb-3">
                     <h2 className="text-sm font-medium text-neutral-500">多空分析</h2>
                     <ExplainTooltip
-                        term="多空比"
-                        definition="散戶 vs 大戶的多空持倉博弈。"
-                        explanation={
-                            <ul className="list-disc pl-4 space-y-1">
-                                <li><strong>散戶指標</strong>：全網多空比高於 2.0 代表散戶過度看多 (反指標)。</li>
-                                <li><strong>聰明錢</strong>：大戶多空比代表主力動向。</li>
-                            </ul>
-                        }
+                        term={INDICATOR_KNOWLEDGE.longShortRatio.term}
+                        definition={INDICATOR_KNOWLEDGE.longShortRatio.definition}
+                        explanation={INDICATOR_KNOWLEDGE.longShortRatio.interpretation}
+                        timeline={INDICATOR_KNOWLEDGE.longShortRatio.timeline}
                     />
                 </div>
                 <LongShortRatio />

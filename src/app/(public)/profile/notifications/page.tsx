@@ -5,9 +5,11 @@ import { useLiff } from '@/components/LiffProvider'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
-import { Bell, Zap, Gift, Newspaper, Skull, TrendingUp, Calendar } from 'lucide-react'
+import { Bell, Zap, Gift, Newspaper, Skull, TrendingUp, Calendar, HelpCircle } from 'lucide-react'
 import { UnifiedHeader } from '@/components/UnifiedHeader'
 import { BottomNav } from '@/components/BottomNav'
+import { ExplainTooltip } from '@/components/ExplainTooltip'
+import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 
 function NotificationToggle({
     icon: Icon,
@@ -15,14 +17,16 @@ function NotificationToggle({
     desc,
     checked,
     onToggle,
-    isNew
+    isNew,
+    helpTooltip
 }: {
     icon: any,
     label: string,
     desc: string,
     checked: boolean,
     onToggle: () => void,
-    isNew?: boolean
+    isNew?: boolean,
+    helpTooltip?: React.ReactNode
 }) {
     return (
         <div className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
@@ -33,6 +37,7 @@ function NotificationToggle({
                 <div className="space-y-0.5">
                     <div className="font-medium text-white flex items-center gap-2">
                         {label}
+                        {helpTooltip}
                         {isNew && (
                             <span className="text-[9px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full">NEW</span>
                         )}
@@ -158,6 +163,14 @@ export default function NotificationsPage() {
                                 checked={prefs.liquidation_alerts ?? false}
                                 onToggle={() => handleToggle('liquidation_alerts')}
                                 isNew
+                                helpTooltip={
+                                    <ExplainTooltip
+                                        term={INDICATOR_KNOWLEDGE.liquidation.term}
+                                        definition={INDICATOR_KNOWLEDGE.liquidation.definition}
+                                        explanation={INDICATOR_KNOWLEDGE.liquidation.interpretation}
+                                        timeline={INDICATOR_KNOWLEDGE.liquidation.timeline}
+                                    />
+                                }
                             />
                             <NotificationToggle
                                 icon={TrendingUp}
@@ -166,6 +179,14 @@ export default function NotificationsPage() {
                                 checked={prefs.funding_rate_alerts ?? false}
                                 onToggle={() => handleToggle('funding_rate_alerts')}
                                 isNew
+                                helpTooltip={
+                                    <ExplainTooltip
+                                        term={INDICATOR_KNOWLEDGE.fundingRate.term}
+                                        definition={INDICATOR_KNOWLEDGE.fundingRate.definition}
+                                        explanation={INDICATOR_KNOWLEDGE.fundingRate.interpretation}
+                                        timeline={INDICATOR_KNOWLEDGE.fundingRate.timeline}
+                                    />
+                                }
                             />
                             <NotificationToggle
                                 icon={Calendar}
