@@ -483,43 +483,6 @@ export const INDICATOR_KNOWLEDGE: Record<string, IndicatorKnowledge> = {
             if (ratio < 0.9) return '賣方偏強'
             return '均衡'
         }
-    },
-
-    liquidationHeatmap: {
-        id: 'liquidationHeatmap',
-        term: '爆倉熱力圖',
-        emoji: '🔥',
-        definition: '顯示各價位的潛在爆倉金額，預測連環清算觸發點。',
-        interpretation: '用來理解「為什麼某個價位一碰就炸」。事件放大器，不是進場參考。',
-        thresholds: {
-            normal: [0, 100_000_000],
-            elevated: 200_000_000,
-            extreme: 500_000_000
-        },
-        timeline: {
-            id: 'heatmap-usage',
-            title: '爆倉熱力圖用法',
-            cards: [
-                { type: 'risk', time: '密集區上方', icon: '⚠️', marketState: '大量空單爆倉位聚集', action: '理解為什麼價格可能被拉上去', ifIgnored: '不是進場參考' },
-                { type: 'event', time: '密集區下方', icon: '💥', marketState: '大量多單爆倉位聚集', action: '理解為什麼一跌就連環爆', ifIgnored: '不要抄底' },
-                { type: 'lesson', time: '', icon: '🧠', marketState: '總結：用來「解釋事件」，不是「預測進場」', action: '看完就好，不要照著操作' }
-            ]
-        },
-        riskHints: {
-            low: '清算壓力小',
-            medium: '清算壓力中',
-            high: '清算壓力大'
-        },
-        getRiskLevel: (value: number): RiskLevel => {
-            if (value > 500_000_000) return 'high'
-            if (value > 200_000_000) return 'medium'
-            return 'low'
-        },
-        getStatusLabel: (value: number): string => {
-            if (value > 500_000_000) return '高密集'
-            if (value > 200_000_000) return '中密集'
-            return '分散'
-        }
     }
 }
 

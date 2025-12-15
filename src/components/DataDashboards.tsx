@@ -10,7 +10,8 @@ import {
     // New compact card components
     LiquidationSummary,
     LongShortSummary,
-    OpenInterestCard
+    OpenInterestCard,
+    TakerVolumeCard
 } from '@/components/CoinglassWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
@@ -62,6 +63,9 @@ export function DerivativesView() {
 
                     {/* Open Interest */}
                     <OpenInterestCard data={dashboard?.openInterest} />
+
+                    {/* Taker Buy/Sell - C級輔助指標 */}
+                    <TakerVolumeCard />
                 </div>
             </section>
 

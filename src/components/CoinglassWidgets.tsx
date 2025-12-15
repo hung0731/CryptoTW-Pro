@@ -1715,3 +1715,136 @@ export function TakerVolumeCard() {
         </div>
     )
 }
+
+// ============================================
+// Stablecoin Market Cap Card (A級)
+// ============================================
+export function StablecoinCard() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/stablecoin')
+                const json = await res.json()
+                if (!json.error) setData(json)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return <Skeleton className="h-28 w-full bg-neutral-900/50 rounded-xl" />
+    }
+
+    if (!data?.latest) return null
+
+    const change7d = data.change7d
+    const isPositive = change7d > 0
+    const getStyle = () => {
+        if (change7d > 2) return { text: 'text-green-400', bg: 'bg-green-500/20', label: '資金進場' }
+        if (change7d > 0) return { text: 'text-green-400/80', bg: 'bg-green-500/10', label: '微幅增加' }
+        if (change7d < -2) return { text: 'text-red-400', bg: 'bg-red-500/20', label: '資金撤離' }
+        if (change7d < 0) return { text: 'text-red-400/80', bg: 'bg-red-500/10', label: '微幅減少' }
+        return { text: 'text-neutral-400', bg: 'bg-neutral-500/20', label: '穩定' }
+    }
+    const style = getStyle()
+
+    return (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="text-base">💵</span>
+                    <span className="text-xs font-bold text-white">穩定幣市值</span>
+                    <ExplainTooltip
+                        term={INDICATOR_KNOWLEDGE.stablecoinMarketCap.term}
+                        definition={INDICATOR_KNOWLEDGE.stablecoinMarketCap.definition}
+                        explanation={INDICATOR_KNOWLEDGE.stablecoinMarketCap.interpretation}
+                        timeline={INDICATOR_KNOWLEDGE.stablecoinMarketCap.timeline}
+                    />
+                </div>
+                <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", style.bg, style.text)}>
+                    {style.label}
+                </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold font-mono text-white">
+                    {data.latest.marketCapFormatted}
+                </span>
+                <span className="text-xs text-neutral-500">乾火藥</span>
+            </div>
+            <div className="mt-2 flex items-center gap-3 text-[10px] text-neutral-400">
+                <span>7D: <span className={isPositive ? 'text-green-400' : 'text-red-400'}>{isPositive ? '+' : ''}{change7d.toFixed(1)}%</span></span>
+                <span className="text-neutral-600">|</span>
+                <span>30D: <span className={data.change30d > 0 ? 'text-green-400' : 'text-red-400'}>{data.change30d > 0 ? '+' : ''}{data.change30d.toFixed(1)}%</span></span>
+            </div>
+        </div>
+    )
+}
+
+// ============================================
+// Coinbase Premium Card (B級)
+// ============================================
+export function CoinbasePremiumCard() {
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/coinglass/coinbase-premium')
+                const json = await res.json()
+                if (!json.error) setData(json)
+            } catch (e) { console.error(e) }
+            finally { setLoading(false) }
+        }
+        fetchData()
+    }, [])
+
+    if (loading) {
+        return <Skeleton className="h-28 w-full bg-neutral-900/50 rounded-xl" />
+    }
+
+    if (!data?.latest) return null
+
+    const premium = data.latest.premium
+    const getStyle = () => {
+        if (premium > 0.1) return { text: 'text-green-400', bg: 'bg-green-500/20', label: '美國買盤' }
+        if (premium > 0) return { text: 'text-green-400/80', bg: 'bg-green-500/10', label: '微正溢價' }
+        if (premium < -0.1) return { text: 'text-red-400', bg: 'bg-red-500/20', label: '亞洲主導' }
+        if (premium < 0) return { text: 'text-red-400/80', bg: 'bg-red-500/10', label: '微負溢價' }
+        return { text: 'text-neutral-400', bg: 'bg-neutral-500/20', label: '中性' }
+    }
+    const style = getStyle()
+
+    return (
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="text-base">🇺🇸</span>
+                    <span className="text-xs font-bold text-white">Coinbase 溢價</span>
+                    <ExplainTooltip
+                        term={INDICATOR_KNOWLEDGE.coinbasePremium.term}
+                        definition={INDICATOR_KNOWLEDGE.coinbasePremium.definition}
+                        explanation={INDICATOR_KNOWLEDGE.coinbasePremium.interpretation}
+                        timeline={INDICATOR_KNOWLEDGE.coinbasePremium.timeline}
+                    />
+                </div>
+                <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", style.bg, style.text)}>
+                    {style.label}
+                </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+                <span className={cn("text-xl font-bold font-mono", style.text)}>
+                    {data.latest.premiumFormatted}
+                </span>
+                <span className="text-xs text-neutral-500">vs 幣安</span>
+            </div>
+            <div className="mt-2 text-[10px] text-neutral-400">
+                <span>7D 均值: <span className={data.avg7d > 0 ? 'text-green-400' : 'text-red-400'}>{data.avg7d > 0 ? '+' : ''}{data.avg7d.toFixed(3)}%</span></span>
+            </div>
+        </div>
+    )
+}
