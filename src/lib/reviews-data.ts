@@ -101,6 +101,7 @@ export interface MarketEvent {
         desc: string;
         type: 'check' | 'alert';
     }[];
+    focusWindow?: [number, number];
 }
 
 export const REVIEWS_DATA: MarketEvent[] = [
@@ -354,7 +355,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 label: '流動性警訊',
                 desc: '當大型機構開始異常轉移資金或提幣延遲發生時，應優先考量保全本金，而非賭注反彈。'
             }
-        ]
+        ],
+        focusWindow: [-10, 14]
     },
     {
         id: 'review-luna-2022',

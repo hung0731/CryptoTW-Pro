@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, LineChart, Line, Cell
+    BarChart, Bar, LineChart, Line, Cell, ReferenceArea
 } from 'recharts'
+import { ZoomIn, RotateCcw } from 'lucide-react'
 import { format } from 'date-fns'
 
 // Static Data Import
@@ -19,11 +20,27 @@ interface ReviewChartProps {
     daysBuffer?: number; // Optional buffer days to show context
     className?: string;
     reviewSlug?: string; // New prop to identify which review's data to pick
+    focusWindow?: [number, number];
 }
 
-export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug }: ReviewChartProps) {
+export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow }: ReviewChartProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+    const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
+
+    const getDaysDiff = (dateStr: string) => {
+        const date = new Date(dateStr)
+        const start = new Date(eventStart)
+        const diffTime = date.getTime() - start.getTime()
+        return Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    }
+
+    const getDateFromDaysDiff = (diff: number) => {
+        const start = new Date(eventStart)
+        const target = new Date(start)
+        target.setDate(start.getDate() + diff)
+        return format(target, 'yyyy-MM-dd')
+    }
 
     useEffect(() => {
         if (!reviewSlug) {
@@ -56,7 +73,17 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                 // We should ensure we show what we need.
                 // Generator adds 15 days buffer. Component asks for 'daysBuffer'.
                 // We can just set data directly.
-                setData(chartData)
+                // Filter based on View Mode
+                const filteredData = chartData.filter((item: any) => {
+                    const daysDiff = getDaysDiff(item.date)
+                    if (viewMode === 'focus' && focusWindow) {
+                        return daysDiff >= focusWindow[0] && daysDiff <= focusWindow[1]
+                    }
+                    // Standard: T-30 ~ T+30
+                    return daysDiff >= -30 && daysDiff <= 30
+                })
+
+                setData(filteredData)
             } catch (e) {
                 console.error('Error loading static chart data', e)
             } finally {
@@ -65,7 +92,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
         }
 
         loadData()
-    }, [type, symbol, eventStart, eventEnd, daysBuffer, reviewSlug])
+    }, [type, symbol, eventStart, eventEnd, daysBuffer, reviewSlug, viewMode, focusWindow])
 
     if (loading) {
         return <Skeleton className="w-full h-full bg-neutral-900 rounded-lg" />
@@ -96,6 +123,25 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
 
     return (
         <div className={`w-full h-full relative ${className}`}>
+            {focusWindow && (
+                <div className="absolute top-2 right-2 z-20 flex gap-1 bg-black/50 backdrop-blur rounded-lg p-0.5 border border-white/10">
+                    <button
+                        onClick={() => setViewMode('standard')}
+                        className={`p-1.5 rounded transition-colors ${viewMode === 'standard' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-neutral-300'}`}
+                        title="全域視角"
+                    >
+                        <RotateCcw className="w-3 h-3" />
+                    </button>
+                    <button
+                        onClick={() => setViewMode('focus')}
+                        className={`p-1.5 rounded transition-colors ${viewMode === 'focus' ? 'bg-blue-500/20 text-blue-400' : 'text-neutral-500 hover:text-neutral-300'}`}
+                        title="重點視角"
+                    >
+                        <ZoomIn className="w-3 h-3" />
+                    </button>
+                </div>
+            )}
+
             {/* Watermark */}
             {/* Watermark */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 select-none opacity-[0.03]">
@@ -115,6 +161,15 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                             </linearGradient>
                         </defs>
+                        {viewMode === 'standard' && focusWindow && (
+                            <ReferenceArea
+                                x1={getDateFromDaysDiff(focusWindow[0])}
+                                x2={getDateFromDaysDiff(focusWindow[1])}
+                                strokeOpacity={0}
+                                fill="#ffffff"
+                                fillOpacity={0.05}
+                            />
+                        )}
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                         <XAxis
                             dataKey="date"
@@ -169,6 +224,15 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
                             </linearGradient>
                         </defs>
+                        {viewMode === 'standard' && focusWindow && (
+                            <ReferenceArea
+                                x1={getDateFromDaysDiff(focusWindow[0])}
+                                x2={getDateFromDaysDiff(focusWindow[1])}
+                                strokeOpacity={0}
+                                fill="#ffffff"
+                                fillOpacity={0.05}
+                            />
+                        )}
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                         <XAxis
                             dataKey="date"

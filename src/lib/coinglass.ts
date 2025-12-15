@@ -55,11 +55,18 @@ export async function coinglassRequest<T>(
             })
         }
 
-        const response = await fetch(url.toString(), {
+        // Use Promise.race for clean timeout without polluting fetch options (avoiding cache miss)
+        const fetchPromise = fetch(url.toString(), {
             headers: getCoinglassV2Headers(),
             next: { revalidate: 60 },
             ...options,
         })
+
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timeout')), 5000)
+        )
+
+        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
 
         if (!response.ok) {
             console.error(`Coinglass V2 API error: ${response.status} ${response.statusText}`)
@@ -93,9 +100,6 @@ export async function coinglassV4Request<T>(
     }
 
     try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5s timeout
-
         const url = new URL(`${COINGLASS_V4_URL}${endpoint}`)
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
@@ -103,14 +107,17 @@ export async function coinglassV4Request<T>(
             })
         }
 
-        const response = await fetch(url.toString(), {
+        const fetchPromise = fetch(url.toString(), {
             headers: getCoinglassV4Headers(),
             next: { revalidate: 60 },
-            signal: controller.signal,
             ...options,
         })
 
-        clearTimeout(timeoutId)
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timeout')), 5000)
+        )
+
+        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
 
         if (!response.ok) {
             console.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`)
