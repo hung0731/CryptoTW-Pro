@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, ReferenceArea
 } from 'recharts'
 import { AlertCircle, Zap, Info } from 'lucide-react'
 import { REVIEWS_DATA } from '@/lib/reviews-data'
@@ -62,9 +62,9 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 })
             }
 
-            // Normalize data to T-days
-            const leftSeries = processHistory(leftHistory, leftInfo.eventStartAt, 'left')
-            const rightSeries = processHistory(rightHistory, rightInfo.eventStartAt, 'right')
+            // Normalize data to T-days using REACTION start (D0 = market reaction point)
+            const leftSeries = processHistory(leftHistory, leftInfo.reactionStartAt, 'left')
+            const rightSeries = processHistory(rightHistory, rightInfo.reactionStartAt, 'right')
 
             // Merge logic
             const mergedMap = new Map<number, any>()
@@ -247,6 +247,29 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                         domain={viewType === 'pct' ? PCT_DOMAIN : DD_DOMAIN}
                         allowDataOverflow={true} // Important: Force clip at domain
                     />
+
+                    {/* Danger Zones for DD View */}
+                    {viewType === 'dd' && (
+                        <>
+                            {/* Death Zone (-80% to -100%) */}
+                            <ReferenceArea
+                                y1={-80}
+                                y2={-100}
+                                fill="#ef4444"
+                                fillOpacity={0.1}
+                                stroke="none"
+                            />
+                            {/* Warning Zone (-50% to -80%) */}
+                            <ReferenceArea
+                                y1={-50}
+                                y2={-80}
+                                fill="#f97316"
+                                fillOpacity={0.05}
+                                stroke="none"
+                            />
+                        </>
+                    )}
+
                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
                     <Legend iconType="circle" verticalAlign="top" height={36} wrapperStyle={{ top: -10, right: 0 }} />
                     <Line
@@ -276,8 +299,8 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             {/* 8. Disclaimer (Bottom Left inside chart area) */}
             <div className="absolute bottom-1 left-2 z-10 hidden md:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <Info className="w-3 h-3 text-neutral-600" />
-                <span className="text-[9px] text-neutral-600">
-                    圖表顯示範圍已優化以利比較，極端值仍保留於詳細資訊中
+                <span className="text-[9px] text-neutral-600 font-mono">
+                    🔁 此圖表以「市場反應起點（D0）」對齊 🧠 非新聞時間，避免錯誤比較
                 </span>
             </div>
         </div>

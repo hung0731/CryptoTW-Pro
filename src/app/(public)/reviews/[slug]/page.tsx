@@ -197,57 +197,63 @@ export default function ReviewDetailPage() {
                         </button>
                     </div>
 
-                    {/* Continuous Line - Aligned center of 50px width is 25px. Left padding/margin needs to be accounted. */}
-                    {/* The date bubble container is min-w-[50px]. So center is at 25px inside the container. */}
-                    {/* The parent container has gap-4. */}
-                    {/* Timeline section p-6 means left padding 24px. */}
-                    {/* So absolute left should be related to the content spacing. */}
-                    {/* Let's use left-[49px] to align with the center of the 50px-wide date column (which is 25px wide + 24px padding = 49px) */}
-                    <div className="absolute left-[49px] top-16 bottom-6 w-px bg-neutral-800 z-0"></div>
+                    <div className="relative">
+                        {/* Vertical Timeline Line - positioned to align with dot centers */}
+                        <div
+                            className="absolute w-px bg-neutral-800"
+                            style={{
+                                left: '20px',  // Center of the 40px date column
+                                top: '40px',   // Start below first date bubble
+                                bottom: '20px'
+                            }}
+                        />
 
-                    <div className="space-y-8 relative z-10">
-                        {review.timeline.slice(0, isTimelineExpanded ? undefined : 3).map((item, idx) => (
-                            <div key={idx} className="flex gap-4 group relative">
-                                {/* Date Bubble & Risk Icon */}
-                                <div className="flex flex-col items-center gap-2 min-w-[50px] pt-1 z-10">
-                                    <span className="text-[10px] font-mono text-neutral-500 bg-black px-1.5 py-0.5 rounded border border-white/10">
-                                        {item.date.slice(5)}
-                                    </span>
-                                    {/* Risk Dot on Line */}
-                                    <div className={cn(
-                                        "w-2.5 h-2.5 rounded-full border-2 bg-black transition-colors relative z-20",
-                                        item.riskLevel === 'high' ? "border-white bg-neutral-800" :
-                                            item.riskLevel === 'medium' ? "border-neutral-500" :
-                                                "border-neutral-700"
-                                    )} />
-                                </div>
+                        <div className="space-y-6">
+                            {review.timeline.slice(0, isTimelineExpanded ? undefined : 3).map((item, idx) => (
+                                <div key={idx} className="flex gap-4 relative">
+                                    {/* Date Column with Dot - Fixed 40px width for alignment */}
+                                    <div className="flex flex-col items-center w-10 flex-shrink-0">
+                                        {/* Date Bubble */}
+                                        <span className="text-[10px] font-mono text-neutral-500 bg-black px-1.5 py-0.5 rounded border border-white/10 mb-2">
+                                            {item.date.slice(5)}
+                                        </span>
+                                        {/* Dot - Centered on the line */}
+                                        <div className={cn(
+                                            "w-2.5 h-2.5 rounded-full border-2 bg-black z-10",
+                                            item.riskLevel === 'high' ? "border-white bg-neutral-800" :
+                                                item.riskLevel === 'medium' ? "border-neutral-500" :
+                                                    "border-neutral-700"
+                                        )} />
+                                    </div>
 
-                                {/* Content Card */}
-                                <div className="flex-1 pt-1">
-                                    <div className="mb-1 flex items-center gap-2">
-                                        {item.riskLevel && (
-                                            <span className={cn(
-                                                "text-[9px]",
-                                                item.riskLevel === 'high' ? "text-neutral-300" :
-                                                    item.riskLevel === 'medium' ? "text-neutral-400" :
-                                                        "text-neutral-600"
-                                            )}>
-                                                {item.riskLevel === 'high' ? '系統性風險' :
-                                                    item.riskLevel === 'medium' ? '結構惡化' : '風險釋放'}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-sm text-neutral-300 leading-relaxed mb-1.5 font-medium">
-                                        {item.description}
-                                    </p>
-                                    <div className="text-[10px] text-neutral-600 flex items-center gap-1.5">
-                                        <Activity className="w-3 h-3" />
-                                        市場：{item.marketImpact}
+                                    {/* Content Card */}
+                                    <div className="flex-1 pb-2">
+                                        <div className="mb-1 flex items-center gap-2">
+                                            {item.riskLevel && (
+                                                <span className={cn(
+                                                    "text-[9px]",
+                                                    item.riskLevel === 'high' ? "text-neutral-300" :
+                                                        item.riskLevel === 'medium' ? "text-neutral-400" :
+                                                            "text-neutral-600"
+                                                )}>
+                                                    {item.riskLevel === 'high' ? '系統性風險' :
+                                                        item.riskLevel === 'medium' ? '結構惡化' : '風險釋放'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-neutral-300 leading-relaxed mb-1.5 font-medium">
+                                            {item.description}
+                                        </p>
+                                        <div className="text-[10px] text-neutral-600 flex items-center gap-1.5">
+                                            <Activity className="w-3 h-3" />
+                                            市場：{item.marketImpact}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
+
 
                     {!isTimelineExpanded && review.timeline.length > 3 && (
                         <button

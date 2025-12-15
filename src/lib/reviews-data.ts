@@ -42,6 +42,10 @@ export interface MarketEvent {
     eventStartAt: string;
     eventEndAt: string;
 
+    // Reaction-based D0 Alignment (V3)
+    reactionStartAt: string;  // Market reaction start point (D0)
+    reactionType: 'trust_collapse' | 'liquidity_crisis' | 'priced_in' | 'external_shock';
+
     // Usage Guide (New V2)
     usageGuide: string[];
 
@@ -121,6 +125,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2024-01-01',
         eventEndAt: '2024-01-25',
+        reactionStartAt: '2024-01-10',  // ETF approval day - priced in before
+        reactionType: 'priced_in',
 
         usageGuide: [
             '當重大利好消息落地，價格卻不漲反跌時',
@@ -251,6 +257,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2022-11-02',
         eventEndAt: '2022-11-15',
+        reactionStartAt: '2022-11-06',  // Binance announces FTT sell-off
+        reactionType: 'trust_collapse',
 
         usageGuide: [
             '當交易所傳出資產負債表疑慮時',
@@ -374,6 +382,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2022-05-07',
         eventEndAt: '2022-05-13',
+        reactionStartAt: '2022-05-09',  // UST breaks 0.95, death spiral begins
+        reactionType: 'trust_collapse',
 
         usageGuide: [
             '當算法穩定幣出現微幅脫鉤時',
@@ -496,6 +506,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2020-03-12',
         eventEndAt: '2020-03-13',
+        reactionStartAt: '2020-03-09',  // Pre-crash selloff begins
+        reactionType: 'liquidity_crisis',
 
         usageGuide: [
             '當全球宏觀市場出現熔斷級恐慌時',
@@ -618,6 +630,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2014-02-07',
         eventEndAt: '2014-02-28',
+        reactionStartAt: '2014-02-07',  // Withdrawal halt = immediate reaction
+        reactionType: 'trust_collapse',
 
         usageGuide: [
             '當交易所提幣延遲或出現異常時',
@@ -730,6 +744,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2016-06-17',
         eventEndAt: '2016-07-20',
+        reactionStartAt: '2016-06-17',  // Hack announcement = immediate reaction
+        reactionType: 'external_shock',
 
         usageGuide: [
             '當新型智能合約協議出現安全漏洞時',
@@ -841,6 +857,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2017-06-01',
         eventEndAt: '2018-01-15',
+        reactionStartAt: '2017-12-17',  // Peak day, reversal begins
+        reactionType: 'priced_in',
 
         usageGuide: [
             '當新幣發行速度遠超市場資金承接能力時',
@@ -946,6 +964,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2021-05-21',
         eventEndAt: '2021-07-20',
+        reactionStartAt: '2021-05-19', // Initial price drop on May 19th, before official ban
+        reactionType: 'external_shock',
 
         usageGuide: [
             '當主要產區出現監管打擊礦業消息時',
@@ -1051,6 +1071,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         updatedAt: '2025-12-15',
         eventStartAt: '2022-09-06',
         eventEndAt: '2022-09-15',
+        reactionStartAt: '2022-09-15',  // Merge day - priced in before
+        reactionType: 'priced_in',
 
         usageGuide: [
             '當區塊鏈進行重大技術升級時',
