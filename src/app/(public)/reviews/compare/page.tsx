@@ -139,12 +139,7 @@ export default function ComparePage() {
                                             {/* Reaction Dot */}
                                             {event.reactionType && (
                                                 <div className="flex items-center gap-1.5 ml-1">
-                                                    <div className={cn(
-                                                        "w-1.5 h-1.5 rounded-full",
-                                                        event.reactionType === 'trust_collapse' ? "bg-red-500" :
-                                                            event.reactionType === 'liquidity_crisis' ? "bg-orange-500" :
-                                                                event.reactionType === 'priced_in' ? "bg-blue-500" : "bg-purple-500"
-                                                    )} />
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
                                                     <span className="text-[10px] text-neutral-500 hidden sm:inline-block">
                                                         {reactionTypeMap[event.reactionType]}
                                                     </span>
@@ -153,7 +148,7 @@ export default function ComparePage() {
                                         </div>
 
                                         {/* Status Icon */}
-                                        {isSelected && <CheckCircle2 className={cn("w-4 h-4 ml-2 flex-shrink-0", side === 'left' ? "text-blue-500" : "text-amber-500")} />}
+                                        {isSelected && <CheckCircle2 className="w-4 h-4 ml-2 flex-shrink-0 text-white" />}
                                         {!isSelected && <ChevronDown className={cn("w-4 h-4 ml-2 text-neutral-600 transition-transform", isExpanded ? "rotate-180" : "")} />}
                                     </button>
 
@@ -204,7 +199,7 @@ export default function ComparePage() {
                     <div>
                         <h1 className="text-sm font-bold text-white flex items-center gap-2">
                             歷史對照
-                            <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-medium">測試版</span>
+                            <span className="text-[9px] bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded border border-white/10 font-medium">測試版</span>
                         </h1>
                     </div>
                 </div>

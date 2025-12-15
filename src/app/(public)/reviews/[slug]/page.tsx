@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getReviewBySlug, getRelatedReviews } from '@/lib/reviews-data';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Share2, Clock, BookOpen, CheckCircle, XCircle, GitCompare, ListChecks, BarChart3, AlertOctagon, ChevronDown, ChevronUp, ChevronRight, AlertTriangle, Activity } from 'lucide-react';
+import { ArrowLeft, Share2, BookOpen, Clock, Tag, ChevronRight, GitCompare, Lightbulb, CheckCircle, BarChart3, ChevronUp, ChevronDown, Activity, ListChecks, AlertOctagon, AlertTriangle, XCircle } from 'lucide-react';
+import { CARDS, TYPOGRAPHY, SPACING } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
 import { EvidenceCard } from '@/components/EvidenceCard';
 import { DecisionCard } from '@/components/DecisionCard';
@@ -267,17 +268,23 @@ export default function ReviewDetailPage() {
                 </section>
 
                 {/* 7. 未來警訊 */}
-                <section className="p-4 space-y-3">
-                    <div className="border-l border-neutral-700 pl-4 py-2" style={{ backgroundColor: '#0F0F10' }}>
-                        <h2 className="text-[10px] font-medium text-neutral-500 uppercase tracking-widest mb-3">
-                            下一次需要注意的不是價格，而是：
-                        </h2>
-                        <div className="space-y-2">
+                <section className="p-4 pt-0">
+                    <div className={CARDS.subtle + " " + SPACING.cardPadding}>
+                        <div className="flex items-center gap-2 mb-3">
+                            <Lightbulb className="w-3.5 h-3.5 text-white" />
+                            <h2 className={TYPOGRAPHY.cardSubtitle + " text-neutral-300"}>
+                                下一次需要注意的不是價格，而是：
+                            </h2>
+                        </div>
+                        <div className="space-y-3">
                             {review.actionableChecklist.map((item, idx) => (
-                                <p key={idx} className="text-xs text-neutral-400 leading-relaxed">
-                                    • {item.label}
-                                    {item.desc && <span className="text-neutral-600 ml-1">— {item.desc}</span>}
-                                </p>
+                                <div key={idx} className="flex items-start gap-3">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-600 mt-1.5 flex-shrink-0" />
+                                    <p className={TYPOGRAPHY.bodySmall + " text-neutral-400"}>
+                                        <span className="text-neutral-200 font-medium">{item.label}</span>
+                                        {item.desc && ` — ${item.desc}`}
+                                    </p>
+                                </div>
                             ))}
                         </div>
                     </div>
