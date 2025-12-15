@@ -55,34 +55,39 @@ export async function coinglassRequest<T>(
             })
         }
 
-        // Use Promise.race for clean timeout without polluting fetch options (avoiding cache miss)
-        const fetchPromise = fetch(url.toString(), {
-            headers: getCoinglassV2Headers(),
-            next: { revalidate: 60 },
-            ...options,
-        })
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
 
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Request timeout')), 5000)
-        )
+        try {
+            const response = await fetch(url.toString(), {
+                headers: getCoinglassV2Headers(),
+                next: { revalidate: 60 },
+                ...options,
+                signal: controller.signal
+            })
 
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
+            if (!response.ok) {
+                console.error(`Coinglass V2 API error: ${response.status} ${response.statusText}`)
+                return null
+            }
 
-        if (!response.ok) {
-            console.error(`Coinglass V2 API error: ${response.status} ${response.statusText}`)
-            return null
+            const data = await response.json()
+
+            if (data.code !== '0') {
+                console.error(`Coinglass V2 API error: ${data.msg}`)
+                return null
+            }
+
+            return data.data as T
+        } finally {
+            clearTimeout(timeoutId)
         }
-
-        const data = await response.json()
-
-        if (data.code !== '0') {
-            console.error(`Coinglass V2 API error: ${data.msg}`)
-            return null
-        }
-
-        return data.data as T
     } catch (error) {
-        console.error('Coinglass V2 API request failed:', error)
+        if (error instanceof Error && error.name === 'AbortError') {
+            console.error('Coinglass V2 API request timed out')
+        } else {
+            console.error('Coinglass V2 API request failed:', error)
+        }
         return null
     }
 }
@@ -107,33 +112,39 @@ export async function coinglassV4Request<T>(
             })
         }
 
-        const fetchPromise = fetch(url.toString(), {
-            headers: getCoinglassV4Headers(),
-            next: { revalidate: 60 },
-            ...options,
-        })
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
 
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Request timeout')), 5000)
-        )
+        try {
+            const response = await fetch(url.toString(), {
+                headers: getCoinglassV4Headers(),
+                next: { revalidate: 60 },
+                ...options,
+                signal: controller.signal
+            })
 
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
+            if (!response.ok) {
+                console.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`)
+                return null
+            }
 
-        if (!response.ok) {
-            console.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`)
-            return null
+            const data = await response.json()
+
+            if (data.code !== '0') {
+                console.error(`Coinglass V4 API error [${endpoint}]: ${data.msg}`)
+                return null
+            }
+
+            return data.data as T
+        } finally {
+            clearTimeout(timeoutId)
         }
-
-        const data = await response.json()
-
-        if (data.code !== '0') {
-            console.error(`Coinglass V4 API error [${endpoint}]: ${data.msg}`)
-            return null
-        }
-
-        return data.data as T
     } catch (error) {
-        console.error('Coinglass V4 API request failed:', error)
+        if (error instanceof Error && error.name === 'AbortError') {
+            console.error(`Coinglass V4 API request timed out [${endpoint}]`)
+        } else {
+            console.error('Coinglass V4 API request failed:', error)
+        }
         return null
     }
 }

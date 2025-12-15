@@ -4,7 +4,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { REVIEWS_DATA, MarketEvent } from '@/lib/reviews-data';
 import { StackedReviewChart } from '@/components/StackedReviewChart';
-import { Columns, Layers } from 'lucide-react';
+import { Columns, Layers, ArrowLeft, ChevronDown, CheckCircle2, TrendingDown, ShieldAlert, Cpu, BrainCircuit } from 'lucide-react';
+import { ReviewChart } from '@/components/ReviewChart';
+import { cn } from '@/lib/utils';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function ComparePage() {
     // Default: FTX (2022) vs Mt.Gox (2014) if available, or just first two
@@ -202,12 +211,52 @@ export default function ComparePage() {
                         />
                     </div>
 
-                    {/* Footer Info for Stacked View */}
-                    <div className="absolute bottom-6 left-6 right-6 z-20 pointer-events-none flex justify-center">
-                        <div className="bg-black/60 backdrop-blur-md border border-white/5 px-4 py-2 rounded-full shadow-xl">
-                            <p className="text-[10px] text-neutral-400">
-                                D0 = 事件發生日，數值顯示為相對 D0 的漲跌幅 %
-                            </p>
+                    {/* AI Insight Header (Top Center) */}
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden md:block">
+                        <div className="bg-neutral-900/90 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-2xl flex items-center gap-4 min-w-[320px]">
+                            <div className="flex items-center gap-2 border-r border-white/10 pr-4">
+                                <BrainCircuit className="w-4 h-4 text-purple-400" />
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider">結構相似度</span>
+                                    <span className="text-xs font-bold text-white">FTX 72% <span className="text-neutral-600">/</span> COVID 28%</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] text-neutral-400 uppercase tracking-wider">類型判斷</span>
+                                <span className="text-xs font-bold text-white flex items-center gap-1">
+                                    信任崩潰型 <span className="text-[9px] text-neutral-500 font-normal">&gt; 流動性危機</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Structure Difference Summary Card (Bottom Center) */}
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-[90%] md:w-[600px] pointer-events-none">
+                        <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl">
+                            <div className="flex items-center gap-2 mb-3 border-b border-white/5 pb-2">
+                                <Cpu className="w-3.5 h-3.5 text-blue-400" />
+                                <span className="text-xs font-bold text-neutral-300">結構差異摘要</span>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex items-start gap-2">
+                                    <span className="text-[10px] uppercase font-mono text-blue-400 mt-0.5 min-w-[40px] text-right">基準</span>
+                                    <p className="text-xs text-neutral-300">
+                                        <span className="font-bold text-white">{leftEvent?.title.split(' ')[0] || 'FTX'}</span>：中心化信任破壞 <span className="text-neutral-500">→</span> 修復期長，資金撤離後難回流
+                                    </p>
+                                </div>
+                                <div className="flex items-start gap-2">
+                                    <span className="text-[10px] uppercase font-mono text-amber-400 mt-0.5 min-w-[40px] text-right">對照</span>
+                                    <p className="text-xs text-neutral-300">
+                                        <span className="font-bold text-white">{rightEvent?.title.split(' ')[0] || 'COVID'}</span>：外生衝擊 <span className="text-neutral-500">→</span> 流動性危機，央行介入後快速回補
+                                    </p>
+                                </div>
+                                <div className="mt-2 pt-2 border-t border-white/5 flex items-start gap-2 bg-white/[0.02] p-2 rounded-lg -mx-1">
+                                    <ShieldAlert className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
+                                    <p className="text-xs text-neutral-200 font-bold">
+                                        結論：雖然跌幅相似，但本質不同。建議關注 <span className="text-blue-400 underline decoration-blue-400/30 underline-offset-2">鏈上資金留存率</span> 而非單純價格反彈。
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
