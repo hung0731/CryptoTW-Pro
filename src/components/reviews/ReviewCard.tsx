@@ -26,7 +26,7 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
                 {review.impactedTokens?.[0] && (
                     <img
                         src={`/tokens/${review.impactedTokens[0]}.png`}
-                        className="w-16 h-16 blur-[0.5px]"
+                        className="w-16 h-16 blur-[0.5px] rounded-full"
                         alt=""
                         onError={(e) => e.currentTarget.style.display = 'none'}
                     />

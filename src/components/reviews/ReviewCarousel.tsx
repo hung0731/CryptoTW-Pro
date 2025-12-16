@@ -37,7 +37,7 @@ export function ReviewCarousel({ items }: ReviewCarouselProps) {
                         {/* Token Background */}
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 pointer-events-none">
                             {item.impactedTokens?.[0] && (
-                                <img src={`/tokens/${item.impactedTokens[0]}.png`} className="w-32 h-32 grayscale" alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                <img src={`/tokens/${item.impactedTokens[0]}.png`} className="w-32 h-32 grayscale rounded-full" alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
                             )}
                         </div>
 
