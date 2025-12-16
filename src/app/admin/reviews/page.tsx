@@ -26,7 +26,7 @@ export default async function ReviewsAdminPage() {
     }
 
     return (
-        <div className="p-8 max-w-7xl mx-auto">
+        <>
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-white mb-2">Market Reviews CMS</h1>
@@ -105,6 +105,6 @@ export default async function ReviewsAdminPage() {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </>
     );
 }

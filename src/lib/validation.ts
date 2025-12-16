@@ -22,9 +22,7 @@ export const exchangeUidSchema = z
 
 /** Allowed exchange names */
 export const exchangeNameSchema = z
-    .enum(['okx', 'binance', 'bybit'], {
-        errorMap: () => ({ message: 'Invalid exchange name' })
-    })
+    .enum(['okx', 'binance', 'bybit'] as const)
 
 // === API Schemas ===
 
@@ -55,8 +53,8 @@ export const analyticsEventSchema = z.object({
         'widget_view',
         'tab_switch',
         'menu_open'
-    ]),
-    metadata: z.record(z.unknown()).optional().default({})
+    ] as const),
+    metadata: z.record(z.string(), z.unknown()).optional().default({})
 }).refine(
     data => JSON.stringify(data.metadata || {}).length <= 4096,
     { message: 'Metadata too large (max 4KB)', path: ['metadata'] }
@@ -87,7 +85,7 @@ export function validateRequest<T>(
         return { success: true, data: result.data }
     }
     // Get first error message
-    const firstError = result.error.errors[0]
+    const firstError = result.error.issues[0]
     const message = firstError?.path?.length
         ? `${firstError.path.join('.')}: ${firstError.message}`
         : firstError?.message || 'Validation failed'

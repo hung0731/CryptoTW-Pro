@@ -1,7 +1,6 @@
 'use client'
 
 import { PageHeader } from '@/components/PageHeader'
-import { BottomNav } from '@/components/BottomNav'
 import { FullNewsFeed } from '@/components/news/FullNewsFeed'
 
 export default function NewsPage() {
@@ -18,7 +17,6 @@ export default function NewsPage() {
 
             </div>
 
-            <BottomNav />
         </main>
     )
 }

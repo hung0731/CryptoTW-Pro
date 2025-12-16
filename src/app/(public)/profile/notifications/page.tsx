@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { Bell, Zap, Gift, Newspaper, Skull, TrendingUp, Calendar, HelpCircle } from 'lucide-react'
 import { UnifiedHeader } from '@/components/UnifiedHeader'
-import { BottomNav } from '@/components/BottomNav'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 
@@ -218,7 +217,6 @@ export default function NotificationsPage() {
 
             </div>
 
-            <BottomNav />
         </div>
     )
 }

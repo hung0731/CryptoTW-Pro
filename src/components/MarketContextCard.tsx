@@ -81,4 +81,5 @@ export function MarketContextCard({ context, updatedAt }: MarketContextCardProps
             </div>
         </div>
 
+    )
 }

@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PageHeader } from '@/components/PageHeader'
-import { BottomNav } from '@/components/BottomNav'
 import { useLiff } from '@/components/LiffProvider'
 import {
     Bell, Settings, ChevronRight, Sparkles
@@ -123,7 +122,6 @@ export default function HomePage() {
 
             </div>
 
-            <BottomNav />
         </main>
     )
 }

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { BottomNav } from '@/components/BottomNav'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, BarChart3, Gauge, DollarSign, Bitcoin, Radar, Flame, Percent, BarChart, Calendar, RefreshCcw, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -583,7 +582,6 @@ function DataPageContent() {
 
             </Tabs>
 
-            <BottomNav />
         </main>
     )
 }

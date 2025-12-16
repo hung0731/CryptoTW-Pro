@@ -7,7 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { Link2, RefreshCw, AlertCircle, CheckCircle, XCircle, ChevronRight, Plus } from 'lucide-react'
 import { UnifiedHeader } from '@/components/UnifiedHeader'
-import { BottomNav } from '@/components/BottomNav'
+import { SingleColumnLayout } from '@/components/layout/PageLayout'
+import { Section } from '@/components/layout/Section'
 
 interface Binding {
     id: string
@@ -76,12 +77,9 @@ export default function BindingsPage() {
                 }
             />
 
-            <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
-
+            <SingleColumnLayout className="max-w-lg py-6">
                 {/* Bindings List */}
-                <section>
-                    <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">已綁定帳戶</h2>
-
+                <Section title="已綁定帳戶">
                     {loading ? (
                         <div className="space-y-2">
                             <Skeleton className="h-16 w-full rounded-xl bg-neutral-900" />
@@ -151,7 +149,7 @@ export default function BindingsPage() {
                             ))}
                         </div>
                     )}
-                </section>
+                </Section>
 
                 {/* Add New Binding Button */}
                 <Link href="/join">
@@ -167,10 +165,8 @@ export default function BindingsPage() {
                         💡 綁定交易所可以解鎖 VIP 專屬優惠，享受最高返佣。每個交易所只能綁定一個帳戶。
                     </p>
                 </div>
+            </SingleColumnLayout>
 
-            </div>
-
-            <BottomNav />
         </div>
     )
 }

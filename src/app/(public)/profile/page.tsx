@@ -11,7 +11,6 @@ import {
     User, LogOut, Bell, Link2, Crown, HelpCircle, ChevronRight,
     Bookmark, Settings, Shield
 } from 'lucide-react'
-import { BottomNav } from '@/components/BottomNav'
 import { PageHeader } from '@/components/PageHeader'
 
 function MenuLink({
@@ -177,7 +176,6 @@ export default function ProfilePage() {
 
             </div>
 
-            <BottomNav />
         </div>
     )
 }
