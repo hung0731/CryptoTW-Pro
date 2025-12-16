@@ -13,6 +13,8 @@ export interface MacroEventDef {
     icon: string
     narrative: string
     insight: string
+    listDescription: string // [NEW] For Calendar Page
+    detailDescription: string // [NEW] For Detail Page
     chartRange: string
     windowDisplay: { start: number; end: number }
     windowStats: { start: number; end: number }
@@ -54,17 +56,21 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         name: '消費者物價指數',
         narrative: '通膨敘事核心',
         icon: 'CPI',
-        insight: '典型行為：公布後 24h 易反轉',
+        insight: '⚠️ 數據斷檔：10月報銷，11月無月增率',
+        listDescription: '反映通膨變化，常影響利率預期與市場定價',
+        detailDescription: '反映通膨變化，常影響利率預期，是市場定價的核心依據',
         chartRange: 'D-3 ~ D+3',
         windowDisplay: { start: -3, end: 3 },
-        windowStats: { start: -1, end: 1 } // For calculating simple win/loss
+        windowStats: { start: -1, end: 1 }
     },
     {
         key: 'nfp',
         name: '非農就業',
         narrative: '風險資產短線波動王',
         icon: 'NFP',
-        insight: '特性：短線震盪 > 趨勢',
+        insight: '⚠️ 異常：10+11月合併發布，權重調整',
+        listDescription: '每月就業數據，常引發短線劇烈波動',
+        detailDescription: '每月就業數據，常引發短線劇烈波動，是評估經濟健康的關鍵指標', // Derived professional text
         chartRange: 'D-3 ~ D+3',
         windowDisplay: { start: -3, end: 3 },
         windowStats: { start: -1, end: 1 }
@@ -74,7 +80,9 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         name: '聯準會利率決議',
         icon: 'FOMC',
         narrative: '趨勢切換來源',
-        insight: '決策關鍵：勝率與波動',
+        insight: '決策盲區：缺乏完整就業通膨數據',
+        listDescription: '決定利率方向，常帶來趨勢轉折',
+        detailDescription: '決定利率方向，常帶來趨勢轉折，是全球資金流動的指揮棒', // Derived professional text
         chartRange: 'D-1 ~ D+5',
         windowDisplay: { start: -1, end: 5 },
         windowStats: { start: -1, end: 3 }
@@ -90,8 +98,8 @@ export const MACRO_OCCURRENCES: MacroEventOccurrence[] = [
     { eventKey: 'cpi', occursAt: '2026-02-11T13:30:00Z', notes: 'Jan 2026 CPI' },
     { eventKey: 'cpi', occursAt: '2026-01-13T13:30:00Z', notes: 'Dec 2025 CPI' },
     // 2025
-    { eventKey: 'cpi', occursAt: '2025-12-10T13:30:00Z', notes: 'Nov 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-11-13T13:30:00Z', notes: 'Oct 2025 CPI' },
+    { eventKey: 'cpi', occursAt: '2025-12-18T13:30:00Z', notes: 'Nov 2025 CPI (Delayed - Thu)' }, // Modified: Thursday Dec 18
+    { eventKey: 'cpi', occursAt: '2025-11-13T13:30:00Z', notes: 'Oct 2025 CPI (CANCELLED)', forecast: undefined, actual: undefined }, // Modified: Cancelled
     { eventKey: 'cpi', occursAt: '2025-10-15T12:30:00Z', notes: 'Sep 2025 CPI' },
     { eventKey: 'cpi', occursAt: '2025-09-11T12:30:00Z', notes: 'Aug 2025 CPI' },
     { eventKey: 'cpi', occursAt: '2025-08-12T12:30:00Z', notes: 'Jul 2025 CPI' },
@@ -140,8 +148,8 @@ export const MACRO_OCCURRENCES: MacroEventOccurrence[] = [
     { eventKey: 'nfp', occursAt: '2026-02-06T13:30:00Z', notes: 'Jan 2026 Employment' },
     { eventKey: 'nfp', occursAt: '2026-01-09T13:30:00Z', notes: 'Dec 2025 Employment' },
     // 2025
-    { eventKey: 'nfp', occursAt: '2025-12-05T13:30:00Z', notes: 'Nov 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-11-07T13:30:00Z', notes: 'Oct 2025 Employment' },
+    { eventKey: 'nfp', occursAt: '2025-12-16T13:30:00Z', notes: 'Nov+Oct Merged Report (Delayed)' }, // Modified: Tonight Dec 16
+    { eventKey: 'nfp', occursAt: '2025-11-07T13:30:00Z', notes: 'Oct 2025 Employment (DELAYED)', forecast: undefined, actual: undefined }, // Modified: Delayed
     { eventKey: 'nfp', occursAt: '2025-10-03T12:30:00Z', notes: 'Sep 2025 Employment' },
     { eventKey: 'nfp', occursAt: '2025-09-05T12:30:00Z', notes: 'Aug 2025 Employment' },
     { eventKey: 'nfp', occursAt: '2025-08-01T12:30:00Z', notes: 'Jul 2025 Employment' },
@@ -263,7 +271,7 @@ export const formatOccursAt = (occursAt: string): string => {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
-    }) + ' ET'
+    }) + ' (美東)'
 }
 
 export const getDaysUntil = (occursAt: string): number => {

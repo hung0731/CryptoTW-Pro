@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils'
 import {
     getMacroEventDef,
     getPastOccurrences,
-    getFutureOccurrences,
     formatValue,
+    getSurprise,
     MacroEventOccurrence
 } from '@/lib/macro-events'
 import { SURFACE, COLORS, CARDS } from '@/lib/design-tokens'
@@ -43,61 +43,102 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
             const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
             const reactionKey = `${eventKey}-${keyDate}`
             const reaction = reactions[reactionKey]
-            return { ...occ, reaction }
+            // Calculate Surprise
+            const surprise = getSurprise(occ)
+            return { ...occ, reaction, surprise }
         })
     }, [eventKey, pastOccurrences, reactions])
 
     // State for selected occurrence
-    // Default to NULL (Show All / Aggregate View)
     const [selectedOcc, setSelectedOcc] = useState<typeof occurrencesWithData[0] | null>(null)
 
+    // State for Time Filter (View Filter)
+    const [timeFilter, setTimeFilter] = useState<'3m' | '1y' | '2y' | 'all'>('all')
+
+    // State for Surprise Filter
+    const [surpriseFilter, setSurpriseFilter] = useState<'all' | 'high' | 'neutral' | 'low'>('all')
+
     // Filter valid reactions for specific calculations
-    const validOccs = useMemo(() => occurrencesWithData.filter(o => o.reaction && o.reaction.priceData.length > 0), [occurrencesWithData])
+    // Base valid occurrences (has data)
+    const baseValidOccs = useMemo(() => occurrencesWithData.filter(o => o.reaction && o.reaction.priceData.length > 0), [occurrencesWithData])
 
-    // Layer 1 Logic: Summary Stats
+    // Apply Filters (Time & Surprise)
+    const filteredOccs = useMemo(() => {
+        let result = baseValidOccs
+
+        // 1. Time Filter
+        if (timeFilter !== 'all') {
+            const now = new Date()
+            const cutoff = new Date()
+            switch (timeFilter) {
+                case '3m': cutoff.setMonth(now.getMonth() - 3); break
+                case '1y': cutoff.setFullYear(now.getFullYear() - 1); break
+                case '2y': cutoff.setFullYear(now.getFullYear() - 2); break
+            }
+            result = result.filter(o => new Date(o.occursAt) >= cutoff)
+        }
+
+        // 2. Surprise Filter
+        if (surpriseFilter !== 'all') {
+            result = result.filter(o => o.surprise === surpriseFilter)
+        }
+
+        return result
+    }, [baseValidOccs, timeFilter, surpriseFilter])
+
+    // Layer 1 Logic: Summary Stats (Uses Filtered Data)
     const summaryStats = useMemo(() => {
-        if (validOccs.length === 0) return null
+        if (filteredOccs.length === 0) return null
 
-        const d1Returns = validOccs.map(o => o.reaction!.stats.d0d1Return).filter((r): r is number => r !== null)
+        const d1Returns = filteredOccs.map(o => o.reaction!.stats.d0d1Return).filter((r): r is number => r !== null)
         const upCount = d1Returns.filter(r => r > 0).length
-        const avgRange = validOccs.reduce((sum, o) => sum + o.reaction!.stats.range, 0) / validOccs.length
+        const avgRange = filteredOccs.reduce((sum, o) => sum + o.reaction!.stats.range, 0) / filteredOccs.length
 
         return {
             winRate: Math.round((upCount / d1Returns.length) * 100),
             avgRange: Math.round(avgRange * 10) / 10,
-            count: validOccs.length
+            count: filteredOccs.length
         }
-    }, [validOccs])
+    }, [filteredOccs])
 
     // Chart Rendering Logic (Spider Plot)
     const renderChart = () => {
-        if (validOccs.length === 0) return <div className="flex h-full items-center justify-center text-xs text-[#444]">Insufficient Data</div>
+        const targetData = selectedOcc ? [selectedOcc] : filteredOccs
+
+        if (targetData.length === 0) return (
+            <div className="flex flex-col items-center justify-center h-full text-neutral-500 gap-2">
+                <span className="text-xs">此篩選條件下無數據</span>
+            </div>
+        )
 
         const width = 600
-        const height = 280 // Taller for better detail
+        const height = 280
         const padding = 20
 
-        // Normalize Data
-        // We need to normalize all series to % change from Start (Index 0) to overlay them
-        // Or normalize to D0? Let's normalize to Window Start to keep it clean left-to-right.
-        // Actually, aligning D0 is "Pro". Let's try to align D0.
-        // But priceData length might differ slightly.
-        // Simplest robust method: Normalize to % Change from Start of Window.
-
-        type NormalizedSeries = { points: string; color: string; width: string; opacity: number; zIndex: number }
-
-        // 1. Calculate Bounds
+        // 1. Calculate Standardized Percentages for all series
         let minPct = 0
         let maxPct = 0
+        const allSeries: { pctValues: number[]; isSelected: boolean; isAverage?: boolean }[] = []
 
-        const seriesList: { pctValues: number[]; isSelected: boolean }[] = []
+        // Temporary arrays for Average calculation
+        const sumAtIdx: number[] = []
+        const countAtIdx: number[] = []
 
-        validOccs.forEach(occ => {
-            const prices = occ.reaction!.priceData.map(p => p.close)
+        targetData.forEach(occ => {
+            if (!occ.reaction) return
+            const prices = occ.reaction.priceData.map(p => p.close)
             const startPrice = prices[0]
             if (!startPrice) return
 
-            const pctValues = prices.map(p => ((p - startPrice) / startPrice) * 100)
+            const pctValues = prices.map((p, i) => {
+                const val = ((p - startPrice) / startPrice) * 100
+                // Accumulate for Average (Only if we are in Aggregate view)
+                if (!selectedOcc) {
+                    sumAtIdx[i] = (sumAtIdx[i] || 0) + val
+                    countAtIdx[i] = (countAtIdx[i] || 0) + 1
+                }
+                return val
+            })
 
             // Update Bounds
             const sMin = Math.min(...pctValues)
@@ -105,54 +146,61 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
             if (sMin < minPct) minPct = sMin
             if (sMax > maxPct) maxPct = sMax
 
-            seriesList.push({
+            allSeries.push({
                 pctValues,
                 isSelected: selectedOcc?.occursAt === occ.occursAt
             })
         })
 
+        // 2. Calculate Average Series (If not single view)
+        let averageSeries: number[] | null = null
+        if (!selectedOcc && countAtIdx.length > 0) {
+            averageSeries = []
+            for (let i = 0; i < sumAtIdx.length; i++) {
+                if (countAtIdx[i] > 0) {
+                    averageSeries[i] = sumAtIdx[i] / countAtIdx[i]
+                }
+            }
+        }
+
         // Add padding to bounds
         const range = maxPct - minPct || 1
 
-        // 2. Generate Paths
-        // User Requirement: 
-        // - Default: All Events Overlay (Neutral Gray)
-        // - Selected: ONLY show selected event (Remove others)
+        // Helper to get coordinates
+        const getPoints = (values: number[]) => values.map((pct, i) => {
+            // Safe alignment if lengths differ slightly
+            // Assuming longest length defines width might be shaky if data is sparse, 
+            // but assuming standard window (7 points usually).
+            // We normalize X by the specific series length or the MAX length?
+            // Ideally alignment by D0. For now normalize by its own length to span width.
+            const totalPoints = values.length
+            const x = padding + (i / (totalPoints - 1)) * (width - padding * 2)
+            const y = height - padding - ((pct - minPct) / range) * (height - padding * 2)
+            return `${x},${y}`
+        }).join(' ')
 
-        const validSeries = selectedOcc
-            ? seriesList.filter(s => s.isSelected)
-            : seriesList
 
-        const paths = validSeries.map((series, idx) => {
-            const isTarget = series.isSelected
-
-            // Style Logic
-            let stroke = '#444' // Default Neutral Gray
+        // Generate Paths for History
+        const historyPaths = allSeries.map((series, idx) => {
+            let stroke = '#222' // Very low subtle grey for background
             let strokeWidth = '1'
-            let opacity = 0.5
+            let opacity = 0.6 // Blend them
 
-            if (selectedOcc) {
-                // Since we filtered, this MUST be the target
+            if (series.isSelected) {
                 stroke = '#EDEDED'
                 strokeWidth = '2'
                 opacity = 1
             }
 
-            const points = series.pctValues.map((pct, i) => {
-                const x = padding + (i / (series.pctValues.length - 1)) * (width - padding * 2)
-                const y = height - padding - ((pct - minPct) / range) * (height - padding * 2)
-                return `${x},${y}`
-            }).join(' ')
-
             return (
                 <polyline
-                    key={idx}
+                    key={`hist-${idx}`}
                     fill="none"
                     stroke={stroke}
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    points={points}
+                    points={getPoints(series.pctValues)}
                     opacity={opacity}
                     style={{ transition: 'all 0.3s ease' }}
                 />
@@ -174,13 +222,27 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                     return (
                         <>
                             <line x1={d0X} y1={0} x2={d0X} y2={height} stroke="#333" strokeWidth="1" strokeDasharray="4,4" />
-                            <text x={d0X} y={-8} fill="#666" fontSize="9" textAnchor="middle" fontFamily="monospace">ANNOUNCEMENT</text>
+                            <text x={d0X} y={-8} fill="#666" fontSize="9" textAnchor="middle" fontFamily="monospace">發布時刻</text>
                         </>
                     )
                 })()}
 
-                {/* Paths */}
-                {paths}
+                {/* Historical Paths (Spaghetti) */}
+                {historyPaths}
+
+                {/* Average Line (On Top) */}
+                {averageSeries && (
+                    <polyline
+                        fill="none"
+                        stroke="#888" // Lighter grey, distinct
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        points={getPoints(averageSeries)}
+                        opacity="1"
+                        className="drop-shadow-sm" // Optional subtle lift
+                    />
+                )}
 
                 {/* Labels */}
                 <text x={width - padding + 5} y={padding} fill="#444" fontSize="9" dominantBaseline="middle" fontFamily="monospace">+{Math.round(maxPct)}%</text>
@@ -193,12 +255,19 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
         <div className="max-w-3xl mx-auto pb-20">
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
-                <Link href="/calendar" className="text-neutral-400 hover:text-white transition-colors">
+                <Link href="/calendar" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1">
                     <ArrowLeft className="w-5 h-5" />
+                    <span className="text-xs">返回日曆</span>
                 </Link>
                 <div className="text-sm font-bold truncate max-w-[200px] text-white flex items-center gap-2">
                     <span className="text-base font-mono">{eventDef.icon}</span>
-                    <span>{eventDef.name}</span>
+                    <div className="flex flex-col">
+                        <span>{eventDef.name}</span>
+                        {/* Market Definition */}
+                        <span className="text-[10px] text-neutral-500 font-normal leading-tight">
+                            {eventDef.detailDescription}
+                        </span>
+                    </div>
                 </div>
                 <div className="w-5" />
             </div>
@@ -209,7 +278,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                     <section className={cn(CARDS.typeA, "min-h-[160px]")}>
                         <div className={cn("px-4 py-3 border-b flex items-center justify-between", SURFACE.border)}>
                             <div className="flex items-center gap-2">
-                                <span className={cn("text-xs font-bold", COLORS.textPrimary)}>NEXT EVENT</span>
+                                <span className={cn("text-xs font-bold", COLORS.textPrimary)}>下一次發布</span>
                                 <div className="w-[1px] h-3 bg-[#2A2A2A]" />
                                 <span className={cn("text-xs", COLORS.textSecondary)}>行為傾向分析</span>
                             </div>
@@ -224,12 +293,14 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                                 <div className={cn("text-3xl font-bold font-mono tracking-tighter", COLORS.textPrimary)}>
                                     {summaryStats.winRate}<span className="text-sm text-[#444] ml-1">%</span>
                                 </div>
+                                <p className="text-[10px] text-neutral-600 mt-1">過去同類事件中，隔天上漲的比例</p>
                             </div>
                             <div>
                                 <div className={cn("text-[10px] mb-1", COLORS.textTertiary)}>平均波動</div>
                                 <div className={cn("text-3xl font-bold font-mono tracking-tighter", COLORS.textPrimary)}>
                                     {summaryStats.avgRange}<span className="text-sm text-[#444] ml-1">%</span>
                                 </div>
+                                <p className="text-[10px] text-neutral-600 mt-1">公布後常見的價格震盪幅度</p>
                             </div>
                         </div>
 
@@ -237,7 +308,6 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                             <div className="flex items-start gap-2">
                                 <div className="w-0.5 h-3 bg-[#444] mt-1" />
                                 <p className={cn("text-xs leading-relaxed", COLORS.textSecondary)}>
-                                    {/* Clean text only */}
                                     {eventDef.insight.split('：')[1] || eventDef.narrative}
                                 </p>
                             </div>
@@ -247,21 +317,69 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
 
                 {/* 2. Chart Section (MOVED UP) */}
                 <section className={cn(CARDS.base, "overflow-hidden")}>
-                    <div className={cn("px-4 py-3 border-b flex items-center justify-between", SURFACE.border)}>
-                        <h2 className={cn("text-xs font-bold uppercase tracking-wider", COLORS.textSecondary)}>
-                            Price Action
-                        </h2>
-                        {selectedOcc ? (
-                            <button
-                                onClick={() => setSelectedOcc(null)}
-                                className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
-                            >
-                                清除篩選 ✕
-                            </button>
-                        ) : (
-                            <span className="text-[10px] text-neutral-600">Showing All History</span>
-                        )}
+                    {/* Toolbar / Filters */}
+                    <div className={cn("px-4 py-3 border-b flex flex-col gap-3", SURFACE.border)}>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className={cn("text-xs font-bold uppercase tracking-wider", COLORS.textSecondary)}>
+                                    價格走勢
+                                </h2>
+                                <p className="text-[10px] text-neutral-600 mt-0.5">顯示指定時間範圍內的歷史事件反應</p>
+                            </div>
+
+                            {selectedOcc ? (
+                                <button
+                                    onClick={() => setSelectedOcc(null)}
+                                    className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                                >
+                                    清除篩選 ✕
+                                </button>
+                            ) : (
+                                <div className="flex items-center gap-3">
+                                    {(['all', '2y', '1y', '3m'] as const).map((mode) => (
+                                        <button
+                                            key={mode}
+                                            onClick={() => setTimeFilter(mode)}
+                                            className={cn(
+                                                "text-[10px] font-mono transition-colors uppercase",
+                                                timeFilter === mode
+                                                    ? "text-white underline decoration-wavy decoration-neutral-600"
+                                                    : "text-neutral-600 hover:text-neutral-400"
+                                            )}
+                                        >
+                                            {mode === 'all' ? '全部' : mode === '2y' ? '2年' : mode === '1y' ? '1年' : '3個月'}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Surprise Filters */}
+                        <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                            <span className="text-[9px] text-neutral-600 uppercase tracking-widest mr-1">預期偏差</span>
+                            {[
+                                { k: 'all', l: '全部' },
+                                { k: 'high', l: '高於預期' },
+                                { k: 'neutral', l: '符合預期' },
+                                { k: 'low', l: '低於預期' }
+                            ].map(opt => (
+                                <button
+                                    key={opt.k}
+                                    onClick={() => setSurpriseFilter(opt.k as any)}
+                                    className={cn(
+                                        "text-[10px] px-2 py-0.5 rounded transition-all",
+                                        surpriseFilter === opt.k
+                                            ? "bg-[#1A1A1A] text-white border border-[#333]"
+                                            : "text-neutral-500 hover:text-neutral-300"
+                                    )}
+                                >
+                                    {opt.l}
+                                </button>
+                            ))}
+                        </div>
                     </div>
+
+
 
                     {/* Chart Canvas */}
                     <div className="aspect-[21/10] w-full relative p-4 bg-[#050505]">
@@ -309,7 +427,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                             <div className={CARDS.typeC}>
                                 <div className={cn("text-[9px] mb-1", COLORS.textTertiary)}>總樣本數</div>
                                 <div className={cn("font-mono text-xs font-bold", COLORS.textPrimary)}>
-                                    {summaryStats?.count || 0} Events
+                                    {summaryStats?.count || 0} 次事件
                                 </div>
                             </div>
                             <div className={CARDS.typeC}>
@@ -325,7 +443,10 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                 {/* 3. Historical Matrix (Type B) */}
                 <section>
                     <div className="px-1 mb-3 flex items-center justify-between">
-                        <h2 className={cn("text-xs font-bold uppercase tracking-wider", COLORS.textTertiary)}>歷史回測矩陣</h2>
+                        <div>
+                            <h2 className={cn("text-xs font-bold uppercase tracking-wider", COLORS.textTertiary)}>歷史回測矩陣</h2>
+                            <p className="text-[10px] text-neutral-600 mt-0.5">點選任一日期，可單獨查看該次事件走勢</p>
+                        </div>
                         <div className="flex gap-4 text-[10px] text-[#666]">
                             <span>▲ 上漲</span>
                             <span>▼ 下跌</span>
@@ -347,11 +468,25 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                                         const d1Return = occ.reaction?.stats.d0d1Return || 0
                                         const symbol = d1Return > 0.5 ? '▲' : d1Return < -0.5 ? '▼' : '─'
 
+                                        // Highlight Surprise & Filter Logic
+                                        let isDimmed = false
+                                        // If filtering, dim non-matches?
+                                        // The user said "Placed in Matrix". 
+                                        // If I filter CHART, Matrix should probably still be selectable but denote which ones match?
+                                        // Or should Matrix ALSO be filtered?
+                                        // "不影響：歷史回測矩陣" (Do NOT affect Matrix) was for Time Filter.
+                                        // For Surprise Filter? "Placed in Chart AND Matrix". 
+                                        // Let's assume Matrix should highlight/dim.
+
+                                        // Logic: If Surprise Filter is Active, Dim non-matches.
+                                        if (surpriseFilter !== 'all') {
+                                            if (occ.surprise !== surpriseFilter) isDimmed = true
+                                        }
+
                                         return (
                                             <button
                                                 key={occ.occursAt}
                                                 onClick={() => {
-                                                    // Toggle selection
                                                     if (isSelected) setSelectedOcc(null)
                                                     else if (occ.reaction) setSelectedOcc(occ)
                                                 }}
@@ -360,19 +495,21 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                                                     CARDS.typeB,
                                                     "relative h-14 flex flex-col items-center justify-center gap-1 transition-all duration-200",
                                                     isSelected
-                                                        ? "bg-[#1A1A1A] border border-[#444]" // Selected: Brighter BG, Visible Border
-                                                        : "bg-[#0E0E0F] border border-transparent hover:bg-[#151515] hover:border-[#2A2A2A]", // Default: Dark BG, No Border (Hover effect)
-                                                    !occ.reaction && "opacity-30 cursor-not-allowed"
+                                                        ? "bg-[#1A1A1A] border border-[#444]"
+                                                        : "bg-[#0E0E0F] border border-transparent hover:bg-[#151515] hover:border-[#2A2A2A]",
+                                                    (!occ.reaction || isDimmed) && "opacity-30"
                                                 )}
                                             >
                                                 <span className={cn("text-xs font-mono", isSelected ? COLORS.textPrimary : COLORS.textSecondary)}>
                                                     {dateShort}
                                                 </span>
-                                                {occ.reaction && (
+                                                <div className="flex items-center gap-1">
                                                     <span className={cn("text-[10px] leading-none", COLORS.textTertiary)}>
                                                         {symbol}
                                                     </span>
-                                                )}
+                                                    {occ.surprise === 'high' && <span className="w-1 h-1 rounded-full bg-red-500" />}
+                                                    {occ.surprise === 'low' && <span className="w-1 h-1 rounded-full bg-green-500" />}
+                                                </div>
                                             </button>
                                         )
                                     })}

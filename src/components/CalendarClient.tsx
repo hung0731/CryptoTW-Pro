@@ -14,6 +14,7 @@ import {
     formatOccursAt,
     MacroEventOccurrence
 } from '@/lib/macro-events'
+import { SURFACE, COLORS, CARDS } from '@/lib/design-tokens'
 
 // Types
 interface MacroReaction {
@@ -34,7 +35,7 @@ interface CalendarClientProps {
     reactions: Record<string, MacroReaction>
 }
 
-// Mini Sparkline Card
+// Mini Sparkline Card (Styled like Type B in SingleEvent)
 function MiniChartCard({
     occ,
     eventDef,
@@ -55,13 +56,6 @@ function MiniChartCard({
     const surprise = getSurprise(occ)
     const daysUntil = getDaysUntil(occ.occursAt)
 
-    const formatCountdown = (days: number) => {
-        if (days <= 0) return '今天'
-        if (days === 1) return '明天'
-        if (days <= 7) return `${days}天`
-        return `${Math.ceil(days / 7)}週`
-    }
-
     // Chart rendering
     const renderChart = () => {
         if (!reaction?.priceData || reaction.priceData.length === 0) {
@@ -69,7 +63,7 @@ function MiniChartCard({
                 <div className="w-full h-12 flex items-center justify-center opacity-30">
                     <div className="flex gap-0.5">
                         {[16, 24, 20, 28, 22].map((h, i) => (
-                            <div key={i} className="w-1 bg-neutral-700 rounded-full" style={{ height: h }} />
+                            <div key={i} className="w-1 bg-[#333] rounded-full" style={{ height: h }} />
                         ))}
                     </div>
                 </div>
@@ -90,69 +84,55 @@ function MiniChartCard({
             return `${x},${y}`
         }).join(' ')
 
-        const color = reaction.stats.direction === 'up' ? '#22c55e' :
-            reaction.stats.direction === 'down' ? '#ef4444' : '#6b7280'
-
-        // Calculate D0 X position
-        // Event data is D-WindowStart to D+WindowEnd
-        // For D-3 to D+3 (7 days), center index is 3
-        const totalPoints = prices.length // e.g. 7
-        // We know reaction data struct matches windowDisplay
-        // center index for D-3..D+3 is 3. For D-1..D+5 is 1.
+        // Pro Style: Green/Red for Up/Down, otherwise Grey
+        const d1 = reaction.stats.d0d1Return || 0
+        const color = d1 > 0 ? '#4ADE80' : '#F87171' // Green : Red
         const centerIndex = -eventDef.windowDisplay.start
-        const d0X = padding + (centerIndex / (totalPoints - 1)) * (width - padding * 2)
+        const d0X = padding + (centerIndex / (prices.length - 1)) * (width - padding * 2)
 
         return (
             <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-12 overflow-visible">
                 {/* D0 marker line */}
-                <line x1={d0X} y1={-5} x2={d0X} y2={height + 5} stroke="#ffffff20" strokeWidth="1" strokeDasharray="2,2" />
-                <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={points} />
+                <line x1={d0X} y1={-5} x2={d0X} y2={height + 5} stroke="#333" strokeWidth="1" strokeDasharray="2,2" />
+                <polyline fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={points} />
             </svg>
         )
     }
 
-    const getSurpriseText = () => {
-        if (!surprise) return null
-        if (surprise === 'high') return '↑'
-        if (surprise === 'low') return '↓'
-        return '='
-    }
-
     return (
         <div className={cn(
-            "flex-shrink-0 w-[130px] rounded-xl relative overflow-hidden flex flex-col justify-between border transition-all duration-300",
+            CARDS.typeB,
+            "flex-shrink-0 w-[130px] rounded-lg relative overflow-hidden flex flex-col justify-between border border-transparent transition-all duration-300",
             isNext
-                ? "bg-amber-500/10 border-amber-500/30"
-                : isLatest
-                    ? "bg-neutral-800 border-blue-500/50 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]"
-                    : "bg-neutral-900/40 border-white/5 opacity-80 hover:opacity-100"
+                ? "bg-[#1A1A1A] border-[#2A2A2A]" // Highlight Next
+                : SURFACE.card // Standard Dark
         )}>
             {/* Header: Date + Time + Badge */}
             <div className="flex items-center justify-between px-2.5 pt-2 pb-1">
                 <div className="flex flex-col">
                     <span className={cn(
-                        "text-[11px] font-mono tracking-wide leading-tight",
-                        isNext ? "text-amber-400 font-bold" : isLatest ? "text-white font-bold" : "text-neutral-500"
+                        "text-[10px] font-mono tracking-wide leading-tight",
+                        isNext ? COLORS.positive : COLORS.textSecondary
                     )}>
                         {dateStr}
                     </span>
                     {isNext && (
-                        <span className="text-[9px] text-amber-500/80 font-mono">
+                        <span className={cn("text-[9px] font-mono", COLORS.textTertiary)}>
                             {formatOccursAt(occ.occursAt).split(', ')[1] || '20:30'}
                         </span>
                     )}
                 </div>
 
                 {isNext ? (
-                    <span className="text-[9px] text-amber-500/90 font-medium px-1.5 py-0.5 bg-amber-500/20 rounded ml-auto">{formatCountdown(daysUntil)}</span>
+                    <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded ml-auto text-black bg-[#4ADE80]")}>
+                        下次
+                    </span>
                 ) : (
                     // D+1 Return Badge
-                    reaction?.stats?.d0d1Return !== null && reaction?.stats?.d0d1Return !== undefined && (
+                    reaction?.stats?.d0d1Return !== null && (
                         <span className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto",
-                            reaction.stats.d0d1Return > 0 ? "bg-green-500/20 text-green-400" :
-                                reaction.stats.d0d1Return < 0 ? "bg-red-500/20 text-red-400" :
-                                    "bg-neutral-600/30 text-neutral-400"
+                            "text-[10px] font-mono font-bold ml-auto",
+                            reaction.stats.d0d1Return > 0 ? COLORS.positive : COLORS.negative
                         )}>
                             {reaction.stats.d0d1Return > 0 ? '+' : ''}{reaction.stats.d0d1Return}%
                         </span>
@@ -161,51 +141,39 @@ function MiniChartCard({
             </div>
 
             {/* Chart Area */}
-            <div className="relative h-12 w-full px-1 my-1">
+            <div className="relative h-12 w-full px-1 my-1 opacity-80">
                 {renderChart()}
             </div>
 
             {/* Footer: Quiet Metrics */}
-            <div className="px-2.5 pb-2.5 flex items-center justify-between text-[9px] text-neutral-500">
+            <div className="px-2.5 pb-2.5 flex items-center justify-between text-[9px]">
                 <div className="flex items-center gap-1">
-                    <span className="scale-90 origin-left opacity-60 font-mono">預測</span>
-                    <span className={cn(
-                        "font-medium tracking-tight font-mono",
-                        isNext ? "text-amber-500/90" : "text-neutral-400"
-                    )}>
+                    <span className={cn("scale-90 origin-left opacity-60 font-mono", COLORS.textTertiary)}>預測</span>
+                    <span className={cn("font-medium tracking-tight font-mono", COLORS.textSecondary)}>
                         {formatValue(eventDef.key, occ.forecast)}
                     </span>
                 </div>
                 {!isNext && (
                     <div className="flex items-center gap-1">
-                        <span className="scale-90 origin-right opacity-60 font-mono">實際</span>
-                        <div className="flex items-center gap-0.5">
-                            <span className={cn(
-                                "font-medium tracking-tight font-mono",
-                                surprise === 'high' ? "text-white" :
-                                    surprise === 'low' ? "text-white" : "text-neutral-400"
-                            )}>
-                                {formatValue(eventDef.key, occ.actual)}
-                            </span>
-                            {/* Surprise Dot instead of arrow for subtle effect */}
-                            <div className={cn(
-                                "w-1 h-1 rounded-full ml-0.5",
-                                surprise === 'high' ? "bg-green-500" :
-                                    surprise === 'low' ? "bg-red-500" : "bg-neutral-600"
-                            )} />
-                        </div>
+                        <span className={cn("scale-90 origin-right opacity-60 font-mono", COLORS.textTertiary)}>實際</span>
+                        <span className={cn("font-medium tracking-tight font-mono", COLORS.textPrimary)}>
+                            {formatValue(eventDef.key, occ.actual)}
+                        </span>
                     </div>
                 )}
             </div>
-
-            {/* Next Badge */}
-            {isNext && (
-                <div className="absolute top-0 right-0 px-2 py-0.5 bg-amber-500 text-[9px] font-bold text-black rounded-bl-lg z-20 shadow-[0_2px_10px_rgba(245,158,11,0.2)]">
-                    NEXT
-                </div>
-            )}
         </div>
     )
+}
+
+// Helper to get Icon
+const getEventIcon = (key: string) => {
+    switch (key) {
+        case 'cpi': return 'CPI'
+        case 'nfp': return 'NFP'
+        case 'fomc': return 'FED'
+        default: return 'EVT'
+    }
 }
 
 export default function CalendarClient({ reactions }: CalendarClientProps) {
@@ -230,47 +198,42 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
         }
     }
 
-    const formatCountdown = (days: number) => {
-        if (days <= 0) return '今天'
-        if (days === 1) return '明天'
-        if (days <= 7) return `${days}天後`
-        return `${Math.ceil(days / 7)}週後`
-    }
-
     return (
-        <div className="px-4 space-y-6">
+        <div className="px-4 space-y-6 pb-20">
             {/* Mode Switch */}
             <div className="flex items-center justify-end px-2">
-                <div className="flex bg-neutral-900 rounded-lg p-0.5 border border-white/5">
+                <div className={cn("flex rounded-lg p-0.5 border", SURFACE.card, SURFACE.border)}>
                     <button
                         onClick={() => setAlignMode('time')}
                         className={cn(
-                            "px-3 py-1 text-[10px] rounded shadow-sm border font-medium transition-all duration-200",
+                            "px-3 py-1 text-[10px] rounded transition-all duration-200",
                             alignMode === 'time'
-                                ? "text-white bg-neutral-800 border-white/5"
-                                : "text-neutral-500 border-transparent hover:text-neutral-300"
+                                ? "text-white bg-[#1A1A1A]"
+                                : "text-[#666] hover:text-[#999]"
                         )}
                     >
-                        時間對齊 ⏱
+                        依日期
                     </button>
                     <button
                         onClick={() => setAlignMode('reaction')}
                         className={cn(
-                            "px-3 py-1 text-[10px] rounded shadow-sm border font-medium transition-all duration-200",
+                            "px-3 py-1 text-[10px] rounded transition-all duration-200",
                             alignMode === 'reaction'
-                                ? "text-white bg-neutral-800 border-white/5"
-                                : "text-neutral-500 border-transparent hover:text-neutral-300"
+                                ? "text-white bg-[#1A1A1A]"
+                                : "text-[#666] hover:text-[#999]"
                         )}
                     >
-                        反應對齊 ⚡
+                        依波動
                     </button>
                 </div>
             </div>
 
             {MACRO_EVENT_DEFS.map((eventDef) => {
                 const nextOccurrence = getNextOccurrence(eventDef.key)
+                const daysUntil = nextOccurrence ? getDaysUntil(nextOccurrence.occursAt) : 999
+                const summaryStats = getSummaryStats(eventDef.key)
 
-                // Get past occurrences and filter
+                // Get past occurrences
                 const allPastOccurrences = getPastOccurrences(eventDef.key, 36)
                 let pastOccurrences = allPastOccurrences
                     .filter(occ => {
@@ -280,7 +243,6 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                     })
                     .slice(0, 11)
 
-                // Sorting logic for 'reaction' mode
                 if (alignMode === 'reaction') {
                     pastOccurrences = [...pastOccurrences].sort((a, b) => {
                         const getDate = (occ: typeof a) => new Date(occ.occursAt).toISOString().split('T')[0]
@@ -288,98 +250,89 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                         const rB = reactions[`${eventDef.key}-${getDate(b)}`]
                         const valA = rA?.stats?.d0d1Return ? Math.abs(rA.stats.d0d1Return) : 0
                         const valB = rB?.stats?.d0d1Return ? Math.abs(rB.stats.d0d1Return) : 0
-                        return valB - valA // Descending order of absolute return
+                        return valB - valA
                     })
                 }
 
-                const daysUntil = nextOccurrence ? getDaysUntil(nextOccurrence.occursAt) : 999
-                const summaryStats = getSummaryStats(eventDef.key)
-
                 return (
-                    <div
+                    <Link
+                        href={`/calendar/${eventDef.key}`}
                         key={eventDef.key}
-                        className="bg-neutral-900/30 border border-white/5 rounded-2xl overflow-hidden"
+                        className={cn(
+                            "block group relative overflow-hidden transition-all",
+                            CARDS.typeA
+                        )}
                     >
-                        {/* Card Header Section */}
-                        <div className="p-4 pb-2">
-                            <div className="flex items-start justify-between mb-3">
-                                <div className="flex gap-3">
-                                    <span className="text-2xl mt-0.5">{eventDef.icon}</span>
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h2 className="text-base font-bold text-white tracking-wide">
+                        {/* 1. Header Section */}
+                        <div className={cn("px-4 py-3 border-b flex items-center justify-between", SURFACE.border)}>
+                            <div className="flex items-center gap-3">
+                                <span className={cn("text-xs font-black tracking-tighter text-[#444]", COLORS.textPrimary)}>
+                                    {getEventIcon(eventDef.key)}
+                                </span>
+
+                                <div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <div className="flex items-center gap-2">
+                                            <h2 className={cn("text-sm font-bold tracking-wide group-hover:text-white transition-colors", COLORS.textPrimary)}>
                                                 {eventDef.name}
                                             </h2>
-                                            <Link href={`/calendar/${eventDef.key}`} className="text-blue-500 hover:text-blue-400 transition-colors bg-blue-500/10 p-1 rounded-full">
-                                                <ChevronRight className="w-3 h-3" />
-                                            </Link>
+                                            <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666] transition-colors" />
                                         </div>
-                                        {/* Insight One-Liner */}
-                                        <p className="text-[11px] text-neutral-400 font-medium">
-                                            {eventDef.insight}
+                                        {/* Market Definition */}
+                                        <p className={cn("text-[10px]", COLORS.textTertiary)}>
+                                            {eventDef.listDescription}
                                         </p>
-                                    </div>
-                                </div>
 
-                                {/* Chart Range Label */}
-                                <div className="flex flex-col items-end gap-1">
-                                    <span className="text-[9px] text-neutral-500 font-mono border border-white/5 rounded px-1.5 py-0.5 bg-neutral-900">
-                                        ⏱ {eventDef.chartRange}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Summary Stats Row */}
-                            <div className="flex items-center gap-2 text-[10px]">
-                                {nextOccurrence && (
-                                    <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-md">
-                                        <Calendar className="w-3 h-3 text-amber-500" />
-                                        <span className={cn("font-medium", daysUntil <= 7 ? "text-amber-400" : "text-neutral-400")}>
-                                            {formatCountdown(daysUntil)}
-                                        </span>
-                                    </div>
-                                )}
-                                {summaryStats && (
-                                    <>
-                                        <div className="h-4 w-px bg-white/10 mx-1" />
-                                        {eventDef.key === 'fomc' ? (
-                                            // FOMC specific stats
-                                            <>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-neutral-500">上漲機率</span>
-                                                    <span className={cn("font-bold", summaryStats.d1WinRate >= 50 ? "text-green-400" : "text-red-400")}>
-                                                        {summaryStats.d1WinRate}%
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-neutral-500">平均波幅</span>
-                                                    <span className="text-amber-400 font-bold">{summaryStats.avgRange}%</span>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            // CPI/NFP specific stats
-                                            <>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-neutral-500">歷史勝率</span>
-                                                    <span className={cn("font-bold", summaryStats.d1WinRate >= 50 ? "text-green-400" : "text-red-400")}>
-                                                        {summaryStats.d1WinRate}%
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-neutral-500">平均波動</span>
-                                                    <span className="text-neutral-300 font-medium">{summaryStats.avgRange}%</span>
-                                                </div>
-                                            </>
+                                        {/* Shutdown/Alert Warning */}
+                                        {eventDef.insight.includes('⚠️') && (
+                                            <p className="text-[10px] text-amber-500 font-medium mt-0.5">
+                                                {eventDef.insight}
+                                            </p>
                                         )}
-                                    </>
-                                )}
+                                    </div>
+                                </div>
                             </div>
+
+                            <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F]", COLORS.textTertiary)}>
+                                {eventDef.chartRange}
+                            </span>
                         </div>
 
-                        {/* Horizontal Scroll Cards */}
-                        <div className="overflow-x-auto scrollbar-hide pb-4 pt-1">
-                            <div className="flex gap-2.5 px-4 min-w-max">
-                                {/* Always show next occurrence first */}
+                        {/* 2. Summary Stats */}
+                        <div className="px-4 py-3 flex items-center gap-4 text-[10px]">
+                            {/* Next Event Countdown */}
+                            {nextOccurrence && (
+                                <div className="flex items-center gap-2">
+                                    <span className={cn("font-bold", daysUntil <= 7 ? COLORS.positive : COLORS.textSecondary)}>
+                                        下次: {daysUntil === 0 ? '今日' : `T-${daysUntil}`}
+                                    </span>
+                                </div>
+                            )}
+
+                            <div className="w-[1px] h-3 bg-[#2A2A2A]" />
+
+                            {/* Key Stats */}
+                            {summaryStats && (
+                                <>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className={COLORS.textTertiary}>上漲機率</span>
+                                        <span className={cn("font-mono font-bold", summaryStats.d1WinRate >= 50 ? COLORS.positive : COLORS.negative)}>
+                                            {summaryStats.d1WinRate}%
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className={COLORS.textTertiary}>平均波動</span>
+                                        <span className={cn("font-mono font-bold", COLORS.textPrimary)}>
+                                            {summaryStats.avgRange}%
+                                        </span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* 3. Horizontal Scroll Cards */}
+                        <div className="overflow-x-auto scrollbar-hide pb-4 pt-1 border-t border-[#2A2A2A] bg-[#0A0A0B]">
+                            <div className="flex gap-2.5 px-4 min-w-max pt-3">
                                 {nextOccurrence && (
                                     <MiniChartCard
                                         occ={nextOccurrence}
@@ -388,28 +341,25 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                                         isNext={true}
                                     />
                                 )}
-                                {/* Past occurrences (Sorted by Time or Reaction) */}
                                 {pastOccurrences.map((occ, index) => (
                                     <MiniChartCard
                                         key={occ.occursAt}
                                         occ={occ}
                                         eventDef={eventDef}
                                         reactions={reactions}
-                                        // Only highlight latest in 'time' mode
                                         isLatest={alignMode === 'time' && index === 0}
                                     />
                                 ))}
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 )
             })}
 
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 text-center">
-                <p className="text-[10px] text-neutral-600">
-                    資料來源：<a href="https://www.bls.gov" className="text-neutral-500 hover:text-white transition-colors">BLS</a>・
-                    <a href="https://www.federalreserve.gov" className="text-neutral-500 hover:text-white transition-colors">Fed</a>・
-                    <span className="text-neutral-500">Binance Spot Pair</span>
+            {/* Footer */}
+            <div className={cn("border border-[#2A2A2A] rounded-xl p-4 text-center", SURFACE.card)}>
+                <p className={cn("text-[10px]", COLORS.textTertiary)}>
+                    數據來源: BLS, Federal Reserve, Binance Spot
                 </p>
             </div>
         </div>

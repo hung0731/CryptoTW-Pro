@@ -19,6 +19,7 @@ import {
   Bot,
   Cog,
   AlertTriangle,
+  BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -30,6 +31,12 @@ const menuSections = [
       { title: "儀表板", url: "/admin", icon: LayoutDashboard },
       { title: "營運中心", url: "/admin/operations", icon: Send },
       { title: "市場快訊", url: "/admin/alerts", icon: AlertTriangle },
+    ]
+  },
+  {
+    label: "事件系統",
+    items: [
+      { title: "復盤庫", url: "/admin/reviews", icon: BookOpen },
     ]
   },
   {
