@@ -1,133 +1,229 @@
 'use client'
 
 /**
- * CryptoTW Pro Design System
+ * CryptoTW Pro Design System v2.0
  * 
- * A unified design language for premium dark UI.
- * Use these tokens across all components for consistency.
+ * MANDATORY CONSTRAINTS:
+ * - Cards: EXACTLY 4 types (primary, secondary, inline, passive)
+ * - Colors: Black/White/Gray UI, functional colors data-only
+ * - Animations: NONE (no transition-*, no duration-*)
+ * - Charts: Unified line hierarchy, mandatory watermark
+ * 
+ * ALL components MUST use these tokens. No inline styles permitted.
  */
 
 // ================================================
-// TYPOGRAPHY SCALE
-// ================================================
-export const TYPOGRAPHY = {
-    // Page Titles (24px)
-    pageTitle: 'text-2xl font-bold tracking-tight',
-
-    // Section Headers
-    sectionTitle: 'text-base font-bold tracking-tight',     // 16px - Main sections
-    sectionSubtitle: 'text-sm font-semibold',               // 14px - Subsections
-    sectionLabel: 'text-xs font-semibold text-neutral-400 uppercase tracking-wider', // 12px - Labels
-
-    // Card Headers
-    cardTitle: 'text-sm font-bold',                         // 14px
-    cardSubtitle: 'text-xs font-medium',                    // 12px
-
-    // Body Text
-    bodyLarge: 'text-sm leading-relaxed',                   // 14px
-    bodyDefault: 'text-xs leading-relaxed',                 // 12px
-    bodySmall: 'text-[11px] leading-relaxed',               // 11px
-
-    // Captions & Labels
-    caption: 'text-[10px]',                                 // 10px
-    micro: 'text-[9px]',                                    // 9px
-
-    // Monospace (Data Display)
-    monoXL: 'text-2xl font-mono font-bold',                 // 24px
-    monoLarge: 'text-lg font-mono font-bold',               // 18px
-    monoMedium: 'text-sm font-mono font-medium',            // 14px
-    monoSmall: 'text-xs font-mono',                         // 12px
-    monoMicro: 'text-[10px] font-mono',                     // 10px
-} as const
-
-// ================================================
-// COLOR PALETTE
+// SURFACE COLORS (Unified Hierarchy)
 // ================================================
 export const SURFACE = {
-    // Level 1: App Background (Deepest)
+    // Level 0: App Background (Deepest)
     app: 'bg-[#050505]',
 
-    // Level 2: Card Background (Base)
-    card: 'bg-[#0E0E0F]',
+    // Level 1: Primary Card Background
+    cardPrimary: 'bg-[#0A0A0A]',
 
-    // Level 3: Elevated / Interactive (Hover, Selected)
+    // Level 2: Passive/Muted Card Background
+    cardPassive: 'bg-[#080808]',
+
+    // Level 3: Elevated / Hover State
+    elevated: 'bg-[#0E0E0F]',
+
+    // Level 4: Highlight / Selected
     highlight: 'bg-[#1A1A1A]',
 
-    // Level 4: Borders / Dividers / Outlines
-    border: 'border-[#2A2A2A]',
-} as const
-
-export const COLORS = {
-    // Text Hierarchy
-    textPrimary: 'text-white',           // Numbers / Primary focus only
-    textSecondary: 'text-[#A0A0A0]',    // Labels / Dates / Secondary info
-    textTertiary: 'text-[#666666]',     // Meta / Disabled
-
-    // Functional Colors (Strictly Limited)
-    positive: 'text-[#4ADE80]',         // Green
-    negative: 'text-[#F87171]',         // Red
-    neutral: 'text-[#A0A0A0]',          // Gray
-
-    // The only allowed "Brand/Focus" accent
-    accent: 'text-white',
+    // Legacy aliases
+    card: 'bg-[#0A0A0A]',
+    border: 'border-[#1A1A1A]',
 } as const
 
 // ================================================
-// CARD STYLES
+// BORDER SYSTEM
+// ================================================
+export const BORDER = {
+    // Primary border (cards)
+    primary: 'border border-[#1A1A1A]',
+
+    // Hover-only border (appears on hover)
+    hover: 'hover:border hover:border-[#1A1A1A]',
+
+    // Dashed border (passive cards)
+    dashed: 'border border-dashed border-[#1A1A1A]',
+
+    // Left accent (inline data blocks)
+    left: 'border-l-2 border-[#1A1A1A]',
+
+    // Divider
+    divider: 'border-[#1A1A1A]',
+} as const
+
+// ================================================
+// RADIUS (Only 2 Values Allowed)
+// ================================================
+export const RADIUS = {
+    xl: 'rounded-xl',  // 12px - Primary/Passive cards
+    lg: 'rounded-lg',  // 8px - Secondary cards
+} as const
+
+// ================================================
+// CARD SYSTEM (EXACTLY 4 TYPES - NO VARIANTS)
 // ================================================
 export const CARDS = {
-    // Type A: Hero / Focus Card
-    // - Taller, Primary Border, 1.2x Height visual weight
-    typeA: 'bg-[#0E0E0F] border border-[#2A2A2A] rounded-xl relative overflow-hidden',
+    /**
+     * Type A: Primary Focus Card
+     * Use for: Hero content, decisions, key actions
+     * Padding: p-5 (default) or p-4 (compact)
+     */
+    primary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl',
 
-    // Type B: Comparison / History
-    // - No Border, relying on Background distinction
-    typeB: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] hover:outline hover:outline-1 hover:outline-[#2A2A2A] rounded-lg',
+    /**
+     * Type B: Secondary List Card  
+     * Use for: Lists, history, comparisons
+     * Padding: p-3 (default) or p-2 (tight)
+     * Hover: Instant background lift + border appear
+     */
+    secondary: 'bg-[#0A0A0A] hover:bg-[#0E0E0F] hover:border hover:border-[#1A1A1A] rounded-lg',
 
-    // Type C: Info / Stats
-    // - Text block + divider style (minimal container)
-    typeC: 'bg-transparent border-l border-[#2A2A2A] pl-4',
+    /**
+     * Type C: Inline Data Block
+     * Use for: Stats, KPIs, metrics inline
+     * Padding: pl-3 only
+     */
+    inline: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',
 
-    // Legacy support (mapped to new system)
-    base: 'bg-[#0E0E0F] border border-[#2A2A2A] rounded-xl',
-    interactive: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl',
+    /**
+     * Type D: Passive Info Card
+     * Use for: Education, explanations, disclaimers
+     * Padding: p-4
+     */
+    passive: 'bg-[#080808] border border-dashed border-[#1A1A1A] rounded-xl',
+
+    // Legacy aliases (map to new system)
+    typeA: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl',
+    typeB: 'bg-[#0A0A0A] hover:bg-[#0E0E0F] hover:border hover:border-[#1A1A1A] rounded-lg',
+    typeC: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',
+    base: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl',
+    interactive: 'bg-[#0A0A0A] hover:bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl',
 } as const
 
 // ================================================
-// SECTION HEADER STYLES (NO decorative bars)
-// ================================================
-export const SECTION = {
-    // Container
-    header: 'flex items-center justify-between',
-    headerTight: 'flex items-center justify-between mb-3',
-    headerLoose: 'flex items-center justify-between mb-4',
-
-    // Title styles
-    titlePrimary: 'text-base font-bold text-white tracking-tight',
-    titleSecondary: 'text-xs font-semibold text-neutral-400 uppercase tracking-wider',
-
-    // Badge for auxiliary info
-    badge: 'text-[10px] text-neutral-500 bg-neutral-800/50 px-2 py-0.5 rounded-full',
-    badgeActive: 'text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20',
-} as const
-
-// ================================================
-// SPACING
+// SPACING (Unified Scale)
 // ================================================
 export const SPACING = {
     // Page-level
     pageX: 'px-4',
     pageY: 'py-4',
     page: 'p-4',
+    pageBottom: 'pb-24', // Only for pages with BottomNav
 
-    // Section-level
+    // Section-level gaps
     sectionGap: 'space-y-6',
     cardGap: 'space-y-4',
+    cardGapCompact: 'space-y-3',
 
-    // Card-level
+    // Card padding
+    cardLarge: 'p-5',      // Primary cards default
+    card: 'p-4',           // Primary cards compact
+    cardCompact: 'p-3',    // Secondary cards default
+    cardTight: 'p-2',      // Secondary cards tight
+    inlineLeft: 'pl-3',    // Inline data blocks
+
+    // Legacy alias
     cardPadding: 'p-4',
-    cardPaddingCompact: 'p-3',
-    cardPaddingTight: 'p-2',
+} as const
+
+// ================================================
+// TYPOGRAPHY SCALE
+// ================================================
+export const TYPOGRAPHY = {
+    // Page Titles (24px)
+    pageTitle: 'text-2xl font-bold tracking-tight text-white',
+
+    // Section Headers
+    sectionTitle: 'text-base font-bold tracking-tight text-white',
+    sectionLabel: 'text-xs font-semibold text-[#808080] uppercase tracking-wider',
+
+    // Card Headers
+    cardTitle: 'text-sm font-bold text-white',
+    cardSubtitle: 'text-xs font-medium text-[#808080]',
+
+    // Body Text
+    bodyLarge: 'text-sm leading-relaxed text-[#A0A0A0]',
+    bodyDefault: 'text-xs leading-relaxed text-[#808080]',
+    bodySmall: 'text-[11px] leading-relaxed text-[#666666]',
+
+    // Captions & Labels
+    caption: 'text-[10px] text-[#666666]',
+    micro: 'text-[9px] text-[#525252]',
+
+    // Monospace (Data Display)
+    monoXL: 'text-2xl font-mono font-bold text-white',
+    monoLarge: 'text-lg font-mono font-bold text-white',
+    monoMedium: 'text-sm font-mono font-medium text-white',
+    monoSmall: 'text-xs font-mono text-[#A0A0A0]',
+    monoMicro: 'text-[10px] font-mono text-[#666666]',
+} as const
+
+// ================================================
+// TEXT COLORS (UI Only - Black/White/Gray)
+// ================================================
+export const COLORS = {
+    // Text Hierarchy
+    textPrimary: 'text-white',
+    textSecondary: 'text-[#A0A0A0]',
+    textTertiary: 'text-[#666666]',
+    textMuted: 'text-[#525252]',
+
+    // Functional Colors (DATA LAYER ONLY)
+    positive: 'text-[#22C55E]',  // Green - positive values only
+    negative: 'text-[#EF4444]',  // Red - negative values only
+    neutral: 'text-[#808080]',   // Gray - unchanged values
+
+    // Comparison Colors (COMPARISON MODE ONLY)
+    compareBase: 'text-[#3B82F6]',    // Blue - base/left
+    compareAlt: 'text-[#F59E0B]',     // Amber - compare/right
+} as const
+
+// ================================================
+// CHART TOKENS (Unified Visual Language)
+// ================================================
+export const CHART = {
+    // Line Hierarchy
+    linePrimary: { stroke: '#E0E0E0', strokeWidth: 2 },
+    lineSecondary: { stroke: '#A0A0A0', strokeWidth: 1.5, opacity: 0.8 },
+    lineHistorical: { stroke: '#666666', strokeWidth: 1, opacity: 0.6 },
+    lineAverage: { stroke: '#808080', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.5 },
+
+    // Comparison Mode
+    lineBase: { stroke: '#3B82F6', strokeWidth: 2 },      // Blue
+    lineCompare: { stroke: '#F59E0B', strokeWidth: 2 },   // Amber
+
+    // Area Fills
+    areaPrimary: { fill: '#E0E0E0', fillOpacity: 0.15 },
+    areaBase: { fill: '#3B82F6', fillOpacity: 0.15 },
+    areaCompare: { fill: '#F59E0B', fillOpacity: 0.15 },
+
+    // Grid & Axes
+    grid: { stroke: '#111111', strokeDasharray: '3 3' },
+    axis: { fontSize: 10, fill: '#525252' },
+
+    // Reference Lines
+    referenceD0: { stroke: '#EF4444', strokeDasharray: '3 3', opacity: 0.8 },
+    referenceBounds: { stroke: '#FFFFFF', opacity: 0.1 },
+    referenceEvent: { stroke: '#FFFFFF', strokeDasharray: '3 3', opacity: 0.4 },
+
+    // Tooltip (Unified)
+    tooltip: {
+        container: 'bg-[#0A0A0A]/95 border border-[#1A1A1A] rounded-lg shadow-xl p-2',
+        date: 'text-[10px] text-[#666666] mb-1',
+        value: 'text-xs font-mono font-bold text-white',
+        label: 'text-[10px] text-[#808080]',
+    },
+
+    // Watermark (MANDATORY)
+    watermark: {
+        src: '/logo.svg',
+        className: 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.03] w-48 h-48 grayscale',
+    },
 } as const
 
 // ================================================
@@ -135,45 +231,58 @@ export const SPACING = {
 // ================================================
 export const BADGES = {
     // Neutral (default)
-    neutral: 'text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700',
+    neutral: 'text-[10px] px-2 py-0.5 rounded-full bg-[#1A1A1A] text-[#A0A0A0] border border-[#2A2A2A]',
 
-    // Status badges
-    success: 'text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20',
-    warning: 'text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-    danger: 'text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20',
-    info: 'text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20',
+    // Status badges (DATA LAYER ONLY)
+    success: 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20',
+    warning: 'text-[10px] px-2 py-0.5 rounded-full bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20',
+    danger: 'text-[10px] px-2 py-0.5 rounded-full bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/20',
 
-    // Grade badges
-    gradeS: 'text-[9px] px-1.5 py-0 h-4 font-mono bg-neutral-800 text-neutral-300 border border-neutral-700',
-    gradeA: 'text-[9px] px-1.5 py-0 h-4 font-mono bg-neutral-800 text-neutral-400 border border-neutral-700',
-    gradeB: 'text-[9px] px-1.5 py-0 h-4 font-mono bg-neutral-800 text-neutral-500 border border-neutral-700',
+    // Comparison badges (COMPARISON MODE ONLY)
+    base: 'text-[10px] px-2 py-0.5 rounded-full bg-[#3B82F6]/20 text-[#3B82F6]',
+    compare: 'text-[10px] px-2 py-0.5 rounded-full bg-[#F59E0B]/20 text-[#F59E0B]',
 } as const
 
 // ================================================
-// BUTTON STYLES
+// BUTTON STYLES (No transition-colors)
 // ================================================
 export const BUTTONS = {
-    // Primary action
-    primary: 'px-4 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-neutral-200 transition-colors',
+    // Primary action (max 1 per screen)
+    primary: 'px-4 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-[#E0E0E0]',
 
     // Secondary action
-    secondary: 'px-4 py-2 rounded-lg bg-neutral-800 text-white font-medium text-sm border border-white/10 hover:bg-neutral-700 transition-colors',
+    secondary: 'px-4 py-2 rounded-lg bg-[#1A1A1A] text-white font-medium text-sm border border-[#2A2A2A] hover:bg-[#2A2A2A]',
 
     // Ghost button
-    ghost: 'px-4 py-2 rounded-lg text-neutral-400 font-medium text-sm hover:bg-white/5 hover:text-white transition-colors',
+    ghost: 'px-4 py-2 rounded-lg text-[#808080] font-medium text-sm hover:bg-[#1A1A1A] hover:text-white',
 
     // Icon button
-    icon: 'w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center hover:bg-white/5 transition-colors',
+    icon: 'w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#1A1A1A]',
 } as const
 
 // ================================================
-// HELPER: Generate section header without bars
+// SECTION HEADER STYLES
 // ================================================
-export function sectionHeader(title: string, subtitle?: string) {
-    return {
-        title,
-        subtitle,
-        className: SECTION.header,
-        titleClassName: subtitle ? SECTION.titleSecondary : SECTION.titlePrimary,
-    }
+export const SECTION = {
+    header: 'flex items-center justify-between',
+    headerWithGap: 'flex items-center justify-between mb-4',
+
+    titlePrimary: 'text-base font-bold text-white tracking-tight',
+    titleSecondary: 'text-xs font-semibold text-[#808080] uppercase tracking-wider',
+
+    badge: 'text-[10px] text-[#666666] bg-[#1A1A1A] px-2 py-0.5 rounded-full',
+} as const
+
+// ================================================
+// HELPER: Chart Tooltip Component Props
+// ================================================
+export const chartTooltipProps = {
+    contentStyle: {
+        backgroundColor: 'rgba(10, 10, 10, 0.95)',
+        border: '1px solid #1A1A1A',
+        borderRadius: '8px',
+        padding: '8px',
+    },
+    labelStyle: { color: '#666666', fontSize: '10px' },
+    itemStyle: { color: '#FFFFFF', fontSize: '12px', fontFamily: 'monospace' },
 }

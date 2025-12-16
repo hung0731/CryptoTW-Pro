@@ -51,7 +51,18 @@ export default function JoinPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!uid.trim() || !profile?.userId) return
+        const trimmedUid = uid.trim()
+
+        // Validate UID format: must be numeric, 5-20 digits
+        if (!trimmedUid || !profile?.userId) return
+        if (!/^\d{5,20}$/.test(trimmedUid)) {
+            toast({
+                title: "UID 格式錯誤",
+                description: "請輸入 5-20 位的數字 UID",
+                variant: "destructive"
+            })
+            return
+        }
 
         setSubmitting(true)
         try {
@@ -61,7 +72,7 @@ export default function JoinPage() {
                 body: JSON.stringify({
                     lineUserId: profile.userId,
                     exchange: 'okx',
-                    uid: uid.trim()
+                    uid: trimmedUid
                 })
             })
 
@@ -173,7 +184,7 @@ export default function JoinPage() {
                 <div className="flex items-center justify-between gap-2">
                     {[1, 2, 3, 4].map((step) => (
                         <div key={step} className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
-                            <div className="h-full w-0 bg-white rounded-full transition-all duration-500" />
+                            <div className="h-full w-0 bg-white rounded-full" />
                         </div>
                     ))}
                 </div>
@@ -202,7 +213,7 @@ export default function JoinPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={() => trackEvent('join_click')}
-                                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-white text-black font-bold text-sm rounded-xl hover:bg-neutral-200 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-white text-black font-bold text-sm rounded-xl hover:bg-[#E0E0E0]"
                             >
                                 前往 OKX 註冊
                                 <ExternalLink className="h-3.5 w-3.5" />
@@ -337,7 +348,7 @@ export default function JoinPage() {
 
             {/* Back to Home Link */}
             <section className="px-6 pb-8">
-                <Link href="/" className="block text-center text-sm text-neutral-600 hover:text-neutral-400 transition-colors">
+                <Link href="/" className="block text-center text-sm text-[#525252] hover:text-[#808080]">
                     ← 返回首頁
                 </Link>
             </section>

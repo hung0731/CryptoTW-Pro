@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { ChevronUp, ChevronDown, Info, TrendingUp, Star } from 'lucide-react'
+import { CARDS, SPACING } from '@/lib/design-tokens'
 
 // ============================================
 // Economic Calendar Component
@@ -30,7 +31,7 @@ export function EconomicCalendar() {
     }
 
     if (loading) {
-        return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+        return <Skeleton className="h-64 w-full bg-[#0A0A0A] rounded-xl" />
     }
 
     if (!data) return null
@@ -68,11 +69,11 @@ export function EconomicCalendar() {
 
                             return (
                                 <div key={event.id} className={cn(
-                                    "rounded-xl transition-all relative overflow-hidden border",
-                                    "bg-neutral-900/50 hover:bg-white/5",
+                                    "rounded-xl relative overflow-hidden border",
+                                    "bg-[#0A0A0A] hover:bg-[#0E0E0F]",
                                     isKey
-                                        ? "border-blue-500/30 hover:border-blue-500/50"
-                                        : "border-white/5"
+                                        ? "border-[#3B82F6]/30 hover:border-[#3B82F6]/50"
+                                        : "border-[#1A1A1A]"
                                 )}>
                                     {/* S-Tier Indicator */}
                                     {isKey && (
@@ -106,7 +107,7 @@ export function EconomicCalendar() {
                                             )}>
                                                 {event.title}
                                             </h4>
-                                            <button className="text-neutral-500 hover:text-white transition-colors">
+                                            <button className="text-[#666666] hover:text-white">
                                                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                             </button>
                                         </div>
@@ -133,7 +134,7 @@ export function EconomicCalendar() {
 
                                     {/* Educational Overlay (Expandable) */}
                                     {isExpanded && (event.whyImportant || event.cryptoReaction) && (
-                                        <div className="bg-white/5 border-t border-white/5 p-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+                                        <div className="bg-[#0E0E0F] border-t border-[#1A1A1A] p-4 space-y-4">
                                             {/* Why Important */}
                                             {event.whyImportant && (
                                                 <div className="space-y-1">

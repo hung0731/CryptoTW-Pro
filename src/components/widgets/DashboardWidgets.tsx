@@ -7,6 +7,7 @@ import { BarChart3, Newspaper } from 'lucide-react'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { DashboardData } from './types'
+import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 
 // ============================================
 // Derivatives AI Summary Card
@@ -35,8 +36,8 @@ export function DerivativesAiSummaryCard() {
     // Loading Skeleton
     if (loading) {
         return (
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden mb-5 animate-pulse">
-                <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 p-4">
+            <div className={cn(CARDS.primary, SPACING.card, "overflow-hidden mb-5")}>
+                <div className="p-4">
                     <div className="flex items-center gap-2 mb-3">
                         <Skeleton className="w-5 h-5 rounded bg-neutral-700" />
                         <Skeleton className="h-4 w-28 bg-neutral-700" />
@@ -61,7 +62,7 @@ export function DerivativesAiSummaryCard() {
     }
 
     return (
-        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-white/5 rounded-xl p-4 overflow-hidden mb-5">
+        <div className={cn(CARDS.primary, SPACING.card, "overflow-hidden mb-5")}>
             {/* AI Context Card */}
             <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -95,7 +96,7 @@ export function OpenInterestCard({ data }: { data?: DashboardData['openInterest'
     const hasData = data.value > 0
 
     return (
-        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+        <div className={cn(CARDS.primary, SPACING.cardCompact, "h-full")}>
             <div className="flex items-center gap-2 mb-2">
                 <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
                 <span className="text-xs font-bold text-white">未平倉</span>

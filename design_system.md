@@ -1,500 +1,347 @@
-# CryptoTW Pro — Design System Specification v1.1
+# CryptoTW Pro — Design System v2.0
 
-> **Extracted From**: Existing `/`, `/news`, `/calendar`, `/prediction`, `/reviews/*`, `/profile` pages.
-> **Philosophy**: Minimal. Professional. Analytical. Closer to Bloomberg/TradingView than consumer apps.
-> **Core Principle**: Monochrome UI surfaces. Functional colors only in data layers.
+> **Status**: MANDATORY SPECIFICATION
+> **Philosophy**: Minimal. Professional. Analytical.
+> **Target**: Bloomberg / TradingView (not consumer SaaS)
 
 ---
 
-## 0. Animation Policy (Critical)
+## HARD CONSTRAINTS (Non-Negotiable)
+
+| Rule | Enforcement |
+|------|-------------|
+| Card types | **EXACTLY 4** (A/B/C/D) — no variants |
+| Surface colors | **ONLY from design-tokens.ts** |
+| Border radius | **ONLY from design-tokens.ts** |
+| Animations | **NONE** — no transition, no duration |
+| UI Colors | **Black/White/Gray ONLY** |
+| Functional Colors | **Data layer ONLY** |
+| Comparison Colors | **Blue/Amber in comparison mode ONLY** |
+| Chart Watermark | **MANDATORY** |
+
+---
+
+## 0. Animation Policy
 
 ### Definition
 
-| Term | Meaning | Allowed |
-|------|---------|---------|
-| **State Change** | Instant visual feedback (no duration/easing) | ✅ Yes |
-| **Animation** | Time-based transition (duration > 0, easing) | ❌ No |
+| Term | Allowed |
+|------|---------|
+| State Change (instant) | ✅ Yes |
+| Time-based Transition | ❌ No |
 
-### Hard Rules
+### Prohibited Classes
 
-- ❌ **No `transition-all`** — Use `transition-none` or instant state changes
-- ❌ **No `duration-*`** classes (except `duration-0`)
-- ❌ **No `ease-*`** classes
-- ❌ **No `animate-*`** classes (shimmer, pulse, spin, etc.)
-- ✅ **Allowed**: `hover:bg-*` (instant), `data-[state=active]:*` (instant)
-
-### Rationale
-
-> Financial terminals do not animate. State changes are immediate and deterministic.
+- `transition-all`, `transition-*`
+- `duration-*` (except `duration-0`)
+- `ease-*`
+- `animate-*`
 
 ### Live Indicator Exception
 
-Small pulsing dots (≤ 4px) used to indicate "live" or "real-time" data streams are **allowed**:
+Pulsing dots (≤ 4px) for real-time data indicators are allowed:
 
 ```html
 <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
 ```
 
-**Allowed contexts:**
+---
 
-- ✅ Live data feed indicators
-- ✅ WebSocket connection status
-- ✅ Real-time price updates
+## 1. Card System (4 Types Only)
 
-**Not allowed:**
+### Type A: Primary Focus Card
 
-- ❌ Loading skeletons
-- ❌ Button hover effects
-- ❌ Card transitions
+```typescript
+CARDS.primary = 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl'
+```
+
+| Property | Value |
+|----------|-------|
+| Background | `#0A0A0A` |
+| Border | 1px solid `#1A1A1A` |
+| Radius | 12px (`rounded-xl`) |
+| Padding | `p-5` (default), `p-4` (compact) |
+| Hover | None |
+
+**Use for**: Hero content, decisions, key actions, event headers
+
+**Never use for**: Lists, scrollable items, inline stats
 
 ---
 
-## 1. Typography System
+### Type B: Secondary List Card
 
-All typography uses `Noto Sans` (system sans-serif fallback). Headings use `font-bold tracking-tight`.
+```typescript
+CARDS.secondary = 'bg-[#0A0A0A] hover:bg-[#0E0E0F] hover:border hover:border-[#1A1A1A] rounded-lg'
+```
 
-| Role | Tailwind Classes | Size | Weight | Color | Usage |
-|------|------------------|------|--------|-------|-------|
-| **Page Title (H1)** | `text-2xl font-bold tracking-tight` | 24px | Bold | `text-white` | Page headers |
-| **Section Title (H2)** | `text-base font-bold tracking-tight` | 16px | Bold | `text-white` | Primary section headers |
-| **Section Label** | `text-xs font-semibold text-neutral-400 uppercase tracking-wider` | 12px | Semibold | `text-neutral-400` | Subsection headers |
-| **Card Title** | `text-sm font-bold` | 14px | Bold | `text-white` | Card headers |
-| **Card Subtitle** | `text-xs font-medium` | 12px | Medium | `text-neutral-400` | Secondary info |
-| **Body Large** | `text-sm leading-relaxed` | 14px | Normal | `text-neutral-300` | Primary body |
-| **Body Default** | `text-xs leading-relaxed` | 12px | Normal | `text-neutral-400` | Secondary body |
-| **Body Small** | `text-[11px] leading-relaxed` | 11px | Normal | `text-neutral-500` | Tertiary info |
-| **Caption** | `text-[10px]` | 10px | Normal | `text-neutral-500` | Timestamps |
-| **Micro** | `text-[9px]` | 9px | Normal | `text-neutral-600` | Badges |
-| **Mono XL** | `text-2xl font-mono font-bold` | 24px | Bold | `text-white` | Hero metrics |
-| **Mono Large** | `text-lg font-mono font-bold` | 18px | Bold | `text-white` | Large numbers |
-| **Mono Medium** | `text-sm font-mono font-medium` | 14px | Medium | `text-white` | Standard metrics |
-| **Mono Small** | `text-xs font-mono` | 12px | Normal | `text-neutral-300` | Data labels |
-| **Mono Micro** | `text-[10px] font-mono` | 10px | Normal | `text-neutral-500` | Chart axis |
+| Property | Value |
+|----------|-------|
+| Background | `#0A0A0A` |
+| Border | None (appears on hover) |
+| Radius | 8px (`rounded-lg`) |
+| Padding | `p-3` (default), `p-2` (tight) |
+| Hover | Instant: bg → `#0E0E0F`, border appears |
 
-### Typography Rules
+**Use for**: Review cards, history lists, comparison items, calendar events
 
-1. **Numeric Emphasis**: All percentages, prices, metrics **must** use `font-mono`.
-2. **Color Hierarchy**:
-   - `text-white` → Primary focus
-   - `text-neutral-300/400` → Secondary
-   - `text-neutral-500/600` → Tertiary
-3. **Never** use decorative fonts.
+**Never use for**: Hero content, standalone metrics
 
 ---
 
-## 2. Color System
+### Type C: Inline Data Block
 
-### Surface Hierarchy (Backgrounds)
+```typescript
+CARDS.inline = 'bg-transparent border-l-2 border-[#1A1A1A] pl-3'
+```
 
-| Level | Token | OKLCH | Hex | Usage |
-|-------|-------|-------|-----|-------|
-| 1 (Deepest) | `--background` | `oklch(0 0 0)` | `#000000` | App background |
-| 2 (Card) | `--card` | `oklch(0.12 0 0)` | `#0E0E0F` | Card backgrounds |
-| 3 (Elevated) | `--highlight` | `oklch(0.18 0 0)` | `#1A1A1A` | Hover states |
-| 4 (Border) | `--border` | `oklch(0.18 0 0)` | `#2A2A2A` | Dividers |
+| Property | Value |
+|----------|-------|
+| Background | Transparent |
+| Border | Left only, 2px |
+| Radius | None |
+| Padding | `pl-3` only |
+| Hover | None |
 
-### Text Colors
+**Use for**: Stats (Win Rate, Avg Return), KPIs, tabular data
 
-| Token | Usage |
-|-------|-------|
-| `text-white` | Primary text, numbers |
-| `text-[#A0A0A0]` | Secondary text |
-| `text-[#666666]` | Tertiary, disabled |
-
-### Functional Color Exception Clause
-
-> **Monochrome applies to UI surfaces & layout.**
-> **Functional colors are allowed ONLY in data layers, with strict scope.**
-
-| Purpose | Class | Allowed Context |
-|---------|-------|-----------------|
-| Positive | `text-[#4ADE80]` | Chart data, metrics, badges |
-| Negative | `text-[#F87171]` | Chart data, metrics, badges |
-| Neutral | `text-[#A0A0A0]` | Chart data, metrics |
-
-### Functional Colors: Hard Restriction
-
-Functional colors (Green, Red, Amber, Blue, Purple, Yellow) are **ONLY** allowed in:
-
-- ✅ Chart primitives (lines, bars, areas)
-- ✅ Inline metric values (e.g., "+5.2%")
-- ✅ Status badges
-
-Functional colors are **NEVER** allowed in:
-
-- ❌ Card backgrounds
-- ❌ Layout containers
-- ❌ Buttons (except badges)
-- ❌ Borders (except chart markers)
+**Never use for**: Standalone containers, clickable items
 
 ---
 
-## 3. Comparison Colors (Blue / Amber)
+### Type D: Passive Info Card
 
-### Definition
+```typescript
+CARDS.passive = 'bg-[#080808] border border-dashed border-[#1A1A1A] rounded-xl'
+```
 
-Blue and Amber are **comparison-only semantic colors**, used exclusively for:
+| Property | Value |
+|----------|-------|
+| Background | `#080808` |
+| Border | Dashed, 1px |
+| Radius | 12px (`rounded-xl`) |
+| Padding | `p-4` |
+| Hover | None |
 
-> **"Same data, different samples"** visual contrast.
+**Use for**: Educational content, explanations, empty states, disclaimers
 
-### Semantic Meaning
-
-| Color | Semantic | Usage |
-|-------|----------|-------|
-| **Blue** (`#3B82F6`) | Base / Primary reference | Left panel, first dataset |
-| **Amber** (`#F59E0B`) | Compare / Secondary reference | Right panel, overlay dataset |
-
-### Allowed Contexts (Exhaustive)
-
-- ✅ Comparison mode (Base vs Compare)
-- ✅ Historical event A vs B
-- ✅ Stacked overlay charts (current vs average)
-- ✅ Comparison badges (e.g., "基準", "對照")
-
-### Explicitly Forbidden
-
-Blue / Amber are **NOT**:
-
-- ❌ Brand colors
-- ❌ Card backgrounds
-- ❌ Button colors
-- ❌ Layout highlights
-- ❌ Success / Warning / Error states
-
-### Visibility Rule
-
-> **If comparison mode is inactive, Blue / Amber must not appear anywhere on screen.**
+**Never use for**: Interactive content, data displays
 
 ---
 
-## 4. Badge System
+### Card Summary
 
-### Status Badges
-
-| Type | Classes | Allowed Usage |
-|------|---------|---------------|
-| Neutral | `bg-neutral-800 text-neutral-300 border-neutral-700` | Default state |
-| Success | `bg-green-500/10 text-green-400 border-green-500/20` | Metrics only |
-| Warning | `bg-yellow-500/10 text-yellow-400 border-yellow-500/20` | Alerts only |
-| Danger | `bg-red-500/10 text-red-400 border-red-500/20` | Errors only |
-| Info | `bg-blue-500/10 text-blue-400 border-blue-500/20` | **Links/info only** |
-
-### Comparison Badges (Exception)
-
-| Type | Classes | Context |
-|------|---------|---------|
-| Base | `bg-blue-500/20 text-blue-400` | Comparison mode only |
-| Compare | `bg-amber-500/20 text-amber-400` | Comparison mode only |
-
-### Badge Color Rule
-
-> Blue / Amber / Yellow may only appear in **Badges** and **Chart Data Layer**.
-> Never in layout, cards, or backgrounds.
+| Type | Background | Border | Radius | Hover |
+|------|------------|--------|--------|-------|
+| A (Primary) | `#0A0A0A` | solid | 12px | None |
+| B (Secondary) | `#0A0A0A` | on hover | 8px | Instant |
+| C (Inline) | transparent | left-2px | none | None |
+| D (Passive) | `#080808` | dashed | 12px | None |
 
 ---
 
-## 5. Card System
+## 2. Surface Hierarchy
 
-### Type A: Hero / Focus Card
-
-```
-bg-[#0E0E0F] border border-[#2A2A2A] rounded-xl
-```
-
-- **Padding**: `p-4` or `p-5`
-- **Usage**: Primary content, feature cards
-
-### Type B: Comparison / History Card
-
-```
-bg-[#0E0E0F] hover:bg-[#1A1A1A] rounded-lg
-```
-
-- **Padding**: `p-3`
-- **Hover**: Instant background change (no transition)
-- **Usage**: Scrollable lists, historical items
-
-### Type C: Info Block
-
-```
-bg-transparent border-l border-[#2A2A2A] pl-4
-```
-
-- **Usage**: Inline stats, secondary info
-
-### Card Rules
-
-- No colored backgrounds
-- No gradients
-- No shadows (except `shadow-sm` on overlays)
+| Level | Hex | Token | Usage |
+|-------|-----|-------|-------|
+| 0 | `#050505` | `SURFACE.app` | Page background |
+| 1 | `#0A0A0A` | `SURFACE.cardPrimary` | Primary/Secondary cards |
+| 2 | `#080808` | `SURFACE.cardPassive` | Passive cards |
+| 3 | `#0E0E0F` | `SURFACE.elevated` | Hover states |
+| 4 | `#1A1A1A` | `SURFACE.highlight` | Selected states |
 
 ---
 
-## 6. Chart Styling Rules
+## 3. Color System
 
-### Line & Area Charts
+### UI Colors (Layout)
 
-| Element | Value |
-|---------|-------|
-| Primary Line | `2px`, `#EDEDED` |
-| Secondary Line | `1.5px` |
-| OI Line | `#eab308` (Amber) |
-| FGI Line | `#8b5cf6` (Purple) |
-| Grid | `#111111`, horizontal only |
-| Axis Text | `10px`, `#525252` |
+| Purpose | Hex | Token |
+|---------|-----|-------|
+| Primary Text | `#FFFFFF` | `COLORS.textPrimary` |
+| Secondary Text | `#A0A0A0` | `COLORS.textSecondary` |
+| Tertiary Text | `#666666` | `COLORS.textTertiary` |
+| Muted Text | `#525252` | `COLORS.textMuted` |
+| Border | `#1A1A1A` | `BORDER.primary` |
 
-### Area Gradient Rule
+### Functional Colors (Data Layer Only)
 
-> Area gradients must be **data-encoding only**, not decorative.
+| Purpose | Hex | Token | Allowed Context |
+|---------|-----|-------|-----------------|
+| Positive | `#22C55E` | `COLORS.positive` | Chart bars, metrics |
+| Negative | `#EF4444` | `COLORS.negative` | Chart bars, metrics |
+| Neutral | `#808080` | `COLORS.neutral` | Unchanged values |
 
-```
-Opacity: 20% at top → 0% at bottom
-```
+### Comparison Colors (Comparison Mode Only)
 
-- ✅ Used to show magnitude/volume
-- ❌ Never for visual appeal or branding
+| Purpose | Hex | Token | Allowed Context |
+|---------|-----|-------|-----------------|
+| Base | `#3B82F6` | `COLORS.compareBase` | Left panel, first series |
+| Compare | `#F59E0B` | `COLORS.compareAlt` | Right panel, overlay |
 
-### Reference Lines
+**Rule**: Blue/Amber ONLY appear when comparison mode is active.
+
+---
+
+## 4. Typography
+
+| Role | Classes | Size |
+|------|---------|------|
+| Page Title | `TYPOGRAPHY.pageTitle` | 24px bold |
+| Section Title | `TYPOGRAPHY.sectionTitle` | 16px bold |
+| Section Label | `TYPOGRAPHY.sectionLabel` | 12px semibold uppercase |
+| Card Title | `TYPOGRAPHY.cardTitle` | 14px bold |
+| Card Subtitle | `TYPOGRAPHY.cardSubtitle` | 12px medium |
+| Body Large | `TYPOGRAPHY.bodyLarge` | 14px |
+| Body Default | `TYPOGRAPHY.bodyDefault` | 12px |
+| Caption | `TYPOGRAPHY.caption` | 10px |
+| Mono XL | `TYPOGRAPHY.monoXL` | 24px mono bold |
+| Mono Medium | `TYPOGRAPHY.monoMedium` | 14px mono medium |
+
+**Rule**: All numbers/prices/percentages use `font-mono`.
+
+---
+
+## 5. Chart Visual Language
+
+### Line Hierarchy
+
+| Role | Width | Color | Opacity |
+|------|-------|-------|---------|
+| Primary | 2px | `#E0E0E0` | 100% |
+| Secondary | 1.5px | `#A0A0A0` | 80% |
+| Historical | 1px | `#666666` | 60% |
+| Average | 1px dashed | `#808080` | 50% |
+
+### Comparison Mode Lines
+
+| Role | Color |
+|------|-------|
+| Base | `#3B82F6` (Blue) |
+| Compare | `#F59E0B` (Amber) |
+
+### Grid & Axes
+
+| Element | Visibility |
+|---------|------------|
+| Grid Lines | Horizontal only, `#111111` dashed |
+| Axis Lines | Hidden |
+| Tick Lines | Hidden |
+| Axis Labels | Visible, 10px, `#525252` |
+
+### Reference Markers
 
 | Type | Color | Style |
 |------|-------|-------|
-| D0 (Reaction) | `#ef4444` | Dashed |
-| D-30/D+30 | `#ffffff` at 10% | Solid |
-| News Date | `#ffffff` at 40% | Dashed |
+| D0 (Reaction) | `#EF4444` | Dashed |
+| Time Bounds | `#FFFFFF` at 10% | Solid |
+| Event Date | `#FFFFFF` at 40% | Dashed |
 
-### Flow Bars
+**Maximum**: 3 reference lines per chart.
 
-- Positive: `#22c55e`
-- Negative: `#ef4444`
+### Tooltip (Unified)
 
-### Watermark
-
-- Position: Center
-- Opacity: `3%`
-- Image: `/logo.svg` grayscale
-
-### What Charts Should NEVER Include
-
-- ❌ 3D effects
-- ❌ Drop shadows
-- ❌ Multiple gradients
-- ❌ Legend boxes (use inline labels)
-- ❌ Decorative icons
-- ❌ Price predictions
-
----
-
-## 7. Layout & Spacing
-
-### Spacing Scale
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `space-y-2` | 8px | Tight lists |
-| `space-y-3` | 12px | Compact cards |
-| `space-y-4` | 16px | Standard gaps |
-| `space-y-6` | 24px | Section separation |
-| `space-y-8` | 32px | Major breaks |
-
-### Page Layout
-
-| Element | Value | Note |
-|---------|-------|------|
-| Horizontal Padding | `px-4` | All pages |
-| Bottom Padding | `pb-24` | **Only pages with BottomNav** |
-| Desktop | No forced `pb-24` | BottomNav may not exist |
-
-### Density
-
-| Context | Density |
-|---------|---------|
-| Dashboard | Compact (`p-3`, `space-y-3`) |
-| Detail/Reading | Relaxed (`p-5`, `space-y-6`) |
-| Data Tables | Tight (`p-2`, `space-y-2`) |
-
----
-
-## 8. Interaction & Controls
-
-### Button Hierarchy
-
-| Type | Classes | Usage Limit |
-|------|---------|-------------|
-| **Primary** | `bg-white text-black` | **Max 1 per screen** |
-| **Secondary** | `bg-neutral-800 text-white border-white/10` | Unlimited |
-| **Ghost** | `text-neutral-400 hover:bg-white/5` | Unlimited |
-| **Icon** | `w-9 h-9 bg-neutral-900 border-white/5` | Unlimited |
-
-### Primary Button Rule
-
-> Primary buttons should be used **sparingly** — maximum 1 per screen.
-> Overuse dilutes CTA hierarchy and makes the interface feel like a consumer app.
-
-### Tab Navigation
-
-**Correct (v1.1):**
-
-```
-Active:   bg-neutral-800 text-white
-Inactive: text-neutral-500
+```typescript
+CHART.tooltip = {
+    container: 'bg-[#0A0A0A]/95 border border-[#1A1A1A] rounded-lg shadow-xl p-2',
+    date: 'text-[10px] text-[#666666] mb-1',
+    value: 'text-xs font-mono font-bold text-white',
+    label: 'text-[10px] text-[#808080]',
+}
 ```
 
-**Forbidden:**
+**Tooltips must NOT include**: Icons, emojis, multiple series, decorations.
 
-- ❌ `bg-gradient-to-r`
-- ❌ Multi-color gradients
-- ❌ Shadow effects
+### Watermark (MANDATORY)
 
-> Bloomberg / TradingView do not use gradients for state. Use solid colors or underlines.
-
-### Filter Chips / Toggles
-
-**Active:**
-
-```
-bg-white text-black border-white
-```
-
-**Inactive:**
-
-```
-bg-neutral-900 text-neutral-500 border-white/10
-```
-
-### Filter Control Rules
-
-1. Filters are **view-only**, not analysis logic
-2. Active state uses **contrast**, not color
-3. No icons inside filter chips
-4. Max **5 options** per filter group
-5. Must reflect state textually (e.g., "顯示: 1Y")
-
-### Disabled States
-
-- Opacity: `opacity-50`
-- Pointer: `pointer-events-none`
-- Never change color — use opacity only
-
----
-
-## 9. Empty / Loading States
-
-### Empty State Rules
-
-| Rule | Specification |
-|------|---------------|
-| Style | Text-first, no illustrations |
-| Icon Size | ≤ 16px (if any) |
-| Message | ≤ 1 sentence |
-| Color | `text-neutral-500` |
-| Layout | **Never center vertically** (keep analytical layout) |
-
-**Example:**
-
-```html
-<div class="text-center py-8">
-  <p class="text-sm text-neutral-500">暫無數據</p>
+```tsx
+<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.03]">
+    <img src="/logo.svg" className="w-48 h-48 grayscale" />
 </div>
 ```
 
-### Loading State Rules
+| Property | Value |
+|----------|-------|
+| Position | Center |
+| Opacity | 3% (2-4% range) |
+| Size | 25% of container, max 192px |
+| Filter | Grayscale |
 
-| Rule | Specification |
-|------|---------------|
-| Preferred | Static placeholders |
-| Forbidden | Animated skeletons, spinners |
-| Timeout | If loading > 500ms, show placeholder text only |
-| Text | `text-neutral-600`, e.g., "載入中..." |
-
-**Hard Rule:**
-
-> No `animate-pulse`, `animate-spin`, or shimmer effects.
-> Loading states must be static.
+**Every chart MUST have watermark. No exceptions.**
 
 ---
 
-## 10. Content Tone Rules
+## 6. Button Hierarchy
 
-### Writing Style
-
-- **Audience**: Senior crypto traders
-- **Tone**: Objective, precise, data-driven
-- **Never**: Sensational, emotional, speculative
-
-### Length Limits
-
-| Element | Max |
-|---------|-----|
-| Decision Card Line | 1 sentence |
-| Card Subtitle | 10 words |
-| Body Paragraph | 2-3 sentences |
-
-### Allowed Language
-
-- ✅ "流動性下降", "槓桿清算"
-- ✅ "價格創新高", "波動率上升"
-
-### Forbidden Language
-
-- ❌ "震驚", "瘋狂" → Use "超出預期"
-- ❌ Price targets
-- ❌ Investment advice
-- ❌ Bracketed English: "(Volatility)"
+| Type | Token | Limit |
+|------|-------|-------|
+| Primary | `BUTTONS.primary` | Max 1 per screen |
+| Secondary | `BUTTONS.secondary` | Unlimited |
+| Ghost | `BUTTONS.ghost` | Unlimited |
+| Icon | `BUTTONS.icon` | Unlimited |
 
 ---
 
-## 11. Do & Don't List
+## 7. Spacing Scale
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `SPACING.cardLarge` | 20px | Primary card default |
+| `SPACING.card` | 16px | Primary card compact |
+| `SPACING.cardCompact` | 12px | Secondary card default |
+| `SPACING.cardTight` | 8px | Secondary card tight |
+| `SPACING.sectionGap` | 24px | Between sections |
+| `SPACING.cardGap` | 16px | Between cards |
+
+---
+
+## 8. Do & Don't
 
 ### DO
 
-- ✅ Use `font-mono` for all numbers
-- ✅ Use strict grayscale for UI surfaces
-- ✅ Use Blue/Amber **only** in comparison mode
-- ✅ Limit Primary button to 1 per screen
-- ✅ Use instant state changes (no duration)
-- ✅ Show data source attribution
+- ✅ Use ONLY `CARDS.primary/secondary/inline/passive`
+- ✅ Use tokens for ALL colors
+- ✅ Use tokens for ALL radii
+- ✅ Add watermark to ALL charts
+- ✅ Use `font-mono` for numbers
+- ✅ Use instant hover states
 
 ### DON'T
 
-- ❌ Use `transition-all` or `duration-*`
-- ❌ Use gradients for tabs or navigation
-- ❌ Use colored backgrounds on cards
-- ❌ Use animated loading states
+- ❌ Create new card variants
+- ❌ Use inline hex colors
+- ❌ Use inline `rounded-*` values
+- ❌ Use `transition-*` or `duration-*`
 - ❌ Use Blue/Amber outside comparison mode
-- ❌ Use more than 1 Primary button per screen
-- ❌ Use emojis in data-heavy sections
-- ❌ Center empty states vertically
+- ❌ Omit chart watermarks
+- ❌ Add more than 3 reference lines
 
 ---
 
-## 12. Code Token Reference
+## 9. Engineering Checklist
 
-```typescript
-// Typography
-TYPOGRAPHY.pageTitle        // text-2xl font-bold tracking-tight
-TYPOGRAPHY.sectionTitle     // text-base font-bold tracking-tight
-TYPOGRAPHY.monoXL           // text-2xl font-mono font-bold
+### Per Component
 
-// Surfaces
-SURFACE.app                 // bg-[#050505]
-SURFACE.card                // bg-[#0E0E0F]
-SURFACE.highlight           // bg-[#1A1A1A]
+- [ ] Uses exactly one of: `CARDS.primary/secondary/inline/passive`
+- [ ] No inline `bg-*` colors
+- [ ] No inline `rounded-*` values
+- [ ] No `transition-*` classes
+- [ ] Hover is instant (if any)
 
-// Colors
-COLORS.textPrimary          // text-white
-COLORS.positive             // text-[#4ADE80]
-COLORS.negative             // text-[#F87171]
+### Per Chart
 
-// Cards
-CARDS.typeA                 // Hero cards (border)
-CARDS.typeB                 // Comparison cards (no border)
-CARDS.typeC                 // Info blocks (left border)
+- [ ] Primary line is 2px, `#E0E0E0`
+- [ ] Watermark present and centered
+- [ ] Watermark opacity is 3%
+- [ ] Tooltip uses `CHART.tooltip`
+- [ ] Max 3 reference lines
+- [ ] Grid horizontal only
 
-// Buttons
-BUTTONS.primary             // bg-white text-black (max 1/screen)
-BUTTONS.secondary           // bg-neutral-800
-BUTTONS.ghost               // transparent
-```
+### Per Page
+
+- [ ] Max 1 primary button
+- [ ] Colors are Black/White/Gray only
+- [ ] Blue/Amber only in comparison mode
 
 ---
 
@@ -503,29 +350,5 @@ BUTTONS.ghost               // transparent
 | Version | Date | Changes |
 |---------|------|---------|
 | v1.0 | 2024-12-16 | Initial extraction |
-| v1.1 | 2024-12-16 | Added: Animation Policy, Functional Color Exception, Comparison Color Rules, Empty/Loading States, Filter Rules. Fixed: Tab gradient → solid, Primary button limit, pb-24 scope, Area gradient clarification. |
-
----
-
-## Usage Guidelines
-
-### For PR Reviews
-
-> UI PR must comply with this specification. Reject if non-compliant. Do not debate aesthetics — check compliance only.
-
-### For AI Generation
-
-Prefix prompts with:
-
-```
-Must comply with CryptoTW Pro Design System v1.1 (strict).
-```
-
-### For Engineering
-
-Extract and use these sections directly:
-
-1. Typography Tokens
-2. Surface Tokens
-3. Chart Rules
-4. Animation Policy
+| v1.1 | 2024-12-16 | Animation policy, color exceptions |
+| v2.0 | 2024-12-16 | Complete unification: 4 card types, chart tokens, mandatory constraints |

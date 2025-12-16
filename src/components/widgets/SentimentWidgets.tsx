@@ -7,6 +7,7 @@ import { Gauge, TrendingUp, TrendingDown, DollarSign, BarChart3, AlertCircle } f
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { DashboardData } from './types'
+import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 
 // ============================================
 // Bull/Bear Index Component
@@ -50,7 +51,7 @@ export function BullBearIndex() {
     }
 
     return (
-        <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-4">
+        <div className={cn(CARDS.primary, SPACING.card, "space-y-4")}>
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Gauge className="w-4 h-4 text-neutral-500" />
@@ -164,7 +165,7 @@ export function FundingRateRankings() {
             {/* Grid Layout for compact view */}
             <div className="grid grid-cols-2 gap-3">
                 {/* Extreme Positive (Bearish Signal) */}
-                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                <div className={cn(CARDS.primary, SPACING.cardCompact)}>
                     <div className="flex items-center gap-1 mb-2 pb-2 border-b border-white/5">
                         <TrendingUp className="w-3 h-3 text-red-400" />
                         <span className="text-xs font-bold text-red-400">極度看多</span>
@@ -190,7 +191,7 @@ export function FundingRateRankings() {
                 </div>
 
                 {/* Extreme Negative (Bullish Signal) */}
-                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3">
+                <div className={cn(CARDS.primary, SPACING.cardCompact)}>
                     <div className="flex items-center gap-1 mb-2 pb-2 border-b border-white/5">
                         <TrendingDown className="w-3 h-3 text-green-400" />
                         <span className="text-xs font-bold text-green-400">極度看空</span>
@@ -258,7 +259,7 @@ export function LongShortRatio() {
         <div className="space-y-4">
             {/* Global Ratio */}
             {data.global && (
-                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-3">
+                <div className={cn(CARDS.primary, SPACING.card, "space-y-3")}>
                     <span className="text-xs text-neutral-500">全網帳戶多空比</span>
                     <div className="flex items-center gap-2">
                         <div className="flex-1">
@@ -283,7 +284,7 @@ export function LongShortRatio() {
 
             {/* Top Accounts */}
             {data.topAccounts && (
-                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 space-y-3">
+                <div className={cn(CARDS.primary, SPACING.card, "space-y-3")}>
                     <span className="text-xs text-neutral-500">大戶帳戶多空比</span>
                     <div className="flex items-center gap-2">
                         <div className="flex-1">
@@ -336,7 +337,7 @@ export function FundingSummary({ data }: { data?: DashboardData['funding'] }) {
     const isNegative = data.status === 'negative'
 
     return (
-        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+        <div className={cn(CARDS.primary, SPACING.cardCompact, "h-full")}>
             <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-3.5 h-3.5 text-yellow-400" />
                 <span className="text-xs font-bold text-white">BTC 費率</span>
@@ -391,7 +392,7 @@ export function LongShortSummary({ data }: { data?: DashboardData['longShort'] }
     }
 
     return (
-        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+        <div className={cn(CARDS.primary, SPACING.cardCompact, "h-full")}>
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <BarChart3 className="w-3.5 h-3.5 text-blue-400" />

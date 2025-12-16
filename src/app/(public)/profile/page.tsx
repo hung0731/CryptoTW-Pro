@@ -28,7 +28,7 @@ function MenuLink({
     external?: boolean
 }) {
     const content = (
-        <div className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-xl">
+        <div className="flex items-center justify-between p-4 hover:bg-[#0E0E0F] rounded-xl">
             <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center">
                     <Icon className="w-4 h-4 text-neutral-400" />
@@ -82,7 +82,7 @@ export default function ProfilePage() {
             case 'pro':
             case 'lifetime':
                 return (
-                    <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 backdrop-blur-md transition-colors px-2 py-0.5 text-xs">
+                    <Badge className="bg-[#1A1A1A] text-white hover:bg-[#2A2A2A] border-[#2A2A2A] backdrop-blur-md px-2 py-0.5 text-xs">
                         PRO 會員
                     </Badge>
                 )

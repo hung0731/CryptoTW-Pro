@@ -8,6 +8,7 @@ import {
 import { AlertTriangle, AlertCircle, Zap, TrendingDown, TrendingUp, Info } from 'lucide-react'
 import { REVIEWS_DATA } from '@/lib/reviews-data'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
+import { CHART } from '@/lib/design-tokens'
 
 // 1. Define Visual Domains (Clamps)
 // 1. Define Visual Domains (Clamps)
@@ -219,13 +220,13 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
     const getLeftColor = () => '#3b82f6' // Blue
     const getRightColor = () => '#fbbf24' // Amber
 
-    if (loading) return <Skeleton className="w-full h-full bg-neutral-900 rounded-lg" />
+    if (loading) return <Skeleton className="w-full h-full bg-[#0A0A0A] rounded-lg" />
 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-neutral-950/90 border border-white/10 p-4 rounded-lg shadow-2xl text-xs backdrop-blur-md min-w-[240px]">
-                    <p className="text-neutral-400 mb-2 font-mono flex items-center gap-2 border-b border-white/5 pb-2">
+                <div className={`${CHART.tooltip.container} min-w-[240px] backdrop-blur-md`}>
+                    <p className="text-[#808080] mb-2 font-mono flex items-center gap-2 border-b border-[#1A1A1A] pb-2">
                         <span className="text-white font-bold">D{label >= 0 ? `+${label}` : label}</span>
                         <span>(事件日)</span>
                     </p>
@@ -293,21 +294,21 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 <div className="flex gap-2">
                     <button
                         onClick={() => setViewType('pct')}
-                        className={`text-[10px] px-2 py-1 rounded transition-colors ${viewType === 'pct' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+                        className={`text-[10px] px-2 py-1 rounded ${viewType === 'pct' ? 'bg-[#1A1A1A] text-white' : 'text-[#666666] hover:text-white'}`}
                     >
                         漲跌幅 (%)
                     </button>
                     {isAsymmetric && (
                         <button
                             onClick={() => setViewType('impact')}
-                            className={`text-[10px] px-2 py-1 rounded transition-colors ${viewType === 'impact' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+                            className={`text-[10px] px-2 py-1 rounded ${viewType === 'impact' ? 'bg-[#1A1A1A] text-white' : 'text-[#666666] hover:text-white'}`}
                         >
                             相對影響力
                         </button>
                     )}
                     <button
                         onClick={() => setViewType('dd')}
-                        className={`text-[10px] px-2 py-1 rounded transition-colors ${viewType === 'dd' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+                        className={`text-[10px] px-2 py-1 rounded ${viewType === 'dd' ? 'bg-[#1A1A1A] text-white' : 'text-[#666666] hover:text-white'}`}
                     >
                         最大回撤 (DD)
                     </button>
@@ -343,7 +344,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                         </linearGradient>
                     </defs>
 
-                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                    <CartesianGrid strokeDasharray={CHART.grid.strokeDasharray} stroke={CHART.grid.stroke} vertical={false} />
 
                     <ReferenceLine
                         x={0}

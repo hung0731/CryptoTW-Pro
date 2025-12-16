@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { REVIEWS_DATA, MarketEvent } from '@/lib/reviews-data'
 import { History, ChevronRight, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CARDS, SPACING } from '@/lib/design-tokens'
 
 interface StatusItem {
     label: string
@@ -103,7 +104,7 @@ export function SimilarHistoryCard() {
 
     return (
         <Link href={`/reviews/${event.slug}`} className="block group">
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 hover:bg-neutral-900/50 hover:border-white/10 transition-all">
+            <div className={cn(CARDS.secondary, SPACING.card)}>
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
@@ -118,7 +119,7 @@ export function SimilarHistoryCard() {
                                     相似度 {similarityPercent}%
                                 </span>
                             </div>
-                            <h3 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors truncate">
+                            <h3 className="text-sm font-bold text-white group-hover:text-[#3B82F6] truncate">
                                 {event.title.split('：')[0]}
                             </h3>
                             <p className="text-xs text-neutral-400 mt-0.5">
@@ -126,7 +127,7 @@ export function SimilarHistoryCard() {
                             </p>
                         </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-blue-400 transition-colors flex-shrink-0 mt-2" />
+                    <ChevronRight className="w-4 h-4 text-[#666666] group-hover:text-[#3B82F6] flex-shrink-0 mt-2" />
                 </div>
 
                 {/* Context hint */}

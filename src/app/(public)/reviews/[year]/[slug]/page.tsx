@@ -29,7 +29,7 @@ export default function ReviewDetailPage() {
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
-                <Link href={`/reviews/${review.year}`} className="text-neutral-400 hover:text-white transition-colors">
+                <Link href={`/reviews/${review.year}`} className="text-[#808080] hover:text-white">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div className="text-sm font-bold truncate max-w-[200px]">{review.title}</div>
@@ -210,7 +210,7 @@ export default function ReviewDetailPage() {
                         </h2>
                         <button
                             onClick={() => setIsTimelineExpanded(!isTimelineExpanded)}
-                            className="text-[10px] flex items-center gap-1 text-neutral-500 hover:text-white transition-colors"
+                            className="text-[10px] flex items-center gap-1 text-[#666666] hover:text-white"
                         >
                             {isTimelineExpanded ? (
                                 <>收合 <ChevronUp className="w-3 h-3" /></>
@@ -350,15 +350,15 @@ export default function ReviewDetailPage() {
                         <div className="space-y-3">
                             {relatedReviews.map((r, i) => (
                                 <Link href={`/reviews/${r.year}/${r.slug}`} key={r.id}>
-                                    <div className="flex items-center gap-4 p-3 rounded-lg bg-neutral-900/30 border border-white/5 hover:bg-neutral-800 transition-colors group">
-                                        <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                    <div className="flex items-center gap-4 p-3 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] hover:bg-[#0E0E0F] group">
+                                        <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[10px] font-bold text-[#666666] group-hover:bg-[#3B82F6] group-hover:text-white">
                                             {i + 1}
                                         </div>
                                         <div className="flex-1">
-                                            <div className="text-xs font-bold text-neutral-300 group-hover:text-white transition-colors">{r.title.split('：')[0]}</div>
+                                            <div className="text-xs font-bold text-[#A0A0A0] group-hover:text-white">{r.title.split('：')[0]}</div>
                                             <div className="text-[10px] text-neutral-600 mt-0.5">{r.title.split('：')[1] || r.summary.slice(0, 20) + '...'}</div>
                                         </div>
-                                        <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                                        <ChevronRight className="w-4 h-4 text-[#525252] group-hover:text-white" />
                                     </div>
                                 </Link>
                             ))}

@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
+// User bindings API - uses RLS, no adminClient needed
+// RLS Policy required: SELECT WHERE user_id = auth.uid()
 export async function POST(req: NextRequest) {
     try {
-        const supabase = createAdminClient()
+        const supabase = createClient()
         const { lineUserId } = await req.json()
 
         if (!lineUserId) {
             return NextResponse.json({ error: 'Missing User ID' }, { status: 400 })
         }
 
-        // 1. Get User ID
+        // 1. Get User ID - this query uses RLS
         const { data: user, error: userError } = await supabase
             .from('users')
             .select('id')
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
-        // 2. Fetch Bindings
+        // 2. Fetch Bindings - uses RLS (user can only see own bindings)
         const { data, error } = await supabase
             .from('exchange_bindings')
             .select('*')

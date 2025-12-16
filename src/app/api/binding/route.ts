@@ -29,6 +29,9 @@ async function getVerificationConfig(supabase: ReturnType<typeof createAdminClie
     return DEFAULT_CONFIG
 }
 
+// Allowed exchanges
+const ALLOWED_EXCHANGES = ['okx', 'binance', 'bybit']
+
 export async function POST(req: NextRequest) {
     // Rate limit: 5 binding requests per minute per IP (prevent abuse)
     const rateLimited = simpleApiRateLimit(req, 'binding', 5, 60)
@@ -38,8 +41,26 @@ export async function POST(req: NextRequest) {
         const supabase = createAdminClient()
         const { lineUserId, exchange, uid } = await req.json()
 
+        // 1. Basic field validation
         if (!lineUserId || !exchange || !uid) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+        }
+
+        // 2. Validate exchange name (whitelist)
+        const normalizedExchange = exchange.toLowerCase().trim()
+        if (!ALLOWED_EXCHANGES.includes(normalizedExchange)) {
+            return NextResponse.json({ error: 'Invalid exchange' }, { status: 400 })
+        }
+
+        // 3. Validate UID format (5-20 digits, numbers only)
+        const trimmedUid = uid.trim()
+        if (!/^\d{5,20}$/.test(trimmedUid)) {
+            return NextResponse.json({ error: 'Invalid UID format (5-20 digits required)' }, { status: 400 })
+        }
+
+        // 4. Validate lineUserId format (basic sanity check)
+        if (typeof lineUserId !== 'string' || lineUserId.length < 10 || lineUserId.length > 50) {
+            return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 })
         }
 
         // 1. Get User ID from line_user_id

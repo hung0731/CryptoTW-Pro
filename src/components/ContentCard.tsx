@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CARDS, SPACING } from '@/lib/design-tokens'
 
 interface ContentCardProps {
     // Card variant
@@ -60,7 +61,7 @@ export function ContentCard({
 
     const content = (
         <div className={cn(
-            "bg-neutral-900/50 rounded-xl border border-white/5 p-4 hover:bg-white/5 transition-all group",
+            CARDS.secondary, SPACING.card, "group",
             className
         )}>
             <div className="flex gap-3">
@@ -77,7 +78,7 @@ export function ContentCard({
                 <div className="flex-1 min-w-0">
                     {/* Title Row */}
                     <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-sm font-medium text-white line-clamp-2 group-hover:text-neutral-200 transition-colors">
+                        <h3 className="text-sm font-medium text-white line-clamp-2 group-hover:text-white">
                             {title}
                         </h3>
                         {badge && (
@@ -110,7 +111,7 @@ export function ContentCard({
 
                 {/* Arrow */}
                 {(href || onClick) && (
-                    <ChevronRight className="w-4 h-4 text-neutral-600 shrink-0 mt-1 group-hover:text-neutral-400 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-[#666666] shrink-0 mt-1 group-hover:text-[#A0A0A0]" />
                 )}
             </div>
         </div>
@@ -151,7 +152,7 @@ interface ListItemProps {
 
 export function ListItem({ title, href, onClick, badge, rightElement }: ListItemProps) {
     const content = (
-        <div className="flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+        <div className="flex items-center justify-between p-3 hover:bg-[#0E0E0F]">
             <span className="text-xs text-neutral-300 line-clamp-1 flex-1">{title}</span>
             {badge && (
                 <span className="text-[9px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full mx-2">

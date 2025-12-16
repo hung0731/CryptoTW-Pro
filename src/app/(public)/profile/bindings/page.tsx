@@ -105,7 +105,7 @@ export default function BindingsPage() {
                     ) : (
                         <div className="space-y-2">
                             {bindings.map(b => (
-                                <div key={b.id} className="group flex items-center justify-between p-4 rounded-xl bg-neutral-900/50 border border-white/5 hover:bg-white/5 transition-all">
+                                <div key={b.id} className="group flex items-center justify-between p-4 rounded-xl bg-[#0A0A0A] border border-[#1A1A1A] hover:bg-[#0E0E0F]">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center border border-white/10 text-xs font-bold uppercase text-neutral-400">
                                             {b.exchange_name.slice(0, 2)}
@@ -155,7 +155,7 @@ export default function BindingsPage() {
 
                 {/* Add New Binding Button */}
                 <Link href="/join">
-                    <Button variant="outline" className="w-full border-dashed border border-white/10 bg-transparent py-6 text-neutral-400 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all rounded-xl">
+                    <Button variant="outline" className="w-full border-dashed border border-[#1A1A1A] bg-transparent py-6 text-[#808080] hover:text-white hover:border-[#2A2A2A] hover:bg-[#0E0E0F] rounded-xl">
                         <Plus className="w-4 h-4 mr-2" />
                         綁定其他交易所
                     </Button>

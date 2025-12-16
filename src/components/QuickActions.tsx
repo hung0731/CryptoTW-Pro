@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { BarChart3, Bell, Calendar, Star, TrendingUp, Wallet, Crown } from 'lucide-react'
+import { CARDS } from '@/lib/design-tokens'
 
 interface QuickAction {
     icon: React.ReactNode
@@ -39,7 +40,7 @@ export function QuickActions() {
                 <Link
                     key={i}
                     href={action.href}
-                    className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl bg-neutral-900/50 border border-white/5 hover:bg-white/5 transition-all"
+                    className={`flex-1 flex flex-col items-center gap-1.5 py-3 ${CARDS.secondary}`}
                 >
                     <div className={action.color}>{action.icon}</div>
                     <span className="text-[10px] text-neutral-400">{action.label}</span>

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { MarketEvent } from '@/lib/reviews-data';
+import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
+import { cn } from '@/lib/utils';
 
 export function ReviewCard({ review }: { review: MarketEvent }) {
     const getTypeConfig = (type: string) => {
@@ -18,9 +20,9 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
     const typeConfig = getTypeConfig(review.type || 'market_structure');
 
     return (
-        <article className="group relative bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:bg-neutral-900/60 hover:border-white/20">
+        <article className={cn(CARDS.secondary, "group relative overflow-hidden")}>
             {/* Watermark Logo */}
-            <div className="absolute -right-4 -bottom-4 opacity-[0.20] group-hover:opacity-[0.30] transition-opacity rotate-12 pointer-events-none">
+            <div className="absolute -right-4 -bottom-4 opacity-[0.20] group-hover:opacity-[0.30] rotate-12 pointer-events-none">
                 {review.impactedTokens?.[0] && (
                     <img
                         src={`/tokens/${review.impactedTokens[0]}.png`}
@@ -31,28 +33,28 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
                 )}
             </div>
 
-            <div className="p-3 relative">
+            <div className={cn(SPACING.cardCompact, "relative")}>
                 {/* Meta Header */}
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-neutral-500">{review.eventStartAt.replace(/-/g, '.')}</span>
-                        <div className="w-[1px] h-2 bg-white/10"></div>
-                        <span className="text-[10px] text-neutral-400">{typeConfig.label}</span>
+                        <span className={TYPOGRAPHY.monoMicro}>{review.eventStartAt.replace(/-/g, '.')}</span>
+                        <div className="w-[1px] h-2 bg-[#1A1A1A]"></div>
+                        <span className={TYPOGRAPHY.caption}>{typeConfig.label}</span>
                     </div>
                     <div className="flex items-center gap-1">
                         {review.impactedTokens?.slice(0, 3).map(t => (
-                            <span key={t} className="text-[9px] font-bold text-neutral-600 bg-white/5 px-1 rounded">{t}</span>
+                            <span key={t} className="text-[9px] font-bold text-[#666666] bg-[#1A1A1A] px-1 rounded">{t}</span>
                         ))}
                     </div>
                 </div>
 
                 {/* Main Content */}
                 <Link href={`/reviews/${review.year}/${review.slug}`} className="block">
-                    <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white mb-1.5 leading-snug">
+                    <h3 className={cn(TYPOGRAPHY.cardTitle, "group-hover:text-white mb-1.5 leading-snug")}>
                         {review.title.split('：')[0]}
-                        {review.title.split('：')[1] && <span className="text-neutral-500 font-normal">：{review.title.split('：')[1]}</span>}
+                        {review.title.split('：')[1] && <span className="text-[#666666] font-normal">：{review.title.split('：')[1]}</span>}
                     </h3>
-                    <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                    <p className={cn(TYPOGRAPHY.bodySmall, "line-clamp-2")}>
                         {review.impactSummary || review.summary}
                     </p>
                 </Link>
@@ -60,3 +62,4 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
         </article>
     )
 }
+

@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { CHART } from '@/lib/design-tokens'
 
 interface MacroPricePoint {
     t: number  // Day relative to D0 (-5 to +5)
@@ -93,7 +94,7 @@ export function MacroEventChart({
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-neutral-950/95 border border-white/10 p-3 rounded-lg shadow-xl text-xs backdrop-blur-md">
+                <div className={CHART.tooltip.container}>
                     <p className="text-neutral-400 mb-2 font-mono">
                         D{label >= 0 ? `+${label}` : label}
                     </p>
@@ -124,10 +125,10 @@ export function MacroEventChart({
                             key={date}
                             onClick={() => setActiveDate(date)}
                             className={cn(
-                                "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap",
+                                "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
                                 activeDate === date
-                                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                                    : "bg-neutral-900 text-neutral-400 border border-white/5 hover:text-white"
+                                    ? "bg-[#1A2234] text-[#3B82F6] border border-[#3B82F6]/30"
+                                    : "bg-[#0A0A0A] text-[#808080] border border-[#1A1A1A] hover:text-white"
                             )}
                         >
                             {date.slice(0, 7)} {/* YYYY-MM */}
@@ -136,10 +137,10 @@ export function MacroEventChart({
                     <button
                         onClick={() => setShowAverage(!showAverage)}
                         className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap",
+                            "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap",
                             showAverage
-                                ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                                : "bg-neutral-900 text-neutral-400 border border-white/5 hover:text-white"
+                                ? "bg-[#1A1F2E] text-[#F59E0B] border border-[#F59E0B]/30"
+                                : "bg-[#0A0A0A] text-[#808080] border border-[#1A1A1A] hover:text-white"
                         )}
                     >
                         平均線
@@ -163,7 +164,7 @@ export function MacroEventChart({
                             </linearGradient>
                         </defs>
 
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray={CHART.grid.strokeDasharray} stroke={CHART.grid.stroke} vertical={false} />
 
                         {/* D0 Reference Line */}
                         <ReferenceLine

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { HelpDrawer } from '@/components/ui/HelpDrawer'
 import { cn } from '@/lib/utils'
+import { CARDS, SPACING } from '@/lib/design-tokens'
 
 interface StatusItem {
     label: string
@@ -61,10 +62,10 @@ export function MarketStatusGrid() {
     if (loading && !data) { // show skeleton only on first load
         return (
             <div className="space-y-3">
-                <Skeleton className="h-12 w-full bg-neutral-900/50 rounded-xl" />
+                <Skeleton className="h-12 w-full bg-[#0A0A0A] rounded-xl" />
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4">
                     {[1, 2, 3, 4, 5].map(i => (
-                        <Skeleton key={i} className="h-20 w-24 flex-none bg-neutral-900/50 rounded-xl" />
+                        <Skeleton key={i} className="h-20 w-24 flex-none bg-[#0A0A0A] rounded-xl" />
                     ))}
                 </div>
             </div>
@@ -193,7 +194,7 @@ export function MarketStatusGrid() {
                     <div
                         key={i}
                         className={cn(
-                            "flex-none w-24 flex flex-col items-center justify-center p-2 rounded-xl border transition-all h-20 snap-center relative group",
+                            "flex-none w-24 flex flex-col items-center justify-center p-2 rounded-xl border h-20 snap-center relative group",
                             getStyle(card.code)
                         )}
                     >
@@ -206,7 +207,7 @@ export function MarketStatusGrid() {
                         <span className="text-[10px] opacity-70 mb-1 font-medium whitespace-nowrap">{card.title}</span>
                         <span className="text-base font-bold tracking-wide whitespace-nowrap">{card.value}</span>
                         {/* Secondary - Action Hint (P1) */}
-                        <span className="text-[9px] text-neutral-500 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap mt-0.5">
+                        <span className="text-[9px] text-neutral-500 opacity-0 group-hover:opacity-100 whitespace-nowrap mt-0.5">
                             {getActionHint(card.code, card.type)}
                         </span>
                     </div>

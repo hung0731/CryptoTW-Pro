@@ -81,11 +81,11 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Link href="/profile" className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center hover:bg-white/5 transition-colors">
-                            <Bell className="w-4 h-4 text-neutral-400" />
+                        <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
+                            <Bell className="w-4 h-4 text-[#808080]" />
                         </Link>
-                        <Link href="/profile" className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center hover:bg-white/5 transition-colors">
-                            <Settings className="w-4 h-4 text-neutral-400" />
+                        <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
+                            <Settings className="w-4 h-4 text-[#808080]" />
                         </Link>
                     </div>
                 </div>
@@ -93,7 +93,7 @@ export default function HomePage() {
                 {/* ===== Unlock CTA (Non-Pro Users) ===== */}
                 {!isPro && (
                     <Link href="/join" className="block">
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-[#0A0A0A] border border-[#1A1A1A] hover:border-[#2A2A2A]">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-white" />
                                 <span className="text-sm font-medium text-white">解鎖完整 Pro 功能</span>

@@ -21,15 +21,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     return
                 }
 
-                // Admin Whitelist Check
-                const allowedEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
-                    .split(',')
-                    .map(e => e.trim())
-                    .filter(Boolean)
+                // Call server-side API to verify admin (uses non-public ADMIN_EMAILS)
+                const res = await fetch('/api/admin/verify-admin')
+                const data = await res.json()
 
-                if (allowedEmails.length > 0 && session.user.email && !allowedEmails.includes(session.user.email)) {
-                    console.warn('Unauthorized admin access attempt:', session.user.email)
-                    await supabase.auth.signOut() // Force sign out
+                if (!data.isAdmin) {
+                    console.warn('Unauthorized admin access attempt')
+                    await supabase.auth.signOut()
                     router.replace('/login?error=unauthorized')
                 } else {
                     setIsAuthenticated(true)

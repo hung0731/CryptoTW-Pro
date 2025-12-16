@@ -9,6 +9,7 @@ import { useLiff } from '@/components/LiffProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { CARDS, SPACING } from '@/lib/design-tokens'
 
 interface ArbitrageItem {
     symbol: string
@@ -103,7 +104,7 @@ export function ArbitrageView() {
             </div>
 
             {/* 2. Controls (Pro Only) */}
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
+            <div className={cn(CARDS.primary, SPACING.card)}>
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-medium text-neutral-300 flex items-center gap-2">
                         <Settings className="w-4 h-4" /> 參數設定
@@ -141,10 +142,10 @@ export function ArbitrageView() {
                                         }
                                     }}
                                     className={cn(
-                                        "px-2 py-1 rounded text-[10px] border transition-all",
+                                        "px-2 py-1 rounded text-[10px] border",
                                         selectedExchanges.includes(ex)
-                                            ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                                            : "bg-black/40 text-neutral-500 border-white/10 hover:border-white/20"
+                                            ? "bg-[#1A2234] text-[#3B82F6] border-[#3B82F6]/30"
+                                            : "bg-[#0A0A0A] text-neutral-500 border-[#1A1A1A] hover:border-[#2A2A2A]"
                                     )}
                                 >
                                     {ex}
@@ -161,14 +162,14 @@ export function ArbitrageView() {
             {/* 3. Data List */}
             <div className="space-y-3">
                 {loading ? (
-                    [1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full bg-neutral-900/50 rounded-xl" />)
+                    [1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full bg-[#0A0A0A] rounded-xl" />)
                 ) : (
                     <>
                         {displayData.map((item, i) => {
                             const { net } = calculateProfit(item)
                             const isPositive = net > 0
                             return (
-                                <div key={i} className="bg-neutral-900/50 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+                                <div key={i} className={cn(CARDS.primary, SPACING.card)}>
                                     {/* Header: Symbol & APR */}
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-3">

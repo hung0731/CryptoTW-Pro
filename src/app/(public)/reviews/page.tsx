@@ -93,14 +93,14 @@ export default function ReviewsPage() {
 
             {/* 1. Editor's Picks (Carousel) */}
             {!hasActiveFilters && (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-4 mb-4">
+                <div className="space-y-4 mb-4">
                     <ReviewCarousel items={featuredReviews} />
 
                     {/* 1.5 Historical Comparison Card */}
                     <div className="px-4">
                         <Link
                             href="/reviews/compare"
-                            className="flex items-center justify-between p-4 rounded-xl bg-neutral-900/50 border border-white/10 hover:border-white/20"
+                            className="flex items-center justify-between p-4 rounded-xl bg-[#0A0A0A] border border-[#1A1A1A] hover:border-[#2A2A2A]"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
@@ -119,7 +119,7 @@ export default function ReviewsPage() {
                 </div>
             )}
 
-            <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-white/5 transition-all">
+            <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-[#1A1A1A]">
                 <div className="px-4 py-4 space-y-4">
                     {/* 2. Search Bar */}
                     <div className="relative">
@@ -129,7 +129,7 @@ export default function ReviewsPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="搜尋事件 / 代幣 (BTC) / 類型 (FTX)..."
-                            className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/30 transition-colors"
+                            className="w-full bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder:text-[#525252] focus:outline-none focus:border-[#2A2A2A]"
                         />
                         {searchQuery && (
                             <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -145,10 +145,10 @@ export default function ReviewsPage() {
                                 key={f.label}
                                 onClick={() => setSelectedType(selectedType === f.value ? null : f.value)}
                                 className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap transition-all text-xs font-medium border shrink-0",
+                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0",
                                     selectedType === f.value
-                                        ? "bg-white text-black border-white shadow-lg shadow-white/10"
-                                        : "bg-neutral-900 text-neutral-500 border-white/10 hover:border-white/30 hover:text-neutral-300"
+                                        ? "bg-white text-black border-white"
+                                        : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#2A2A2A] hover:text-[#A0A0A0]"
                                 )}
                             >
                                 {f.label}
@@ -161,8 +161,8 @@ export default function ReviewsPage() {
                         <button
                             onClick={() => setSelectedYear(null)}
                             className={cn(
-                                "px-3 py-1 text-[11px] font-mono font-bold rounded transition-colors shrink-0",
-                                selectedYear === null ? "text-amber-500 bg-amber-500/10" : "text-neutral-600 hover:text-neutral-400"
+                                "px-3 py-1 text-[11px] font-mono font-bold rounded shrink-0",
+                                selectedYear === null ? "text-[#F59E0B] bg-[#F59E0B]/10" : "text-[#525252] hover:text-[#808080]"
                             )}
                         >
                             ALL
@@ -172,10 +172,10 @@ export default function ReviewsPage() {
                                 key={year}
                                 onClick={() => setSelectedYear(selectedYear === year ? null : year)}
                                 className={cn(
-                                    "px-3 py-1 text-[11px] font-mono font-bold rounded transition-colors shrink-0",
+                                    "px-3 py-1 text-[11px] font-mono font-bold rounded shrink-0",
                                     selectedYear === year
-                                        ? "text-white bg-white/10 border border-white/20"
-                                        : "text-neutral-600 hover:text-neutral-300"
+                                        ? "text-white bg-[#1A1A1A] border border-[#2A2A2A]"
+                                        : "text-[#525252] hover:text-[#A0A0A0]"
                                 )}
                             >
                                 {year}

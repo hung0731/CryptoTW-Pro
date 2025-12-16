@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { Radar, Users, Newspaper } from 'lucide-react'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
+import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 
 // ============================================
 // Whale Watch Components
@@ -104,9 +105,9 @@ export function WhaleAlertFeed() {
     // Loading Skeleton
     if (loading) {
         return (
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden animate-pulse">
+            <div className={cn(CARDS.primary, "p-0 overflow-hidden")}>
                 {/* AI Context Skeleton */}
-                <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border-b border-white/5 p-4">
+                <div className="p-4 border-b border-[#1A1A1A]">
                     <div className="flex items-center gap-2 mb-3">
                         <Skeleton className="w-5 h-5 rounded bg-neutral-700" />
                         <Skeleton className="h-4 w-28 bg-neutral-700" />
@@ -149,9 +150,9 @@ export function WhaleAlertFeed() {
     }
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-0 overflow-hidden relative group">
-            {/* Key Context Card (The "Soul" of the page) */}
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-b border-white/5 p-4">
+        <div className={cn(CARDS.primary, "p-0 overflow-hidden relative group")}>
+            {/* Key Context Card */}
+            <div className="bg-[#0A1628] border-b border-[#1A1A1A] p-4">
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{contextEmoji}</span>
                     <h3 className="text-sm font-bold text-blue-200">市場脈絡 (巨鯨)</h3>
@@ -197,7 +198,7 @@ export function WhaleAlertFeed() {
                     const formatAmt = positionValue >= 1000000 ? `$${(positionValue / 1000000).toFixed(1)}M` : `$${(positionValue / 1000).toFixed(0)}K`
 
                     return (
-                        <div key={i} className="flex items-center justify-between text-[11px] px-3 py-2 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                        <div key={i} className="flex items-center justify-between text-[11px] px-3 py-2 border-b border-[#1A1A1A] last:border-0 hover:bg-[#0E0E0F]">
                             <div className="flex items-center gap-2">
                                 {/* Symbol */}
                                 <span className={cn(
@@ -255,7 +256,7 @@ export function WhaleAiSummaryCard() {
     if (!fetchedSummary) return null
 
     return (
-        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-white/5 rounded-xl p-4 relative overflow-hidden">
+        <div className={cn(CARDS.primary, SPACING.card, "relative overflow-hidden")}>
             <div className="flex items-center gap-2 mb-3">
                 <div className="bg-blue-500/20 p-1.5 rounded-lg">
                     <Users className="w-4 h-4 text-blue-400" />
@@ -315,7 +316,7 @@ export function WhalePositionsList() {
     }
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-2 h-full flex flex-col">
+        <div className={cn(CARDS.primary, SPACING.cardTight, "h-full flex flex-col")}>
             <div className="flex items-center gap-2 mb-2 px-1">
                 <Users className="w-3.5 h-3.5 text-blue-400" />
                 <span className="text-xs font-bold text-white">Top 20 巨鯨持倉</span>
@@ -463,7 +464,7 @@ export function IndicatorsGrid({ compact = false }: { compact?: boolean }) {
                 {indicators.map((ind, i) => (
                     <div
                         key={i}
-                        className="bg-neutral-900/50 rounded-xl border border-white/5 p-3"
+                        className={cn(CARDS.primary, SPACING.cardCompact)}
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">

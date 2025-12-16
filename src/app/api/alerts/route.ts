@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 // Public API for fetching alerts (used by /alerts page)
+// Uses anonymous client - relies on RLS policies for security
 export async function GET(req: NextRequest) {
-    const supabase = createAdminClient()
+    const supabase = createClient()
     const { searchParams } = new URL(req.url)
     const limit = parseInt(searchParams.get('limit') || '20')
     const hoursAgo = parseInt(searchParams.get('hours') || '24')

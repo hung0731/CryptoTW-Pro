@@ -14,14 +14,11 @@ export async function triggerMarketSummaryAction() {
         return { success: false, error: 'Unauthorized' }
     }
 
-    // 2. Check Admin Email Whitelist (Same as verifyAdmin, avoids DB query entirely)
-    const allowedEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+    // 2. Check Admin Email Whitelist (server-side only)
+    const allowedEmails = (process.env.ADMIN_EMAILS || '')
         .split(',')
         .map(e => e.trim())
         .filter(Boolean)
-
-    console.log('[AdminAction] User Email:', user.email)
-    console.log('[AdminAction] Allowed Emails:', allowedEmails)
 
     if (allowedEmails.length > 0 && !allowedEmails.includes(user.email)) {
         return { success: false, error: `Forbidden: Email not in admin whitelist` }

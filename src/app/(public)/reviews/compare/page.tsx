@@ -109,8 +109,8 @@ function CompareContent() {
 
                                             {/* Title */}
                                             <span className={cn(
-                                                "text-sm font-bold truncate transition-colors",
-                                                isSelected ? (side === 'left' ? "text-blue-400" : "text-amber-400") : "text-white"
+                                                "text-sm font-bold truncate",
+                                                isSelected ? (side === 'left' ? "text-[#3B82F6]" : "text-[#F59E0B]") : "text-white"
                                             )}>
                                                 {event.title.split('：')[0]}
                                             </span>
@@ -128,7 +128,7 @@ function CompareContent() {
 
                                         {/* Status Icon */}
                                         {isSelected && <CheckCircle2 className="w-4 h-4 ml-2 flex-shrink-0 text-white" />}
-                                        {!isSelected && <ChevronDown className={cn("w-4 h-4 ml-2 text-neutral-600 transition-transform", isExpanded ? "rotate-180" : "")} />}
+                                        {!isSelected && <ChevronDown className={cn("w-4 h-4 ml-2 text-[#525252]", isExpanded ? "rotate-180" : "")} />}
                                     </button>
 
                                     {/* Expanded Peek Content */}
@@ -147,7 +147,7 @@ function CompareContent() {
                                                         setIsOpen(false);
                                                     }}
                                                     className={cn(
-                                                        "w-full py-2 rounded-lg text-xs font-bold transition-colors mb-2",
+                                                        "w-full py-2 rounded-lg text-xs font-bold mb-2",
                                                         side === 'left'
                                                             ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                                                             : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
@@ -173,7 +173,7 @@ function CompareContent() {
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <Link href="/reviews" className="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center hover:bg-neutral-800 transition-colors">
+                    <Link href="/reviews" className="w-8 h-8 rounded-full bg-[#0A0A0A] flex items-center justify-center hover:bg-[#0E0E0F]">
                         <ArrowLeft className="w-4 h-4 text-neutral-400" />
                     </Link>
                     <div>
@@ -189,8 +189,8 @@ function CompareContent() {
                     <button
                         onClick={() => setViewMode('split')}
                         className={cn(
-                            "px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5",
-                            viewMode === 'split' ? "bg-neutral-800 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-300"
+                            "px-3 py-1.5 rounded-md flex items-center gap-1.5",
+                            viewMode === 'split' ? "bg-[#1A1A1A] text-white shadow-sm" : "text-[#666666] hover:text-[#A0A0A0]"
                         )}
                     >
                         <Columns className="w-3.5 h-3.5" />
@@ -199,8 +199,8 @@ function CompareContent() {
                     <button
                         onClick={() => setViewMode('stacked')}
                         className={cn(
-                            "px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5",
-                            viewMode === 'stacked' ? "bg-neutral-800 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-300"
+                            "px-3 py-1.5 rounded-md flex items-center gap-1.5",
+                            viewMode === 'stacked' ? "bg-[#1A1A1A] text-white shadow-sm" : "text-[#666666] hover:text-[#A0A0A0]"
                         )}
                     >
                         <Layers className="w-3.5 h-3.5" />

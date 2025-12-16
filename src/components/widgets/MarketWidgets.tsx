@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { ArrowLeftRight } from 'lucide-react'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
+import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 
 // ============================================
 // Exchange Transparency Component
@@ -44,7 +45,7 @@ export function ExchangeTransparency() {
             </div>
 
             {/* Summary Card */}
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+            <div className={cn(CARDS.primary, SPACING.card, "flex items-center justify-between")}>
                 <div>
                     <span className="text-xs text-neutral-500 block">24H 淨流向</span>
                     <span className={cn(
@@ -62,7 +63,7 @@ export function ExchangeTransparency() {
             </div>
 
             {/* Exchange List */}
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
+            <div className={cn(CARDS.primary, "overflow-hidden")}>
                 <div className="grid grid-cols-12 gap-2 p-3 bg-black/20 text-[10px] text-neutral-500 font-medium border-b border-white/5">
                     <div className="col-span-4">交易所</div>
                     <div className="col-span-4 text-right">持有量</div>
@@ -140,7 +141,7 @@ export function ETFFlowCard() {
         : `$${(Math.abs(data.flow7d) / 1_000_000).toFixed(0)}M`
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+        <div className={cn(CARDS.primary, SPACING.cardCompact)}>
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <span className="text-base">🏛️</span>
@@ -212,7 +213,7 @@ export function BubbleIndexCard() {
     const style = getColor()
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+        <div className={cn(CARDS.primary, SPACING.cardCompact)}>
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <span className="text-base">🫧</span>
@@ -282,7 +283,7 @@ export function TakerVolumeCard() {
     const sellDisplay = (data.totalSellUsd / 1_000_000).toFixed(0)
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+        <div className={cn(CARDS.primary, SPACING.cardCompact)}>
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <span className="text-base">🛒</span>
@@ -350,7 +351,7 @@ export function StablecoinCard() {
     const style = getStyle()
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+        <div className={cn(CARDS.primary, SPACING.cardCompact)}>
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <span className="text-base">💵</span>
@@ -417,7 +418,7 @@ export function CoinbasePremiumCard() {
     const style = getStyle()
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-3">
+        <div className={cn(CARDS.primary, SPACING.cardCompact)}>
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <span className="text-base">🇺🇸</span>

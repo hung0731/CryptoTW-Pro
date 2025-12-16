@@ -21,15 +21,14 @@ export async function verifyAdmin(): Promise<{ id: string; email: string } | nul
             return null
         }
 
-        // Optional: Email Whitelist Check
-        const allowedEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+        // Email Whitelist Check - only use server-side env var
+        const allowedEmails = (process.env.ADMIN_EMAILS || '')
             .split(',')
             .map(e => e.trim())
             .filter(Boolean)
 
         // If whitelist is configured, check it
         if (allowedEmails.length > 0 && !allowedEmails.includes(user.email)) {
-            console.warn('Admin access denied for:', user.email)
             return null
         }
 

@@ -7,6 +7,7 @@ import { Flame } from 'lucide-react'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { DashboardData } from './types'
+import { CARDS, SPACING } from '@/lib/design-tokens'
 
 // ============================================
 // Liquidation Waterfall Component
@@ -96,7 +97,7 @@ export function LiquidationSummary({ data }: { data?: DashboardData['liquidation
     if (!data) return <Skeleton className="h-20 w-full bg-neutral-900/50 rounded-xl" />
 
     return (
-        <div className="bg-neutral-900/50 rounded-xl border border-white/5 p-3 hover:bg-white/5 transition-all h-full">
+        <div className={cn(CARDS.primary, SPACING.cardCompact, "h-full")}>
             <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-3.5 h-3.5 text-orange-400" />
                 <span className="text-xs font-bold text-white">24H 爆倉</span>

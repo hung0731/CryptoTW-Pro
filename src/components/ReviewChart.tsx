@@ -8,6 +8,7 @@ import {
 } from 'recharts'
 import { ZoomIn, RotateCcw } from 'lucide-react'
 import { format } from 'date-fns'
+import { CHART } from '@/lib/design-tokens'
 
 // Static Data Import
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
@@ -150,7 +151,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     }, [type, symbol, eventStart, eventEnd, daysBuffer, reviewSlug, viewMode, focusWindow])
 
     if (loading) {
-        return <Skeleton className="w-full h-full bg-neutral-900 rounded-lg" />
+        return <Skeleton className="w-full h-full bg-[#0A0A0A] rounded-lg" />
     }
 
     // Gradient Definitions
@@ -160,9 +161,9 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-neutral-900/90 border border-white/10 p-2 rounded shadow-xl text-xs">
-                    <p className="text-neutral-400 mb-1">{label}</p>
-                    <p className="text-white font-mono font-bold">
+                <div className={CHART.tooltip.container}>
+                    <p className={CHART.tooltip.date}>{label}</p>
+                    <p className={CHART.tooltip.value}>
                         {type === 'price' && (
                             isPercentage
                                 ? <span className={payload[0].payload.percentage >= 0 ? 'text-green-400' : 'text-red-400'}>

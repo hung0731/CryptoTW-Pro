@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Clock, Calendar, User, ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CARDS } from '@/lib/design-tokens'
 
 interface ArticleItem {
     id: string
@@ -27,12 +28,12 @@ export function ArticleGrid({ items }: { items: ArticleItem[] }) {
             {/* Featured Article */}
             {featured && (
                 <Link href={`/content/${featured.id}`} className="group block">
-                    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-neutral-900 border border-white/10">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-[#0A0A0A] border border-[#1A1A1A]">
                         {featured.thumbnail_url ? (
                             <img
                                 src={featured.thumbnail_url}
                                 alt={featured.title}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                className="w-full h-full object-cover group-hover:scale-105"
                             />
                         ) : (
                             <div className="w-full h-full bg-gradient-to-br from-neutral-800 to-neutral-900 flex items-center justify-center">
@@ -52,7 +53,7 @@ export function ArticleGrid({ items }: { items: ArticleItem[] }) {
                                         {new Date(featured.created_at).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <h2 className="text-2xl font-bold text-white leading-tight group-hover:text-blue-400 transition-colors">
+                                <h2 className="text-2xl font-bold text-white leading-tight group-hover:text-[#3B82F6]">
                                     {featured.title}
                                 </h2>
                                 <p className="text-sm text-neutral-300 line-clamp-2 max-w-2xl">
@@ -69,12 +70,12 @@ export function ArticleGrid({ items }: { items: ArticleItem[] }) {
                 {others.map((item) => (
                     <Link href={`/content/${item.id}`} key={item.id} className="group flex gap-4 items-start">
                         {/* Thumbnail */}
-                        <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-neutral-900 border border-white/10">
+                        <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-[#0A0A0A] border border-[#1A1A1A]">
                             {item.thumbnail_url ? (
                                 <img
                                     src={item.thumbnail_url}
                                     alt={item.title}
-                                    className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-80"
+                                    className="w-full h-full object-cover group-hover:opacity-80"
                                 />
                             ) : (
                                 <div className="w-full h-full bg-neutral-800 flex items-center justify-center">
@@ -92,7 +93,7 @@ export function ArticleGrid({ items }: { items: ArticleItem[] }) {
                                 <span>•</span>
                                 <span>{new Date(item.created_at).toLocaleDateString()}</span>
                             </div>
-                            <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white transition-colors line-clamp-2 leading-snug">
+                            <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white line-clamp-2 leading-snug">
                                 {item.title}
                             </h3>
                             <p className="text-xs text-neutral-500 line-clamp-2">

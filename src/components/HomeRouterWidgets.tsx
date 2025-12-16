@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { AIDecisionCard } from '@/components/home/AIDecisionCard'
 import { MarketContextCard } from '@/components/home/MarketContextCard'
+import { CARDS, SPACING, TYPOGRAPHY, COLORS } from '@/lib/design-tokens'
 
 // AI Decision type (from backend)
 interface AIDecisionData {
@@ -99,15 +100,15 @@ export function HomeRouterWidget() {
             <MarketContextCard data={data.marketContext || null} isLoading={loading} />
 
             {/* 1. Market Mainline (Control Center) */}
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
+            <div className={cn(CARDS.primary, SPACING.card)}>
                 {/* Header Status */}
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                    <span className="text-xs font-bold text-neutral-400 tracking-wider">籌碼快照</span>
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-[#3B82F6] animate-pulse"></span>
+                    <span className={TYPOGRAPHY.sectionLabel}>籌碼快照</span>
                 </div>
 
                 {/* Headline */}
-                <h1 className="text-base font-bold text-white mb-3 leading-snug">
+                <h1 className={cn(TYPOGRAPHY.sectionTitle, "mb-3 leading-snug")}>
                     {data.mainline.headline}
                 </h1>
 

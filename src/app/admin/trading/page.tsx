@@ -72,11 +72,9 @@ export default function TradingDataPage() {
     const handleSync = async () => {
         setSyncing(true)
         try {
-            const res = await fetch('/api/cron/okx-sync', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ''}`
-                }
+            // Call through admin API proxy (server handles auth)
+            const res = await fetch('/api/admin/okx-sync', {
+                method: 'POST'
             })
             if (res.ok) {
                 // Refresh data after sync

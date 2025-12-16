@@ -88,7 +88,7 @@ function CryptoPricePrediction() {
                 <Link
                     href={`https://polymarket.com/event/${data?.slug || 'what-price-will-bitcoin-hit-in-2025'}`}
                     target="_blank"
-                    className="text-[10px] text-blue-400/80 hover:text-blue-300 transition-colors flex items-center gap-1"
+                    className="text-[10px] text-[#3B82F6]/80 hover:text-[#60A5FA] flex items-center gap-1"
                 >
                     資訊來源 Polymarket <ExternalLink className="w-2.5 h-2.5" />
                 </Link>
@@ -459,11 +459,11 @@ function DataPageContent() {
                                         <span className="text-sm">📈</span>
                                     </div>
                                     <div>
-                                        <span className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">市場狀態時間軸</span>
+                                        <span className="text-xs font-medium text-[#A0A0A0] group-hover:text-white">市場狀態時間軸</span>
                                         <p className="text-[10px] text-neutral-600">查看各指標的歷史判斷順序</p>
                                     </div>
                                 </div>
-                                <span className="text-neutral-700 group-hover:text-neutral-500 transition-colors text-xs">→</span>
+                                <span className="text-[#333333] group-hover:text-[#666666] text-xs">→</span>
                             </button>
 
                             {/* 入口 2: 判斷依據 */}
@@ -473,11 +473,11 @@ function DataPageContent() {
                                         <span className="text-sm">🧠</span>
                                     </div>
                                     <div>
-                                        <span className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">為什麼是這個判斷？</span>
+                                        <span className="text-xs font-medium text-[#A0A0A0] group-hover:text-white">為什麼是這個判斷？</span>
                                         <p className="text-[10px] text-neutral-600">了解多項指標如何綜合評估</p>
                                     </div>
                                 </div>
-                                <span className="text-neutral-700 group-hover:text-neutral-500 transition-colors text-xs">→</span>
+                                <span className="text-[#333333] group-hover:text-[#666666] text-xs">→</span>
                             </button>
 
                             {/* 入口 3: 歷史相似 (Linked to Market Reviews) */}
@@ -487,11 +487,11 @@ function DataPageContent() {
                                         <span className="text-sm">📓</span>
                                     </div>
                                     <div>
-                                        <span className="text-xs font-medium text-neutral-300 group-hover:text-white transition-colors">市場復盤資料庫</span>
+                                        <span className="text-xs font-medium text-[#A0A0A0] group-hover:text-white">市場復盤資料庫</span>
                                         <p className="text-[10px] text-neutral-600">查看相似歷史案例與經驗教訓</p>
                                     </div>
                                 </div>
-                                <span className="text-neutral-700 group-hover:text-neutral-500 transition-colors text-xs">→</span>
+                                <span className="text-[#333333] group-hover:text-[#666666] text-xs">→</span>
                             </Link>
                         </div>
 
@@ -554,7 +554,7 @@ function DataPageContent() {
                                         <div className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/50 p-4 hover:border-white/10">
                                             <div className="flex items-center gap-3 mb-3">
                                                 {market.icon && <img src={market.icon} className="w-5 h-5 rounded-full ring-1 ring-white/10" />}
-                                                <h3 className="text-sm font-medium text-neutral-200 line-clamp-1 group-hover:text-white transition-colors">{market.question}</h3>
+                                                <h3 className="text-sm font-medium text-[#E0E0E0] line-clamp-1 group-hover:text-white">{market.question}</h3>
                                             </div>
                                             <div className="grid grid-cols-2 gap-2">
                                                 {(market.outcomes || []).slice(0, 2).map((outcome: any, idx: number) => (

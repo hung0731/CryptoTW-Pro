@@ -29,7 +29,7 @@ function NotificationToggle({
     helpTooltip?: React.ReactNode
 }) {
     return (
-        <div className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
+        <div className="flex items-center justify-between p-4 hover:bg-[#0E0E0F]">
             <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center">
                     <Icon className="w-4 h-4 text-neutral-400" />
@@ -47,9 +47,9 @@ function NotificationToggle({
             </div>
             <div
                 onClick={onToggle}
-                className={`w-11 h-6 rounded-full flex items-center transition-colors cursor-pointer px-0.5 ${checked ? 'bg-white' : 'bg-neutral-700'}`}
+                className={`w-11 h-6 rounded-full flex items-center cursor-pointer px-0.5 ${checked ? 'bg-white' : 'bg-[#333333]'}`}
             >
-                <div className={`w-5 h-5 bg-black rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-[20px]' : ''}`} />
+                <div className={`w-5 h-5 bg-black rounded-full shadow-sm ${checked ? 'translate-x-[20px]' : ''}`} />
             </div>
         </div>
     )

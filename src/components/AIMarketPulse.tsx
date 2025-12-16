@@ -3,6 +3,8 @@
 import { Sparkles, ChevronUp, ChevronDown } from 'lucide-react'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { useState } from 'react'
+import { cn } from '@/lib/utils'
+import { CARDS } from '@/lib/design-tokens'
 
 interface AIMarketPulseProps {
     report: any // Using specific type would be better but keeping flexible for now
@@ -18,10 +20,10 @@ export function AIMarketPulse({ report }: AIMarketPulseProps) {
     const riskNote = report.metadata?.risk_note || report.risk_note
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl transition-all overflow-hidden">
+        <div className={cn(CARDS.primary, "overflow-hidden")}>
             {/* Display Layer (Always Visible) */}
             <div
-                className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5"
+                className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#0E0E0F]"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -43,7 +45,7 @@ export function AIMarketPulse({ report }: AIMarketPulseProps) {
 
             {/* Detail Layer (Expandable) */}
             {isExpanded && (
-                <div className="px-5 pb-5 pt-0 space-y-4 animate-in slide-in-from-top-2 duration-200">
+                <div className="px-5 pb-5 pt-0 space-y-4">
 
                     {/* Analysis */}
                     {analysisText && (
