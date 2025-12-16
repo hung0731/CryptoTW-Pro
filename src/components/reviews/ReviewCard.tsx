@@ -35,7 +35,7 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
                 {/* Meta Header */}
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-neutral-500">{review.year}</span>
+                        <span className="text-[10px] font-mono text-neutral-500">{review.eventStartAt.replace(/-/g, '.')}</span>
                         <div className="w-[1px] h-2 bg-white/10"></div>
                         <span className="text-[10px] text-neutral-400">{typeConfig.label}</span>
                     </div>
