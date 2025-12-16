@@ -46,6 +46,8 @@ export default function ReviewDetailPage() {
                             {review.importance} 級事件
                         </Badge>
                         <span className="text-xs text-neutral-500 font-mono">{review.year}</span>
+                        <div className="w-[1px] h-3 bg-white/10 mx-1"></div>
+                        <span className="text-xs text-neutral-500 font-mono">D0: {review.reactionStartAt.replace(/-/g, '.')}</span>
                     </div>
 
                     <h1 className="text-3xl font-bold leading-tight tracking-tight text-white mb-2">

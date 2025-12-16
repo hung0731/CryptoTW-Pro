@@ -284,9 +284,9 @@ function fetchFromCSV(startMs, endMs) {
 async function fetchHistory(type, symbol, reactionStartStr) {
     const reactionStart = new Date(reactionStartStr);
 
-    // Buffer 30 days before and after D0 (Total: 61 days)
-    const bufferedStart = new Date(reactionStart); bufferedStart.setDate(reactionStart.getDate() - 30);
-    const bufferedEnd = new Date(reactionStart); bufferedEnd.setDate(reactionStart.getDate() + 30);
+    // Buffer 60 days before and after D0 (Total: 121 days) to ensure D-30/D+30 coverage
+    const bufferedStart = new Date(reactionStart); bufferedStart.setDate(reactionStart.getDate() - 60);
+    const bufferedEnd = new Date(reactionStart); bufferedEnd.setDate(reactionStart.getDate() + 60);
 
     const startMs = bufferedStart.getTime();
     const endMs = bufferedEnd.getTime();
@@ -444,9 +444,10 @@ async function run() {
             // Make sure slug matches what we set in REVIEWS_CONFIG ('luna')
             if (conf.slug === 'luna' && type === 'flow') {
                 console.log(`  Generating Mock Supply Data for LUNA...`);
-                // ... logic remains same ...
-                const sDate = new Date('2022-05-01');
-                const eDate = new Date('2022-05-30');
+                // Use new Reaction Start (2022-05-09) with 60d buffer
+                // Range: March to July
+                const sDate = new Date('2022-03-01');
+                const eDate = new Date('2022-07-01');
                 let supply = 350000000;
                 const mockData = [];
                 for (let d = new Date(sDate); d <= eDate; d.setDate(d.getDate() + 1)) {

@@ -20,9 +20,9 @@ function CompareContent() {
     const searchParams = useSearchParams();
     const eventParam = searchParams.get('event');
 
-    // Default: param event OR FTX (2022)
-    const [leftSlug, setLeftSlug] = useState(eventParam || 'ftx-collapse-2022');
-    const [rightSlug, setRightSlug] = useState('covid-crash-2020');
+    // Default: param event OR ETF (2024) vs LUNA (2022) - Showcase Asymmetric Mode
+    const [leftSlug, setLeftSlug] = useState(eventParam || 'etf-2024');
+    const [rightSlug, setRightSlug] = useState('luna-2022');
     const [viewMode, setViewMode] = useState<'split' | 'stacked'>('split');
 
     // Get event data
@@ -41,44 +41,15 @@ function CompareContent() {
     const EventSelector = ({ selectedSlug, onSelect, side }: { selectedSlug: string, onSelect: (s: string) => void, side: 'left' | 'right' }) => {
         const [isOpen, setIsOpen] = useState(false);
         const [expandedId, setExpandedId] = useState<string | null>(null); // For Peek mode
-        const selected = REVIEWS_DATA.find(r => r.slug === selectedSlug);
+
+        // Fix: Match composite slug (slug-year)
+        const selected = REVIEWS_DATA.find(r => `${r.slug}-${r.year}` === selectedSlug);
 
         // Reset expanded state when sheet closes
         const handleOpenChange = (open: boolean) => {
             setIsOpen(open);
             if (!open) setExpandedId(null);
         }
-
-        const handleItemClick = (e: React.MouseEvent, slug: string) => {
-            // If clicking the currently selected/active item, select it (close sheet)
-            // Or if already expanded, select it
-            if (expandedId === slug || selectedSlug === slug) {
-                onSelect(slug);
-                setIsOpen(false);
-            } else {
-                // Otherwise contrast peek
-                setExpandedId(slug);
-                e.stopPropagation(); // Prevent immediate selection if we treat the row as click-to-select, but here we separate logic maybe?
-                // Actually user suggests: "Click to peek" then maybe double click or button to select? 
-                // "點擊某一列 → 只展開該列的描述... 使用者會自然只看一個事件"
-                // Let's implement: Click toggle expansion. If expanded, showing a "Confirm" button or just let them select?
-                // Simpler: Row click expands. Inside expanded area, have a "Select" button? 
-                // Or: Row click expands. Clicking AGAIN selects?
-                // Let's go with: Click sets expandedId. If already expandedId, do nothing (or toggle off?). 
-                // To Select: We need a clear action. Maybe the row itself is selectable, but the description reveals?
-                // Re-reading: "點擊某一列 → 只展開該列的描述" -> implies interaction to see detail. 
-                // But ultimately they need to SELECT.
-                // Let's make single click -> Expand. Double click or click "Select" button inside -> Select.
-            }
-        }
-
-        // Revised logic based on "control layer":
-        // List items are buttons. Click = Select (and Close)? 
-        // User said: "點擊某一列 → 只展開該列的描述... 自動 dim 其他列"
-        // This implies the SELECTION hasn't happened yet. It's browsing.
-        // So: Click -> Expand (Peek). 
-        // How to finalize selection? Maybe a specific "Select" button appears in the expanded view?
-        // Or clicking the header of expanded item selects it?
 
         return (
             <Sheet open={isOpen} onOpenChange={handleOpenChange}>
@@ -87,18 +58,21 @@ function CompareContent() {
                         "flex items-center gap-2 bg-black/60 backdrop-blur-md border pl-3 pr-2 py-1.5 rounded-full hover:bg-black/80 transition-all group max-w-[240px] shadow-lg",
                         side === 'left' ? "border-blue-500/30 text-blue-100" : "border-amber-500/30 text-amber-100"
                     )}>
-                        <div className="flex flex-col items-start px-0.5">
+                        <div className="flex flex-col items-start px-0.5 text-left">
                             <span className={cn(
                                 "text-[9px] font-mono leading-none mb-0.5",
                                 side === 'left' ? "text-blue-400" : "text-amber-400"
                             )}>
                                 {side === 'left' ? '基準' : '對照'}
                             </span>
-                            <span className="text-xs font-bold truncate max-w-[160px]">
-                                {selected?.title.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').split('：')[0]}
+                            <span className="text-xs font-bold truncate max-w-[160px] block">
+                                {selected
+                                    ? selected.title.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').split('：')[0]
+                                    : '選擇事件'
+                                }
                             </span>
                         </div>
-                        <ChevronDown className={cn("w-3.5 h-3.5 opacity-50", side === 'left' ? "text-blue-400" : "text-amber-400")} />
+                        <ChevronDown className={cn("w-3.5 h-3.5 opacity-50 flex-shrink-0", side === 'left' ? "text-blue-400" : "text-amber-400")} />
                     </button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="bg-neutral-950 border-white/10 max-h-[70vh] rounded-t-3xl px-0 pb-8">
@@ -109,13 +83,14 @@ function CompareContent() {
                     </SheetHeader>
                     <div className="flex flex-col overflow-y-auto max-h-[50vh]">
                         {REVIEWS_DATA.map((event) => {
-                            const isExpanded = expandedId === event.slug;
-                            const isSelected = selectedSlug === event.slug;
+                            const compositeSlug = `${event.slug}-${event.year}`;
+                            const isExpanded = expandedId === compositeSlug;
+                            const isSelected = selectedSlug === compositeSlug;
                             const isDimmed = expandedId && !isExpanded;
 
                             return (
                                 <div
-                                    key={event.slug}
+                                    key={compositeSlug}
                                     className={cn(
                                         "transition-all duration-300 border-b border-white/5 last:border-0",
                                         isExpanded ? "bg-white/[0.03]" : "hover:bg-white/[0.02]",
@@ -123,7 +98,7 @@ function CompareContent() {
                                     )}
                                 >
                                     <button
-                                        onClick={() => setExpandedId(isExpanded ? null : event.slug)}
+                                        onClick={() => setExpandedId(isExpanded ? null : compositeSlug)}
                                         className="w-full flex items-center justify-between py-3 px-5 text-left"
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
@@ -168,7 +143,7 @@ function CompareContent() {
                                                 </p>
                                                 <button
                                                     onClick={() => {
-                                                        onSelect(event.slug);
+                                                        onSelect(compositeSlug);
                                                         setIsOpen(false);
                                                     }}
                                                     className={cn(

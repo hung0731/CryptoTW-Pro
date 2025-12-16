@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, ReferenceArea
 } from 'recharts'
-import { AlertCircle, Zap, Info } from 'lucide-react'
+import { AlertTriangle, AlertCircle, Zap, TrendingDown, TrendingUp, Info } from 'lucide-react'
 import { REVIEWS_DATA } from '@/lib/reviews-data'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
 
@@ -23,8 +23,9 @@ interface StackedReviewChartProps {
 export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: StackedReviewChartProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    const [viewType, setViewType] = useState<'pct' | 'dd'>('pct')
+    const [viewType, setViewType] = useState<'pct' | 'dd' | 'impact'>('pct')
     const [pctDomain, setPctDomain] = useState([-20, 20])
+    const [isAsymmetric, setIsAsymmetric] = useState(false)
     const [deathPoints, setDeathPoints] = useState<{ left: any, right: any }>({ left: null, right: null })
 
     // Helper: Soft Clamp
@@ -35,18 +36,29 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
 
     useEffect(() => {
         const loadData = () => {
-            const leftInfo = REVIEWS_DATA.find(r => r.slug === leftSlug)
-            const rightInfo = REVIEWS_DATA.find(r => r.slug === rightSlug)
+            // Fix: Compare state passes composite "slug-year" string, so we must match composite.
+            const leftInfo = REVIEWS_DATA.find(r => `${r.slug}-${r.year}` === leftSlug)
+            const rightInfo = REVIEWS_DATA.find(r => `${r.slug}-${r.year}` === rightSlug)
 
             if (!leftInfo || !rightInfo) {
                 setLoading(false)
                 return
             }
 
-            // 0. Auto-Switch View to DD if Collapse or S-Tier Crisis
-            if ((leftInfo.importance === 'S' || leftInfo.reactionType === 'trust_collapse') ||
-                (rightInfo.importance === 'S' || rightInfo.reactionType === 'trust_collapse')) {
+            const isCollapse = (e: any) => e.reactionType === 'trust_collapse' || e.reactionType === 'liquidity_crisis'
+            const leftCollapse = isCollapse(leftInfo)
+            const rightCollapse = isCollapse(rightInfo)
+
+            // 0. Outcome Logic
+            if (leftCollapse && rightCollapse) {
                 setViewType('dd')
+                setIsAsymmetric(false)
+            } else if (leftCollapse !== rightCollapse) {
+                setViewType('impact')
+                setIsAsymmetric(true)
+            } else {
+                setViewType('pct')
+                setIsAsymmetric(false)
             }
 
             // @ts-ignore
@@ -165,25 +177,34 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 }
             })
 
-            // 2. Determine Asymmetric Adaptive Limit
-            // Lower: minVal * 1.2, clamped at -100
-            let lowerBound = Math.max(-100, minVal * 1.2)
-            // Upper: maxVal * 1.2, min 20
-            let upperBound = Math.max(20, maxVal * 1.2)
-
-            // Round to nearest 5
-            lowerBound = Math.floor(lowerBound / 5) * 5
-            upperBound = Math.ceil(upperBound / 5) * 5
-
-            setPctDomain([lowerBound, upperBound])
             setDeathPoints({ left: leftDeathPoint, right: rightDeathPoint })
 
-            // 3. Second Pass: Clamp Values for Display (using Asymmetric limits)
-            const finalData = rawData.map(d => ({
+            // 2. Determine Scale & Process Data (Normal or Asymmetric)
+            let finalData
+
+            // Asymmetric Impact Normalization
+            // Find max impact (absolute) for each valid series
+            const leftMaxImpact = Math.max(...rawData.filter(d => d.leftPct !== null).map(d => Math.abs(d.leftPct!))) || 1
+            const rightMaxImpact = Math.max(...rawData.filter(d => d.rightPct !== null).map(d => Math.abs(d.rightPct!))) || 1
+
+            // Standard Logic Bounds
+            let lowerBound = Math.max(-100, minVal * 1.2)
+            let upperBound = Math.max(20, maxVal * 1.2)
+            lowerBound = Math.floor(lowerBound / 5) * 5
+            upperBound = Math.ceil(upperBound / 5) * 5
+            setPctDomain([lowerBound, upperBound])
+
+            finalData = rawData.map(d => ({
                 ...d,
-                // Pass raw if valid, else null
+                // Absolute Percentage (Clamped)
                 leftPctDisplay: d.leftPct !== null ? clamp(d.leftPct, lowerBound, upperBound) : null,
                 rightPctDisplay: d.rightPct !== null ? clamp(d.rightPct, lowerBound, upperBound) : null,
+
+                // Normalized Impact (Raw 0-1ish)
+                leftImpactDisplay: d.leftPct !== null ? (d.leftPct / leftMaxImpact) : null,
+                rightImpactDisplay: d.rightPct !== null ? (d.rightPct / rightMaxImpact) : null,
+
+                // Drawdown (Clamped)
                 leftDDDisplay: clamp(d.leftDD, DD_DOMAIN[0], DD_DOMAIN[1]),
                 rightDDDisplay: clamp(d.rightDD, DD_DOMAIN[0], DD_DOMAIN[1])
             }))
@@ -210,20 +231,28 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                     </p>
                     {payload.map((p: any, i: number) => {
                         // Determine which real value to pick based on viewType
-                        const realKey = viewType === 'pct'
-                            ? (p.dataKey === 'leftPctDisplay' ? 'leftPct' : 'rightPct')
-                            : (p.dataKey === 'leftDDDisplay' ? 'leftDD' : 'rightDD')
+                        let realKey: string
+                        if (viewType === 'pct') {
+                            realKey = p.dataKey === 'leftPctDisplay' ? 'leftPct' : 'rightPct'
+                        } else if (viewType === 'impact') {
+                            realKey = p.dataKey === 'leftImpactDisplay' ? 'leftPct' : 'rightPct' // Impact view shows PCT value but normalized graph
+                        } else { // dd
+                            realKey = p.dataKey === 'leftDDDisplay' ? 'leftDD' : 'rightDD'
+                        }
 
                         // We access the real value from payload[0].payload (the full data object)
                         const realVal = p.payload[realKey]
-                        const isClamped = realVal !== p.value // p.value is the clamped display value
+                        const isClamped = realVal !== p.value && viewType !== 'impact' // p.value is the clamped display value, impact is normalized
 
                         // Context logic
                         let context = ''
-                        if (realVal < -20) context = '恐慌加劇'
-                        else if (realVal < -10) context = '信心脆弱'
-                        else if (realVal > 10) context = '反彈強勁'
-                        else context = '盤整中'
+                        if (realVal !== null) {
+                            if (realVal < -20) context = '恐慌加劇'
+                            else if (realVal < -10) context = '信心脆弱'
+                            else if (realVal > 10) context = '反彈強勁'
+                            else context = '盤整中'
+                        }
+
 
                         return (
                             <div key={i} className="mb-3 last:mb-0">
@@ -235,8 +264,8 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                                         </span>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`font-mono font-bold text-sm ${realVal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {realVal > 0 ? '+' : ''}{Number(realVal).toFixed(2)}%
+                                        <span className={`font-mono font-bold text-sm ${realVal !== null && realVal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                            {realVal !== null ? (realVal > 0 ? '+' : '') + Number(realVal).toFixed(2) + '%' : 'N/A'}
                                         </span>
                                     </div>
                                 </div>
@@ -261,19 +290,28 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
         <div className="w-full h-full relative group">
             {/* View Type Toggle */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-20 flex bg-neutral-900/80 backdrop-blur rounded-lg p-0.5 border border-white/10 shadow-lg">
-                <button
-                    onClick={() => setViewType('pct')}
-                    className={`px-3 py-1 rounded text-[10px] transition-all font-medium ${viewType === 'pct' ? 'bg-white/10 text-white shadow-sm' : 'text-neutral-500 hover:text-neutral-300'}`}
-                >
-                    漲跌幅 %
-                </button>
-                <div className="w-[1px] bg-white/10 my-1 mx-0.5" />
-                <button
-                    onClick={() => setViewType('dd')}
-                    className={`px-3 py-1 rounded text-[10px] transition-all font-medium ${viewType === 'dd' ? 'bg-red-500/10 text-red-400 shadow-sm' : 'text-neutral-500 hover:text-neutral-300'}`}
-                >
-                    最大回撤 (DD)
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setViewType('pct')}
+                        className={`text-[10px] px-2 py-1 rounded transition-colors ${viewType === 'pct' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+                    >
+                        漲跌幅 (%)
+                    </button>
+                    {isAsymmetric && (
+                        <button
+                            onClick={() => setViewType('impact')}
+                            className={`text-[10px] px-2 py-1 rounded transition-colors ${viewType === 'impact' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+                        >
+                            相對影響力
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setViewType('dd')}
+                        className={`text-[10px] px-2 py-1 rounded transition-colors ${viewType === 'dd' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+                    >
+                        最大回撤 (DD)
+                    </button>
+                </div>
             </div>
 
             {/* Watermark (Center Logo) */}
@@ -281,8 +319,30 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 <img src="/logo.svg" alt="Watermark" className="w-48 h-48" />
             </div>
 
+            {/* Asymmetric Warning */}
+            {isAsymmetric && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-yellow-900/40 border border-yellow-500/30 px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm">
+                    <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />
+                    <span className="text-[10px] text-yellow-200 font-medium tracking-wide">
+                        比較包含「系統性崩潰」，已依相對影響力標準化
+                    </span>
+                </div>
+            )}
+
+            {/* Chart */}
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 20, right: 20, bottom: 35, left: 10 }}>
+                    <defs>
+                        <linearGradient id="splitGradientLeft" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={getLeftColor()} stopOpacity={0.15} />
+                            <stop offset="95%" stopColor={getLeftColor()} stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="splitGradientRight" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={getRightColor()} stopOpacity={0.15} />
+                            <stop offset="95%" stopColor={getRightColor()} stopOpacity={0} />
+                        </linearGradient>
+                    </defs>
+
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
 
                     <ReferenceLine
@@ -303,19 +363,26 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
 
                     <XAxis
                         dataKey="t"
+                        type="number"
+                        domain={[-30, 30]} // Full D-30 to D+30
+                        ticks={[-30, -15, 0, 15, 30]}
+                        tickFormatter={(val) => val === 0 ? 'D0' : `D${val > 0 ? '+' : ''}${val}`}
                         tick={{ fontSize: 10, fill: '#525252' }}
                         tickLine={false}
                         axisLine={false}
                         minTickGap={30}
-                        tickFormatter={(t) => t === 0 ? 'D0' : `D${t}`}
                     />
                     <YAxis
                         tick={{ fontSize: 10, fill: '#525252' }}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(val) => `${Number(val).toFixed(0)}%`}
+                        tickFormatter={(val) =>
+                            viewType === 'impact'
+                                ? `${(val * 100).toFixed(0)}%`
+                                : `${Number(val).toFixed(0)}%`
+                        }
                         // 5. Apply Visual Domain
-                        domain={viewType === 'pct' ? pctDomain : DD_DOMAIN}
+                        domain={viewType === 'impact' ? [-1.1, 1.1] : (viewType === 'pct' ? pctDomain : DD_DOMAIN)}
                         allowDataOverflow={true} // Important: Force clip at domain
                     />
 
@@ -392,8 +459,8 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
 
                     <Line
                         type="monotone"
-                        // 7. Use Display Values
-                        dataKey={viewType === 'pct' ? 'leftPctDisplay' : 'leftDDDisplay'}
+                        // 7. Use Display Values: Impact uses 'leftImpactDisplay'
+                        dataKey={viewType === 'impact' ? 'leftImpactDisplay' : (viewType === 'pct' ? 'leftPctDisplay' : 'leftDDDisplay')}
                         name="基準 (左)"
                         stroke={getLeftColor()}
                         strokeWidth={2}
@@ -403,7 +470,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                     />
                     <Line
                         type="monotone"
-                        dataKey={viewType === 'pct' ? 'rightPctDisplay' : 'rightDDDisplay'}
+                        dataKey={viewType === 'impact' ? 'rightImpactDisplay' : (viewType === 'pct' ? 'rightPctDisplay' : 'rightDDDisplay')}
                         name="對照 (右)"
                         stroke={getRightColor()}
                         strokeWidth={2}
