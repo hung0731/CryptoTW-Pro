@@ -228,8 +228,8 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     <AreaChart data={data}>
                         <defs>
                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#EDEDED" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="#EDEDED" stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         {viewMode === 'standard' && focusWindow && (
@@ -249,7 +249,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             label={{
                                 value: `${eventStart.replace(/-/g, '.')} (D0)`,
                                 position: 'insideTopLeft',
-                                fill: '#ef4444',
+                                fill: '#666',
                                 fontSize: 10,
                                 fontWeight: 'bold',
                                 opacity: 0.9,
@@ -288,7 +288,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             strokeOpacity={0.1}
                             label={{ value: 'D+30', position: 'insideTopRight', fill: '#ffffff', fontSize: 9, opacity: 0.3 }}
                         />
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#111111" vertical={false} />
                         <XAxis
                             dataKey="date"
                             tick={{ fontSize: 10, fill: '#525252' }}
@@ -314,7 +314,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <Area
                             type="monotone"
                             dataKey={isPercentage && type === 'price' ? "percentage" : "price"}
-                            stroke="#3b82f6"
+                            stroke="#EDEDED"
                             strokeWidth={2}
                             fill={`url(#${gradientId})`}
                         />

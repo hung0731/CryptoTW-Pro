@@ -43,44 +43,54 @@ export const TYPOGRAPHY = {
 // ================================================
 // COLOR PALETTE
 // ================================================
+export const SURFACE = {
+    // Level 1: App Background (Deepest)
+    app: 'bg-[#050505]',
+
+    // Level 2: Card Background (Base)
+    card: 'bg-[#0E0E0F]',
+
+    // Level 3: Elevated / Interactive (Hover, Selected)
+    highlight: 'bg-[#1A1A1A]',
+
+    // Level 4: Borders / Dividers / Outlines
+    border: 'border-[#2A2A2A]',
+} as const
+
 export const COLORS = {
     // Text Hierarchy
-    textPrimary: 'text-white',
-    textSecondary: 'text-neutral-200',
-    textMuted: 'text-neutral-400',
-    textSubtle: 'text-neutral-500',
-    textGhost: 'text-neutral-600',
-    textDisabled: 'text-neutral-700',
+    textPrimary: 'text-white',           // Numbers / Primary focus only
+    textSecondary: 'text-[#A0A0A0]',    // Labels / Dates / Secondary info
+    textTertiary: 'text-[#666666]',     // Meta / Disabled
 
-    // Functional Colors (Use sparingly - only for data indicators)
-    positive: 'text-green-400',
-    positiveBg: 'bg-green-500/10 border-green-500/20',
-    negative: 'text-red-400',
-    negativeBg: 'bg-red-500/10 border-red-500/20',
-    warning: 'text-yellow-400',
-    warningBg: 'bg-yellow-500/10 border-yellow-500/20',
-    info: 'text-blue-400',
-    infoBg: 'bg-blue-500/10 border-blue-500/20',
+    // Functional Colors (Strictly Limited)
+    positive: 'text-[#4ADE80]',         // Green
+    negative: 'text-[#F87171]',         // Red
+    neutral: 'text-[#A0A0A0]',          // Gray
+
+    // The only allowed "Brand/Focus" accent
+    accent: 'text-white',
 } as const
 
 // ================================================
 // CARD STYLES
 // ================================================
 export const CARDS = {
-    // Standard card
-    base: 'bg-neutral-900/50 border border-white/5 rounded-xl',
+    // Type A: Hero / Focus Card
+    // - Taller, Primary Border, 1.2x Height visual weight
+    typeA: 'bg-[#0E0E0F] border border-[#2A2A2A] rounded-xl relative overflow-hidden',
 
-    // Interactive card (with hover)
-    interactive: 'bg-neutral-900/50 border border-white/5 rounded-xl hover:bg-neutral-900/70 hover:border-white/10 transition-all duration-200',
+    // Type B: Comparison / History
+    // - No Border, relying on Background distinction
+    typeB: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] hover:outline hover:outline-1 hover:outline-[#2A2A2A] transition-all rounded-lg',
 
-    // Elevated card (more prominent)
-    elevated: 'bg-gradient-to-br from-neutral-900/80 to-neutral-900/50 border border-white/10 rounded-xl shadow-lg',
+    // Type C: Info / Stats
+    // - Text block + divider style (minimal container)
+    typeC: 'bg-transparent border-l border-[#2A2A2A] pl-4',
 
-    // Subtle card (less prominent)
-    subtle: 'bg-neutral-900/30 border border-white/[0.03] rounded-xl',
-
-    // Hero card (featured content)
-    hero: 'bg-gradient-to-br from-neutral-900/80 via-neutral-900/60 to-neutral-900/40 border border-white/[0.08] rounded-2xl',
+    // Legacy support (mapped to new system)
+    base: 'bg-[#0E0E0F] border border-[#2A2A2A] rounded-xl',
+    interactive: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] border border-[#2A2A2A] transition-all rounded-xl',
 } as const
 
 // ================================================
