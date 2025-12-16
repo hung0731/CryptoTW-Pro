@@ -12,6 +12,7 @@ interface EvidenceCardProps {
     eventStart: string
     eventEnd: string
     reviewSlug: string
+    newsDate?: string
     interpretation?: {
         whatItMeans: string
         whatToWatch: string
@@ -43,6 +44,7 @@ export function EvidenceCard({
     reviewSlug,
     interpretation,
     caption,
+    newsDate,
 }: EvidenceCardProps) {
     // Build title text (remove emoji, add symbol)
     const cleanTitle = title.replace(/^[📈📊🔍🧠⚠️✅\s]+/, '')
@@ -67,6 +69,7 @@ export function EvidenceCard({
                     eventStart={eventStart}
                     eventEnd={eventEnd}
                     reviewSlug={reviewSlug}
+                    newsDate={newsDate}
                 />
             </div>
             {/* Evidence Interpretation (Narrative Style) */}

@@ -22,9 +22,10 @@ interface ReviewChartProps {
     reviewSlug?: string; // New prop to identify which review's data to pick
     focusWindow?: [number, number];
     isPercentage?: boolean;
+    newsDate?: string;
 }
 
-export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false }: ReviewChartProps) {
+export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false, newsDate }: ReviewChartProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
@@ -242,16 +243,50 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         )}
                         <ReferenceLine
                             x={eventStart}
-                            stroke="#ffffff"
-                            strokeOpacity={0.3}
+                            stroke="#ef4444"
+                            strokeOpacity={0.8}
                             strokeDasharray="3 3"
                             label={{
-                                value: 'D0',
-                                position: 'insideTop',
-                                fill: '#ffffff',
+                                value: `${eventStart.replace(/-/g, '.')} (D0)`,
+                                position: 'insideTopLeft',
+                                fill: '#ef4444',
                                 fontSize: 10,
-                                opacity: 0.5
+                                fontWeight: 'bold',
+                                opacity: 0.9,
+                                dy: 10
                             }}
+                        />
+
+                        {/* News Date Marker (Visual Aid) */}
+                        {newsDate && newsDate !== eventStart && (
+                            <ReferenceLine
+                                x={newsDate}
+                                stroke="#ffffff"
+                                strokeOpacity={0.4}
+                                strokeDasharray="3 3"
+                                label={{
+                                    value: '📰 新聞',
+                                    position: 'insideTopLeft',
+                                    fill: '#ffffff',
+                                    fontSize: 9,
+                                    opacity: 0.6,
+                                    dy: -10
+                                }}
+                            />
+                        )}
+
+                        {/* Analysis Window Markers (D-30 / D+30) */}
+                        <ReferenceLine
+                            x={getDateFromDaysDiff(-30)}
+                            stroke="#ffffff"
+                            strokeOpacity={0.1}
+                            label={{ value: 'D-30', position: 'insideTopLeft', fill: '#ffffff', fontSize: 9, opacity: 0.3 }}
+                        />
+                        <ReferenceLine
+                            x={getDateFromDaysDiff(30)}
+                            stroke="#ffffff"
+                            strokeOpacity={0.1}
+                            label={{ value: 'D+30', position: 'insideTopRight', fill: '#ffffff', fontSize: 9, opacity: 0.3 }}
                         />
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                         <XAxis

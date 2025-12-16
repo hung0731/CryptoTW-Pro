@@ -105,7 +105,8 @@ export default function ReviewDetailPage() {
                                 chartType="price"
                                 symbol={review.chartConfig?.symbol || 'BTC'}
                                 daysBuffer={review.chartConfig?.daysBuffer}
-                                eventStart={review.eventStartAt}
+                                eventStart={review.reactionStartAt}
+                                newsDate={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
                                 reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.main.interpretation}
@@ -120,7 +121,8 @@ export default function ReviewDetailPage() {
                                 chartType={review.slug.includes('etf') || review.slug.includes('luna') ? 'flow' : 'oi'}
                                 symbol={review.chartConfig?.symbol || 'BTC'}
                                 daysBuffer={review.chartConfig?.daysBuffer}
-                                eventStart={review.eventStartAt}
+                                eventStart={review.reactionStartAt}
+                                newsDate={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
                                 reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.flow.interpretation}
@@ -135,7 +137,8 @@ export default function ReviewDetailPage() {
                                 chartType="oi"
                                 symbol={review.chartConfig?.symbol || 'BTC'}
                                 daysBuffer={review.chartConfig?.daysBuffer}
-                                eventStart={review.eventStartAt}
+                                eventStart={review.reactionStartAt}
+                                newsDate={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
                                 reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.oi.interpretation}
@@ -150,7 +153,8 @@ export default function ReviewDetailPage() {
                                 chartType="fgi"
                                 symbol={review.chartConfig?.symbol || 'BTC'}
                                 daysBuffer={review.chartConfig?.daysBuffer}
-                                eventStart={review.eventStartAt}
+                                eventStart={review.reactionStartAt}
+                                newsDate={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
                                 reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.sentiment.interpretation}
