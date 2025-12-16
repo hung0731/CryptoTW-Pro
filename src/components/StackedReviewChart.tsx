@@ -25,6 +25,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
     const [loading, setLoading] = useState(true)
     const [viewType, setViewType] = useState<'pct' | 'dd'>('pct')
     const [pctDomain, setPctDomain] = useState([-20, 20])
+    const [deathPoints, setDeathPoints] = useState<{ left: any, right: any }>({ left: null, right: null })
 
     // Helper: Soft Clamp
     const clamp = (val: number | null, min: number, max: number) => {
@@ -40,6 +41,12 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             if (!leftInfo || !rightInfo) {
                 setLoading(false)
                 return
+            }
+
+            // 0. Auto-Switch View to DD if Collapse or S-Tier Crisis
+            if ((leftInfo.importance === 'S' || leftInfo.reactionType === 'trust_collapse') ||
+                (rightInfo.importance === 'S' || rightInfo.reactionType === 'trust_collapse')) {
+                setViewType('dd')
             }
 
             // @ts-ignore
@@ -100,9 +107,18 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             // Calculate Peaks for Drawdown (Peak-to-Date)
             let leftMax = -Infinity
             let rightMax = -Infinity
-            let maxAbsChange = 0
 
-            // 1. First Pass: Compute Raw Values & Determine Scale
+            // Domain Tracking
+            let minVal = 0
+            let maxVal = 0
+
+            // Death Tracking
+            let leftDead = false
+            let rightDead = false
+            let leftDeathPoint: any = null
+            let rightDeathPoint: any = null
+
+            // 1. First Pass: Compute Raw Values & Determine Scale & Death
             const rawData = sortedData.map(d => {
                 if (d.leftPrice) leftMax = Math.max(leftMax, d.leftPrice)
                 if (d.rightPrice) rightMax = Math.max(rightMax, d.rightPrice)
@@ -112,27 +128,62 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 const leftDD = d.leftPrice ? ((d.leftPrice - leftMax) / leftMax) * 100 : null
                 const rightDD = d.rightPrice ? ((d.rightPrice - rightMax) / rightMax) * 100 : null
 
-                // Track max absolute change for adaptive scale
-                if (leftPct !== null) maxAbsChange = Math.max(maxAbsChange, Math.abs(leftPct))
-                if (rightPct !== null) maxAbsChange = Math.max(maxAbsChange, Math.abs(rightPct))
+                // Death Logic (Cutoff at -90%)
+                let finalLeftPct = leftPct
+                let finalRightPct = rightPct
 
-                return { ...d, leftPct, rightPct, leftDD, rightDD }
+                if (leftDead) finalLeftPct = null
+                else if (leftPct !== null && leftPct <= -90) {
+                    leftDead = true
+                    leftDeathPoint = { t: d.t, val: leftPct }
+                }
+
+                if (rightDead) finalRightPct = null
+                else if (rightPct !== null && rightPct <= -90) {
+                    rightDead = true
+                    rightDeathPoint = { t: d.t, val: rightPct }
+                }
+
+                // Track Min/Max for Adaptive Scale (Only valid points)
+                if (finalLeftPct !== null) {
+                    minVal = Math.min(minVal, finalLeftPct)
+                    maxVal = Math.max(maxVal, finalLeftPct)
+                }
+                if (finalRightPct !== null) {
+                    minVal = Math.min(minVal, finalRightPct)
+                    maxVal = Math.max(maxVal, finalRightPct)
+                }
+
+                return {
+                    ...d,
+                    leftPct: finalLeftPct,
+                    rightPct: finalRightPct,
+                    leftDD,
+                    rightDD,
+                    // Store 'dead' status for this point if we want specialized rendering? 
+                    // No, null value handles the line cut.
+                }
             })
 
-            // 2. Determine Adaptive Limit
-            let limit = maxAbsChange * 1.25
-            if (maxAbsChange < 15) limit = 20
+            // 2. Determine Asymmetric Adaptive Limit
+            // Lower: minVal * 1.2, clamped at -100
+            let lowerBound = Math.max(-100, minVal * 1.2)
+            // Upper: maxVal * 1.2, min 20
+            let upperBound = Math.max(20, maxVal * 1.2)
 
-            // Round to nearest 5 for clean axis
-            limit = Math.ceil(limit / 5) * 5
+            // Round to nearest 5
+            lowerBound = Math.floor(lowerBound / 5) * 5
+            upperBound = Math.ceil(upperBound / 5) * 5
 
-            setPctDomain([-limit, limit])
+            setPctDomain([lowerBound, upperBound])
+            setDeathPoints({ left: leftDeathPoint, right: rightDeathPoint })
 
-            // 3. Second Pass: Clamp Values for Display
+            // 3. Second Pass: Clamp Values for Display (using Asymmetric limits)
             const finalData = rawData.map(d => ({
                 ...d,
-                leftPctDisplay: clamp(d.leftPct, -limit, limit),
-                rightPctDisplay: clamp(d.rightPct, -limit, limit),
+                // Pass raw if valid, else null
+                leftPctDisplay: d.leftPct !== null ? clamp(d.leftPct, lowerBound, upperBound) : null,
+                rightPctDisplay: d.rightPct !== null ? clamp(d.rightPct, lowerBound, upperBound) : null,
                 leftDDDisplay: clamp(d.leftDD, DD_DOMAIN[0], DD_DOMAIN[1]),
                 rightDDDisplay: clamp(d.rightDD, DD_DOMAIN[0], DD_DOMAIN[1])
             }))
@@ -288,6 +339,53 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                                 stroke="none"
                             />
                         </>
+                    )}
+
+                    {viewType === 'pct' && deathPoints.left && (
+                        <ReferenceLine x={deathPoints.left.t} stroke={getLeftColor()} strokeDasharray="3 3" />
+                        // We will use ReferenceDot via standard Scatter or just ReferenceDot if available
+                    )}
+                    {viewType === 'pct' && deathPoints.left && (
+                        <ReferenceLine
+                            segment={[{ x: deathPoints.left.t, y: deathPoints.left.val }, { x: deathPoints.left.t, y: deathPoints.left.val }]} // Mock point
+                        // Recharts ReferenceDot is better
+                        />
+                    )}
+
+                    {/* Death Skull Markers */}
+                    {viewType === 'pct' && deathPoints.left && (
+                        <ReferenceArea
+                            x1={deathPoints.left.t}
+                            x2={deathPoints.left.t}
+                            y1={deathPoints.left.val}
+                            y2={deathPoints.left.val}
+                            stroke="none"
+                            fill="none"
+                            label={{
+                                value: '⚡ 死亡', // Using ⚡ or ☠️
+                                position: 'top',
+                                fill: '#ef4444',
+                                fontSize: 12,
+                                fontWeight: 'bold'
+                            }}
+                        />
+                    )}
+                    {viewType === 'pct' && deathPoints.right && (
+                        <ReferenceArea
+                            x1={deathPoints.right.t}
+                            x2={deathPoints.right.t}
+                            y1={deathPoints.right.val}
+                            y2={deathPoints.right.val}
+                            stroke="none"
+                            fill="none"
+                            label={{
+                                value: '⚡ 死亡',
+                                position: 'top',
+                                fill: '#ef4444',
+                                fontSize: 12,
+                                fontWeight: 'bold'
+                            }}
+                        />
                     )}
 
                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
