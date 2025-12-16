@@ -39,12 +39,43 @@ export interface OccurrenceStats {
     direction: 'up' | 'down' | 'chop'
 }
 
+export interface MacroReaction {
+    eventKey: string
+    occursAt: string
+    stats: OccurrenceStats
+    priceData: { date: string; close: number; high: number; low: number }[]
+}
+
 export interface EventSummaryStats {
     d1WinRate: number
     d3WinRate: number
     avgUp: number
     avgDown: number
     avgRange: number
+    samples: number
+}
+
+export function calculateEventStats(eventKey: string, reactions: Record<string, MacroReaction>): EventSummaryStats | null {
+    const pastOccs = getPastOccurrences(eventKey, 12)
+    const eventReactions = pastOccs.map(occ => {
+        const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
+        return reactions[`${eventKey}-${keyDate}`]
+    }).filter(Boolean)
+
+    if (eventReactions.length === 0) return null
+
+    const d1Returns = eventReactions.map(r => r.stats.d0d1Return).filter((r): r is number => r !== null)
+    const upCount = d1Returns.filter(r => r > 0).length
+    const avgRange = eventReactions.reduce((sum, r) => sum + r.stats.range, 0) / eventReactions.length
+
+    return {
+        d1WinRate: d1Returns.length > 0 ? Math.round((upCount / d1Returns.length) * 100) : 0,
+        d3WinRate: 0, // Not used yet
+        avgUp: 0, // Not used yet
+        avgDown: 0, // Not used yet
+        avgRange: Math.round(avgRange * 10) / 10,
+        samples: eventReactions.length
+    }
 }
 
 export type D0Mode = 'time' | 'reaction'

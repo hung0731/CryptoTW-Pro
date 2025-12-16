@@ -23,6 +23,22 @@ export function SingleColumnLayout({ children, className }: LayoutProps) {
 }
 
 /**
+ * L1 Mobile: Mobile-First Layout (War Room)
+ * - Max Width: lg (Matches Header)
+ * - Aligned: Center
+ * - Padding: Bottom safe area for Nav
+ */
+export function MobileOptimizedLayout({ children, className }: LayoutProps) {
+    return (
+        <div className={cn("w-full max-w-lg mx-auto pb-24", SPACING.pageX, className)}>
+            <div className={cn("flex flex-col", SPACING.sectionGap)}>
+                {children}
+            </div>
+        </div>
+    )
+}
+
+/**
  * L2: Two Column Layout (Dashboard)
  * - Ratio: 8:4 (2:1)
  * - Mobile: Collapse to Single Column (Left stacks on top of Right)

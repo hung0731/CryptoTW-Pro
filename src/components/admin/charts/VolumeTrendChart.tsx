@@ -11,6 +11,7 @@ import {
     ResponsiveContainer,
     Legend
 } from 'recharts'
+import { CHARTS } from '@/lib/design-tokens'
 
 interface VolumeTrendChartProps {
     data: { date: string; volume: number; commission: number }[]
@@ -37,16 +38,16 @@ export function VolumeTrendChart({ data }: VolumeTrendChartProps) {
                         bottom: 0,
                     }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff10" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHARTS.grid} />
                     <XAxis
                         dataKey="date"
-                        tick={{ fill: '#737373', fontSize: 10 }}
+                        tick={{ fill: CHARTS.axis, fontSize: 10 }}
                         tickLine={false}
                         axisLine={false}
                     />
                     <YAxis
                         yAxisId="left"
-                        tick={{ fill: '#737373', fontSize: 10 }}
+                        tick={{ fill: CHARTS.axis, fontSize: 10 }}
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={formatCurrency}
@@ -55,24 +56,29 @@ export function VolumeTrendChart({ data }: VolumeTrendChartProps) {
                     <YAxis
                         yAxisId="right"
                         orientation="right"
-                        tick={{ fill: '#737373', fontSize: 10 }}
+                        tick={{ fill: CHARTS.axis, fontSize: 10 }}
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(val) => `$${val}`}
                         width={40}
                     />
                     <Tooltip
-                        contentStyle={{ backgroundColor: '#171717', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
-                        itemStyle={{ fontSize: '12px' }}
-                        cursor={{ fill: '#ffffff10' }}
+                        contentStyle={{
+                            backgroundColor: CHARTS.tooltip.bg,
+                            border: `1px solid ${CHARTS.tooltip.border}`,
+                            borderRadius: '8px',
+                            color: CHARTS.tooltip.text
+                        }}
+                        itemStyle={{ fontSize: '12px', color: CHARTS.tooltip.text }}
+                        cursor={{ fill: CHARTS.grid }} // Use grid color as hover background
                         formatter={(value: number, name: string) => [
                             name === 'volume' ? formatCurrency(value) : `$${value.toLocaleString()}`,
                             name === 'volume' ? '交易量' : '返佣'
                         ]}
                     />
-                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                    <Bar yAxisId="left" dataKey="volume" name="交易量" fill="#525252" radius={[4, 4, 0, 0]} barSize={20} />
-                    <Bar yAxisId="right" dataKey="commission" name="返佣" fill="#4ADE80" radius={[4, 4, 0, 0]} barSize={20} />
+                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px', color: CHARTS.tooltip.label }} />
+                    <Bar yAxisId="left" dataKey="volume" name="交易量" fill={CHARTS.axis} radius={[4, 4, 0, 0]} barSize={20} />
+                    <Bar yAxisId="right" dataKey="commission" name="返佣" fill={CHARTS.primary} radius={[4, 4, 0, 0]} barSize={20} />
                 </BarChart>
             </ResponsiveContainer>
         </div>

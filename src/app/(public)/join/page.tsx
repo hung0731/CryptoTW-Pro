@@ -318,12 +318,13 @@ export default function JoinPage() {
                         解鎖後你可以...
                     </h2>
 
-                    {/* Top 3 Highlighted Features */}
+                    {/* Top Features - Highlighted */}
                     <div className="space-y-3 mb-4">
                         {[
-                            { emoji: '🤖', title: 'AI 即時盤勢分析', desc: '每日判斷方向，不再猜盤' },
-                            { emoji: '🐋', title: '巨鯨動態追蹤', desc: '大戶進出場一目瞭然' },
-                            { emoji: '📊', title: '合約數據儀表板', desc: '爆倉、費率、多空比一站掌握' },
+                            { emoji: '🎯', title: 'AI 每日判斷', desc: '一句話告訴你今天偏多還是偏空' },
+                            { emoji: '📊', title: '市場快照', desc: '5 秒掃完槓桿、情緒、大戶動向' },
+                            { emoji: '🐋', title: '巨鯨追蹤', desc: '頂級交易員多空持倉即時更新' },
+                            { emoji: '📅', title: '財經日曆', desc: 'CPI/FOMC/非農，附帶歷史勝率' },
                         ].map((f, i) => (
                             <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
                                 <span className="text-xl">{f.emoji}</span>
@@ -335,9 +336,27 @@ export default function JoinPage() {
                         ))}
                     </div>
 
-                    {/* Additional Features */}
+                    {/* Secondary Features */}
+                    <div className="space-y-2 mb-4">
+                        {[
+                            { emoji: '💹', title: '合約數據', desc: '爆倉量、資金費率、多空比' },
+                            { emoji: '📰', title: '盤面脈絡', desc: 'AI 整理今日影響行情的關鍵事件' },
+                            { emoji: '📚', title: '歷史復盤', desc: '過去重大事件的市場反應分析' },
+                            { emoji: '🔔', title: 'LINE 推播', desc: '每日早報 + 重大事件即時通知' },
+                        ].map((f, i) => (
+                            <div key={i} className="flex items-center gap-3 py-2">
+                                <span className="text-base">{f.emoji}</span>
+                                <div className="flex-1">
+                                    <span className="text-sm text-neutral-300">{f.title}</span>
+                                    <span className="text-xs text-neutral-600 ml-2">{f.desc}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Additional Features Tags */}
                     <div className="flex flex-wrap gap-2">
-                        {['財經日曆', '價格提醒', 'VIP 社群'].map((name, i) => (
+                        {['Coinbase 溢價', 'ETF 資金流', '穩定幣供應', '恐懼指數', '價格預測', 'VIP 社群'].map((name, i) => (
                             <span key={i} className="text-xs text-neutral-500 bg-white/5 px-2.5 py-1 rounded-full">
                                 + {name}
                             </span>

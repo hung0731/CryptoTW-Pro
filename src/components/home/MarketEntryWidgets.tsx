@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { CARDS } from '@/lib/design-tokens'
 import { ChevronRight, Bell } from 'lucide-react'
 import { HelpDrawer } from '@/components/ui/HelpDrawer'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
@@ -105,23 +106,24 @@ export function MarketEntryWidgets() {
                     <div
                         key={i}
                         className={cn(
-                            "flex-none w-36 h-28 relative rounded-xl border overflow-hidden group hover:bg-[#0E0E0F] snap-center",
-                            tool.active
-                                ? "bg-neutral-900/80 border-blue-500/30 hover:border-blue-500/50"
-                                : "bg-[#0E0E0F] border-[#1A1A1A]"
+                            "flex-none w-36 h-28 relative overflow-hidden group snap-center",
+                            CARDS.secondary // Standard Type B Card
                         )}
                     >
                         <Link href={tool.href} className="block p-4 h-full w-full flex flex-col justify-between">
                             <div className="flex items-center justify-between pr-4">
-                                <span className="text-sm font-bold text-white group-hover:text-[#93C5FD] whitespace-nowrap">
+                                <span className={cn(
+                                    "text-sm font-bold whitespace-nowrap transition-colors",
+                                    tool.active ? "text-[#93C5FD]" : "text-white group-hover:text-[#93C5FD]"
+                                )}>
                                     {tool.title}
                                 </span>
-                                <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
+                                <ChevronRight className="w-3.5 h-3.5 text-[#666666] group-hover:text-[#A0A0A0]" />
                             </div>
 
                             <div className={cn(
                                 "text-xs font-medium truncate",
-                                tool.active ? "text-blue-300" : "text-neutral-500"
+                                tool.active ? "text-[#93C5FD]" : "text-[#808080]"
                             )}>
                                 {/* Add Bell icon if active alert */}
                                 {tool.active && tool.title === '巨鯨動態' && '🔔 '}

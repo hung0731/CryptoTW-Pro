@@ -4,33 +4,19 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Scale, ChevronRight, AlertTriangle, History } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, ChevronRight, Shield } from 'lucide-react'
 
-interface Conclusion {
-    bias: '偏多' | '偏空' | '觀望'
-    action: string
-    emoji: string
-    reasoning: string
+import { MarketStatusData, Conclusion } from '@/lib/types'
+
+interface DecisionHeroProps {
+    initialStatus: MarketStatusData | null
+    initialConclusion: Conclusion | null
 }
 
-interface StatusItem {
-    label: string
-    code: string
-    value: string
-}
+type BiasType = 'bullish' | 'bearish' | 'neutral'
 
-interface MarketStatus {
-    regime: StatusItem
-    leverage: StatusItem
-    sentiment: StatusItem
-    whale: StatusItem
-    volatility: StatusItem
-}
-
-type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH'
-
-// Calculate risk level from status data
-function calculateRiskLevel(status: MarketStatus): RiskLevel {
+// Determine bias from status
+function determineBias(status: MarketStatusData): BiasType {
     const bullishSignals = [
         status.sentiment.code === 'fear',
         status.whale.code === 'bullish',
@@ -43,54 +29,70 @@ function calculateRiskLevel(status: MarketStatus): RiskLevel {
         status.leverage.code === 'overheated',
     ].filter(Boolean).length
 
-    const cautionSignals = [
-        status.regime.code === 'pressure',
-        status.volatility.code === 'high',
-    ].filter(Boolean).length
-
-    if (cautionSignals >= 1) return 'HIGH'
-    if (bearishSignals >= 2) return 'HIGH'
-    if (bullishSignals >= 2 && cautionSignals === 0) return 'LOW'
-    return 'MEDIUM'
+    if (bullishSignals >= 2) return 'bullish'
+    if (bearishSignals >= 2) return 'bearish'
+    return 'neutral'
 }
 
-// Risk level visuals
-const riskConfig = {
-    LOW: {
-        label: '低風險',
-        sublabel: '適合策略執行',
-        color: 'text-green-400',
-        bg: 'bg-green-500/10',
-        border: 'border-green-500/30',
-        icon: TrendingUp,
-        glow: 'shadow-green-500/20',
+// Visual config per bias
+const biasConfig = {
+    bullish: {
+        gradient: 'from-emerald-950/80 via-emerald-900/40 to-transparent',
+        accent: 'text-emerald-400',
+        accentBg: 'bg-emerald-500/15',
+        border: 'border-emerald-500/20',
+        Icon: TrendingUp,
+        label: '偏多',
     },
-    MEDIUM: {
-        label: '中風險',
-        sublabel: '小倉位 / 等確認',
-        color: 'text-amber-400',
-        bg: 'bg-amber-500/10',
-        border: 'border-amber-500/30',
-        icon: Scale,
-        glow: 'shadow-amber-500/20',
+    bearish: {
+        gradient: 'from-red-950/80 via-red-900/40 to-transparent',
+        accent: 'text-red-400',
+        accentBg: 'bg-red-500/15',
+        border: 'border-red-500/20',
+        Icon: TrendingDown,
+        label: '偏空',
     },
-    HIGH: {
-        label: '高風險',
-        sublabel: '觀望 / 降槓桿',
-        color: 'text-red-400',
-        bg: 'bg-red-500/10',
-        border: 'border-red-500/30',
-        icon: AlertTriangle,
-        glow: 'shadow-red-500/20',
+    neutral: {
+        gradient: 'from-amber-950/80 via-amber-900/40 to-transparent',
+        accent: 'text-amber-400',
+        accentBg: 'bg-amber-500/15',
+        border: 'border-amber-500/20',
+        Icon: Minus,
+        label: '震盪',
     },
 }
 
-export function DecisionHero() {
-    const [conclusion, setConclusion] = useState<Conclusion | null>(null)
-    const [status, setStatus] = useState<MarketStatus | null>(null)
-    const [loading, setLoading] = useState(true)
+// Generate 2 non-technical reasons
+function generateReasons(status: MarketStatusData): string[] {
+    const reasons: string[] = []
+
+    if (status.sentiment.code === 'fear') {
+        reasons.push('散戶恐慌中')
+    } else if (status.sentiment.code === 'greed') {
+        reasons.push('市場過熱')
+    } else {
+        reasons.push('情緒平穩')
+    }
+
+    if (status.leverage.code === 'cool') {
+        reasons.push('槓桿冷靜區')
+    } else if (status.leverage.code === 'overheated') {
+        reasons.push('槓桿過熱')
+    } else {
+        reasons.push('槓桿偏熱')
+    }
+
+    return reasons
+}
+
+export function DecisionHero({ initialStatus, initialConclusion }: DecisionHeroProps) {
+    const [conclusion, setConclusion] = useState<Conclusion | null>(initialConclusion)
+    const [status, setStatus] = useState<MarketStatusData | null>(initialStatus)
+    const [loading, setLoading] = useState(!initialStatus || !initialConclusion)
 
     useEffect(() => {
+        if (initialStatus && initialConclusion) return
+
         const fetchData = async () => {
             try {
                 const res = await fetch('/api/market/status')
@@ -107,91 +109,86 @@ export function DecisionHero() {
         fetchData()
         const interval = setInterval(fetchData, 60000)
         return () => clearInterval(interval)
-    }, [])
+    }, [initialStatus, initialConclusion])
 
     if (loading) {
-        return (
-            <div className="space-y-3">
-                <Skeleton className="h-28 w-full bg-neutral-900/50 rounded-2xl" />
-            </div>
-        )
+        return <Skeleton className="h-36 w-full bg-neutral-900/50 rounded-2xl" />
     }
 
-    if (!conclusion || !status) {
-        return null // Don't render if no data
-    }
+    if (!conclusion || !status) return null
 
-    const riskLevel = calculateRiskLevel(status)
-    const config = riskConfig[riskLevel]
-    const RiskIcon = config.icon
+    const bias = determineBias(status)
+    const config = biasConfig[bias]
+    const BiasIcon = config.Icon
+    const reasons = generateReasons(status)
 
     return (
-        <div className="space-y-3">
-            {/* Hero Decision Card */}
+        <div className={cn(
+            "relative rounded-2xl border overflow-hidden",
+            "bg-[#0A0A0A]",
+            config.border
+        )}>
+            {/* Gradient Overlay */}
             <div className={cn(
-                "relative rounded-2xl border p-4",
-                config.bg,
-                config.border,
-                "shadow-lg",
-                config.glow
-            )}>
-                {/* Risk Badge - Top Right */}
-                <div className="absolute -top-2 -right-2 z-10">
+                "absolute inset-0 bg-gradient-to-br pointer-events-none",
+                config.gradient
+            )} />
+
+            {/* Content */}
+            <div className="relative p-3">
+                {/* Header Row */}
+                <div className="flex items-center justify-between mb-2">
+                    {/* Bias Badge */}
                     <div className={cn(
-                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold shadow-lg",
-                        config.bg,
-                        config.border,
-                        config.color,
-                        "backdrop-blur-md"
+                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold",
+                        config.accentBg,
+                        config.accent
                     )}>
-                        <RiskIcon className="w-3.5 h-3.5" />
+                        <BiasIcon className="w-3.5 h-3.5" />
                         <span>{config.label}</span>
                     </div>
+
+                    {/* Time indicator */}
+                    <span className="text-[10px] text-neutral-500 font-mono">
+                        {new Date().toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })} 更新
+                    </span>
                 </div>
 
-                {/* Main Content */}
-                <div className="flex flex-col gap-3">
-                    {/* Bias + Emoji */}
-                    <div className="flex items-center gap-3">
-                        <span className="text-3xl">{conclusion.emoji}</span>
-                        <div>
-                            <h2 className={cn("text-xl font-bold", config.color)}>
-                                今日市場：{conclusion.bias}
-                            </h2>
-                            <p className="text-sm text-neutral-400">
-                                {config.sublabel}
-                            </p>
-                        </div>
-                    </div>
+                {/* Main Title */}
+                <h2 className="text-lg font-bold text-white mb-0.5">
+                    今日市場 <span className={config.accent}>{config.label}</span>
+                </h2>
 
-                    {/* AI Recommendation */}
-                    <div className="bg-black/20 rounded-xl p-3">
-                        <p className="text-sm text-white font-medium">
-                            {conclusion.action}
-                        </p>
-                        <p className="text-xs text-neutral-500 mt-1">
-                            依據：{conclusion.reasoning}
-                        </p>
-                    </div>
+                {/* Action Line */}
+                <p className="text-sm text-neutral-300 mb-2">
+                    {conclusion.action}
+                </p>
 
-                    {/* Quick Actions */}
-                    <div className="flex items-center gap-2">
-                        <Link
-                            href="/market"
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] text-xs text-[#A0A0A0] hover:bg-[#1A1A1A]"
+                {/* Reason Pills */}
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    {reasons.map((reason, i) => (
+                        <span
+                            key={i}
+                            className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-neutral-400 border border-white/5"
                         >
-                            <span>查看依據</span>
-                            <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
-                        <Link
-                            href="/reviews"
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] text-xs text-[#A0A0A0] hover:bg-[#1A1A1A]"
-                        >
-                            <History className="w-3.5 h-3.5" />
-                            <span>相似歷史</span>
-                        </Link>
-                    </div>
+                            {reason}
+                        </span>
+                    ))}
                 </div>
+
+                {/* CTA */}
+                <Link
+                    href="/calendar"
+                    className={cn(
+                        "flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium",
+                        "bg-white/5 border border-white/10 text-neutral-300",
+                        "hover:bg-white/10 hover:text-white hover:border-white/20"
+                    )}
+                >
+                    <Shield className="w-4 h-4" />
+                    <span>查看判斷依據</span>
+                    <ChevronRight className="w-4 h-4" />
+                </Link>
             </div>
         </div>
     )

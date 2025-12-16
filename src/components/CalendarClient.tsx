@@ -12,24 +12,11 @@ import {
     getSurprise,
     formatValue,
     formatOccursAt,
-    MacroEventOccurrence
+    MacroEventOccurrence,
+    MacroReaction,
+    calculateEventStats
 } from '@/lib/macro-events'
 import { SURFACE, COLORS, CARDS } from '@/lib/design-tokens'
-
-// Types
-interface MacroReaction {
-    eventKey: string
-    occursAt: string
-    stats: {
-        d0d1Return: number | null
-        d0d3Return: number | null
-        maxDrawdown: number
-        maxUpside: number
-        range: number
-        direction: 'up' | 'down' | 'chop'
-    }
-    priceData: { date: string; close: number; high: number; low: number }[]
-}
 
 interface CalendarClientProps {
     reactions: Record<string, MacroReaction>
@@ -180,22 +167,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
     const [alignMode, setAlignMode] = React.useState<'time' | 'reaction'>('time')
 
     const getSummaryStats = (eventKey: string) => {
-        const pastOccs = getPastOccurrences(eventKey, 12)
-        const eventReactions = pastOccs.map(occ => {
-            const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
-            return reactions[`${eventKey}-${keyDate}`]
-        }).filter(Boolean)
-
-        if (eventReactions.length === 0) return null
-
-        const d1Returns = eventReactions.map(r => r.stats.d0d1Return).filter((r): r is number => r !== null)
-        const upCount = d1Returns.filter(r => r > 0).length
-        const avgRange = eventReactions.reduce((sum, r) => sum + r.stats.range, 0) / eventReactions.length
-
-        return {
-            d1WinRate: d1Returns.length > 0 ? Math.round((upCount / d1Returns.length) * 100) : 0,
-            avgRange: Math.round(avgRange * 10) / 10,
-        }
+        return calculateEventStats(eventKey, reactions)
     }
 
     return (

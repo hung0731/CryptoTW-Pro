@@ -184,6 +184,26 @@ export const COLORS = {
 } as const
 
 // ================================================
+// CHART COLORS (Functional)
+// ================================================
+export const CHARTS = {
+    primary: '#22C55E', // Green-500
+    primaryGradientFrom: '#22C55E',
+    primaryGradientTo: '#22C55E', // Usually transparent, handled in component
+    secondary: '#3B82F6', // Blue-500
+    tertiary: '#F59E0B', // Amber-500
+    grid: '#1A1A1A', // Neutral-900 (Border color)
+    tooltip: {
+        bg: '#0A0A0A',
+        border: '#1A1A1A',
+        text: '#FFFFFF',
+        label: '#A0A0A0'
+    },
+    axis: '#525252', // Neutral-600
+    cursor: '#404040', // Neutral-700
+} as const
+
+// ================================================
 // CHART TOKENS (Unified Visual Language)
 // ================================================
 export const CHART = {

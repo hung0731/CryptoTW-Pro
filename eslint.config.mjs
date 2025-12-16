@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import localRules from "./tools/eslint-local-rules.js";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -13,6 +14,14 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    plugins: {
+      "consistency": localRules
+    },
+    rules: {
+      "consistency/no-hardcoded-colors": "warn"
+    }
+  }
 ]);
 
 export default eslintConfig;
