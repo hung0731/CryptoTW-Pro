@@ -141,6 +141,21 @@ export default function ReviewDetailPage() {
                                 caption={review.charts.oi.caption}
                             />
                         )}
+
+                        {/* Evidence Card 3: Sentiment (FGI) */}
+                        {review.charts.sentiment && (
+                            <EvidenceCard
+                                title="市場情緒 (恐慌與貪婪)"
+                                chartType="fgi"
+                                symbol={review.chartConfig?.symbol || 'BTC'}
+                                daysBuffer={review.chartConfig?.daysBuffer}
+                                eventStart={review.eventStartAt}
+                                eventEnd={review.eventEndAt}
+                                reviewSlug={review.slug}
+                                interpretation={review.charts.sentiment.interpretation}
+                                caption={review.charts.sentiment.caption}
+                            />
+                        )}
                     </section>
                 )}
 

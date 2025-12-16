@@ -1,5 +1,6 @@
 import { LiffProvider } from "@/components/LiffProvider";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
+import { RiskToast } from "@/components/RiskToast";
 import { RouteHandler } from "@/components/RouteHandler";
 import { Suspense } from "react";
 import { BottomNav } from "@/components/BottomNav";
@@ -18,6 +19,7 @@ export default function PublicLayout({
                 <AnnouncementBanner />
                 {children}
             </div>
+            <RiskToast />
             <BottomNav />
         </LiffProvider>
     );

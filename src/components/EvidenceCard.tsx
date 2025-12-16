@@ -6,7 +6,7 @@ import { ReviewChart } from './ReviewChart'
 
 interface EvidenceCardProps {
     title: string
-    chartType: 'price' | 'flow' | 'oi' | 'supply'
+    chartType: 'price' | 'flow' | 'oi' | 'supply' | 'fgi'
     symbol: string
     daysBuffer?: number
     eventStart: string
@@ -25,6 +25,8 @@ function getChartIcon(type: string) {
         case 'price':
             return <TrendingUp className="w-4 h-4 text-neutral-500" />
         case 'flow':
+            return <Activity className="w-4 h-4 text-neutral-500" />
+        case 'fgi':
             return <Activity className="w-4 h-4 text-neutral-500" />
         default:
             return <BarChart2 className="w-4 h-4 text-neutral-500" />

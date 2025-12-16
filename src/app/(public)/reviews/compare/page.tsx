@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { REVIEWS_DATA, MarketEvent } from '@/lib/reviews-data';
 import { StackedReviewChart } from '@/components/StackedReviewChart';
 import { Columns, Layers, ArrowLeft, ChevronDown, CheckCircle2, TrendingDown, ShieldAlert, Cpu, BrainCircuit } from 'lucide-react';
@@ -16,8 +17,11 @@ import {
 } from "@/components/ui/sheet"
 
 export default function ComparePage() {
-    // Default: FTX (2022) vs Mt.Gox (2014) if available, or just first two
-    const [leftSlug, setLeftSlug] = useState('ftx-collapse-2022');
+    const searchParams = useSearchParams();
+    const eventParam = searchParams.get('event');
+
+    // Default: param event OR FTX (2022)
+    const [leftSlug, setLeftSlug] = useState(eventParam || 'ftx-collapse-2022');
     const [rightSlug, setRightSlug] = useState('covid-crash-2020');
     const [viewMode, setViewMode] = useState<'split' | 'stacked'>('split');
 

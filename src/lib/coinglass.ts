@@ -235,6 +235,21 @@ export interface NewsFlashItem {
     images?: string[]
 }
 
+// Economic Calendar Types
+export interface EconomicData {
+    calendar_name: string
+    country_code: string
+    country_name: string
+    data_effect: string
+    forecast_value: string
+    revised_previous_value: string
+    previous_value: string
+    publish_timestamp: number
+    published_value: string
+    importance_level: number // 1, 2, 3
+    has_exact_publish_time: number
+}
+
 // ============================================
 // API Endpoint Functions (All migrated to V4)
 // ============================================

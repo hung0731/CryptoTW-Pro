@@ -13,7 +13,7 @@ import { format } from 'date-fns'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
 
 interface ReviewChartProps {
-    type: 'price' | 'flow' | 'oi' | 'supply';
+    type: 'price' | 'flow' | 'oi' | 'supply' | 'fgi';
     symbol: string;
     eventStart: string;
     eventEnd: string;
@@ -68,6 +68,8 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     chartData = reviewData.flow || []
                 } else if (type === 'oi') {
                     chartData = reviewData.oi || []
+                } else if (type === 'fgi') {
+                    chartData = reviewData.fgi || []
                 }
 
                 // Client-side filtering if needed, though data is already roughly cut by generator
@@ -141,6 +143,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         {type === 'flow' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
                         {type === 'oi' && `$${(Number(payload[0].value) / 1000000).toFixed(0)}M`}
                         {type === 'supply' && `${Number(payload[0].value).toLocaleString()}`}
+                        {type === 'fgi' && `${Number(payload[0].value)}`}
                     </p>
                     {isPercentage && type === 'price' && (
                         <p className="text-neutral-500 text-[10px] mt-1">
@@ -279,6 +282,42 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             }
                         </Bar>
                     </BarChart>
+                ) : type === 'fgi' ? (
+                    <AreaChart data={data}>
+                        <defs>
+                            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <ReferenceLine y={20} stroke="#ef4444" strokeDasharray="3 3" opacity={0.5} label={{ value: '極恐', position: 'insideRight', fill: '#ef4444', fontSize: 10 }} />
+                        <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="3 3" opacity={0.5} label={{ value: '極貪', position: 'insideRight', fill: '#22c55e', fontSize: 10 }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            domain={[0, 100]}
+                        />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            minTickGap={30}
+                            tickFormatter={(str) => str.slice(5)}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Area
+                            type="monotone"
+                            dataKey="fgi"
+                            stroke="#8b5cf6"
+                            strokeWidth={2}
+                            fill={`url(#${gradientId})`}
+                        />
+                    </AreaChart>
                 ) : (
                     // OI
                     <AreaChart data={data}>

@@ -100,6 +100,11 @@ export interface MarketEvent {
         similarity: string;
     };
 
+    // 8. Trading Perspective (V4 - New Redesign)
+    type: 'leverage_cleanse' | 'policy_regulation' | 'market_structure' | 'exchange_event' | 'macro_shock' | 'tech_event';
+    impactSummary: string; // "它對交易有什麼用"
+    impactedTokens: string[];
+
     actionableChecklist: {
         label: string;
         desc: string;
@@ -127,6 +132,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventEndAt: '2024-01-25',
         reactionStartAt: '2024-01-10',  // ETF approval day - priced in before
         reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'policy_regulation',
+        impactedTokens: ['BTC'],
+        impactSummary: 'ETF 通過當日成為短期頂部，BTC 回調 20% 後才開啟主升段。',
 
         usageGuide: [
             '當重大利好消息落地，價格卻不漲反跌時',
@@ -260,6 +270,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2022-11-06',  // Binance announces FTT sell-off
         reactionType: 'trust_collapse',
 
+        // Trading Perspective
+        type: 'exchange_event',
+        impactedTokens: ['FTT', 'SOL', 'BTC'],
+        impactSummary: '信任崩潰引發連鎖去槓桿，BTC 跌破前低，唯有現貨流動性可信。',
+
         usageGuide: [
             '當交易所傳出資產負債表疑慮時',
             '當市場出現大型機構流動性枯竭傳言時',
@@ -339,6 +354,14 @@ export const REVIEWS_DATA: MarketEvent[] = [
                     whatItMeans: '關鍵資產崩盤通常伴隨關聯生態系（Solana）的無差別拋售。',
                     whatToWatch: '在系統性危機中，與源頭高度關聯的優質資產也會遭遇錯殺（這可能是機會）。'
                 }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：事件爆發當週 FGI 暴跌至 20 (極度恐慌)，市場信心降至冰點。',
+                interpretation: {
+                    whatItMeans: '恐慌指數觸底通常伴隨價格的階段性底部。',
+                    whatToWatch: '在極度恐慌區間，往往是不錯的逆向佈局機會。'
+                }
             }
         },
 
@@ -384,6 +407,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventEndAt: '2022-05-13',
         reactionStartAt: '2022-05-09',  // UST breaks 0.95, death spiral begins
         reactionType: 'trust_collapse',
+
+        // Trading Perspective
+        type: 'leverage_cleanse',
+        impactedTokens: ['LUNA', 'UST'],
+        impactSummary: '算法脫鉤引發 400 億美元資產歸零，恐慌擴散導致全市場修正 50%。',
 
         usageGuide: [
             '當算法穩定幣出現微幅脫鉤時',
@@ -464,6 +492,14 @@ export const REVIEWS_DATA: MarketEvent[] = [
                     whatItMeans: '指數級的供應量增發是「死亡螺旋」最直接的鏈上證據。',
                     whatToWatch: '當代幣供應量開始異常激增時，即使價格看似便宜也不應抄底。'
                 }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：LUNA 崩盤引發全市場恐慌，FGI 連續多日維持在 10 附近的歷史低位。',
+                interpretation: {
+                    whatItMeans: '算法穩定幣崩潰導致的恐慌具有極強的傳染性。',
+                    whatToWatch: '當 FGI 長期滯留於極度恐慌區，代表市場正在進行深度的去槓桿。'
+                }
             }
         },
 
@@ -508,6 +544,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventEndAt: '2020-03-13',
         reactionStartAt: '2020-03-09',  // Pre-crash selloff begins
         reactionType: 'liquidity_crisis',
+
+        // Trading Perspective
+        type: 'macro_shock',
+        impactedTokens: ['BTC', 'ETH'],
+        impactSummary: '流動性枯竭導致各類資產無差別拋售，BTC 單日腰斬 50% 後 V 轉。',
 
         usageGuide: [
             '當全球宏觀市場出現熔斷級恐慌時',
@@ -588,6 +629,14 @@ export const REVIEWS_DATA: MarketEvent[] = [
                     whatItMeans: '持倉量的大幅重置通常意味著市場底部，因為強制賣壓已耗盡。',
                     whatToWatch: '當 OI 降至歷史低點且費率為負時，通常是反轉的前兆。'
                 }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：3/12 暴跌當日 FGI 觸及個位數，反映了市場無差別拋售的恐慌心理。',
+                interpretation: {
+                    whatItMeans: '極端恐慌往往是流動性危機的特徵。',
+                    whatToWatch: '恐慌指數的快速反彈通常預示著流動性危機的解除。'
+                }
             }
         },
 
@@ -632,6 +681,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventEndAt: '2014-02-28',
         reactionStartAt: '2014-02-07',  // Withdrawal halt = immediate reaction
         reactionType: 'trust_collapse',
+
+        // Trading Perspective
+        type: 'exchange_event',
+        impactedTokens: ['BTC'],
+        impactSummary: '最大交易所倒閉導致由比特幣主導的市場進入兩年熊市。',
 
         usageGuide: [
             '當交易所提幣延遲或出現異常時',
@@ -747,6 +801,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2016-06-17',  // Hack announcement = immediate reaction
         reactionType: 'external_shock',
 
+        // Trading Perspective
+        type: 'tech_event',
+        impactedTokens: ['ETH', 'ETC'],
+        impactSummary: '智能合約漏洞導致以太坊硬分叉，確立了回滾機制的可能性。',
+
         usageGuide: [
             '當新型智能合約協議出現安全漏洞時',
             '當社群面臨是否介入逆轉交易的辯論時',
@@ -860,6 +919,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2017-12-17',  // Peak day, reversal begins
         reactionType: 'priced_in',
 
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['ETH', 'BTC'],
+        impactSummary: 'ICO 狂熱導致 ETH 需求激增，泡沫破裂後 90% 項目歸零。',
+
         usageGuide: [
             '當新幣發行速度遠超市場資金承接能力時',
             '當「萬物皆可代幣化」成為主流敘事時'
@@ -967,6 +1031,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2021-05-19', // Initial price drop on May 19th, before official ban
         reactionType: 'external_shock',
 
+        // Trading Perspective
+        type: 'policy_regulation',
+        impactedTokens: ['BTC'],
+        impactSummary: '算力暴跌 50% 後迅速遷徙，展現了比特幣網絡的極強韌性。',
+
         usageGuide: [
             '當主要產區出現監管打擊礦業消息時',
             '當全網算力出現大幅下降時'
@@ -1035,6 +1104,14 @@ export const REVIEWS_DATA: MarketEvent[] = [
                     whatItMeans: '比特幣網絡的抗審查性在極端壓力測試下得到驗證。',
                     whatToWatch: '監管衝擊往往是短期恐慌，長期應觀察網絡基本面恢復情況。'
                 }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：禁令與算力清退導致市場情緒從貪婪迅速轉向恐慌，FGI 驟降。',
+                interpretation: {
+                    whatItMeans: '政策性利空對市場情緒的打擊通常是劇烈但短暫的。',
+                    whatToWatch: '情緒修復通常滯後於價格反彈。'
+                }
             }
         },
 
@@ -1073,6 +1150,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         eventEndAt: '2022-09-15',
         reactionStartAt: '2022-09-15',  // Merge day - priced in before
         reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'tech_event',
+        impactedTokens: ['ETH'],
+        impactSummary: 'PoS 升級成功但呈現利多出盡，價格未漲反跌。',
 
         usageGuide: [
             '當區塊鏈進行重大技術升級時',
@@ -1152,6 +1234,1541 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 type: 'alert',
                 label: '警惕利多出盡',
                 desc: '當市場對已知事件過度期待時，事件發生可能是賣點。'
+            }
+        ]
+    },
+    // ===== Bitcoin Halving Events =====
+    {
+        id: 'review-halving-2012',
+        slug: 'bitcoin-halving-2012',
+        title: '2012 第一次減半：稀缺性程式碼的首次驗證',
+        year: 2012,
+        importance: 'A',
+        tags: ['減半', '供給衝擊', '稀缺性'],
+        marketStates: ['修復', '過熱'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2012-11-01',
+        eventEndAt: '2012-12-31',
+        reactionStartAt: '2012-11-28',  // Block 210,000
+        reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['BTC'],
+        impactSummary: '首次減半驗證了稀缺性模型，開啟了比特幣的首個大週期。',
+
+        usageGuide: [
+            '當市場質疑比特幣的長期價值時',
+            '當減半敘事開始升溫，需要回顧歷史驗證時'
+        ],
+
+        summary: '當區塊獎勵首次從 50 BTC 減半至 25 BTC 時，比特幣用程式碼證明了：稀缺性可以被寫入貨幣基因。',
+
+        context: {
+            what: '比特幣網絡在區塊高度 210,000 完成首次減半，區塊獎勵從 50 BTC 降至 25 BTC。',
+            narrative: '市場尚未形成「減半週期」概念，多數參與者是技術愛好者而非投資者。',
+            realImpact: '這次減半驗證了比特幣的核心設計——通膨率可被程式碼永久控制，無需人為干預。'
+        },
+
+        initialState: {
+            price: '約 $12，處於 2011 年泡沫後的緩慢復甦期',
+            fearGreed: '中性偏恐懼 - 市場規模極小，參與者有限'
+        },
+
+        misconceptions: [
+            {
+                myth: '減半會立即推高價格',
+                fact: '第一次減半後價格在數月內才開始明顯上漲，從 $12 漲至隔年的 $1,000+，市場需要時間消化供給變化。'
+            },
+            {
+                myth: '市場太小，減半沒有意義',
+                fact: '正因為市場小，第一次減半為後續所有週期建立了「供給衝擊 → 價格發現」的敘事模板。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2012-11-28',
+                title: '區塊 210,000 - 首次減半',
+                description: '比特幣網絡完成歷史性的首次減半，區塊獎勵從 50 BTC 降至 25 BTC。',
+                marketImpact: '短期價格平穩，市場尚未意識到供給衝擊的深遠影響。',
+                riskState: '歷史時刻',
+                riskLevel: 'low'
+            },
+            {
+                date: '2013-01-15',
+                title: '價格開始突破',
+                description: '比特幣突破 $15 並持續上漲，開始進入第一個真正的牛市週期。',
+                marketImpact: '新一代投資者開始關注，交易量逐步攀升。',
+                riskState: '週期啟動',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2013-04-10',
+                title: '首次大規模價格發現',
+                description: '價格飆升至 $260 後迅速回落，完成減半後首次劇烈波動。',
+                marketImpact: '全球媒體首次大規模報導比特幣，FOMO 與恐慌並存。',
+                riskState: '市場過熱',
+                riskLevel: 'high'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 30
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：減半當日價格約 $12，隨後數月緩步上漲，開啟了比特幣第一個完整的牛市週期。',
+                interpretation: {
+                    whatItMeans: '首次減半確立了「供給減少 → 稀缺性增加 → 價格上漲」的市場敘事，成為後續週期的藍圖。',
+                    whatToWatch: '減半效應通常需要 3-6 個月才會充分反映在價格上。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '黃金供給衝擊（南非罷工）',
+            similarity: '兩者皆涉及供給端的結構性減少，但比特幣的減半是可預測且寫入程式碼的，而黃金供給衝擊是偶發事件。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '理解減半本質',
+                desc: '減半是供給端事件，通常需要時間傳導至價格。'
+            },
+            {
+                type: 'check',
+                label: '長期視角',
+                desc: '減半後 12-18 個月通常是價格表現最強的時期。'
+            },
+            {
+                type: 'alert',
+                label: '避免短視',
+                desc: '不要因為減半當日價格未立即上漲就否定減半效應。'
+            }
+        ]
+    },
+    {
+        id: 'review-halving-2016',
+        slug: 'bitcoin-halving-2016',
+        title: '2016 第二次減半：減半週期敘事的確立',
+        year: 2016,
+        importance: 'A',
+        tags: ['減半', '週期', '機構關注'],
+        marketStates: ['觀望', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2016-06-01',
+        eventEndAt: '2016-08-15',
+        reactionStartAt: '2016-07-09',  // Block 420,000
+        reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['BTC'],
+        impactSummary: '減半週期理論成形，市場開始學會等待供應衝擊。',
+
+        usageGuide: [
+            '當市場開始討論「四年週期」時',
+            '當需要驗證減半是否具有可重複性時'
+        ],
+
+        summary: '當區塊獎勵從 25 BTC 再次減半至 12.5 BTC 時，市場首次有意識地「等待減半」，週期理論開始成形。',
+
+        context: {
+            what: '比特幣網絡在區塊高度 420,000 完成第二次減半，區塊獎勵從 25 BTC 降至 12.5 BTC。',
+            narrative: '市場已經歷過一次減半週期，開始形成「減半 → 牛市」的預期心理。',
+            realImpact: '此次減半確立了「四年週期」敘事，成為後續所有市場分析的重要框架。'
+        },
+
+        initialState: {
+            price: '約 $650，處於 2014 年熊市底部後的復甦期',
+            fearGreed: '中性 (45) - 市場觀望情緒濃厚'
+        },
+
+        misconceptions: [
+            {
+                myth: '減半日是最佳買點',
+                fact: '價格往往在減半前已上漲反映預期，減半日通常是「利多出盡」的風險點。'
+            },
+            {
+                myth: '減半效果可精確預測',
+                fact: '雖然存在週期模式，但每次減半的市場環境、參與者結構都不同，不宜機械套用。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2016-06-18',
+                title: '減半前回調',
+                description: '由於中國交易所槓桿清洗，價格從 $780 回調至 $550。',
+                marketImpact: '短期投機者被清洗，市場在減半前完成一次健康整理。',
+                riskState: '槓桿清洗',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2016-07-09',
+                title: '區塊 420,000 - 第二次減半',
+                description: '區塊獎勵從 25 BTC 降至 12.5 BTC，全球礦工收入減半。',
+                marketImpact: '媒體報導增加，價格在減半後小幅回落（利多出盡）。',
+                riskState: '預期兌現',
+                riskLevel: 'low'
+            },
+            {
+                date: '2017-01-01',
+                title: '牛市確認',
+                description: '價格突破 $1,000，正式進入 2017 大牛市週期。',
+                marketImpact: '減半效應在 6 個月後開始充分釋放，市場進入主升浪。',
+                riskState: '週期啟動',
+                riskLevel: 'medium'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 30
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：減半當日價格約 $650，短期呈現利多出盡，但 6 個月後價格突破 $1,000 開啟 2017 大牛市。',
+                interpretation: {
+                    whatItMeans: '第二次減半確認了減半週期的可重複性，「四年週期」敘事開始主導市場預期。',
+                    whatToWatch: '減半後 3-6 個月是觀察供給衝擊效應是否兌現的關鍵窗口。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2012 第一次減半',
+            similarity: '兩次減半都呈現「利多出盡」的短期反應，但長期都開啟了新的牛市週期。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '建立週期意識',
+                desc: '減半是約每四年一次的可預期事件，應提前佈局而非追高。'
+            },
+            {
+                type: 'alert',
+                label: '警惕短期波動',
+                desc: '減半前後的價格波動往往劇烈，不宜過度槓桿。'
+            },
+            {
+                type: 'check',
+                label: '耐心持有',
+                desc: '減半效應需要時間發酵，持有週期應以年為單位。'
+            }
+        ]
+    },
+    {
+        id: 'review-halving-2020',
+        slug: 'bitcoin-halving-2020',
+        title: '2020 第三次減半：機構時代的開端',
+        year: 2020,
+        importance: 'A',
+        featuredRank: 7,
+        tags: ['減半', '機構入場', '供給衝擊'],
+        marketStates: ['修復', '過熱'],
+        relatedMetrics: ['price', 'oi', 'fearGreed'],
+        readingMinutes: 6,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2020-04-01',
+        eventEndAt: '2020-06-15',
+        reactionStartAt: '2020-05-11',  // Block 630,000
+        reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['BTC'],
+        impactSummary: '機構資金首次大規模參與減半，推動價格突破 2017 高點。',
+
+        usageGuide: [
+            '當機構資金開始佈局加密資產時',
+            '當供給衝擊理論需要數據驗證時'
+        ],
+
+        summary: '當區塊獎勵從 12.5 BTC 減半至 6.25 BTC 時，機構投資者首次大規模參與減半敘事，開啟了比特幣機構化時代。',
+
+        context: {
+            what: '比特幣網絡在區塊高度 630,000 完成第三次減半，區塊獎勵從 12.5 BTC 降至 6.25 BTC。',
+            narrative: '市場在 COVID 崩盤後快速復甦，機構開始將比特幣視為「數位黃金」與通膨對沖工具。',
+            realImpact: 'MicroStrategy、Tesla 等上市公司開始配置比特幣，推動了史上最大規模的機構入場潮。'
+        },
+
+        initialState: {
+            price: '約 $8,600，距離 312 崩盤底部已反彈超過 100%',
+            fearGreed: '恐懼轉中性 (42) - 市場仍處謹慎觀望',
+            oi: '合約持倉量穩步回升，顯示槓桿資金重新入場'
+        },
+
+        misconceptions: [
+            {
+                myth: '減半效應已被市場完全定價',
+                fact: '雖然市場預期減半，但機構買盤的規模與持續性超出預期，價格最終漲至 $69,000。'
+            },
+            {
+                myth: 'COVID 崩盤會延遲減半效應',
+                fact: '恰恰相反，央行大規模 QE 強化了比特幣的抗通膨敘事，加速了機構入場。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2020-03-12',
+                title: 'COVID 崩盤',
+                description: '全球流動性危機導致比特幣單日腰斬，但也清洗了過度槓桿。',
+                marketImpact: '市場在減半前完成了徹底的去槓桿化，為後續上漲創造了健康的籌碼結構。',
+                riskState: '極端恐慌',
+                riskLevel: 'high'
+            },
+            {
+                date: '2020-05-11',
+                title: '區塊 630,000 - 第三次減半',
+                description: '區塊獎勵從 12.5 BTC 降至 6.25 BTC，日產出減少約 900 BTC。',
+                marketImpact: '減半當日價格平穩，市場已充分預期，後續開始緩步上漲。',
+                riskState: '預期兌現',
+                riskLevel: 'low'
+            },
+            {
+                date: '2020-12-16',
+                title: '突破歷史新高',
+                description: '比特幣突破 2017 年高點 $20,000，正式確認新一輪牛市週期。',
+                marketImpact: '機構 FOMO 加速，MicroStrategy 帶頭的企業買入潮全面展開。',
+                riskState: '週期主升浪',
+                riskLevel: 'medium'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 30
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：減半前市場已從 312 崩盤中復甦，減半後 7 個月突破歷史新高，開啟機構牛市。',
+                interpretation: {
+                    whatItMeans: '這次減半證明了即使在極端恐慌後，供給衝擊效應依然有效。',
+                    whatToWatch: '觀察機構資金流向（Grayscale、ETF 申請進度）作為領先指標。'
+                }
+            },
+            oi: {
+                url: '',
+                caption: '圖表解讀：持倉量在減半後穩步攀升，顯示市場信心恢復且槓桿結構健康。',
+                interpretation: {
+                    whatItMeans: '持倉量隨價格同步上升，代表市場是由現貨需求而非過度槓桿推動。',
+                    whatToWatch: '當 OI 增速遠超價格漲幅時，需警惕槓桿過熱。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2016 第二次減半',
+            similarity: '兩次減半都在減半後 6-7 個月突破上一輪歷史高點，確認了減半週期的可重複性。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '追蹤機構資金',
+                desc: '機構配置動態（13F 持倉報告、ETF 流量）是這個週期的核心變量。'
+            },
+            {
+                type: 'check',
+                label: '供給衝擊量化',
+                desc: '減半後每日供給減少約 900 BTC，年化約 33 萬 BTC 減產。'
+            },
+            {
+                type: 'alert',
+                label: '宏觀環境',
+                desc: '央行政策（QE/QT）會放大或抑制減半效應，需同步關注。'
+            }
+        ]
+    },
+    {
+        id: 'review-halving-2024',
+        slug: 'bitcoin-halving-2024',
+        title: '2024 第四次減半：ETF 時代的首次供給衝擊',
+        year: 2024,
+        importance: 'S',
+        featuredRank: 8,
+        tags: ['減半', 'ETF', '機構需求', '供給衝擊'],
+        marketStates: ['過熱', '修復'],
+        relatedMetrics: ['price', 'oi', 'etfFlow', 'funding'],
+        readingMinutes: 7,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2024-03-15',
+        eventEndAt: '2024-05-31',
+        reactionStartAt: '2024-04-20',  // Block 840,000
+        reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['BTC'],
+        impactSummary: 'ETF 需求提前透支減半紅利，打破了減半後才創新高的慣例。',
+
+        usageGuide: [
+            '當 ETF 資金流與減半效應交互作用時',
+            '當需要分析「需求結構性改變」對減半效應的影響時',
+            '當市場在歷史高點附近完成減半時'
+        ],
+
+        summary: '當區塊獎勵從 6.25 BTC 減半至 3.125 BTC 時，這是比特幣首次在現貨 ETF 時代完成減半，供給衝擊遇上了史上最強的結構性需求。',
+
+        context: {
+            what: '比特幣網絡在區塊高度 840,000 完成第四次減半，區塊獎勵從 6.25 BTC 降至 3.125 BTC。',
+            narrative: '市場在 ETF 通過後創下歷史新高，減半前價格已突破 $73,000，「減半前新高」打破歷史慣例。',
+            realImpact: '這次減半是供給與需求雙重結構性改變的交匯點——供給減半，需求因 ETF 通道而永久性增加。'
+        },
+
+        initialState: {
+            price: '約 $64,000，距離歷史高點 $73,000 回調約 12%',
+            fearGreed: '貪婪 (65) - 市場情緒偏熱但未極端',
+            funding: '資金費率正向偏高，衍生品市場偏多',
+            etfFlow: 'ETF 淨流入在減半前趨緩，部分獲利了結'
+        },
+
+        misconceptions: [
+            {
+                myth: '減半前已創新高，減半效應已失效',
+                fact: '歷史上減半效應主要體現在 12-18 個月的中長期，減半前的新高反映的是 ETF 需求，兩者可疊加。'
+            },
+            {
+                myth: 'ETF 買盤會取代減半效應',
+                fact: '兩者是互補關係，ETF 提供需求，減半減少供給，供需雙重利多是前所未有的組合。'
+            },
+            {
+                myth: '礦工營收減半會導致大量拋售',
+                fact: '歷史數據顯示，礦工在減半後傾向於惜售而非拋售，因為預期價格將上漲彌補收入減少。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2024-03-14',
+                title: '減半前歷史新高',
+                description: '比特幣在減半前創下 $73,000 歷史新高，打破「減半後才創新高」的歷史慣例。',
+                marketImpact: 'ETF 需求主導的新高，市場開始辯論減半效應是否已被提前消化。',
+                riskState: '預期過熱',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2024-04-20',
+                title: '區塊 840,000 - 第四次減半',
+                description: '區塊獎勵從 6.25 BTC 降至 3.125 BTC，日產出減少至約 450 BTC。',
+                marketImpact: '減半當日價格約 $64,000，呈現輕微回調後穩定，市場反應平淡。',
+                riskState: '利多出盡',
+                riskLevel: 'low'
+            },
+            {
+                date: '2024-05-15',
+                title: '減半後整理',
+                description: '價格在 $60,000-$70,000 區間震盪整理，市場等待下一個催化劑。',
+                marketImpact: 'ETF 流入速度放緩，減半效應尚需時間發酵。',
+                riskState: '供需平衡',
+                riskLevel: 'low'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 30
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：這是史上首次在歷史高點附近完成減半，短期呈現利多出盡，中長期效應待驗證。',
+                interpretation: {
+                    whatItMeans: '減半前已創新高打破歷史慣例，顯示 ETF 需求力道可能超越傳統減半邏輯。',
+                    whatToWatch: '觀察減半後 6-12 個月的價格表現，驗證供需雙重利多的疊加效應。'
+                }
+            },
+            flow: {
+                url: '',
+                caption: '圖表解讀：ETF 每日淨流入約數億美元，而減半後日產出僅約 450 BTC（約 $30M），結構性供不應求。',
+                interpretation: {
+                    whatItMeans: 'ETF 需求 > 新增供給，只要 ETF 流入持續，價格底部將持續抬高。',
+                    whatToWatch: '若 ETF 連續多日淨流出，需重新評估供需平衡點。'
+                }
+            },
+            oi: {
+                url: '',
+                caption: '圖表解讀：持倉量在減半期間維持高位，顯示市場對中長期走勢仍有信心。',
+                interpretation: {
+                    whatItMeans: '持倉量未隨價格回調而大幅下降，代表多頭並未離場。',
+                    whatToWatch: '若 OI 與價格同時下跌，可能預示趨勢反轉。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2024 年 1 月比特幣 ETF 通過',
+            similarity: '兩者都是「利多出盡」的典型案例，但長期來看都是結構性利多，短期賣壓不改長期趨勢。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '量化供需缺口',
+                desc: '日產出 450 BTC vs ETF 日均淨流入（需即時追蹤），計算供需比。'
+            },
+            {
+                type: 'check',
+                label: '追蹤礦工行為',
+                desc: '觀察礦工地址餘額變化，確認是否惜售。'
+            },
+            {
+                type: 'alert',
+                label: '週期疊加效應',
+                desc: '這是首次「ETF + 減半」的雙重供需改變，歷史參照價值有限，需持續觀察。'
+            },
+            {
+                type: 'check',
+                label: '耐心等待',
+                desc: '減半效應通常在 12-18 個月後充分釋放，避免短線噪音干擾判斷。'
+            }
+        ],
+        focusWindow: [-14, 30]
+    },
+    // ===== 2020 Events =====
+    {
+        id: 'review-defi-summer-2020',
+        slug: 'defi-summer-2020',
+        title: '2020 DeFi Summer：流動性挖礦與鏈上金融的爆發',
+        year: 2020,
+        importance: 'A',
+        tags: ['DeFi', '流動性挖礦', 'TVL'],
+        marketStates: ['過熱', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 6,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2020-06-15',
+        eventEndAt: '2020-09-30',
+        reactionStartAt: '2020-06-15',  // Compound COMP token launch
+        reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['ETH', 'UNI', 'COMP'],
+        impactSummary: '流動性挖礦開啟了 DeFi 熱潮，TVL 暴增重新定義了 ETH 的價值。',
+
+        usageGuide: [
+            '當新型收益協議出現極高 APY 時',
+            '當「挖礦」成為市場熱門敘事時',
+            '當 TVL 快速膨脹時'
+        ],
+
+        summary: '當 Compound 推出 COMP 代幣開啟流動性挖礦狂潮時，DeFi 從概念變成了可量化的金融基礎設施，也同時揭開了「高收益 = 高風險」的序幕。',
+
+        context: {
+            what: 'Compound 於 2020 年 6 月推出治理代幣 COMP 並開啟流動性挖礦，引發 DeFi 協議爆發式增長，TVL 從 10 億美元飆升至 100 億美元。',
+            narrative: '市場開始相信「DeFi 將取代傳統金融」，高 APY 成為吸引資金的主要手段。',
+            realImpact: 'DeFi Summer 確立了鏈上金融的可行性，但也暴露了智能合約風險與不可持續的代幣經濟模型。'
+        },
+
+        initialState: {
+            price: 'ETH 約 $230，處於 COVID 崩盤後的復甦期',
+            fearGreed: '中性轉貪婪 - 新敘事吸引資金進場'
+        },
+
+        misconceptions: [
+            {
+                myth: '高 APY 可以持續',
+                fact: '極高收益率通常來自代幣通膨補貼，當補貼減少或代幣價格下跌，APY 會迅速歸零。'
+            },
+            {
+                myth: 'DeFi 無風險',
+                fact: '智能合約漏洞、無常損失、預言機攻擊等風險在這一時期頻繁發生，多個協議遭駭。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2020-06-15',
+                title: 'COMP 代幣啟動',
+                description: 'Compound 開始分發 COMP 治理代幣，開創「流動性挖礦」模式。',
+                marketImpact: '資金開始湧入 DeFi 協議，TVL 快速攀升。',
+                riskState: '敘事啟動',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2020-08-28',
+                title: 'Sushiswap 分叉 Uniswap',
+                description: '「吸血鬼攻擊」成為熱門策略，DeFi 競爭白熱化。',
+                marketImpact: '協議之間的競爭推高收益率，也增加了系統性風險。',
+                riskState: '競爭過熱',
+                riskLevel: 'high'
+            },
+            {
+                date: '2020-09-17',
+                title: 'Uniswap 發幣 UNI',
+                description: 'Uniswap 空投 UNI 代幣，回饋早期用戶。',
+                marketImpact: 'DeFi 熱潮達到高峰，隨後開始冷卻。',
+                riskState: '泡沫頂點',
+                riskLevel: 'high'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'ETH',
+            daysBuffer: 30
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：ETH 從 $230 漲至 $480，DeFi 敘事成為這段期間的主要推動力。',
+                interpretation: {
+                    whatItMeans: 'DeFi Summer 證明了鏈上金融的市場需求，但也顯示了敘事驅動的價格波動風險。',
+                    whatToWatch: '當 TVL 增速遠超實際使用量時，需警惕泡沫風險。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2017 ICO 狂潮',
+            similarity: '兩者都是新敘事驅動的資金狂熱，最終只有少數優質協議存活。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '審視收益來源',
+                desc: '高 APY 通常來自代幣通膨，需評估代幣經濟模型的可持續性。'
+            },
+            {
+                type: 'check',
+                label: '理解智能合約風險',
+                desc: '參與 DeFi 前，確認協議是否經過審計。'
+            },
+            {
+                type: 'check',
+                label: '分散協議風險',
+                desc: '不要將所有資金放在單一協議中。'
+            }
+        ]
+    },
+    // ===== 2021 Events =====
+    {
+        id: 'review-tesla-btc-2021',
+        slug: 'tesla-bitcoin-purchase-2021',
+        title: '2021 Tesla 購買比特幣：企業資產配置敘事的高峰',
+        year: 2021,
+        importance: 'A',
+        tags: ['機構入場', '企業配置', 'Elon Musk'],
+        marketStates: ['過熱', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2021-02-01',
+        eventEndAt: '2021-02-28',
+        reactionStartAt: '2021-02-08',  // Tesla 8-K filing public
+        reactionType: 'external_shock',
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['BTC'],
+        impactSummary: '企業資產配置敘事達到頂峰，但名人效應也帶來了巨大的雙向波動。',
+
+        usageGuide: [
+            '當上市公司宣佈配置比特幣時',
+            '當名人效應推動市場情緒時'
+        ],
+
+        summary: '當 Tesla 宣佈購買 15 億美元比特幣時，企業資產配置敘事達到頂峰，但也埋下了名人影響力過度主導市場的隱憂。',
+
+        context: {
+            what: 'Tesla 在 SEC 文件中揭露購買 15 億美元比特幣，並計劃接受 BTC 支付。',
+            narrative: '市場相信 Tesla 只是開始，更多企業將跟進配置比特幣。',
+            realImpact: '雖然少數企業跟進，但 Tesla 後來因環保爭議暫停接受 BTC 支付，顯示企業決策的不確定性。'
+        },
+
+        initialState: {
+            price: 'BTC 約 $38,000，處於持續上漲趨勢中',
+            fearGreed: '極度貪婪 (80+) - 市場情緒過熱'
+        },
+
+        misconceptions: [
+            {
+                myth: '企業配置會持續加速',
+                fact: '多數企業對加密資產配置仍持保守態度，Tesla 是例外而非趨勢。'
+            },
+            {
+                myth: '名人背書等於無風險',
+                fact: 'Elon Musk 後來的推文多次造成市場劇烈波動，顯示名人影響力的雙面性。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2021-02-08',
+                title: 'Tesla 8-K 揭露',
+                description: 'Tesla 向 SEC 提交文件，揭露購買 15 億美元比特幣。',
+                marketImpact: 'BTC 單日上漲超過 15%，創下 $44,000 新高。',
+                riskState: '利多衝擊',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2021-03-24',
+                title: 'Tesla 接受 BTC 支付',
+                description: 'Elon Musk 宣佈 Tesla 開始接受比特幣購車。',
+                marketImpact: '市場情緒進一步升溫，BTC 逼近 $60,000。',
+                riskState: '預期強化',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2021-05-12',
+                title: 'Tesla 暫停 BTC 支付',
+                description: 'Musk 宣佈因環保考量暫停接受 BTC 支付。',
+                marketImpact: 'BTC 單日暴跌 10%，名人風險首次被正視。',
+                riskState: '敘事反轉',
+                riskLevel: 'high'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：Tesla 公告當日 BTC 跳空高開，隨後持續上漲至 $58,000，但 5 月環保爭議引發大幅回調。',
+                interpretation: {
+                    whatItMeans: '企業配置是重要的需求端訊號，但單一企業的決策變化也會帶來相應風險。',
+                    whatToWatch: '關注企業季報中的加密資產持倉變化與管理層態度。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: 'MicroStrategy 購買比特幣',
+            similarity: '兩者都開創了企業配置比特幣的先例，但 MicroStrategy 的態度更為堅定持久。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '警惕名人效應',
+                desc: '名人推文造成的價格波動往往是短期噪音，不宜追高殺低。'
+            },
+            {
+                type: 'check',
+                label: '追蹤企業持倉',
+                desc: '關注上市公司 10-K/10-Q 文件中的加密資產持倉披露。'
+            }
+        ]
+    },
+    {
+        id: 'review-coinbase-ipo-2021',
+        slug: 'coinbase-direct-listing-2021',
+        title: '2021 Coinbase 直接上市：加密產業納入主流金融',
+        year: 2021,
+        importance: 'A',
+        tags: ['IPO', '合規', '機構化'],
+        marketStates: ['過熱', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2021-04-01',
+        eventEndAt: '2021-04-30',
+        reactionStartAt: '2021-04-14',  // Direct listing day
+        reactionType: 'priced_in',
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactedTokens: ['BTC', 'COIN'],
+        impactSummary: '上市日即頂部，合規里程碑往往是利多出盡的信號。',
+
+        usageGuide: [
+            '當加密企業申請 IPO 時',
+            '當市場對合規里程碑反應過熱時'
+        ],
+
+        summary: '當 Coinbase 以 850 億美元估值直接上市時，加密產業正式被納入美股主流敘事，但也呈現了典型的「利多出盡」結構。',
+
+        context: {
+            what: 'Coinbase 選擇直接上市而非傳統 IPO，開盤價 $381，估值達 850 億美元。',
+            narrative: '市場將此視為加密產業的「成人禮」，預期更多投資者將透過股票市場間接參與加密資產。',
+            realImpact: '上市當日成為短期高點，隨後股價持續下跌，顯示市場已提前定價。'
+        },
+
+        initialState: {
+            price: 'BTC 約 $64,000，處於週期高點',
+            fearGreed: '極度貪婪 (78) - 市場情緒過熱'
+        },
+
+        misconceptions: [
+            {
+                myth: '上市代表價格會繼續漲',
+                fact: '重大事件往往是「利多出盡」的轉折點，Coinbase 上市日正好是 BTC 的短期高點。'
+            },
+            {
+                myth: 'Coinbase 股價與 BTC 正相關',
+                fact: '短期內高度相關，但 Coinbase 還受到監管、競爭、用戶增長等因素影響。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2021-04-14',
+                title: 'Coinbase 直接上市',
+                description: 'COIN 在 NASDAQ 開始交易，開盤價 $381，盤中最高 $429。',
+                marketImpact: 'BTC 當日創下 $64,800 歷史新高，隨後開始回調。',
+                riskState: '利多出盡',
+                riskLevel: 'high'
+            },
+            {
+                date: '2021-04-18',
+                title: '週末閃崩',
+                description: 'BTC 週末跌破 $52,000，顯示市場過度槓桿。',
+                marketImpact: '超過 80 億美元合約被清算，市場開始去槓桿。',
+                riskState: '槓桿清洗',
+                riskLevel: 'high'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：Coinbase 上市當日 BTC 創下 $64,800 高點，隨後開始長達兩個月的回調。',
+                interpretation: {
+                    whatItMeans: '重大合規里程碑往往已被市場提前定價，事件發生日通常是高點。',
+                    whatToWatch: '觀察衍生品持倉量與資金費率，識別過熱風險。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: '2024 比特幣 ETF 通過',
+            similarity: '兩者都是合規里程碑，且都呈現「利多出盡」的短期價格結構。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '識別利多出盡',
+                desc: '當市場對已知事件過度期待時，事件發生往往是賣點。'
+            },
+            {
+                type: 'check',
+                label: '監測槓桿水平',
+                desc: '資金費率持續正向偏高時，需警惕回調風險。'
+            }
+        ]
+    },
+    {
+        id: 'review-el-salvador-2021',
+        slug: 'el-salvador-bitcoin-legal-tender-2021',
+        title: '2021 薩爾瓦多：比特幣成為法定貨幣',
+        year: 2021,
+        importance: 'A',
+        tags: ['國家採用', '法規', '實驗'],
+        marketStates: ['觀望', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2021-09-01',
+        eventEndAt: '2021-09-15',
+        reactionStartAt: '2021-09-07',  // Law takes effect
+        reactionType: 'external_shock',
+
+        // Trading Perspective
+        type: 'policy_regulation',
+        impactedTokens: ['BTC'],
+        impactSummary: '國家級採用雷聲大雨點小，執行日的閃崩提醒了現實與敘事的落差。',
+
+        usageGuide: [
+            '當國家層級的比特幣政策出台時',
+            '當評估國家採用對市場的實際影響時'
+        ],
+
+        summary: '當薩爾瓦多成為全球首個將比特幣列為法定貨幣的國家時，它創造了歷史，但也揭示了國家級採用的複雜性與短期對價格的有限影響。',
+
+        context: {
+            what: '薩爾瓦多《比特幣法》於 9 月 7 日生效，所有企業必須接受 BTC 支付（有能力時）。',
+            narrative: '市場期待這是多米諾骨牌的第一張，更多國家將跟進採用。',
+            realImpact: '生效當日 BTC 閃崩 18%，顯示市場反應複雜。至今僅有少數小國跟進。'
+        },
+
+        initialState: {
+            price: 'BTC 約 $52,000，處於 5 月崩盤後的反彈階段',
+            fearGreed: '貪婪 (70) - 市場情緒偏熱'
+        },
+
+        misconceptions: [
+            {
+                myth: '國家採用會立即推高價格',
+                fact: '薩爾瓦多採用當日 BTC 閃崩 18%，顯示市場對執行細節與風險的重新評估。'
+            },
+            {
+                myth: '更多國家會快速跟進',
+                fact: '至今跟進的僅有中非共和國等少數小國，主權國將 BTC 納入法幣的門檻極高。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2021-06-09',
+                title: '法案通過',
+                description: '薩爾瓦多國會以絕對多數通過《比特幣法》。',
+                marketImpact: '市場短暫興奮，BTC 當日小幅上漲。',
+                riskState: '敘事啟動',
+                riskLevel: 'low'
+            },
+            {
+                date: '2021-09-07',
+                title: '法律生效',
+                description: '《比特幣法》正式生效，政府推出 Chivo 錢包並發放 $30 等值 BTC。',
+                marketImpact: 'BTC 當日閃崩 18% 至 $43,000，市場反應與預期相反。',
+                riskState: '預期落空',
+                riskLevel: 'high'
+            },
+            {
+                date: '2021-09-20',
+                title: '價格回穩',
+                description: '市場消化閃崩後回穩，BTC 重回 $45,000 上方。',
+                marketImpact: '國家採用敘事被重新評估，長期影響有限。',
+                riskState: '情緒平復',
+                riskLevel: 'low'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：法律生效當日閃崩 18%，是典型的「預期與現實落差」案例。',
+                interpretation: {
+                    whatItMeans: '國家採用是長期利多，但短期執行困難與市場過熱可能帶來反向波動。',
+                    whatToWatch: '觀察採用國的實際 BTC 交易量與民眾接受度。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: 'Coinbase 直接上市',
+            similarity: '兩者都是「利多出盡」的案例，重大事件落地當日反而成為短期高點或引發回調。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '區分敘事與現實',
+                desc: '國家採用是長期敘事，短期價格反應往往與預期相反。'
+            },
+            {
+                type: 'check',
+                label: '評估執行細節',
+                desc: '法律通過不等於成功執行，需觀察實際採用情況。'
+            }
+        ]
+    },
+    // ===== 2022 Events =====
+    {
+        id: 'review-celsius-2022',
+        slug: 'celsius-bankruptcy-2022',
+        title: '2022 Celsius 破產：CeFi 借貸平台的擠兌模板',
+        year: 2022,
+        importance: 'A',
+        tags: ['CeFi', '擠兌', '借貸危機'],
+        marketStates: ['崩跌', '極恐'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2022-06-01',
+        eventEndAt: '2022-07-15',
+        reactionStartAt: '2022-06-12',  // Withdrawals paused
+        reactionType: 'trust_collapse',
+
+        // Trading Perspective
+        type: 'leverage_cleanse',
+        impactedTokens: ['CEL', 'ETH'],
+        impactSummary: 'CeFi 借貸平台挪用資產導致擠兌，揭開了機構去槓桿的序幕。',
+
+        usageGuide: [
+            '當 CeFi 平台傳出流動性問題時',
+            '當借貸平台提供異常高收益時'
+        ],
+
+        summary: '當 Celsius 宣佈暫停提款時，它成為 LUNA 崩盤後信用緊縮連鎖反應的第一個大型受害者，也為 CeFi 借貸危機提供了標準案例。',
+
+        context: {
+            what: 'Celsius 擁有超過 100 億美元 AUM 的加密借貸平台，因流動性枯竭暫停提款，隨後申請破產。',
+            narrative: '用戶相信 Celsius 的「銀行級安全」與穩定高收益承諾。',
+            realImpact: '暴露了 CeFi 借貸平台的不透明運營、過度槓桿與資產錯配風險。'
+        },
+
+        initialState: {
+            price: 'BTC 約 $28,000，熊市情緒籠罩',
+            fearGreed: '極度恐懼 (12) - 市場信心崩潰'
+        },
+
+        misconceptions: [
+            {
+                myth: 'CeFi 比 DeFi 更安全',
+                fact: 'CeFi 的不透明性使其更難評估真實風險，Celsius 的資產錯配直到破產才被揭露。'
+            },
+            {
+                myth: '高收益有保障',
+                fact: 'Celsius 承諾的高利率來自高風險策略（如 stETH 質押），市場下跌時流動性枯竭。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2022-06-12',
+                title: '暫停提款',
+                description: 'Celsius 宣佈暫停所有提款、轉帳與兌換功能，理由是「極端市場條件」。',
+                marketImpact: 'BTC 跌破 $24,000，市場恐慌加劇。',
+                riskState: '流動性斷裂',
+                riskLevel: 'high'
+            },
+            {
+                date: '2022-06-18',
+                title: 'stETH 折價擴大',
+                description: 'Celsius 持有大量 stETH，其對 ETH 的折價擴大至 6%，無法快速變現。',
+                marketImpact: 'ETH 跌破 $1,000，連鎖清算加速。',
+                riskState: '資產錯配暴露',
+                riskLevel: 'high'
+            },
+            {
+                date: '2022-07-13',
+                title: '申請破產',
+                description: 'Celsius 正式申請 Chapter 11 破產保護。',
+                marketImpact: '市場已大致消化利空，價格築底。',
+                riskState: '信用事件確認',
+                riskLevel: 'medium'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：Celsius 暫停提款期間 BTC 從 $28,000 跌至 $18,000，信用緊縮全面爆發。',
+                interpretation: {
+                    whatItMeans: 'CeFi 借貸平台的流動性危機會傳導至整體市場。',
+                    whatToWatch: '當 stETH 等流動性質押代幣出現異常折價時，需警惕連鎖清算。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：Celsius 暫停提幣引發新一輪恐慌，FGI 再度跌入極度恐慌區間。',
+                interpretation: {
+                    whatItMeans: '機構破產引發的恐慌會延長熊市的築底時間。',
+                    whatToWatch: '恐慌指數的反覆築底是熊市中後期的特徵。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: 'Mt.Gox 倒閉',
+            similarity: '兩者都是用戶將資產託管給中心化機構後遭遇流動性危機，再次驗證「Not your keys, not your coins」。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '質疑高收益來源',
+                desc: 'CeFi 的高利率通常伴隨高風險策略，需了解收益如何產生。'
+            },
+            {
+                type: 'check',
+                label: '分散託管風險',
+                desc: '不要將大量資產長期存放在單一 CeFi 平台。'
+            },
+            {
+                type: 'check',
+                label: '關注流動性指標',
+                desc: '觀察平台相關資產（如 stETH）的折溢價變化。'
+            }
+        ]
+    },
+    {
+        id: 'review-3ac-2022',
+        slug: 'three-arrows-capital-collapse-2022',
+        title: '2022 三箭資本 (3AC) 清算：高槓桿基金的爆倉連鎖',
+        year: 2022,
+        importance: 'A',
+        tags: ['對沖基金', '槓桿', '清算'],
+        marketStates: ['崩跌', '極恐'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2022-06-15',
+        eventEndAt: '2022-07-01',
+        reactionStartAt: '2022-06-15',  // Rumors of insolvency start
+        reactionType: 'trust_collapse',
+
+        // Trading Perspective
+        type: 'leverage_cleanse',
+        impactedTokens: ['BTC', 'ETH'],
+        impactSummary: '百億基金爆倉引發連鎖清算，多個借貸平台因此破產。',
+
+        usageGuide: [
+            '當聽聞大型基金面臨流動性問題時',
+            '當市場出現連鎖清算跡象時'
+        ],
+
+        summary: '當曾管理超過 100 億美元的三箭資本因 LUNA 崩盤與過度槓桿而爆倉時，它引發了波及 BlockFi、Voyager 等多個機構的連鎖清算。',
+
+        context: {
+            what: '三箭資本 (3AC) 是亞洲最大的加密對沖基金之一，因 LUNA 持倉與高槓桿策略在熊市中資不抵債。',
+            narrative: '市場曾認為 3AC 是「聰明錢」，其持倉被視為市場風向標。',
+            realImpact: 'Su Zhu 和 Kyle Davies 的過度自信與槓桿最終導致整個產業的信用緊縮，多家借貸機構因 3AC 違約而破產。'
+        },
+
+        initialState: {
+            price: 'BTC 約 $22,000，處於 LUNA 崩盤後的延續下跌中',
+            fearGreed: '極度恐懼 (10) - 市場陷入恐慌'
+        },
+
+        misconceptions: [
+            {
+                myth: '大型基金不會爆倉',
+                fact: '規模大不等於風險低，3AC 的高槓桿策略在極端行情下完全暴露。'
+            },
+            {
+                myth: '機構違約只影響機構',
+                fact: '3AC 的違約引發借貸平台 BlockFi、Voyager、Genesis 的連鎖危機，最終影響散戶。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2022-06-15',
+                title: '資不抵債傳言',
+                description: '市場開始傳出 3AC 無法滿足追加保證金要求的消息。',
+                marketImpact: '恐慌情緒蔓延，BTC 跌破 $22,000。',
+                riskState: '信用風險升溫',
+                riskLevel: 'high'
+            },
+            {
+                date: '2022-06-27',
+                title: '法院下令清算',
+                description: '英屬維爾京群島法院下令清算 3AC。',
+                marketImpact: '利空落地，市場開始評估連鎖影響範圍。',
+                riskState: '清算確認',
+                riskLevel: 'high'
+            },
+            {
+                date: '2022-07-05',
+                title: 'Voyager 申請破產',
+                description: 'Voyager Digital 因 3AC 違約申請破產，連鎖效應開始。',
+                marketImpact: '市場意識到 3AC 違約的影響遠超預期。',
+                riskState: '連鎖傳導',
+                riskLevel: 'high'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：3AC 清算期間 BTC 在 $19,000-$22,000 區間劇烈波動，市場情緒極度恐懼。',
+                interpretation: {
+                    whatItMeans: '大型機構的槓桿爆倉會引發連鎖反應，影響範圍往往超出預期。',
+                    whatToWatch: '觀察借貸平台是否出現異常提款限制或利率變化。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：3AC 的倒閉揭露了機構間的連環槓桿，市場情緒在恐慌中持續低迷。',
+                interpretation: {
+                    whatItMeans: '去槓桿過程中的情緒修復極為緩慢。',
+                    whatToWatch: '在連環爆雷期間，恐慌指數失去對短期價格的指導意義，轉為反映長期信心匱乏。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: 'LTCM 1998 年危機',
+            similarity: '兩者都是高槓桿對沖基金因過度自信而崩潰，都引發了產業範圍的信用緊縮。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '辨識系統性風險',
+                desc: '當機構違約消息出現時，優先評估連鎖影響範圍。'
+            },
+            {
+                type: 'check',
+                label: '追蹤交易對手風險',
+                desc: '了解自己使用的平台是否與問題機構有借貸關係。'
+            },
+            {
+                type: 'check',
+                label: '保持流動性',
+                desc: '熊市持有現金或穩定幣，等待連鎖清算結束。'
+            }
+        ]
+    },
+    // ===== 2023 Events =====
+    {
+        id: 'review-sec-coinbase-2023',
+        slug: 'sec-coinbase-lawsuit-2023',
+        title: '2023 SEC 起訴 Coinbase：監管清算之戰',
+        year: 2023,
+        importance: 'A',
+        tags: ['監管', 'SEC', '合規'],
+        marketStates: ['觀望', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2023-06-01',
+        eventEndAt: '2023-06-15',
+        reactionStartAt: '2023-06-06',  // SEC files lawsuit
+        reactionType: 'external_shock',
+
+        // Trading Perspective
+        type: 'policy_regulation',
+        impactedTokens: ['BTC', 'COIN'],
+        impactSummary: 'SEC 對合規龍頭的起訴標誌著監管執法時代的全面來臨。',
+
+        usageGuide: [
+            '當 SEC 對加密企業提起訴訟時',
+            '當美國監管態度出現重大轉變時'
+        ],
+
+        summary: '當 SEC 起訴 Coinbase 經營未註冊證券交易所時，美國監管對加密產業的態度從「灰色地帶」正式轉向「執法優先」。',
+
+        context: {
+            what: 'SEC 指控 Coinbase 經營未註冊的證券交易所、經紀商與清算機構，涉及多個代幣。',
+            narrative: '市場長期認為 Coinbase 作為上市公司與最合規的交易所，應該是監管的「安全區」。',
+            realImpact: '此案將決定美國對加密資產證券性的判定標準，影響整個產業的合規策略。'
+        },
+
+        initialState: {
+            price: 'BTC 約 $26,000，處於熊市築底階段',
+            fearGreed: '恐懼 (35) - 市場對監管不確定性感到擔憂'
+        },
+
+        misconceptions: [
+            {
+                myth: 'Coinbase 會因上市公司身份而免責',
+                fact: 'SEC 明確表示，上市並不代表業務合規，IPO 審查與證券法執行是不同程序。'
+            },
+            {
+                myth: '訴訟會立即導致 Coinbase 關閉',
+                fact: '法律程序耗時數年，Coinbase 可持續運營同時積極抗辯。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2023-06-06',
+                title: 'SEC 正式起訴',
+                description: 'SEC 提交訴狀，指控 Coinbase 違反證券法。',
+                marketImpact: 'COIN 股價下跌 12%，BTC 短暫回調 5%。',
+                riskState: '監管壓力升溫',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2023-06-07',
+                title: 'Coinbase CEO 回應',
+                description: 'Brian Armstrong 發推表示將積極抗辯，強調公司一直尋求監管明確性。',
+                marketImpact: '市場情緒稍微平復，開始評估長期影響。',
+                riskState: '對峙確認',
+                riskLevel: 'medium'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：SEC 起訴消息對 BTC 價格影響有限，市場更關注 Coinbase 個股與合規風險。',
+                interpretation: {
+                    whatItMeans: '單一交易所的監管訴訟不會摧毀整個市場，但會影響美國市場的長期發展。',
+                    whatToWatch: '追蹤案件進展與法院對「什麼是證券」的判定。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: 'Ripple vs SEC 案件',
+            similarity: '兩案都涉及 SEC 對加密資產證券性的判定，法院裁決將成為重要先例。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '追蹤案件進展',
+                desc: '法院裁決將直接影響美國加密監管框架。'
+            },
+            {
+                type: 'alert',
+                label: '評估代幣風險',
+                desc: 'SEC 起訴書中列出的代幣可能面臨更大的監管壓力。'
+            }
+        ]
+    },
+    {
+        id: 'review-ripple-2023',
+        slug: 'ripple-sec-ruling-2023',
+        title: '2023 Ripple 案裁決：代幣證券性的切分判定',
+        year: 2023,
+        importance: 'A',
+        tags: ['監管', 'SEC', 'XRP'],
+        marketStates: ['修復', '過熱'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2023-07-01',
+        eventEndAt: '2023-07-20',
+        reactionStartAt: '2023-07-13',  // Judge Torres ruling
+        reactionType: 'external_shock',
+
+        // Trading Perspective
+        type: 'policy_regulation',
+        impactedTokens: ['XRP'],
+        impactSummary: '法院對證券性的切分裁決引發山寨幣暴漲，但法律戰仍未終結。',
+
+        usageGuide: [
+            '當法院對代幣證券性做出裁決時',
+            '當需要理解「銷售場景」對證券判定的影響時'
+        ],
+
+        summary: '當法官裁定 XRP 在二級市場銷售不構成證券時，為「代幣本身 vs 代幣銷售方式」的區分提供了重要法律先例。',
+
+        context: {
+            what: '紐約南區法院 Torres 法官裁定：Ripple 向機構投資者銷售 XRP 構成證券發行，但在交易所的二級市場銷售不構成證券。',
+            narrative: '市場將此視為 SEC「監管過度」敘事的挫敗。',
+            realImpact: '裁決提供了「銷售場景區分」的法律框架，但案件仍在上訴中，最終結果未定。'
+        },
+
+        initialState: {
+            price: 'XRP 約 $0.47，因案件不確定性長期受壓',
+            fearGreed: '中性 (50) - 市場等待裁決'
+        },
+
+        misconceptions: [
+            {
+                myth: 'XRP 被判定為「不是證券」',
+                fact: '裁決是區分銷售場景，機構銷售仍被判定違反證券法，只有二級市場交易不構成證券發行。'
+            },
+            {
+                myth: '此案為所有代幣定性',
+                fact: '法院裁決僅適用於 XRP 案件事實，其他代幣需個案判定。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2023-07-13',
+                title: 'Torres 法官裁決',
+                description: '法官對機構銷售與二級市場銷售做出區分判定。',
+                marketImpact: 'XRP 當日暴漲 70%，市場將其視為產業勝利。',
+                riskState: '利多衝擊',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2023-07-14',
+                title: '山寨幣跟漲',
+                description: '被 SEC 點名的代幣（SOL、ADA、MATIC）跟隨上漲。',
+                marketImpact: '市場暫時解讀為監管壓力緩解。',
+                riskState: '敘事擴散',
+                riskLevel: 'medium'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：BTC 在 Ripple 裁決日小幅上漲，主要受益者是 XRP 與被 SEC 起訴的代幣。',
+                interpretation: {
+                    whatItMeans: '監管裁決會影響特定代幣的風險評估，但對 BTC 影響有限。',
+                    whatToWatch: '關注 SEC 是否上訴以及其他案件的法院裁決。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: 'SEC vs Howey (1946)',
+            similarity: '兩案都涉及「什麼是證券」的定義，Ripple 案為數位資產時代提供了新的判定框架。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '理解裁決範圍',
+                desc: '裁決區分銷售場景，不代表所有代幣都「不是證券」。'
+            },
+            {
+                type: 'alert',
+                label: '追蹤上訴進展',
+                desc: 'SEC 可能上訴，最終結果需等待上級法院確認。'
+            }
+        ]
+    },
+    {
+        id: 'review-binance-cz-2023',
+        slug: 'binance-cz-settlement-2023',
+        title: '2023 Binance/CZ 認罪和解：全球最大交易所的合規大考',
+        year: 2023,
+        importance: 'S',
+        featuredRank: 9,
+        tags: ['交易所', '合規', '和解'],
+        marketStates: ['觀望', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 6,
+        isProOnly: false,
+        publishedAt: '2025-12-16',
+        updatedAt: '2025-12-16',
+        eventStartAt: '2023-11-15',
+        eventEndAt: '2023-11-30',
+        reactionStartAt: '2023-11-21',  // DOJ settlement announced
+        reactionType: 'external_shock',
+
+        // Trading Perspective
+        type: 'exchange_event',
+        impactedTokens: ['BNB'],
+        impactSummary: '以歷史性罰款換取持續運營，最大交易所的合規轉型消除了重大尾部風險。',
+
+        usageGuide: [
+            '當全球性交易所面臨多國監管壓力時',
+            '當評估交易所合規風險對市場的影響時'
+        ],
+
+        summary: '當 Binance 同意支付 43 億美元和解金且 CZ 辭去 CEO 並認罪時，全球最大交易所完成了代價慘痛但必要的合規轉型。',
+
+        context: {
+            what: '美國司法部 (DOJ) 與財政部就反洗錢與制裁違規與 Binance 達成 43 億美元和解，CZ 認罪並辭職。',
+            narrative: '市場一度擔心這是「FTX 2.0」——監管壓力將導致交易所崩潰。',
+            realImpact: 'Binance 選擇和解而非對抗，保全了運營，但支付了歷史性的罰款並接受長期監管。'
+        },
+
+        initialState: {
+            price: 'BTC 約 $37,000，處於年度反彈後的高位整理',
+            fearGreed: '貪婪 (65) - 市場情緒偏熱'
+        },
+
+        misconceptions: [
+            {
+                myth: 'Binance 會像 FTX 一樣倒閉',
+                fact: 'FTX 是挪用用戶資產的詐欺，Binance 是合規問題。兩者本質不同，Binance 選擇認罪和解保全運營。'
+            },
+            {
+                myth: 'CZ 下台會導致 Binance 崩潰',
+                fact: 'Binance 作為全球最大交易所，運營團隊成熟，CEO 更替不影響日常運營。'
+            }
+        ],
+
+        timeline: [
+            {
+                date: '2023-11-21',
+                title: 'DOJ 和解公告',
+                description: 'Binance 同意支付 43 億美元和解金，CZ 辭去 CEO 並認罪。',
+                marketImpact: 'BTC 短暫下跌 3%，市場迅速消化利空。',
+                riskState: '利空落地',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2023-11-22',
+                title: '市場恢復',
+                description: '市場認定 Binance 將持續運營，恐慌情緒消退。',
+                marketImpact: 'BTC 回升至 $37,000 上方，確認利空出盡。',
+                riskState: '信心修復',
+                riskLevel: 'low'
+            },
+            {
+                date: '2023-11-30',
+                title: 'Richard Teng 接任 CEO',
+                description: '前區域合規官 Richard Teng 接任 CEO，強調合規優先。',
+                marketImpact: '市場對 Binance 新領導層反應正面。',
+                riskState: '轉型開始',
+                riskLevel: 'low'
+            }
+        ],
+
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 14
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：和解消息僅造成 3% 短暫回調，市場迅速將其解讀為「利空出盡」。',
+                interpretation: {
+                    whatItMeans: '已知的合規問題落地和解，通常是利空出盡而非危機開始。',
+                    whatToWatch: '觀察 Binance 後續儲備證明 (PoR) 與用戶流量變化。'
+                }
+            }
+        },
+
+        historicalComparison: {
+            event: 'FTX 破產',
+            similarity: '兩者都是大型交易所危機，但性質不同：FTX 是詐欺，Binance 是合規。市場反應也截然不同。'
+        },
+
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '區分合規問題與詐欺',
+                desc: '合規問題可透過罰款和解解決，詐欺則導致崩潰。'
+            },
+            {
+                type: 'check',
+                label: '追蹤儲備證明',
+                desc: '關注 Binance PoR 報告，確認資產充足。'
+            },
+            {
+                type: 'alert',
+                label: '分散交易所風險',
+                desc: '即使是最大交易所也可能面臨監管風險，不宜過度集中。'
             }
         ]
     }

@@ -1,305 +1,251 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { REVIEWS_DATA, MarketEvent } from '@/lib/reviews-data';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Clock, TrendingUp, AlertTriangle, BookOpen, ChevronRight, Filter, Search, Calendar, Star } from 'lucide-react';
+import { ReviewCarousel } from '@/components/reviews/ReviewCarousel';
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet"
+    Zap,
+    Landmark,
+    Building2,
+    Globe,
+    TrendingDown,
+    BarChart2,
+    ArrowRightLeft,
+    Search,
+    X,
+    Filter
+} from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
+
+// Calculate available years from data directly
+const AVAILABLE_YEARS = Array.from(new Set(REVIEWS_DATA.map(d => d.year))).sort((a, b) => b - a);
 
 export default function ReviewsPage() {
     // State
-    const [activeTab, setActiveTab] = useState('all'); // 'all' (was featured/major)
-    const [selectedTag, setSelectedTag] = useState<string | null>(null);
+    const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedYear, setSelectedYear] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
-    // --- P1: Editor's Pick (Must Read) ---
-    // Hardcoded list as requested: ETF 2024, FTX 2022, COVID 2020
-    const MUST_READ_SLUGS = ['bitcoin-etf-launch-2024', 'ftx-collapse-2022', 'covid-crash-2020'];
-    const mustReadReviews = REVIEWS_DATA.filter(r => MUST_READ_SLUGS.includes(r.slug));
-
-    // Remaining Reviews (Non-Must Read, or All if user wants to browse)
-    // Actually user wants "Editor's Pick" to be separate from the list.
-    // Let's keep a "Browse" section below.
-
-    // --- Helpers ---
-    const allYears = Array.from(new Set(REVIEWS_DATA.map(r => r.year))).sort((a, b) => b - a);
-    const apiTags = Array.from(new Set(REVIEWS_DATA.flatMap(r => r.tags)));
-
-    // --- P0: Context Entry Scenarios ---
-    const SCENARIOS = [
-        { label: '市場崩潰時怎麼發生的', icon: AlertTriangle, filter: { tag: '崩跌' } }, // Or tag: '系統性風險'
-        { label: '機構資金進場的案例', icon: TrendingUp, filter: { tag: '機構資金' } },
-        { label: '結構性風險怎麼累積', icon: BookOpen, filter: { tag: '系統性風險' } },
-        { label: '機制失效的教訓', icon: AlertTriangle, filter: { tag: '機制風險' } },
+    // --- Filter Categories ---
+    const FILTERS = [
+        { label: '全部', value: null, icon: null },
+        { label: '政策監管', value: 'policy_regulation', icon: Landmark },
+        { label: '交易所', value: 'exchange_event', icon: Building2 },
+        { label: '槓桿清算', value: 'leverage_cleanse', icon: Zap },
+        { label: '黑天鵝', value: 'macro_shock', icon: Globe },
+        { label: '市場結構', value: 'market_structure', icon: TrendingDown },
     ];
 
-    const applyScenario = (tag: string) => {
-        setSelectedTag(tag);
-        setSelectedYear(null);
-        setActiveTab('all'); // switch to list view
-        window.scrollTo({ top: 400, behavior: 'smooth' }); // Scroll to list
-    }
-
-    // --- Filtering Logic ---
-    const getFilteredReviews = () => {
+    // --- Derived Data ---
+    const { filteredReviews, featuredReviews } = useMemo(() => {
         let filtered = REVIEWS_DATA;
 
-        // 1. Tag
-        if (selectedTag) {
-            filtered = filtered.filter(r => r.tags.includes(selectedTag));
-        }
-
-        // 2. Year
+        // 1. Year Filter (Timeline)
         if (selectedYear) {
             filtered = filtered.filter(r => r.year === selectedYear);
         }
 
-        // 3. Search (Simple implementation for P2 future proofing)
+        // 2. Type Filter
+        if (selectedType) {
+            filtered = filtered.filter(r => r.type === selectedType);
+        }
+
+        // 3. Search
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
             filtered = filtered.filter(r =>
                 r.title.toLowerCase().includes(q) ||
-                r.slug.includes(q)
+                r.impactSummary?.toLowerCase().includes(q) ||
+                r.slug.includes(q) ||
+                r.tags?.some(t => t.toLowerCase().includes(q)) ||
+                r.impactedTokens?.some(t => t.toLowerCase().includes(q)) ||
+                String(r.year).includes(q)
             );
         }
 
         // Sort by Date Descending
-        return filtered.sort((a, b) => new Date(b.eventEndAt).getTime() - new Date(a.eventEndAt).getTime());
-    };
+        filtered.sort((a, b) => new Date(b.eventEndAt).getTime() - new Date(a.eventEndAt).getTime());
 
-    const displayReviews = getFilteredReviews();
+        // Featured: Sort by Featured Rank then Importance
+        const featured = REVIEWS_DATA
+            .filter(r => r.importance === 'S' || (r.featuredRank && r.featuredRank > 0))
+            .sort((a, b) => (a.featuredRank || 99) - (b.featuredRank || 99))
+            .slice(0, 6);
+
+        return { filteredReviews: filtered, featuredReviews: featured };
+    }, [selectedYear, selectedType, searchQuery]);
+
+    const hasActiveFilters = selectedType || selectedYear || searchQuery;
+
+    const clearFilters = () => {
+        setSelectedType(null);
+        setSelectedYear(null);
+        setSearchQuery('');
+    };
 
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
-            {/* Header & P0: Context Entry */}
-            <div className="bg-black/80 backdrop-blur-xl border-b border-white/5 pt-12 pb-6 px-4 sticky top-0 z-40">
-                <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">📓 市場復盤</h1>
-                        <p className="text-xs text-neutral-500 mt-1">把歷史變成可查詢的投資記憶</p>
-                    </div>
-                    {/* Year Jump (P1) */}
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <button className="flex items-center gap-2 bg-neutral-900 border border-white/10 px-3 py-1.5 rounded-full text-xs text-neutral-300">
-                                <Calendar className="w-3 h-3" />
-                                {selectedYear || '所有年份'}
-                            </button>
-                        </SheetTrigger>
-                        <SheetContent side="bottom" className="bg-neutral-950 border-white/10 p-6 rounded-t-xl h-[40vh]">
-                            <SheetHeader className="mb-4">
-                                <SheetTitle className="text-neutral-200 text-sm">選擇年份</SheetTitle>
-                                <SheetDescription className="text-xs text-neutral-500">跳轉至特定年份的市場復盤</SheetDescription>
-                            </SheetHeader>
-                            <div className="grid grid-cols-3 gap-2">
-                                <button
-                                    onClick={() => setSelectedYear(null)}
-                                    className={cn("p-2 rounded-lg text-xs font-mono border", !selectedYear ? "bg-white text-black border-white" : "bg-neutral-900 text-neutral-400 border-white/10")}
-                                >
-                                    ALL
-                                </button>
-                                {allYears.map(year => (
-                                    <button
-                                        key={year}
-                                        onClick={() => setSelectedYear(year)}
-                                        className={cn("p-2 rounded-lg text-xs font-mono border", selectedYear === year ? "bg-white text-black border-white" : "bg-neutral-900 text-neutral-400 border-white/10")}
-                                    >
-                                        {year} <span className="text-[10px] opacity-50 ml-1">({REVIEWS_DATA.filter(r => r.year === year).length})</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </SheetContent>
-                    </Sheet>
-                </div>
-            </div>
+            <PageHeader title="市場復盤資料庫" showLogo={false} backHref="/" backLabel="返回" />
 
-            {/* P0: Compare Banner (New) */}
-            <div className="px-4 mb-6">
-                <Link href="/reviews/compare" className="block">
-                    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-r from-neutral-900 to-neutral-900/50 p-4 hover:border-white/20 transition-all group">
-                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <TrendingUp className="w-24 h-24 rotate-12" />
-                        </div>
-                        <div className="relative z-10 flex items-center justify-between">
-                            <div className="space-y-1">
-                                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                                    <TrendingUp className="w-4 h-4 text-blue-400" />
-                                    歷史事件對照
-                                    <span className="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/20">Beta</span>
-                                </h3>
-                                <p className="text-xs text-neutral-400">
-                                    疊加兩段歷史走勢，發現驚人的相似性
-                                </p>
-                            </div>
-                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                                <ChevronRight className="w-4 h-4 text-neutral-400" />
-                            </div>
-                        </div>
-                    </div>
-                </Link>
-            </div>
-
-            {/* P0: Scenario Entry */}
-            {!selectedTag && !selectedYear && (
-                <div className="space-y-3 mb-2">
-                    <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-wider pl-1">我想找...</span>
-                    <div className="grid grid-cols-2 gap-2">
-                        {SCENARIOS.map((s, i) => (
-                            <button
-                                key={i}
-                                onClick={() => applyScenario(s.filter.tag)}
-                                className="text-left p-3 rounded-lg bg-neutral-900/50 border border-white/5 hover:bg-neutral-800 transition-colors"
-                            >
-                                <h4 className="text-xs text-neutral-300 font-medium mb-0.5">{s.label}</h4>
-                            </button>
-                        ))}
-                    </div>
+            {/* 1. Editor's Picks (Carousel) */}
+            {!hasActiveFilters && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                    <ReviewCarousel items={featuredReviews} />
                 </div>
             )}
 
-            {/* Active Filters Display */}
-            {(selectedTag || selectedYear) && (
-                <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Filtered by:</span>
-                    {selectedTag && (
-                        <Badge variant="secondary" onClick={() => setSelectedTag(null)} className="cursor-pointer bg-white text-black hover:bg-neutral-200 text-[10px] h-5 px-2">
-                            #{selectedTag} <span className="ml-1 text-xs">×</span>
-                        </Badge>
-                    )}
-                    {selectedYear && (
-                        <Badge variant="secondary" onClick={() => setSelectedYear(null)} className="cursor-pointer bg-white text-black hover:bg-neutral-200 text-[10px] h-5 px-2">
-                            {selectedYear} <span className="ml-1 text-xs">×</span>
-                        </Badge>
-                    )}
-                </div>
-            )}
-
-
-            <div className="p-4 space-y-8">
-
-                {/* P1: Must Read (Only show when no specific filter active or if it matches) */}
-                {(!selectedTag && !selectedYear) && (
-                    <section className="space-y-3">
-                        <div className="flex items-center gap-2 px-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            <h2 className="text-sm font-bold text-neutral-200">第一次來必讀</h2>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3">
-                            {mustReadReviews.map(review => (
-                                <ReviewCard key={review.id} review={review} />
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* Browse List */}
-                <section className="space-y-3">
-                    <div className="flex items-center justify-between px-1">
-                        <h2 className="text-sm font-bold text-neutral-200">
-                            {selectedTag ? `#${selectedTag} 相關復盤` : selectedYear ? `${selectedYear} 歷史紀錄` : '完整記憶庫'}
-                        </h2>
-                        <span className="text-xs text-neutral-600 font-mono">{displayReviews.length} 篇</span>
-                    </div>
-
-                    {/* Filter Chips (Horizontal Scroll) */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
-                        <Filter className="w-3 h-3 text-neutral-600 flex-shrink-0" />
-                        {apiTags.map(tag => (
-                            <button
-                                key={tag}
-                                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                                className={cn(
-                                    "text-[10px] px-2.5 py-1 rounded-full whitespace-nowrap transition-colors border",
-                                    selectedTag === tag
-                                        ? "bg-neutral-200 text-black border-neutral-200"
-                                        : "bg-neutral-900 text-neutral-500 border-white/10 hover:border-white/20"
-                                )}
-                            >
-                                {tag}
+            <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-white/5 pb-2 transition-all">
+                <div className="px-4 pt-3 pb-2 space-y-3">
+                    {/* 2. Search Bar */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="搜尋事件 / 代幣 (BTC) / 類型 (FTX)..."
+                            className="w-full bg-neutral-900 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/30 transition-colors"
+                        />
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <X className="w-3 h-3 text-neutral-500 hover:text-white" />
                             </button>
-                        ))}
-                    </div>
-
-                    <div className="space-y-3">
-                        {displayReviews.length > 0 ? (
-                            displayReviews.map((review) => (
-                                <ReviewCard key={review.id} review={review} />
-                            ))
-                        ) : (
-                            <div className="text-center py-12 bg-neutral-900/30 rounded-xl border border-white/5 border-dashed">
-                                <p className="text-neutral-500 text-xs mb-2">沒有找到相關歷史紀錄</p>
-                                <button onClick={() => { setSelectedTag(null); setSelectedYear(null) }} className="text-blue-400 text-xs hover:underline">
-                                    清除篩選
-                                </button>
-                            </div>
                         )}
                     </div>
-                </section>
+
+                    {/* 3. Filter Chips (Horizontal) */}
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+                        {FILTERS.map((f) => (
+                            <button
+                                key={f.label}
+                                onClick={() => setSelectedType(selectedType === f.value ? null : f.value)}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap transition-all text-xs font-medium border shrink-0",
+                                    selectedType === f.value
+                                        ? "bg-white text-black border-white shadow-lg shadow-white/10"
+                                        : "bg-neutral-900 text-neutral-500 border-white/10 hover:border-white/30 hover:text-neutral-300"
+                                )}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* 4. Year Navigation (Timeline) - Plan A */}
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 pt-1 border-t border-white/5 mt-2">
+                        <button
+                            onClick={() => setSelectedYear(null)}
+                            className={cn(
+                                "px-3 py-1 text-[11px] font-mono font-bold rounded transition-colors shrink-0",
+                                selectedYear === null ? "text-amber-500 bg-amber-500/10" : "text-neutral-600 hover:text-neutral-400"
+                            )}
+                        >
+                            ALL
+                        </button>
+                        {AVAILABLE_YEARS.map(year => (
+                            <button
+                                key={year}
+                                onClick={() => setSelectedYear(selectedYear === year ? null : year)}
+                                className={cn(
+                                    "px-3 py-1 text-[11px] font-mono font-bold rounded transition-colors shrink-0",
+                                    selectedYear === year
+                                        ? "text-white bg-white/10 border border-white/20"
+                                        : "text-neutral-600 hover:text-neutral-300"
+                                )}
+                            >
+                                {year}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
-        </main >
+
+            {/* 5. Content List */}
+            <div className="px-4 py-4 space-y-3 max-w-3xl mx-auto min-h-[50vh]">
+                {/* Active Filters Summary */}
+                {hasActiveFilters && (
+                    <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
+                        <span>找到 {filteredReviews.length} 個相關事件</span>
+                        <button onClick={clearFilters} className="text-blue-400 hover:text-blue-300">清除全部</button>
+                    </div>
+                )}
+
+                {filteredReviews.length > 0 ? (
+                    filteredReviews.map((review) => (
+                        <ReviewCard key={review.id} review={review} />
+                    ))
+                ) : (
+                    <div className="text-center py-20 bg-neutral-900/20 rounded-2xl border border-white/5 border-dashed">
+                        <Search className="w-8 h-8 text-neutral-600 mx-auto mb-3" />
+                        <p className="text-neutral-500 text-sm">沒有找到相關事件</p>
+                        <button onClick={clearFilters} className="text-blue-400 text-xs mt-2 hover:underline">
+                            清除篩選條件
+                        </button>
+                    </div>
+                )}
+            </div>
+        </main>
     );
 }
 
-// --- P0: Card Redesign ---
-// [S級｜系統性風險]
-// 2022 FTX 倒閉
-// 一句話結論（淡色）
-// Tags
+// --- Component: ReviewCard ---
 function ReviewCard({ review }: { review: MarketEvent }) {
-    // Extract first sentence or use summary text. User wants "One sentence conclusion".
-    // We will use the full summary but truncate it visually to 1 line?
-    // Or maybe we process the summary to be shorter.
-    // User Ex: "中心化信任崩潰，而非單一資產下跌"
-    // Our data `summary`: "當 FTX ... 宣佈破產時..." (Longer)
-    // We will use `line-clamp-1` and a more subtle color.
+    const getTypeConfig = (type: string) => {
+        switch (type) {
+            case 'leverage_cleanse': return { label: '槓桿清算' };
+            case 'policy_regulation': return { label: '政策監管' };
+            case 'exchange_event': return { label: '交易所危機' };
+            case 'macro_shock': return { label: '黑天鵝' };
+            case 'market_structure': return { label: '市場結構' };
+            case 'tech_event': return { label: '技術事件' };
+            default: return { label: '事件' };
+        }
+    };
+    const typeConfig = getTypeConfig(review.type || 'market_structure');
 
     return (
-        <Link href={`/reviews/${review.slug}`} className="block">
-            <div className="group bg-neutral-900/30 border border-white/[0.05] hover:bg-neutral-900/60 hover:border-white/20 transition-all duration-200 rounded-xl p-4 relative overflow-hidden">
+        <article className="group relative bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:bg-neutral-900/60 hover:border-white/20 transition-all duration-300">
+            {/* Watermark Logo */}
+            <div className="absolute -right-4 -bottom-4 opacity-[0.12] group-hover:opacity-[0.20] transition-opacity rotate-12 pointer-events-none mix-blend-overlay">
+                {review.impactedTokens?.[0] && (
+                    <img
+                        src={`/tokens/${review.impactedTokens[0]}.png`}
+                        className="w-24 h-24 blur-[0.5px]"
+                        alt=""
+                        onError={(e) => e.currentTarget.style.display = 'none'}
+                    />
+                )}
+            </div>
 
-                {/* Header Meta: Grade | Type */}
-                <div className="flex items-center gap-2 mb-1.5">
-                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 border h-4 font-mono bg-neutral-800 text-neutral-300 border-neutral-700">
-                        {review.importance} 級
-                    </Badge>
-                    <span className="text-[10px] text-neutral-400">{review.tags[0]}</span>
-
-                    <span className="ml-auto text-[10px] font-mono text-neutral-600">{review.year}</span>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white transition-colors mb-1">
-                    {review.title}
-                </h3>
-
-                {/* P0: One-line Conclusion */}
-                <p className="text-[11px] text-neutral-500 line-clamp-1 leading-relaxed mb-3">
-                    {review.summary}
-                </p>
-
-                {/* Footer Tags (Secondary) */}
-                <div className="flex items-center justify-between border-t border-white/[0.03] pt-2 mt-1">
-                    <div className="flex gap-2">
-                        {review.tags.slice(1, 3).map(tag => (
-                            <span key={tag} className="text-[9px] text-neutral-600 hover:text-neutral-500">
-                                #{tag}
-                            </span>
+            <div className="p-3 relative">
+                {/* Meta Header */}
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-neutral-500">{review.year}</span>
+                        <div className="w-[1px] h-2 bg-white/10"></div>
+                        <span className="text-[10px] text-neutral-400">{typeConfig.label}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        {review.impactedTokens?.slice(0, 3).map(t => (
+                            <span key={t} className="text-[9px] font-bold text-neutral-600 bg-white/5 px-1 rounded">{t}</span>
                         ))}
                     </div>
-                    <ChevronRight className="w-3 h-3 text-neutral-700 group-hover:text-neutral-400 transition-colors" />
                 </div>
+
+                {/* Main Content */}
+                <Link href={`/reviews/${review.slug}`} className="block">
+                    <h3 className="text-sm font-bold text-neutral-200 group-hover:text-white mb-1.5 leading-snug">
+                        {review.title.split('：')[0]}
+                        {review.title.split('：')[1] && <span className="text-neutral-500 font-normal">：{review.title.split('：')[1]}</span>}
+                    </h3>
+                    <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                        {review.impactSummary || review.summary}
+                    </p>
+                </Link>
             </div>
-        </Link>
+        </article>
     )
 }
