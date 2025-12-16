@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { ChevronRight, Calendar } from 'lucide-react'
+import { ChevronRight, Calendar, Activity, Briefcase, Landmark } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
     MACRO_EVENT_DEFS,

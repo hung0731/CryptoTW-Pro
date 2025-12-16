@@ -53,8 +53,8 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         key: 'cpi',
         name: '消費者物價指數',
         narrative: '通膨敘事核心',
-        icon: '📊',
-        insight: '🧠 典型行為：公布後 24h 易反轉',
+        icon: 'CPI',
+        insight: '典型行為：公布後 24h 易反轉',
         chartRange: 'D-3 ~ D+3',
         windowDisplay: { start: -3, end: 3 },
         windowStats: { start: -1, end: 1 } // For calculating simple win/loss
@@ -63,8 +63,8 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         key: 'nfp',
         name: '非農就業',
         narrative: '風險資產短線波動王',
-        icon: '💼',
-        insight: '⚠️ 特性：短線震盪 > 趨勢',
+        icon: 'NFP',
+        insight: '特性：短線震盪 > 趨勢',
         chartRange: 'D-3 ~ D+3',
         windowDisplay: { start: -3, end: 3 },
         windowStats: { start: -1, end: 1 }
@@ -72,9 +72,9 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
     {
         key: 'fomc',
         name: '聯準會利率決議',
-        icon: '🏛️',
+        icon: 'FOMC',
         narrative: '趨勢切換來源',
-        insight: '⚡ 決策關鍵：勝率與波動',
+        insight: '決策關鍵：勝率與波動',
         chartRange: 'D-1 ~ D+5',
         windowDisplay: { start: -1, end: 5 },
         windowStats: { start: -1, end: 3 }

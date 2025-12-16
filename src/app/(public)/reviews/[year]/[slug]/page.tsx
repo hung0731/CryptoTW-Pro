@@ -291,7 +291,7 @@ export default function ReviewDetailPage() {
 
                 {/* 7. 未來警訊 */}
                 <section className="p-4 pt-0">
-                    <div className={CARDS.subtle + " " + SPACING.cardPadding}>
+                    <div className={CARDS.base + " " + SPACING.cardPadding}>
                         <div className="flex items-center gap-2 mb-3">
                             <Lightbulb className="w-3.5 h-3.5 text-white" />
                             <h2 className={TYPOGRAPHY.cardSubtitle + " text-neutral-300"}>
