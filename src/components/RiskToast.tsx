@@ -30,7 +30,7 @@ export function RiskToast() {
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-[60] flex justify-center pointer-events-none p-4 pb-24 md:pb-6">
-            <div className="w-full max-w-[480px] pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300">
+            <div className="w-full max-w-[480px] pointer-events-auto">
                 <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 shadow-2xl rounded-xl p-4 ring-1 ring-black/5">
                     <div className="flex flex-col gap-3">
                         {/* Header */}
@@ -54,13 +54,13 @@ export function RiskToast() {
                         <div className="flex gap-3 items-center mt-1">
                             <Link
                                 href="/disclosure"
-                                className="flex-1 text-center text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                                className="flex-1 text-center text-xs text-[#666666] hover:text-[#A0A0A0]"
                             >
                                 了解完整政策
                             </Link>
                             <button
                                 onClick={handleAcknowledge}
-                                className="flex-[2] bg-white hover:bg-zinc-200 text-black font-bold py-2 px-4 rounded-lg transition-all active:scale-95 shadow-sm text-xs"
+                                className="flex-[2] bg-white hover:bg-[#E0E0E0] text-black font-bold py-2 px-4 rounded-lg active:scale-95 shadow-sm text-xs"
                             >
                                 我已了解
                             </button>

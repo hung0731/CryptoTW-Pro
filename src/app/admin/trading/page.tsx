@@ -185,7 +185,7 @@ export default function TradingDataPage() {
                         <div className="text-center py-12 text-neutral-500">載入中...</div>
                     ) : bindings.length === 0 ? (
                         <div className="text-center py-12 text-neutral-500">
-                            暫無驗證用戶
+                            尚無驗證用戶
                         </div>
                     ) : (
                         <div className="overflow-x-auto">

@@ -52,7 +52,7 @@ export function LiquidationWaterfall() {
                             key={tf}
                             onClick={() => setTimeframe(tf as any)}
                             className={cn(
-                                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                                "px-3 py-1 text-xs font-medium rounded-md",
                                 timeframe === tf ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-neutral-300"
                             )}
                         >

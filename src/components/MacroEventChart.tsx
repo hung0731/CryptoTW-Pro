@@ -7,6 +7,7 @@ import {
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { CHART } from '@/lib/design-tokens'
+import { formatPercent } from '@/lib/format-helpers'
 
 interface MacroPricePoint {
     t: number  // Day relative to D0 (-5 to +5)
@@ -105,7 +106,7 @@ export function MacroEventChart({
                                 "font-mono font-bold",
                                 p.value >= 0 ? "text-green-400" : "text-red-400"
                             )}>
-                                {p.value !== null ? `${p.value >= 0 ? '+' : ''}${p.value.toFixed(2)}%` : 'N/A'}
+                                {p.value !== null ? formatPercent(p.value) : '—'}
                             </span>
                         </div>
                     ))}
@@ -249,7 +250,7 @@ export function MacroEventChart({
                         "text-sm font-bold",
                         finalReturn >= 0 ? "text-green-400" : "text-red-400"
                     )}>
-                        D+{range === 'short' ? 3 : 5} 報酬：{finalReturn >= 0 ? '+' : ''}{finalReturn.toFixed(2)}%
+                        D+{range === 'short' ? 3 : 5} 報酬：{formatPercent(finalReturn)}
                     </span>
                 </div>
             )}

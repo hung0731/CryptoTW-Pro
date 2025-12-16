@@ -86,7 +86,7 @@ export function BullBearIndex() {
                     <div className="w-1/4 bg-red-500/30" />
                 </div>
                 <div
-                    className={cn("absolute h-4 w-1 -top-1 rounded-full transition-all", getBgColor(data.index))}
+                    className={cn("absolute h-4 w-1 -top-1 rounded-full", getBgColor(data.index))}
                     style={{ left: `${data.index}%` }}
                 />
             </div>
@@ -177,7 +177,7 @@ export function FundingRateRankings() {
                     </div>
                     <div className="space-y-0.5">
                         {(data.extremePositive || []).slice(0, 8).map((item: any, i: number) => (
-                            <div key={i} className="flex items-center justify-between text-[10px] py-0.5 hover:bg-white/5 rounded px-1 transition-colors">
+                            <div key={i} className="flex items-center justify-between text-[10px] py-0.5 hover:bg-[#0E0E0F] rounded px-1">
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-neutral-600 font-mono w-3 text-[9px]">{i + 1}</span>
                                     <span className="text-neutral-300 font-medium">{item.symbol}</span>
@@ -203,7 +203,7 @@ export function FundingRateRankings() {
                     </div>
                     <div className="space-y-0.5">
                         {(data.extremeNegative || []).slice(0, 8).map((item: any, i: number) => (
-                            <div key={i} className="flex items-center justify-between text-[10px] py-0.5 hover:bg-white/5 rounded px-1 transition-colors">
+                            <div key={i} className="flex items-center justify-between text-[10px] py-0.5 hover:bg-[#0E0E0F] rounded px-1">
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-neutral-600 font-mono w-3 text-[9px]">{i + 1}</span>
                                     <span className="text-neutral-300 font-medium">{item.symbol}</span>
@@ -410,8 +410,8 @@ export function LongShortSummary({ data }: { data?: DashboardData['longShort'] }
             </div>
             <div className="mt-2">
                 <div className="h-4 bg-neutral-800 rounded-full overflow-hidden flex mb-2 relative">
-                    <div className="bg-green-500/60 h-full transition-all duration-500" style={{ width: `${longRate}%` }} />
-                    <div className="bg-red-500/60 h-full transition-all duration-500" style={{ width: `${shortRate}%` }} />
+                    <div className="bg-[#4ADE80]/60 h-full" style={{ width: `${longRate}%` }} />
+                    <div className="bg-[#F87171]/60 h-full" style={{ width: `${shortRate}%` }} />
                     {/* Center Marker */}
                     <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-black/20 z-10" />
                 </div>

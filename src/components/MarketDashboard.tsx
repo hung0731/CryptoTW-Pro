@@ -74,7 +74,7 @@ export default function MarketDashboard() {
                     <CardContent className="p-0 w-full overflow-x-auto no-scrollbar">
                         <div className="flex items-center divide-x divide-slate-200/50 min-w-max">
                             {prices.map((coin) => (
-                                <div key={coin.id} className="flex items-center gap-3 px-6 py-4 min-w-[200px] hover:bg-white/40 transition-colors">
+                                <div key={coin.id} className="flex items-center gap-3 px-6 py-4 min-w-[200px] hover:bg-[#0E0E0F]">
                                     <img src={coin.image} alt={coin.symbol} className="w-8 h-8 rounded-full" />
                                     <div>
                                         <div className="font-bold text-slate-900 uppercase flex items-center gap-2">

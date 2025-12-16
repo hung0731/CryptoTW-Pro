@@ -7,6 +7,7 @@ import { ArrowLeftRight } from 'lucide-react'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { formatPercent, formatPrice } from '@/lib/format-helpers'
 
 // ============================================
 // Exchange Transparency Component
@@ -71,7 +72,7 @@ export function ExchangeTransparency() {
                 </div>
                 <div className="divide-y divide-white/5">
                     {(data.items || []).map((item: any, i: number) => (
-                        <div key={i} className="grid grid-cols-12 gap-2 p-3 items-center hover:bg-white/5 transition-colors">
+                        <div key={i} className="grid grid-cols-12 gap-2 p-3 items-center hover:bg-[#0E0E0F]">
                             <div className="col-span-4 flex items-center gap-2">
                                 <span className="text-neutral-600 font-mono text-xs w-3">{i + 1}</span>
                                 <span className="text-sm font-medium text-white">{item.name}</span>
@@ -172,7 +173,7 @@ export function ETFFlowCard() {
             <div className="mt-2 flex items-center gap-3 text-[10px] text-neutral-400">
                 <span>7D: <span className={data.flow7d > 0 ? 'text-green-400' : 'text-red-400'}>{data.flow7d > 0 ? '+' : ''}{flow7dDisplay}</span></span>
                 <span className="text-neutral-600">|</span>
-                <span>BTC ${data.latest.priceUsd?.toLocaleString()}</span>
+                <span>BTC {formatPrice(data.latest.priceUsd)}</span>
             </div>
         </div>
     )
@@ -236,7 +237,7 @@ export function BubbleIndexCard() {
                 <span className="text-xs text-neutral-500">週期指標</span>
             </div>
             <div className="mt-2 text-[10px] text-neutral-400">
-                <span>BTC ${data.latest.price?.toLocaleString()}</span>
+                <span>BTC {formatPrice(data.latest.price)}</span>
                 <span className="mx-2 text-neutral-600">|</span>
                 <span>{data.latest.date}</span>
             </div>
@@ -374,9 +375,9 @@ export function StablecoinCard() {
                 <span className="text-xs text-neutral-500">乾火藥</span>
             </div>
             <div className="mt-2 flex items-center gap-3 text-[10px] text-neutral-400">
-                <span>7D: <span className={isPositive ? 'text-green-400' : 'text-red-400'}>{isPositive ? '+' : ''}{change7d.toFixed(1)}%</span></span>
+                <span>7D: <span className={isPositive ? 'text-green-400' : 'text-red-400'}>{formatPercent(change7d)}</span></span>
                 <span className="text-neutral-600">|</span>
-                <span>30D: <span className={data.change30d > 0 ? 'text-green-400' : 'text-red-400'}>{data.change30d > 0 ? '+' : ''}{data.change30d.toFixed(1)}%</span></span>
+                <span>30D: <span className={data.change30d > 0 ? 'text-green-400' : 'text-red-400'}>{formatPercent(data.change30d)}</span></span>
             </div>
         </div>
     )
@@ -441,7 +442,7 @@ export function CoinbasePremiumCard() {
                 <span className="text-xs text-neutral-500">vs 幣安</span>
             </div>
             <div className="mt-2 text-[10px] text-neutral-400">
-                <span>7D 均值: <span className={data.avg7d > 0 ? 'text-green-400' : 'text-red-400'}>{data.avg7d > 0 ? '+' : ''}{data.avg7d.toFixed(3)}%</span></span>
+                <span>7D 均值: <span className={data.avg7d > 0 ? 'text-green-400' : 'text-red-400'}>{formatPercent(data.avg7d)}</span></span>
             </div>
         </div>
     )

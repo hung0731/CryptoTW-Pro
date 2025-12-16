@@ -9,6 +9,7 @@ import { AlertTriangle, AlertCircle, Zap, TrendingDown, TrendingUp, Info } from 
 import { REVIEWS_DATA } from '@/lib/reviews-data'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
 import { CHART } from '@/lib/design-tokens'
+import { formatPercent } from '@/lib/format-helpers'
 
 // 1. Define Visual Domains (Clamps)
 // 1. Define Visual Domains (Clamps)
@@ -266,7 +267,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                                     </div>
                                     <div className="text-right">
                                         <span className={`font-mono font-bold text-sm ${realVal !== null && realVal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {realVal !== null ? (realVal > 0 ? '+' : '') + Number(realVal).toFixed(2) + '%' : 'N/A'}
+                                            {realVal !== null ? formatPercent(Number(realVal)) : '—'}
                                         </span>
                                     </div>
                                 </div>
@@ -275,7 +276,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                                 {isClamped && (
                                     <div className="flex items-center justify-end gap-1 mb-1 text-amber-500">
                                         <AlertCircle className="w-3 h-3" />
-                                        <span className="text-[10px]">極端值已截斷 ({p.value > 0 ? '+' : ''}{p.value}%)</span>
+                                        <span className="text-[10px]">極端值已截斷 ({formatPercent(p.value)})</span>
                                     </div>
                                 )}
                             </div>
@@ -483,7 +484,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             </ResponsiveContainer>
 
             {/* 8. Disclaimer (Bottom Left inside chart area) */}
-            <div className="absolute bottom-1 left-2 z-10 hidden md:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute bottom-1 left-2 z-10 hidden md:flex items-center gap-1.5 opacity-0 group-hover:opacity-100">
                 <Info className="w-3 h-3 text-neutral-600" />
                 <span className="text-[9px] text-neutral-600 font-mono">
                     🔁 此圖表以「市場反應起點（D0）」對齊 🧠 非新聞時間，避免錯誤比較

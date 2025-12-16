@@ -59,7 +59,7 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
         <Sheet>
             <SheetTrigger asChild>
                 {trigger || (
-                    <button className="inline-flex items-center justify-center text-neutral-600 hover:text-neutral-400 transition-colors ml-1 align-middle">
+                    <button className="inline-flex items-center justify-center text-[#525252] hover:text-[#808080] ml-1 align-middle">
                         <HelpCircle className="w-3.5 h-3.5" />
                     </button>
                 )}
@@ -92,7 +92,7 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                     <div className="mt-6">
                         <button
                             onClick={() => setShowTimeline(!showTimeline)}
-                            className="w-full flex items-center justify-between px-6 py-3 text-neutral-500 hover:text-neutral-400 transition-colors"
+                            className="w-full flex items-center justify-between px-6 py-3 text-[#666666] hover:text-[#808080]"
                         >
                             <span className="text-xs font-medium tracking-wide">
                                 📅 {timeline.title}
@@ -104,7 +104,7 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                             )}
                         </button>
 
-                        <div className={`transition-all duration-300 ease-out ${showTimeline ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+                        <div className={`${showTimeline ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
                             {/* 區塊背景：#0B0B0B */}
                             <div className="bg-[#0B0B0B] py-4">
                                 {/* 水平滑動 + 右側漸層消失 */}
@@ -113,15 +113,14 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                                         <div className="flex gap-2.5 px-6 pb-2" style={{ width: 'max-content' }}>
                                             {timeline.cards.map((card, index) => {
                                                 const isLesson = isLessonCard(card.type)
-                                                
+
                                                 return (
-                                                    <div 
-                                                        key={index} 
-                                                        className={`flex-none rounded-lg overflow-hidden ${
-                                                            isLesson 
-                                                                ? 'w-60 bg-[#181818] border border-white/10' 
-                                                                : 'w-52 bg-[#111]'
-                                                        }`}
+                                                    <div
+                                                        key={index}
+                                                        className={`flex-none rounded-lg overflow-hidden ${isLesson
+                                                            ? 'w-60 bg-[#181818] border border-white/10'
+                                                            : 'w-52 bg-[#111]'
+                                                            }`}
                                                     >
                                                         {/* 日期：極淡、極小 */}
                                                         <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
@@ -132,16 +131,15 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                                                                 {card.icon}
                                                             </span>
                                                         </div>
-                                                        
+
                                                         {/* 第一層：市場狀態（白、bold） */}
                                                         <div className="px-3 pb-2">
-                                                            <div className={`text-[13px] leading-snug ${
-                                                                isLesson ? 'text-white font-semibold' : 'text-neutral-200 font-medium'
-                                                            }`}>
+                                                            <div className={`text-[13px] leading-snug ${isLesson ? 'text-white font-semibold' : 'text-neutral-200 font-medium'
+                                                                }`}>
                                                                 {card.marketState}
                                                             </div>
                                                         </div>
-                                                        
+
                                                         {/* 第二層：當下該做（色彩區分） */}
                                                         <div className="px-3 pb-3">
                                                             <div className={`text-[11px] leading-relaxed ${getActionColor(card.type)}`}>
@@ -153,7 +151,7 @@ export function ExplainTooltip({ term, definition, explanation, timeline, trigge
                                             })}
                                         </div>
                                     </div>
-                                    
+
                                     {/* 右側漸層消失（peek 效果） */}
                                     <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#0B0B0B] to-transparent pointer-events-none" />
                                 </div>

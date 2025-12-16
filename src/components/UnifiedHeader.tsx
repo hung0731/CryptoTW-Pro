@@ -60,11 +60,11 @@ export function UnifiedHeader({
                     <div className="flex items-center justify-start">
                         {showBack && (
                             backHref ? (
-                                <Link href={backHref} className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center">
+                                <Link href={backHref} className="w-9 h-9 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] flex items-center justify-center">
                                     <ArrowLeft className="w-4 h-4 text-neutral-400" />
                                 </Link>
                             ) : (
-                                <button onClick={handleBack} className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center">
+                                <button onClick={handleBack} className="w-9 h-9 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] flex items-center justify-center">
                                     <ArrowLeft className="w-4 h-4 text-neutral-400" />
                                 </button>
                             )
@@ -90,7 +90,7 @@ export function UnifiedHeader({
             )}>
                 <div className="flex items-center px-4 h-14 max-w-lg mx-auto">
                     {backHref ? (
-                        <Link href={backHref} className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center mr-3">
+                        <Link href={backHref} className="w-9 h-9 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] flex items-center justify-center mr-3">
                             <ArrowLeft className="w-4 h-4 text-neutral-400" />
                         </Link>
                     ) : (
@@ -121,7 +121,7 @@ export function UnifiedHeader({
             <div className="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
                 <div className="flex items-center">
                     {backHref ? (
-                        <Link href={backHref} className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center mr-3">
+                        <Link href={backHref} className="w-9 h-9 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] flex items-center justify-center mr-3">
                             <ArrowLeft className="w-4 h-4 text-neutral-400" />
                         </Link>
                     ) : (

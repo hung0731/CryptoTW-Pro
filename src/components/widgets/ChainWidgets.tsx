@@ -144,7 +144,7 @@ export function WhaleAlertFeed() {
         return (
             <div className="bg-neutral-900/50 rounded-xl p-4 text-center border border-dashed border-white/10">
                 <Radar className="w-5 h-5 text-neutral-600 mx-auto mb-1" />
-                <p className="text-xs text-neutral-500">暫無巨鯨快訊</p>
+                <p className="text-xs text-neutral-500">尚無巨鯨快訊</p>
             </div>
         )
     }
@@ -310,7 +310,7 @@ export function WhalePositionsList() {
         return (
             <div className="bg-neutral-900/50 rounded-xl p-6 text-center border border-dashed border-white/10">
                 <Users className="w-6 h-6 text-neutral-600 mx-auto mb-2" />
-                <p className="text-xs text-neutral-500">暫無持倉數據</p>
+                <p className="text-xs text-neutral-500">尚無持倉數據</p>
             </div>
         )
     }
@@ -500,7 +500,7 @@ export function IndicatorsGrid({ compact = false }: { compact?: boolean }) {
                     <div
                         key={i}
                         className={cn(
-                            "rounded-xl p-4 border transition-all",
+                            "rounded-xl p-4 border",
                             colorMap[ind.color] || 'bg-neutral-900/30 border-white/5'
                         )}
                     >

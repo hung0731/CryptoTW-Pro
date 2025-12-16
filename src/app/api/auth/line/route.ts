@@ -1,32 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { rateLimit } from '@/lib/rate-limit'
 import jwt from 'jsonwebtoken'
+
+// Token cache for anti-replay (in-memory, per instance)
+// In production, consider using Redis for distributed systems
+const usedTokens = new Map<string, number>()
+const TOKEN_EXPIRY_MS = 5 * 60 * 1000 // 5 minutes
+
+// Clean up expired tokens periodically
+function cleanupExpiredTokens() {
+    const now = Date.now()
+    for (const [token, timestamp] of usedTokens.entries()) {
+        if (now - timestamp > TOKEN_EXPIRY_MS) {
+            usedTokens.delete(token)
+        }
+    }
+}
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json()
         const { accessToken } = body
 
-        if (!accessToken) {
+        // 1. Validate input
+        if (!accessToken || typeof accessToken !== 'string') {
             return NextResponse.json({ error: 'Missing accessToken' }, { status: 400 })
         }
 
-        // 1. Verify LINE Token & Get Profile
+        // 2. Rate limit by IP (10 auth attempts per minute)
+        const ip = req.headers.get('x-forwarded-for') || 'unknown'
+        const { success: rateLimitOk } = await rateLimit(`auth:${ip}`, 10, 60)
+        if (!rateLimitOk) {
+            return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+        }
+
+        // 3. Anti-replay: Check if token was already used
+        const tokenHash = accessToken.substring(0, 32) // Use prefix as identifier
+        if (usedTokens.has(tokenHash)) {
+            console.warn('[Auth/Line] Token replay detected')
+            return NextResponse.json({ error: 'Token already used' }, { status: 400 })
+        }
+
+        // Mark token as used (before verification to prevent race conditions)
+        usedTokens.set(tokenHash, Date.now())
+
+        // Cleanup old tokens periodically
+        if (usedTokens.size > 1000) {
+            cleanupExpiredTokens()
+        }
+
+        // 4. Verify LINE Token & Get Profile
         const profileRes = await fetch('https://api.line.me/v2/profile', {
             headers: { Authorization: `Bearer ${accessToken}` }
         })
 
         if (!profileRes.ok) {
+            // Token invalid - remove from used cache so retry is possible
+            usedTokens.delete(tokenHash)
             return NextResponse.json({ error: 'Invalid access token' }, { status: 401 })
         }
 
         const profile = await profileRes.json()
         const { userId: lineUserId, displayName, pictureUrl } = profile
 
-        // 2. Init Admin Client
+        // Validate LINE userId format (basic sanity check)
+        if (!lineUserId || typeof lineUserId !== 'string' || lineUserId.length < 10) {
+            return NextResponse.json({ error: 'Invalid LINE profile' }, { status: 400 })
+        }
+
+        // 5. Init Admin Client (required for auth.admin operations)
         const supabase = createAdminClient()
 
-        // 3. Upsert Public User to get UUID
+        // 6. Upsert Public User to get UUID
         const { data: publicUser, error: upsertError } = await supabase
             .from('users')
             .upsert({
@@ -43,16 +89,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Database error' }, { status: 500 })
         }
 
-        // 4. Sync with Auth Users (Ensure Auth User exists with same UUID)
+        // 7. Sync with Auth Users (Ensure Auth User exists with same UUID)
         const { data: authUser, error: getAuthError } = await supabase.auth.admin.getUserById(publicUser.id)
 
         if (getAuthError || !authUser.user) {
             // User doesn't exist in Auth, create it
-            // Use a dummy email for mapping (LINE users might not provide email)
             const dummyEmail = `${lineUserId}@line.login.cryptotw`
 
             const { error: createAuthError } = await supabase.auth.admin.createUser({
-                id: publicUser.id, // FORCE SAME UUID
+                id: publicUser.id,
                 email: dummyEmail,
                 email_confirm: true,
                 user_metadata: { line_user_id: lineUserId, display_name: displayName }
@@ -64,18 +109,17 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // 5. Mint Supabase JWT (Custom Token)
+        // 8. Mint Supabase JWT
         const jwtSecret = process.env.SUPABASE_JWT_SECRET
         if (!jwtSecret) {
             console.error('Missing SUPABASE_JWT_SECRET')
             return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
         }
 
-        // Payload must match Supabase expectation
         const token = jwt.sign({
             aud: 'authenticated',
             role: 'authenticated',
-            sub: publicUser.id, // The User UUID
+            sub: publicUser.id,
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7), // 7 days
             app_metadata: {
                 provider: 'line',

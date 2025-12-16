@@ -19,7 +19,7 @@ export function MarketContextCard({ context, updatedAt }: MarketContextCardProps
     if (!context) return null
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-5 space-y-4">
+        <div className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl p-5 space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export function MarketContextCard({ context, updatedAt }: MarketContextCardProps
             {/* Highlights List */}
             <div className="space-y-3">
                 {context.highlights?.map((item, i) => (
-                    <div key={i} className="bg-black/20 rounded-lg p-3 border border-white/5 hover:border-white/10 transition-colors">
+                    <div key={i} className="bg-black/20 rounded-lg p-3 border border-[#1A1A1A] hover:border-[#2A2A2A]">
                         <div className="flex items-start gap-3">
                             <div className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-500/10 flex items-center justify-center mt-0.5">
                                 <span className="text-xs font-bold text-purple-400">{i + 1}</span>
@@ -80,5 +80,5 @@ export function MarketContextCard({ context, updatedAt }: MarketContextCardProps
                 </p>
             </div>
         </div>
-    )
+
 }

@@ -273,10 +273,10 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                                 <div>
                                     <div className="flex flex-col gap-0.5">
                                         <div className="flex items-center gap-2">
-                                            <h2 className={cn("text-sm font-bold tracking-wide group-hover:text-white transition-colors", COLORS.textPrimary)}>
+                                            <h2 className={cn("text-sm font-bold tracking-wide group-hover:text-white", COLORS.textPrimary)}>
                                                 {eventDef.name}
                                             </h2>
-                                            <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666] transition-colors" />
+                                            <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666]" />
                                         </div>
                                         {/* Market Definition */}
                                         <p className={cn("text-[10px]", COLORS.textTertiary)}>

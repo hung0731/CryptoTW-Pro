@@ -273,7 +273,7 @@ export function ArbitrageView() {
 
                         {data.length === 0 && (
                             <div className="text-center py-10">
-                                <p className="text-sm text-neutral-500">暫無符合條件的套利機會</p>
+                                <p className="text-sm text-neutral-500">尚無符合條件的套利機會</p>
                             </div>
                         )}
                     </>

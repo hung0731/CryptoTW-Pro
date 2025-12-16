@@ -56,7 +56,7 @@ export function BottomNav() {
                         key={item.href}
                         href={item.href}
                         className={cn(
-                            "flex flex-col items-center justify-center space-y-1 transition-colors duration-200",
+                            "flex flex-col items-center justify-center space-y-1",
                             item.active
                                 ? "text-white"
                                 : "text-neutral-500 hover:text-neutral-300"

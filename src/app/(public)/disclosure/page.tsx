@@ -21,7 +21,7 @@ export default function DisclosurePage() {
 
                 <div className="space-y-3">
                     {/* Section 1: Non-investment advice */}
-                    <section className="bg-neutral-900/50 border border-white/10 rounded-lg p-4">
+                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
                         <h2 className="font-bold text-sm text-white mb-2">
                             非投資建議聲明
                         </h2>
@@ -39,7 +39,7 @@ export default function DisclosurePage() {
                     </section>
 
                     {/* Section 2: Data Source & AI */}
-                    <section className="bg-neutral-900/30 border border-white/5 rounded-lg p-4">
+                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
                         <h2 className="font-bold text-sm text-white mb-2">資料來源與分析</h2>
                         <div className="space-y-3 text-xs leading-relaxed text-neutral-400">
                             <div>
@@ -62,7 +62,7 @@ export default function DisclosurePage() {
                     </section>
 
                     {/* Section 3: Affiliate Marketing */}
-                    <section className="bg-neutral-900/30 border border-white/5 rounded-lg p-4">
+                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
                         <h2 className="font-bold text-sm text-white mb-2">聯盟行銷揭露</h2>
                         <div className="text-xs leading-relaxed text-neutral-400 space-y-2">
                             <p>
@@ -76,7 +76,7 @@ export default function DisclosurePage() {
                     </section>
 
                     {/* Section 4: Cookie & LINE */}
-                    <section className="bg-neutral-900/30 border border-white/5 rounded-lg p-4">
+                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
                         <h2 className="font-bold text-sm text-white mb-2">Cookie 與隱私</h2>
                         <div className="grid grid-cols-1 gap-3 text-xs text-neutral-400 leading-relaxed">
                             <div>
@@ -91,7 +91,7 @@ export default function DisclosurePage() {
                     </section>
 
                     {/* Section 5: Server & Data */}
-                    <section className="bg-neutral-900/30 border border-white/5 rounded-lg p-4">
+                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
                         <h2 className="font-bold text-sm text-white mb-2">資料儲存</h2>
                         <div className="text-xs leading-relaxed text-neutral-400">
                             <p>

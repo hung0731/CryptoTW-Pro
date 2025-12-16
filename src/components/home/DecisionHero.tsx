@@ -129,7 +129,7 @@ export function DecisionHero() {
         <div className="space-y-3">
             {/* Hero Decision Card */}
             <div className={cn(
-                "relative rounded-2xl border p-4 transition-all",
+                "relative rounded-2xl border p-4",
                 config.bg,
                 config.border,
                 "shadow-lg",
@@ -178,14 +178,14 @@ export function DecisionHero() {
                     <div className="flex items-center gap-2">
                         <Link
                             href="/market"
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-neutral-300 hover:bg-white/10 transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] text-xs text-[#A0A0A0] hover:bg-[#1A1A1A]"
                         >
                             <span>查看依據</span>
                             <ChevronRight className="w-3.5 h-3.5" />
                         </Link>
                         <Link
                             href="/reviews"
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-neutral-300 hover:bg-white/10 transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#0E0E0F] border border-[#1A1A1A] text-xs text-[#A0A0A0] hover:bg-[#1A1A1A]"
                         >
                             <History className="w-3.5 h-3.5" />
                             <span>相似歷史</span>

@@ -146,8 +146,8 @@ export function HomeRouterWidget() {
 
             {/* 2. Anomaly Alert (Single Critical) - Standard Background */}
             {data.anomaly && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="bg-neutral-900/50 border border-red-500/30 rounded-xl p-4 relative overflow-hidden">
+                <div>
+                    <div className="bg-[#0E0E0F] border border-red-500/30 rounded-xl p-4 relative overflow-hidden">
                         {/* Removed red background, kept red border for alert meaning, but base is neutral */}
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div>
@@ -176,7 +176,7 @@ export function HomeRouterWidget() {
                                 "flex items-center justify-center w-full py-2 border rounded-lg text-xs font-bold",
                                 data.anomaly.type === 'funding_rate'
                                     ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
-                                    : "bg-neutral-800 hover:bg-neutral-700 border-white/5 text-neutral-300"
+                                    : "bg-[#0E0E0F] border-[#1A1A1A] hover:bg-neutral-700 text-neutral-300"
                             )}
                         >
                             {data.anomaly.type === 'funding_rate' ? (
@@ -208,7 +208,7 @@ export function HomeRouterWidget() {
                                         來自{ref.source}
                                     </span>
                                 </div>
-                                <span className="text-sm text-neutral-300 group-hover:text-white transition-colors mt-0.5">
+                                <span className="text-sm text-[#A0A0A0] group-hover:text-white mt-0.5">
                                     {ref.implication}
                                 </span>
                             </div>

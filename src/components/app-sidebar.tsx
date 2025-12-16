@@ -92,7 +92,7 @@ export function AppSidebar() {
                     <Link
                       href={item.url}
                       className={cn(
-                        "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors",
+                        "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm",
                         isActive
                           ? "bg-white/10 text-white"
                           : "text-neutral-400 hover:bg-white/5 hover:text-neutral-200"

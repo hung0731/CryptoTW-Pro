@@ -74,11 +74,11 @@ export function MarketStatusGrid() {
 
     // Default Fallback (Safe Guard)
     const displayData = data || {
-        regime: { label: '暫無', code: 'stable', value: '--' },
-        leverage: { label: '暫無', code: 'cool', value: '--' },
-        sentiment: { label: '暫無', code: 'neutral', value: '--' },
-        whale: { label: '暫無', code: 'watch', value: '--' },
-        volatility: { label: '暫無', code: 'low', value: '--' }
+        regime: { label: '—', code: 'stable', value: '—' },
+        leverage: { label: '—', code: 'cool', value: '—' },
+        sentiment: { label: '—', code: 'neutral', value: '—' },
+        whale: { label: '—', code: 'watch', value: '—' },
+        volatility: { label: '—', code: 'low', value: '—' }
     }
 
     // Helper to get color style based on code

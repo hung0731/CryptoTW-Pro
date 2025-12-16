@@ -42,8 +42,8 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
     if (loading) {
         return (
             <div className="space-y-3">
-                <div className="h-4 w-32 bg-neutral-900/50 rounded animate-pulse" />
-                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-3 space-y-3 animate-pulse">
+                <div className="h-4 w-32 bg-[#1A1A1A] rounded animate-pulse" />
+                <div className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl p-3 space-y-3 animate-pulse">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="h-10 bg-neutral-800/50 rounded-lg" />
                     ))}
@@ -71,7 +71,7 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
             </h3>
 
             {/* Signal-style Card */}
-            <div className="bg-neutral-900/30 border border-white/5 rounded-xl overflow-hidden">
+            <div className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl overflow-hidden">
 
                 {/* Summary - One line, scannable */}
                 {marketContext?.summary && (
@@ -87,7 +87,7 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
                     {displayItems?.map((item, index) => (
                         <div
                             key={index}
-                            className="px-4 py-3 flex items-start gap-3 group hover:bg-white/[0.02] transition-colors"
+                            className="px-4 py-3 flex items-start gap-3 group hover:bg-[#0E0E0F]"
                         >
                             {/* Bias Indicator */}
                             <span className={cn(
@@ -99,7 +99,7 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                                <h5 className="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors truncate">
+                                <h5 className="text-sm font-medium text-[#E0E0E0] group-hover:text-white truncate">
                                     {item.title}
                                 </h5>
                                 {/* Impact Note - Always visible but muted */}
@@ -110,7 +110,7 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
                         </div>
                     )) || (
                             <div className="p-6 text-center text-neutral-500 text-sm">
-                                暫無盤勢影響事件
+                                尚無盤勢影響事件
                             </div>
                         )}
                 </div>
@@ -119,7 +119,7 @@ export function FlashNewsFeed({ compact = false }: { compact?: boolean }) {
                 {compact && (
                     <Link
                         href="/news"
-                        className="flex items-center justify-center py-2.5 text-xs font-medium text-neutral-500 hover:text-white hover:bg-white/5 transition-colors border-t border-white/5"
+                        className="flex items-center justify-center py-2.5 text-xs font-medium text-[#666666] hover:text-white hover:bg-[#0E0E0F] border-t border-[#1A1A1A]"
                     >
                         查看更多 <ArrowRight className="w-3 h-3 ml-1" />
                     </Link>

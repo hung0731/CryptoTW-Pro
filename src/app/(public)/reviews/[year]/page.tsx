@@ -37,7 +37,7 @@ export default function ReviewYearPage() {
                         ))
                     ) : (
                         <div className="text-center py-20 bg-neutral-900/20 rounded-2xl border border-white/5 text-neutral-500 text-sm">
-                            該年度暫無收錄事件
+                            該年度尚無收錄事件
                         </div>
                     )}
                 </div>

@@ -77,8 +77,8 @@ export function MarketEntryWidgets() {
                 }
             } catch (e) {
                 console.error(e)
-                // On error, keep defaults but update status to '暫無數據'
-                setTools(prev => prev.map(t => ({ ...t, status: t.status === '載入中...' ? '暫無數據' : t.status })))
+                // On error, keep defaults but update status to '尚無數據'
+                setTools(prev => prev.map(t => ({ ...t, status: t.status === '載入中...' ? '尚無數據' : t.status })))
             } finally {
                 setLoading(false)
             }
@@ -105,15 +105,15 @@ export function MarketEntryWidgets() {
                     <div
                         key={i}
                         className={cn(
-                            "flex-none w-36 h-28 relative rounded-xl border transition-all overflow-hidden group hover:bg-neutral-900/50 snap-center",
+                            "flex-none w-36 h-28 relative rounded-xl border overflow-hidden group hover:bg-[#0E0E0F] snap-center",
                             tool.active
                                 ? "bg-neutral-900/80 border-blue-500/30 hover:border-blue-500/50"
-                                : "bg-neutral-900/30 border-white/5"
+                                : "bg-[#0E0E0F] border-[#1A1A1A]"
                         )}
                     >
                         <Link href={tool.href} className="block p-4 h-full w-full flex flex-col justify-between">
                             <div className="flex items-center justify-between pr-4">
-                                <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors whitespace-nowrap">
+                                <span className="text-sm font-bold text-white group-hover:text-[#93C5FD] whitespace-nowrap">
                                     {tool.title}
                                 </span>
                                 <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />

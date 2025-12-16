@@ -43,10 +43,10 @@ export function FullNewsFeed() {
     if (loading) {
         return (
             <div className="space-y-4">
-                <Skeleton className="h-32 w-full bg-neutral-900/50 rounded-xl" />
+                <Skeleton className="h-32 w-full bg-[#1A1A1A] rounded-xl" />
                 <div className="space-y-2">
                     {[1, 2, 3, 4, 5].map(i => (
-                        <Skeleton key={i} className="h-12 w-full bg-neutral-900/50 rounded-lg" />
+                        <Skeleton key={i} className="h-12 w-full bg-[#1A1A1A] rounded-lg" />
                     ))}
                 </div>
             </div>
@@ -56,7 +56,7 @@ export function FullNewsFeed() {
     return (
         <div className="space-y-4">
             {/* AI Summary Card - Like Derivatives Style */}
-            <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4 relative overflow-hidden">
+            <div className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl p-4 relative overflow-hidden">
                 {/* Subtle glow */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[40px] -mr-8 -mt-8 pointer-events-none" />
 
@@ -87,7 +87,7 @@ export function FullNewsFeed() {
                 {marketContext?.highlights?.map((item, index) => (
                     <div
                         key={index}
-                        className="group bg-neutral-900/30 hover:bg-neutral-900/50 border border-white/5 rounded-lg px-4 py-3 transition-colors"
+                        className="group bg-[#0A0A0A] hover:bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg px-4 py-3"
                     >
                         <div className="flex items-center gap-3">
                             {/* Rank Number */}
@@ -96,7 +96,7 @@ export function FullNewsFeed() {
                             </span>
 
                             {/* Title - One Line */}
-                            <h4 className="flex-1 text-sm font-medium text-neutral-200 group-hover:text-white truncate transition-colors">
+                            <h4 className="flex-1 text-sm font-medium text-[#E0E0E0] group-hover:text-white truncate">
                                 {item.title}
                             </h4>
                         </div>
@@ -110,7 +110,7 @@ export function FullNewsFeed() {
                     </div>
                 )) || (
                         <div className="p-8 text-center text-neutral-500 text-sm">
-                            暫無相關數據
+                            尚無相關數據
                         </div>
                     )}
             </div>

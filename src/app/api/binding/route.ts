@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         let okxUpdateData = {}
         let rejectionReason: string | null = null
 
-        if (exchange.toLowerCase() === 'okx') {
+        if (normalizedExchange === 'okx') {
             // Get verification config from database
             const config = await getVerificationConfig(supabase)
 
@@ -87,8 +87,8 @@ export async function POST(req: NextRequest) {
                 console.log('[Binding] Auto-verify disabled, skipping')
             } else {
                 try {
-                    console.log('[Binding] Checking OKX API for UID:', uid)
-                    const okxData = await getInviteeDetail(uid)
+                    console.log('[Binding] Checking OKX API for UID:', trimmedUid)
+                    const okxData = await getInviteeDetail(trimmedUid)
 
                     if (okxData) {
                         console.log('[Binding] OKX data received:', JSON.stringify(okxData))
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
                         }
                     } else {
                         rejectionReason = `OKX API 查無此 UID，請確認是否已使用推薦碼 ${config.okx_affiliate_code} 註冊`
-                        console.log('[Binding] ❌ OKX API returned no data for UID:', uid)
+                        console.log('[Binding] ❌ OKX API returned no data for UID:', trimmedUid)
                     }
                 } catch (okxError) {
                     console.error('[Binding] OKX API error:', okxError)
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
             .insert({
                 user_id: user.id,
                 exchange_name: exchange,
-                exchange_uid: uid,
+                exchange_uid: trimmedUid,
                 status: bindingStatus,
                 rejection_reason: autoVerified ? null : rejectionReason,
                 ...okxUpdateData

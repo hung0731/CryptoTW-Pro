@@ -255,7 +255,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
         <div className="max-w-3xl mx-auto pb-20">
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
-                <Link href="/calendar" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1">
+                <Link href="/calendar" className="text-[#808080] hover:text-white flex items-center gap-1">
                     <ArrowLeft className="w-5 h-5" />
                     <span className="text-xs">返回日曆</span>
                 </Link>
@@ -330,7 +330,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                             {selectedOcc ? (
                                 <button
                                     onClick={() => setSelectedOcc(null)}
-                                    className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                                    className="text-[10px] px-2 py-0.5 rounded-full bg-[#1A1A1A] text-[#808080] hover:text-white"
                                 >
                                     清除篩選 ✕
                                 </button>
@@ -341,7 +341,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                                             key={mode}
                                             onClick={() => setTimeFilter(mode)}
                                             className={cn(
-                                                "text-[10px] font-mono transition-colors uppercase",
+                                                "text-[10px] font-mono uppercase",
                                                 timeFilter === mode
                                                     ? "text-white underline decoration-wavy decoration-neutral-600"
                                                     : "text-neutral-600 hover:text-neutral-400"

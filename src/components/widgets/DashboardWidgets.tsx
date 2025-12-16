@@ -8,6 +8,7 @@ import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { DashboardData } from './types'
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { formatPercent } from '@/lib/format-helpers'
 
 // ============================================
 // Derivatives AI Summary Card
@@ -111,11 +112,11 @@ export function OpenInterestCard({ data }: { data?: DashboardData['openInterest'
                 <div className="text-lg font-bold font-mono text-white">{data.formatted}</div>
                 {hasData && (
                     <div className={cn("text-xs font-mono", isPositive ? "text-green-400" : "text-red-400")}>
-                        24H: {isPositive ? '+' : ''}{data.change24h.toFixed(2)}%
+                        24H: {formatPercent(data.change24h)}
                     </div>
                 )}
                 {!hasData && (
-                    <div className="text-xs text-neutral-500">暫無數據</div>
+                    <div className="text-xs text-neutral-500">尚無數據</div>
                 )}
             </div>
         </div>

@@ -9,6 +9,7 @@ import {
 import { ZoomIn, RotateCcw } from 'lucide-react'
 import { format } from 'date-fns'
 import { CHART } from '@/lib/design-tokens'
+import { formatPercent, formatPrice } from '@/lib/format-helpers'
 
 // Static Data Import
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
@@ -167,14 +168,14 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         {type === 'price' && (
                             isPercentage
                                 ? <span className={payload[0].payload.percentage >= 0 ? 'text-green-400' : 'text-red-400'}>
-                                    {payload[0].payload.percentage > 0 ? '+' : ''}{Number(payload[0].payload.percentage).toFixed(2)}%
+                                    {formatPercent(payload[0].payload.percentage)}
                                 </span>
-                                : `$${Number(payload[0].value).toLocaleString()}`
+                                : formatPrice(Number(payload[0].value))
                         )}
                         {type === 'flow' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
                         {type === 'oi' && (
                             <span className={payload[0].payload.percentage >= 0 ? 'text-green-400' : 'text-red-400'}>
-                                {payload[0].payload.percentage > 0 ? '+' : ''}{Number(payload[0].payload.percentage).toFixed(2)}%
+                                {formatPercent(payload[0].payload.percentage)}
                             </span>
                         )}
                         {type === 'supply' && `${Number(payload[0].value).toLocaleString()}`}
@@ -182,7 +183,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     </p>
                     {isPercentage && type === 'price' && (
                         <p className="text-neutral-500 text-[10px] mt-1">
-                            ${Number(payload[0].payload.price).toLocaleString()}
+                            {formatPrice(Number(payload[0].payload.price))}
                         </p>
                     )}
                 </div>
@@ -191,7 +192,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
         return null
     }
 
-    if (!data || data.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">暫無數據</div>
+    if (!data || data.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">尚無數據</div>
 
     return (
         <div className={`w-full h-full relative ${className}`}>
@@ -199,14 +200,14 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                 <div className="absolute top-2 right-2 z-20 flex gap-1 bg-black/50 backdrop-blur rounded-lg p-0.5 border border-white/10">
                     <button
                         onClick={() => setViewMode('standard')}
-                        className={`p-1.5 rounded transition-colors ${viewMode === 'standard' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-neutral-300'}`}
+                        className={`p-1.5 rounded ${viewMode === 'standard' ? 'bg-[#1A1A1A] text-white' : 'text-[#666666] hover:text-[#A0A0A0]'}`}
                         title="全域視角"
                     >
                         <RotateCcw className="w-3 h-3" />
                     </button>
                     <button
                         onClick={() => setViewMode('focus')}
-                        className={`p-1.5 rounded transition-colors ${viewMode === 'focus' ? 'bg-blue-500/20 text-blue-400' : 'text-neutral-500 hover:text-neutral-300'}`}
+                        className={`p-1.5 rounded ${viewMode === 'focus' ? 'bg-[#3B82F6]/20 text-[#3B82F6]' : 'text-[#666666] hover:text-[#A0A0A0]'}`}
                         title="重點視角"
                     >
                         <ZoomIn className="w-3 h-3" />
