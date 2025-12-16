@@ -256,9 +256,7 @@ export default function ComparePage() {
                     <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
                         <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
                             {/* Watermark (Center Logo) */}
-                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none opacity-10">
-                                <img src="/logo.svg" alt="Watermark" className="w-32 h-32" />
-                            </div>
+
 
                             {leftEvent && (
                                 <ReviewChart
@@ -266,7 +264,7 @@ export default function ComparePage() {
                                     symbol={leftEvent.slug.toUpperCase()}
                                     eventStart={leftEvent.reactionStartAt}
                                     eventEnd={leftEvent.eventEndAt}
-                                    reviewSlug={leftEvent.slug}
+                                    reviewSlug={`${leftEvent.slug}-${leftEvent.year}`}
                                     focusWindow={leftEvent.focusWindow}
                                     isPercentage={true}
                                     className="w-full h-full"
@@ -279,9 +277,7 @@ export default function ComparePage() {
                     <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
                         <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
                             {/* Watermark (Center Logo) */}
-                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none opacity-10">
-                                <img src="/logo.svg" alt="Watermark" className="w-32 h-32" />
-                            </div>
+
 
                             {rightEvent && (
                                 <ReviewChart
@@ -289,7 +285,7 @@ export default function ComparePage() {
                                     symbol={rightEvent.slug.toUpperCase()}
                                     eventStart={rightEvent.reactionStartAt}
                                     eventEnd={rightEvent.eventEndAt}
-                                    reviewSlug={rightEvent.slug}
+                                    reviewSlug={`${rightEvent.slug}-${rightEvent.year}`}
                                     focusWindow={rightEvent.focusWindow}
                                     isPercentage={true}
                                     className="w-full h-full"

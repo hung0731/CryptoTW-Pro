@@ -1,5 +1,5 @@
 {
-  "bitcoin-etf-launch-2024": {
+  "etf-2024": {
     "price": [
       {
         "date": "2023-12-11",
@@ -744,7 +744,7 @@
       }
     ]
   },
-  "ftx-collapse-2022": {
+  "ftx-2022": {
     "price": [
       {
         "date": "2022-10-09",
@@ -1537,7 +1537,7 @@
       }
     ]
   },
-  "luna-ust-collapse-2022": {
+  "luna-2022": {
     "price": [
       {
         "date": "2022-04-09",
@@ -2215,7 +2215,7 @@
       }
     ]
   },
-  "covid-crash-2020": {
+  "covid-2020": {
     "price": [
       {
         "date": "2020-02-08",
@@ -3038,7 +3038,7 @@
       }
     ]
   },
-  "mtgox-collapse-2014": {
+  "mtgox-2014": {
     "price": [
       {
         "date": "2014-01-08",
@@ -3347,7 +3347,7 @@
       }
     ]
   },
-  "the-dao-hack-2016": {
+  "dao-2016": {
     "price": [
       {
         "date": "2016-05-18",
@@ -3656,7 +3656,7 @@
       }
     ]
   },
-  "ico-mania-2017": {
+  "ico-2017": {
     "price": [
       {
         "date": "2017-11-17",
@@ -3966,7 +3966,7 @@
     ],
     "oi": []
   },
-  "china-crypto-ban-2021": {
+  "china-ban-2021": {
     "price": [
       {
         "date": "2021-04-19",
@@ -4879,7 +4879,7 @@
       }
     ]
   },
-  "ethereum-merge-2022": {
+  "the-merge-2022": {
     "price": [
       {
         "date": "2022-08-16",
@@ -5490,7 +5490,7 @@
       }
     ]
   },
-  "bitcoin-halving-2012": {
+  "halving-2012": {
     "price": [
       {
         "date": "2012-10-29",
@@ -5799,7 +5799,7 @@
       }
     ]
   },
-  "bitcoin-halving-2016": {
+  "halving-2016": {
     "price": [
       {
         "date": "2016-06-09",
@@ -6108,7 +6108,7 @@
       }
     ]
   },
-  "bitcoin-halving-2020": {
+  "halving-2020": {
     "price": [
       {
         "date": "2020-04-11",
@@ -6719,7 +6719,7 @@
       }
     ]
   },
-  "bitcoin-halving-2024": {
+  "halving-2024": {
     "price": [
       {
         "date": "2024-03-21",
@@ -8201,7 +8201,7 @@
       }
     ]
   },
-  "tesla-bitcoin-purchase-2021": {
+  "tesla-2021": {
     "price": [
       {
         "date": "2021-01-09",
@@ -8812,7 +8812,7 @@
       }
     ]
   },
-  "coinbase-direct-listing-2021": {
+  "coinbase-2021": {
     "price": [
       {
         "date": "2021-03-15",
@@ -9423,7 +9423,7 @@
       }
     ]
   },
-  "el-salvador-bitcoin-legal-tender-2021": {
+  "el-salvador-2021": {
     "price": [
       {
         "date": "2021-08-08",
@@ -10034,7 +10034,7 @@
       }
     ]
   },
-  "celsius-bankruptcy-2022": {
+  "celsius-2022": {
     "price": [
       {
         "date": "2022-05-13",
@@ -10947,7 +10947,7 @@
       }
     ]
   },
-  "three-arrows-capital-collapse-2022": {
+  "3ac-2022": {
     "price": [
       {
         "date": "2022-05-16",
@@ -11860,7 +11860,7 @@
       }
     ]
   },
-  "sec-coinbase-lawsuit-2023": {
+  "sec-coinbase-2023": {
     "price": [
       {
         "date": "2023-05-07",
@@ -12471,7 +12471,7 @@
       }
     ]
   },
-  "ripple-sec-ruling-2023": {
+  "xrp-ruling-2023": {
     "price": [
       {
         "date": "2023-06-13",
@@ -13082,7 +13082,7 @@
       }
     ]
   },
-  "binance-cz-settlement-2023": {
+  "cz-2023": {
     "price": [
       {
         "date": "2023-10-22",
@@ -13693,7 +13693,7 @@
       }
     ]
   },
-  "yen-carry-trade-crash-2024": {
+  "yen-carry-2024": {
     "price": [
       {
         "date": "2024-07-06",
@@ -14606,7 +14606,7 @@
       }
     ]
   },
-  "german-govt-selloff-2024": {
+  "german-selloff-2024": {
     "price": [
       {
         "date": "2024-06-08",
@@ -15519,7 +15519,7 @@
       }
     ]
   },
-  "iran-israel-flash-crash-2024": {
+  "iran-conflict-2024": {
     "price": [
       {
         "date": "2024-03-14",

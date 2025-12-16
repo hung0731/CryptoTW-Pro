@@ -23,159 +23,180 @@ const BASE_URL = 'https://open-api-v4.coinglass.com';
 const REVIEWS_CONFIG = [
     // S-Class Events
     {
-        slug: 'bitcoin-etf-launch-2024',
+        slug: 'etf',
+        year: 2024,
         symbol: 'BTC',
         reactionStart: '2024-01-10', // D0: SEC approval day
         types: ['price', 'flow', 'oi']
     },
     {
-        slug: 'ftx-collapse-2022',
+        slug: 'ftx',
+        year: 2022,
         symbol: 'FTT',
         reactionStart: '2022-11-08', // D0: Binance CZ tweet triggers crash
         types: ['price', 'oi', 'fgi']
     },
     {
-        slug: 'luna-ust-collapse-2022',
+        slug: 'luna',
+        year: 2022,
         symbol: 'LUNA',
         reactionStart: '2022-05-09', // D0: UST breaks 0.95
         types: ['price', 'flow', 'fgi']
     },
     {
-        slug: 'covid-crash-2020',
+        slug: 'covid',
+        year: 2020,
         symbol: 'BTC',
         reactionStart: '2020-03-09', // D0: Pre-crash selloff begins
         types: ['price', 'oi', 'fgi']
     },
     {
-        slug: 'mtgox-collapse-2014',
+        slug: 'mtgox',
+        year: 2014,
         symbol: 'BTC',
         reactionStart: '2014-02-07', // D0: Withdrawal halt
         types: ['price']
     },
     {
-        slug: 'the-dao-hack-2016',
+        slug: 'dao',
+        year: 2016,
         symbol: 'ETH',
         reactionStart: '2016-06-17', // D0: Hack announcement
         types: ['price']
     },
     // A-Class Events
     {
-        slug: 'ico-mania-2017',
+        slug: 'ico',
+        year: 2017,
         symbol: 'ETH',
-        reactionStart: '2017-12-17', // D0: BTC peak day
+        reactionStart: '2017-12-17', // D0: BTC peak day (proxy for mania)
         types: ['price', 'oi']
     },
     {
-        slug: 'china-crypto-ban-2021',
+        slug: 'china-ban',
+        year: 2021,
         symbol: 'BTC',
         reactionStart: '2021-05-19', // D0: Initial price drop
         types: ['price', 'oi', 'fgi']
     },
     {
-        slug: 'ethereum-merge-2022',
+        slug: 'the-merge',
+        year: 2022,
         symbol: 'ETH',
         reactionStart: '2022-09-15', // D0: Merge day
         types: ['price', 'oi']
     },
-    // Bitcoin Halvings
+    // Bitcoin Halvings (slug 'halving' duplicated, key by year)
     {
-        slug: 'bitcoin-halving-2012',
+        slug: 'halving',
+        year: 2012,
         symbol: 'BTC',
         reactionStart: '2012-11-28', // D0: Block 210,000
-        types: ['price']  // 2012 只有價格數據 (from CSV)
+        types: ['price']
     },
     {
-        slug: 'bitcoin-halving-2016',
+        slug: 'halving',
+        year: 2016,
         symbol: 'BTC',
         reactionStart: '2016-07-09', // D0: Block 420,000
-        types: ['price']  // 2016 Binance 尚未上線，無法取得 OI
+        types: ['price']
     },
     {
-        slug: 'bitcoin-halving-2020',
+        slug: 'halving',
+        year: 2020,
         symbol: 'BTC',
         reactionStart: '2020-05-11', // D0: Block 630,000
-        types: ['price', 'oi']  // 2020 有衍生品數據
+        types: ['price', 'oi']
     },
     {
-        slug: 'bitcoin-halving-2024',
+        slug: 'halving',
+        year: 2024,
         symbol: 'BTC',
         reactionStart: '2024-04-20', // D0: Block 840,000
-        types: ['price', 'flow', 'oi']  // 2024 有完整 ETF 數據
+        types: ['price', 'flow', 'oi']
     },
     // ===== New Events =====
-    // 2020
     {
-        slug: 'defi-summer-2020',
+        slug: 'defi-summer',
+        year: 2020,
         symbol: 'ETH',
         reactionStart: '2020-06-15', // D0: COMP token launch
         types: ['price', 'oi']
     },
-    // 2021
     {
-        slug: 'tesla-bitcoin-purchase-2021',
+        slug: 'tesla',
+        year: 2021,
         symbol: 'BTC',
         reactionStart: '2021-02-08', // D0: Tesla 8-K filing
         types: ['price', 'oi']
     },
     {
-        slug: 'coinbase-direct-listing-2021',
+        slug: 'coinbase',
+        year: 2021,
         symbol: 'BTC',
         reactionStart: '2021-04-14', // D0: Direct listing day
         types: ['price', 'oi']
     },
     {
-        slug: 'el-salvador-bitcoin-legal-tender-2021',
+        slug: 'el-salvador',
+        year: 2021,
         symbol: 'BTC',
         reactionStart: '2021-09-07', // D0: Law takes effect
         types: ['price', 'oi']
     },
-    // 2022
     {
-        slug: 'celsius-bankruptcy-2022',
+        slug: 'celsius',
+        year: 2022,
         symbol: 'BTC',
         reactionStart: '2022-06-12', // D0: Withdrawals paused
         types: ['price', 'oi', 'fgi']
     },
     {
-        slug: 'three-arrows-capital-collapse-2022',
+        slug: '3ac',
+        year: 2022,
         symbol: 'BTC',
         reactionStart: '2022-06-15', // D0: Rumors of insolvency
         types: ['price', 'oi', 'fgi']
     },
-    // 2023
     {
-        slug: 'sec-coinbase-lawsuit-2023',
+        slug: 'sec-coinbase',
+        year: 2023,
         symbol: 'BTC',
         reactionStart: '2023-06-06', // D0: SEC files lawsuit
         types: ['price', 'oi']
     },
     {
-        slug: 'ripple-sec-ruling-2023',
+        slug: 'xrp-ruling',
+        year: 2023,
         symbol: 'BTC',
         reactionStart: '2023-07-13', // D0: Judge Torres ruling
         types: ['price', 'oi']
     },
     {
-        slug: 'binance-cz-settlement-2023',
+        slug: 'cz',
+        year: 2023,
         symbol: 'BTC',
         reactionStart: '2023-11-21', // D0: DOJ settlement
         types: ['price', 'oi']
     },
     // 2024 New Events
     {
-        slug: 'yen-carry-trade-crash-2024',
+        slug: 'yen-carry',
+        year: 2024,
         symbol: 'BTC',
         reactionStart: '2024-08-05', // D0: Black Monday
         types: ['price', 'oi', 'fgi']
     },
     {
-        slug: 'german-govt-selloff-2024',
+        slug: 'german-selloff',
+        year: 2024,
         symbol: 'BTC',
         reactionStart: '2024-07-08', // D0: Selling Peak
         types: ['price', 'oi', 'fgi']
     },
     {
-        slug: 'iran-israel-flash-crash-2024',
+        slug: 'iran-conflict',
+        year: 2024,
         symbol: 'BTC',
         reactionStart: '2024-04-13', // D0: Attack day
         types: ['price', 'oi', 'fgi']
@@ -414,13 +435,16 @@ async function run() {
     const output = {};
 
     for (const conf of REVIEWS_CONFIG) {
-        console.log(`\nProcessing ${conf.slug}...`);
-        output[conf.slug] = {};
+        console.log(`\nProcessing ${conf.slug} (${conf.year})...`);
+        const key = `${conf.slug}-${conf.year}`;
+        output[key] = {};
 
         for (const type of conf.types) {
             // LUNA Flow Special Case
-            if (conf.slug === 'luna-ust-collapse-2022' && type === 'flow') {
+            // Make sure slug matches what we set in REVIEWS_CONFIG ('luna')
+            if (conf.slug === 'luna' && type === 'flow') {
                 console.log(`  Generating Mock Supply Data for LUNA...`);
+                // ... logic remains same ...
                 const sDate = new Date('2022-05-01');
                 const eDate = new Date('2022-05-30');
                 let supply = 350000000;
@@ -433,12 +457,12 @@ async function run() {
                     });
                     if (d > new Date('2022-05-08')) supply = supply * 3;
                 }
-                output[conf.slug][type] = mockData;
+                output[key][type] = mockData;
                 continue;
             }
 
             const data = await fetchHistory(type, conf.symbol, conf.reactionStart);
-            output[conf.slug][type] = data || [];
+            output[key][type] = data || [];
             console.log(`    -> Got ${data ? data.length : 0} items.`);
         }
     }

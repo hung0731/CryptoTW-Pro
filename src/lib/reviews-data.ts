@@ -116,7 +116,7 @@ export interface MarketEvent {
 export const REVIEWS_DATA: MarketEvent[] = [
     {
         id: 'review-etf-2024',
-        slug: 'bitcoin-etf-launch-2024',
+        slug: 'etf',
         title: '2024 比特幣 ETF 上線：預期兌現後的結構性調整',
         year: 2024,
         importance: 'S',
@@ -253,7 +253,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-ftx-2022',
-        slug: 'ftx-collapse-2022',
+        slug: 'ftx',
         title: '2022 FTX 倒閉：中心化信任機制的崩潰',
         year: 2022,
         importance: 'S',
@@ -391,7 +391,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-luna-2022',
-        slug: 'luna-ust-collapse-2022',
+        slug: 'luna',
         title: '2022 LUNA/UST 崩潰：算法穩定幣的機制失效',
         year: 2022,
         importance: 'S',
@@ -528,7 +528,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-covid-2020',
-        slug: 'covid-crash-2020',
+        slug: 'covid',
         title: '2020 COVID 312 黑天鵝：流動性危機的極致考驗',
         year: 2020,
         importance: 'S',
@@ -665,7 +665,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-mtgox-2014',
-        slug: 'mtgox-collapse-2014',
+        slug: 'mtgox',
         title: '2014 Mt.Gox 倒閉：第一次大規模交易所信用毀滅',
         year: 2014,
         importance: 'S',
@@ -784,7 +784,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-dao-2016',
-        slug: 'the-dao-hack-2016',
+        slug: 'dao',
         title: '2016 The DAO 事件：以太坊硬分叉與「不可竄改」的重新定義',
         year: 2016,
         importance: 'S',
@@ -903,7 +903,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-ico-2017',
-        slug: 'ico-mania-2017',
+        slug: 'ico',
         title: '2017 ICO 狂潮：散戶風險教育的起點',
         year: 2017,
         importance: 'A',
@@ -1015,7 +1015,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-china-ban-2021',
-        slug: 'china-crypto-ban-2021',
+        slug: 'china-ban',
         title: '2021 中國全面禁令：算力遷徙與供給端重塑',
         year: 2021,
         importance: 'A',
@@ -1135,7 +1135,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-merge-2022',
-        slug: 'ethereum-merge-2022',
+        slug: 'the-merge',
         title: '2022 以太坊 The Merge：共識機制轉換的歷史時刻',
         year: 2022,
         importance: 'A',
@@ -1240,7 +1240,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     // ===== Bitcoin Halving Events =====
     {
         id: 'review-halving-2012',
-        slug: 'bitcoin-halving-2012',
+        slug: 'halving',
         title: '2012 第一次減半：稀缺性程式碼的首次驗證',
         year: 2012,
         importance: 'A',
@@ -1357,7 +1357,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-halving-2016',
-        slug: 'bitcoin-halving-2016',
+        slug: 'halving',
         title: '2016 第二次減半：減半週期敘事的確立',
         year: 2016,
         importance: 'A',
@@ -1474,7 +1474,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-halving-2020',
-        slug: 'bitcoin-halving-2020',
+        slug: 'halving',
         title: '2020 第三次減半：機構時代的開端',
         year: 2020,
         importance: 'A',
@@ -1601,7 +1601,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-halving-2024',
-        slug: 'bitcoin-halving-2024',
+        slug: 'halving',
         title: '2024 第四次減半：ETF 時代的首次供給衝擊',
         year: 2024,
         importance: 'S',
@@ -1749,7 +1749,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     // ===== 2020 Events =====
     {
         id: 'review-defi-summer-2020',
-        slug: 'defi-summer-2020',
+        slug: 'defi-summer',
         title: '2020 DeFi Summer：流動性挖礦與鏈上金融的爆發',
         year: 2020,
         importance: 'A',
@@ -1868,7 +1868,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     // ===== 2021 Events =====
     {
         id: 'review-tesla-btc-2021',
-        slug: 'tesla-bitcoin-purchase-2021',
+        slug: 'tesla',
         title: '2021 Tesla 購買比特幣：企業資產配置敘事的高峰',
         year: 2021,
         importance: 'A',
@@ -1980,7 +1980,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-coinbase-ipo-2021',
-        slug: 'coinbase-direct-listing-2021',
+        slug: 'coinbase',
         title: '2021 Coinbase 直接上市：加密產業納入主流金融',
         year: 2021,
         importance: 'A',
@@ -2084,7 +2084,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-el-salvador-2021',
-        slug: 'el-salvador-bitcoin-legal-tender-2021',
+        slug: 'el-salvador',
         title: '2021 薩爾瓦多：比特幣成為法定貨幣',
         year: 2021,
         importance: 'A',
@@ -2197,7 +2197,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     // ===== 2022 Events =====
     {
         id: 'review-celsius-2022',
-        slug: 'celsius-bankruptcy-2022',
+        slug: 'celsius',
         title: '2022 Celsius 破產：CeFi 借貸平台的擠兌模板',
         year: 2022,
         importance: 'A',
@@ -2322,7 +2322,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-3ac-2022',
-        slug: 'three-arrows-capital-collapse-2022',
+        slug: '3ac',
         title: '2022 三箭資本 (3AC) 清算：高槓桿基金的爆倉連鎖',
         year: 2022,
         importance: 'A',
@@ -2448,7 +2448,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     // ===== 2023 Events =====
     {
         id: 'review-sec-coinbase-2023',
-        slug: 'sec-coinbase-lawsuit-2023',
+        slug: 'sec-coinbase',
         title: '2023 SEC 起訴 Coinbase：監管清算之戰',
         year: 2023,
         importance: 'A',
@@ -2552,7 +2552,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-ripple-2023',
-        slug: 'ripple-sec-ruling-2023',
+        slug: 'xrp-ruling',
         title: '2023 Ripple 案裁決：代幣證券性的切分判定',
         year: 2023,
         importance: 'A',
@@ -2656,7 +2656,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'review-binance-cz-2023',
-        slug: 'binance-cz-settlement-2023',
+        slug: 'cz',
         title: '2023 Binance/CZ 認罪和解：全球最大交易所的合規大考',
         year: 2023,
         importance: 'S',
@@ -2774,7 +2774,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'yen-carry-trade-crash-2024',
-        slug: 'yen-carry-trade-crash-2024',
+        slug: 'yen-carry',
         title: '2024 日圓套利崩盤：黑色星期一',
         year: 2024,
         type: 'macro_shock',
@@ -2912,7 +2912,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'german-govt-selloff-2024',
-        slug: 'german-govt-selloff-2024',
+        slug: 'german-selloff',
         title: '2024 德國政府拋售：國家級賣壓',
         year: 2024,
         type: 'supply_shock',
@@ -3018,7 +3018,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
     },
     {
         id: 'iran-israel-flash-crash-2024',
-        slug: 'iran-israel-flash-crash-2024',
+        slug: 'iran-conflict',
         title: '2024 伊朗攻擊以色列：地緣政治閃崩',
         year: 2024,
         type: 'geopolitics',
@@ -3105,6 +3105,17 @@ export const getFeaturedReviews = () => {
 
 export const getReviewBySlug = (slug: string) => {
     return REVIEWS_DATA.find(r => r.slug === slug);
+};
+
+export const getReview = (slug: string, year?: string | number) => {
+    if (year) {
+        return REVIEWS_DATA.find(r => r.slug === slug && r.year === Number(year));
+    }
+    return REVIEWS_DATA.find(r => r.slug === slug);
+};
+
+export const getReviewsByYear = (year: number) => {
+    return REVIEWS_DATA.filter(r => r.year === year).sort((a, b) => new Date(a.reactionStartAt).getTime() - new Date(b.reactionStartAt).getTime());
 };
 
 export const getReviewsByTag = (tag: string) => {

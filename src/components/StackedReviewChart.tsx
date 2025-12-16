@@ -32,15 +32,20 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
 
     useEffect(() => {
         const loadData = () => {
-            // @ts-ignore
-            const leftHistory = REVIEWS_HISTORY[leftSlug]
-            // @ts-ignore
-            const rightHistory = REVIEWS_HISTORY[rightSlug]
-
             const leftInfo = REVIEWS_DATA.find(r => r.slug === leftSlug)
             const rightInfo = REVIEWS_DATA.find(r => r.slug === rightSlug)
 
-            if (!leftHistory || !rightHistory || !leftInfo || !rightInfo) {
+            if (!leftInfo || !rightInfo) {
+                setLoading(false)
+                return
+            }
+
+            // @ts-ignore
+            const leftHistory = REVIEWS_HISTORY[`${leftInfo.slug}-${leftInfo.year}`]
+            // @ts-ignore
+            const rightHistory = REVIEWS_HISTORY[`${rightInfo.slug}-${rightInfo.year}`]
+
+            if (!leftHistory || !rightHistory) {
                 setLoading(false)
                 return
             }

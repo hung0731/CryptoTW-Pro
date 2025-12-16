@@ -31,7 +31,7 @@ export function ReviewCarousel({ items }: ReviewCarouselProps) {
                 {items.map((item) => (
                     <Link
                         key={item.id}
-                        href={`/reviews/${item.slug}`}
+                        href={`/reviews/${item.year}/${item.slug}`}
                         className="group relative flex-none w-[85vw] max-w-[320px] bg-neutral-900 border border-white/10 rounded-2xl overflow-hidden snap-center hover:border-amber-500/50 transition-all duration-300 shadow-xl"
                     >
                         {/* Token Background (Optional visual flair) */}

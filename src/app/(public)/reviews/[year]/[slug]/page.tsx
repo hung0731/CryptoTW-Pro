@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getReviewBySlug, getRelatedReviews } from '@/lib/reviews-data';
+import { getReview, getRelatedReviews } from '@/lib/reviews-data';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Share2, BookOpen, Clock, Tag, ChevronRight, GitCompare, Lightbulb, CheckCircle, BarChart3, ChevronUp, ChevronDown, Activity, ListChecks, AlertOctagon, AlertTriangle, XCircle } from 'lucide-react';
 import { CARDS, TYPOGRAPHY, SPACING } from '@/lib/design-tokens';
@@ -15,7 +15,8 @@ import { ContextBlock } from '@/components/ContextBlock';
 export default function ReviewDetailPage() {
     const params = useParams();
     const slug = params.slug as string;
-    const review = getReviewBySlug(slug);
+    const year = params.year as string;
+    const review = getReview(slug, year);
     const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
 
     if (!review) {
@@ -28,7 +29,7 @@ export default function ReviewDetailPage() {
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
-                <Link href="/reviews" className="text-neutral-400 hover:text-white transition-colors">
+                <Link href={`/reviews/${review.year}`} className="text-neutral-400 hover:text-white transition-colors">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div className="text-sm font-bold truncate max-w-[200px]">{review.title}</div>
@@ -106,7 +107,7 @@ export default function ReviewDetailPage() {
                                 daysBuffer={review.chartConfig?.daysBuffer}
                                 eventStart={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
-                                reviewSlug={review.slug}
+                                reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.main.interpretation}
                                 caption={review.charts.main.caption}
                             />
@@ -121,7 +122,7 @@ export default function ReviewDetailPage() {
                                 daysBuffer={review.chartConfig?.daysBuffer}
                                 eventStart={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
-                                reviewSlug={review.slug}
+                                reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.flow.interpretation}
                                 caption={review.charts.flow.caption}
                             />
@@ -136,7 +137,7 @@ export default function ReviewDetailPage() {
                                 daysBuffer={review.chartConfig?.daysBuffer}
                                 eventStart={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
-                                reviewSlug={review.slug}
+                                reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.oi.interpretation}
                                 caption={review.charts.oi.caption}
                             />
@@ -151,7 +152,7 @@ export default function ReviewDetailPage() {
                                 daysBuffer={review.chartConfig?.daysBuffer}
                                 eventStart={review.eventStartAt}
                                 eventEnd={review.eventEndAt}
-                                reviewSlug={review.slug}
+                                reviewSlug={`${review.slug}-${review.year}`}
                                 interpretation={review.charts.sentiment.interpretation}
                                 caption={review.charts.sentiment.caption}
                             />
@@ -342,7 +343,7 @@ export default function ReviewDetailPage() {
                         </h3>
                         <div className="space-y-3">
                             {relatedReviews.map((r, i) => (
-                                <Link href={`/reviews/${r.slug}`} key={r.id}>
+                                <Link href={`/reviews/${r.year}/${r.slug}`} key={r.id}>
                                     <div className="flex items-center gap-4 p-3 rounded-lg bg-neutral-900/30 border border-white/5 hover:bg-neutral-800 transition-colors group">
                                         <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-neutral-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                                             {i + 1}
