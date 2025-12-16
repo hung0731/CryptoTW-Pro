@@ -55,7 +55,7 @@ function CompareContent() {
             <Sheet open={isOpen} onOpenChange={handleOpenChange}>
                 <SheetTrigger asChild>
                     <button className={cn(
-                        "flex items-center gap-2 bg-black/60 backdrop-blur-md border pl-3 pr-2 py-1.5 rounded-full hover:bg-black/80 transition-all group max-w-[240px] shadow-lg",
+                        "flex items-center gap-2 bg-black/60 backdrop-blur-md border pl-3 pr-2 py-1.5 rounded-full hover:bg-black/80 group max-w-[240px] shadow-lg",
                         side === 'left' ? "border-blue-500/30 text-blue-100" : "border-amber-500/30 text-amber-100"
                     )}>
                         <div className="flex flex-col items-start px-0.5 text-left">
@@ -92,7 +92,7 @@ function CompareContent() {
                                 <div
                                     key={compositeSlug}
                                     className={cn(
-                                        "transition-all duration-300 border-b border-white/5 last:border-0",
+                                        "border-b border-white/5 last:border-0",
                                         isExpanded ? "bg-white/[0.03]" : "hover:bg-white/[0.02]",
                                         isDimmed ? "opacity-30" : "opacity-100"
                                     )}
@@ -133,7 +133,7 @@ function CompareContent() {
 
                                     {/* Expanded Peek Content */}
                                     <div className={cn(
-                                        "grid transition-all duration-300 ease-out overflow-hidden",
+                                        "grid overflow-hidden",
                                         isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                                     )}>
                                         <div className="min-h-0 px-5 pb-4">

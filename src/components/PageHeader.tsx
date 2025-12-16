@@ -22,8 +22,8 @@ export function PageHeader({
 
     return (
         <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/10">
-            {/* Gradient Separator */}
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
+            {/* Border Separator */}
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white/10" />
             <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
                 {/* Left: Back Button or Empty */}
                 <div className="flex items-center justify-start">
@@ -51,8 +51,7 @@ export function PageHeader({
                     {profile && (
                         <Link href="/profile">
                             <div className="relative group cursor-pointer">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-600 to-neutral-400 rounded-full opacity-30 group-hover:opacity-100 transition duration-500 blur-sm"></div>
-                                <img src={profile.pictureUrl} alt="Profile" className="relative w-9 h-9 rounded-full ring-2 ring-white/10 group-hover:ring-white transition-all shadow-lg" />
+                                <img src={profile.pictureUrl} alt="Profile" className="w-9 h-9 rounded-full ring-2 ring-white/10 hover:ring-white/30" />
                             </div>
                         </Link>
                     )}

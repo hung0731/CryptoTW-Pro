@@ -102,7 +102,7 @@ function MiniChartCard({
     return (
         <div className={cn(
             CARDS.typeB,
-            "flex-shrink-0 w-[130px] rounded-lg relative overflow-hidden flex flex-col justify-between border border-transparent transition-all duration-300",
+            "flex-shrink-0 w-[130px] rounded-lg relative overflow-hidden flex flex-col justify-between border border-transparent",
             isNext
                 ? "bg-[#1A1A1A] border-[#2A2A2A]" // Highlight Next
                 : SURFACE.card // Standard Dark
@@ -206,7 +206,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                     <button
                         onClick={() => setAlignMode('time')}
                         className={cn(
-                            "px-3 py-1 text-[10px] rounded transition-all duration-200",
+                            "px-3 py-1 text-[10px] rounded",
                             alignMode === 'time'
                                 ? "text-white bg-[#1A1A1A]"
                                 : "text-[#666] hover:text-[#999]"
@@ -217,7 +217,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                     <button
                         onClick={() => setAlignMode('reaction')}
                         className={cn(
-                            "px-3 py-1 text-[10px] rounded transition-all duration-200",
+                            "px-3 py-1 text-[10px] rounded",
                             alignMode === 'reaction'
                                 ? "text-white bg-[#1A1A1A]"
                                 : "text-[#666] hover:text-[#999]"
@@ -259,7 +259,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                         href={`/calendar/${eventDef.key}`}
                         key={eventDef.key}
                         className={cn(
-                            "block group relative overflow-hidden transition-all",
+                            "block group relative overflow-hidden",
                             CARDS.typeA
                         )}
                     >

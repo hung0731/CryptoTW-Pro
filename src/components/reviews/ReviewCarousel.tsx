@@ -32,7 +32,7 @@ export function ReviewCarousel({ items }: ReviewCarouselProps) {
                     <Link
                         key={item.id}
                         href={`/reviews/${item.year}/${item.slug}`}
-                        className="group relative flex-none w-[85vw] max-w-[320px] bg-neutral-900 border border-white/10 rounded-2xl overflow-hidden snap-center hover:border-amber-500/50 transition-all duration-300 shadow-xl"
+                        className="group relative flex-none w-[85vw] max-w-[320px] bg-neutral-900 border border-white/10 rounded-2xl overflow-hidden snap-center hover:border-white/30 shadow-xl"
                     >
                         {/* Token Background (Optional visual flair) */}
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">

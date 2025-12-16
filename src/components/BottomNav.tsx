@@ -63,12 +63,12 @@ export function BottomNav() {
                         )}
                     >
                         <div className={cn(
-                            "p-1 rounded-xl transition-all",
+                            "p-1 rounded-xl",
                             // item.active && "bg-white/10"
                         )}>
                             <item.icon
                                 className={cn(
-                                    "w-5 h-5 transition-all duration-200",
+                                    "w-5 h-5",
                                     // Removed fill-current as it breaks line-based icons like BarChart2
                                     item.active && "drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"
                                 )}

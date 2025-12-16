@@ -8,7 +8,7 @@ export default function GlobalLoader() {
                 <img
                     src="/logo.svg"
                     alt="CryptoTW"
-                    className="w-16 h-16 animate-pulse opacity-90"
+                    className="w-16 h-16 opacity-90"
                 />
             </div>
         </div>

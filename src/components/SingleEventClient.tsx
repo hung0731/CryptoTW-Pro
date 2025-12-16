@@ -367,7 +367,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                                     key={opt.k}
                                     onClick={() => setSurpriseFilter(opt.k as any)}
                                     className={cn(
-                                        "text-[10px] px-2 py-0.5 rounded transition-all",
+                                        "text-[10px] px-2 py-0.5 rounded",
                                         surpriseFilter === opt.k
                                             ? "bg-[#1A1A1A] text-white border border-[#333]"
                                             : "text-neutral-500 hover:text-neutral-300"
@@ -493,7 +493,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                                                 disabled={!occ.reaction}
                                                 className={cn(
                                                     CARDS.typeB,
-                                                    "relative h-14 flex flex-col items-center justify-center gap-1 transition-all duration-200",
+                                                    "relative h-14 flex flex-col items-center justify-center gap-1",
                                                     isSelected
                                                         ? "bg-[#1A1A1A] border border-[#444]"
                                                         : "bg-[#0E0E0F] border border-transparent hover:bg-[#151515] hover:border-[#2A2A2A]",

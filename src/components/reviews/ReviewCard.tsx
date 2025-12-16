@@ -18,7 +18,7 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
     const typeConfig = getTypeConfig(review.type || 'market_structure');
 
     return (
-        <article className="group relative bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:bg-neutral-900/60 hover:border-white/20 transition-all duration-300">
+        <article className="group relative bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:bg-neutral-900/60 hover:border-white/20">
             {/* Watermark Logo */}
             <div className="absolute -right-4 -bottom-4 opacity-[0.20] group-hover:opacity-[0.30] transition-opacity rotate-12 pointer-events-none">
                 {review.impactedTokens?.[0] && (

@@ -115,7 +115,7 @@ export function PageLoading() {
                 <img
                     src="/logo.svg"
                     alt="Loading..."
-                    className="w-12 h-12 opacity-80 animate-pulse"
+                    className="w-12 h-12 opacity-80"
                 />
             </div>
         </div>

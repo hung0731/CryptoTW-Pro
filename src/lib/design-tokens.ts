@@ -82,7 +82,7 @@ export const CARDS = {
 
     // Type B: Comparison / History
     // - No Border, relying on Background distinction
-    typeB: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] hover:outline hover:outline-1 hover:outline-[#2A2A2A] transition-all rounded-lg',
+    typeB: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] hover:outline hover:outline-1 hover:outline-[#2A2A2A] rounded-lg',
 
     // Type C: Info / Stats
     // - Text block + divider style (minimal container)
@@ -90,7 +90,7 @@ export const CARDS = {
 
     // Legacy support (mapped to new system)
     base: 'bg-[#0E0E0F] border border-[#2A2A2A] rounded-xl',
-    interactive: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] border border-[#2A2A2A] transition-all rounded-xl',
+    interactive: 'bg-[#0E0E0F] hover:bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl',
 } as const
 
 // ================================================

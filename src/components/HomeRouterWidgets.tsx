@@ -127,7 +127,7 @@ export function HomeRouterWidget() {
                         <Link
                             key={i}
                             href={dim.name === '合約' ? '/prediction?tab=derivatives' : dim.name === '大戶' ? '/prediction?tab=smartmoney' : '/prediction'}
-                            className="group bg-neutral-900 border border-white/5 rounded-lg p-2 hover:bg-white/5 hover:border-white/10 transition-all text-center flex flex-col items-center justify-center h-16"
+                            className="group bg-neutral-900 border border-white/5 rounded-lg p-2 hover:bg-white/5 hover:border-white/10 text-center flex flex-col items-center justify-center h-16"
                         >
                             <span className="text-[10px] text-neutral-500 mb-0.5">{dim.name}面</span>
                             <span className={cn(
@@ -172,7 +172,7 @@ export function HomeRouterWidget() {
                         <Link
                             href={data.anomaly.type === 'funding_rate' ? '/prediction?tab=arbitrage' : data.anomaly.link}
                             className={cn(
-                                "flex items-center justify-center w-full py-2 border rounded-lg text-xs font-bold transition-all",
+                                "flex items-center justify-center w-full py-2 border rounded-lg text-xs font-bold",
                                 data.anomaly.type === 'funding_rate'
                                     ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
                                     : "bg-neutral-800 hover:bg-neutral-700 border-white/5 text-neutral-300"
@@ -194,7 +194,7 @@ export function HomeRouterWidget() {
                     <Link
                         key={i}
                         href={ref.link}
-                        className="block bg-neutral-900/50 border border-white/5 rounded-xl p-3 pl-4 hover:border-white/20 transition-all group"
+                        className="block bg-neutral-900/50 border border-white/5 rounded-xl p-3 pl-4 hover:border-white/20 group"
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
@@ -211,7 +211,7 @@ export function HomeRouterWidget() {
                                     {ref.implication}
                                 </span>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:translate-x-1 group-hover:text-neutral-400 transition-all" />
+                            <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:translate-x-1 group-hover:text-neutral-400" />
                         </div>
                     </Link>
                 ))}
@@ -228,12 +228,12 @@ export function HomeRouterWidget() {
                             <Link
                                 key={i}
                                 href={item.link}
-                                className="flex items-center justify-between py-2.5 hover:bg-white/5 px-2 -mx-2 rounded transition-all group"
+                                className="flex items-center justify-between py-2.5 hover:bg-white/5 px-2 -mx-2 rounded group"
                             >
                                 <span className="text-sm text-neutral-300">{item.name}</span>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-medium text-neutral-400">{item.status}</span>
-                                    <ArrowRight className="w-3 h-3 text-neutral-600 group-hover:text-neutral-400 -ml-1 opacity-0 group-hover:opacity-100 transition-all" />
+                                    <ArrowRight className="w-3 h-3 text-neutral-600 group-hover:text-neutral-400 -ml-1 opacity-0 group-hover:opacity-100" />
                                 </div>
                             </Link>
                         ))}

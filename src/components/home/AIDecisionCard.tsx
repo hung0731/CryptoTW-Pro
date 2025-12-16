@@ -64,7 +64,7 @@ export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
     const biasStyle = BiasConfig[data.bias] || BiasConfig['中性']
 
     return (
-        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-white/5 rounded-xl p-4 transition-all duration-300">
+        <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🧠</span>

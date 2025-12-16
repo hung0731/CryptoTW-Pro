@@ -46,7 +46,7 @@ export default function HomePage() {
 
     if (isAuthLoading) {
         return <div className="min-h-screen bg-black flex items-center justify-center">
-            <img src="/logo.svg" className="h-8 w-auto opacity-50 animate-pulse" />
+            <img src="/logo.svg" className="h-8 w-auto opacity-50" />
         </div>
     }
 

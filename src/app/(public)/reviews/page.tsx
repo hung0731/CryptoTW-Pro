@@ -100,7 +100,7 @@ export default function ReviewsPage() {
                     <div className="px-4">
                         <Link
                             href="/reviews/compare"
-                            className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-900/10 border border-amber-500/20 active:scale-[0.98] transition-all hover:border-amber-500/40"
+                            className="flex items-center justify-between p-4 rounded-xl bg-neutral-900/50 border border-white/10 hover:border-white/20"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">

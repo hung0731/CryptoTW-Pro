@@ -65,7 +65,7 @@ function CryptoPricePrediction() {
                     <button
                         onClick={() => setActiveToken('btc')}
                         className={cn(
-                            "px-2 py-1 rounded-lg text-xs font-medium transition-all",
+                            "px-2 py-1 rounded-lg text-xs font-medium",
                             activeToken === 'btc'
                                 ? "bg-white/10 text-white border border-white/20"
                                 : "bg-black/30 text-neutral-500 border border-white/5 hover:bg-white/5"
@@ -76,7 +76,7 @@ function CryptoPricePrediction() {
                     <button
                         onClick={() => setActiveToken('eth')}
                         className={cn(
-                            "px-2 py-1 rounded-lg text-xs font-medium transition-all",
+                            "px-2 py-1 rounded-lg text-xs font-medium",
                             activeToken === 'eth'
                                 ? "bg-white/10 text-white border border-white/20"
                                 : "bg-black/30 text-neutral-500 border border-white/5 hover:bg-white/5"
@@ -121,7 +121,7 @@ function CryptoPricePrediction() {
                                     <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
                                         <div
                                             className={cn(
-                                                "h-full rounded-full transition-all",
+                                                "h-full rounded-full",
                                                 target.direction === 'up' ? 'bg-green-500' : 'bg-red-500'
                                             )}
                                             style={{ width: `${barWidth}%` }}
@@ -269,7 +269,7 @@ function DataPageContent() {
                     <TabsList className="w-full grid grid-cols-3 h-auto p-1.5 bg-neutral-900/60 rounded-xl border border-white/[0.04]">
                         <TabsTrigger
                             value="market"
-                            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-neutral-800 data-[state=active]:to-neutral-800/80 data-[state=active]:text-white data-[state=active]:shadow-lg text-neutral-500 rounded-lg text-[11px] font-semibold transition-all duration-200 py-2 flex flex-col items-center justify-center gap-0.5 px-0"
+                            className="relative data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-lg text-[11px] font-semibold py-2 flex flex-col items-center justify-center gap-0.5 px-0"
                         >
                             <div className="flex items-center gap-1.5">
                                 <div className="w-4 h-4 rounded-md bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
@@ -281,7 +281,7 @@ function DataPageContent() {
                         </TabsTrigger>
                         <TabsTrigger
                             value="derivatives"
-                            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-neutral-800 data-[state=active]:to-neutral-800/80 data-[state=active]:text-white data-[state=active]:shadow-lg text-neutral-500 rounded-lg text-[11px] font-semibold transition-all duration-200 py-2 flex flex-col items-center justify-center gap-0.5 px-0"
+                            className="relative data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-lg text-[11px] font-semibold py-2 flex flex-col items-center justify-center gap-0.5 px-0"
                         >
                             <div className="flex items-center gap-1.5">
                                 <div className="w-4 h-4 rounded-md bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
@@ -293,7 +293,7 @@ function DataPageContent() {
                         </TabsTrigger>
                         <TabsTrigger
                             value="strategies"
-                            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-neutral-800 data-[state=active]:to-neutral-800/80 data-[state=active]:text-white data-[state=active]:shadow-lg text-neutral-500 rounded-lg text-[11px] font-semibold transition-all duration-200 py-2 flex flex-col items-center justify-center gap-0.5 px-0"
+                            className="relative data-[state=active]:bg-neutral-800 data-[state=active]:text-white text-neutral-500 rounded-lg text-[11px] font-semibold py-2 flex flex-col items-center justify-center gap-0.5 px-0"
                         >
                             <div className="flex items-center gap-1.5">
                                 <div className="w-4 h-4 rounded-md bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
@@ -380,7 +380,7 @@ function DataPageContent() {
                                                 <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                                                     <div
                                                         className={cn(
-                                                            "h-full rounded-full transition-all duration-500",
+                                                            "h-full rounded-full",
                                                             parseInt(fearGreed.value) >= 75 ? "bg-gradient-to-r from-red-600 to-red-400" :
                                                                 parseInt(fearGreed.value) >= 55 ? "bg-gradient-to-r from-yellow-600 to-yellow-400" :
                                                                     parseInt(fearGreed.value) <= 25 ? "bg-gradient-to-r from-green-600 to-green-400" :
@@ -453,7 +453,7 @@ function DataPageContent() {
 
                         <div className="grid grid-cols-1 gap-2">
                             {/* 入口 1: 時間軸 */}
-                            <button className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] transition-all duration-200 text-left">
+                            <button className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] text-left">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                         <span className="text-sm">📈</span>
@@ -467,7 +467,7 @@ function DataPageContent() {
                             </button>
 
                             {/* 入口 2: 判斷依據 */}
-                            <button className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] transition-all duration-200 text-left">
+                            <button className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] text-left">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
                                         <span className="text-sm">🧠</span>
@@ -481,7 +481,7 @@ function DataPageContent() {
                             </button>
 
                             {/* 入口 3: 歷史相似 (Linked to Market Reviews) */}
-                            <Link href="/reviews?tab=featured" className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] transition-all duration-200 text-left">
+                            <Link href="/reviews?tab=featured" className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/30 border border-white/[0.03] hover:bg-neutral-800/50 hover:border-white/[0.06] text-left">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                                         <span className="text-sm">📓</span>
@@ -551,7 +551,7 @@ function DataPageContent() {
                             <div className="space-y-3">
                                 {markets.slice(0, 3).map((market) => (
                                     <Link href={`https://polymarket.com/event/${market.slug}`} target="_blank" key={market.id}>
-                                        <div className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-gradient-to-br from-neutral-900/60 to-neutral-900/30 p-4 hover:border-white/10 transition-all duration-300">
+                                        <div className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/50 p-4 hover:border-white/10">
                                             <div className="flex items-center gap-3 mb-3">
                                                 {market.icon && <img src={market.icon} className="w-5 h-5 rounded-full ring-1 ring-white/10" />}
                                                 <h3 className="text-sm font-medium text-neutral-200 line-clamp-1 group-hover:text-white transition-colors">{market.question}</h3>
