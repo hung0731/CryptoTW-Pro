@@ -10,7 +10,8 @@ import { REVIEWS_DATA } from '@/lib/reviews-data'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
 
 // 1. Define Visual Domains (Clamps)
-const PCT_DOMAIN = [-80, 80]
+// 1. Define Visual Domains (Clamps)
+// PCT_DOMAIN is now dynamic
 const DD_DOMAIN = [-100, 0]
 
 interface StackedReviewChartProps {
@@ -23,6 +24,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [viewType, setViewType] = useState<'pct' | 'dd'>('pct')
+    const [pctDomain, setPctDomain] = useState([-20, 20])
 
     // Helper: Soft Clamp
     const clamp = (val: number | null, min: number, max: number) => {
@@ -98,34 +100,42 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             // Calculate Peaks for Drawdown (Peak-to-Date)
             let leftMax = -Infinity
             let rightMax = -Infinity
+            let maxAbsChange = 0
 
-            const finalData = sortedData.map(d => {
+            // 1. First Pass: Compute Raw Values & Determine Scale
+            const rawData = sortedData.map(d => {
                 if (d.leftPrice) leftMax = Math.max(leftMax, d.leftPrice)
                 if (d.rightPrice) rightMax = Math.max(rightMax, d.rightPrice)
 
-                // 2. Compute Original Values
                 const leftPct = d.leftPrice ? ((d.leftPrice - leftT0) / leftT0) * 100 : null
                 const rightPct = d.rightPrice ? ((d.rightPrice - rightT0) / rightT0) * 100 : null
                 const leftDD = d.leftPrice ? ((d.leftPrice - leftMax) / leftMax) * 100 : null
                 const rightDD = d.rightPrice ? ((d.rightPrice - rightMax) / rightMax) * 100 : null
 
-                // 3. Compute Display Values (Clamped)
-                // We compute clamps for BOTH modes here to keep logic separate or compute on fly?
-                // Better compute here.
-                const leftPctDisplay = clamp(leftPct, PCT_DOMAIN[0], PCT_DOMAIN[1])
-                const rightPctDisplay = clamp(rightPct, PCT_DOMAIN[0], PCT_DOMAIN[1])
-                const leftDDDisplay = clamp(leftDD, DD_DOMAIN[0], DD_DOMAIN[1])
-                const rightDDDisplay = clamp(rightDD, DD_DOMAIN[0], DD_DOMAIN[1])
+                // Track max absolute change for adaptive scale
+                if (leftPct !== null) maxAbsChange = Math.max(maxAbsChange, Math.abs(leftPct))
+                if (rightPct !== null) maxAbsChange = Math.max(maxAbsChange, Math.abs(rightPct))
 
-                return {
-                    ...d,
-                    leftPct, rightPct,
-                    leftDD, rightDD,
-                    // Clamped values for rendering
-                    leftPctDisplay, rightPctDisplay,
-                    leftDDDisplay, rightDDDisplay
-                }
+                return { ...d, leftPct, rightPct, leftDD, rightDD }
             })
+
+            // 2. Determine Adaptive Limit
+            let limit = maxAbsChange * 1.25
+            if (maxAbsChange < 15) limit = 20
+
+            // Round to nearest 5 for clean axis
+            limit = Math.ceil(limit / 5) * 5
+
+            setPctDomain([-limit, limit])
+
+            // 3. Second Pass: Clamp Values for Display
+            const finalData = rawData.map(d => ({
+                ...d,
+                leftPctDisplay: clamp(d.leftPct, -limit, limit),
+                rightPctDisplay: clamp(d.rightPct, -limit, limit),
+                leftDDDisplay: clamp(d.leftDD, DD_DOMAIN[0], DD_DOMAIN[1]),
+                rightDDDisplay: clamp(d.rightDD, DD_DOMAIN[0], DD_DOMAIN[1])
+            }))
 
             setData(finalData)
             setLoading(false)
@@ -252,9 +262,9 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                         tick={{ fontSize: 10, fill: '#525252' }}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(val) => `${val}%`}
+                        tickFormatter={(val) => `${Number(val).toFixed(0)}%`}
                         // 5. Apply Visual Domain
-                        domain={viewType === 'pct' ? PCT_DOMAIN : DD_DOMAIN}
+                        domain={viewType === 'pct' ? pctDomain : DD_DOMAIN}
                         allowDataOverflow={true} // Important: Force clip at domain
                     />
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { REVIEWS_DATA, MarketEvent } from '@/lib/reviews-data';
@@ -16,7 +16,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 
-export default function ComparePage() {
+function CompareContent() {
     const searchParams = useSearchParams();
     const eventParam = searchParams.get('event');
 
@@ -194,6 +194,7 @@ export default function ComparePage() {
 
     return (
         <main className="min-h-screen bg-black text-white font-sans pb-20">
+            {/* ... component content ... */}
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -365,6 +366,13 @@ export default function ComparePage() {
                 </div>
             </div>
         </main>
-
     );
+}
+
+export default function ComparePage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">載入中...</div>}>
+            <CompareContent />
+        </Suspense>
+    )
 }

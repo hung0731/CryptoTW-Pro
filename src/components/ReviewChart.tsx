@@ -28,6 +28,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
+    const [yDomain, setYDomain] = useState<any>(['auto', 'auto'])
 
     const getDaysDiff = (dateStr: string) => {
         const date = new Date(dateStr)
@@ -86,28 +87,56 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     return daysDiff >= -30 && daysDiff <= 30
                 })
 
-                if (isPercentage && type === 'price' && filteredData.length > 0) {
+                // Normalization Logic (Price & OI)
+                const shouldNormalize = (isPercentage && type === 'price') || type === 'oi'
+
+                if (shouldNormalize && filteredData.length > 0) {
                     // Normalize to Percentage Change from D0 (eventStart)
                     const startTimestamp = new Date(eventStart).getTime()
                     // Find D0 item
                     let baseItem = filteredData.find((item: any) => new Date(item.date).getTime() === startTimestamp)
                     if (!baseItem) {
-                        // Fallback to first item if D0 not in range (should rarely happen if eventStart inside ranges)
-                        // But filteredData is -30 to +30, so D0 is inside.
-                        // But if date doesn't match exactly... find closest?
                         const dates = filteredData.map((d: any) => Math.abs(new Date(d.date).getTime() - startTimestamp))
                         const minIdx = dates.indexOf(Math.min(...dates))
                         baseItem = filteredData[minIdx]
                     }
-                    const basePrice = baseItem?.price || 1
 
-                    const pctData = filteredData.map((item: any) => ({
-                        ...item,
-                        percentage: ((item.price - basePrice) / basePrice) * 100
-                    }))
-                    setData(pctData)
+                    const valKey = type === 'oi' ? 'oi' : 'price'
+                    const baseVal = baseItem?.[valKey] || 1
+
+                    // Processing Loop & MaxAbs Calculation
+                    let maxAbs = 0
+
+                    const processedData = filteredData.map((item: any) => {
+                        const val = item[valKey]
+                        const pct = ((val - baseVal) / baseVal) * 100
+                        if (!isNaN(pct)) maxAbs = Math.max(maxAbs, Math.abs(pct))
+                        return {
+                            ...item,
+                            percentage: pct,
+                            displayValue: val // Keep original for tooltip
+                        }
+                    })
+
+                    setData(processedData)
+
+                    // Adaptive Domain for OI
+                    if (type === 'oi') {
+                        let limit = maxAbs * 1.25
+                        if (limit < 15) limit = 15
+                        // Round to nearest 5
+                        limit = Math.ceil(limit / 5) * 5
+                        setYDomain([-limit, limit])
+                    } else {
+                        // Price usually keeps auto or custom logic, but for now strict 'auto' for basic area
+                        // If we needed symmetric for price percentage, we'd do it here. 
+                        // But current request is only strict for OI.
+                        setYDomain(['auto', 'auto'])
+                    }
+
                 } else {
                     setData(filteredData)
+                    setYDomain(['auto', 'auto'])
                 }
             } catch (e) {
                 console.error('Error loading static chart data', e)
@@ -141,7 +170,11 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 : `$${Number(payload[0].value).toLocaleString()}`
                         )}
                         {type === 'flow' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
-                        {type === 'oi' && `$${(Number(payload[0].value) / 1000000).toFixed(0)}M`}
+                        {type === 'oi' && (
+                            <span className={payload[0].payload.percentage >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                {payload[0].payload.percentage > 0 ? '+' : ''}{Number(payload[0].payload.percentage).toFixed(2)}%
+                            </span>
+                        )}
                         {type === 'supply' && `${Number(payload[0].value).toLocaleString()}`}
                         {type === 'fgi' && `${Number(payload[0].value)}`}
                     </p>
@@ -344,7 +377,8 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             tick={{ fontSize: 10, fill: '#525252' }}
                             tickLine={false}
                             axisLine={false}
-                            tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                            domain={yDomain}
+                            tickFormatter={(value) => `${Number(value).toFixed(0)}%`}
                         />
                         <XAxis
                             dataKey="date"
@@ -357,7 +391,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
-                            dataKey={type === 'oi' ? 'oi' : 'price'}
+                            dataKey="percentage"
                             stroke="#eab308"
                             strokeWidth={2}
                             fill={`url(#${gradientId})`}
