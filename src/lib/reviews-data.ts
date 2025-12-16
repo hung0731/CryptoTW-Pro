@@ -101,7 +101,7 @@ export interface MarketEvent {
     };
 
     // 8. Trading Perspective (V4 - New Redesign)
-    type: 'leverage_cleanse' | 'policy_regulation' | 'market_structure' | 'exchange_event' | 'macro_shock' | 'tech_event';
+    type: 'leverage_cleanse' | 'policy_regulation' | 'market_structure' | 'exchange_event' | 'macro_shock' | 'tech_event' | 'supply_shock' | 'geopolitics';
     impactSummary: string; // "它對交易有什麼用"
     impactedTokens: string[];
 
@@ -2769,6 +2769,331 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 type: 'alert',
                 label: '分散交易所風險',
                 desc: '即使是最大交易所也可能面臨監管風險，不宜過度集中。'
+            }
+        ]
+    },
+    {
+        id: 'yen-carry-trade-crash-2024',
+        slug: 'yen-carry-trade-crash-2024',
+        title: '2024 日圓套利崩盤：黑色星期一',
+        year: 2024,
+        type: 'macro_shock',
+        impactSummary: '日銀升息引發全球去槓桿，比特幣暴跌 25%',
+        importance: 'S',
+        featuredRank: 1,
+        tags: ['Macro Shock', 'Black Swan', 'Liquidity Crisis'],
+        marketStates: ['崩跌', '極恐', '修復'],
+        relatedMetrics: ['price', 'fearGreed', 'oi'],
+        readingMinutes: 8,
+        isProOnly: false,
+        publishedAt: '2024-08-10T00:00:00Z',
+        updatedAt: '2024-08-10T00:00:00Z',
+        eventStartAt: '2024-07-31T00:00:00Z',
+        eventEndAt: '2024-08-10T00:00:00Z',
+        reactionStartAt: '2024-08-05T00:00:00Z',
+        reactionType: 'external_shock',
+        impactedTokens: ['BTC', 'ETH', 'SOL'],
+        usageGuide: [
+            '當宏觀利率發生劇烈變化時參考',
+            '理解「套利交易解除 (Carry Trade Unwind)」的威力',
+            '學習如何應對 V 型反轉的極端行情'
+        ],
+        summary: '日本央行意外升息，導致長期藉由低利日圓進行的套利交易瞬間解除 (Unwind)。全球股市與加密貨幣同步閃崩，比特幣單日重挫 25% 跌破 $50,000，隨後在日銀副總裁安撫下 V 型反轉。',
+        context: {
+            what: '日圓套利交易 (Yen Carry Trade) 解除',
+            narrative: '美國經濟衰退擔憂 (Sahm Rule) 疊加日銀鷹派升息，導致全球借日圓買資產的資金被迫清算償債。',
+            realImpact: '標普 500 單日大跌 3%，日經指數暴跌 12% (超越 1987 黑色星期一)。比特幣因流動性最好，成為首要提款機。'
+        },
+        initialState: {
+            price: '$58,000 -> $49,000',
+            fearGreed: '17 (極度恐慌)',
+            oi: '-25% (解槓桿)',
+            funding: '負費率 (極度看空)'
+        },
+        misconceptions: [
+            {
+                myth: '加密貨幣本身出問題了',
+                fact: '這是宏觀流動性危機，所有風險資產 (股票、黃金、Crypto) 都在跌，與 Crypto 基本面無關。'
+            },
+            {
+                myth: '牛市結束了',
+                fact: '流動性衝擊造成的急跌通常是槓桿清洗，而非週期結束。V 轉證明了買盤強勁。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2024-07-31',
+                title: '日本央行升息',
+                description: '日銀意外將利率從 0.1% 上調至 0.25%，日圓開始走強，套利成本上升。',
+                marketImpact: '市場開始動盪，聰明錢開始去槓桿。',
+                riskState: '變盤前夕',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2024-08-02',
+                title: '非農數據疲軟',
+                description: '美國失業率觸發薩姆規則 (Sahm Rule)，引發衰退恐慌。',
+                marketImpact: '美股大跌，恐慌情緒蔓延。',
+                riskState: '恐慌升溫',
+                riskLevel: 'high'
+            },
+            {
+                date: '2024-08-05',
+                title: '黑色星期一',
+                description: '亞洲開盤日股熔斷，全球資產遭無差別拋售。BTC 觸及 $49,000。',
+                marketImpact: '全網爆倉 10 億美元，流動性枯竭。',
+                riskState: '崩盤',
+                riskLevel: 'high'
+            },
+            {
+                date: '2024-08-06',
+                title: '日銀投降',
+                description: '日銀副總裁內田真一表示「市場不穩定時不會升息」。',
+                marketImpact: '日圓回落，風險資產報復性反彈，BTC 重回 $56,000。',
+                riskState: 'V型反彈',
+                riskLevel: 'medium'
+            }
+        ],
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 10
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：典型的 V 型反轉，黑色星期一 (Aug 5) 創下極端低點後迅速回升。',
+                interpretation: {
+                    whatItMeans: '流動性驅動的崩盤通常創造黃金坑 (Golden Pit)。',
+                    whatToWatch: '日圓匯率 (USD/JPY) 若再度急升，風險資產將承壓。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：恐懼貪婪指數單日驟降至 17 (極度恐慌)，為 2024 年最低點之一。',
+                interpretation: {
+                    whatItMeans: '極度恐慌往往是反向指標。',
+                    whatToWatch: '當指數在 24 小時內從極恐反彈，確認底部。'
+                }
+            },
+            oi: {
+                url: '',
+                caption: '圖表解讀：未平倉合約 (OI) 單日蒸發 25%，槓桿被徹底清洗。',
+                interpretation: {
+                    whatItMeans: 'OI 的急劇下降代表市場槓桿出清，車變輕了。',
+                    whatToWatch: 'OI 是否隨價格緩步回升（健康），還是快速堆積（危險）。'
+                }
+            },
+            // Macro chart specific request
+            stablecoin: {
+                url: '',
+                caption: '圖表解讀：日本央行升息 (0.1% -> 0.25%) 與美日利差縮小，引發套利平倉海嘯。',
+                interpretation: {
+                    whatItMeans: '全球資金成本上升，借便宜日圓買比特幣的邏輯逆轉。',
+                    whatToWatch: 'USD/JPY 匯率 140 關卡保衛戰。'
+                }
+            }
+        },
+        historicalComparison: {
+            event: '2020 312 崩盤',
+            similarity: '都是宏觀流動性衝擊導致的無差別拋售，隨後都迎來了強勁的 V 型反轉與新高。'
+        },
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '關注宏觀數據',
+                desc: '日圓匯率與美聯儲利率政策是 2024 的核心變數。'
+            },
+            {
+                type: 'check',
+                label: '急跌時勇於接刀',
+                desc: '若是因外部流動性導致的急跌，且基本面未變，通常是極佳買點。'
+            }
+        ]
+    },
+    {
+        id: 'german-govt-selloff-2024',
+        slug: 'german-govt-selloff-2024',
+        title: '2024 德國政府拋售：國家級賣壓',
+        year: 2024,
+        type: 'supply_shock',
+        impactSummary: '德國政府拋售 5 萬枚 BTC，市場承受 30 億美元賣壓',
+        importance: 'A',
+        tags: ['Supply Shock', 'Government Selling'],
+        marketStates: ['觀望', '修復'],
+        relatedMetrics: ['etfFlow', 'price'],
+        readingMinutes: 5,
+        isProOnly: false,
+        publishedAt: '2024-07-15T00:00:00Z',
+        updatedAt: '2024-07-15T00:00:00Z',
+        eventStartAt: '2024-06-19T00:00:00Z',
+        eventEndAt: '2024-07-12T00:00:00Z',
+        reactionStartAt: '2024-07-08T00:00:00Z',
+        reactionType: 'trust_collapse',
+        impactedTokens: ['BTC'],
+        usageGuide: [
+            '學習如何分析鏈上大額轉移',
+            '理解供應衝擊 (Supply Shock) 的短期影響'
+        ],
+        summary: '德國薩克森邦政府在三週內將查扣的 50,000 枚比特幣（約 30 億美元）全數拋售至交易所，引發市場恐慌，比特幣一度跌至 $53,000，但隨後因賣壓解除而迅速反彈。',
+        context: {
+            what: '德國政府充公資產拍賣',
+            narrative: 'Movie2k 盜版網站案查扣的 5 萬枚 BTC，政府選擇直接市價拋售換現，而非長期持有。',
+            realImpact: '市場不僅要承接 MT.GOX 賠付預期，又增加了 30 億美元的實盤賣壓。'
+        },
+        initialState: {
+            price: '$65,000 -> $53,000',
+            fearGreed: '26 (恐慌)',
+            etfFlow: '淨流出 (情緒受影響)'
+        },
+        misconceptions: [
+            {
+                myth: '德國政府看空比特幣',
+                fact: '這只是司法程序的標準資產處置流程，並非國家戰略性的看空操作 (雖然被嘲笑賣飛)。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2024-06-19',
+                title: '開始小額轉移',
+                description: '鏈上偵測到德國政府錢包開始向交易所轉入 BTC。',
+                marketImpact: '市場開始猜測拋售計畫。',
+                riskState: '疑慮',
+                riskLevel: 'low'
+            },
+            {
+                date: '2024-07-08',
+                title: '賣壓高峰',
+                description: '每日數千枚 BTC 轉入交易所，價格承受最大壓力觸及 $53,500。',
+                marketImpact: '散戶恐慌殺跌。',
+                riskState: '恐慌',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2024-07-12',
+                title: '清倉完畢',
+                description: '德國政府錢包餘額歸零。',
+                marketImpact: '賣壓正式解除，價格當日反彈至 $58,000。',
+                riskState: '利空出盡',
+                riskLevel: 'low'
+            }
+        ],
+        chartConfig: {
+            symbol: 'BTC',
+            daysBuffer: 7
+        },
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：價格下跌與德國政府轉幣至交易所的時間點完全吻合 (On-chain Logic)。',
+                interpretation: {
+                    whatItMeans: '一旦政府錢包歸零，剛性賣壓解除，價格失去下跌動力。',
+                    whatToWatch: 'Arkham 標記的政府實體錢包餘額變化。'
+                }
+            },
+            flow: {
+                url: '',
+                caption: '圖表解讀：ETF 資金在恐慌期間呈現淨流出，但在賣壓結束後迅速轉為淨流入。',
+                interpretation: {
+                    whatItMeans: '機構資金也會受到情緒影響而暫時觀望。',
+                    whatToWatch: 'ETF 淨流入是否連續 3 日轉正。'
+                }
+            }
+        },
+        historicalComparison: {
+            event: 'Mt. Gox 賠付',
+            similarity: '都是非基本面的供應衝擊。但德國是主動市價砸盤，Mt. Gox 是分發給債權人（不一定賣），德國的影響更直接但更短暫。'
+        },
+        actionableChecklist: [
+            {
+                type: 'check',
+                label: '監控鏈上數據',
+                desc: '使用 Arkham 等工具追蹤大戶錢包流向，能提前預知賣壓。'
+            },
+            {
+                type: 'alert',
+                label: '不要過度反應',
+                desc: '一次性的供應衝擊 (One-off Supply Shock) 通常是買入機會。'
+            }
+        ]
+    },
+    {
+        id: 'iran-israel-flash-crash-2024',
+        slug: 'iran-israel-flash-crash-2024',
+        title: '2024 伊朗攻擊以色列：地緣政治閃崩',
+        year: 2024,
+        type: 'geopolitics',
+        impactSummary: '地緣衝突引發週末流動性閃崩',
+        importance: 'B',
+        tags: ['Geopolitics', 'Flash Crash'],
+        marketStates: ['崩跌', '修復'],
+        relatedMetrics: ['price', 'fearGreed'],
+        readingMinutes: 4,
+        isProOnly: false,
+        publishedAt: '2024-04-15T00:00:00Z',
+        updatedAt: '2024-04-15T00:00:00Z',
+        eventStartAt: '2024-04-13T00:00:00Z',
+        eventEndAt: '2024-04-15T00:00:00Z',
+        reactionStartAt: '2024-04-13T00:00:00Z',
+        reactionType: 'external_shock',
+        impactedTokens: ['BTC'],
+        usageGuide: [
+            '觀察週末流動性不足時的極端波動',
+            '理解比特幣在戰爭初期的「風險資產」屬性'
+        ],
+        summary: '伊朗向以色列發射無人機與導彈，報復使館被炸。消息在週末流動性稀薄時傳出，比特幣作為唯一 24/7 交易的資產遭恐慌拋售，瞬間暴跌 8%，反而黃金代幣 (PAXG) 對比特幣溢價大漲。',
+        context: {
+            what: '中東地緣衝突升級',
+            narrative: 'WW3 擔憂重燃。',
+            realImpact: '實際上衝突並未進一步擴大，市場反應過度。'
+        },
+        initialState: {
+            price: '$67,000 -> $60,800',
+            fearGreed: '72 -> 55',
+            stablecoin: 'PAXG 溢價 20%'
+        },
+        misconceptions: [
+            {
+                myth: '比特幣是避險資產',
+                fact: '在流動性危機初期，比特幣通常被視為風險資產先被拋售換現，之後才可能展現避險屬性。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2024-04-13',
+                title: '無人機攻擊消息傳出',
+                description: '週六深夜傳出伊朗發射無人機。',
+                marketImpact: 'BTC 30 分鐘內暴跌 $5,000 點。',
+                riskState: '崩盤',
+                riskLevel: 'high'
+            },
+            {
+                date: '2024-04-14',
+                title: '防禦成功',
+                description: '以色列攔截絕大多數導彈，美國呼籲克制。',
+                marketImpact: '恐慌消退，價格企穩。',
+                riskState: '修復',
+                riskLevel: 'medium'
+            }
+        ],
+        charts: {
+            main: {
+                url: '',
+                caption: '圖表解讀：週末流動性不足 (Low Liquidity) 時，地緣政治消息引發的下殺往往有長下影線。',
+                interpretation: {
+                    whatItMeans: '週末的恐慌拋售通常是反應過度，週一開盤機構回歸後常有修復。',
+                    whatToWatch: '衝突是否真的升級（如石油禁運），否則僅為且戰且走。'
+                }
+            }
+        },
+        historicalComparison: {
+            event: '2022 俄烏戰爭爆發',
+            similarity: '開戰瞬間比特幣都先跌，隨後因避險需求或利空出盡而上漲。'
+        },
+        actionableChecklist: [
+            {
+                type: 'alert',
+                label: '週末操作需謹慎',
+                desc: '週末做市商休假，深度差，容易發生閃崩。'
             }
         ]
     }

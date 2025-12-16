@@ -160,6 +160,25 @@ const REVIEWS_CONFIG = [
         symbol: 'BTC',
         reactionStart: '2023-11-21', // D0: DOJ settlement
         types: ['price', 'oi']
+    },
+    // 2024 New Events
+    {
+        slug: 'yen-carry-trade-crash-2024',
+        symbol: 'BTC',
+        reactionStart: '2024-08-05', // D0: Black Monday
+        types: ['price', 'oi', 'fgi']
+    },
+    {
+        slug: 'german-govt-selloff-2024',
+        symbol: 'BTC',
+        reactionStart: '2024-07-08', // D0: Selling Peak
+        types: ['price', 'oi', 'fgi']
+    },
+    {
+        slug: 'iran-israel-flash-crash-2024',
+        symbol: 'BTC',
+        reactionStart: '2024-04-13', // D0: Attack day
+        types: ['price', 'oi', 'fgi']
     }
 ];
 

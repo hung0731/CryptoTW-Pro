@@ -48,7 +48,7 @@ export const ECONOMIC_DICTIONARY: Record<string, string> = {
     "Export orders": "外銷訂單",
     "Export Orders": "外銷訂單",
     "Current account": "經常帳",
-    "Current Account": "經常帳",
+    // "Current Account": "經常帳", // Removed duplicate
     "Seasonally adjusted unemployment rate": "經季調失業率",
     "M2 Currency Total": "M2 貨幣總計",
     "Foreign exchange reserves": "外匯存底",

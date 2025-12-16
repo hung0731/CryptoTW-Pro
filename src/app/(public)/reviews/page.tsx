@@ -92,13 +92,34 @@ export default function ReviewsPage() {
 
             {/* 1. Editor's Picks (Carousel) */}
             {!hasActiveFilters && (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-4 mb-4">
                     <ReviewCarousel items={featuredReviews} />
+
+                    {/* 1.5 Historical Comparison Card */}
+                    <div className="px-4">
+                        <Link
+                            href="/reviews/compare"
+                            className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-900/10 border border-amber-500/20 active:scale-[0.98] transition-all hover:border-amber-500/40"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                                    <ArrowRightLeft className="w-5 h-5 text-amber-500" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-amber-100">歷史對照模式</h3>
+                                    <p className="text-[10px] text-amber-200/60">比較兩個事件的結構差異 (Compare Mode)</p>
+                                </div>
+                            </div>
+                            <div className="bg-amber-500 text-black text-[10px] font-bold px-2 py-1 rounded">
+                                TRY
+                            </div>
+                        </Link>
+                    </div>
                 </div>
             )}
 
-            <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-white/5 pb-2 transition-all">
-                <div className="px-4 pt-3 pb-2 space-y-3">
+            <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-white/5 transition-all">
+                <div className="px-4 py-4 space-y-4">
                     {/* 2. Search Bar */}
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
@@ -209,11 +230,11 @@ function ReviewCard({ review }: { review: MarketEvent }) {
     return (
         <article className="group relative bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:bg-neutral-900/60 hover:border-white/20 transition-all duration-300">
             {/* Watermark Logo */}
-            <div className="absolute -right-4 -bottom-4 opacity-[0.12] group-hover:opacity-[0.20] transition-opacity rotate-12 pointer-events-none mix-blend-overlay">
+            <div className="absolute -right-4 -bottom-4 opacity-[0.20] group-hover:opacity-[0.30] transition-opacity rotate-12 pointer-events-none">
                 {review.impactedTokens?.[0] && (
                     <img
                         src={`/tokens/${review.impactedTokens[0]}.png`}
-                        className="w-24 h-24 blur-[0.5px]"
+                        className="w-16 h-16 blur-[0.5px]"
                         alt=""
                         onError={(e) => e.currentTarget.style.display = 'none'}
                     />

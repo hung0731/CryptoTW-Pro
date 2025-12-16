@@ -17,6 +17,12 @@ export function BottomNav() {
             active: pathname === '/'
         },
         {
+            label: '快訊',
+            icon: Newspaper,
+            href: '/news',
+            active: pathname === '/news'
+        },
+        {
             label: '日曆',
             icon: Calendar,
             href: '/calendar',

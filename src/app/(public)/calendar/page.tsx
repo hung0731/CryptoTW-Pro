@@ -177,74 +177,71 @@ export default function CalendarPage() {
                     </div>
                 ) : (
                     <div className="space-y-0">
-                        {Object.entries(groupedEvents).map(([dateKey, items], groupIdx) => {
-                            // Parse dateKey (YYYY-MM-DD) for display
-                            const dateObj = new Date(dateKey)
-                            return (
-                                <div key={dateKey} className="border-b border-white/5">
-                                    {/* Date Header (Sticky below Month Selector) */}
-                                    <div className="sticky top-[105px] z-30 bg-neutral-950/95 backdrop-blur border-y border-white/5 py-3 px-4 flex items-baseline gap-3">
-                                        <span className="font-bold text-2xl text-white font-mono tracking-tight">
-                                            {dateObj.getDate()}
-                                        </span>
-                                        <span className="text-sm font-medium text-neutral-500 uppercase">
-                                            {dateObj.toLocaleDateString('zh-TW', { weekday: 'long', month: 'long' })}
-                                        </span>
-                                    </div>
+                        {Object.entries(groupedEvents).map(([dateKey, items], groupIdx) => (
+                            <div key={dateKey} className="border-b border-white/5">
+                                {/* Date Header (Sticky below Month Selector) */}
+                                <div className="sticky top-[105px] z-30 bg-neutral-950/95 backdrop-blur border-y border-white/5 py-3 px-4 flex items-baseline gap-3">
+                                    <span className="font-bold text-2xl text-white font-mono tracking-tight">
+                                        {new Date(dateKey).getDate()}
+                                    </span>
+                                    <span className="text-sm font-medium text-neutral-500 uppercase">
+                                        {new Date(dateKey).toLocaleDateString('zh-TW', { weekday: 'long', month: 'long' })}
+                                    </span>
+                                </div>
 
-                                    {/* Events List */}
-                                    <div className="divide-y divide-white/5">
-                                        {items.map((item, idx) => {
-                                            const timeStr = new Date(item.publish_timestamp).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })
-                                            return (
-                                                <div key={idx} className="grid grid-cols-[50px_1fr_90px] gap-2 p-4 items-center hover:bg-white/5 transition-colors">
-                                                    {/* Time & Country */}
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-sm font-medium text-neutral-400">{timeStr}</span>
-                                                        <Badge variant="outline" className={cn(
-                                                            "text-[10px] h-4 px-1 rounded-sm border-0 font-bold",
-                                                            item.country_name === '美國' ? "bg-blue-950 text-blue-400" : "bg-green-950 text-green-400"
-                                                        )}>
-                                                            {item.country_name}
-                                                        </Badge>
-                                                    </div>
+                                {/* Events List */}
+                                <div className="divide-y divide-white/5">
+                                    {items.map((item, idx) => {
+                                        const timeStr = new Date(item.publish_timestamp).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })
+                                        return (
+                                            <div key={idx} className="grid grid-cols-[50px_1fr_90px] gap-2 p-4 items-center hover:bg-white/5 transition-colors">
+                                                {/* Time & Country */}
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-sm font-medium text-neutral-400">{timeStr}</span>
+                                                    <Badge variant="outline" className={cn(
+                                                        "text-[10px] h-4 px-1 rounded-sm border-0 font-bold",
+                                                        item.country_name === '美國' ? "bg-blue-950 text-blue-400" : "bg-green-950 text-green-400"
+                                                    )}>
+                                                        {item.country_name}
+                                                    </Badge>
+                                                </div>
 
-                                                    {/* Name & Impact */}
-                                                    <div className="flex flex-col gap-1 min-w-0">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-medium text-sm text-neutral-200 truncate">{translateEventName(item.calendar_name)}</span>
-                                                            {item.importance_level >= 3 && (
-                                                                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]"></span>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-3 text-xs text-neutral-500">
-                                                            <span>前值: <span className="text-neutral-300">{item.previous_value || '--'}</span></span>
-                                                            <span>預期: <span className="text-neutral-300">{item.forecast_value || '--'}</span></span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Actual Value */}
-                                                    <div className="text-right">
-                                                        {item.published_value ? (
-                                                            <span className={cn(
-                                                                "font-mono font-bold text-sm",
-                                                                // Simple logic: if actual > forecast usually green? 
-                                                                // Without detailed 'impact type' (bullish/bearish), we might just use yellow/white.
-                                                                // Coinglass sometimes gives 'data_effect'.
-                                                                "text-amber-400"
-                                                            )}>
-                                                                {item.published_value}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-xs text-neutral-600">未公佈</span>
+                                                {/* Name & Impact */}
+                                                <div className="flex flex-col gap-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-sm text-neutral-200 truncate">{translateEventName(item.calendar_name)}</span>
+                                                        {item.importance_level >= 3 && (
+                                                            <span className="flex-shrink-0 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]"></span>
                                                         )}
                                                     </div>
+                                                    <div className="flex items-center gap-3 text-xs text-neutral-500">
+                                                        <span>前值: <span className="text-neutral-300">{item.previous_value || '--'}</span></span>
+                                                        <span>預期: <span className="text-neutral-300">{item.forecast_value || '--'}</span></span>
+                                                    </div>
                                                 </div>
-                                            )
-                                        })}
-                                    </div>
+
+                                                {/* Actual Value */}
+                                                <div className="text-right">
+                                                    {item.published_value ? (
+                                                        <span className={cn(
+                                                            "font-mono font-bold text-sm",
+                                                            // Simple logic: if actual > forecast usually green? 
+                                                            // Without detailed 'impact type' (bullish/bearish), we might just use yellow/white.
+                                                            // Coinglass sometimes gives 'data_effect'.
+                                                            "text-amber-400"
+                                                        )}>
+                                                            {item.published_value}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-neutral-600">未公佈</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
-                            ))}
+                            </div>
+                        ))}
 
                         {events.length === 0 && (
                             <div className="py-20 text-center text-neutral-500 text-sm">
