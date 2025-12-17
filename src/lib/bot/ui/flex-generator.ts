@@ -636,7 +636,7 @@ export function createCurrencyCard(
                         ]
                     }
                 ],
-                paddingBottom: "10px"
+                paddingBottom: "2px"
             },
             body: {
                 type: "box" as const,
@@ -646,7 +646,7 @@ export function createCurrencyCard(
                     {
                         type: "box" as const,
                         layout: "baseline" as const,
-                        margin: "md",
+                        margin: "sm",
                         contents: [
                             {
                                 type: "text" as const,
@@ -674,16 +674,17 @@ export function createCurrencyCard(
                         color: "#555555",
                         margin: "md"
                     },
-                    { type: "separator" as const, margin: "lg", color: "#f0f0f0" },
+                    { type: "separator" as const, margin: "md", color: "#f0f0f0" },
                     // 表頭
                     {
                         type: "box" as const,
                         layout: "horizontal" as const,
                         contents: [
                             { type: "text" as const, text: "交易所", size: "xs" as const, color: "#888888", flex: 2 },
-                            { type: "text" as const, text: "買 U (Ask)", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 },
-                            { type: "text" as const, text: "賣 U (Bid)", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 }
-                        ]
+                            { type: "text" as const, text: "買進", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 },
+                            { type: "text" as const, text: "賣出", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 }
+                        ],
+                        margin: "md"
                     },
                     { type: "separator" as const, margin: "sm", color: "#f0f0f0" },
 
@@ -696,7 +697,7 @@ export function createCurrencyCard(
                             { type: "text" as const, text: `${maxBuyRef}`, size: "sm" as const, color: maxBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: maxBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
                             { type: "text" as const, text: `${maxSellRef}`, size: "sm" as const, color: maxSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: maxSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
-                        margin: "md"
+                        margin: "sm"
                     },
                     // BitoPro
                     {
@@ -707,7 +708,7 @@ export function createCurrencyCard(
                             { type: "text" as const, text: `${bitoBuyRef}`, size: "sm" as const, color: bitoBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: bitoBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
                             { type: "text" as const, text: `${bitoSellRef}`, size: "sm" as const, color: bitoSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: bitoSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
-                        margin: "md"
+                        margin: "sm"
                     },
                     // HoyaBit
                     {
@@ -718,11 +719,14 @@ export function createCurrencyCard(
                             { type: "text" as const, text: `${hoyaBuyRef}`, size: "sm" as const, color: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
                             { type: "text" as const, text: `${hoyaSellRef}`, size: "sm" as const, color: hoyaSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: hoyaSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
-                        margin: "md"
+                        margin: "sm"
                     }
                 ]
             },
-            footer: createSharedFooter()
+            footer: createSharedFooter(),
+            styles: {
+                footer: { separator: true }
+            }
         }
     }
 }
@@ -774,7 +778,7 @@ export function createPriceCard(data: any) {
                         ]
                     }
                 ],
-                paddingBottom: "10px" as const
+                paddingBottom: "2px" as const
             },
             body: {
                 type: "box" as const,

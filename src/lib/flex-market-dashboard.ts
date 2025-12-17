@@ -330,13 +330,63 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
             contents: [
                 {
                     type: 'box' as const,
-                    layout: 'horizontal' as const,
+                    layout: 'vertical' as const,
+                    spacing: 'md',
                     contents: [
-                        createColumn('市場情緒', `${fgi}`, fgiStatus, fgiColor),
-                        // Separator line between columns? Flex doesn't support vertical separator easily in box contents list without extra boxes.
-                        // Can use border or just spacing. Spacing is fine.
-                        createColumn('資金費率', `${fundingRate.toFixed(3)}%`, fundingStatus, fundingColor),
-                        createColumn('多空分佈', `${whaleLsr.toFixed(2)}`, lsStatus, lsColor)
+                        // Row 1: Sentiment
+                        {
+                            type: 'box' as const,
+                            layout: 'horizontal' as const,
+                            contents: [
+                                { type: 'text' as const, text: '市場情緒', size: 'sm' as const, color: '#555555', flex: 1 },
+                                {
+                                    type: 'box' as const,
+                                    layout: 'baseline' as const,
+                                    contents: [
+                                        { type: 'text' as const, text: `${fgi}`, size: 'lg' as const, weight: 'bold' as const, color: fgiColor, flex: 0 },
+                                        { type: 'text' as const, text: ` ${fgiStatus}`, size: 'xs' as const, color: '#888888', margin: 'sm', flex: 0 }
+                                    ],
+                                    flex: 0
+                                }
+                            ],
+                            justifyContent: 'space-between' as const
+                        },
+                        // Row 2: Funding
+                        {
+                            type: 'box' as const,
+                            layout: 'horizontal' as const,
+                            contents: [
+                                { type: 'text' as const, text: '資金費率', size: 'sm' as const, color: '#555555', flex: 1 },
+                                {
+                                    type: 'box' as const,
+                                    layout: 'baseline' as const,
+                                    contents: [
+                                        { type: 'text' as const, text: `${fundingRate.toFixed(4)}%`, size: 'lg' as const, weight: 'bold' as const, color: fundingColor, flex: 0 },
+                                        { type: 'text' as const, text: ` ${fundingStatus}`, size: 'xs' as const, color: '#888888', margin: 'sm', flex: 0 }
+                                    ],
+                                    flex: 0
+                                }
+                            ],
+                            justifyContent: 'space-between' as const
+                        },
+                        // Row 3: Long/Short
+                        {
+                            type: 'box' as const,
+                            layout: 'horizontal' as const,
+                            contents: [
+                                { type: 'text' as const, text: '多空分佈', size: 'sm' as const, color: '#555555', flex: 1 },
+                                {
+                                    type: 'box' as const,
+                                    layout: 'baseline' as const,
+                                    contents: [
+                                        { type: 'text' as const, text: `${whaleLsr.toFixed(2)}`, size: 'lg' as const, weight: 'bold' as const, color: lsColor, flex: 0 },
+                                        { type: 'text' as const, text: ` ${lsStatus}`, size: 'xs' as const, color: '#888888', margin: 'sm', flex: 0 }
+                                    ],
+                                    flex: 0
+                                }
+                            ],
+                            justifyContent: 'space-between' as const
+                        }
                     ]
                 },
                 // Footer Hint
