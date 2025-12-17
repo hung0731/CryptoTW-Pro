@@ -9,8 +9,6 @@ import {
 } from 'lucide-react'
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
-import { MarketStatusGrid } from '@/components/home/MarketStatusGrid'
-import { DecisionHero } from '@/components/home/DecisionHero'
 import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
 import { UpcomingEventsCard } from '@/components/home/UpcomingEventsCard'
 import { FeaturedReviewsCard } from '@/components/home/FeaturedReviewsCard'
@@ -122,17 +120,6 @@ export function HomePageClient({
                     </Link>
                 )}
 
-                {/* ===== Strategy Section ===== */}
-                <section className="space-y-3">
-                    <h2 className="text-base font-bold text-white pl-1">🎯 今天怎麼看</h2>
-                    <DecisionHero initialStatus={initialStatus} initialConclusion={initialConclusion} />
-                </section>
-
-                {/* ===== Data Section ===== */}
-                <section className="space-y-3">
-                    <h2 className="text-base font-bold text-white pl-1">📊 盤面健康嗎</h2>
-                    <MarketStatusGrid initialStatus={initialStatus} initialConclusion={initialConclusion} />
-                </section>
 
                 {/* ===== Context Section ===== */}
                 <section className="space-y-3">

@@ -27,7 +27,7 @@ const REVIEWS_CONFIG = [
         year: 2024,
         symbol: 'BTC',
         reactionStart: '2024-01-10', // D0: SEC approval day
-        types: ['price', 'flow', 'oi']
+        types: ['price', 'flow', 'oi', 'premium']
     },
     {
         slug: 'ftx',
@@ -48,7 +48,7 @@ const REVIEWS_CONFIG = [
         year: 2020,
         symbol: 'BTC',
         reactionStart: '2020-03-09', // D0: Pre-crash selloff begins
-        types: ['price', 'oi', 'fgi']
+        types: ['price', 'oi', 'fgi', 'liquidation']
     },
     {
         slug: 'mtgox',
@@ -200,13 +200,50 @@ const REVIEWS_CONFIG = [
         symbol: 'BTC',
         reactionStart: '2024-04-13', // D0: Attack day
         types: ['price', 'oi', 'fgi']
+    },
+    // ===== New Indicator-Related Events =====
+    {
+        slug: '2021-may-crash',
+        year: 2021,
+        symbol: 'BTC',
+        reactionStart: '2021-05-12', // D0: Elon Musk tweet
+        types: ['price', 'oi', 'fgi', 'funding', 'liquidation', 'longShort']
+    },
+    {
+        slug: '2024-ath-pullback',
+        year: 2024,
+        symbol: 'BTC',
+        reactionStart: '2024-03-14', // D0: ATH $73,000
+        types: ['price', 'oi', 'fgi', 'funding']
+    },
+    {
+        slug: '2021-nov-top',
+        year: 2021,
+        symbol: 'BTC',
+        reactionStart: '2021-11-10', // D0: ATH $69,000
+        types: ['price', 'oi', 'fgi', 'basis']
+    },
+    {
+        slug: '2022-june-deleverage',
+        year: 2022,
+        symbol: 'BTC',
+        reactionStart: '2022-06-12', // D0: Celsius pause
+        types: ['price', 'oi', 'fgi', 'stablecoin']
+    },
+    {
+        slug: '2023-march-squeeze',
+        year: 2023,
+        symbol: 'BTC',
+        reactionStart: '2023-03-10', // D0: SVB collapse
+        types: ['price', 'oi', 'fgi', 'longShort']
     }
 ];
 
 // Helper to make request
 async function fetchApi(endpoint) {
     try {
-        const url = `${BASE_URL}${endpoint}`;
+        await new Promise(resolve => setTimeout(resolve, 3500)); // Rate limit protection (increased to 3.5s)
+        const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
         const headers = {
             'CG-API-KEY': API_KEY,
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -424,6 +461,132 @@ async function fetchHistory(type, symbol, reactionStartStr) {
             console.error('    V3 FGI Fetch Error:', e);
         }
 
+        return [];
+    }
+
+    // Funding Rate (V4 OI Weighted)
+    if (type === 'funding') {
+        // V4: /api/futures/funding-rate/oi-weight-history
+        // Params: symbol (BTC), interval (1d), start_time (ms), end_time (ms)
+        const endpoint = `https://open-api-v4.coinglass.com/api/futures/funding-rate/oi-weight-history?symbol=${symbol}&interval=1d&start_time=${startMs}&end_time=${endMs}`;
+        console.log(`  Fetching Funding Rate (V4 Weighted): ${symbol}`);
+
+        const json = await fetchApi(endpoint);
+        if (json && json.code === '0' && json.data) {
+            // data: [{ time, open, high, low, close }]
+            const rawList = json.data;
+            const mapped = rawList.map(item => ({
+                date: new Date(item.time).toISOString().split('T')[0],
+                timestamp: item.time,
+                fundingRate: parseFloat(item.close) * 100 // Convert to percentage
+            })).filter(d => d.timestamp >= startMs && d.timestamp <= endMs);
+
+            console.log(`      V4 Funding Got ${mapped.length} items.`);
+            return mapped;
+        } else {
+            console.warn('    V4 Funding Error:', json ? (json.msg || JSON.stringify(json)) : 'Fetch failed');
+        }
+        return [];
+    }
+
+    // Liquidation (V4 History)
+    if (type === 'liquidation') {
+        // V4: /api/futures/liquidation/history
+        // Params: exchange (Binance), symbol (BTCUSDT), interval (1d), start_time (ms), end_time (ms)
+        const endpoint = `https://open-api-v4.coinglass.com/api/futures/liquidation/history?exchange=Binance&symbol=${pair}&interval=1d&start_time=${startMs}&end_time=${endMs}`;
+        console.log(`  Fetching Liquidation (V4): ${pair} (Binance)`);
+
+        const json = await fetchApi(endpoint);
+        if (json && json.code === '0' && json.data) {
+            // data: [{ time, long_liquidation_usd, short_liquidation_usd }]
+            const rawList = json.data;
+            const mapped = rawList.map(item => ({
+                date: new Date(item.time).toISOString().split('T')[0],
+                timestamp: item.time,
+                liquidation: parseFloat(item.long_liquidation_usd) + parseFloat(item.short_liquidation_usd)
+            })).filter(d => d.timestamp >= startMs && d.timestamp <= endMs);
+
+            console.log(`      V4 Liquidation Got ${mapped.length} items.`);
+            return mapped;
+        } else {
+            console.warn('    V4 Liquidation Error:', json ? (json.msg || JSON.stringify(json)) : 'Fetch failed');
+        }
+        return [];
+    }
+
+    // Long/Short Ratio (V4)
+    if (type === 'longShort') {
+        // V4: /api/futures/global-long-short-account-ratio/history
+        // Params: exchange (Binance), symbol (BTCUSDT), interval (1d), start_time (ms), end_time (ms)
+        const endpoint = `https://open-api-v4.coinglass.com/api/futures/global-long-short-account-ratio/history?exchange=Binance&symbol=${pair}&interval=1d&start_time=${startMs}&end_time=${endMs}`;
+        console.log(`  Fetching LSR (V4): ${pair} (Binance)`);
+
+        const json = await fetchApi(endpoint);
+        if (json && json.code === '0' && json.data) {
+            // data: [{ time, global_account_long_short_ratio }]
+            const rawList = json.data;
+            const mapped = rawList.map(item => ({
+                date: new Date(item.time).toISOString().split('T')[0],
+                timestamp: item.time,
+                longShortRatio: parseFloat(item.global_account_long_short_ratio)
+            })).filter(d => d.timestamp >= startMs && d.timestamp <= endMs);
+
+            console.log(`      V4 LSR Got ${mapped.length} items.`);
+            return mapped;
+        } else {
+            console.warn('    V4 LSR Error:', json ? (json.msg || JSON.stringify(json)) : 'Fetch failed');
+        }
+        return [];
+    }
+
+    // A-Tier Indicators
+    // Futures Basis
+    if (type === 'basis') {
+        const endpoint = `https://open-api-v4.coinglass.com/api/futures/basis/history?exchange=Binance&symbol=${pair}&interval=1d&start_time=${startMs}&end_time=${endMs}`;
+        const json = await fetchApi(endpoint);
+        if (json && json.code === '0' && json.data) {
+            const mapped = json.data.map(item => ({
+                date: new Date(item.time).toISOString().split('T')[0],
+                timestamp: item.time,
+                basis: parseFloat(item.close_basis) * 100 // %
+            }));
+            return mapped;
+        }
+        return [];
+    }
+
+    // Coinbase Premium (No symbol param usually? Or defaults. Doc says interval required. endpoint is /api/coinbase-premium-index)
+    if (type === 'premium') {
+        const endpoint = `https://open-api-v4.coinglass.com/api/coinbase-premium-index?interval=1d&start_time=${startMs}&end_time=${endMs}`;
+        // Note: Doc endpoint URL might be missing 'history' suffix or it's just index. User doc: /api/coinbase-premium-index
+        // Wait, response example shows timestamp in seconds? No, "time": 1658880000. That is seconds.
+
+        const json = await fetchApi(endpoint);
+        if (json && json.code === '0' && json.data) {
+            const mapped = json.data.map(item => ({
+                date: new Date(item.time * 1000).toISOString().split('T')[0],
+                timestamp: item.time * 1000,
+                premium: parseFloat(item.premium_rate)
+            }));
+            return mapped;
+        }
+        return [];
+    }
+
+    // Stablecoin Market Cap
+    if (type === 'stablecoin') {
+        const endpoint = `https://open-api-v4.coinglass.com/api/index/stableCoin-marketCap-history`;
+        const json = await fetchApi(endpoint);
+        if (json && json.code === '0' && json.data && json.data[0]) {
+            // data: [{ data_list, time_list }]
+            const d = json.data[0];
+            const mapped = d.time_list.map((t, i) => ({
+                date: new Date(t * 1000).toISOString().split('T')[0],
+                timestamp: t * 1000,
+                stablecoin: d.data_list[i]
+            })).filter(x => x.timestamp >= startMs && x.timestamp <= endMs);
+            return mapped;
+        }
         return [];
     }
 

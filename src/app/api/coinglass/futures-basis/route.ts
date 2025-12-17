@@ -4,18 +4,22 @@ import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 
-interface PremiumItem {
-    time: number // seconds usually for Index APIs, checking docs... User doc says: "time": 1658880000 (seconds)
-    premium: number
-    premium_rate: number
+interface BasisItem {
+    time: number
+    open_basis: number
+    close_basis: number
+    open_change: number
+    close_change: number
 }
 
 export async function GET(req: NextRequest) {
-    const rateLimited = simpleApiRateLimit(req, 'cg-premium', 20, 60)
+    const rateLimited = simpleApiRateLimit(req, 'cg-basis', 20, 60)
     if (rateLimited) return rateLimited
 
     const { searchParams } = new URL(req.url)
     const symbol = searchParams.get('symbol') || 'BTC'
+    // Convert symbol to pair if needed, but defaults usually BTCUSDT for Binance
+    const pair = symbol.includes('USDT') ? symbol : `${symbol}USDT`
 
     try {
         const apiKey = getCoinglassApiKey()
@@ -23,9 +27,9 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'API Key not configured' }, { status: 500 })
         }
 
-        // V4 Coinbase Premium Index
-        // https://open-api-v4.coinglass.com/api/coinbase-premium-index
-        const url = `https://open-api-v4.coinglass.com/api/coinbase-premium-index?interval=1d&limit=4500`
+        // V4 Basis History
+        // https://open-api-v4.coinglass.com/api/futures/basis/history
+        const url = `https://open-api-v4.coinglass.com/api/futures/basis/history?exchange=Binance&symbol=${pair}&interval=1d&limit=4500`
 
         const res = await fetch(url, {
             headers: {
@@ -44,19 +48,20 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: json.msg || 'No data' }, { status: 500 })
         }
 
-        const rawList: PremiumItem[] = json.data
+        const rawList: BasisItem[] = json.data
 
+        // Map to standard format
         const history = rawList.map(item => ({
-            date: new Date(item.time * 1000).toISOString().split('T')[0],
-            timestamp: item.time * 1000,
-            value: item.premium_rate * 100,
-            price: 0
+            date: new Date(item.time).toISOString().split('T')[0],
+            timestamp: item.time,
+            value: item.close_basis * 100, // Convert decimal to percentage (e.g. 0.05 -> 5%)
+            price: 0 // Basis API doesn't return price context usually, or we can fetch separately if needed. For now 0.
         })).sort((a, b) => a.timestamp - b.timestamp)
 
         return NextResponse.json({ history })
 
     } catch (error) {
-        console.error('Premium API Error:', error)
+        console.error('Basis API Error:', error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

@@ -14,7 +14,7 @@ import GlobalLoader from '@/components/GlobalLoader'
 import { trackEvent } from '@/lib/analytics'
 
 export default function JoinPage() {
-    const { dbUser, profile, isLoading } = useLiff()
+    const { dbUser, profile, isLoading, liffObject } = useLiff()
     const router = useRouter()
     const { toast } = useToast()
 
@@ -66,11 +66,24 @@ export default function JoinPage() {
 
         setSubmitting(true)
         try {
+            // Get access token from LIFF for secure API call
+            const accessToken = liffObject?.getAccessToken()
+            if (!accessToken) {
+                toast({
+                    title: "認證錯誤",
+                    description: "請重新登入 LINE",
+                    variant: "destructive"
+                })
+                return
+            }
+
             const res = await fetch('/api/binding', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
                 body: JSON.stringify({
-                    lineUserId: profile.userId,
                     exchange: 'okx',
                     uid: trimmedUid
                 })

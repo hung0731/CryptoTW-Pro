@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { replyMessage, verifyLineSignature } from '@/lib/line-bot'
+import { getHoyabitPrices } from '@/lib/hoyabit'
 import { createAdminClient } from '@/lib/supabase' // Use Service Role for background
 import { cookies } from 'next/headers'
 import { getMarketState, type MarketState } from '@/lib/market-state'
@@ -1262,7 +1263,7 @@ async function fetchForexRate() {
 }
 
 // Create Currency Converter Flex Message
-function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calcResult?: string) {
+function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, forexRate: number, calcResult?: string) {
     // MAX Data (即時掛單)
     const maxBuyRef = parseFloat(maxData.sell) // User Buys (Ask)
     const maxSellRef = parseFloat(maxData.buy) // User Sells (Bid)
@@ -1275,19 +1276,38 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
         bitoSellRef = parseFloat(bitoData.bids[0].price) // User Sells (Bid)
     }
 
+    // Hoyabit Data (快兌)
+    const hoyaBuyRef = hoyaData?.buy || 0
+    const hoyaSellRef = hoyaData?.sell || 0
+
     const premium = ((maxBuyRef - forexRate) / forexRate) * 100
 
     // ===== 買入成本 / 賣出回收比較 =====
     // 買入成本較低 = Ask 價格較低
     // 賣出回收較高 = Bid 價格較高
     let bestBuyExchange = 'MAX'
+    let bestBuyPrice = maxBuyRef
     let bestSellExchange = 'MAX'
+    let bestSellPrice = maxSellRef
 
-    if (bitoBuyRef > 0 && bitoBuyRef < maxBuyRef) {
+    // Check Bito
+    if (bitoBuyRef > 0 && bitoBuyRef < bestBuyPrice) {
         bestBuyExchange = 'BitoPro'
+        bestBuyPrice = bitoBuyRef
     }
-    if (bitoSellRef > 0 && bitoSellRef > maxSellRef) {
+    if (bitoSellRef > 0 && bitoSellRef > bestSellPrice) {
         bestSellExchange = 'BitoPro'
+        bestSellPrice = bitoSellRef
+    }
+
+    // Check Hoyabit (Only if valid)
+    if (hoyaBuyRef > 0 && hoyaBuyRef < bestBuyPrice) {
+        bestBuyExchange = 'HOYA BIT'
+        bestBuyPrice = hoyaBuyRef
+    }
+    if (hoyaSellRef > 0 && hoyaSellRef > bestSellPrice) {
+        bestSellExchange = 'HOYA BIT'
+        bestSellPrice = hoyaSellRef
     }
 
     // Header Content
@@ -1295,7 +1315,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
 
     return {
         type: "flex",
-        altText: `TWD Rate: ${maxBuyRef}`,
+        altText: `TWD Rate: ${bestBuyPrice}`,
         contents: {
             type: "bubble",
             size: "kilo",
@@ -1345,7 +1365,7 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "即時掛單", size: "xs", color: "#888888", flex: 2 },
+                            { type: "text", text: "即時參考", size: "xs", color: "#888888", flex: 2 },
                             { type: "text", text: "買 U", size: "xs", color: "#D00000", align: "end", flex: 1 },
                             { type: "text", text: "賣 U", size: "xs", color: "#00B900", align: "end", flex: 1 }
                         ]
@@ -1377,6 +1397,18 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                         margin: "sm"
                     },
 
+                    // HOYA BIT
+                    {
+                        type: "box",
+                        layout: "horizontal",
+                        contents: [
+                            { type: "text", text: "HOYA BIT", size: "md", color: "#111111", weight: "bold", flex: 2 },
+                            { type: "text", text: hoyaBuyRef ? `${hoyaBuyRef}` : '--', size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
+                            { type: "text", text: hoyaSellRef ? `${hoyaSellRef}` : '--', size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
+                        ],
+                        margin: "sm"
+                    },
+
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
                     // 銀行匯率
@@ -1395,14 +1427,14 @@ function createCurrencyCard(maxData: any, bitoData: any, forexRate: number, calc
                     // 結論
                     {
                         type: "text",
-                        text: `買入較低：${bestBuyExchange}`,
+                        text: `買入最優：${bestBuyExchange} (${bestBuyPrice})`,
                         size: "xs",
                         color: "#aaaaaa",
                         margin: "md"
                     },
                     {
                         type: "text",
-                        text: `賣出較高：${bestSellExchange}`,
+                        text: `賣出最優：${bestSellExchange} (${bestSellPrice})`,
                         size: "xs",
                         color: "#aaaaaa",
                         margin: "xs"
@@ -1554,9 +1586,10 @@ export async function POST(req: NextRequest) {
                 const isRateOnlyQuery = /^[#@$]?(TWD|USD|USDT)$/i.test(text) || originalText === '匯率' || originalText === '匯率查詢'
 
                 if (currencyParsed || isRateOnlyQuery) {
-                    const [maxData, bitoData, forexRate] = await Promise.all([
+                    const [maxData, bitoData, hoyaData, forexRate] = await Promise.all([
                         fetchMaxTicker(),
                         fetchBitoOrderBook(),
+                        getHoyabitPrices(),
                         fetchForexRate()
                     ])
 
@@ -1579,7 +1612,7 @@ export async function POST(req: NextRequest) {
                             }
                         }
 
-                        const flexMsg = createCurrencyCard(maxData, bitoData, forexRate, calcResult)
+                        const flexMsg = createCurrencyCard(maxData, bitoData, hoyaData, forexRate, calcResult)
                         await replyMessage(replyToken, [flexMsg])
                     } else {
                         await replyMessage(replyToken, [{ type: "text", text: "⚠️ 目前無法取得匯率資訊，請稍後再試。" }])

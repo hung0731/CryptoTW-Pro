@@ -1,7 +1,7 @@
 
 export type MarketEventImportance = 'S' | 'A' | 'B';
 export type MarketState = '極恐' | '過熱' | '修復' | '崩跌' | '觀望';
-export type MetricType = 'fearGreed' | 'etfFlow' | 'oi' | 'funding' | 'price' | 'stablecoin';
+export type MetricType = 'fearGreed' | 'etfFlow' | 'oi' | 'funding' | 'price' | 'stablecoin' | 'liquidation' | 'longShort' | 'basis' | 'premium';
 
 export type TimelineRiskLevel = 'high' | 'medium' | 'low';
 
@@ -92,6 +92,11 @@ export interface MarketEvent {
         sentiment?: ChartDef; // 情緒
         oi?: ChartDef;        // 持倉量
         stablecoin?: ChartDef;// 穩定幣
+        funding?: ChartDef;   // 資金費率
+        liquidation?: ChartDef; // 清算量
+        longShort?: ChartDef;   // 多空比
+        basis?: ChartDef;       // 期貨基差
+        premium?: ChartDef;     // Coinbase 溢價
     };
 
     // 7. Analysis Modules (New)
@@ -224,6 +229,18 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 interpretation: {
                     whatItMeans: 'OI 的快速下降伴隨價格下跌，是典型的多頭去槓桿過程。',
                     whatToWatch: '當 OI 還在高位但價格滯漲時，需警惕即將到來的多殺多。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：FGI 從極度貪婪回落，修正過熱情緒。'
+            },
+            premium: {
+                url: '',
+                caption: '圖表解讀：Coinbase 正溢價持續，顯示美股時段買盤強勁。',
+                interpretation: {
+                    whatItMeans: '溢價是機構資金流入的直接證據。',
+                    whatToWatch: '溢價是否轉負，代表機構買盤衰竭。'
                 }
             }
         },
@@ -636,6 +653,14 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 interpretation: {
                     whatItMeans: '極端恐慌往往是流動性危機的特徵。',
                     whatToWatch: '恐慌指數的快速反彈通常預示著流動性危機的解除。'
+                }
+            },
+            liquidation: {
+                url: '',
+                caption: '圖表解讀：3/12 單日清算量巨大，甚至導致交易所引擎過載。',
+                interpretation: {
+                    whatItMeans: '流動性危機下的強制平倉是無差別的。',
+                    whatToWatch: '爆倉量是否衰竭。'
                 }
             }
         },
@@ -3095,6 +3120,497 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 label: '週末操作需謹慎',
                 desc: '週末做市商休假，深度差，容易發生閃崩。'
             }
+        ]
+    },
+    // ================================================
+    // 2021/05 槓桿崩盤 - 多殺多
+    // ================================================
+    {
+        id: 'review-2021-05',
+        slug: '2021-may-crash',
+        title: '2021/05 槓桿崩盤：多殺多連環爆倉',
+        year: 2021,
+        type: 'leverage_cleanse',
+        impactSummary: '長期偏正費率 + 高 OI，回調時形成連環爆倉',
+        importance: 'B',
+        tags: ['槓桿崩盤', '多殺多', '連鎖爆倉'],
+        marketStates: ['崩跌', '過熱'],
+        relatedMetrics: ['funding', 'oi', 'fearGreed'],
+        readingMinutes: 4,
+        isProOnly: false,
+        publishedAt: '2025-12-17',
+        updatedAt: '2025-12-17',
+        eventStartAt: '2021-05-12',
+        eventEndAt: '2021-05-19',
+        reactionStartAt: '2021-05-12',
+        reactionType: 'trust_collapse',
+        impactedTokens: ['BTC', 'ETH'],
+        usageGuide: [
+            '當資金費率持續偏高時（>0.01%）',
+            '當 OI 累積過高且價格開始走弱時'
+        ],
+        summary: '牛市中後段，資金費率長期偏正 + 持倉量高位堆積，Elon Musk 推特成為導火索，引發多殺多連環爆倉。',
+        context: {
+            what: 'Tesla 暫停 BTC 支付 + 中國加強監管，引發槓桿多頭踩踏式出逃。',
+            narrative: '牛市還在繼續，買跌就對了。',
+            realImpact: '過度擁擠的多頭槓桿形成連鎖清算，單週跌幅超過 30%。'
+        },
+        initialState: {
+            price: '$58,000 → $30,000',
+            fearGreed: '75（貪婪）→ 10（極度恐懼）',
+            funding: '持續 > 0.03% 偏高',
+            oi: '歷史高位'
+        },
+        misconceptions: [
+            {
+                myth: '這是牛市正常回調，很快會反彈',
+                fact: '當槓桿過度擁擠時，回調會被放大成崩盤，恢復時間遠超預期。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2021-05-12',
+                title: 'Elon Musk 推特',
+                description: 'Tesla 暫停接受 BTC 購車。',
+                marketImpact: 'BTC 單日跌 10%，情緒急轉。',
+                riskState: '恐慌開始',
+                riskLevel: 'high'
+            },
+            {
+                date: '2021-05-19',
+                title: '連環爆倉',
+                description: '價格跌破 $40,000 後觸發大規模清算。',
+                marketImpact: '單日清算超過 $8B，多殺多加劇。',
+                riskState: '流動性危機',
+                riskLevel: 'high'
+            }
+        ],
+        charts: {
+            flow: {
+                url: '',
+                caption: '圖表解讀：ETF 凈流出入與價格呈現高度相關性。'
+            },
+            oi: {
+                url: '',
+                caption: '圖表解讀：OI 隨着 ETF 資金持續堆積，顯示機構持續加倉。',
+                interpretation: {
+                    whatItMeans: '持倉量驟降代表槓桿被強制去化。',
+                    whatToWatch: '當 OI 降至低點且費率轉負時，通常是階段性底部。'
+                }
+            },
+            funding: {
+                url: '',
+                caption: '圖表解讀：長期偏正費率，多頭過度擁擠，回調時形成連環爆倉。',
+                interpretation: {
+                    whatItMeans: '費率過高代表槓桿過熱。',
+                    whatToWatch: '費率是否快速轉負（清洗完成）。'
+                }
+            },
+            liquidation: {
+                url: '',
+                caption: '圖表解讀：單日清算超過 $8B，多殺多加劇。',
+                interpretation: {
+                    whatItMeans: '清算量驟增是去槓桿的標誌。',
+                    whatToWatch: '清算峰值通常對應短期底部。'
+                }
+            },
+            longShort: {
+                url: '',
+                caption: '圖表解讀：長時間偏多，下跌時形成多殺多連環爆倉。',
+                interpretation: {
+                    whatItMeans: '高多空比 + 價格下跌 = 多殺多。',
+                    whatToWatch: '多空比回落至中性區域。'
+                }
+            },
+            main: {
+                url: '',
+                caption: '圖表解讀：高位堆積的槓桿 + 突發利空 = 多殺多崩盤結構。'
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：情緒從極度貪婪 (75) 直接墜入極度恐懼 (10)。'
+            }
+        },
+        historicalComparison: {
+            event: '2020/03 COVID',
+            similarity: '都是槓桿去化型崩盤，清算主導下跌。'
+        },
+        actionableChecklist: [
+            { type: 'alert', label: '費率偏高警示', desc: '當費率 > 0.01% 持續多日，降低槓桿。' }
+        ]
+    },
+    // ================================================
+    // 2024/03 新高回調
+    // ================================================
+    {
+        id: 'review-2024-03',
+        slug: '2024-ath-pullback',
+        title: '2024/03 新高回調：槓桿升溫後的典型清算',
+        year: 2024,
+        type: 'leverage_cleanse',
+        impactSummary: '新高附近槓桿升溫，費率偏高引發回調',
+        importance: 'B',
+        tags: ['新高', '回調', '清算'],
+        marketStates: ['過熱', '修復'],
+        relatedMetrics: ['funding', 'oi', 'price'],
+        readingMinutes: 3,
+        isProOnly: false,
+        publishedAt: '2025-12-17',
+        updatedAt: '2025-12-17',
+        eventStartAt: '2024-03-14',
+        eventEndAt: '2024-03-20',
+        reactionStartAt: '2024-03-14',
+        reactionType: 'priced_in',
+        impactedTokens: ['BTC'],
+        usageGuide: [
+            '當價格創新高但費率急升時',
+            '當 OI 快速堆積時警惕回調'
+        ],
+        summary: 'BTC 創下 $73,000 新高後，資金費率飆升，槓桿過熱導致 15% 回調。',
+        context: {
+            what: 'ETF 資金推動 BTC 創新高，但槓桿跟進速度過快。',
+            narrative: 'ETF 持續買入，上看 10 萬。',
+            realImpact: '費率偏高 + OI 急升 = 典型的清算前兆。'
+        },
+        initialState: {
+            price: '$73,000 → $62,000',
+            fearGreed: '85（極度貪婪）→ 65',
+            funding: '0.025% 偏高'
+        },
+        misconceptions: [
+            {
+                myth: '有 ETF 買盤，不會大跌',
+                fact: 'ETF 是現貨買盤，無法阻止合約市場的槓桿清算。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2024-03-14',
+                title: '創新高 $73,000',
+                description: '費率飆升至 0.03%。',
+                marketImpact: '槓桿過熱訊號明確。',
+                riskState: '過熱',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2024-03-15',
+                title: '回調開始',
+                description: '多頭清算引發連鎖反應。',
+                marketImpact: '24H 清算超過 $1B。',
+                riskState: '去槓桿',
+                riskLevel: 'high'
+            }
+        ],
+        charts: {
+            main: { url: '', caption: '新高 + 高費率 = 回調風險升高' },
+            oi: {
+                url: '',
+                caption: '圖表解讀：OI 在新高處快速堆積，隨後隨價格回調而減少。',
+                interpretation: {
+                    whatItMeans: '這是典型的多頭獲利了結與追高者被清洗的過程。',
+                    whatToWatch: 'OI 是否回歸健康水位。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：FGI 從極度貪婪回落至修復區間。'
+            },
+            funding: {
+                url: '',
+                caption: '圖表解讀：創新高時費率飆升，顯示突破是由高槓桿推動而非現貨。',
+                interpretation: {
+                    whatItMeans: '高費率突破往往難以持續。',
+                    whatToWatch: '費率回落後的價格支撐測試。'
+                }
+            }
+        },
+        historicalComparison: {
+            event: '2021/04 ATH',
+            similarity: '新高附近槓桿過熱後的回調結構相似。'
+        },
+        actionableChecklist: [
+            { type: 'alert', label: '新高警示', desc: '創新高時若費率 > 0.02%，考慮減倉。' }
+        ]
+    },
+    // ================================================
+    // 2021/11 高位接盤
+    // ================================================
+    {
+        id: 'review-2021-11',
+        slug: '2021-nov-top',
+        title: '2021/11 高位接盤：OI 見頂訊號',
+        year: 2021,
+        type: 'market_structure',
+        impactSummary: '高位 OI + 價格走弱 = 典型頂部結構',
+        importance: 'B',
+        tags: ['頂部', 'OI', '分配'],
+        marketStates: ['過熱', '觀望'],
+        relatedMetrics: ['oi', 'price', 'fearGreed'],
+        readingMinutes: 3,
+        isProOnly: false,
+        publishedAt: '2025-12-17',
+        updatedAt: '2025-12-17',
+        eventStartAt: '2021-11-10',
+        eventEndAt: '2021-11-14',
+        reactionStartAt: '2021-11-10',
+        reactionType: 'priced_in',
+        impactedTokens: ['BTC'],
+        usageGuide: [
+            '當 OI 創新高但價格無法跟進時',
+            '當價格走弱但 OI 不降時'
+        ],
+        summary: 'BTC 創下 $69,000 歷史新高後，OI 維持高位但價格開始走弱，形成典型的頂部分配結構。',
+        context: {
+            what: '牛市頂部，槓桿高位但現貨買盤不足。',
+            narrative: '年底上看 10 萬。',
+            realImpact: 'OI 高位 + 價格走弱 = 長達一年的熊市開端。'
+        },
+        initialState: {
+            price: '$69,000 → $55,000 (一週)',
+            fearGreed: '84（極度貪婪）→ 50',
+            oi: '歷史新高'
+        },
+        misconceptions: [
+            {
+                myth: 'OI 增加代表市場看漲',
+                fact: '高 OI + 價格走弱代表槓桿多頭被套，是危險訊號。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2021-11-10',
+                title: '創 $69,000 ATH',
+                description: 'OI 同步創新高。',
+                marketImpact: '表面強勢，實則分配開始。',
+                riskState: '表面樂觀',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2021-11-14',
+                title: '價格開始走弱',
+                description: 'OI 維持但價格下跌。',
+                marketImpact: '槓桿多頭開始被套。',
+                riskState: '分配階段',
+                riskLevel: 'high'
+            }
+        ],
+        charts: {
+            main: { url: '', caption: 'OI 頂背離：價格走弱但 OI 不降' },
+            oi: {
+                url: '',
+                caption: '圖表解讀：OI 在高位維持不墜，顯示多頭不願離場，最終成為下跌燃料。',
+                interpretation: {
+                    whatItMeans: '價格下跌但 OI 不降，代表主力出貨給槓桿散戶。',
+                    whatToWatch: 'OI 何時開始崩潰，通常伴隨大跌。'
+                }
+            },
+            basis: {
+                url: '',
+                caption: '圖表解讀：年化基差飆升至 25%，市場極度樂觀，典型的頂部特徵。',
+                interpretation: {
+                    whatItMeans: '過高的基差代表期貨市場過度擁擠。',
+                    whatToWatch: '基差快速收斂通常對應價格下跌。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：FGI 長期處於貪婪高位，隨後快速冷卻。'
+            },
+
+        },
+        historicalComparison: {
+            event: '2017/12 頂部',
+            similarity: '都是 OI/成交量頂背離後的長期熊市。'
+        },
+        actionableChecklist: [
+            { type: 'alert', label: 'OI 頂背離', desc: '價格走弱但 OI 不降時，警惕頂部。' }
+        ]
+    },
+    // ================================================
+    // 2022/06 去槓桿
+    // ================================================
+    {
+        id: 'review-2022-06',
+        slug: '2022-june-deleverage',
+        title: '2022/06 去槓桿：3AC/Celsius 連環暴雷',
+        year: 2022,
+        type: 'leverage_cleanse',
+        impactSummary: 'OI 持續下滑的槓桿去化期',
+        importance: 'B',
+        tags: ['去槓桿', '3AC', 'Celsius'],
+        marketStates: ['崩跌', '極恐'],
+        relatedMetrics: ['oi', 'price', 'stablecoin'],
+        readingMinutes: 4,
+        isProOnly: false,
+        publishedAt: '2025-12-17',
+        updatedAt: '2025-12-17',
+        eventStartAt: '2022-06-12',
+        eventEndAt: '2022-06-18',
+        reactionStartAt: '2022-06-12',
+        reactionType: 'trust_collapse',
+        impactedTokens: ['BTC', 'ETH', 'stETH'],
+        usageGuide: [
+            '當 OI 持續下滑配合價格下跌時',
+            '當流動性危機蔓延時'
+        ],
+        summary: 'Celsius 暫停提款 + 3AC 爆倉，引發市場信任危機，BTC 跌破 $20,000 心理關卡。',
+        context: {
+            what: '多個 CeFi 機構連環暴雷，信任危機蔓延。',
+            narrative: '熊市會很快結束。',
+            realImpact: 'OI 持續下滑代表槓桿在被強制去化，趨勢短期不會反轉。'
+        },
+        initialState: {
+            price: '$28,000 → $17,500',
+            fearGreed: '25（恐懼）→ 6（極度恐懼）',
+            oi: '持續下滑'
+        },
+        misconceptions: [
+            {
+                myth: 'OI 下降代表空頭被清算，利多',
+                fact: '熊市中 OI 下降通常代表多頭在被清算，是趨勢延續訊號。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2022-06-12',
+                title: 'Celsius 暫停提款',
+                description: '引發市場恐慌。',
+                marketImpact: 'BTC 跌破 $25,000。',
+                riskState: '信任危機',
+                riskLevel: 'high'
+            },
+            {
+                date: '2022-06-18',
+                title: 'BTC 跌破 $20,000',
+                description: '3AC 傳出爆倉消息。',
+                marketImpact: '歷史性心理關卡失守。',
+                riskState: '恐慌頂點',
+                riskLevel: 'high'
+            }
+        ],
+        charts: {
+            main: { url: '', caption: 'OI 持續下滑 = 槓桿去化未結束' },
+            oi: {
+                url: '',
+                caption: '圖表解讀：OI 呈現階梯式下降，每一波下跌都伴隨大規模平倉。',
+                interpretation: {
+                    whatItMeans: '去槓桿過程往往緩慢且痛苦。',
+                    whatToWatch: 'OI 何時止跌回穩，才是真正的底部。'
+                }
+            },
+            stablecoin: {
+                url: '',
+                caption: '圖表解讀：穩定幣市值見頂回落，流動性開始抽離。',
+                interpretation: {
+                    whatItMeans: '流動性縮減是熊市持續的根本原因。',
+                    whatToWatch: '市值何時止跌回升，才是牛市起點。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：FGI 在個位數極度恐慌區徘徊長達數週。'
+            },
+
+        },
+        historicalComparison: {
+            event: '2020/03 COVID',
+            similarity: '都是流動性危機型的去槓桿過程。'
+        },
+        actionableChecklist: [
+            { type: 'alert', label: '去槓桿警示', desc: 'OI 持續下滑時不要抄底。' }
+        ]
+    },
+    // ================================================
+    // 2023/03 極端偏空反彈
+    // ================================================
+    {
+        id: 'review-2023-03',
+        slug: '2023-march-squeeze',
+        title: '2023/03 極端偏空反彈：銀行危機意外利多',
+        year: 2023,
+        type: 'leverage_cleanse',
+        impactSummary: '極端偏空後的情緒反轉型反彈',
+        importance: 'B',
+        tags: ['軋空', '銀行危機', '反彈'],
+        marketStates: ['修復', '觀望'],
+        relatedMetrics: ['funding', 'fearGreed', 'price'],
+        readingMinutes: 3,
+        isProOnly: false,
+        publishedAt: '2025-12-17',
+        updatedAt: '2025-12-17',
+        eventStartAt: '2023-03-10',
+        eventEndAt: '2023-03-20',
+        reactionStartAt: '2023-03-10',
+        reactionType: 'external_shock',
+        impactedTokens: ['BTC'],
+        usageGuide: [
+            '當多空比極端偏空時（< 0.7）',
+            '當傳統金融出現危機時'
+        ],
+        summary: '矽谷銀行倒閉引發銀行危機，反而推動 BTC 作為「替代金融」敘事上漲 40%。',
+        context: {
+            what: '美國銀行危機爆發，SVB 倒閉。',
+            narrative: 'BTC 會跟著銀行股崩盤。',
+            realImpact: '極端偏空被軋，BTC 從 $20,000 飆升至 $28,000。'
+        },
+        initialState: {
+            price: '$20,000 → $28,000',
+            fearGreed: '30 → 65',
+            funding: '負費率轉正'
+        },
+        misconceptions: [
+            {
+                myth: '銀行危機對加密貨幣是利空',
+                fact: '傳統金融信任危機反而強化了去中心化敘事。'
+            }
+        ],
+        timeline: [
+            {
+                date: '2023-03-10',
+                title: 'SVB 倒閉',
+                description: 'USDC 一度脫鉤。',
+                marketImpact: 'BTC 短暫下跌後開始反彈。',
+                riskState: '恐慌',
+                riskLevel: 'high'
+            },
+            {
+                date: '2023-03-15',
+                title: '空頭被軋',
+                description: '費率轉正，空頭開始回補。',
+                marketImpact: 'BTC 突破 $25,000。',
+                riskState: '反轉',
+                riskLevel: 'low'
+            }
+        ],
+        charts: {
+            main: { url: '', caption: '極端偏空 + 外部衝擊 = 軋空反彈' },
+            oi: {
+                url: '',
+                caption: '圖表解讀：OI 在上漲初期並未顯著增加，這是典型的空頭回補（軋空）特徵。',
+                interpretation: {
+                    whatItMeans: '上漲動力來自於空頭買回，而非新多頭進場。',
+                    whatToWatch: '當 OI 開始重新增加時，反彈變為趨勢。'
+                }
+            },
+            sentiment: {
+                url: '',
+                caption: '圖表解讀：FGI 快速反彈，確認了恐慌的底。'
+            },
+            longShort: {
+                url: '',
+                caption: '圖表解讀：反彈初期多空比極低 (<0.7)，顯示市場極度看空，隨後被迫回補。',
+                interpretation: {
+                    whatItMeans: '低多空比 + 價格上漲 = 軋空強勢特徵。',
+                    whatToWatch: '空頭回補後的趨勢延續性。'
+                }
+            }
+        },
+        historicalComparison: {
+            event: '2020/03 COVID 反彈',
+            similarity: '都是恐慌後的 V 型反轉。'
+        },
+        actionableChecklist: [
+            { type: 'alert', label: '極端偏空', desc: '多空比 < 0.7 時觀察反彈機會。' }
         ]
     }
 ];

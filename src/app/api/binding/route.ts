@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 import { getInviteeDetail, parseOkxData } from '@/lib/okx-affiliate'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { verifyLineAccessToken } from '@/lib/line-auth'
 
 // Default verification rules (fallback if DB config unavailable)
 const DEFAULT_CONFIG = {
@@ -24,7 +25,10 @@ async function getVerificationConfig(supabase: ReturnType<typeof createAdminClie
             return { ...DEFAULT_CONFIG, ...data.value }
         }
     } catch (e) {
-        console.log('[Binding] Using default config (DB unavailable)')
+        console.error('[Binding] ⚠️ FALLBACK: Using default config (DB unavailable)', {
+            error: e instanceof Error ? e.message : 'Unknown error'
+        })
+        // TODO: Integrate alerting system (Sentry, Discord webhook, etc.)
     }
     return DEFAULT_CONFIG
 }
@@ -38,11 +42,24 @@ export async function POST(req: NextRequest) {
     if (rateLimited) return rateLimited
 
     try {
-        const supabase = createAdminClient()
-        const { lineUserId, exchange, uid } = await req.json()
+        // Security: Verify LINE Access Token
+        const authHeader = req.headers.get('Authorization')
+        if (!authHeader?.startsWith('Bearer ')) {
+            return NextResponse.json({ error: 'Unauthorized: Missing token' }, { status: 401 })
+        }
+        const accessToken = authHeader.slice(7)
+        const tokenVerification = await verifyLineAccessToken(accessToken)
+        if (!tokenVerification.valid || !tokenVerification.userId) {
+            console.warn('[Binding] Token verification failed:', tokenVerification.error)
+            return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 })
+        }
+        const verifiedLineUserId = tokenVerification.userId
 
-        // 1. Basic field validation
-        if (!lineUserId || !exchange || !uid) {
+        const supabase = createAdminClient()
+        const { exchange, uid } = await req.json()
+
+        // 1. Basic field validation (lineUserId now comes from verified token)
+        if (!exchange || !uid) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
         }
 
@@ -58,16 +75,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid UID format (5-20 digits required)' }, { status: 400 })
         }
 
-        // 4. Validate lineUserId format (basic sanity check)
-        if (typeof lineUserId !== 'string' || lineUserId.length < 10 || lineUserId.length > 50) {
-            return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 })
-        }
+        // Note: lineUserId validation is no longer needed here as it comes from verified LINE token
 
-        // 1. Get User ID from line_user_id
+        // 1. Get User ID from verified LINE user ID (not from request body!)
         const { data: user, error: userError } = await supabase
             .from('users')
             .select('id, line_user_id, display_name')
-            .eq('line_user_id', lineUserId)
+            .eq('line_user_id', verifiedLineUserId)
             .single()
 
         if (userError || !user) {
@@ -170,12 +184,14 @@ export async function POST(req: NextRequest) {
             // Send LINE notification for auto-verification
             try {
                 const { pushMessage } = await import('@/lib/line-bot')
-                await pushMessage(lineUserId, [{
+                await pushMessage(verifiedLineUserId, [{
                     type: 'text',
                     text: '🎉 恭喜！您的 OKX 帳號已自動驗證通過，Pro 會員資格已開通！'
                 }])
             } catch (e) {
-                console.error('[Binding] Failed to send LINE notification:', e)
+                console.error('[Binding] Failed to send LINE notification:', {
+                    message: e instanceof Error ? e.message : 'Unknown error'
+                })
             }
 
             return NextResponse.json({
@@ -202,7 +218,11 @@ export async function POST(req: NextRequest) {
             })
         }
     } catch (e) {
-        console.error('API Error:', e)
+        console.error('[Binding] API Error:', {
+            message: e instanceof Error ? e.message : 'Unknown error',
+            // Only include stack trace in development
+            ...(process.env.NODE_ENV === 'development' && { stack: (e as Error).stack })
+        })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

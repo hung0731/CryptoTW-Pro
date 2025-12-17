@@ -15,7 +15,7 @@ import { formatPercent, formatPrice } from '@/lib/format-helpers'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
 
 interface ReviewChartProps {
-    type: 'price' | 'flow' | 'oi' | 'supply' | 'fgi';
+    type: 'price' | 'flow' | 'oi' | 'supply' | 'fgi' | 'funding' | 'liquidation' | 'longShort' | 'basis' | 'premium' | 'stablecoin';
     symbol: string;
     eventStart: string;
     eventEnd: string;
@@ -74,6 +74,18 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     chartData = reviewData.oi || []
                 } else if (type === 'fgi') {
                     chartData = reviewData.fgi || []
+                } else if (type === 'funding') {
+                    chartData = reviewData.funding || []
+                } else if (type === 'liquidation') {
+                    chartData = reviewData.liquidation || []
+                } else if (type === 'longShort') {
+                    chartData = reviewData.longShort || []
+                } else if (type === 'basis') {
+                    chartData = reviewData.basis || []
+                } else if (type === 'premium') {
+                    chartData = reviewData.premium || []
+                } else if (type === 'stablecoin') {
+                    chartData = reviewData.stablecoin || []
                 }
 
                 // Client-side filtering if needed, though data is already roughly cut by generator
@@ -180,6 +192,20 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         )}
                         {type === 'supply' && `${Number(payload[0].value).toLocaleString()}`}
                         {type === 'fgi' && `${Number(payload[0].value)}`}
+                        {type === 'funding' && (
+                            <span className={Number(payload[0].value) > 0 ? 'text-red-400' : 'text-green-400'}>
+                                {Number(payload[0].value).toFixed(4)}%
+                            </span>
+                        )}
+                        {type === 'liquidation' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
+                        {type === 'longShort' && Number(payload[0].value).toFixed(2)}
+                        {type === 'basis' && `${Number(payload[0].value).toFixed(2)}%`}
+                        {type === 'premium' && (
+                            <span className={Number(payload[0].value) > 0 ? 'text-green-400' : 'text-red-400'}>
+                                {Number(payload[0].value).toFixed(4)}%
+                            </span>
+                        )}
+                        {type === 'stablecoin' && `$${(Number(payload[0].value) / 1000000000).toFixed(2)}B`}
                     </p>
                     {isPercentage && type === 'price' && (
                         <p className="text-neutral-500 text-[10px] mt-1">
@@ -384,6 +410,186 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             type="monotone"
                             dataKey="fgi"
                             stroke="#8b5cf6"
+                            strokeWidth={2}
+                            fill={`url(#${gradientId})`}
+                        />
+                    </AreaChart>
+                ) : type === 'funding' ? (
+                    <BarChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={45}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => `${Number(value).toFixed(3)}%`}
+                        />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            minTickGap={30}
+                            tickFormatter={(str) => str.slice(5)}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
+                        <ReferenceLine y={0} stroke="#333" />
+                        <Bar dataKey="fundingRate" fill="#eab308">
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fundingRate > 0 ? '#ef4444' : '#22c55e'} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                ) : type === 'liquidation' ? (
+                    <BarChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => `$${(value / 1000000).toFixed(0)}M`}
+                        />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            minTickGap={30}
+                            tickFormatter={(str) => str.slice(5)}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
+                        <Bar dataKey="liquidation" fill="#f59e0b" />
+                    </BarChart>
+                ) : type === 'longShort' ? (
+                    <AreaChart data={data}>
+                        <defs>
+                            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <ReferenceLine y={1} stroke="#fff" strokeOpacity={0.5} strokeDasharray="3 3" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            domain={['auto', 'auto']}
+                        />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            minTickGap={30}
+                            tickFormatter={(str) => str.slice(5)}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Area
+                            type="monotone"
+                            dataKey="longShortRatio"
+                            stroke="#3b82f6"
+                            strokeWidth={2}
+                            fill={`url(#${gradientId})`}
+                        />
+                    </AreaChart>
+                ) : type === 'basis' ? (
+                    <AreaChart data={data}>
+                        <defs>
+                            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => `${Number(value).toFixed(1)}%`}
+                        />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            minTickGap={30}
+                            tickFormatter={(str) => str.slice(5)}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Area
+                            type="monotone"
+                            dataKey="basis"
+                            stroke="#f59e0b"
+                            strokeWidth={2}
+                            fill={`url(#${gradientId})`}
+                        />
+                    </AreaChart>
+                ) : type === 'premium' ? (
+                    <BarChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={(value) => `${Number(value).toFixed(2)}%`}
+                        />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            minTickGap={30}
+                            tickFormatter={(str) => str.slice(5)}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
+                        <ReferenceLine y={0} stroke="#333" />
+                        <Bar dataKey="premium">
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.premium > 0 ? '#22c55e' : '#ef4444'} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                ) : type === 'stablecoin' ? (
+                    <AreaChart data={data}>
+                        <defs>
+                            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <YAxis
+                            hide={false}
+                            width={40}
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            domain={['auto', 'auto']}
+                            tickFormatter={(value) => `$${(value / 1000000000).toFixed(0)}B`}
+                        />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#525252' }}
+                            tickLine={false}
+                            axisLine={false}
+                            minTickGap={30}
+                            tickFormatter={(str) => str.slice(5)}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Area
+                            type="monotone"
+                            dataKey="stablecoin"
+                            stroke="#3b82f6"
                             strokeWidth={2}
                             fill={`url(#${gradientId})`}
                         />

@@ -14,8 +14,8 @@ interface QuickAction {
 const actions: QuickAction[] = [
     {
         icon: <BarChart3 className="w-4 h-4" />,
-        label: '數據',
-        href: '/prediction',
+        label: '指標',
+        href: '/indicators',
         color: 'text-neutral-400'
     },
 

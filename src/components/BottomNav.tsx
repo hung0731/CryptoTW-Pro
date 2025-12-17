@@ -29,10 +29,10 @@ export function BottomNav() {
             active: pathname === '/calendar'
         },
         {
-            label: '數據',
+            label: '指標',
             icon: BarChart2,
-            href: '/prediction',
-            active: pathname === '/prediction'
+            href: '/indicators',
+            active: pathname.startsWith('/indicators')
         },
         {
             label: '復盤',

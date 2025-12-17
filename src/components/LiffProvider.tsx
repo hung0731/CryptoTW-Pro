@@ -97,8 +97,16 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                             if (res.ok) {
                                 const data = await res.json()
                                 setDbUser(data.user)
-                                // Update Cache
-                                localStorage.setItem('dbUser', JSON.stringify(data.user))
+                                // Security: Only cache non-sensitive fields to minimize XSS impact
+                                const safeCache = {
+                                    id: data.user.id,
+                                    line_user_id: data.user.line_user_id,
+                                    display_name: data.user.display_name,
+                                    avatar_url: data.user.avatar_url,
+                                    membership_status: data.user.membership_status,
+                                    // Do NOT cache sensitive fields like email, session tokens, etc.
+                                }
+                                localStorage.setItem('dbUser', JSON.stringify(safeCache))
 
                                 // Set Supabase Session
                                 if (data.session) {
