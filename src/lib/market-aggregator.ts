@@ -27,7 +27,7 @@ async function fetchBtcTicker() {
 
 export async function getMarketSnapshot(symbol: string = 'BTC') {
     const [
-        btcPrice,
+        ticker,
         rsi,
         fearGreed,
         fundingRates,
@@ -41,29 +41,18 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
         hyperliquidWhales,
         liquidationCoinList
     ] = await Promise.all([
-        fetchBtcTicker(), // Still fetches BTC price for reference, maybe unused for other coins
-        fetchBinanceRSI(`${symbol}USDT`, '1h'), // Dynamic RSI
-        // 恐懼貪婪指數 (15 min cache - daily data) - MARKET WIDE
-        cachedCoinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }, CacheTTL.SLOW),
-        // 資金費率 (5 min cache - 8hr settlement) - Dynamic
-        cachedCoinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: symbol }, CacheTTL.MEDIUM),
-        // 全球多空比 (5 min cache) - Dynamic
-        cachedCoinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM),
-        // 大戶多空比 (5 min cache) - 目前 API 故障 - Dynamic
-        cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM).catch(() => null),
-        // 持倉量 (1 min cache - changes faster) - Dynamic
-        cachedCoinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: symbol }, CacheTTL.FAST),
-        // 爆倉 (1 min cache) - 使用 exchange 參數 - Dynamic
-        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.FAST),
-        // 主動買賣比 (1 min cache) - Dynamic
-        cachedCoinglassV4Request<any>('/api/futures/taker-buy-sell-volume/exchange-list', { symbol: symbol, range: '1h' }, CacheTTL.FAST),
-        // BTC ETF 資金流 (15 min cache - daily data) - BTC ONLY
+        fetchBtcTicker().catch(() => null),
+        fetchBinanceRSI(`${symbol}USDT`, '1h').catch(() => 50), // Default to 50 neutral
+        cachedCoinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }, CacheTTL.SLOW).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: symbol }, CacheTTL.MEDIUM).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: symbol }, CacheTTL.FAST).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.FAST).catch(() => []),
+        cachedCoinglassV4Request<any>('/api/futures/taker-buy-sell-volume/exchange-list', { symbol: symbol, range: '1h' }, CacheTTL.FAST).catch(() => null),
         symbol === 'BTC' ? cachedCoinglassV4Request<any[]>('/api/etf/bitcoin/flow-history', { limit: 1 }, CacheTTL.SLOW).catch(() => null) : Promise.resolve(null),
-        // Coinbase 溢價 (5 min cache) - BTC ONLY usually
         symbol === 'BTC' ? cachedCoinglassV4Request<any[]>('/api/coinbase-premium-index', { limit: 1 }, CacheTTL.MEDIUM).catch(() => null) : Promise.resolve(null),
-        // Hyperliquid 鯨魚 (1 min cache) - Market Wide but filtered later
         cachedCoinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}, CacheTTL.FAST).catch(() => null),
-        // 爆倉 coin-list (1 min cache) - Market Wide but filtered later
         cachedCoinglassV4Request<any[]>('/api/futures/liquidation/coin-list', {}, CacheTTL.FAST).catch(() => null)
     ])
 
@@ -80,7 +69,7 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
     return {
         timestamp: new Date().toISOString(),
         symbol: symbol,
-        btc: btcPrice || { price: 0, change_24h: 0, high_24h: 0, low_24h: 0, volume_24h: 0 },
+        btc: ticker || { price: 0, change_24h: 0, high_24h: 0, low_24h: 0, volume_24h: 0 },
 
         // 價格動能 (from CoinGecko + Binance RSI)
         // Note: btcPrice variable name is legacy, but here it's still BTC ticker. 

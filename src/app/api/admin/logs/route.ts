@@ -18,18 +18,51 @@ export async function GET(req: NextRequest) {
 
         const supabase = createAdminClient()
         let query = supabase
-            .from('system_logs')
+            .from('line_events')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(limit)
 
-        if (level && level !== 'all') {
-            query = query.eq('level', level)
+        // Filter: Mapping UI 'level' to DB 'success'
+        // 'error' -> success=false
+        // 'info'/'success' -> success=true
+        if (level === 'error') {
+            query = query.eq('success', false)
+        } else if (level === 'success' || level === 'info') {
+            query = query.eq('success', true)
         }
 
-        const { data: logs, error } = await query
+        const { data: events, error } = await query
 
         if (error) throw error
+
+        // Transform line_events to SystemLog format for UI
+        const logs = events.map((event: any) => {
+            const isError = !event.success
+            const isSlow = event.latency_ms > 2000
+
+            let logLevel = 'info'
+            if (isError) logLevel = 'error'
+            else if (isSlow) logLevel = 'warning'
+            else logLevel = 'success'
+
+            return {
+                id: event.id,
+                level: logLevel,
+                module: event.trigger || 'unknown',
+                message: event.error_message
+                    ? `[Error] ${event.error_message}`
+                    : `User: ${event.text_raw || '(Image/Audio)'}`,
+                metadata: {
+                    userId: event.user_id,
+                    intent: event.intent,
+                    symbol: event.extracted_symbol,
+                    latency: `${event.latency_ms}ms`,
+                    apiCalls: event.api_calls
+                },
+                created_at: event.created_at
+            }
+        })
 
         return NextResponse.json({ logs })
     } catch (error) {

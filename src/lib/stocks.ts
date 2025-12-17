@@ -58,72 +58,72 @@ export function createStockCard(data: any) {
     }
 
     return {
-        type: "flex",
+        type: "flex" as const,
         altText: `${data.symbol} 股價`,
         contents: {
-            type: "bubble",
-            size: "kilo",
+            type: "bubble" as const,
+            size: "kilo" as const,
             header: {
-                type: "box",
-                layout: "vertical",
+                type: "box" as const,
+                layout: "vertical" as const,
                 contents: [
                     {
-                        type: "box",
-                        layout: "horizontal",
+                        type: "box" as const,
+                        layout: "horizontal" as const,
                         contents: [
                             {
-                                type: "text",
+                                type: "text" as const,
                                 text: data.symbol,
-                                weight: "bold",
-                                size: "lg",
+                                weight: "bold" as const,
+                                size: "lg" as const,
                                 color: "#1F1AD9",
                                 flex: 1
                             },
                             {
-                                type: "text",
+                                type: "text" as const,
                                 text: "加密台灣 Pro",
-                                size: "xxs",
+                                size: "xxs" as const,
                                 color: "#888888",
-                                align: "end",
-                                gravity: "center"
+                                align: "end" as const,
+                                gravity: "center" as const
                             }
                         ]
                     },
                     {
-                        type: "text",
+                        type: "text" as const,
                         text: data.shortName,
-                        size: "xs",
+                        size: "xs" as const,
                         color: "#666666",
                         margin: "none"
                     },
                     {
-                        type: "box",
-                        layout: "horizontal",
+                        type: "box" as const,
+                        layout: "horizontal" as const,
                         contents: [
                             {
-                                type: "text",
+                                type: "text" as const,
                                 text: `${price?.toFixed(2)}`,
-                                weight: "bold",
-                                size: "xl",
+                                weight: "bold" as const,
+                                size: "xl" as const,
                                 color: "#111111"
                             },
                             {
-                                type: "text",
+                                type: "text" as const,
                                 text: `${sign}${changePercent.toFixed(2)}%`,
-                                size: "sm",
+                                size: "sm" as const,
                                 color: color,
-                                align: "end",
-                                weight: "bold",
-                                gravity: "center"
+                                align: "end" as const,
+                                weight: "bold" as const,
+                                gravity: "center" as const
                             }
                         ],
                         margin: "md"
                     },
                     // Extended Hours
                     ...(extendedText ? [{
-                        type: "text",
+                        type: "text" as const,
                         text: extendedText,
-                        size: "xs",
+                        size: "xs" as const,
                         color: "#888888",
                         margin: "sm"
                     } as any] : [])
@@ -131,40 +131,40 @@ export function createStockCard(data: any) {
                 paddingBottom: "10px"
             },
             body: {
-                type: "box",
-                layout: "vertical",
+                type: "box" as const,
+                layout: "vertical" as const,
                 contents: [
-                    { type: "separator", color: "#f0f0f0" },
+                    { type: "separator" as const, color: "#f0f0f0" },
                     {
-                        type: "box",
-                        layout: "horizontal",
+                        type: "box" as const,
+                        layout: "horizontal" as const,
                         contents: [
-                            { type: "text", text: "昨收", size: "sm", color: "#555555", flex: 1 },
-                            { type: "text", text: `${data.regularMarketPreviousClose}`, size: "sm", color: "#111111", align: "end", flex: 2 }
+                            { type: "text" as const, text: "昨收", size: "sm" as const, color: "#555555", flex: 1 },
+                            { type: "text" as const, text: `${data.regularMarketPreviousClose}`, size: "sm" as const, color: "#111111", align: "end" as const, flex: 2 }
                         ],
                         margin: "md"
                     },
                     {
-                        type: "text",
+                        type: "text" as const,
                         text: `Market State: ${data.marketState}`,
-                        size: "xxs",
+                        size: "xxs" as const,
                         color: "#cccccc",
                         margin: "md",
-                        align: "end"
+                        align: "end" as const
                     }
                 ],
                 paddingTop: "10px"
             },
             footer: {
-                type: "box",
-                layout: "vertical",
+                type: "box" as const,
+                layout: "vertical" as const,
                 contents: [
                     {
-                        type: "button",
-                        style: "primary",
+                        type: "button" as const,
+                        style: "primary" as const,
                         height: "sm",
                         action: {
-                            type: "uri",
+                            type: "uri" as const,
                             label: "追蹤 加密台灣 IG 🏃",
                             uri: "https://www.instagram.com/crypto.tw_"
                         },
