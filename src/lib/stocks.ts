@@ -3,7 +3,9 @@ import yahooFinance from 'yahoo-finance2'
 
 export async function fetchStockTicker(symbol: string) {
     try {
-        const quote = await yahooFinance.quote(symbol) as any
+        // @ts-ignore
+        const yf = new yahooFinance()
+        const quote = await yf.quote(symbol) as any
 
         if (!quote) return null
 
@@ -79,7 +81,7 @@ export function createStockCard(data: any) {
                             },
                             {
                                 type: "text",
-                                text: "美股快訊",
+                                text: "加密台灣 Pro",
                                 size: "xxs",
                                 color: "#888888",
                                 align: "end",
@@ -152,6 +154,23 @@ export function createStockCard(data: any) {
                     }
                 ],
                 paddingTop: "10px"
+            },
+            footer: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    {
+                        type: "button",
+                        style: "primary",
+                        height: "sm",
+                        action: {
+                            type: "uri",
+                            label: "追蹤 加密台灣 IG 🏃",
+                            uri: "https://www.instagram.com/crypto.tw_"
+                        },
+                        color: "#1F1AD9"
+                    }
+                ]
             }
         }
     }

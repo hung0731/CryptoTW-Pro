@@ -245,7 +245,7 @@ export function createMarketDashboardFlex(data: any): FlexMessage {
                         height: 'sm',
                         action: {
                             type: 'uri',
-                            label: '追蹤加密台灣 IG',
+                            label: '追蹤 加密台灣 IG 🏃',
                             uri: 'https://www.instagram.com/crypto.tw_'
                         },
                         color: COLORS.primary
@@ -310,7 +310,7 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
                     layout: 'horizontal',
                     contents: [
                         { type: 'text', text: '綜合數據分析', weight: 'bold', size: 'md', color: COLORS.primary },
-                        { type: 'text', text: 'CryptoTW Pro', size: 'xxs', color: '#cccccc', align: 'end', gravity: 'bottom' }
+                        { type: 'text', text: '加密台灣 Pro', size: 'xxs', color: '#cccccc', align: 'end', gravity: 'bottom' }
                     ]
                 },
                 { type: 'separator', margin: 'md', color: '#f0f0f0' },
@@ -327,6 +327,24 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
                     align: 'center'
                 }
             ]
+        },
+        footer: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
+                {
+                    type: 'button',
+                    style: 'primary',
+                    height: 'sm',
+                    action: {
+                        type: 'uri',
+                        label: '追蹤 加密台灣 IG 🏃',
+                        uri: 'https://www.instagram.com/crypto.tw_'
+                    },
+                    color: COLORS.primary
+                }
+            ]
         }
     }
 }
+

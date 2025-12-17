@@ -61,9 +61,10 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/lodash": "^4.17.21",
-    "@types/node": "^20",
+    "@types/node": "^20.19.27",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "tailwindcss": "^4",

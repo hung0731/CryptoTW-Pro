@@ -231,6 +231,12 @@ function parseCurrencyAmount(input: string): { type: 'USD' | 'TWD', amount: numb
         return { type: 'TWD', amount: parseAmount(twdChineseMatch[1]) }
     }
 
+    // 模式 9: 中文 "台幣 2000", "台幣1萬" (Prefix)
+    const twdPrefixMatch = normalized.match(/(台幣|新台幣|臺幣)\s*([\d.]+[萬千kKmM]?)/i)
+    if (twdPrefixMatch) {
+        return { type: 'TWD', amount: parseAmount(twdPrefixMatch[2]) }
+    }
+
     return null
 }
 
@@ -349,7 +355,7 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                             height: "sm",
                             action: {
                                 type: "uri",
-                                label: "追蹤加密台灣 IG",
+                                label: "追蹤 加密台灣 IG 🏃",
                                 uri: "https://www.instagram.com/crypto.tw_"
                             },
                             color: "#1F1AD9"
@@ -382,6 +388,23 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                         },
                         { type: "separator", margin: "lg", color: "#f0f0f0" },
                         { type: "text", text: "暫時無法取得數據", size: "sm", color: "#888888", margin: "md" }
+                    ]
+                },
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [
+                        {
+                            type: "button",
+                            style: "primary",
+                            height: "sm",
+                            action: {
+                                type: "uri",
+                                label: "追蹤 加密台灣 IG 🏃",
+                                uri: "https://www.instagram.com/crypto.tw_"
+                            },
+                            color: "#1F1AD9"
+                        }
                     ]
                 }
             }
@@ -444,8 +467,25 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                             }
                         ]
                     },
-                    { type: "separator", margin: "md", color: "#f0f0f0" },
-                    { type: "text", text: timeText, size: "xxs", color: "#888888", margin: "sm", align: "end" }
+                    { type: "separator", margin: "lg", color: "#f0f0f0" },
+                    { type: "text", text: timeText, size: "xxs", color: "#cccccc", margin: "md", align: "center" }
+                ]
+            },
+            footer: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    {
+                        type: "button",
+                        style: "primary",
+                        height: "sm",
+                        action: {
+                            type: "uri",
+                            label: "追蹤 加密台灣 IG 🏃",
+                            uri: "https://www.instagram.com/crypto.tw_"
+                        },
+                        color: "#1F1AD9"
+                    }
                 ]
             }
         }
@@ -459,7 +499,7 @@ const WELCOME_FLEX_MESSAGE = {
     contents: {
         type: "bubble",
         size: "kilo",
-        body: {
+        header: {
             type: "box",
             layout: "vertical",
             contents: [
@@ -467,31 +507,88 @@ const WELCOME_FLEX_MESSAGE = {
                     type: "box",
                     layout: "horizontal",
                     contents: [
+                        { type: "text", text: "👋 歡迎加入", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                        { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                    ]
+                }
+            ]
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
+            spacing: "md",
+            contents: [
+                {
+                    type: "text",
+                    text: "我是您的全方位加密貨幣助理，能隨時為您提供市場數據與換算服務！",
+                    size: "sm",
+                    color: "#555555",
+                    wrap: true
+                },
+                { type: "separator", color: "#f0f0f0" },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    contents: [
+                        { type: "text", text: "💡 您可以這樣問我：", size: "xs", color: "#888888", weight: "bold" },
                         {
-                            type: "text",
-                            text: "👋 歡迎加入",
-                            weight: "bold",
-                            size: "lg",
-                            color: "#1F1AD9",
-                            flex: 1
+                            type: "box",
+                            layout: "vertical",
+                            margin: "md",
+                            spacing: "sm",
+                            contents: [
+                                {
+                                    type: "box",
+                                    layout: "horizontal",
+                                    contents: [
+                                        { type: "text", text: "💱 想查匯率？", size: "sm", color: "#111111", weight: "bold", flex: 1 },
+                                        { type: "text", text: "「3000 台幣」", size: "xs", color: "#0066cc", align: "end", weight: "bold" }
+                                    ]
+                                },
+                                {
+                                    type: "text",
+                                    text: "👉 幫您算出能換多少 USDT",
+                                    size: "xxs",
+                                    color: "#aaaaaa",
+                                    margin: "none"
+                                }
+                            ]
                         },
                         {
-                            type: "text",
-                            text: "加密台灣 Pro",
-                            size: "xxs",
-                            color: "#888888",
-                            align: "end",
-                            gravity: "center"
+                            type: "box",
+                            layout: "vertical",
+                            margin: "md",
+                            spacing: "sm",
+                            contents: [
+                                {
+                                    type: "box",
+                                    layout: "horizontal",
+                                    contents: [
+                                        { type: "text", text: "📈 想查幣價？", size: "sm", color: "#111111", weight: "bold", flex: 1 },
+                                        { type: "text", text: "「BTC」", size: "xs", color: "#0066cc", align: "end", weight: "bold" }
+                                    ]
+                                },
+                                {
+                                    type: "text",
+                                    text: "👉 即時報價與多空數據",
+                                    size: "xxs",
+                                    color: "#aaaaaa",
+                                    margin: "none"
+                                }
+                            ]
                         }
                     ]
                 },
+                { type: "separator", color: "#f0f0f0", margin: "lg" },
                 {
                     type: "text",
-                    text: "輸入 #BTC 查價格 | #TWD 查匯率 | #HOT 看排行",
-                    size: "xs",
-                    color: "#888888",
-                    margin: "md",
-                    wrap: true
+                    text: "🔥 不如馬上試試看吧！",
+                    size: "sm",
+                    color: "#1F1AD9",
+                    weight: "bold",
+                    align: "center",
+                    margin: "lg"
                 }
             ]
         },
@@ -752,7 +849,7 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "追蹤加密台灣 IG",
+                        label: "追蹤 加密台灣 IG 🏃",
                         uri: "https://www.instagram.com/crypto.tw_"
                     },
                     color: "#1F1AD9"
@@ -844,7 +941,6 @@ const HELP_COMMAND_FLEX_MESSAGE = {
         footer: {
             type: "box",
             layout: "vertical",
-            spacing: "sm",
             contents: [
                 {
                     type: "button",
@@ -852,8 +948,8 @@ const HELP_COMMAND_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "📊 查看市場脈絡",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/`
+                        label: "追蹤 加密台灣 IG 🏃",
+                        uri: "https://www.instagram.com/crypto.tw_"
                     },
                     color: "#1F1AD9"
                 }
@@ -1155,7 +1251,6 @@ function createPriceCard(data: any) {
             footer: {
                 type: "box",
                 layout: "vertical",
-                spacing: "sm",
                 contents: [
                     {
                         type: "button",
@@ -1163,21 +1258,10 @@ function createPriceCard(data: any) {
                         height: "sm",
                         action: {
                             type: "uri",
-                            label: "📸 追蹤 Instagram",
+                            label: "追蹤 加密台灣 IG 🏃",
                             uri: "https://www.instagram.com/crypto.tw_"
                         },
                         color: "#1F1AD9"
-                    },
-                    {
-                        type: "button",
-                        style: "primary",
-                        height: "sm",
-                        action: {
-                            type: "uri",
-                            label: "註冊 OKX 交易所",
-                            uri: "https://www.okx.com/join/CTWPRO"
-                        },
-                        color: "#000000"
                     }
                 ],
                 paddingTop: "10px"
@@ -1286,20 +1370,21 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
     // Header Sub -> "在 [Exchange] 買入/賣出 [Amount] [Currency]" (Black small text)
 
     let headerTitle = "匯率快訊 (USDT/TWD)"
-    let headerValue = ""
+    let headerAmount = ""
+    let headerUnit = ""
     let headerSub = ""
 
     if (currencyParsed) {
         headerTitle = "換算結果"
         if (isTwdInput) {
             // User wants to Buy U (Input TWD)
-            // e.g. "在 HOYA BIT 買入 1,000 TWD"
-            headerValue = `${buyTotalStr}`
+            headerAmount = buyTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })
+            headerUnit = "USDT"
             headerSub = `在 ${bestBuyExchange} 買入 ${amount.toLocaleString()} TWD`
         } else {
             // User wants to Sell U (Input USDT)
-            // e.g. "在 MAX 賣出 500 USDT"
-            headerValue = `${sellTotalStr}`
+            headerAmount = Math.round(sellTotal).toLocaleString()
+            headerUnit = "TWD"
             headerSub = `在 ${bestSellExchange} 賣出 ${amount.toLocaleString()} USDT`
         }
     }
@@ -1322,14 +1407,28 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                             { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
                         ]
                     },
-                    ...(headerValue ? [{
-                        type: "text",
-                        text: headerValue,
-                        weight: "bold",
-                        size: "xxl",
-                        color: "#111111",
+                    ...(headerAmount ? [{
+                        type: "box",
+                        layout: "baseline",
                         margin: "md",
-                        wrap: true
+                        contents: [
+                            {
+                                type: "text",
+                                text: headerAmount,
+                                weight: "bold",
+                                size: "xxl",
+                                color: "#111111",
+                                flex: 0
+                            },
+                            {
+                                type: "text",
+                                text: ` ${headerUnit}`,
+                                weight: "bold",
+                                size: "sm",
+                                color: "#111111",
+                                flex: 0
+                            }
+                        ]
                     } as any] : []),
                     // Bold the Exchange Name via nested contents
                     ...(headerSub ? [{
@@ -1408,11 +1507,166 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                     }
                 ]
             },
+            footer: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    {
+                        type: "button",
+                        style: "primary",
+                        height: "sm",
+                        action: {
+                            type: "uri",
+                            label: "追蹤 加密台灣 IG 🏃",
+                            uri: "https://www.instagram.com/crypto.tw_"
+                        },
+                        color: "#1F1AD9"
+                    }
+                ]
+            }
 
         }
     }
 }
 
+
+// ============================================
+// 快速查詢引導 (Help Card)
+// ============================================
+function createHelpFlexMessage() {
+    return {
+        type: "flex",
+        altText: "快速查詢指南",
+        contents: {
+            type: "bubble",
+            size: "kilo", // Consistent with other cards
+            header: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                    {
+                        type: "box",
+                        layout: "horizontal",
+                        contents: [
+                            { type: "text", text: "快速查詢指南", weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                            { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
+                        ]
+                    },
+                    { type: "text", text: "您可以直接輸入以下內容：", size: "xs", color: "#555555", margin: "md" }
+                ]
+            },
+            body: {
+                type: "box",
+                layout: "vertical",
+                spacing: "md",
+                contents: [
+                    // Crypto Section
+                    {
+                        type: "box",
+                        layout: "vertical",
+                        contents: [
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                contents: [
+                                    { type: "text", text: "💰 加密貨幣", size: "sm", weight: "bold", color: "#111111", flex: 1 },
+                                    { type: "text", text: "報價、分析", size: "xs", color: "#888888", align: "end" }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                spacing: "xs",
+                                margin: "sm",
+                                contents: [
+                                    { type: "text", text: "BTC", size: "xs", color: "#0066cc", align: "center", weight: "bold", action: { type: "message", label: "BTC", text: "BTC" } },
+                                    { type: "text", text: "ETH", size: "xs", color: "#0066cc", align: "center", weight: "bold", action: { type: "message", label: "ETH", text: "ETH" } },
+                                    { type: "text", text: "SOL", size: "xs", color: "#0066cc", align: "center", weight: "bold", action: { type: "message", label: "SOL", text: "SOL" } },
+                                    { type: "text", text: "DOGE", size: "xs", color: "#0066cc", align: "center", weight: "bold", action: { type: "message", label: "DOGE", text: "DOGE" } }
+                                ]
+                            }
+                        ]
+                    },
+                    { type: "separator", color: "#f0f0f0" },
+                    // Fiat Section
+                    {
+                        type: "box",
+                        layout: "vertical",
+                        contents: [
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                contents: [
+                                    { type: "text", text: "💱 匯率換算", size: "sm", weight: "bold", color: "#111111", flex: 1 },
+                                    { type: "text", text: "USDT / TWD", size: "xs", color: "#888888", align: "end" }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                margin: "sm",
+                                contents: [
+                                    { type: "text", text: "「台幣 2000」", size: "xs", color: "#555555" },
+                                    { type: "text", text: "「USD 100」", size: "xs", color: "#555555", align: "end" }
+                                ]
+                            }
+                        ]
+                    },
+                    { type: "separator", color: "#f0f0f0" },
+                    // Stock Section
+                    {
+                        type: "box",
+                        layout: "vertical",
+                        contents: [
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                contents: [
+                                    { type: "text", text: "📈 美股報價", size: "sm", weight: "bold", color: "#111111", flex: 1 },
+                                    { type: "text", text: "即時行情", size: "xs", color: "#888888", align: "end" }
+                                ]
+                            },
+                            {
+                                type: "box",
+                                layout: "horizontal",
+                                spacing: "xs",
+                                margin: "sm",
+                                contents: [
+                                    { type: "text", text: "NVDA", size: "xs", color: "#0066cc", align: "center", weight: "bold", action: { type: "message", label: "NVDA", text: "NVDA" } },
+                                    { type: "text", text: "MSTR", size: "xs", color: "#0066cc", align: "center", weight: "bold", action: { type: "message", label: "MSTR", text: "MSTR" } },
+                                    { type: "text", text: "COIN", size: "xs", color: "#0066cc", align: "center", weight: "bold", action: { type: "message", label: "COIN", text: "COIN" } }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "button",
+                    style: "primary",
+                    height: "sm",
+                    action: {
+                        type: "uri",
+                        label: "追蹤 加密台灣 IG 🏃",
+                        uri: "https://www.instagram.com/crypto.tw_"
+                    },
+                    color: "#1F1AD9"
+                }
+            ]
+        }
+    }
+}
+
+
+// Rate Limiting
+const userRateLimit = new Map<string, { count: number, startTime: number }>()
+const LIMIT_WINDOW = 3000 // 3 seconds
+const MAX_MSG = 3 // Max 3 messages per 3 seconds
 
 export async function POST(req: NextRequest) {
     try {
@@ -1428,6 +1682,27 @@ export async function POST(req: NextRequest) {
 
         for (const event of events) {
             const replyToken = event.replyToken
+
+            // === Rate Limiting Check ===
+            // Prevent spamming: Max 3 messages per 3 seconds
+            if (event.source?.userId) {
+                const userId = event.source.userId
+                const now = Date.now()
+                const userRecord = userRateLimit.get(userId) || { count: 0, startTime: now }
+
+                if (now - userRecord.startTime > LIMIT_WINDOW) {
+                    // Reset window
+                    userRateLimit.set(userId, { count: 1, startTime: now })
+                } else {
+                    // Within window
+                    if (userRecord.count >= MAX_MSG) {
+                        console.warn(`[Rate Limit] User ${userId} ignored. Too many requests.`)
+                        continue // Skip processing this event
+                    }
+                    userRecord.count++
+                    userRateLimit.set(userId, userRecord)
+                }
+            }
 
             // 1. Handle FOLLOW event
             if (event.type === 'follow') {
@@ -1570,20 +1845,57 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // ===== E. 低頻柔性引導 (Fallback) =====
-                // 每個用戶每 6 小時最多收到一次提示
+                // ===== E. LLM 智慧判讀 & 柔性引導 =====
                 const userId = event.source.userId
-                if (userId && originalText.length >= 2 && originalText.length <= 20) {
-                    const now = Date.now()
-                    const lastHintTime = fallbackHintCache.get(userId) || 0
-                    const SIX_HOURS = 6 * 60 * 60 * 1000
+                if (!userId) continue
 
-                    if (now - lastHintTime > SIX_HOURS) {
-                        fallbackHintCache.set(userId, now)
-                        await replyMessage(replyToken, [{
-                            type: "text",
-                            text: "💡 我可以幫你查「幣價 / 匯率」\n\n例如：\n• BTC、比特幣、ETH\n• USD 1000、1萬美金"
-                        }])
+                // 1. 嘗試用 Gemini 判讀意圖
+                const { generateFallbackReply } = await import('@/lib/gemini')
+                const aiResult = await generateFallbackReply(originalText)
+
+                if (aiResult?.type === 'price_query' && aiResult.symbol) {
+                    const coinSymbol = aiResult.symbol
+                    const ticker = await fetchCryptoTicker(coinSymbol)
+
+                    if (ticker) {
+                        const priceCard = createPriceCard(ticker)
+                        // Market Data Check
+                        const { getMarketSnapshot } = await import('@/lib/market-aggregator')
+                        const { createMiniAnalysisCard } = await import('@/lib/flex-market-dashboard')
+                        const marketData = await getMarketSnapshot(coinSymbol)
+                        const hasFuturesData = (marketData.capital_flow?.open_interest_total || 0) > 0
+
+                        if (hasFuturesData) {
+                            const analysisCard = createMiniAnalysisCard(marketData)
+                            await replyMessage(replyToken, [priceCard, analysisCard])
+                        } else {
+                            await replyMessage(replyToken, [priceCard])
+                        }
+                    } else {
+                        // Fallback: Try Stock Ticker (e.g. TSLA, NVDA)
+                        const { fetchStockTicker, createStockCard } = await import('@/lib/stocks')
+                        const stockData = await fetchStockTicker(coinSymbol)
+
+                        if (stockData) {
+                            const stockCard = createStockCard(stockData)
+                            await replyMessage(replyToken, [stockCard])
+                        } else {
+                            // Symbol found but no ticker data for Crypto OR Stock
+                            await replyMessage(replyToken, [{ type: "text", text: `⚠️ 找不到代號為 "${coinSymbol}" 的即時價格（加密貨幣或美股）。` }])
+                        }
+                    }
+                } else {
+                    // 2. 如果 AI 也無法判讀，才顯示低頻引導 (使用 Help Card)
+                    // 每個用戶每 6 小時最多收到一次提示
+                    if (originalText.length >= 2 && originalText.length <= 20) {
+                        const now = Date.now()
+                        const lastHintTime = fallbackHintCache.get(userId) || 0
+                        const SIX_HOURS = 6 * 60 * 60 * 1000
+
+                        if (now - lastHintTime > SIX_HOURS) {
+                            fallbackHintCache.set(userId, now)
+                            await replyMessage(replyToken, [createHelpFlexMessage()])
+                        }
                     }
                 }
             }

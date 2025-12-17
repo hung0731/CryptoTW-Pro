@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getCache, setCache } from '@/lib/cache'
+import { MODEL_NAME } from '@/lib/gemini'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ async function generateWhaleSummary(positions: WhalePosition[]): Promise<string 
     if (!genAI || !positions || positions.length === 0) return null
 
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
         const top20 = positions.slice(0, 20).map((p, i) => ({
             rank: i + 1,
@@ -69,6 +70,7 @@ ${JSON.stringify(top20, null, 2)}
         return null
     }
 }
+
 
 export async function getWhaleData() {
     // Check cache first

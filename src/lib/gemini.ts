@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const apiKey = process.env.GEMINI_API_KEY
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
-const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
+export const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
 
 export interface MarketSummaryResult {
     emoji: string
@@ -528,6 +528,56 @@ export async function generateDailyBroadcastPolish(
         return JSON.parse(text)
     } catch (e) {
         console.error('[Daily Broadcast] AI Polish Error:', e)
+        return null
+    }
+}
+
+// ============================================
+// Fallback Reply (Smart Interpreter)
+// ============================================
+
+export interface FallbackResult {
+    type: 'price_query' | 'unknown'
+    symbol?: string
+}
+
+export async function generateFallbackReply(userInput: string): Promise<FallbackResult | null> {
+    if (!genAI) return null
+
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+        const prompt = `
+你是一個加密貨幣意圖分類器。使用者輸入了一段文字，請判斷其意圖。
+
+【使用者輸入】
+"${userInput}"
+
+【判斷邏輯】
+1. **幣價查詢**：如果使用者在問某個幣的價格、行情、漲跌。
+   - 提取幣種代號 (Symbol)，例如 "BTC", "ETH", "DOGE"。
+   - 轉為大寫。
+2. **其他任何情況**：包含閒聊、問好、無法理解、或是沒有明確幣種。
+   - 回傳 unknown。
+
+【輸出格式】(JSON Only)
+{
+  "type": "price_query" | "unknown",
+  "symbol": "BTC" (僅 price_query 需要，若無則 null)
+}
+`
+        const result = await model.generateContent(prompt)
+        const text = result.response.text().trim()
+
+        // Clean markdown
+        const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
+
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[1] || jsonMatch[0])
+        }
+
+        return JSON.parse(text)
+    } catch (e) {
+        console.error('Gemini Fallback Error:', e)
         return null
     }
 }
