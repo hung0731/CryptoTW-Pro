@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function PUT(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const admin = await verifyAdmin();
+    if (!admin) return unauthorizedResponse();
+
     const { id } = await params;
     const supabase = createAdminClient();
     try {
@@ -33,6 +37,9 @@ export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const admin = await verifyAdmin();
+    if (!admin) return unauthorizedResponse();
+
     const { id } = await params;
     const supabase = createAdminClient();
     try {

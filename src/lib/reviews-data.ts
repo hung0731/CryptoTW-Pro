@@ -143,10 +143,12 @@ export const REVIEWS_DATA: MarketEvent[] = [
         impactedTokens: ['BTC'],
         impactSummary: 'ETF 通過當日成為短期頂部，BTC 回調 20% 後才開啟主升段。',
 
-        '當重大利好消息落地，價格卻不漲反跌時',
-        '當市場過度擁擠導致資金費率異常偏高時',
-        '當機構資金流向與價格走勢出現背離時',
-        '當 Coinbase Premium 出現持續性正溢價時'
+        usageGuide: [
+            '當重大利好消息落地，價格卻不漲反跌時',
+            '當市場過度擁擠導致資金費率異常偏高時',
+            '當機構資金流向與價格走勢出現背離時',
+            '當 Coinbase Premium 出現持續性正溢價時'
+        ],
 
         summary: '當比特幣現貨 ETF 獲准上市時，市場真正改變的是「機構資金的長期配置通道」，而不是短期的價格投機波動。',
 

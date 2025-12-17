@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase'; // Using the service role client if available or default
 import { REVIEWS_DATA } from '@/lib/reviews-data';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function GET() {
+    const admin = await verifyAdmin();
+    if (!admin) return unauthorizedResponse();
+
     try {
         const results = [];
 

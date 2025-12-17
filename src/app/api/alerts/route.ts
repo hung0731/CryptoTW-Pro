@@ -6,8 +6,12 @@ import { createClient } from '@/lib/supabase'
 export async function GET(req: NextRequest) {
     const supabase = createClient()
     const { searchParams } = new URL(req.url)
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const hoursAgo = parseInt(searchParams.get('hours') || '24')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
+    const hoursAgo = Math.min(parseInt(searchParams.get('hours') || '24'), 72)
+
+    if (isNaN(limit) || isNaN(hoursAgo)) {
+        return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 })
+    }
 
     const since = new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString()
 

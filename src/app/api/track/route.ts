@@ -8,8 +8,12 @@ export async function POST(req: NextRequest) {
         const body = await req.json()
         const { exchange_name, activity_id, event_type, user_id } = body
 
-        if (!exchange_name || !event_type) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        if (!exchange_name || !event_type || typeof exchange_name !== 'string' || typeof event_type !== 'string') {
+            return NextResponse.json({ error: 'Missing or invalid required fields' }, { status: 400 })
+        }
+
+        if (exchange_name.length > 50 || event_type.length > 50) {
+            return NextResponse.json({ error: 'Field length exceeded' }, { status: 400 })
         }
 
         // Rate Limit: 30 requests per minute

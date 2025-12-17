@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function POST(request: Request) {
+    const admin = await verifyAdmin();
+    if (!admin) return unauthorizedResponse();
+
     const supabase = createAdminClient();
     try {
         const body = await request.json();

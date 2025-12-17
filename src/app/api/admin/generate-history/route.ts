@@ -446,10 +446,15 @@ async function fetchHistory(type: string, symbol: string, reactionStartStr: stri
     return []
 }
 
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
+
 // ----------------------------------------------------------------------------
 // POST Handler
 // ----------------------------------------------------------------------------
 export async function POST() {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     if (!API_KEY) {
         return NextResponse.json({ error: 'COINGLASS_API_KEY is missing' }, { status: 500 })
     }

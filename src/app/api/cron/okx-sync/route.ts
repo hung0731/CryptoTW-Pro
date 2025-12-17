@@ -19,6 +19,9 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const secret = searchParams.get('secret')
     const cronSecret = process.env.CRON_SECRET
+    if (!cronSecret) {
+        return NextResponse.json({ error: 'Server misconfiguration: CRON_SECRET missing' }, { status: 500 })
+    }
 
     // Allow if: Bearer token matches OR secret query param matches
     const isAuthorized =

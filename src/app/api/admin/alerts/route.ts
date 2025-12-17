@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 // GET: Fetch recent alerts and current market state
 export async function GET(req: NextRequest) {
+    const admin = await verifyAdmin()
+    if (!admin) return unauthorizedResponse()
+
     const supabase = createAdminClient()
     const { searchParams } = new URL(req.url)
     const limit = parseInt(searchParams.get('limit') || '50')

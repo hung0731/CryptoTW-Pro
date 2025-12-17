@@ -12,6 +12,7 @@ import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
 import { UpcomingEventsCard } from '@/components/home/UpcomingEventsCard'
 import { FeaturedReviewsCard } from '@/components/home/FeaturedReviewsCard'
+import { SentimentMatrix } from '@/components/home/SentimentMatrix'
 import { MacroReaction } from '@/lib/macro-events'
 
 import { ActionCard } from '@/components/home/ActionCard'
@@ -120,6 +121,12 @@ export function HomePageClient({
                     </Link>
                 )}
 
+
+
+                {/* ===== Sentiment Dashboard ===== */}
+                <section className="mt-6">
+                    <SentimentMatrix />
+                </section>
 
                 {/* ===== Context Section ===== */}
                 <section className="space-y-3">

@@ -26,8 +26,8 @@ export default async function HomePage() {
 
     try {
         const [statusRes, contextRes] = await Promise.all([
-            fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/market/status`, { next: { revalidate: 60 } }),
-            fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/market-context`, { next: { revalidate: 300 } })
+            fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:3000'}/api/market/status`, { next: { revalidate: 60 } }),
+            fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:3000'}/api/market-context`, { next: { revalidate: 300 } })
         ])
 
         if (statusRes.ok) {

@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createClient, createAdminClient } from '@/lib/supabase'
 import { getInviteeDetail, parseOkxData } from '@/lib/okx-affiliate'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 import { verifyLineAccessToken } from '@/lib/line-auth'
 
-// Default verification rules (fallback if DB config unavailable)
-const DEFAULT_CONFIG = {
-    okx_affiliate_code: 'CTW20',
-    okx_min_deposit: 1,
-    okx_require_kyc: true,
-    auto_verify_enabled: true,
+// Define Config Type
+interface VerificationConfig {
+    okx_affiliate_code: string
+    okx_min_deposit: number
+    okx_require_kyc: boolean
+    auto_verify_enabled: boolean
 }
 
 // Get verification config from database
-async function getVerificationConfig(supabase: ReturnType<typeof createAdminClient>) {
+// NOW SAFE: Uses provided client (User Client with RLS is fine for reading public system config, or Admin Client if needed)
+// If you want to keep config hidden from public RLS, this helper might need AdminClient, 
+// but for now let's assume system_config is readable or we use AdminClient JUST for this config fetch if it's sensitive.
+// DECISION: Verification rules are business logic, better to fetch with AdminClient to ensure we get them regardless of RLS, 
+// BUT this function is called inside the user flow. 
+// To correspond with the plan "Use User Client for data fetching", we should ideally use User Client. 
+// However, if RLS prevents reading 'system_config', we might fail.
+// SAFE HYBRID APPROACH: Use a specific localized admin client just for fetching config to ensure reliability, 
+// but keeping the main logic user-bound.
+async function getVerificationConfig() {
+    const supabase = createAdminClient()
     try {
         const { data } = await supabase
             .from('system_config')
@@ -22,22 +32,19 @@ async function getVerificationConfig(supabase: ReturnType<typeof createAdminClie
             .single()
 
         if (data?.value) {
-            return { ...DEFAULT_CONFIG, ...data.value }
+            return data.value as VerificationConfig
         }
     } catch (e) {
-        console.error('[Binding] ⚠️ FALLBACK: Using default config (DB unavailable)', {
-            error: e instanceof Error ? e.message : 'Unknown error'
-        })
-        // TODO: Integrate alerting system (Sentry, Discord webhook, etc.)
+        console.error('[Binding] Failed to fetch config:', e)
     }
-    return DEFAULT_CONFIG
+    return null // No fallback to hardcoded insecure defaults
 }
 
 // Allowed exchanges
 const ALLOWED_EXCHANGES = ['okx', 'binance', 'bybit']
 
 export async function POST(req: NextRequest) {
-    // Rate limit: 5 binding requests per minute per IP (prevent abuse)
+    // Rate limit: 5 binding requests per minute per IP
     const rateLimited = simpleApiRateLimit(req, 'binding', 5, 60)
     if (rateLimited) return rateLimited
 
@@ -55,29 +62,26 @@ export async function POST(req: NextRequest) {
         }
         const verifiedLineUserId = tokenVerification.userId
 
-        const supabase = createAdminClient()
+        // 1. Use User Client (Least Privilege)
+        const supabase = createClient()
         const { exchange, uid } = await req.json()
 
-        // 1. Basic field validation (lineUserId now comes from verified token)
+        // 2. validation
         if (!exchange || !uid) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
         }
 
-        // 2. Validate exchange name (whitelist)
         const normalizedExchange = exchange.toLowerCase().trim()
         if (!ALLOWED_EXCHANGES.includes(normalizedExchange)) {
             return NextResponse.json({ error: 'Invalid exchange' }, { status: 400 })
         }
 
-        // 3. Validate UID format (5-20 digits, numbers only)
         const trimmedUid = uid.trim()
         if (!/^\d{5,20}$/.test(trimmedUid)) {
             return NextResponse.json({ error: 'Invalid UID format (5-20 digits required)' }, { status: 400 })
         }
 
-        // Note: lineUserId validation is no longer needed here as it comes from verified LINE token
-
-        // 1. Get User ID from verified LINE user ID (not from request body!)
+        // 3. Get User ID from verified LINE user ID
         const { data: user, error: userError } = await supabase
             .from('users')
             .select('id, line_user_id, display_name')
@@ -88,68 +92,53 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
-        // 2. For OKX bindings, try auto-verification
+        // 4. For OKX bindings, try auto-verification
         let autoVerified = false
         let okxUpdateData = {}
         let rejectionReason: string | null = null
 
         if (normalizedExchange === 'okx') {
-            // Get verification config from database
-            const config = await getVerificationConfig(supabase)
+            // Securely fetch config
+            const config = await getVerificationConfig()
 
-            if (!config.auto_verify_enabled) {
-                console.log('[Binding] Auto-verify disabled, skipping')
+            if (!config) {
+                console.error('[Binding] Critical: Verification config missing')
+                // Fail safe: Don't auto-verify if we can't check rules
+                rejectionReason = '系統暫時無法驗證，將轉為人工審核'
+            } else if (!config.auto_verify_enabled) {
+                console.log('[Binding] Auto-verify disabled by config')
             } else {
                 try {
                     console.log('[Binding] Checking OKX API for UID:', trimmedUid)
                     const okxData = await getInviteeDetail(trimmedUid)
 
                     if (okxData) {
-                        console.log('[Binding] OKX data received:', JSON.stringify(okxData))
-
-                        // Parse and prepare update data
                         okxUpdateData = parseOkxData(okxData)
 
-                        // Check auto-verification criteria using DB config
                         const affiliateMatch = okxData.affiliateCode === config.okx_affiliate_code
                         const hasKyc = !config.okx_require_kyc || (!!okxData.kycTime && okxData.kycTime !== '')
                         const hasDeposit = parseFloat(okxData.depAmt) >= config.okx_min_deposit
 
-                        console.log('[Binding] Verification check:', {
-                            config,
-                            affiliateCode: okxData.affiliateCode,
-                            affiliateMatch,
-                            kycTime: okxData.kycTime,
-                            hasKyc,
-                            depAmt: okxData.depAmt,
-                            hasDeposit
-                        })
-
                         if (affiliateMatch && hasKyc && hasDeposit) {
                             autoVerified = true
-                            console.log('[Binding] ✅ Auto-verified!')
                         } else {
-                            // Build rejection reason
                             const reasons: string[] = []
-                            if (!affiliateMatch) reasons.push(`邀請碼不符 (需 ${config.okx_affiliate_code}，實際 ${okxData.affiliateCode})`)
+                            if (!affiliateMatch) reasons.push(`邀請碼不符`)
                             if (!hasKyc) reasons.push('尚未完成 KYC')
-                            if (!hasDeposit) reasons.push(`入金不足 (需 ≥$${config.okx_min_deposit}，實際 $${okxData.depAmt})`)
+                            if (!hasDeposit) reasons.push(`入金不足`)
                             rejectionReason = reasons.join('; ')
-                            console.log('[Binding] ❌ Auto-verify failed:', rejectionReason)
                         }
                     } else {
-                        rejectionReason = `OKX API 查無此 UID，請確認是否已使用推薦碼 ${config.okx_affiliate_code} 註冊`
-                        console.log('[Binding] ❌ OKX API returned no data for UID:', trimmedUid)
+                        rejectionReason = `OKX API 查無此 UID`
                     }
                 } catch (okxError) {
                     console.error('[Binding] OKX API error:', okxError)
-                    // If API fails, fall back to manual review
-                    rejectionReason = null // Don't set reason, just pending
+                    rejectionReason = null
                 }
             }
         }
 
-        // 3. Insert Binding with appropriate status
+        // 5. Insert Binding (Using User Client - RLS must allow insert for own user_id)
         const bindingStatus = autoVerified ? 'verified' : 'pending'
 
         const { data, error } = await supabase
@@ -173,36 +162,54 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Failed to submit binding' }, { status: 500 })
         }
 
-        // 4. Update user membership status
+        // 6. Update user membership status (Privileged Operation)
         if (autoVerified) {
-            // Auto-verified: upgrade to pro immediately
-            await supabase
-                .from('users')
-                .update({ membership_status: 'pro', updated_at: new Date().toISOString() })
-                .eq('id', user.id)
-
-            // Send LINE notification for auto-verification
             try {
+                // ELEVATED PRIVILEGES BEGIN
+                const adminSupabase = createAdminClient()
+
+                await adminSupabase
+                    .from('users')
+                    .update({ membership_status: 'pro', updated_at: new Date().toISOString() })
+                    .eq('id', user.id)
+                // ELEVATED PRIVILEGES END
+
+                // Send Notification
                 const { pushMessage } = await import('@/lib/line-bot')
                 await pushMessage(verifiedLineUserId, [{
                     type: 'text',
                     text: '🎉 恭喜！您的 OKX 帳號已自動驗證通過，Pro 會員資格已開通！'
-                }])
-            } catch (e) {
-                console.error('[Binding] Failed to send LINE notification:', {
-                    message: e instanceof Error ? e.message : 'Unknown error'
+                }]).catch(e => console.error('Push error:', e))
+
+                return NextResponse.json({
+                    success: true,
+                    binding: data,
+                    autoVerified: true,
+                    message: '🎉 驗證通過！Pro 會員已開通'
+                })
+            } catch (upgradeError) {
+                console.error('[Binding] Upgrade failed:', upgradeError)
+                // If upgrade fails, we still returned success for binding, but user isn't upgraded.
+                // Ideally we should transaction this, but Supabase HTTP API doesn't support easy transactions across calls.
+                // We will log critical error.
+                return NextResponse.json({
+                    success: true,
+                    binding: data,
+                    autoVerified: true,
+                    warning: '驗證通過但會員狀態更新失敗，請聯繫管理員'
                 })
             }
-
-            return NextResponse.json({
-                success: true,
-                binding: data,
-                autoVerified: true,
-                message: '🎉 驗證通過！Pro 會員已開通'
-            })
         } else {
-            // Not auto-verified: set to pending
-            await supabase
+            // Check if we need to set pending status
+            // Using User Client (RLS might allow updating own status to pending? Or RLS prevents update?)
+            // Usually users can't update their own membership_status.
+            // So we use AdminClient here too if we need to change status.
+
+            // Logic: "Not auto-verified: set to pending". 
+            // Only if current status is 'free'.
+
+            const adminSupabase = createAdminClient()
+            await adminSupabase
                 .from('users')
                 .update({ membership_status: 'pending' })
                 .eq('id', user.id)
@@ -218,11 +225,7 @@ export async function POST(req: NextRequest) {
             })
         }
     } catch (e) {
-        console.error('[Binding] API Error:', {
-            message: e instanceof Error ? e.message : 'Unknown error',
-            // Only include stack trace in development
-            ...(process.env.NODE_ENV === 'development' && { stack: (e as Error).stack })
-        })
+        console.error('[Binding] API Error:', e)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

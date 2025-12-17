@@ -135,7 +135,7 @@ export function MarketEntryWidgets() {
                         <HelpDrawer
                             title={tool.title}
                             content={getExplanation(tool.title)}
-                            className="absolute top-2 right-2 z-20 opacity-40 hover:opacity-100"
+                            className="absolute top-2 right-2 z-20 text-neutral-600 hover:text-white transition-colors"
                         />
 
                         {/* Active Indicator Pulse */}
