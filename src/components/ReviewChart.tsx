@@ -194,17 +194,34 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         {type === 'supply' && `${Number(payload[0].value).toLocaleString()}`}
                         {type === 'fgi' && `${Number(payload[0].value)}`}
                         {type === 'funding' && (
-                            <span className={Number(payload[0].value) > 0 ? 'text-red-400' : 'text-green-400'}>
-                                {Number(payload[0].value).toFixed(4)}%
-                            </span>
+                            <>
+                                <span className={Number(payload[0].value) > 0 ? 'text-red-400' : 'text-green-400'}>
+                                    {Number(payload[0].value).toFixed(4)}%
+                                </span>
+                                <span className="block text-[10px] text-neutral-500 mt-0.5">
+                                    {Number(payload[0].value) > 0.05 ? '多頭擁擠（不利追多）' : Number(payload[0].value) < -0.02 ? '空頭擁擠（不利追空）' : '正常範圍'}
+                                </span>
+                            </>
                         )}
                         {type === 'liquidation' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
-                        {type === 'longShort' && Number(payload[0].value).toFixed(2)}
+                        {type === 'longShort' && (
+                            <>
+                                <span>{Number(payload[0].value).toFixed(2)}</span>
+                                <span className="block text-[10px] text-neutral-500 mt-0.5">
+                                    {Number(payload[0].value) > 1.5 ? '散戶極端偏多' : Number(payload[0].value) > 1.2 ? '散戶偏多' : Number(payload[0].value) < 0.67 ? '散戶極端偏空' : Number(payload[0].value) < 0.83 ? '散戶偏空' : '多空均衡'}
+                                </span>
+                            </>
+                        )}
                         {type === 'basis' && `${Number(payload[0].value).toFixed(2)}%`}
                         {type === 'premium' && (
-                            <span className={Number(payload[0].value) > 0 ? 'text-green-400' : 'text-red-400'}>
-                                {Number(payload[0].value).toFixed(4)}%
-                            </span>
+                            <>
+                                <span className={Number(payload[0].value) > 0 ? 'text-green-400' : 'text-red-400'}>
+                                    {Number(payload[0].value).toFixed(4)}%
+                                </span>
+                                <span className="block text-[10px] text-neutral-500 mt-0.5">
+                                    {Number(payload[0].value) > 0.1 ? '美國機構需求強' : Number(payload[0].value) < -0.1 ? '亞洲主導或賣壓' : '區域均衡'}
+                                </span>
+                            </>
                         )}
                         {type === 'stablecoin' && `$${(Number(payload[0].value) / 1000000000).toFixed(2)}B`}
                     </p>
@@ -435,7 +452,11 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             tickFormatter={(str) => str.slice(5)}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
-                        <ReferenceLine y={0} stroke="#333" />
+                        {/* Y=0 中軸線 */}
+                        <ReferenceLine y={0} stroke="#666" strokeWidth={1.5} label={{ value: '中性', position: 'insideRight', fill: '#666', fontSize: 9 }} />
+                        {/* 擁擠警戒區間 */}
+                        <ReferenceLine y={0.05} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '多頭擁擠', position: 'insideTopRight', fill: '#ef4444', fontSize: 8, opacity: 0.7 }} />
+                        <ReferenceLine y={-0.02} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '空頭擁擠', position: 'insideBottomRight', fill: '#22c55e', fontSize: 8, opacity: 0.7 }} />
                         <Bar dataKey="fundingRate" fill="#eab308">
                             {data.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.fundingRate > 0 ? '#ef4444' : '#22c55e'} />
@@ -472,7 +493,11 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <ReferenceLine y={1} stroke="#fff" strokeOpacity={0.5} strokeDasharray="3 3" />
+                        {/* 多空均衡線 Y=1 */}
+                        <ReferenceLine y={1} stroke="#fff" strokeWidth={1.5} strokeOpacity={0.8} label={{ value: '均衡 1.0', position: 'insideRight', fill: '#fff', fontSize: 9, fontWeight: 'bold' }} />
+                        {/* 失衡警戒線 */}
+                        <ReferenceLine y={1.5} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.4} label={{ value: '偏多', position: 'insideTopRight', fill: '#ef4444', fontSize: 8, opacity: 0.6 }} />
+                        <ReferenceLine y={0.67} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.4} label={{ value: '偏空', position: 'insideBottomRight', fill: '#22c55e', fontSize: 8, opacity: 0.6 }} />
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                         <YAxis
                             hide={false}

@@ -34,6 +34,17 @@ export async function GET(req: NextRequest) {
             query = query.eq('exchange_name', exchange)
         }
 
+        // Optional search query
+        const searchQuery = searchParams.get('query')
+        if (searchQuery) {
+            // Search by UID or User Display Name or Line User ID
+            // Note: Supabase standard textSearch or ilike on joined tables is tricky with OR conditions across tables.
+            // Simplified approach: Search heavily on UID (most common use case)
+            // For complex cross-table OR search, we might need a different approach or RPC, 
+            // but for now let's prioritize UID search which is the request.
+            query = query.or(`exchange_uid.ilike.%${searchQuery}%`)
+        }
+
         const { data, error } = await query
 
         if (error) {

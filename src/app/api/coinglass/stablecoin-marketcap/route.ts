@@ -5,9 +5,20 @@ import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 export const dynamic = 'force-dynamic'
 
 interface StablecoinHistoryData {
-    data_list: number[]
+    data_list: (Record<string, number> | number)[]  // Can be objects with USDT/DAI/USDC etc or numbers
     price_list: number[] // often empty or null
     time_list: number[]  // seconds
+}
+
+// Helper to convert timestamp (handles both seconds and milliseconds)
+function toDate(ts: number): Date {
+    return new Date(ts < 10_000_000_000 ? ts * 1000 : ts)
+}
+
+// Helper to sum stablecoin marketcaps from object
+function sumMarketCap(data: Record<string, number> | number): number {
+    if (typeof data === 'number') return data
+    return Object.values(data).reduce((sum, val) => sum + (val || 0), 0)
 }
 
 export async function GET(req: NextRequest) {
@@ -48,16 +59,16 @@ export async function GET(req: NextRequest) {
             dataObj = json.data
         }
 
-        if (!dataObj) {
+        if (!dataObj || !dataObj.time_list || !dataObj.data_list) {
             return NextResponse.json({ error: 'Invalid data format' }, { status: 500 })
         }
 
         const { time_list, data_list } = dataObj
 
         const history = time_list.map((t, i) => ({
-            date: new Date(t * 1000).toISOString().split('T')[0],
-            timestamp: t * 1000,
-            value: data_list[i], // Market Cap Value usually in USD
+            date: toDate(t).toISOString().split('T')[0],
+            timestamp: toDate(t).getTime(),
+            value: sumMarketCap(data_list[i]), // Sum all stablecoin marketcaps
             price: 0
         })).sort((a, b) => a.timestamp - b.timestamp)
 
@@ -68,3 +79,4 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }
+

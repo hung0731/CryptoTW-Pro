@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { coinglassV4Request } from '@/lib/coinglass'
+import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 
-// Coinglass Long/Short Ratio History response
-interface LSRatioHistoryResponse {
-    dataList?: number[]  // Ratio values
-    priceList?: number[]
-    dateList?: number[]
+// Coinglass V4 Long/Short Ratio History response
+interface LSRatioHistoryItem {
+    time: number                              // timestamp in ms
+    global_account_long_percent: number       // long %
+    global_account_short_percent: number      // short %
+    global_account_long_short_ratio: number   // long/short ratio
 }
 
 interface HistoryDataPoint {
@@ -26,20 +27,43 @@ export async function GET(req: NextRequest) {
     const symbol = searchParams.get('symbol') || 'BTC'
 
     try {
-        const res = await coinglassV4Request<LSRatioHistoryResponse>(
-            '/api/futures/global-long-short-account-ratio/history',
-            { symbol, interval: 'h4' }
-        )
+        const apiKey = getCoinglassApiKey()
+        if (!apiKey) {
+            return NextResponse.json({ error: 'API Key not configured' }, { status: 500 })
+        }
 
-        if (!res || !res.dateList || res.dateList.length === 0) {
+        // Use correct V4 endpoint: /api/futures/global-long-short-account-ratio/history
+        // Requires exchange and symbol (as pair like BTCUSDT)
+        const url = `https://open-api-v4.coinglass.com/api/futures/global-long-short-account-ratio/history?exchange=Binance&symbol=${symbol}USDT&interval=h4&limit=1000`
+
+        const res = await fetch(url, {
+            headers: {
+                'CG-API-KEY': apiKey,
+                'accept': 'application/json'
+            },
+            next: { revalidate: 3600 }
+        })
+
+        if (!res.ok) {
+            console.error(`Long/Short V4 API error: ${res.status}`)
+            return NextResponse.json({ error: 'Upstream API error' }, { status: 502 })
+        }
+
+        const json = await res.json()
+        if (json.code !== '0' || !json.data || !Array.isArray(json.data)) {
+            console.error('Long/Short V4 API error:', json.msg)
             return NextResponse.json({ error: 'No data available' }, { status: 500 })
         }
 
-        const allData: HistoryDataPoint[] = res.dateList.map((time, i) => ({
-            date: time,
-            value: res.dataList?.[i] || 1,  // Default to neutral
-            price: res.priceList?.[i] || 0,
+        // Parse data
+        const allData: HistoryDataPoint[] = json.data.map((item: LSRatioHistoryItem) => ({
+            date: item.time,
+            value: item.global_account_long_short_ratio || 1,
+            price: 0
         }))
+
+        // Sort by date ascending
+        allData.sort((a, b) => a.date - b.date)
 
         // Filter by range
         const now = Date.now()
@@ -85,3 +109,4 @@ function downsample<T>(arr: T[], n: number): T[] {
     }
     return result
 }
+

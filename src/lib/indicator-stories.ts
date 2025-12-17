@@ -8,21 +8,100 @@
  */
 
 // ================================================
-// ZONE TYPES (嚴格控制，與 Coinglass FGI 區間對齊)
+// INDICATOR SEMANTIC TYPE (核心：區分指標語意類型)
+// ================================================
+export type IndicatorSemanticType =
+    | 'emotion'      // 情緒型：僅 FGI 適用恐懼/貪婪標籤
+    | 'flow'         // 資金流型：流入/流出
+    | 'crowding'     // 擁擠型：多頭/空頭擁擠
+    | 'intensity'    // 強度型：清算量高/低
+    | 'leverage'     // 槓桿型：OI 高/低
+    | 'ratio'        // 比率型：多空比偏多/偏空
+    | 'premium'      // 溢價型：溢價/折價
+    | 'liquidity';   // 流動性型：充裕/匱乏
+
+// ================================================
+// ZONE TYPES (內部使用，不直接暴露給使用者)
 // ================================================
 export type ZoneKey =
-    | 'fear'           // 0-25：恐懼
-    | 'lean_fear'      // 25-50：偏恐懼 / 中性偏低
-    | 'lean_greed'     // 50-75：偏貪婪 / 中性偏高
-    | 'greed';         // 75-100：高度貪婪
+    | 'fear'           // 0-25：低位區
+    | 'lean_fear'      // 25-50：偏低區
+    | 'lean_greed'     // 50-75：偏高區
+    | 'greed';         // 75-100：高位區
 
-export const ZONE_LABELS: Record<ZoneKey, string> = {
-    fear: '恐懼區',
-    lean_fear: '中性偏恐懼',
-    lean_greed: '中性偏貪婪',
-    greed: '高度貪婪區',
+// ================================================
+// 各指標專屬語意標籤（核心修復）
+// ================================================
+export const INDICATOR_ZONE_LABELS: Record<string, Record<ZoneKey, string>> = {
+    // 情緒型：僅 FGI 使用恐懼/貪婪
+    'fear-greed': {
+        fear: '恐懼區',
+        lean_fear: '中性偏恐懼',
+        lean_greed: '中性偏貪婪',
+        greed: '高度貪婪區',
+    },
+    // 資金流型：流入/流出
+    'etf-flow': {
+        fear: '大量流出',
+        lean_fear: '淨流出',
+        lean_greed: '淨流入',
+        greed: '大量流入',
+    },
+    // 擁擠型：多頭/空頭擁擠
+    'funding-rate': {
+        fear: '空頭擁擠',
+        lean_fear: '偏向空頭',
+        lean_greed: '偏向多頭',
+        greed: '多頭擁擠',
+    },
+    // 強度型：清算強度
+    'liquidation': {
+        fear: '清算清淡',
+        lean_fear: '清算正常',
+        lean_greed: '清算增加',
+        greed: '清算劇烈',
+    },
+    // 槓桿型：OI 水位
+    'open-interest': {
+        fear: '槓桿偏低',
+        lean_fear: '槓桿正常',
+        lean_greed: '槓桿偏高',
+        greed: '槓桿過熱',
+    },
+    // 比率型：多空比
+    'long-short-ratio': {
+        fear: '極端偏空',
+        lean_fear: '偏向空方',
+        lean_greed: '偏向多方',
+        greed: '極端偏多',
+    },
+    // 溢價型：基差
+    'futures-basis': {
+        fear: '期貨折價',
+        lean_fear: '正常偏低',
+        lean_greed: '正常偏高',
+        greed: '溢價過熱',
+    },
+    // 溢價型：Coinbase Premium
+    'coinbase-premium': {
+        fear: '亞洲主導',
+        lean_fear: '區域均衡偏亞',
+        lean_greed: '區域均衡偏美',
+        greed: '美國需求強',
+    },
+    // 流動性型：穩定幣
+    'stablecoin-supply': {
+        fear: '流動性匱乏',
+        lean_fear: '流動性偏低',
+        lean_greed: '流動性充裕',
+        greed: '流動性歷史高位',
+    },
 };
 
+// 舊版 ZONE_LABELS 保留向後兼容（僅用於 FGI）
+export const ZONE_LABELS: Record<ZoneKey, string> = INDICATOR_ZONE_LABELS['fear-greed'];
+
+// 區間顏色（通用）
 export const ZONE_COLORS: Record<ZoneKey, { bg: string; text: string; border: string }> = {
     fear: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20' },
     lean_fear: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
@@ -37,6 +116,22 @@ export function getZoneFromValue(value: number): ZoneKey {
     if (value <= 75) return 'lean_greed';
     return 'greed';
 }
+
+// 根據指標 ID 取得正確的區間標籤
+export function getZoneLabel(indicatorId: string, zone: ZoneKey): string {
+    const labels = INDICATOR_ZONE_LABELS[indicatorId];
+    if (labels) return labels[zone];
+    // Fallback to generic (shouldn't happen)
+    return ZONE_LABELS[zone];
+}
+
+// ================================================
+// Y-AXIS MODEL (核心：決定圖表 Y 軸顯示方式)
+// ================================================
+export type YAxisModel =
+    | { type: 'fixed'; min: number; max: number }        // 固定範圍 (僅 FGI: 0-100)
+    | { type: 'auto' }                                    // 自動縮放 (ETF Flow, Liquidation, Stablecoin)
+    | { type: 'symmetric'; center: number }               // 對稱軸 (Funding: 0, Long/Short: 1)
 
 // ================================================
 // INDICATOR STORY INTERFACE
@@ -62,6 +157,8 @@ export interface IndicatorStory {
     chart: {
         unit?: string;                 // '', '%', 'B', etc.
         valueFormat?: 'number' | 'percent' | 'ratio';
+        // Y 軸模型（核心修復）
+        yAxisModel: YAxisModel;
         // Coinglass FGI 區間：0-25 / 25-50 / 50-75 / 75-100
         zones: {
             fear: { min: number; max: number };       // 0-25
@@ -136,6 +233,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: '',
             valueFormat: 'number',
+            yAxisModel: { type: 'fixed', min: 0, max: 100 },  // FGI: 唯一固定 0-100
             zones: {
                 fear: { min: 0, max: 25 },
                 leanFear: { min: 25, max: 50 },
@@ -206,6 +304,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: 'B',
             valueFormat: 'number',
+            yAxisModel: { type: 'auto' },  // ETF Flow: 無界資金流
             zones: {
                 fear: { min: -Infinity, max: -0.5 },
                 leanFear: { min: -0.5, max: 0 },
@@ -213,7 +312,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
                 greed: { min: 0.5, max: Infinity },
             },
             api: {
-                endpoint: '/api/coinglass/etf',
+                endpoint: '/api/coinglass/etf-flow',
                 params: {},
             },
         },
@@ -268,6 +367,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: '%',
             valueFormat: 'percent',
+            yAxisModel: { type: 'symmetric', center: 0 },  // Funding: 以 0 為中心
             zones: {
                 fear: { min: -Infinity, max: -0.01 },
                 leanFear: { min: -0.01, max: 0 },
@@ -338,6 +438,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: 'M',
             valueFormat: 'number',
+            yAxisModel: { type: 'auto' },  // Liquidation: 事件密度型
             zones: {
                 fear: { min: 0, max: 100 },
                 leanFear: { min: 100, max: 300 },
@@ -408,6 +509,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: 'B',
             valueFormat: 'number',
+            yAxisModel: { type: 'auto' },  // OI: 絕對量型
             zones: {
                 fear: { min: 0, max: 20 },
                 leanFear: { min: 20, max: 35 },
@@ -478,6 +580,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: '',
             valueFormat: 'ratio',
+            yAxisModel: { type: 'symmetric', center: 1 },  // Long/Short: 以 1 為中心
             zones: {
                 fear: { min: 0, max: 0.8 },
                 leanFear: { min: 0.8, max: 1 },
@@ -548,6 +651,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: '%',
             valueFormat: 'percent',
+            yAxisModel: { type: 'symmetric', center: 0 },  // Basis: 以 0 為中心
             zones: {
                 fear: { min: -Infinity, max: 0 },
                 leanFear: { min: 0, max: 5 },
@@ -607,6 +711,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: '%',
             valueFormat: 'percent',
+            yAxisModel: { type: 'symmetric', center: 0 },  // Premium: 以 0 為中心
             zones: {
                 fear: { min: -Infinity, max: -0.1 },
                 leanFear: { min: -0.1, max: 0 },
@@ -666,6 +771,7 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         chart: {
             unit: 'B',
             valueFormat: 'number',
+            yAxisModel: { type: 'auto' },  // Stablecoin: 累積量型
             zones: {
                 fear: { min: -Infinity, max: 100 },
                 leanFear: { min: 100, max: 130 },

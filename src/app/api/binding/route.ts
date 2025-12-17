@@ -92,6 +92,20 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
+        // 3.5 Check if UID is already bound by ANY user
+        const { data: existingBinding } = await supabase
+            .from('exchange_bindings')
+            .select('id')
+            .eq('exchange_name', normalizedExchange)
+            .eq('exchange_uid', trimmedUid)
+            .single()
+
+        if (existingBinding) {
+            return NextResponse.json({
+                error: '此 UID 已被其他帳號綁定，請聯繫客服'
+            }, { status: 409 })
+        }
+
         // 4. For OKX bindings, try auto-verification
         let autoVerified = false
         let okxUpdateData = {}

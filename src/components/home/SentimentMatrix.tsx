@@ -8,7 +8,7 @@ import { ChevronRight } from 'lucide-react'
 import { INDICATOR_STORIES, IndicatorStory, ZONE_COLORS, getZoneFromValue } from '@/lib/indicator-stories'
 
 // Define the indicators we want to show on the dashboard
-const DASHBOARD_INDICATORS = ['fear-greed', 'etf-flow', 'coinbase-premium', 'stablecoin-supply']
+const DASHBOARD_INDICATORS = ['fear-greed', 'etf-flow', 'coinbase-premium', 'stablecoin-supply', 'funding-rate']
 
 interface IndicatorStatus {
     slug: string

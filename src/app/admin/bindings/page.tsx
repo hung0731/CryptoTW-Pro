@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Check, X, RefreshCw, User, Loader2, AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { Check, X, RefreshCw, User, Loader2, AlertCircle, CheckCircle, Clock, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface BindingRequest {
@@ -28,12 +29,19 @@ export default function BindingsPage() {
     const [bindings, setBindings] = useState<BindingRequest[]>([])
     const [loading, setLoading] = useState(true)
     const [processingId, setProcessingId] = useState<string | null>(null)
+    const [searchQuery, setSearchQuery] = useState('')
     const { toast } = useToast()
 
     const fetchBindings = async () => {
         setLoading(true)
         try {
-            const res = await fetch('/api/admin/bindings?status=pending')
+            const params = new URLSearchParams()
+            params.set('status', 'pending')
+            if (searchQuery) {
+                params.set('query', searchQuery)
+            }
+
+            const res = await fetch(`/api/admin/bindings?${params.toString()}`)
             const data = await res.json()
             if (data.bindings) {
                 setBindings(data.bindings)
@@ -45,6 +53,7 @@ export default function BindingsPage() {
             setLoading(false)
         }
     }
+
 
     useEffect(() => {
         fetchBindings()
@@ -96,6 +105,22 @@ export default function BindingsPage() {
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
                 </div>
+            </div>
+
+            <div className="flex items-center gap-4 bg-neutral-900/50 p-4 rounded-lg border border-white/5">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+                    <Input
+                        placeholder="搜尋 UID..."
+                        className="pl-9 bg-neutral-950/50 border-white/10 text-white placeholder:text-neutral-500"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && fetchBindings()}
+                    />
+                </div>
+                <Button variant="secondary" onClick={fetchBindings}>
+                    搜尋
+                </Button>
             </div>
 
             <div className="space-y-3">

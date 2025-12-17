@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, ChevronRight, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CARDS, TYPOGRAPHY, COLORS, SPACING, CHART } from '@/lib/design-tokens';
-import { IndicatorStory, ZONE_LABELS, ZONE_COLORS } from '@/lib/indicator-stories';
+import { IndicatorStory, ZONE_COLORS, getZoneLabel, YAxisModel } from '@/lib/indicator-stories';
 import { REVIEWS_DATA } from '@/lib/reviews-data';
 
 // ================================================
@@ -26,9 +26,7 @@ function SectionCard({ children, className }: SectionCardProps) {
 
 // ================================================
 // ⓪ CHART HERO - 雙層圖表 (Above the fold)
-// 上：指標主圖（0-100 區間）
-// 下：BTC Context（價格走勢）
-// 同步時間範圍切換 + Hover 同步
+// 動態 Y 軸：根據 yAxisModel 決定軸範圍
 // ================================================
 interface ChartHeroProps {
     story: IndicatorStory;
@@ -40,33 +38,147 @@ interface ChartDataPoint {
     price?: number;
 }
 
+// 計算 Y 軸範圍（根據 yAxisModel）
+function computeYBounds(data: ChartDataPoint[], model: YAxisModel): { min: number; max: number } {
+    if (model.type === 'fixed') {
+        return { min: model.min, max: model.max };
+    }
+
+    if (data.length === 0) {
+        // 無數據時的預設值
+        if (model.type === 'symmetric') {
+            return { min: model.center - 1, max: model.center + 1 };
+        }
+        return { min: 0, max: 100 };
+    }
+
+    const values = data.map(d => d.value);
+    const dataMin = Math.min(...values);
+    const dataMax = Math.max(...values);
+
+    if (model.type === 'symmetric') {
+        // 對稱軸：以 center 為中心，上下對稱
+        const maxDeviation = Math.max(
+            Math.abs(dataMax - model.center),
+            Math.abs(dataMin - model.center)
+        ) * 1.1; // 留 10% 邊距
+        return { min: model.center - maxDeviation, max: model.center + maxDeviation };
+    }
+
+    // auto: 自動縮放
+    const range = dataMax - dataMin || 1;
+    const padding = range * 0.1;
+    return { min: dataMin - padding, max: dataMax + padding };
+}
+
+// 格式化 Y 軸數值
+function formatYAxisValue(value: number, story: IndicatorStory): string {
+    const format = story.chart.valueFormat;
+    const unit = story.chart.unit;
+    if (format === 'percent') return `${value.toFixed(2)}%`;
+    if (format === 'ratio') return value.toFixed(2);
+    if (unit === 'M') return `$${value.toFixed(0)}M`;
+    if (unit === 'B') return `$${value.toFixed(1)}B`;
+    return value.toFixed(1);
+}
+
 function ChartHero({ story }: ChartHeroProps) {
     const [timeRange, setTimeRange] = React.useState<'1M' | '3M' | '1Y'>('3M');
     const [chartData, setChartData] = React.useState<ChartDataPoint[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [hoverIndex, setHoverIndex] = React.useState<number | null>(null);
-    const zoneColors = ZONE_COLORS[story.zone];
-    const zoneLabel = ZONE_LABELS[story.zone];
 
-    // 獲取真實數據
-    // 獲取真實數據
+    // 即時數據狀態（從 API 獲取）
+    const [liveCurrentValue, setLiveCurrentValue] = React.useState<number | null>(null);
+    const [liveZone, setLiveZone] = React.useState<'fear' | 'lean_fear' | 'lean_greed' | 'greed' | null>(null);
+
+    // 使用即時數據或靜態數據
+    const currentValue = liveCurrentValue ?? story.currentValue ?? 0;
+    const currentZone = liveZone ?? story.zone;
+    const zoneColors = ZONE_COLORS[currentZone];
+    const zoneLabel = getZoneLabel(story.id, currentZone);
+
+    // Y 軸模型
+    const yAxisModel = story.chart.yAxisModel;
+    const isFixedAxis = yAxisModel.type === 'fixed';
+
+    // 計算動態 Y 軸範圍
+    const yBounds = React.useMemo(() =>
+        computeYBounds(chartData, yAxisModel),
+        [chartData, yAxisModel]
+    );
+
+    // 獲取真實數據 + BTC 價格（非 FGI 需要單獨獲取）
     React.useEffect(() => {
         setLoading(true);
         const endpoint = story.chart.api.endpoint;
-        // Construct query params
         const params = new URLSearchParams({
             range: timeRange,
             ...(story.chart.api.params as Record<string, string>)
         });
 
-        fetch(`${endpoint}?${params.toString()}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.history) {
-                    setChartData(data.history);
-                } else {
+        // 並行獲取指標數據和 BTC 價格（非 FGI 的話才需要 BTC 價格）
+        const indicatorFetch = fetch(`${endpoint}?${params.toString()}`).then(res => res.json());
+        const btcPriceFetch = !isFixedAxis
+            ? fetch(`/api/coinglass/fear-greed?range=${timeRange}`).then(res => res.json())
+            : Promise.resolve(null);
+
+        Promise.all([indicatorFetch, btcPriceFetch])
+            .then(([indicatorData, btcData]) => {
+                if (!indicatorData.history) {
                     console.warn(`No history data found for ${story.slug}`);
                     setChartData([]);
+                    setLoading(false);
+                    return;
+                }
+
+                // 設置即時當前值（從 API 響應中獲取）
+                if (indicatorData.current?.value !== undefined) {
+                    const value = indicatorData.current.value;
+                    setLiveCurrentValue(value);
+
+                    // 根據指標的 zones 設定計算 zone
+                    const zones = story.chart.zones;
+                    if (value <= zones.fear.max) {
+                        setLiveZone('fear');
+                    } else if (value <= zones.leanFear.max) {
+                        setLiveZone('lean_fear');
+                    } else if (value <= zones.leanGreed.max) {
+                        setLiveZone('lean_greed');
+                    } else {
+                        setLiveZone('greed');
+                    }
+                }
+
+                // 合併 BTC 價格數據（如果有）
+                if (btcData?.history && btcData.history.length > 0) {
+                    // 建立日期 -> 價格的映射表
+                    const priceMap = new Map<number, number>();
+                    btcData.history.forEach((item: { date: number; price: number }) => {
+                        // 用日期（去掉時間）作為 key
+                        const dayKey = Math.floor(item.date / 86400000) * 86400000;
+                        priceMap.set(dayKey, item.price);
+                    });
+
+                    // 合併價格到指標數據
+                    const mergedData = indicatorData.history.map((item: ChartDataPoint) => {
+                        const dayKey = Math.floor(item.date / 86400000) * 86400000;
+                        // 嘗試找到匹配的價格，或者找最接近的
+                        let price = priceMap.get(dayKey);
+                        if (!price) {
+                            // 找最接近的日期
+                            const keys = Array.from(priceMap.keys()).sort((a, b) =>
+                                Math.abs(a - item.date) - Math.abs(b - item.date)
+                            );
+                            if (keys.length > 0) {
+                                price = priceMap.get(keys[0]);
+                            }
+                        }
+                        return { ...item, price: price || 0 };
+                    });
+                    setChartData(mergedData);
+                } else {
+                    setChartData(indicatorData.history);
                 }
                 setLoading(false);
             })
@@ -75,12 +187,10 @@ function ChartHero({ story }: ChartHeroProps) {
                 setChartData([]);
                 setLoading(false);
             });
-    }, [story.slug, timeRange, story.chart.api.endpoint, story.chart.api.params]);
+    }, [story.slug, timeRange, story.chart.api.endpoint, story.chart.api.params, isFixedAxis, story.chart.zones]);
 
-    // 計算當前值在 Y 軸的位置 (0-100 scale)
-    const currentValue = story.currentValue ?? 50;
 
-    // 將數據轉換為 SVG 路徑點
+    // 將數據轉換為 SVG 路徑點（使用動態 Y 軸範圍）
     const generatePath = (data: ChartDataPoint[], accessor: 'value' | 'price', height: number, minVal?: number, maxVal?: number) => {
         if (data.length === 0) return '';
 
@@ -153,48 +263,90 @@ function ChartHero({ story }: ChartHeroProps) {
                 )}
 
                 {/* ═══════════════════════════════════════════════ */}
-                {/* 上層：指標主圖 (0-100) */}
+                {/* 上層：指標主圖 */}
                 {/* ═══════════════════════════════════════════════ */}
                 <div className="aspect-[16/9] w-full relative pt-12 pb-2 px-4">
-                    {/* Zone Backgrounds (0-25 / 25-50 / 50-75 / 75-100) */}
-                    <div className="absolute inset-x-0 top-12 bottom-2 flex flex-col">
-                        {/* 75-100: 貪婪區 */}
-                        <div className="h-[25%] bg-red-500/[0.04] border-b border-red-500/10 relative">
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-red-400/50 font-mono">
-                                貪婪
-                            </span>
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-neutral-600 font-mono">
-                                75
-                            </span>
+                    {/* Zone Backgrounds - 所有指標都顯示 4 區間背景 */}
+                    {isFixedAxis ? (
+                        <div className="absolute inset-x-0 top-12 bottom-2 flex flex-col">
+                            {/* 75-100: 高位區 */}
+                            <div className="h-[25%] bg-red-500/[0.04] border-b border-red-500/10 relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-red-400/50 font-mono">
+                                    {getZoneLabel(story.id, 'greed')}
+                                </span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-neutral-600 font-mono">
+                                    75
+                                </span>
+                            </div>
+                            {/* 50-75: 偏高區 */}
+                            <div className="h-[25%] bg-yellow-500/[0.02] border-b border-yellow-500/5 relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-yellow-400/30 font-mono">
+                                    {getZoneLabel(story.id, 'lean_greed')}
+                                </span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-neutral-600 font-mono">
+                                    50
+                                </span>
+                            </div>
+                            {/* 25-50: 偏低區 */}
+                            <div className="h-[25%] bg-blue-500/[0.02] border-b border-blue-500/5 relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-blue-400/30 font-mono">
+                                    {getZoneLabel(story.id, 'lean_fear')}
+                                </span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-neutral-600 font-mono">
+                                    25
+                                </span>
+                            </div>
+                            {/* 0-25: 低位區 */}
+                            <div className="h-[25%] bg-green-500/[0.04] relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-green-400/50 font-mono">
+                                    {getZoneLabel(story.id, 'fear')}
+                                </span>
+                                <span className="absolute left-3 bottom-1 text-[9px] text-neutral-600 font-mono">
+                                    0
+                                </span>
+                            </div>
                         </div>
-                        {/* 50-75: 偏貪婪 */}
-                        <div className="h-[25%] bg-yellow-500/[0.02] border-b border-yellow-500/5 relative">
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-yellow-400/30 font-mono">
-                                偏貪婪
-                            </span>
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-neutral-600 font-mono">
-                                50
-                            </span>
+                    ) : (
+                        /* 動態軸 - 同樣顯示 4 區間背景，但用動態 Y 軸標籤 */
+                        <div className="absolute inset-x-0 top-12 bottom-2 flex flex-col">
+                            {/* 高位區 (貪婪/過熱) */}
+                            <div className="h-[25%] bg-red-500/[0.04] border-b border-red-500/10 relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-red-400/50 font-mono">
+                                    {getZoneLabel(story.id, 'greed')}
+                                </span>
+                                <span className="absolute left-3 top-0 text-[9px] text-neutral-600 font-mono">
+                                    {formatYAxisValue(yBounds.max, story)}
+                                </span>
+                            </div>
+                            {/* 偏高區 */}
+                            <div className="h-[25%] bg-yellow-500/[0.02] border-b border-yellow-500/5 relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-yellow-400/30 font-mono">
+                                    {getZoneLabel(story.id, 'lean_greed')}
+                                </span>
+                            </div>
+                            {/* 偏低區 */}
+                            <div className="h-[25%] bg-blue-500/[0.02] border-b border-blue-500/5 relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-blue-400/30 font-mono">
+                                    {getZoneLabel(story.id, 'lean_fear')}
+                                </span>
+                                {/* 對稱軸中心線 */}
+                                {yAxisModel.type === 'symmetric' && (
+                                    <span className="absolute left-3 bottom-0 text-[9px] text-neutral-500 font-mono">
+                                        {yAxisModel.center}{story.chart.unit}
+                                    </span>
+                                )}
+                            </div>
+                            {/* 低位區 (恐懼/冷清) */}
+                            <div className="h-[25%] bg-green-500/[0.04] relative">
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-green-400/50 font-mono">
+                                    {getZoneLabel(story.id, 'fear')}
+                                </span>
+                                <span className="absolute left-3 bottom-1 text-[9px] text-neutral-600 font-mono">
+                                    {formatYAxisValue(yBounds.min, story)}
+                                </span>
+                            </div>
                         </div>
-                        {/* 25-50: 偏恐懼 */}
-                        <div className="h-[25%] bg-blue-500/[0.02] border-b border-blue-500/5 relative">
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-blue-400/30 font-mono">
-                                偏恐懼
-                            </span>
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] text-neutral-600 font-mono">
-                                25
-                            </span>
-                        </div>
-                        {/* 0-25: 恐懼區 (綠色 - 更直觀) */}
-                        <div className="h-[25%] bg-green-500/[0.04] relative">
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-green-400/50 font-mono">
-                                恐懼
-                            </span>
-                            <span className="absolute left-3 bottom-1 text-[9px] text-neutral-600 font-mono">
-                                0
-                            </span>
-                        </div>
-                    </div>
+                    )}
 
                     {/* Watermark (MANDATORY per design-tokens) */}
                     <div className={CHART.watermark.className}>
@@ -209,9 +361,11 @@ function ChartHero({ story }: ChartHeroProps) {
                     </div>
 
                     {/* Y-Axis Label (Design Token: CHART.axis) */}
-                    <div className="absolute left-3 top-12" style={{ fontSize: CHART.axis.fontSize, color: CHART.axis.fill }}>
-                        100
-                    </div>
+                    {isFixedAxis && (
+                        <div className="absolute left-3 top-12" style={{ fontSize: CHART.axis.fontSize, color: CHART.axis.fill }}>
+                            100
+                        </div>
+                    )}
 
                     {/* Indicator Line */}
                     <div
@@ -241,7 +395,7 @@ function ChartHero({ story }: ChartHeroProps) {
                                     strokeWidth={CHART.linePrimary.strokeWidth}
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    points={generatePath(chartData, 'value', 100, 0, 100)}
+                                    points={generatePath(chartData, 'value', 100, yBounds.min, yBounds.max)}
                                 />
                             ) : (
                                 <polyline
@@ -274,7 +428,7 @@ function ChartHero({ story }: ChartHeroProps) {
                 {/* 分隔線 + 標籤 */}
                 {/* ═══════════════════════════════════════════════ */}
                 <div className="flex items-center gap-2 px-4 py-1.5 border-t border-white/[0.04]">
-                    <span className="text-[9px] text-neutral-600 font-mono uppercase tracking-wider">BTC Context</span>
+                    <span className="text-[9px] text-neutral-600 font-mono uppercase tracking-wider">比特幣走勢</span>
                     <div className="flex-1 h-px bg-white/[0.04]" />
                 </div>
 
@@ -303,8 +457,8 @@ function ChartHero({ story }: ChartHeroProps) {
                                 setHoverIndex(index);
                             }}
                         >
-                            {/* 情緒區間背景標示 - 只標貪婪(紅)和恐懼(綠) */}
-                            {chartData.length > 0 && (() => {
+                            {/* 情緒區間背景標示 - 只有 FGI 才顯示 */}
+                            {isFixedAxis && chartData.length > 0 && (() => {
                                 // 只標示貪婪 (≥75) 和 恐懼 (≤25)
                                 type ZoneType = 'fear' | 'greed';
                                 const zones: { start: number; end: number; type: ZoneType }[] = [];
@@ -421,17 +575,23 @@ function ChartHero({ story }: ChartHeroProps) {
             <div className="px-1 pt-2">
                 {/* 主要資訊區：數值 + 區間 + 描述 */}
                 <div className="flex items-start gap-4">
-                    {/* 左側：大數字 */}
-                    {story.currentValue !== undefined && (
+                    {/* 左側：大數字（即時數據） */}
+                    {currentValue !== 0 && (
                         <div className="flex flex-col items-center">
                             <span className={cn(
                                 "text-4xl font-mono font-bold tracking-tight",
                                 zoneColors.text
                             )}>
-                                {story.currentValue}
+                                {loading ? '—' : (
+                                    story.chart.valueFormat === 'percent'
+                                        ? `${currentValue.toFixed(3)}%`
+                                        : story.chart.valueFormat === 'ratio'
+                                            ? currentValue.toFixed(2)
+                                            : currentValue.toFixed(story.chart.unit === '' ? 0 : 1)
+                                )}
                             </span>
                             <span className={cn("text-[10px] mt-0.5", COLORS.textTertiary)}>
-                                指數
+                                {loading ? '載入中...' : '即時數據'}
                             </span>
                         </div>
                     )}
@@ -442,7 +602,7 @@ function ChartHero({ story }: ChartHeroProps) {
                             "inline-block text-[11px] px-2.5 py-1 rounded-full font-medium border",
                             zoneColors.bg, zoneColors.text, zoneColors.border
                         )}>
-                            {zoneLabel}
+                            {loading ? '計算中...' : zoneLabel}
                         </span>
                         {story.positionRationale && (
                             <p className={cn("text-sm leading-relaxed", COLORS.textSecondary)}>

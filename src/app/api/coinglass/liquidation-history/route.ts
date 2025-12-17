@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { coinglassV4Request } from '@/lib/coinglass'
+import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 
-// Coinglass Liquidation Aggregated History response
-interface LiquidationHistoryResponse {
-    dataMap?: {
-        longLiquidation?: number[]
-        shortLiquidation?: number[]
-    }
-    dateList?: number[]
-    priceList?: number[]
+// Coinglass V4 Liquidation Aggregated History response
+interface LiquidationHistoryItem {
+    time: number                           // timestamp (seconds or ms)
+    aggregated_long_liquidation_usd: string  // long liq USD
+    aggregated_short_liquidation_usd: string // short liq USD
 }
 
 interface HistoryDataPoint {
     date: number
-    value: number  // Net liquidation (positive = more longs, negative = more shorts)
+    value: number  // Total liquidation in millions
     price: number
     longLiq?: number
     shortLiq?: number
@@ -31,32 +28,52 @@ export async function GET(req: NextRequest) {
     const symbol = searchParams.get('symbol') || 'BTC'
 
     try {
-        const res = await coinglassV4Request<LiquidationHistoryResponse>(
-            '/api/futures/liquidation/aggregated-history',
-            { symbol, interval: 'h4' }
-        )
+        const apiKey = getCoinglassApiKey()
+        if (!apiKey) {
+            return NextResponse.json({ error: 'API Key not configured' }, { status: 500 })
+        }
 
-        if (!res || !res.dateList || res.dateList.length === 0) {
+        // Use correct V4 endpoint: /api/futures/liquidation/aggregated-history
+        const url = `https://open-api-v4.coinglass.com/api/futures/liquidation/aggregated-history?exchange_list=Binance,OKX,Bybit&symbol=${symbol}&interval=1d&limit=365`
+
+        const res = await fetch(url, {
+            headers: {
+                'CG-API-KEY': apiKey,
+                'accept': 'application/json'
+            },
+            next: { revalidate: 3600 }
+        })
+
+        if (!res.ok) {
+            console.error(`Liquidation V4 API error: ${res.status}`)
+            return NextResponse.json({ error: 'Upstream API error' }, { status: 502 })
+        }
+
+        const json = await res.json()
+        if (json.code !== '0' || !json.data || !Array.isArray(json.data)) {
+            console.error('Liquidation V4 API error:', json.msg)
             return NextResponse.json({ error: 'No data available' }, { status: 500 })
         }
 
-        const longLiqs = res.dataMap?.longLiquidation || []
-        const shortLiqs = res.dataMap?.shortLiquidation || []
-
-        const allData: HistoryDataPoint[] = res.dateList.map((time, i) => {
-            const longLiq = longLiqs[i] || 0
-            const shortLiq = shortLiqs[i] || 0
-            // Total liquidation volume (both sides)
+        // Parse data
+        const allData: HistoryDataPoint[] = json.data.map((item: LiquidationHistoryItem) => {
+            const longLiq = parseFloat(item.aggregated_long_liquidation_usd) || 0
+            const shortLiq = parseFloat(item.aggregated_short_liquidation_usd) || 0
             const total = longLiq + shortLiq
+            // Normalize timestamp (V4 may use seconds)
+            const timestamp = item.time < 10000000000 ? item.time * 1000 : item.time
 
             return {
-                date: time,
+                date: timestamp,
                 value: total / 1_000_000,  // Convert to millions
-                price: res.priceList?.[i] || 0,
+                price: 0,
                 longLiq: longLiq / 1_000_000,
                 shortLiq: shortLiq / 1_000_000,
             }
         })
+
+        // Sort by date ascending
+        allData.sort((a, b) => a.date - b.date)
 
         // Filter by range
         const now = Date.now()
@@ -102,3 +119,4 @@ function downsample<T>(arr: T[], n: number): T[] {
     }
     return result
 }
+

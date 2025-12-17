@@ -1,9 +1,16 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
 const CG_BASE = 'https://open-api-v4.coinglass.com'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    const rateLimited = simpleApiRateLimit(req, 'cg-etf-flow', 20, 60)
+    if (rateLimited) return rateLimited
+
+    const { searchParams } = new URL(req.url)
+    const range = searchParams.get('range') || '3M'
+
     try {
         const res = await fetch(`${CG_BASE}/api/etf/bitcoin/flow-history`, {
             headers: { 'CG-API-KEY': CG_API_KEY },
@@ -15,33 +22,44 @@ export async function GET() {
             return NextResponse.json({ error: 'API error' }, { status: 500 })
         }
 
-        // Get last 30 days
-        const recentData = json.data.slice(-30)
+        // Parse all data with proper timestamps
+        const allData = json.data.map((d: any) => ({
+            date: d.timestamp, // Already in milliseconds from Coinglass
+            value: (d.flow_usd || 0) / 1_000_000_000, // Convert to billions for display
+            price: d.price_usd || 0
+        }))
 
-        // Calculate totals
-        const last7Days = recentData.slice(-7)
-        const last30Days = recentData
+        // Filter by range
+        const now = Date.now()
+        const rangeMsMap: Record<string, number> = {
+            '1M': 30 * 24 * 60 * 60 * 1000,
+            '3M': 90 * 24 * 60 * 60 * 1000,
+            '1Y': 365 * 24 * 60 * 60 * 1000,
+        }
+        const rangeMs = rangeMsMap[range] || rangeMsMap['3M']
+        const cutoff = now - rangeMs
 
-        const flow7d = last7Days.reduce((sum: number, d: any) => sum + (d.flow_usd || 0), 0)
-        const flow30d = last30Days.reduce((sum: number, d: any) => sum + (d.flow_usd || 0), 0)
+        const filtered = allData.filter((item: any) => item.date >= cutoff)
+
+        // Calculate sums for display
+        const last7Days = allData.slice(-7)
+        const last30Days = allData.slice(-30)
+        const flow7d = last7Days.reduce((sum: number, d: any) => sum + (d.value * 1_000_000_000), 0)
+        const flow30d = last30Days.reduce((sum: number, d: any) => sum + (d.value * 1_000_000_000), 0)
 
         // Latest day
-        const latest = recentData[recentData.length - 1]
+        const latest = allData[allData.length - 1]
 
         return NextResponse.json({
             latest: {
-                date: new Date(latest.timestamp).toISOString().split('T')[0],
-                flowUsd: latest.flow_usd,
-                priceUsd: latest.price_usd,
-                etfFlows: latest.etf_flows
+                date: new Date(latest.date).toISOString().split('T')[0],
+                flowUsd: latest.value * 1_000_000_000,
+                priceUsd: latest.price,
             },
             flow7d,
             flow30d,
-            history: recentData.map((d: any) => ({
-                date: new Date(d.timestamp).toISOString().split('T')[0],
-                flowUsd: d.flow_usd,
-                priceUsd: d.price_usd
-            }))
+            history: filtered,
+            range,
         })
     } catch (e) {
         console.error('ETF Flow API error:', e)
