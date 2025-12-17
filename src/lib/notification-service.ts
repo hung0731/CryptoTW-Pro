@@ -156,8 +156,8 @@ async function createAlertFlexMessage(event: AlertEvent) {
                         height: "sm",
                         action: {
                             type: "uri",
-                            label: "查看詳細數據",
-                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/markets`
+                            label: "追蹤加密台灣 IG",
+                            uri: "https://www.instagram.com/crypto.tw_"
                         },
                         color: "#1F1AD9"
                     }

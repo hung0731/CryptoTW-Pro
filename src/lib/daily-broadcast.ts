@@ -316,13 +316,14 @@ export function createDailyBroadcastFlex(content: DailyBroadcastContent): FlexMe
                 contents: [
                     {
                         type: 'button',
-                        style: 'secondary',
+                        style: 'secondary', // Keep secondary style for broadcast to be less aggressive? Or primary? User asked for the button. Let's use primary to be consistent. Actually previous was secondary. Let's use primary as it's the only call to action.
                         height: 'sm',
                         action: {
                             type: 'uri',
-                            label: '查看判斷依據',
-                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/prediction`
-                        }
+                            label: '追蹤加密台灣 IG',
+                            uri: 'https://www.instagram.com/crypto.tw_'
+                        },
+                        color: "#1F1AD9"
                     }
                 ]
             }

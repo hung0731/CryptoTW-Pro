@@ -348,9 +348,9 @@ function createMarketStateCard(state: MarketState | null, isPro: boolean) {
                             style: "primary",
                             height: "sm",
                             action: {
-                                type: "message",
-                                label: "了解 Pro 會員",
-                                text: "pro"
+                                type: "uri",
+                                label: "追蹤加密台灣 IG",
+                                uri: "https://www.instagram.com/crypto.tw_"
                             },
                             color: "#1F1AD9"
                         }
@@ -497,8 +497,7 @@ const WELCOME_FLEX_MESSAGE = {
         },
         footer: {
             type: "box",
-            layout: "horizontal",
-            spacing: "sm",
+            layout: "vertical",
             contents: [
                 {
                     type: "button",
@@ -506,21 +505,10 @@ const WELCOME_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "開啟控制台",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/feed`
+                        label: "追蹤加密台灣 IG",
+                        uri: "https://www.instagram.com/crypto.tw_"
                     },
                     color: "#1F1AD9"
-                },
-                {
-                    type: "button",
-                    style: "primary",
-                    height: "sm",
-                    action: {
-                        type: "uri",
-                        label: "連結帳戶",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
-                    },
-                    color: "#000000"
                 }
             ]
         }
@@ -608,7 +596,6 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
         footer: {
             type: "box",
             layout: "vertical",
-            spacing: "sm",
             contents: [
                 {
                     type: "button",
@@ -616,21 +603,10 @@ const JOIN_MEMBER_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "立即加入",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
+                        label: "追蹤加密台灣 IG",
+                        uri: "https://www.instagram.com/crypto.tw_"
                     },
                     color: "#1F1AD9"
-                },
-                {
-                    type: "button",
-                    style: "primary",
-                    height: "sm",
-                    action: {
-                        type: "uri",
-                        label: "了解更多福利",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
-                    },
-                    color: "#000000"
                 }
             ]
         }
@@ -769,7 +745,6 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
         footer: {
             type: "box",
             layout: "vertical",
-            spacing: "sm",
             contents: [
                 {
                     type: "button",
@@ -777,21 +752,10 @@ const PRO_BENEFITS_FLEX_MESSAGE = {
                     height: "sm",
                     action: {
                         type: "uri",
-                        label: "立即加入 Pro",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
+                        label: "追蹤加密台灣 IG",
+                        uri: "https://www.instagram.com/crypto.tw_"
                     },
                     color: "#1F1AD9"
-                },
-                {
-                    type: "button",
-                    style: "primary",
-                    height: "sm",
-                    action: {
-                        type: "uri",
-                        label: "了解更多",
-                        uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/join`
-                    },
-                    color: "#000000"
                 }
             ]
         }
@@ -1199,8 +1163,8 @@ function createPriceCard(data: any) {
                         height: "sm",
                         action: {
                             type: "uri",
-                            label: "📊 查看市場脈絡",
-                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/`
+                            label: "📸 追蹤 Instagram",
+                            uri: "https://www.instagram.com/crypto.tw_"
                         },
                         color: "#1F1AD9"
                     },
@@ -1211,7 +1175,7 @@ function createPriceCard(data: any) {
                         action: {
                             type: "uri",
                             label: "註冊 OKX 交易所",
-                            uri: "https://www.okx.com/join/CRYPTOTW"
+                            uri: "https://www.okx.com/join/CTWPRO"
                         },
                         color: "#000000"
                     }
@@ -1366,14 +1330,19 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                         color: "#111111",
                         margin: "md",
                         wrap: true
-                    }] : []),
+                    } as any] : []),
+                    // Bold the Exchange Name via nested contents
                     ...(headerSub ? [{
                         type: "text",
-                        text: headerSub,
-                        size: "sm", // Changed to sm for better readability (black small text)
-                        color: "#111111", // Black
+                        contents: [
+                            { type: "span", text: "在 " },
+                            { type: "span", text: (isTwdInput ? bestBuyExchange : bestSellExchange), weight: "bold", color: "#000000" },
+                            { type: "span", text: (isTwdInput ? ` 買入 ${amount.toLocaleString()} TWD` : ` 賣出 ${amount.toLocaleString()} USDT`) }
+                        ],
+                        size: "sm",
+                        color: "#555555",
                         margin: "sm"
-                    }] : [])
+                    } as any] : [])
                 ]
             },
             body: {
@@ -1398,8 +1367,8 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                         layout: "horizontal",
                         contents: [
                             { type: "text", text: "MAX", size: "md", color: "#111111", weight: "bold", flex: 2 },
-                            { type: "text", text: `${maxBuyRef}`, size: "sm", color: maxBuyRef === bestBuyPrice ? "#00B900" : "#95D5B2", align: "end", weight: "bold", flex: 1 },
-                            { type: "text", text: `${maxSellRef}`, size: "sm", color: maxSellRef === bestSellPrice ? "#D00000" : "#E5989B", align: "end", weight: "bold", flex: 1 }
+                            { type: "text", text: `${maxBuyRef}`, size: "sm", color: maxBuyRef === bestBuyPrice ? "#00B900" : "#bbbbbb", align: "end", weight: maxBuyRef === bestBuyPrice ? "bold" : "regular", flex: 1 },
+                            { type: "text", text: `${maxSellRef}`, size: "sm", color: maxSellRef === bestSellPrice ? "#D00000" : "#bbbbbb", align: "end", weight: maxSellRef === bestSellPrice ? "bold" : "regular", flex: 1 }
                         ],
                         margin: "md"
                     },
@@ -1409,8 +1378,8 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                         layout: "horizontal",
                         contents: [
                             { type: "text", text: "BitoPro", size: "md", color: "#111111", weight: "bold", flex: 2 },
-                            { type: "text", text: bitoBuyRef !== Infinity ? `${bitoBuyRef}` : '--', size: "sm", color: bitoBuyRef === bestBuyPrice ? "#00B900" : "#95D5B2", align: "end", weight: "bold", flex: 1 },
-                            { type: "text", text: bitoSellRef > 0 ? `${bitoSellRef}` : '--', size: "sm", color: bitoSellRef === bestSellPrice ? "#D00000" : "#E5989B", align: "end", weight: "bold", flex: 1 }
+                            { type: "text", text: bitoBuyRef !== Infinity ? `${bitoBuyRef}` : '--', size: "sm", color: bitoBuyRef === bestBuyPrice ? "#00B900" : "#bbbbbb", align: "end", weight: bitoBuyRef === bestBuyPrice ? "bold" : "regular", flex: 1 },
+                            { type: "text", text: bitoSellRef > 0 ? `${bitoSellRef}` : '--', size: "sm", color: bitoSellRef === bestSellPrice ? "#D00000" : "#bbbbbb", align: "end", weight: bitoSellRef === bestSellPrice ? "bold" : "regular", flex: 1 }
                         ],
                         margin: "sm"
                     },
@@ -1420,8 +1389,8 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                         layout: "horizontal",
                         contents: [
                             { type: "text", text: "HOYA BIT", size: "md", color: "#111111", weight: "bold", flex: 2 },
-                            { type: "text", text: hoyaBuyRef !== Infinity ? `${hoyaBuyRef}` : '--', size: "sm", color: hoyaBuyRef === bestBuyPrice ? "#00B900" : "#95D5B2", align: "end", weight: "bold", flex: 1 },
-                            { type: "text", text: hoyaSellRef > 0 ? `${hoyaSellRef}` : '--', size: "sm", color: hoyaSellRef === bestSellPrice ? "#D00000" : "#E5989B", align: "end", weight: "bold", flex: 1 }
+                            { type: "text", text: hoyaBuyRef !== Infinity ? `${hoyaBuyRef}` : '--', size: "sm", color: hoyaBuyRef === bestBuyPrice ? "#00B900" : "#bbbbbb", align: "end", weight: hoyaBuyRef === bestBuyPrice ? "bold" : "regular", flex: 1 },
+                            { type: "text", text: hoyaSellRef > 0 ? `${hoyaSellRef}` : '--', size: "sm", color: hoyaSellRef === bestSellPrice ? "#D00000" : "#bbbbbb", align: "end", weight: hoyaSellRef === bestSellPrice ? "bold" : "regular", flex: 1 }
                         ],
                         margin: "sm"
                     },
@@ -1440,35 +1409,6 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                 ]
             },
 
-            footer: {
-                type: "box",
-                layout: "vertical",
-                spacing: "sm",
-                contents: [
-                    {
-                        type: "button",
-                        style: "primary",
-                        height: "sm",
-                        action: {
-                            type: "uri",
-                            label: "📊 查看市場脈絡",
-                            uri: `https://liff.line.me/${process.env.NEXT_PUBLIC_LIFF_ID}?path=/`
-                        },
-                        color: "#1F1AD9"
-                    },
-                    {
-                        type: "button",
-                        style: "primary",
-                        height: "sm",
-                        action: {
-                            type: "uri",
-                            label: "註冊 OKX 交易所",
-                            uri: "https://www.okx.com/join/CRYPTOTW"
-                        },
-                        color: "#000000"
-                    }
-                ]
-            }
         }
     }
 }
@@ -1543,28 +1483,10 @@ export async function POST(req: NextRequest) {
                     continue
                 }
 
-                // B4. Pro Benefits Command (Pro 有什麼)
-                if (originalText === 'Pro 有什麼' || originalText === 'pro 有什麼' || originalText === 'Pro有什麼' || originalText === '有什麼' || originalText === 'pro') {
-                    await replyMessage(replyToken, [PRO_BENEFITS_FLEX_MESSAGE])
-                    continue
-                }
 
-                // B5. Daily Broadcast Test (日報)
-                if (originalText === '日報' || originalText === '今日判斷' || originalText === '市場判斷') {
-                    const { generateDailyBroadcast, createDailyBroadcastFlex } = await import('@/lib/daily-broadcast')
-                    const { fetchDailyBroadcastMetrics } = await import('@/lib/daily-broadcast-data')
 
-                    // Fetch real Coinglass data
-                    const realMetrics = await fetchDailyBroadcastMetrics()
 
-                    const content = await generateDailyBroadcast(realMetrics)
-                    // Add BTC price changes
-                    content.btcPriceChange = realMetrics.btcPriceChanges
 
-                    const dailyFlex = createDailyBroadcastFlex(content)
-                    await replyMessage(replyToken, [dailyFlex])
-                    continue
-                }
 
 
 
@@ -1605,26 +1527,45 @@ export async function POST(req: NextRequest) {
 
                     const ticker = await fetchCryptoTicker(coinSymbol)
 
+
                     if (ticker) {
                         const priceCard = createPriceCard(ticker)
 
-                        // v1 僅對 BTC 顯示市場狀態
-                        if (coinSymbol === 'BTC') {
-                            const lineUserId = event.source.userId
-                            const [isPro, marketState] = await Promise.all([
-                                lineUserId ? checkIsProUser(lineUserId) : Promise.resolve(false),
-                                getMarketState('BTC')
-                            ])
-                            const stateCard = createMarketStateCard(marketState, isPro)
-                            await replyMessage(replyToken, [priceCard, stateCard])
+
+                        // Check if we should show the dashboard for this token
+                        // We try to fetch for ALL tokens, but only show if data exists (has Open Interest).
+                        const { getMarketSnapshot } = await import('@/lib/market-aggregator')
+                        const { createMiniAnalysisCard } = await import('@/lib/flex-market-dashboard')
+
+                        // Pass the coin symbol to get specific data
+                        // getMarketSnapshot handles defaults gracefully
+                        const marketData = await getMarketSnapshot(coinSymbol)
+
+                        // Check if we actually have valid Futures data
+                        // If Total Open Interest > 0, it means Coinglass tracks this token's futures.
+                        const hasFuturesData = (marketData.capital_flow?.open_interest_total || 0) > 0
+
+                        if (hasFuturesData) {
+                            const analysisCard = createMiniAnalysisCard(marketData)
+                            await replyMessage(replyToken, [priceCard, analysisCard])
                         } else {
+                            // No futures data (Spot only or unsupported by Coinglass), show Price Card only
                             await replyMessage(replyToken, [priceCard])
                         }
                     } else {
-                        await replyMessage(replyToken, [{
-                            type: "text",
-                            text: `⚠️ 找不到代幣 "${coinSymbol}" 或 OKX 尚未上架。`
-                        }])
+                        // Fallback: Try Stock Ticker (e.g. NVDA, MSTR, COIN)
+                        const { fetchStockTicker, createStockCard } = await import('@/lib/stocks')
+                        const stockData = await fetchStockTicker(coinSymbol)
+
+                        if (stockData) {
+                            const stockCard = createStockCard(stockData)
+                            await replyMessage(replyToken, [stockCard])
+                        } else {
+                            await replyMessage(replyToken, [{
+                                type: "text",
+                                text: `⚠️ 找不到 "${coinSymbol}" 的加密貨幣或美股資訊。`
+                            }])
+                        }
                     }
                     continue
                 }
