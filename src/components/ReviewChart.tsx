@@ -13,6 +13,7 @@ import { formatPercent, formatPrice } from '@/lib/format-helpers'
 
 // Static Data Import
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
+import { SkeletonReviewChart } from '@/components/SkeletonReviewChart'
 
 interface ReviewChartProps {
     type: 'price' | 'flow' | 'oi' | 'supply' | 'fgi' | 'funding' | 'liquidation' | 'longShort' | 'basis' | 'premium' | 'stablecoin';
@@ -164,7 +165,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     }, [type, symbol, eventStart, eventEnd, daysBuffer, reviewSlug, viewMode, focusWindow])
 
     if (loading) {
-        return <Skeleton className="w-full h-full bg-[#0A0A0A] rounded-lg" />
+        return <SkeletonReviewChart />
     }
 
     // Gradient Definitions

@@ -1249,73 +1249,97 @@ async function fetchBitoOrderBook() {
     }
 }
 
-// Fetch Forex Rate (USD/TWD)
-async function fetchForexRate() {
-    try {
-        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD', { next: { revalidate: 3600 } }) // Cache 1h
-        if (!res.ok) return null
-        const data = await res.json()
-        return data.rates.TWD
-    } catch (e) {
-        console.error('Forex API Error:', e)
-        return null
-    }
-}
+// function fetchForexRate() removed as per user request (Hide Bank Rate)
 
 // Create Currency Converter Flex Message
-function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, forexRate: number, calcResult?: string) {
+function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currencyParsed?: { type: 'USD' | 'TWD', amount: number }) {
     // MAX Data (即時掛單)
     const maxBuyRef = parseFloat(maxData.sell) // User Buys (Ask)
     const maxSellRef = parseFloat(maxData.buy) // User Sells (Bid)
 
     // Bito Data (即時掛單)
-    let bitoBuyRef = 0
-    let bitoSellRef = 0
+    let bitoBuyRef = Infinity // Lower is better for buy
+    let bitoSellRef = 0 // Higher is better for sell
     if (bitoData && bitoData.asks && bitoData.bids) {
-        bitoBuyRef = parseFloat(bitoData.asks[0].price) // User Buys (Ask)
-        bitoSellRef = parseFloat(bitoData.bids[0].price) // User Sells (Bid)
+        bitoBuyRef = parseFloat(bitoData.asks[0].price)
+        bitoSellRef = parseFloat(bitoData.bids[0].price)
     }
 
     // Hoyabit Data (快兌)
-    const hoyaBuyRef = hoyaData?.buy || 0
+    // Note: If API fails/returns 0, ignore
+    const hoyaBuyRef = hoyaData?.buy || Infinity
     const hoyaSellRef = hoyaData?.sell || 0
 
-    const premium = ((maxBuyRef - forexRate) / forexRate) * 100
-
-    // ===== 買入成本 / 賣出回收比較 =====
-    // 買入成本較低 = Ask 價格較低
-    // 賣出回收較高 = Bid 價格較高
+    // ===== 買入成本比較 (Ask) - User paying TWD to get USDT =====
+    // We want the Lowest Ask Price
     let bestBuyExchange = 'MAX'
     let bestBuyPrice = maxBuyRef
-    let bestSellExchange = 'MAX'
-    let bestSellPrice = maxSellRef
 
-    // Check Bito
     if (bitoBuyRef > 0 && bitoBuyRef < bestBuyPrice) {
         bestBuyExchange = 'BitoPro'
         bestBuyPrice = bitoBuyRef
     }
-    if (bitoSellRef > 0 && bitoSellRef > bestSellPrice) {
-        bestSellExchange = 'BitoPro'
-        bestSellPrice = bitoSellRef
-    }
-
-    // Check Hoyabit (Only if valid)
     if (hoyaBuyRef > 0 && hoyaBuyRef < bestBuyPrice) {
         bestBuyExchange = 'HOYA BIT'
         bestBuyPrice = hoyaBuyRef
+    }
+
+    // ===== 賣出回收比較 (Bid) - User selling USDT to get TWD =====
+    // We want the Highest Bid Price
+    let bestSellExchange = 'MAX'
+    let bestSellPrice = maxSellRef
+
+    if (bitoSellRef > 0 && bitoSellRef > bestSellPrice) {
+        bestSellExchange = 'BitoPro'
+        bestSellPrice = bitoSellRef
     }
     if (hoyaSellRef > 0 && hoyaSellRef > bestSellPrice) {
         bestSellExchange = 'HOYA BIT'
         bestSellPrice = hoyaSellRef
     }
 
+    // Calculation Logic
+    const amount = currencyParsed?.amount || 1
+    const isTwdInput = currencyParsed?.type === 'TWD'
+
+    // Result Text Calculation
+    // If TWD Input (e.g. 1000):
+    // Buy U: 1000 / Price
+    // Sell U: 1000 * Price (Hypothetical: "If you sold 1000 U")
+    const buyTotal = (amount / bestBuyPrice)
+    const sellTotal = (amount * bestSellPrice)
+
+    const buyTotalStr = isTwdInput
+        ? `${buyTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT`
+        : `${buyTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT` // Default reference
+
+    // If input is 1000 TWD, showing "Sell 1000 USDT" might be confusing, but user asked for "Total Amount".
+    // Let's format nicely.
+    const sellTotalStr = `${Math.round(sellTotal).toLocaleString()} TWD`
+
     // Header Content
-    const headerTitle = calcResult ? "換算結果" : "匯率快訊 (USDT/TWD)"
+    // Use the User's suggestion: Replace generic result with the Best Option for their intent
+    let headerTitle = "匯率快訊 (USDT/TWD)"
+    let headerValue = ""
+    let headerSub = ""
+
+    if (currencyParsed) {
+        if (isTwdInput) {
+            // User wants to Buy U
+            headerTitle = `買入最優 (${bestBuyExchange})`
+            headerValue = `≈ ${buyTotalStr}`
+            headerSub = `使用 ${amount.toLocaleString()} TWD`
+        } else {
+            // User wants to Sell U
+            headerTitle = `賣出最優 (${bestSellExchange})`
+            headerValue = `≈ ${sellTotalStr}`
+            headerSub = `賣出 ${amount.toLocaleString()} USDT`
+        }
+    }
 
     return {
         type: "flex",
-        altText: `TWD Rate: ${bestBuyPrice}`,
+        altText: `最佳匯率: ${bestBuyPrice}`,
         contents: {
             type: "bubble",
             size: "kilo",
@@ -1327,32 +1351,25 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, forexRat
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            {
-                                type: "text",
-                                text: headerTitle,
-                                weight: "bold",
-                                size: "lg",
-                                color: "#1F1AD9",
-                                flex: 1
-                            },
-                            {
-                                type: "text",
-                                text: "加密台灣 Pro",
-                                size: "xxs",
-                                color: "#888888",
-                                align: "end",
-                                gravity: "center"
-                            }
+                            { type: "text", text: headerTitle, weight: "bold", size: "lg", color: "#1F1AD9", flex: 1 },
+                            { type: "text", text: "加密台灣 Pro", size: "xxs", color: "#888888", align: "end", gravity: "center" }
                         ]
                     },
-                    ...(calcResult ? [{
+                    ...(headerValue ? [{
                         type: "text",
-                        text: calcResult,
+                        text: headerValue,
                         weight: "bold",
-                        size: "xl",
+                        size: "xxl", // Make it big
                         color: "#111111",
-                        margin: "sm",
+                        margin: "md",
                         wrap: true
+                    }] : []),
+                    ...(headerSub ? [{
+                        type: "text",
+                        text: headerSub,
+                        size: "xs",
+                        color: "#888888",
+                        margin: "sm"
                     }] : [])
                 ]
             },
@@ -1360,17 +1377,16 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, forexRat
                 type: "box",
                 layout: "vertical",
                 contents: [
-                    // 表頭：買 U / 賣 U
+                    // 表頭
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
-                            { type: "text", text: "即時參考", size: "xs", color: "#888888", flex: 2 },
-                            { type: "text", text: "買 U", size: "xs", color: "#D00000", align: "end", flex: 1 },
-                            { type: "text", text: "賣 U", size: "xs", color: "#00B900", align: "end", flex: 1 }
+                            { type: "text", text: "交易所", size: "xs", color: "#888888", flex: 2 },
+                            { type: "text", text: "買 U (Ask)", size: "xs", color: "#aaaaaa", align: "end", flex: 1 },
+                            { type: "text", text: "賣 U (Bid)", size: "xs", color: "#aaaaaa", align: "end", flex: 1 }
                         ]
                     },
-
                     { type: "separator", margin: "sm", color: "#f0f0f0" },
 
                     // MAX
@@ -1379,78 +1395,48 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, forexRat
                         layout: "horizontal",
                         contents: [
                             { type: "text", text: "MAX", size: "md", color: "#111111", weight: "bold", flex: 2 },
-                            { type: "text", text: `${maxBuyRef}`, size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
-                            { type: "text", text: `${maxSellRef}`, size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
+                            { type: "text", text: `${maxBuyRef}`, size: "sm", color: maxBuyRef === bestBuyPrice ? "#00B900" : "#95D5B2", align: "end", weight: "bold", flex: 1 },
+                            { type: "text", text: `${maxSellRef}`, size: "sm", color: maxSellRef === bestSellPrice ? "#D00000" : "#E5989B", align: "end", weight: "bold", flex: 1 }
                         ],
                         margin: "md"
                     },
-
                     // BitoPro
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
                             { type: "text", text: "BitoPro", size: "md", color: "#111111", weight: "bold", flex: 2 },
-                            { type: "text", text: bitoBuyRef ? `${bitoBuyRef}` : '--', size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
-                            { type: "text", text: bitoSellRef ? `${bitoSellRef}` : '--', size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
+                            { type: "text", text: bitoBuyRef !== Infinity ? `${bitoBuyRef}` : '--', size: "sm", color: bitoBuyRef === bestBuyPrice ? "#00B900" : "#95D5B2", align: "end", weight: "bold", flex: 1 },
+                            { type: "text", text: bitoSellRef > 0 ? `${bitoSellRef}` : '--', size: "sm", color: bitoSellRef === bestSellPrice ? "#D00000" : "#E5989B", align: "end", weight: "bold", flex: 1 }
                         ],
                         margin: "sm"
                     },
-
                     // HOYA BIT
                     {
                         type: "box",
                         layout: "horizontal",
                         contents: [
                             { type: "text", text: "HOYA BIT", size: "md", color: "#111111", weight: "bold", flex: 2 },
-                            { type: "text", text: hoyaBuyRef ? `${hoyaBuyRef}` : '--', size: "sm", color: "#D00000", align: "end", weight: "bold", flex: 1 },
-                            { type: "text", text: hoyaSellRef ? `${hoyaSellRef}` : '--', size: "sm", color: "#00B900", align: "end", weight: "bold", flex: 1 }
+                            { type: "text", text: hoyaBuyRef !== Infinity ? `${hoyaBuyRef}` : '--', size: "sm", color: hoyaBuyRef === bestBuyPrice ? "#00B900" : "#95D5B2", align: "end", weight: "bold", flex: 1 },
+                            { type: "text", text: hoyaSellRef > 0 ? `${hoyaSellRef}` : '--', size: "sm", color: hoyaSellRef === bestSellPrice ? "#D00000" : "#E5989B", align: "end", weight: "bold", flex: 1 }
                         ],
                         margin: "sm"
                     },
 
                     { type: "separator", margin: "md", color: "#f0f0f0" },
 
-                    // 銀行匯率
-                    {
-                        type: "box",
-                        layout: "horizontal",
-                        contents: [
-                            { type: "text", text: "銀行美元（參考）", size: "xs", color: "#aaaaaa", flex: 2 },
-                            { type: "text", text: `${forexRate} TWD`, size: "xs", color: "#aaaaaa", align: "end", flex: 2 }
-                        ],
-                        margin: "md"
-                    },
-
-                    { type: "separator", margin: "md", color: "#f0f0f0" },
-
-                    // 結論
-                    {
-                        type: "text",
-                        text: `買入最優：${bestBuyExchange} (${bestBuyPrice})`,
-                        size: "xs",
-                        color: "#aaaaaa",
-                        margin: "md"
-                    },
-                    {
-                        type: "text",
-                        text: `賣出最優：${bestSellExchange} (${bestSellPrice})`,
-                        size: "xs",
-                        color: "#aaaaaa",
-                        margin: "xs"
-                    },
-
                     // 時間戳記
                     {
                         type: "text",
-                        text: "⏱ 剛剛更新",
+                        text: "⏱ 剛剛更新 (僅供參考)",
                         size: "xxs",
                         color: "#cccccc",
-                        margin: "md"
+                        margin: "lg",
+                        align: "center"
                     }
-                ],
-                paddingTop: "10px"
+                ]
             },
+
             footer: {
                 type: "box",
                 layout: "vertical",
@@ -1586,33 +1572,19 @@ export async function POST(req: NextRequest) {
                 const isRateOnlyQuery = /^[#@$]?(TWD|USD|USDT)$/i.test(text) || originalText === '匯率' || originalText === '匯率查詢'
 
                 if (currencyParsed || isRateOnlyQuery) {
-                    const [maxData, bitoData, hoyaData, forexRate] = await Promise.all([
+                    const [maxData, bitoData, hoyaData] = await Promise.all([
                         fetchMaxTicker(),
                         fetchBitoOrderBook(),
-                        getHoyabitPrices(),
-                        fetchForexRate()
+                        getHoyabitPrices()
                     ])
 
-                    if (maxData && forexRate) {
-                        let calcResult = undefined
-
-                        const maxBuyRef = parseFloat(maxData.sell)
-                        const maxSellRef = parseFloat(maxData.buy)
-
-                        if (currencyParsed) {
-                            // Calculator Logic
-                            if (currencyParsed.type === 'TWD') {
-                                // TWD -> USDT (Buy U at Ask Price)
-                                const result = (currencyParsed.amount / maxBuyRef).toFixed(2)
-                                calcResult = `${currencyParsed.amount.toLocaleString()} TWD\n≈ ${parseFloat(result).toLocaleString()} USDT`
-                            } else {
-                                // USD/USDT -> TWD (Sell U at Bid Price)
-                                const result = (currencyParsed.amount * maxSellRef).toFixed(0)
-                                calcResult = `${currencyParsed.amount.toLocaleString()} USDT\n≈ ${parseInt(result).toLocaleString()} TWD`
-                            }
-                        }
-
-                        const flexMsg = createCurrencyCard(maxData, bitoData, hoyaData, forexRate, calcResult)
+                    if (maxData) {
+                        const flexMsg = createCurrencyCard(
+                            maxData,
+                            bitoData,
+                            hoyaData,
+                            currencyParsed || undefined
+                        )
                         await replyMessage(replyToken, [flexMsg])
                     } else {
                         await replyMessage(replyToken, [{ type: "text", text: "⚠️ 目前無法取得匯率資訊，請稍後再試。" }])

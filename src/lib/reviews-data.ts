@@ -143,11 +143,10 @@ export const REVIEWS_DATA: MarketEvent[] = [
         impactedTokens: ['BTC'],
         impactSummary: 'ETF 通過當日成為短期頂部，BTC 回調 20% 後才開啟主升段。',
 
-        usageGuide: [
-            '當重大利好消息落地，價格卻不漲反跌時',
-            '當市場過度擁擠導致資金費率異常偏高時',
-            '當機構資金流向與價格走勢出現背離時'
-        ],
+        '當重大利好消息落地，價格卻不漲反跌時',
+        '當市場過度擁擠導致資金費率異常偏高時',
+        '當機構資金流向與價格走勢出現背離時',
+        '當 Coinbase Premium 出現持續性正溢價時'
 
         summary: '當比特幣現貨 ETF 獲准上市時，市場真正改變的是「機構資金的長期配置通道」，而不是短期的價格投機波動。',
 
@@ -3357,7 +3356,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         impactedTokens: ['BTC'],
         usageGuide: [
             '當 OI 創新高但價格無法跟進時',
-            '當價格走弱但 OI 不降時'
+            '當價格走弱但 OI 不降時',
+            '當期貨基差 (Basis) 異常飆升至 20% 以上時'
         ],
         summary: 'BTC 創下 $69,000 歷史新高後，OI 維持高位但價格開始走弱，形成典型的頂部分配結構。',
         context: {
@@ -3451,7 +3451,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         impactedTokens: ['BTC', 'ETH', 'stETH'],
         usageGuide: [
             '當 OI 持續下滑配合價格下跌時',
-            '當流動性危機蔓延時'
+            '當流動性危機蔓延時',
+            '當穩定幣市值開始趨勢性下降時'
         ],
         summary: 'Celsius 暫停提款 + 3AC 爆倉，引發市場信任危機，BTC 跌破 $20,000 心理關卡。',
         context: {

@@ -123,10 +123,17 @@ function ChartHero({ story }: ChartHeroProps) {
                 </div>
 
                 {/* Indicator Name - Top Left */}
-                <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-                    <span className={cn("text-xs font-medium", COLORS.textSecondary)}>{story.name}</span>
-                    {loading && (
-                        <span className="text-[9px] text-neutral-600">載入中...</span>
+                <div className="absolute top-3 left-3 z-10 flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2">
+                        <span className={cn("text-xs font-medium", COLORS.textSecondary)}>{story.name}</span>
+                        {loading && (
+                            <span className="text-[9px] text-neutral-600">載入中...</span>
+                        )}
+                    </div>
+                    {!loading && chartData.length > 0 && (
+                        <span className="text-[9px] text-neutral-600 font-mono">
+                            Updated: {new Date(chartData[chartData.length - 1].date).toLocaleDateString('zh-TW')}
+                        </span>
                     )}
                 </div>
 
