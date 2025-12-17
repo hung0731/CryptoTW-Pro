@@ -606,9 +606,9 @@ export function createCurrencyCard(
     const actionText = fromCurrency === 'TWD' ? '買入' : '賣出'
     const inputDisplayReference = fromCurrency === 'TWD'
         ? `${amount.toLocaleString()} TWD`
-        : `${amount.toLocaleString()} USD`
+        : `${amount.toLocaleString()} USDT` // Changed USD to USDT
 
-    const contextText = `在 ${bestExchangeName} ${actionText} ${inputDisplayReference}`
+    // const contextText = `在 ${bestExchangeName} ${actionText} ${inputDisplayReference}` // Removed simple string
 
     const maxBuyRef = maxPrice.toFixed(2)
     const maxSellRef = maxPrice.toFixed(2)
@@ -636,7 +636,7 @@ export function createCurrencyCard(
                         ]
                     }
                 ],
-                paddingBottom: "2px"
+                paddingBottom: "0px"
             },
             body: {
                 type: "box" as const,
@@ -646,7 +646,7 @@ export function createCurrencyCard(
                     {
                         type: "box" as const,
                         layout: "baseline" as const,
-                        margin: "sm",
+                        margin: "xs",
                         contents: [
                             {
                                 type: "text" as const,
@@ -666,13 +666,16 @@ export function createCurrencyCard(
                             }
                         ]
                     },
-                    // Context Subtext
+                    // Context Subtext: "在 [Exchange] Buy/Sell [Input]"
                     {
-                        type: "text" as const,
-                        text: contextText,
-                        size: "md" as const,
-                        color: "#555555",
-                        margin: "md"
+                        type: "box" as const,
+                        layout: "baseline" as const,
+                        margin: "xs",
+                        contents: [
+                            { type: "text" as const, text: "在 ", size: "md" as const, color: "#555555" },
+                            { type: "text" as const, text: bestExchangeName, size: "md" as const, color: "#555555", weight: "bold" as const },
+                            { type: "text" as const, text: ` ${actionText} ${inputDisplayReference}`, size: "md" as const, color: "#555555" }
+                        ]
                     },
                     { type: "separator" as const, margin: "md", color: "#f0f0f0" },
                     // 表頭
@@ -684,7 +687,7 @@ export function createCurrencyCard(
                             { type: "text" as const, text: "買進", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 },
                             { type: "text" as const, text: "賣出", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 }
                         ],
-                        margin: "md"
+                        margin: "sm"
                     },
                     { type: "separator" as const, margin: "sm", color: "#f0f0f0" },
 
@@ -697,7 +700,7 @@ export function createCurrencyCard(
                             { type: "text" as const, text: `${maxBuyRef}`, size: "sm" as const, color: maxBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: maxBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
                             { type: "text" as const, text: `${maxSellRef}`, size: "sm" as const, color: maxSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: maxSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
-                        margin: "sm"
+                        margin: "xs"
                     },
                     // BitoPro
                     {
@@ -708,7 +711,7 @@ export function createCurrencyCard(
                             { type: "text" as const, text: `${bitoBuyRef}`, size: "sm" as const, color: bitoBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: bitoBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
                             { type: "text" as const, text: `${bitoSellRef}`, size: "sm" as const, color: bitoSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: bitoSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
-                        margin: "sm"
+                        margin: "xs"
                     },
                     // HoyaBit
                     {
@@ -719,7 +722,7 @@ export function createCurrencyCard(
                             { type: "text" as const, text: `${hoyaBuyRef}`, size: "sm" as const, color: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
                             { type: "text" as const, text: `${hoyaSellRef}`, size: "sm" as const, color: hoyaSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: hoyaSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
-                        margin: "sm"
+                        margin: "xs"
                     }
                 ]
             },
@@ -751,7 +754,7 @@ export function formatPrice(price: number): string {
 export function createPriceCard(data: any) {
     const isUp = parseFloat(data.priceChangePercent) >= 0
     const color = isUp ? THEME.colors.up : THEME.colors.down
-    const sign = isUp ? "+" : ""
+    const sign = isUp ? "+" : "-"
     const symbol = data.symbol.replace("USDT", "")
     const price = parseFloat(data.lastPrice)
     const high = parseFloat(data.highPrice)
@@ -778,7 +781,7 @@ export function createPriceCard(data: any) {
                         ]
                     }
                 ],
-                paddingBottom: "2px" as const
+                paddingBottom: "0px" as const
             },
             body: {
                 type: "box" as const,
@@ -798,12 +801,12 @@ export function createPriceCard(data: any) {
                             },
                             {
                                 type: "text" as const,
-                                text: ` ${sign}${changePercent.toFixed(2)}%`,
+                                text: `${sign}${changePercent.toFixed(2)}%`,
                                 weight: "bold" as const,
                                 size: "md" as const,
                                 color: color,
                                 flex: 0,
-                                margin: "md" as const
+                                margin: "xs" as const
                             }
                         ]
                     }

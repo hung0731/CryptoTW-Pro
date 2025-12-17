@@ -322,16 +322,17 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
                     ]
                 }
             ],
-            paddingBottom: '10px'
+            paddingBottom: '0px'
         },
         body: {
             type: 'box' as const,
             layout: 'vertical' as const,
+            paddingTop: '0px',
             contents: [
                 {
                     type: 'box' as const,
                     layout: 'vertical' as const,
-                    spacing: 'md',
+                    spacing: 'sm',
                     contents: [
                         // Row 1: Sentiment
                         {
@@ -339,17 +340,9 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
                             layout: 'horizontal' as const,
                             contents: [
                                 { type: 'text' as const, text: '市場情緒', size: 'sm' as const, color: '#555555', flex: 1 },
-                                {
-                                    type: 'box' as const,
-                                    layout: 'baseline' as const,
-                                    contents: [
-                                        { type: 'text' as const, text: `${fgi}`, size: 'lg' as const, weight: 'bold' as const, color: fgiColor, flex: 0 },
-                                        { type: 'text' as const, text: ` ${fgiStatus}`, size: 'xs' as const, color: '#888888', margin: 'sm', flex: 0 }
-                                    ],
-                                    flex: 0
-                                }
-                            ],
-                            justifyContent: 'space-between' as const
+                                { type: 'text' as const, text: `${fgi}`, size: 'sm' as const, weight: 'bold' as const, color: fgiColor, flex: 1, align: "end" as const },
+                                { type: 'text' as const, text: fgiStatus, size: 'xs' as const, color: '#888888', flex: 1, align: "end" as const, gravity: "center" as const }
+                            ]
                         },
                         // Row 2: Funding
                         {
@@ -357,17 +350,9 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
                             layout: 'horizontal' as const,
                             contents: [
                                 { type: 'text' as const, text: '資金費率', size: 'sm' as const, color: '#555555', flex: 1 },
-                                {
-                                    type: 'box' as const,
-                                    layout: 'baseline' as const,
-                                    contents: [
-                                        { type: 'text' as const, text: `${fundingRate.toFixed(4)}%`, size: 'lg' as const, weight: 'bold' as const, color: fundingColor, flex: 0 },
-                                        { type: 'text' as const, text: ` ${fundingStatus}`, size: 'xs' as const, color: '#888888', margin: 'sm', flex: 0 }
-                                    ],
-                                    flex: 0
-                                }
-                            ],
-                            justifyContent: 'space-between' as const
+                                { type: 'text' as const, text: `${fundingRate.toFixed(4)}%`, size: 'sm' as const, weight: 'bold' as const, color: fundingColor, flex: 1, align: "end" as const },
+                                { type: 'text' as const, text: fundingStatus, size: 'xs' as const, color: '#888888', flex: 1, align: "end" as const, gravity: "center" as const }
+                            ]
                         },
                         // Row 3: Long/Short
                         {
@@ -375,17 +360,9 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
                             layout: 'horizontal' as const,
                             contents: [
                                 { type: 'text' as const, text: '多空分佈', size: 'sm' as const, color: '#555555', flex: 1 },
-                                {
-                                    type: 'box' as const,
-                                    layout: 'baseline' as const,
-                                    contents: [
-                                        { type: 'text' as const, text: `${whaleLsr.toFixed(2)}`, size: 'lg' as const, weight: 'bold' as const, color: lsColor, flex: 0 },
-                                        { type: 'text' as const, text: ` ${lsStatus}`, size: 'xs' as const, color: '#888888', margin: 'sm', flex: 0 }
-                                    ],
-                                    flex: 0
-                                }
-                            ],
-                            justifyContent: 'space-between' as const
+                                { type: 'text' as const, text: `${whaleLsr.toFixed(2)}`, size: 'sm' as const, weight: 'bold' as const, color: lsColor, flex: 1, align: "end" as const },
+                                { type: 'text' as const, text: lsStatus, size: 'xs' as const, color: '#888888', flex: 1, align: "end" as const, gravity: "center" as const }
+                            ]
                         }
                     ]
                 },

@@ -36,7 +36,7 @@ export async function fetchStockTicker(symbol: string) {
 export function createStockCard(data: any) {
     const isUp = (data.regularMarketChangePercent || 0) >= 0
     const color = isUp ? "#00B900" : "#D00000"
-    const sign = isUp ? "+" : ""
+    const sign = isUp ? "+" : "-"
 
     // Determine current display price based on market state if desired, 
     // but usually users want "Regular Market" as main, and "Pre/Post" as secondary.
@@ -97,7 +97,7 @@ export function createStockCard(data: any) {
                         margin: "none"
                     }
                 ],
-                paddingBottom: "10px"
+                paddingBottom: "0px"
             },
             body: {
                 type: "box" as const,
@@ -123,7 +123,7 @@ export function createStockCard(data: any) {
                                 color: color,
                                 flex: 0,
                                 weight: "bold" as const,
-                                margin: "md"
+                                margin: "xs"
                             }
                         ]
                     },
@@ -133,10 +133,10 @@ export function createStockCard(data: any) {
                         text: extendedText,
                         size: "xs" as const,
                         color: "#888888",
-                        margin: "sm"
+                        margin: "xs"
                     } as any] : []),
 
-                    { type: "separator" as const, color: "#f0f0f0", margin: "lg" },
+                    { type: "separator" as const, color: "#f0f0f0", margin: "md" },
                     {
                         type: "box" as const,
                         layout: "horizontal" as const,
@@ -144,14 +144,14 @@ export function createStockCard(data: any) {
                             { type: "text" as const, text: "昨收", size: "sm" as const, color: "#555555", flex: 1 },
                             { type: "text" as const, text: `${data.regularMarketPreviousClose}`, size: "sm" as const, color: "#111111", align: "end" as const, flex: 2 }
                         ],
-                        margin: "md"
+                        margin: "xs"
                     },
                     {
                         type: "text" as const,
                         text: `Market State: ${data.marketState}`,
                         size: "xxs" as const,
                         color: "#cccccc",
-                        margin: "md",
+                        margin: "xs",
                         align: "end" as const
                     }
                 ],

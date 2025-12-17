@@ -43,21 +43,18 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
     ] = await Promise.all([
         fetchBtcTicker().catch(() => null),
         fetchBinanceRSI(`${symbol}USDT`, '1h').catch(() => 50), // Default to 50 neutral
-        cachedCoinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 }, CacheTTL.SLOW).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 100 }, CacheTTL.SLOW).catch(() => []),
         cachedCoinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: symbol }, CacheTTL.MEDIUM).catch(() => []),
-        cachedCoinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM).catch(() => []),
-        cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.MEDIUM).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/futures/global-long-short-account-ratio/history', { symbol: `${symbol}USDT`, exchange: 'Binance', interval: '1h', limit: 100 }, CacheTTL.MEDIUM).catch(() => []),
+        cachedCoinglassV4Request<any[]>('/api/futures/top-long-short-account-ratio/history', { symbol: `${symbol}USDT`, exchange: 'Binance', interval: '1h', limit: 100 }, CacheTTL.MEDIUM).catch(() => []),
         cachedCoinglassV4Request<any[]>('/api/futures/open-interest/exchange-list', { symbol: symbol }, CacheTTL.FAST).catch(() => []),
-        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: symbol, exchange: 'Binance', interval: '1h', limit: 1 }, CacheTTL.FAST).catch(() => []),
-        cachedCoinglassV4Request<any>('/api/futures/taker-buy-sell-volume/exchange-list', { symbol: symbol, range: '1h' }, CacheTTL.FAST).catch(() => null),
-        symbol === 'BTC' ? cachedCoinglassV4Request<any[]>('/api/etf/bitcoin/flow-history', { limit: 1 }, CacheTTL.SLOW).catch(() => null) : Promise.resolve(null),
-        symbol === 'BTC' ? cachedCoinglassV4Request<any[]>('/api/coinbase-premium-index', { limit: 1 }, CacheTTL.MEDIUM).catch(() => null) : Promise.resolve(null),
+        cachedCoinglassV4Request<any[]>('/api/futures/liquidation/history', { symbol: `${symbol}USDT`, exchange: 'Binance', interval: '1h', limit: 100 }, CacheTTL.FAST).catch(() => []),
+        cachedCoinglassV4Request<any>('/api/futures/taker-buy-sell-volume/exchange-list', { symbol: `${symbol}USDT`, range: '1h' }, CacheTTL.FAST).catch(() => null),
+        symbol === 'BTC' ? cachedCoinglassV4Request<any[]>('/api/etf/bitcoin/flow-history', { limit: 100 }, CacheTTL.SLOW).catch(() => null) : Promise.resolve(null),
+        symbol === 'BTC' ? cachedCoinglassV4Request<any[]>('/api/coinbase-premium-index', { limit: 100 }, CacheTTL.MEDIUM).catch(() => null) : Promise.resolve(null),
         cachedCoinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}, CacheTTL.FAST).catch(() => null),
         cachedCoinglassV4Request<any[]>('/api/futures/liquidation/coin-list', {}, CacheTTL.FAST).catch(() => null)
     ])
-
-    // Debug logging
-    console.log(`[MarketAggregator] Snapshot for ${symbol}`)
 
     // Calculate aggregated OI
     const totalOI = openInterest?.reduce((sum: number, ex: any) => sum + (ex.openInterest || 0), 0) || 0
@@ -65,18 +62,24 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
     const oiChange4h = openInterest?.[0]?.open_interest_change_percent_4h || 0
     const oiChange24h = openInterest?.[0]?.open_interest_change_percent_24h || 0
 
+    // Helper to get latest item (API returns ascending history)
+    const getLatest = (arr: any[] | null) => arr && arr.length > 0 ? arr[arr.length - 1] : null;
+
     // Consolidate Data
+    const latestFGI = getLatest(fearGreed);
+    const latestFunding = fundingRates?.[0]?.stablecoin_margin_list?.[0]; // Exchange list is not history, [0] is fine (Binance)
+    const latestGlobalLS = getLatest(globalLongShort);
+    const latestTopLS = getLatest(topLongShort);
+    const latestLiq = getLatest(liquidations);
+    const latestEtf = getLatest(etfFlows);
+    const latestCb = getLatest(coinbasePremium);
+
     return {
         timestamp: new Date().toISOString(),
         symbol: symbol,
         btc: ticker || { price: 0, change_24h: 0, high_24h: 0, low_24h: 0, volume_24h: 0 },
 
         // 價格動能 (from CoinGecko + Binance RSI)
-        // Note: btcPrice variable name is legacy, but here it's still BTC ticker. 
-        // For other coins, we trust the caller to have price from createPriceCard logic, 
-        // OR we should fetch ticker for this symbol?
-        // Let's stick to returning what we have. 
-        // RSI is correct for the symbol.
         technical: {
             rsi_1h: rsi,
             rsi_status: rsi > 70 ? '超買' : rsi < 30 ? '超賣' : '中性',
@@ -84,37 +87,37 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
 
         // 市場情緒 (from Coinglass) - MARKET WIDE
         sentiment: {
-            fear_greed_index: fearGreed?.[0]?.value,
-            fear_greed_label: fearGreed?.[0]?.value >= 75 ? '極度貪婪' :
-                fearGreed?.[0]?.value >= 55 ? '貪婪' :
-                    fearGreed?.[0]?.value >= 45 ? '中性' :
-                        fearGreed?.[0]?.value >= 25 ? '恐懼' : '極度恐懼',
+            fear_greed_index: latestFGI?.value, // Note: FGI uses 'value' (V4 confirmed in log)
+            fear_greed_label: latestFGI?.value >= 75 ? '極度貪婪' :
+                latestFGI?.value >= 55 ? '貪婪' :
+                    latestFGI?.value >= 45 ? '中性' :
+                        latestFGI?.value >= 25 ? '恐懼' : '極度恐懼',
         },
 
         // 資金熱度 & 趨勢 (from Coinglass V4)
         capital_flow: {
-            funding_rate: fundingRates?.[0]?.stablecoin_margin_list?.[0]?.funding_rate,
-            funding_rate_exchange: fundingRates?.[0]?.stablecoin_margin_list?.[0]?.exchange,
+            funding_rate: latestFunding?.funding_rate,
+            funding_rate_exchange: latestFunding?.exchange,
             open_interest_total: totalOI,
             oi_change_1h: oiChange1h,
             oi_change_4h: oiChange4h,
             oi_change_24h: oiChange24h,
-            trend_signal: (oiChange1h > 0) ? '持倉增加' : '持倉減少' // Simplified as we don't have this symbol's price change easily here without refetching
+            trend_signal: (oiChange1h > 0) ? '持倉增加' : '持倉減少'
         },
 
         // 多空比 (from Coinglass V4)
         long_short: {
-            global_ratio: globalLongShort?.[0]?.longShortRatio,
-            global_long_rate: globalLongShort?.[0]?.longRate,
-            whale_ratio: topLongShort?.[0]?.longShortRatio,
-            whale_long_rate: topLongShort?.[0]?.longRate,
+            global_ratio: latestGlobalLS?.global_account_long_short_ratio,
+            global_long_rate: latestGlobalLS?.global_account_long_percent,
+            whale_ratio: latestTopLS?.top_account_long_short_ratio, // Guessing snake_case based on global
+            whale_long_rate: latestTopLS?.top_account_long_percent,
         },
 
         // 爆倉數據 (from Coinglass V4)
         liquidations: {
-            long_liquidated: liquidations?.[0]?.longLiquidationUsd,
-            short_liquidated: liquidations?.[0]?.shortLiquidationUsd,
-            total_liquidated: (liquidations?.[0]?.longLiquidationUsd || 0) + (liquidations?.[0]?.shortLiquidationUsd || 0),
+            long_liquidated: latestLiq?.long_liquidation_usd,
+            short_liquidated: latestLiq?.short_liquidation_usd,
+            total_liquidated: (latestLiq?.long_liquidation_usd || 0) + (latestLiq?.short_liquidation_usd || 0),
         },
 
         // 主動買賣比 (NEW) - data is object, not array
@@ -128,10 +131,10 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
 
         // BTC ETF 資金流 (NEW)
         etf: {
-            daily_flow_usd: etfFlows?.[0]?.flow_usd,
-            price_usd: etfFlows?.[0]?.price_usd,
-            flow_direction: (etfFlows?.[0]?.flow_usd || 0) > 0 ? '淨流入' : (etfFlows?.[0]?.flow_usd || 0) < 0 ? '淨流出' : '持平',
-            has_data: !!etfFlows?.[0],
+            daily_flow_usd: latestEtf?.flow_usd,
+            price_usd: latestEtf?.price_usd,
+            flow_direction: (latestEtf?.flow_usd || 0) > 0 ? '淨流入' : (latestEtf?.flow_usd || 0) < 0 ? '淨流出' : '持平',
+            has_data: !!latestEtf,
         },
 
         // Coinbase 溢價 (NEW)
