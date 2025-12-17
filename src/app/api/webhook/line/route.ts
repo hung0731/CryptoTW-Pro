@@ -1318,22 +1318,25 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
     const sellTotalStr = `${Math.round(sellTotal).toLocaleString()} TWD`
 
     // Header Content
-    // Use the User's suggestion: Replace generic result with the Best Option for their intent
+    // Header Title -> "換算結果" (Fixed)
+    // Header Sub -> "在 [Exchange] 買入/賣出 [Amount] [Currency]" (Black small text)
+
     let headerTitle = "匯率快訊 (USDT/TWD)"
     let headerValue = ""
     let headerSub = ""
 
     if (currencyParsed) {
+        headerTitle = "換算結果"
         if (isTwdInput) {
-            // User wants to Buy U
-            headerTitle = `買入最優 (${bestBuyExchange})`
-            headerValue = `≈ ${buyTotalStr}`
-            headerSub = `使用 ${amount.toLocaleString()} TWD`
+            // User wants to Buy U (Input TWD)
+            // e.g. "在 HOYA BIT 買入 1,000 TWD"
+            headerValue = `${buyTotalStr}`
+            headerSub = `在 ${bestBuyExchange} 買入 ${amount.toLocaleString()} TWD`
         } else {
-            // User wants to Sell U
-            headerTitle = `賣出最優 (${bestSellExchange})`
-            headerValue = `≈ ${sellTotalStr}`
-            headerSub = `賣出 ${amount.toLocaleString()} USDT`
+            // User wants to Sell U (Input USDT)
+            // e.g. "在 MAX 賣出 500 USDT"
+            headerValue = `${sellTotalStr}`
+            headerSub = `在 ${bestSellExchange} 賣出 ${amount.toLocaleString()} USDT`
         }
     }
 
@@ -1359,7 +1362,7 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                         type: "text",
                         text: headerValue,
                         weight: "bold",
-                        size: "xxl", // Make it big
+                        size: "xxl",
                         color: "#111111",
                         margin: "md",
                         wrap: true
@@ -1367,8 +1370,8 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                     ...(headerSub ? [{
                         type: "text",
                         text: headerSub,
-                        size: "xs",
-                        color: "#888888",
+                        size: "sm", // Changed to sm for better readability (black small text)
+                        color: "#111111", // Black
                         margin: "sm"
                     }] : [])
                 ]
@@ -1428,7 +1431,7 @@ function createCurrencyCard(maxData: any, bitoData: any, hoyaData: any, currency
                     // 時間戳記
                     {
                         type: "text",
-                        text: "⏱ 剛剛更新 (僅供參考)",
+                        text: `更新時間：${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}`,
                         size: "xxs",
                         color: "#cccccc",
                         margin: "lg",
