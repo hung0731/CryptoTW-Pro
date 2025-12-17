@@ -21,14 +21,10 @@ export async function verifyAdmin(): Promise<{ id: string; email: string } | nul
             return null
         }
 
-        // Email Whitelist Check - only use server-side env var
-        const allowedEmails = (process.env.ADMIN_EMAILS || '')
-            .split(',')
-            .map(e => e.trim())
-            .filter(Boolean)
-
-        // If whitelist is configured, check it
-        if (allowedEmails.length > 0 && !allowedEmails.includes(user.email)) {
+        // Check for admin role in app_metadata (secure) or user_metadata
+        // This matches the logic in middleware.ts
+        const role = user.app_metadata?.role || user.user_metadata?.role || 'user'
+        if (role !== 'admin' && role !== 'super_admin') {
             return null
         }
 

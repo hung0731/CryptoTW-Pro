@@ -95,29 +95,37 @@ export function createStockCard(data: any) {
                         size: "xs" as const,
                         color: "#666666",
                         margin: "none"
-                    },
+                    }
+                ],
+                paddingBottom: "10px"
+            },
+            body: {
+                type: "box" as const,
+                layout: "vertical" as const,
+                contents: [
+                    // Big Price in Body
                     {
                         type: "box" as const,
-                        layout: "horizontal" as const,
+                        layout: "baseline" as const,
                         contents: [
                             {
                                 type: "text" as const,
                                 text: `${price?.toFixed(2)}`,
                                 weight: "bold" as const,
-                                size: "xl" as const,
-                                color: "#111111"
+                                size: "xxl" as const,
+                                color: "#111111",
+                                flex: 0
                             },
                             {
                                 type: "text" as const,
                                 text: `${sign}${changePercent.toFixed(2)}%`,
                                 size: "sm" as const,
                                 color: color,
-                                align: "end" as const,
+                                flex: 0,
                                 weight: "bold" as const,
-                                gravity: "center" as const
+                                margin: "md"
                             }
-                        ],
-                        margin: "md"
+                        ]
                     },
                     // Extended Hours
                     ...(extendedText ? [{
@@ -126,15 +134,9 @@ export function createStockCard(data: any) {
                         size: "xs" as const,
                         color: "#888888",
                         margin: "sm"
-                    } as any] : [])
-                ],
-                paddingBottom: "10px"
-            },
-            body: {
-                type: "box" as const,
-                layout: "vertical" as const,
-                contents: [
-                    { type: "separator" as const, color: "#f0f0f0" },
+                    } as any] : []),
+
+                    { type: "separator" as const, color: "#f0f0f0", margin: "lg" },
                     {
                         type: "box" as const,
                         layout: "horizontal" as const,
@@ -153,7 +155,7 @@ export function createStockCard(data: any) {
                         align: "end" as const
                     }
                 ],
-                paddingTop: "10px"
+                paddingTop: "0px"
             },
             footer: {
                 type: "box" as const,

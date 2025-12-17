@@ -86,7 +86,7 @@ export function createMarketStateCard(state: MarketState | null, isPro: boolean)
             contents: {
                 type: "bubble" as const,
                 size: "kilo" as const,
-                body: {
+                header: {
                     type: "box" as const,
                     layout: "vertical" as const,
                     contents: [
@@ -97,7 +97,14 @@ export function createMarketStateCard(state: MarketState | null, isPro: boolean)
                                 { type: "text" as const, text: "交易市場狀態", weight: "bold" as const, size: "lg" as const, color: "#1F1AD9", flex: 1 },
                                 createProLabel()
                             ]
-                        },
+                        }
+                    ],
+                    paddingBottom: "10px"
+                },
+                body: {
+                    type: "box" as const,
+                    layout: "vertical" as const,
+                    contents: [
                         { type: "separator" as const, margin: "lg", color: "#f0f0f0" },
                         {
                             type: "box" as const,
@@ -148,7 +155,7 @@ export function createMarketStateCard(state: MarketState | null, isPro: boolean)
             contents: {
                 type: "bubble" as const,
                 size: "kilo" as const,
-                body: {
+                header: {
                     type: "box" as const,
                     layout: "vertical" as const,
                     contents: [
@@ -159,7 +166,14 @@ export function createMarketStateCard(state: MarketState | null, isPro: boolean)
                                 { type: "text" as const, text: "交易市場狀態", weight: "bold" as const, size: "lg" as const, color: "#1F1AD9", flex: 1 },
                                 createProLabel()
                             ]
-                        },
+                        }
+                    ],
+                    paddingBottom: "10px"
+                },
+                body: {
+                    type: "box" as const,
+                    layout: "vertical" as const,
+                    contents: [
                         { type: "separator" as const, margin: "lg", color: "#f0f0f0" },
                         { type: "text" as const, text: "暫時無法取得數據", size: "sm" as const, color: "#888888", margin: "md" }
                     ]
@@ -180,7 +194,7 @@ export function createMarketStateCard(state: MarketState | null, isPro: boolean)
         contents: {
             type: "bubble" as const,
             size: "kilo" as const,
-            body: {
+            header: {
                 type: "box" as const,
                 layout: "vertical" as const,
                 contents: [
@@ -191,7 +205,14 @@ export function createMarketStateCard(state: MarketState | null, isPro: boolean)
                             { type: "text" as const, text: "交易市場狀態", weight: "bold" as const, size: "lg" as const, color: "#1F1AD9", flex: 1 },
                             createProLabel()
                         ]
-                    },
+                    }
+                ],
+                paddingBottom: "10px"
+            },
+            body: {
+                type: "box" as const,
+                layout: "vertical" as const,
+                contents: [
                     { type: "separator" as const, margin: "lg", color: "#f0f0f0" },
                     {
                         type: "box" as const,
@@ -242,20 +263,26 @@ export const WELCOME_FLEX_MESSAGE = {
     contents: {
         type: "bubble" as const,
         size: "kilo" as const,
+        header: {
+            type: "box" as const,
+            layout: "vertical" as const,
+            contents: [
+                {
+                    type: "box" as const,
+                    layout: "horizontal" as const,
+                    contents: [
+                        { type: "text" as const, text: "歡迎使用 Pro", weight: "bold" as const, size: "lg" as const, color: "#1F1AD9", flex: 1 },
+                        createProLabel()
+                    ]
+                }
+            ],
+            paddingBottom: "10px"
+        },
         body: {
             type: "box" as const,
             layout: "vertical" as const,
             spacing: "md",
             contents: [
-                // Header / Intro
-                {
-                    type: "text" as const,
-                    text: "Hi 歡迎使用加密台灣 Pro ,",
-                    weight: "bold" as const,
-                    size: "lg" as const,
-                    color: "#1F1AD9",
-                    wrap: true
-                },
                 {
                     type: "text" as const,
                     text: "歡迎使用以下工具，助你交易更順利！",
@@ -273,7 +300,7 @@ export const WELCOME_FLEX_MESSAGE = {
                     margin: "lg",
                     spacing: "sm",
                     contents: [
-                        { type: "text" as const, text: "💱 查詢可以換多少？", size: "sm" as const, color: "#111111", weight: "bold" as const },
+                        { type: "text" as const, text: "匯率換算", size: "sm" as const, color: "#111111", weight: "bold" as const },
                         {
                             type: "box" as const,
                             layout: "horizontal" as const,
@@ -283,21 +310,19 @@ export const WELCOME_FLEX_MESSAGE = {
                                     type: "button" as const,
                                     action: { type: "message" as const, label: "3000 台幣", text: "3000 台幣" },
                                     style: "secondary" as const,
-                                    color: ACTION_COLOR_PURPLE,
                                     height: "sm" as const
                                 },
                                 {
                                     type: "button" as const,
                                     action: { type: "message" as const, label: "美金 500", text: "美金 500" },
                                     style: "secondary" as const,
-                                    color: ACTION_COLOR_PURPLE,
                                     height: "sm" as const
                                 }
                             ]
                         },
                         {
                             type: "button" as const,
-                            action: { type: "message" as const, label: "查詢 USDT 匯率？", text: "USDT" },
+                            action: { type: "message" as const, label: "查詢 USDT / TWD", text: "USDT" },
                             style: "link" as const,
                             color: "#888888",
                             height: "sm" as const,
@@ -313,7 +338,7 @@ export const WELCOME_FLEX_MESSAGE = {
                     margin: "md",
                     spacing: "sm",
                     contents: [
-                        { type: "text" as const, text: "📈 想查幣價 / 美股？", size: "sm" as const, color: "#111111", weight: "bold" as const },
+                        { type: "text" as const, text: "幣價 / 美股查詢", size: "sm" as const, color: "#111111", weight: "bold" as const },
                         {
                             type: "box" as const,
                             layout: "horizontal" as const,
@@ -344,7 +369,7 @@ export const WELCOME_FLEX_MESSAGE = {
                 { type: "separator" as const, color: "#f0f0f0", margin: "lg" as const },
                 {
                     type: "text" as const,
-                    text: "🔥 不如馬上試試看吧！",
+                    text: "立即輸入指令試試看！",
                     size: "xs" as const,
                     color: "#aaaaaa",
                     align: "center" as const,
@@ -362,7 +387,7 @@ export const JOIN_MEMBER_FLEX_MESSAGE = {
     contents: {
         type: "bubble" as const,
         size: "kilo" as const,
-        body: {
+        header: {
             type: "box" as const,
             layout: "vertical" as const,
             contents: [
@@ -370,17 +395,17 @@ export const JOIN_MEMBER_FLEX_MESSAGE = {
                     type: "box" as const,
                     layout: "horizontal" as const,
                     contents: [
-                        {
-                            type: "text" as const,
-                            text: "🎉 加入會員",
-                            weight: "bold" as const,
-                            size: "lg" as const,
-                            color: "#1F1AD9",
-                            flex: 1
-                        },
+                        { type: "text" as const, text: "加入會員", weight: "bold" as const, size: "lg" as const, color: "#1F1AD9", flex: 1 },
                         createProLabel()
                     ]
-                },
+                }
+            ],
+            paddingBottom: "10px"
+        },
+        body: {
+            type: "box" as const,
+            layout: "vertical" as const,
+            contents: [
                 {
                     type: "separator" as const,
                     margin: "lg",
@@ -394,19 +419,19 @@ export const JOIN_MEMBER_FLEX_MESSAGE = {
                     contents: [
                         {
                             type: "text" as const,
-                            text: "📝 Step 1. 透過推薦碼註冊交易所",
+                            text: "1. 透過推薦碼註冊交易所",
                             size: "sm" as const,
                             color: "#333333"
                         },
                         {
                             type: "text" as const,
-                            text: "🔗 Step 2. 綁定交易所 UID",
+                            text: "2. 綁定交易所 UID",
                             size: "sm" as const,
                             color: "#333333"
                         },
                         {
                             type: "text" as const,
-                            text: "✅ Step 3. 等待審核 (24H 內)",
+                            text: "3. 等待審核 (24H 內)",
                             size: "sm" as const,
                             color: "#333333"
                         }
@@ -419,7 +444,7 @@ export const JOIN_MEMBER_FLEX_MESSAGE = {
                 },
                 {
                     type: "text" as const,
-                    text: "✨ 會員福利：即時信號、獨家分析、大客戶社群",
+                    text: "會員福利：即時信號、獨家分析、大客戶社群",
                     size: "xs" as const,
                     color: "#888888",
                     margin: "lg",
@@ -437,7 +462,7 @@ export const PRO_BENEFITS_FLEX_MESSAGE = {
     contents: {
         type: "bubble" as const,
         size: "mega" as const,
-        body: {
+        header: {
             type: "box" as const,
             layout: "vertical" as const,
             contents: [
@@ -445,17 +470,17 @@ export const PRO_BENEFITS_FLEX_MESSAGE = {
                     type: "box" as const,
                     layout: "horizontal" as const,
                     contents: [
-                        {
-                            type: "text" as const,
-                            text: "⭐ Pro 能幫你做什麼",
-                            weight: "bold" as const,
-                            size: "lg" as const,
-                            color: "#1F1AD9",
-                            flex: 1
-                        },
+                        { type: "text" as const, text: "Pro 能幫你做什麼", weight: "bold" as const, size: "lg" as const, color: "#1F1AD9", flex: 1 },
                         createProLabel()
                     ]
-                },
+                }
+            ],
+            paddingBottom: "10px"
+        },
+        body: {
+            type: "box" as const,
+            layout: "vertical" as const,
+            contents: [
                 {
                     type: "separator" as const,
                     margin: "lg",
@@ -472,7 +497,7 @@ export const PRO_BENEFITS_FLEX_MESSAGE = {
                             type: "box" as const,
                             layout: "horizontal" as const,
                             contents: [
-                                { type: "text" as const, text: "1️⃣", size: "lg" as const, flex: 0 },
+                                { type: "text" as const, text: "•", size: "lg" as const, flex: 0, color: "#1F1AD9" },
                                 {
                                     type: "box" as const,
                                     layout: "vertical" as const,
@@ -490,7 +515,7 @@ export const PRO_BENEFITS_FLEX_MESSAGE = {
                             type: "box" as const,
                             layout: "horizontal" as const,
                             contents: [
-                                { type: "text" as const, text: "2️⃣", size: "lg" as const, flex: 0 },
+                                { type: "text" as const, text: "•", size: "lg" as const, flex: 0, color: "#1F1AD9" },
                                 {
                                     type: "box" as const,
                                     layout: "vertical" as const,
@@ -508,7 +533,7 @@ export const PRO_BENEFITS_FLEX_MESSAGE = {
                             type: "box" as const,
                             layout: "horizontal" as const,
                             contents: [
-                                { type: "text" as const, text: "3️⃣", size: "lg" as const, flex: 0 },
+                                { type: "text" as const, text: "•", size: "lg" as const, flex: 0, color: "#1F1AD9" },
                                 {
                                     type: "box" as const,
                                     layout: "vertical" as const,
@@ -543,16 +568,47 @@ export function createCurrencyCard(
     bitoPrice: number,
     hoyaPrice: number | null
 ) {
-    // 匯率比較邏輯 (保持原樣)
+    // 匯率比較邏輯
     const bestBuyPrice = Math.min(maxPrice, bitoPrice, hoyaPrice ?? Infinity)
     const bestSellPrice = Math.max(maxPrice, bitoPrice, hoyaPrice ?? -Infinity)
 
+    // Calculate Result
     const usdtAmount = fromCurrency === 'TWD' ? amount / bestBuyPrice : amount
     const twdAmount = fromCurrency === 'USD' ? amount * bestSellPrice : amount
 
-    const headerTitle = fromCurrency === 'TWD' ? '台幣換算' : '美金換算'
-    const headerAmount = fromCurrency === 'TWD' ? amount.toLocaleString() : amount.toLocaleString()
-    const headerUnit = fromCurrency === 'TWD' ? 'TWD' : 'USD'
+    // Determine Best Exchange Name
+    let bestExchangeName = 'MAX'
+    if (fromCurrency === 'TWD') {
+        // Buying USDT (Ask Price)
+        if (bitoPrice === bestBuyPrice) bestExchangeName = 'BitoPro'
+        if (hoyaPrice === bestBuyPrice) bestExchangeName = 'HoyaBit'
+        if (maxPrice === bestBuyPrice) bestExchangeName = 'MAX'
+    } else {
+        // Selling USDT (Bid Price)
+        if (bitoPrice === bestSellPrice) bestExchangeName = 'BitoPro'
+        if (hoyaPrice === bestSellPrice) bestExchangeName = 'HoyaBit'
+        if (maxPrice === bestSellPrice) bestExchangeName = 'MAX'
+    }
+
+    // Display Logic: Result is King
+    const headerTitle = "換算結果"
+    // If input TWD -> Result is USDT. If input USD -> Result is TWD.
+    const resultAmount = fromCurrency === 'TWD' ? usdtAmount : twdAmount
+    const resultUnit = fromCurrency === 'TWD' ? 'USDT' : 'TWD'
+    const resultColor = "#111111"
+
+    // Format Big Number
+    const bigNumberText = fromCurrency === 'TWD'
+        ? resultAmount.toFixed(2)
+        : Math.round(resultAmount).toLocaleString()
+
+    // Context Subtext: "At [Exchange] Buy/Sell [Input]"
+    const actionText = fromCurrency === 'TWD' ? '買入' : '賣出'
+    const inputDisplayReference = fromCurrency === 'TWD'
+        ? `${amount.toLocaleString()} TWD`
+        : `${amount.toLocaleString()} USD`
+
+    const contextText = `在 ${bestExchangeName} ${actionText} ${inputDisplayReference}`
 
     const maxBuyRef = maxPrice.toFixed(2)
     const maxSellRef = maxPrice.toFixed(2)
@@ -578,62 +634,55 @@ export function createCurrencyCard(
                             { type: "text" as const, text: headerTitle, weight: "bold" as const, size: "lg" as const, color: "#1F1AD9", flex: 1 },
                             createProLabel()
                         ]
-                    },
-                    ...(headerAmount ? [{
+                    }
+                ],
+                paddingBottom: "10px"
+            },
+            body: {
+                type: "box" as const,
+                layout: "vertical" as const,
+                contents: [
+                    // Big Result Number
+                    {
                         type: "box" as const,
                         layout: "baseline" as const,
                         margin: "md",
                         contents: [
                             {
                                 type: "text" as const,
-                                text: headerAmount,
+                                text: bigNumberText,
                                 weight: "bold" as const,
                                 size: "xxl" as const,
-                                color: "#111111",
+                                color: resultColor,
                                 flex: 0
                             },
                             {
                                 type: "text" as const,
-                                text: ` ${headerUnit}`,
+                                text: ` ${resultUnit}`,
                                 weight: "bold" as const,
                                 size: "sm" as const,
                                 color: "#111111",
                                 flex: 0
                             }
                         ]
-                    }] : []),
-                    ...(usdtAmount > 0 && fromCurrency === 'TWD' ? [{
-                        type: "box" as const,
-                        layout: "horizontal" as const,
-                        contents: [
-                            { type: "text" as const, text: "約", size: "sm" as const, color: "#555555" },
-                            { type: "text" as const, text: `${usdtAmount.toFixed(2)} USDT`, size: "md" as const, color: "#111111", weight: "bold" as const, margin: "sm" }
-                        ],
+                    },
+                    // Context Subtext
+                    {
+                        type: "text" as const,
+                        text: contextText,
+                        size: "md" as const,
+                        color: "#555555",
                         margin: "md"
-                    }] : []),
-                    ...(twdAmount > 0 && fromCurrency === 'USD' ? [{
-                        type: "box" as const,
-                        layout: "horizontal" as const,
-                        contents: [
-                            { type: "text" as const, text: "約", size: "sm" as const, color: "#555555" },
-                            { type: "text" as const, text: `${twdAmount.toLocaleString()} TWD`, size: "md" as const, color: "#111111", weight: "bold" as const, margin: "sm" }
-                        ],
-                        margin: "md"
-                    }] : [])
-                ]
-            },
-            body: {
-                type: "box" as const,
-                layout: "vertical" as const,
-                contents: [
+                    },
+                    { type: "separator" as const, margin: "lg", color: "#f0f0f0" },
                     // 表頭
                     {
                         type: "box" as const,
                         layout: "horizontal" as const,
                         contents: [
                             { type: "text" as const, text: "交易所", size: "xs" as const, color: "#888888", flex: 2 },
-                            { type: "text" as const, text: "買入", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 },
-                            { type: "text" as const, text: "賣出", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 }
+                            { type: "text" as const, text: "買 U (Ask)", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 },
+                            { type: "text" as const, text: "賣 U (Bid)", size: "xs" as const, color: "#aaaaaa", align: "end" as const, flex: 1 }
                         ]
                     },
                     { type: "separator" as const, margin: "sm", color: "#f0f0f0" },
@@ -723,17 +772,23 @@ export function createPriceCard(data: any) {
                             { type: "text" as const, text: `${symbol} 即時報價`, weight: "bold" as const, size: "lg" as const, color: THEME.colors.brand, flex: 1 },
                             createProLabel()
                         ]
-                    },
+                    }
+                ],
+                paddingBottom: "10px" as const
+            },
+            body: {
+                type: "box" as const,
+                layout: "vertical" as const,
+                contents: [
                     {
                         type: "box" as const,
                         layout: "baseline" as const,
-                        margin: "md" as const,
                         contents: [
                             {
                                 type: "text" as const,
                                 text: `${formatPrice(price)}`,
                                 weight: "bold" as const,
-                                size: "5xl" as const, // Requested "Large like currency", 5xl is biggest
+                                size: "xxl" as const,
                                 color: "#111111",
                                 flex: 0
                             },
@@ -748,14 +803,7 @@ export function createPriceCard(data: any) {
                             }
                         ]
                     }
-                ],
-                paddingBottom: "10px" as const
-            },
-            // Body is empty intentionally, to be filled by merge or left empty
-            body: {
-                type: "box" as const,
-                layout: "vertical" as const,
-                contents: []
+                ]
             },
             footer: createSharedFooter(),
             styles: {

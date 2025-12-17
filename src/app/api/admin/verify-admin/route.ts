@@ -14,13 +14,9 @@ export async function GET() {
             return NextResponse.json({ isAdmin: false }, { status: 401 })
         }
 
-        // Use server-side only env var (not NEXT_PUBLIC_)
-        const allowedEmails = (process.env.ADMIN_EMAILS || '')
-            .split(',')
-            .map(e => e.trim())
-            .filter(Boolean)
-
-        const isAdmin = allowedEmails.length === 0 || allowedEmails.includes(user.email)
+        // Check for admin role
+        const role = user.app_metadata?.role || user.user_metadata?.role || 'user'
+        const isAdmin = role === 'admin' || role === 'super_admin'
 
         return NextResponse.json({ isAdmin })
     } catch (error) {

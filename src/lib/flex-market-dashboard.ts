@@ -47,7 +47,8 @@ export function createMarketDashboardFlex(data: any): FlexMessage {
 
     // 3. Market Heat
     const fundingRate = (data.capital_flow?.funding_rate || 0) * 100 // %
-    const fundingColor = fundingRate > 0.01 ? '#FF9900' : fundingRate < 0 ? '#00B900' : COLORS.neutral
+    // High Funding (Crowded Long) = Risk = Red. Negative Funding (Crowded Short) = Signal = Green.
+    const fundingColor = fundingRate > 0.01 ? '#D00000' : fundingRate < 0 ? '#00B900' : COLORS.neutral
 
     const longLiq = data.liquidations?.long_liquidated || 0
     const shortLiq = data.liquidations?.short_liquidated || 0
@@ -68,11 +69,10 @@ export function createMarketDashboardFlex(data: any): FlexMessage {
                         type: 'box' as const,
                         layout: 'horizontal' as const,
                         contents: [
-                            { type: 'text' as const, text: '🔥 即時市場儀表板', weight: 'bold' as const, size: 'lg' as const, color: COLORS.primary, flex: 1 },
+                            { type: 'text' as const, text: '市場儀表板', weight: 'bold' as const, size: 'lg' as const, color: COLORS.primary, flex: 1 },
                             { type: 'text' as const, text: '加密台灣 Pro', size: 'xxs' as const, color: COLORS.subText, align: 'end' as const, gravity: 'center' as const }
                         ]
-                    },
-                    { type: 'text' as const, text: `${timestamp} 更新`, size: 'xxs' as const, color: '#CCCCCC' }
+                    }
                 ]
             },
             body: {
@@ -84,7 +84,7 @@ export function createMarketDashboardFlex(data: any): FlexMessage {
                         type: 'box' as const,
                         layout: 'vertical' as const,
                         contents: [
-                            { type: 'text' as const, text: '市場情緒(FGI)', size: 'xs' as const, color: COLORS.subText, weight: 'bold' as const },
+                            { type: 'text' as const, text: '市場情緒 (FGI)', size: 'xs' as const, color: COLORS.subText, weight: 'bold' as const },
                             {
                                 type: 'box' as const,
                                 layout: 'horizontal' as const,
@@ -224,7 +224,9 @@ export function createMarketDashboardFlex(data: any): FlexMessage {
                                 ]
                             }
                         ]
-                    }
+                    },
+                    { type: 'separator' as const, margin: 'lg' as const, color: '#F0F0F0' },
+                    { type: 'text' as const, text: `${timestamp} 更新`, size: 'xxs' as const, color: '#cccccc', margin: 'md', align: 'center' as const }
                 ]
             },
             footer: {
@@ -299,7 +301,7 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
         alignItems: 'center' as const,
         contents: [
             { type: 'text' as const, text: label, size: 'xs' as const, color: '#111111' }, // Black Label
-            { type: 'text' as const, text: value, size: 'xl' as const, weight: 'bold' as const, color: color, margin: 'sm' as const }, // Value
+            { type: 'text' as const, text: value, size: 'lg' as const, weight: 'bold' as const, color: color, margin: 'sm' as const }, // Value
             { type: 'text' as const, text: status, size: 'xxs' as const, color: '#888888', margin: 'xs' as const } // Small Status
         ]
     })
@@ -307,6 +309,21 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
     return {
         type: 'bubble' as const,
         size: 'kilo' as const,
+        header: {
+            type: 'box' as const,
+            layout: 'vertical' as const,
+            contents: [
+                {
+                    type: 'box' as const,
+                    layout: 'horizontal' as const,
+                    contents: [
+                        { type: 'text' as const, text: '即時市場分析', weight: 'bold' as const, size: 'lg' as const, color: COLORS.primary, flex: 1 },
+                        { type: 'text' as const, text: '加密台灣 Pro', size: 'xxs' as const, color: COLORS.subText, align: 'end' as const, gravity: 'center' as const }
+                    ]
+                }
+            ],
+            paddingBottom: '10px'
+        },
         body: {
             type: 'box' as const,
             layout: 'vertical' as const,
