@@ -54,14 +54,14 @@ export class CryptoHandler implements BotHandler {
                     const extraContents = analysisBodyContents
 
                     // Add a separator before appending
-                    const separator = { type: 'separator' as const, margin: 'lg', color: '#f0f0f0' }
+                    const separator: { type: 'separator'; margin: 'lg'; color: string } = { type: 'separator' as const, margin: 'lg', color: '#f0f0f0' }
 
-                    // Merge
-                    priceBubble.body.contents = [
-                        ...priceBodyContents,
-                        separator,
-                        ...extraContents
-                    ]
+                        // Merge
+                        ; (priceBubble.body as any).contents = [
+                            ...priceBodyContents,
+                            separator,
+                            ...extraContents
+                        ]
                 }
 
                 return {

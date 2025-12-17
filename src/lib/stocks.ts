@@ -162,7 +162,7 @@ export function createStockCard(data: any) {
                     {
                         type: "button" as const,
                         style: "primary" as const,
-                        height: "sm",
+                        height: "sm" as const,
                         action: {
                             type: "uri" as const,
                             label: "追蹤 加密台灣 IG 🏃",

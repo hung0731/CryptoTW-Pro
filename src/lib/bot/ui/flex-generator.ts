@@ -418,6 +418,7 @@ export const JOIN_MEMBER_FLEX_MESSAGE = {
                     color: "#f0f0f0"
                 },
                 {
+                    type: "text" as const,
                     text: "✨ 會員福利：即時信號、獨家分析、大客戶社群",
                     size: "xs" as const,
                     color: "#888888",
@@ -643,8 +644,8 @@ export function createCurrencyCard(
                         layout: "horizontal" as const,
                         contents: [
                             { type: "text" as const, text: "MAX", size: "md" as const, color: "#111111", weight: "bold" as const, flex: 2 },
-                            { type: "text" as const, text: `${maxBuyRef}`, size: "sm" as const, color: maxBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: maxBuyRef === bestBuyPrice.toFixed(2) ? "bold" : "regular", flex: 1 },
-                            { type: "text" as const, text: `${maxSellRef}`, size: "sm" as const, color: maxSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: maxSellRef === bestSellPrice.toFixed(2) ? "bold" : "regular", flex: 1 }
+                            { type: "text" as const, text: `${maxBuyRef}`, size: "sm" as const, color: maxBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: maxBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
+                            { type: "text" as const, text: `${maxSellRef}`, size: "sm" as const, color: maxSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: maxSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
                         margin: "md"
                     },
@@ -654,8 +655,8 @@ export function createCurrencyCard(
                         layout: "horizontal" as const,
                         contents: [
                             { type: "text" as const, text: "BitoPro", size: "md" as const, color: "#111111", weight: "bold" as const, flex: 2 },
-                            { type: "text" as const, text: `${bitoBuyRef}`, size: "sm" as const, color: bitoBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: bitoBuyRef === bestBuyPrice.toFixed(2) ? "bold" : "regular", flex: 1 },
-                            { type: "text" as const, text: `${bitoSellRef}`, size: "sm" as const, color: bitoSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: bitoSellRef === bestSellPrice.toFixed(2) ? "bold" : "regular", flex: 1 }
+                            { type: "text" as const, text: `${bitoBuyRef}`, size: "sm" as const, color: bitoBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: bitoBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
+                            { type: "text" as const, text: `${bitoSellRef}`, size: "sm" as const, color: bitoSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: bitoSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
                         margin: "md"
                     },
@@ -665,8 +666,8 @@ export function createCurrencyCard(
                         layout: "horizontal" as const,
                         contents: [
                             { type: "text" as const, text: "HoyaBit", size: "md" as const, color: "#111111", weight: "bold" as const, flex: 2 },
-                            { type: "text" as const, text: `${hoyaBuyRef}`, size: "sm" as const, color: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "bold" : "regular", flex: 1 },
-                            { type: "text" as const, text: `${hoyaSellRef}`, size: "sm" as const, color: hoyaSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: hoyaSellRef === bestSellPrice.toFixed(2) ? "bold" : "regular", flex: 1 }
+                            { type: "text" as const, text: `${hoyaBuyRef}`, size: "sm" as const, color: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "#00B900" : "#bbbbbb", align: "end" as const, weight: hoyaBuyRef === bestBuyPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 },
+                            { type: "text" as const, text: `${hoyaSellRef}`, size: "sm" as const, color: hoyaSellRef === bestSellPrice.toFixed(2) ? "#D00000" : "#bbbbbb", align: "end" as const, weight: hoyaSellRef === bestSellPrice.toFixed(2) ? "bold" as const : "regular" as const, flex: 1 }
                         ],
                         margin: "md"
                     }
