@@ -74,11 +74,13 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
     const totalOI = openInterest?.reduce((sum: number, ex: any) => sum + (ex.openInterest || 0), 0) || 0
     const oiChange1h = openInterest?.[0]?.open_interest_change_percent_1h || 0
     const oiChange4h = openInterest?.[0]?.open_interest_change_percent_4h || 0
+    const oiChange24h = openInterest?.[0]?.open_interest_change_percent_24h || 0
 
     // Consolidate Data
     return {
         timestamp: new Date().toISOString(),
         symbol: symbol,
+        btc: btcPrice || { price: 0, change_24h: 0, high_24h: 0, low_24h: 0, volume_24h: 0 },
 
         // 價格動能 (from CoinGecko + Binance RSI)
         // Note: btcPrice variable name is legacy, but here it's still BTC ticker. 
@@ -107,6 +109,7 @@ export async function getMarketSnapshot(symbol: string = 'BTC') {
             open_interest_total: totalOI,
             oi_change_1h: oiChange1h,
             oi_change_4h: oiChange4h,
+            oi_change_24h: oiChange24h,
             trend_signal: (oiChange1h > 0) ? '持倉增加' : '持倉減少' // Simplified as we don't have this symbol's price change easily here without refetching
         },
 

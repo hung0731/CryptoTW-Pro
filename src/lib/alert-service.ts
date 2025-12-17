@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase'
 import { getMarketSnapshot } from '@/lib/market-aggregator'
 import { detectAlerts, MarketStateRecord } from '@/lib/alert-engine'
+import { generateMarketSignals, RawMarketData } from '@/lib/signal-engine'
 // LINE Notification temporarily disabled
 // import { sendAlertNotifications } from '@/lib/notification-service'
 
@@ -43,7 +44,19 @@ export async function runAlertCheck() {
 
     // 1. Get Real-time Data
     const snapshot = await getMarketSnapshot()
-    const { signals, btc, capital_flow, long_short } = snapshot
+    const { btc, capital_flow, long_short } = snapshot as any
+
+    // Reconstruct signals using Signal Engine
+    const rawData: RawMarketData = {
+        price: btc.price,
+        price_change_24h: btc.change_24h,
+        funding_rate: capital_flow.funding_rate,
+        oi_change_24h: capital_flow.oi_change_24h,
+        long_short_ratio: long_short.global_ratio,
+        top_trader_long_short_ratio: long_short.whale_ratio,
+        whale_sentiment: (snapshot as any).whales?.summary?.whale_sentiment
+    }
+    const signals = generateMarketSignals(rawData)
 
     if (!btc.price) {
         console.warn('Skipping alert check: No BTC Price')
