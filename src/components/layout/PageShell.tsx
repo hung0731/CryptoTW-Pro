@@ -17,7 +17,7 @@ export function PageShell({ children, className, variant = 'L1' }: PageShellProp
         <div
             className={cn(
                 "min-h-screen w-full",
-                SPACING.page, // Apply global page padding (p-4)
+                SPACING.pageX, // Apply global page padding (p-4)
                 className
             )}
         >
