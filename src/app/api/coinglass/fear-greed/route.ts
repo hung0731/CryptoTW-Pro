@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { trackApiCall } from '@/lib/api-usage'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +33,9 @@ export async function GET(req: NextRequest) {
             '/api/index/fear-greed-history',
             {}
         )
+
+        // 追蹤 API 調用
+        trackApiCall('coinglass/fear-greed');
 
         if (!fgiRes || !fgiRes.data_list || fgiRes.data_list.length === 0) {
             return NextResponse.json({ error: 'No data available' }, { status: 500 })

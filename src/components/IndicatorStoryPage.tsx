@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { CARDS, TYPOGRAPHY, COLORS, SPACING, CHART } from '@/lib/design-tokens';
 import { IndicatorStory, ZONE_COLORS, getZoneLabel, YAxisModel } from '@/lib/indicator-stories';
 import { REVIEWS_DATA } from '@/lib/reviews-data';
+import { getIndicatorExplanation, CHART_SEMANTIC_MODELS } from '@/lib/chart-semantics';
 
 // ================================================
 // SECTION CARD - 統一容器
@@ -92,6 +93,11 @@ function ChartHero({ story }: ChartHeroProps) {
     const [liveCurrentValue, setLiveCurrentValue] = React.useState<number | null>(null);
     const [liveZone, setLiveZone] = React.useState<'fear' | 'lean_fear' | 'lean_greed' | 'greed' | null>(null);
 
+    // 自動刷新狀態
+    const [lastUpdated, setLastUpdated] = React.useState<Date | null>(null);
+    const refreshIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+    const AUTO_REFRESH_INTERVAL = 60 * 1000; // 60 秒
+
     // 使用即時數據或靜態數據
     const currentValue = liveCurrentValue ?? story.currentValue ?? 0;
     const currentZone = liveZone ?? story.zone;
@@ -108,86 +114,100 @@ function ChartHero({ story }: ChartHeroProps) {
         [chartData, yAxisModel]
     );
 
-    // 獲取真實數據 + BTC 價格（非 FGI 需要單獨獲取）
-    React.useEffect(() => {
-        setLoading(true);
+    // 獲取真實數據的回調函數
+    const fetchData = React.useCallback(async (isInitialLoad = false) => {
+        if (isInitialLoad) setLoading(true);
+
         const endpoint = story.chart.api.endpoint;
         const params = new URLSearchParams({
             range: timeRange,
             ...(story.chart.api.params as Record<string, string>)
         });
 
-        // 並行獲取指標數據和 BTC 價格（非 FGI 的話才需要 BTC 價格）
-        const indicatorFetch = fetch(`${endpoint}?${params.toString()}`).then(res => res.json());
-        const btcPriceFetch = !isFixedAxis
-            ? fetch(`/api/coinglass/fear-greed?range=${timeRange}`).then(res => res.json())
-            : Promise.resolve(null);
+        try {
+            // 並行獲取指標數據和 BTC 價格（非 FGI 的話才需要 BTC 價格）
+            const indicatorFetch = fetch(`${endpoint}?${params.toString()}`).then(res => res.json());
+            const btcPriceFetch = !isFixedAxis
+                ? fetch(`/api/coinglass/fear-greed?range=${timeRange}`).then(res => res.json())
+                : Promise.resolve(null);
 
-        Promise.all([indicatorFetch, btcPriceFetch])
-            .then(([indicatorData, btcData]) => {
-                if (!indicatorData.history) {
-                    console.warn(`No history data found for ${story.slug}`);
-                    setChartData([]);
-                    setLoading(false);
-                    return;
-                }
+            const [indicatorData, btcData] = await Promise.all([indicatorFetch, btcPriceFetch]);
 
-                // 設置即時當前值（從 API 響應中獲取）
-                if (indicatorData.current?.value !== undefined) {
-                    const value = indicatorData.current.value;
-                    setLiveCurrentValue(value);
-
-                    // 根據指標的 zones 設定計算 zone
-                    const zones = story.chart.zones;
-                    if (value <= zones.fear.max) {
-                        setLiveZone('fear');
-                    } else if (value <= zones.leanFear.max) {
-                        setLiveZone('lean_fear');
-                    } else if (value <= zones.leanGreed.max) {
-                        setLiveZone('lean_greed');
-                    } else {
-                        setLiveZone('greed');
-                    }
-                }
-
-                // 合併 BTC 價格數據（如果有）
-                if (btcData?.history && btcData.history.length > 0) {
-                    // 建立日期 -> 價格的映射表
-                    const priceMap = new Map<number, number>();
-                    btcData.history.forEach((item: { date: number; price: number }) => {
-                        // 用日期（去掉時間）作為 key
-                        const dayKey = Math.floor(item.date / 86400000) * 86400000;
-                        priceMap.set(dayKey, item.price);
-                    });
-
-                    // 合併價格到指標數據
-                    const mergedData = indicatorData.history.map((item: ChartDataPoint) => {
-                        const dayKey = Math.floor(item.date / 86400000) * 86400000;
-                        // 嘗試找到匹配的價格，或者找最接近的
-                        let price = priceMap.get(dayKey);
-                        if (!price) {
-                            // 找最接近的日期
-                            const keys = Array.from(priceMap.keys()).sort((a, b) =>
-                                Math.abs(a - item.date) - Math.abs(b - item.date)
-                            );
-                            if (keys.length > 0) {
-                                price = priceMap.get(keys[0]);
-                            }
-                        }
-                        return { ...item, price: price || 0 };
-                    });
-                    setChartData(mergedData);
-                } else {
-                    setChartData(indicatorData.history);
-                }
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(`Failed to fetch chart data for ${story.slug}:`, err);
+            if (!indicatorData.history) {
+                console.warn(`No history data found for ${story.slug}`);
                 setChartData([]);
-                setLoading(false);
-            });
+                return;
+            }
+
+            // 設置即時當前值（從 API 響應中獲取）
+            if (indicatorData.current?.value !== undefined) {
+                const value = indicatorData.current.value;
+                setLiveCurrentValue(value);
+
+                // 根據指標的 zones 設定計算 zone
+                const zones = story.chart.zones;
+                if (value <= zones.fear.max) {
+                    setLiveZone('fear');
+                } else if (value <= zones.leanFear.max) {
+                    setLiveZone('lean_fear');
+                } else if (value <= zones.leanGreed.max) {
+                    setLiveZone('lean_greed');
+                } else {
+                    setLiveZone('greed');
+                }
+            }
+
+            // 合併 BTC 價格數據（如果有）
+            if (btcData?.history && btcData.history.length > 0) {
+                const priceMap = new Map<number, number>();
+                btcData.history.forEach((item: { date: number; price: number }) => {
+                    const dayKey = Math.floor(item.date / 86400000) * 86400000;
+                    priceMap.set(dayKey, item.price);
+                });
+
+                const mergedData = indicatorData.history.map((item: ChartDataPoint) => {
+                    const dayKey = Math.floor(item.date / 86400000) * 86400000;
+                    let price = priceMap.get(dayKey);
+                    if (!price) {
+                        const keys = Array.from(priceMap.keys()).sort((a, b) =>
+                            Math.abs(a - item.date) - Math.abs(b - item.date)
+                        );
+                        if (keys.length > 0) {
+                            price = priceMap.get(keys[0]);
+                        }
+                    }
+                    return { ...item, price: price || 0 };
+                });
+                setChartData(mergedData);
+            } else {
+                setChartData(indicatorData.history);
+            }
+
+            // 更新最後刷新時間
+            setLastUpdated(new Date());
+        } catch (err) {
+            console.error(`Failed to fetch chart data for ${story.slug}:`, err);
+            setChartData([]);
+        } finally {
+            if (isInitialLoad) setLoading(false);
+        }
     }, [story.slug, timeRange, story.chart.api.endpoint, story.chart.api.params, isFixedAxis, story.chart.zones]);
+
+    // 初始加載和自動刷新
+    React.useEffect(() => {
+        fetchData(true); // 初始加載
+
+        // 設置 60 秒自動刷新
+        refreshIntervalRef.current = setInterval(() => {
+            fetchData(false); // 背景刷新（不顯示 loading）
+        }, AUTO_REFRESH_INTERVAL);
+
+        return () => {
+            if (refreshIntervalRef.current) {
+                clearInterval(refreshIntervalRef.current);
+            }
+        };
+    }, [fetchData, AUTO_REFRESH_INTERVAL]);
 
 
     // 將數據轉換為 SVG 路徑點（使用動態 Y 軸範圍）
@@ -240,25 +260,40 @@ function ChartHero({ story }: ChartHeroProps) {
                             <span className="text-[9px] text-neutral-600">載入中...</span>
                         )}
                     </div>
-                    {!loading && chartData.length > 0 && (
-                        <span className="text-[9px] text-neutral-600 font-mono">
-                            Updated: {new Date(chartData[chartData.length - 1].date).toLocaleDateString('zh-TW')}
-                        </span>
+                    {!loading && lastUpdated && (
+                        <div className="flex items-center gap-1.5">
+                            <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                            </span>
+                            <span className="text-[9px] text-neutral-600 font-mono">
+                                {lastUpdated.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            </span>
+                            <span className="text-[8px] text-neutral-700">（自動更新）</span>
+                        </div>
                     )}
                 </div>
 
                 {/* Hover Info - Top Center (Design Token: CHART.tooltip) */}
                 {hoverData && (
-                    <div className={cn(CHART.tooltip.container, "absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4")}>
-                        <span className={CHART.tooltip.date}>
-                            {new Date(hoverData.date).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })}
-                        </span>
-                        <span className={CHART.tooltip.value}>FGI: {hoverData.value}</span>
-                        {hoverData.price && (
-                            <span className="text-xs font-mono text-[#F59E0B]">
-                                ${hoverData.price.toLocaleString()}
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 bg-black/90 rounded-lg px-3 py-2 border border-white/10">
+                        <div className="flex items-center gap-3">
+                            <span className={CHART.tooltip.date}>
+                                {new Date(hoverData.date).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })}
                             </span>
-                        )}
+                            <span className={cn(CHART.tooltip.value, zoneColors.text)}>
+                                {formatYAxisValue(hoverData.value, story)}
+                            </span>
+                            {hoverData.price && (
+                                <span className="text-xs font-mono text-[#F59E0B]">
+                                    ${hoverData.price.toLocaleString()}
+                                </span>
+                            )}
+                        </div>
+                        {/* 語意解釋 */}
+                        <span className="text-[9px] text-neutral-400 max-w-[200px] text-center">
+                            {getIndicatorExplanation(story.id.replace(/-/g, ''), hoverData.value)}
+                        </span>
                     </div>
                 )}
 
