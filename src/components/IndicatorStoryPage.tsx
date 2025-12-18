@@ -2,13 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Info } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { ArrowLeft, ChevronRight, Info, Undo2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CARDS, TYPOGRAPHY, COLORS, SPACING, CHART } from '@/lib/design-tokens';
 import { IndicatorStory, ZONE_COLORS, getZoneLabel, YAxisModel } from '@/lib/indicator-stories';
 import { REVIEWS_DATA } from '@/lib/reviews-data';
 import { getIndicatorExplanation, CHART_SEMANTIC_MODELS } from '@/lib/chart-semantics';
-import { getRelatedEvents } from '@/lib/semantic-linkage';
+import { getRelatedEvents, getRelatedIndicators, getPrerequisiteConcepts } from '@/lib/semantic-linkage';
 
 // ================================================
 // SECTION CARD - 統一容器
@@ -925,6 +926,104 @@ function ActionGuidelines({ guidelines, relatedLinks }: ActionGuidelinesProps) {
 }
 
 // ================================================
+// ⑤ RELATED CONCEPTS - 想看懂這個指標，先了解
+// ================================================
+interface RelatedConceptsProps {
+    indicatorId: string;
+}
+
+function RelatedConcepts({ indicatorId }: RelatedConceptsProps) {
+    const concepts = getPrerequisiteConcepts(indicatorId);
+    if (concepts.length === 0) return null;
+
+    return (
+        <SectionCard className="bg-[#050505] border-dashed border-blue-500/20">
+            <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-3 text-blue-400/80")}>
+                💡 想看懂這個指標，先了解
+            </h2>
+            <div className="flex flex-wrap gap-2">
+                {concepts.map((c) => (
+                    <div
+                        key={c.id}
+                        className="group relative px-3 py-1.5 rounded-full 
+                                   bg-blue-500/10 border border-blue-500/20 
+                                   hover:bg-blue-500/20 transition-colors cursor-help"
+                    >
+                        <span className="text-xs text-blue-300">{c.term}</span>
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 
+                                        hidden group-hover:block z-50 w-48">
+                            <div className="bg-black/95 border border-white/10 rounded-lg 
+                                            p-2 text-[10px] text-neutral-300 shadow-xl">
+                                {c.definition}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <p className={cn(TYPOGRAPHY.micro, "mt-3 italic")}>
+                基礎知識頁面即將上線 ✨
+            </p>
+        </SectionCard>
+    );
+}
+
+// ================================================
+// ⑥ RELATED INDICATORS - 搭配閱讀
+// ================================================
+interface RelatedIndicatorsProps {
+    indicatorId: string;
+}
+
+const RELATIONSHIP_LABELS: Record<string, string> = {
+    prerequisite: '先修',
+    complementary: '互補',
+    contrast: '對照',
+};
+
+function RelatedIndicators({ indicatorId }: RelatedIndicatorsProps) {
+    const related = getRelatedIndicators(indicatorId);
+    if (related.length === 0) return null;
+
+    return (
+        <SectionCard>
+            <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-3")}>
+                🔗 搭配閱讀
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {related.map((r) => (
+                    <Link
+                        key={r.indicatorId}
+                        href={`/indicators/${r.slug}`}
+                        className={cn(
+                            CARDS.secondary,
+                            "block group hover:border-white/20 transition-colors"
+                        )}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[9px] px-1.5 py-0.5 rounded 
+                                               bg-neutral-800 text-neutral-400">
+                                    {RELATIONSHIP_LABELS[r.relationship]}
+                                </span>
+                                <span className="text-sm font-medium text-white">
+                                    {r.name}
+                                </span>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-neutral-600 
+                                                    group-hover:text-white" />
+                        </div>
+                        <p className="mt-1 text-[11px] text-neutral-500 leading-relaxed">
+                            {r.reason}
+                        </p>
+                    </Link>
+                ))}
+            </div>
+        </SectionCard>
+    );
+}
+
+// ================================================
 // MAIN COMPONENT - INDICATOR STORY PAGE
 // 順序：圖表 Hero → 怎麼看 → 判斷什麼 → 例題 → 行動
 // ================================================
@@ -933,8 +1032,34 @@ interface IndicatorStoryPageProps {
 }
 
 export default function IndicatorStoryPage({ story }: IndicatorStoryPageProps) {
+    // 雙向連結：處理 from=review 參數
+    const searchParams = useSearchParams();
+    const fromReview = searchParams.get('from') === 'review';
+    const reviewId = searchParams.get('reviewId');
+    const reviewTitle = searchParams.get('reviewTitle');
+
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
+            {/* 雙向連結提示 */}
+            {fromReview && reviewTitle && (
+                <div className="bg-blue-500/5 border-b border-blue-500/20 px-4 py-2">
+                    <div className="max-w-3xl mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs text-blue-300/80">
+                            <span className="text-neutral-500">你是從</span>
+                            <span className="font-medium text-blue-300">{decodeURIComponent(reviewTitle).split('：')[0]}</span>
+                            <span className="text-neutral-500">來的</span>
+                        </div>
+                        <Link
+                            href={`/reviews/2024/${reviewId?.replace('review-', '').replace('-2024', '').replace('-2022', '').replace('-2020', '')}`}
+                            className="flex items-center gap-1 text-[10px] text-blue-400 hover:text-blue-300"
+                        >
+                            <Undo2 className="w-3 h-3" />
+                            返回復盤
+                        </Link>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
                 <Link href="/indicators" className="text-[#808080] hover:text-white flex items-center gap-1">
@@ -958,14 +1083,19 @@ export default function IndicatorStoryPage({ story }: IndicatorStoryPageProps) {
                 {/* ② 這個指標在判斷什麼？ */}
                 <UseCaseList useCases={story.useCases} />
 
+                {/* ③ 想看懂這個指標，先了解 (基礎概念) */}
+                <RelatedConcepts indicatorId={story.id} />
+
                 {/* ④ Related Event Types (Reverse Citation) */}
                 <RelatedEventTypes indicatorSlug={story.id} />
 
-                {/* ③ 例題：歷史案例 */}
                 {/* ⑤ 歷史案例 (Pattern 3: Reverse Citation) */}
                 <HistoricalCases cases={story.historicalCases} storyName={story.name} />
 
-                {/* ④ 行動指引 */}
+                {/* ⑥ 搭配閱讀 (相關指標) */}
+                <RelatedIndicators indicatorId={story.id} />
+
+                {/* ⑦ 行動指引 */}
                 <ActionGuidelines
                     guidelines={story.actionGuidelines}
                     relatedLinks={story.relatedLinks}

@@ -120,6 +120,13 @@ export interface MarketEvent {
         };
     }[];
     focusWindow?: [number, number];
+
+    // 相關指標連結（知識網）
+    relatedIndicators?: Array<{
+        slug: string;           // funding-rate, liquidation, etc.
+        why: string;            // 描述句：「這次像擁擠交易，主要看資金費率的極端化。」
+        anchor?: string;        // 指標頁要跳到的章節（預留）
+    }>;
 }
 
 export const REVIEWS_DATA: MarketEvent[] = [
@@ -280,6 +287,18 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 label: '區分價格與價值',
                 desc: '價格反映的是短期供需與情緒，資金流向反映的才是長期的實質需求。'
             }
+        ],
+
+        // 知識網連結
+        relatedIndicators: [
+            {
+                slug: 'funding-rate',
+                why: '這次像擁擠交易清洗，主要看資金費率在利多落地時的極端化程度。'
+            },
+            {
+                slug: 'etf-flow',
+                why: '這次的結構轉變，主要看 ETF 淨流入是否持續，判斷機構需求是否真實。'
+            }
         ]
     },
     {
@@ -418,7 +437,19 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 desc: '當大型機構開始異常轉移資金或提幣延遲發生時，應優先考量保全本金，而非賭注反彈。'
             }
         ],
-        focusWindow: [-10, 14]
+        focusWindow: [-10, 14],
+
+        // 知識網連結
+        relatedIndicators: [
+            {
+                slug: 'fear-greed',
+                why: '這次像信任崩潰，主要看恐懼指數是否觸及極端區，判斷市場是否過度恐慌。'
+            },
+            {
+                slug: 'stablecoin-supply',
+                why: '這次涉及流動性危機，主要看穩定幣供應量是否縮減，判斷資金是否撤離。'
+            }
+        ]
     },
     {
         id: 'review-luna-2022',
@@ -554,6 +585,18 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 type: 'alert',
                 label: '迴避機制性崩潰',
                 desc: '當資產陷入機制性死亡螺旋時，技術分析失效，不應嘗試抄底。'
+            }
+        ],
+
+        // 知識網連結
+        relatedIndicators: [
+            {
+                slug: 'stablecoin-supply',
+                why: '這次像機制崩潰，主要看算法穩定幣脫鉤對整體穩定幣生態的連鎖影響。'
+            },
+            {
+                slug: 'fear-greed',
+                why: '這次恐慌蔓延極快，主要看恐懼指數是否長期滯留於極端區。'
             }
         ]
     },
@@ -699,6 +742,18 @@ export const REVIEWS_DATA: MarketEvent[] = [
                 type: 'check',
                 label: '逆向思維',
                 desc: '非基本面因素導致的流動性崩盤，是十年一遇的戰略性買點。'
+            }
+        ],
+
+        // 知識網連結
+        relatedIndicators: [
+            {
+                slug: 'liquidation',
+                why: '這次像流動性恐慌，主要看爆倉量是否達到歷史極端，判斷槓桿清洗程度。'
+            },
+            {
+                slug: 'open-interest',
+                why: '這次槓桿瞬間蒸發，主要看 OI 是否急速歸零，判斷市場是否完成去槓桿。'
             }
         ]
     },
