@@ -672,9 +672,9 @@ export function createCurrencyCard(
                         layout: "baseline" as const,
                         margin: "xs",
                         contents: [
-                            { type: "text" as const, text: "在 ", size: "md" as const, color: "#555555" },
-                            { type: "text" as const, text: bestExchangeName, size: "md" as const, color: "#555555", weight: "bold" as const },
-                            { type: "text" as const, text: ` ${actionText} ${inputDisplayReference}`, size: "md" as const, color: "#555555" }
+                            { type: "text" as const, text: "在 ", size: "md" as const, color: "#555555", flex: 0 },
+                            { type: "text" as const, text: bestExchangeName, size: "md" as const, color: "#555555", weight: "bold" as const, flex: 0 },
+                            { type: "text" as const, text: ` ${actionText} ${inputDisplayReference}`, size: "md" as const, color: "#555555", flex: 0 }
                         ]
                     },
                     { type: "separator" as const, margin: "md", color: "#f0f0f0" },
