@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
             // Set cookie valid for 30 days
             (await cookies()).set(COOKIE_NAME, 'granted', {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: false, // Changed from process.env.NODE_ENV === 'production' to fix URL change issues
                 sameSite: 'lax',
                 maxAge: 60 * 60 * 24 * 30, // 30 days
                 path: '/',
