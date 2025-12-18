@@ -26,8 +26,8 @@ function CompareContent() {
     const [viewMode, setViewMode] = useState<'split' | 'stacked'>('split');
 
     // Get event data
-    const leftEvent = REVIEWS_DATA.find(r => r.slug === leftSlug) || REVIEWS_DATA[0];
-    const rightEvent = REVIEWS_DATA.find(r => r.slug === rightSlug) || REVIEWS_DATA[1];
+    const leftEvent = REVIEWS_DATA.find(r => `${r.slug}-${r.year}` === leftSlug) || REVIEWS_DATA[0];
+    const rightEvent = REVIEWS_DATA.find(r => `${r.slug}-${r.year}` === rightSlug) || REVIEWS_DATA[1];
 
     // Reaction Type Mapping
     const reactionTypeMap: Record<string, string> = {

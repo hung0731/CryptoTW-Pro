@@ -109,7 +109,10 @@ export function OpenInterestCard({ data }: { data?: DashboardData['openInterest'
                 />
             </div>
             <div className="space-y-1">
-                <div className="text-lg font-bold font-mono text-white">{data.formatted}</div>
+                <div className="text-lg font-bold font-mono text-white flex items-baseline gap-1">
+                    {data.formatted}
+                    <span className="text-xs text-neutral-500 font-sans">USD</span>
+                </div>
                 {hasData && (
                     <div className={cn("text-xs font-mono", isPositive ? "text-green-400" : "text-red-400")}>
                         24H: {formatPercent(data.change24h)}

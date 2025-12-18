@@ -142,7 +142,7 @@ export function parseCurrencyAmount(input: string): { type: 'USD' | 'TWD', amoun
     // 模式 7: "1000 TWD", "1000 NTD", "1000 NT"
     match = text.match(/^([\d.]+[萬千KM]?)\s*(TWD|NT\$?|NTD)$/i)
     if (match) {
-        return { type: 'TWD', amount: parseAmount(match[2]) }
+        return { type: 'TWD', amount: parseAmount(match[1]) }
     }
 
     // 模式 8: 中文 "10000台幣", "1萬台幣"

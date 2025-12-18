@@ -70,11 +70,17 @@ export function LiquidationWaterfall() {
             <div className="grid grid-cols-2 gap-2">
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex flex-col justify-center items-center">
                     <span className="text-[10px] text-neutral-400 mb-1">多單爆倉 ({timeframe.toUpperCase()})</span>
-                    <span className="text-xl font-bold text-red-400 font-mono tracking-tight">{data.summary?.longLiquidatedFormatted || '$0'}</span>
+                    <span className="text-xl font-bold text-red-400 font-mono tracking-tight flex items-baseline gap-1">
+                        {data.summary?.longLiquidatedFormatted || '$0'}
+                        <span className="text-xs text-red-400/50 font-sans">USD</span>
+                    </span>
                 </div>
                 <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 flex flex-col justify-center items-center">
                     <span className="text-[10px] text-neutral-400 mb-1">空單爆倉 ({timeframe.toUpperCase()})</span>
-                    <span className="text-xl font-bold text-green-400 font-mono tracking-tight">{data.summary?.shortLiquidatedFormatted || '$0'}</span>
+                    <span className="text-xl font-bold text-green-400 font-mono tracking-tight flex items-baseline gap-1">
+                        {data.summary?.shortLiquidatedFormatted || '$0'}
+                        <span className="text-xs text-green-400/50 font-sans">USD</span>
+                    </span>
                 </div>
             </div>
 
@@ -111,11 +117,15 @@ export function LiquidationSummary({ data }: { data?: DashboardData['liquidation
             <div className="grid grid-cols-2 gap-2 mt-1">
                 <div className="text-center bg-red-500/10 rounded py-1.5">
                     <span className="text-[9px] text-neutral-400 block mb-0.5">多單</span>
-                    <span className="text-xs font-mono text-red-400 font-bold block">{data.longFormatted}</span>
+                    <span className="text-xs font-mono text-red-400 font-bold block">
+                        {data.longFormatted} <span className="text-[9px] opacity-70">USD</span>
+                    </span>
                 </div>
                 <div className="text-center bg-green-500/10 rounded py-1.5">
                     <span className="text-[9px] text-neutral-400 block mb-0.5">空單</span>
-                    <span className="text-xs font-mono text-green-400 font-bold block">{data.shortFormatted}</span>
+                    <span className="text-xs font-mono text-green-400 font-bold block">
+                        {data.shortFormatted} <span className="text-[9px] opacity-70">USD</span>
+                    </span>
                 </div>
             </div>
         </div>

@@ -13,8 +13,47 @@ const notoSansTC = Noto_Sans_TC({
 
 
 export const metadata: Metadata = {
-  title: "加密台灣 Pro",
-  description: "Crypto Market Insights & Exclusive Airdrops",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://pro.cryptotw.com'),
+  title: {
+    default: "加密台灣 Pro | 您的鏈上軍火庫",
+    template: "%s | 加密台灣 Pro"
+  },
+  description: "每日市場分析、獨家空投機會、專業交易指標。CryptoTW Pro 提供最即時的加密貨幣市場洞察。",
+  keywords: ["加密貨幣", "比特幣", "區塊鏈", "交易訊號", "空投", "CryptoTW"],
+  authors: [{ name: "CryptoTW Team" }],
+  openGraph: {
+    type: 'website',
+    locale: 'zh_TW',
+    url: '/',
+    siteName: 'CryptoTW Pro',
+    title: '加密台灣 Pro | 您的鏈上軍火庫',
+    description: '每日市場分析、獨家空投機會、專業交易指標。',
+    images: [
+      {
+        url: '/icon.png', // Temporary default
+        width: 512,
+        height: 512,
+        alt: 'CryptoTW Pro Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '加密台灣 Pro',
+    description: '每日市場分析、獨家空投機會、專業交易指標。',
+    images: ['/icon.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: '/icon.png',
     shortcut: '/icon.png',

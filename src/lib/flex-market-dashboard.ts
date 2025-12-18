@@ -329,10 +329,13 @@ export function createMiniAnalysisCard(data: any): FlexBubble {
             layout: 'vertical' as const,
             paddingTop: '0px',
             contents: [
+                // Separator for visual spacing
+                { type: 'separator' as const, margin: 'md' as const, color: '#F0F0F0' },
                 {
                     type: 'box' as const,
                     layout: 'vertical' as const,
                     spacing: 'sm',
+                    margin: 'md' as const,
                     contents: [
                         // Row 1: Sentiment
                         {
