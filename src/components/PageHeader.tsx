@@ -21,9 +21,9 @@ export function PageHeader({
     const { profile } = useLiff()
 
     return (
-        <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/10">
+        <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-[#1A1A1A]">
             {/* Border Separator */}
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white/10" />
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#1A1A1A]" />
             <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
                 {/* Left: Back Button or Empty */}
                 <div className="flex items-center justify-start">

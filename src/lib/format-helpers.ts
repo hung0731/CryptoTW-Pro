@@ -31,6 +31,21 @@ export function formatPercent(value: number | null | undefined): string {
 }
 
 /**
+ * Format small percentage values (e.g. Funding Rate)
+ * - Always 3 decimal places
+ * - Includes % sign
+ * - Positive values get + prefix
+ */
+export function formatSmallPercent(value: number | null | undefined): string {
+    if (value === null || value === undefined) return '—'
+
+    const formatted = Math.abs(value).toFixed(3)
+    if (value > 0) return `+${formatted}%`
+    if (value < 0) return `-${formatted}%`
+    return `0.000%`
+}
+
+/**
  * Get color class for percentage value
  */
 export function getPercentColor(value: number | null | undefined): string {
@@ -38,6 +53,15 @@ export function getPercentColor(value: number | null | undefined): string {
     if (value > 0) return 'text-[#22C55E]'
     if (value < 0) return 'text-[#EF4444]'
     return 'text-[#808080]'
+}
+
+/**
+ * Format ratio value (e.g. Long/Short)
+ * - 2 decimal places
+ */
+export function formatRatio(value: number | null | undefined): string {
+    if (value === null || value === undefined) return '—'
+    return value.toFixed(2)
 }
 
 /**
@@ -75,7 +99,7 @@ export function formatLargeNumber(value: number | null | undefined, prefix = '$'
     if (absValue >= 1_000) {
         return `${prefix}${(value / 1_000).toFixed(1)}K`
     }
-    return `${prefix}${value}`
+    return `${prefix}${parseFloat(value.toFixed(2))}`
 }
 
 /**

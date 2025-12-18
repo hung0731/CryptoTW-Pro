@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { SkeletonReviewChart } from '@/components/SkeletonReviewChart'
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area, BarChart, Bar, ComposedChart, ReferenceLine
@@ -102,7 +103,7 @@ function ChartCard({ title, index, children, color = '#3B82F6' }: { title: strin
 // ===================================
 export default function ChartCatalogPage() {
     return (
-        <div className="min-h-screen bg-[#050505] text-white p-6 space-y-8 pb-24">
+        <div className={`min-h-screen bg-[#050505] text-white p-6 ${SPACING.sectionGap} pb-24`}>
             <header className="border-b border-[#1A1A1A] pb-6">
                 <h1 className={TYPOGRAPHY.pageTitle}>圖表目錄 (Chart Catalog)</h1>
                 <p className="text-[#A0A0A0] text-sm mt-2">

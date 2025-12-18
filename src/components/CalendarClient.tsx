@@ -18,6 +18,11 @@ import {
 } from '@/lib/macro-events'
 import { SURFACE, COLORS, CARDS } from '@/lib/design-tokens'
 import { AISummaryCard } from '@/components/ui/AISummaryCard'
+import {
+    Sheet,
+    SheetContent,
+} from "@/components/ui/sheet"
+import SingleEventClient from '@/components/SingleEventClient'
 
 interface CalendarClientProps {
     reactions: Record<string, MacroReaction>
@@ -106,7 +111,11 @@ function MiniChartCard({
                     </span>
                     {isNext && (
                         <span className={cn("text-[9px] font-mono", COLORS.textTertiary)}>
-                            {formatOccursAt(occ.occursAt).split(', ')[1] || '20:30'}
+                            {(() => {
+                                const parts = formatOccursAt(occ.occursAt).split(' ')
+                                // [0]=Date, [1]=Period, [2]=Time, [3]=(Zone)
+                                return parts[1] && parts[2] ? `${parts[1]} ${parts[2]}` : '20:30'
+                            })()}
                         </span>
                     )}
                 </div>
@@ -168,6 +177,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
     const [alignMode, setAlignMode] = useState<'time' | 'reaction'>('time')
     const [aiSummary, setAiSummary] = useState<string>('')
     const [aiLoading, setAiLoading] = useState(true)
+    const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null)
 
     const getSummaryStats = (eventKey: string) => {
         return calculateEventStats(eventKey, reactions)
@@ -263,7 +273,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
     }, [reactions])
 
     return (
-        <div className="px-4 space-y-6 pb-20">
+        <div className="px-4 space-y-6 pb-20 pt-6">
             {/* AI Summary Card */}
             <AISummaryCard
                 summary={aiSummary || '正在分析近期宏觀事件...'}
@@ -326,18 +336,18 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                 }
 
                 return (
-                    <Link
-                        href={`/calendar/${eventDef.key}`}
+                    <div
+                        onClick={() => setSelectedEventKey(eventDef.key)}
                         key={eventDef.key}
                         className={cn(
-                            "block group relative overflow-hidden",
-                            CARDS.typeA
+                            "cursor-pointer block group relative overflow-hidden active:opacity-90 transition-opacity",
+                            CARDS.secondary
                         )}
                     >
-                        {/* 1. Header Section */}
-                        <div className={cn("px-4 py-3 border-b flex items-center justify-between", SURFACE.border)}>
+                        {/* 1. Header Section: Name vs Next Badge */}
+                        <div className={cn("px-4 py-3 border-b flex items-start justify-between", SURFACE.border)}>
                             <div className="flex items-center gap-3">
-                                <span className={cn("text-xs font-black tracking-tighter text-[#444]", COLORS.textPrimary)}>
+                                <span className={cn("text-xs font-black tracking-tighter text-[#444] mt-0.5", COLORS.textPrimary)}>
                                     {getEventIcon(eventDef.key)}
                                 </span>
 
@@ -349,55 +359,71 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                                             </h2>
                                             <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666]" />
                                         </div>
-                                        {/* Market Definition */}
-                                        <p className={cn("text-[10px]", COLORS.textTertiary)}>
-                                            {eventDef.listDescription}
+                                        {/* Market Definition / Insight */}
+                                        <p className={cn("text-[10px] truncate max-w-[200px]", COLORS.textTertiary)}>
+                                            {eventDef.insight.includes('⚠️') ? (
+                                                <span className="text-amber-500 font-medium">{eventDef.insight}</span>
+                                            ) : (
+                                                eventDef.listDescription
+                                            )}
                                         </p>
-
-                                        {/* Shutdown/Alert Warning */}
-                                        {eventDef.insight.includes('⚠️') && (
-                                            <p className="text-[10px] text-amber-500 font-medium mt-0.5">
-                                                {eventDef.insight}
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
                             </div>
 
-                            <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F]", COLORS.textTertiary)}>
-                                {eventDef.chartRange}
-                            </span>
-                        </div>
-
-                        {/* 2. Summary Stats */}
-                        <div className="px-4 py-3 flex items-center gap-4 text-[10px]">
-                            {/* Next Event Countdown */}
-                            {nextOccurrence && (
-                                <div className="flex items-center gap-2">
-                                    <span className={cn("font-bold", daysUntil <= 7 ? COLORS.positive : COLORS.textSecondary)}>
-                                        下次: {daysUntil === 0 ? '今日' : `T-${daysUntil}`}
+                            {/* Right Anchor: Next Occurrence Badge */}
+                            {nextOccurrence ? (
+                                <div className={cn(
+                                    "flex flex-col items-end",
+                                    daysUntil <= 7 ? "text-white" : "text-[#666]"
+                                )}>
+                                    <span className={cn(
+                                        "text-[10px] px-1.5 py-0.5 rounded font-bold border",
+                                        daysUntil <= 3
+                                            ? "bg-white/10 border-white/20 text-white"
+                                            : "bg-[#0E0E0F] border-[#2A2A2A] text-[#666]"
+                                    )}>
+                                        {daysUntil === 0 ? '今天' : `T-${daysUntil}`}
                                     </span>
                                 </div>
+                            ) : (
+                                <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F]", COLORS.textTertiary)}>
+                                    待定
+                                </span>
                             )}
+                        </div>
 
-                            <div className="w-[1px] h-3 bg-[#2A2A2A]" />
+                        {/* 2. Summary Stats Bar */}
+                        <div className="px-4 py-3 flex items-center justify-between text-[10px]">
+                            {/* Left: Chart Range / Next Date */}
+                            <div className="flex items-center gap-2 text-neutral-500">
+                                <span className="font-mono bg-[#1A1A1A] px-1 rounded">{eventDef.chartRange}</span>
+                                {nextOccurrence && (
+                                    <span>
+                                        {(() => {
+                                            const parts = formatOccursAt(nextOccurrence.occursAt).split(' ')
+                                            return parts[1] && parts[2] ? `${parts[1]} ${parts[2]}` : '20:30'
+                                        })()}
+                                    </span>
+                                )}
+                            </div>
 
-                            {/* Key Stats */}
+                            {/* Right: Stats Anchors */}
                             {summaryStats && (
-                                <>
+                                <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1.5">
-                                        <span className={COLORS.textTertiary}>上漲機率</span>
-                                        <span className={cn("font-mono font-bold", summaryStats.d1WinRate >= 50 ? COLORS.positive : COLORS.negative)}>
-                                            {summaryStats.d1WinRate}%
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className={COLORS.textTertiary}>平均波動</span>
+                                        <span className={COLORS.textTertiary}>波動</span>
                                         <span className={cn("font-mono font-bold", COLORS.textPrimary)}>
                                             {summaryStats.avgRange}%
                                         </span>
                                     </div>
-                                </>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className={COLORS.textTertiary}>上漲</span>
+                                        <span className={cn("font-mono font-bold", summaryStats.d1WinRate >= 50 ? COLORS.positive : COLORS.negative)}>
+                                            {summaryStats.d1WinRate}%
+                                        </span>
+                                    </div>
+                                </div>
                             )}
                         </div>
 
@@ -423,11 +449,25 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                                 ))}
                             </div>
                         </div>
-                    </Link>
+                    </div>
                 )
             })}
 
 
-        </div>
+            <Sheet open={!!selectedEventKey} onOpenChange={(open) => !open && setSelectedEventKey(null)}>
+                <SheetContent side="bottom" className="h-[85vh] p-0 bg-[#0A0A0A] border-t-white/10">
+                    {selectedEventKey && (
+                        <SingleEventClient
+                            eventKey={selectedEventKey}
+                            reactions={Object.entries(reactions)
+                                .filter(([k, v]) => k.startsWith(selectedEventKey))
+                                .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
+                            }
+                            isDrawer
+                        />
+                    )}
+                </SheetContent>
+            </Sheet>
+        </div >
     )
 }

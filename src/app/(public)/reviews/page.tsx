@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { REVIEWS_DATA, MarketEvent } from '@/lib/reviews-data';
 import { cn } from '@/lib/utils';
+import { CARDS, SPACING } from '@/lib/design-tokens';
 import { Badge } from '@/components/ui/badge';
 import { ReviewCarousel } from '@/components/reviews/ReviewCarousel';
 import { ReviewCard } from '@/components/reviews/ReviewCard';
@@ -93,14 +94,14 @@ export default function ReviewsPage() {
 
             {/* 1. Editor's Picks (Carousel) */}
             {!hasActiveFilters && (
-                <div className="space-y-4 mb-4">
+                <div className={`${SPACING.cardGap} mb-4 pt-4`}>
                     <ReviewCarousel items={featuredReviews} />
 
                     {/* 1.5 Historical Comparison Card */}
                     <div className="px-4">
                         <Link
                             href="/reviews/compare"
-                            className="flex items-center justify-between p-4 rounded-xl bg-[#0A0A0A] border border-[#1A1A1A] hover:border-[#2A2A2A]"
+                            className={cn("flex items-center justify-between p-4", CARDS.secondary)}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
@@ -120,7 +121,7 @@ export default function ReviewsPage() {
             )}
 
             <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-[#1A1A1A]">
-                <div className="px-4 py-4 space-y-4">
+                <div className={`px-4 py-4 ${SPACING.cardGap}`}>
                     {/* 2. Search Bar */}
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
@@ -129,7 +130,7 @@ export default function ReviewsPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="搜尋事件 / 代幣 (BTC) / 類型 (FTX)..."
-                            className="w-full bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder:text-[#525252] focus:outline-none focus:border-[#2A2A2A]"
+                            className={cn("w-full bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder:text-[#525252] focus:outline-none focus:border-[#2A2A2A]")}
                         />
                         {searchQuery && (
                             <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -186,7 +187,7 @@ export default function ReviewsPage() {
             </div>
 
             {/* 5. Content List */}
-            <div className="px-4 py-4 space-y-3 max-w-3xl mx-auto min-h-[50vh]">
+            <div className={`px-4 py-4 ${SPACING.cardGapCompact} max-w-3xl mx-auto min-h-[50vh]`}>
                 {/* Active Filters Summary */}
                 {hasActiveFilters && (
                     <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">

@@ -1,0 +1,323 @@
+[
+    {
+        "slug": "etf",
+        "year": 2024,
+        "symbol": "BTC",
+        "reactionStart": "2024-01-10",
+        "types": [
+            "price",
+            "flow",
+            "oi",
+            "premium"
+        ]
+    },
+    {
+        "slug": "ftx",
+        "year": 2022,
+        "symbol": "FTT",
+        "reactionStart": "2022-11-08",
+        "types": [
+            "price",
+            "oi",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "luna",
+        "year": 2022,
+        "symbol": "LUNA",
+        "reactionStart": "2022-05-09",
+        "types": [
+            "price",
+            "flow",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "covid",
+        "year": 2020,
+        "symbol": "BTC",
+        "reactionStart": "2020-03-09",
+        "types": [
+            "price",
+            "oi",
+            "fgi",
+            "liquidation"
+        ]
+    },
+    {
+        "slug": "mtgox",
+        "year": 2014,
+        "symbol": "BTC",
+        "reactionStart": "2014-02-07",
+        "types": [
+            "price"
+        ]
+    },
+    {
+        "slug": "dao",
+        "year": 2016,
+        "symbol": "ETH",
+        "reactionStart": "2016-06-17",
+        "types": [
+            "price"
+        ]
+    },
+    {
+        "slug": "ico",
+        "year": 2017,
+        "symbol": "ETH",
+        "reactionStart": "2017-12-17",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "china-ban",
+        "year": 2021,
+        "symbol": "BTC",
+        "reactionStart": "2021-05-19",
+        "types": [
+            "price",
+            "oi",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "the-merge",
+        "year": 2022,
+        "symbol": "ETH",
+        "reactionStart": "2022-09-15",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "halving",
+        "year": 2012,
+        "symbol": "BTC",
+        "reactionStart": "2012-11-28",
+        "types": [
+            "price"
+        ]
+    },
+    {
+        "slug": "halving",
+        "year": 2016,
+        "symbol": "BTC",
+        "reactionStart": "2016-07-09",
+        "types": [
+            "price"
+        ]
+    },
+    {
+        "slug": "halving",
+        "year": 2020,
+        "symbol": "BTC",
+        "reactionStart": "2020-05-11",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "halving",
+        "year": 2024,
+        "symbol": "BTC",
+        "reactionStart": "2024-04-20",
+        "types": [
+            "price",
+            "flow",
+            "oi"
+        ]
+    },
+    {
+        "slug": "defi-summer",
+        "year": 2020,
+        "symbol": "ETH",
+        "reactionStart": "2020-06-15",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "tesla",
+        "year": 2021,
+        "symbol": "BTC",
+        "reactionStart": "2021-02-08",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "coinbase",
+        "year": 2021,
+        "symbol": "BTC",
+        "reactionStart": "2021-04-14",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "el-salvador",
+        "year": 2021,
+        "symbol": "BTC",
+        "reactionStart": "2021-09-07",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "celsius",
+        "year": 2022,
+        "symbol": "BTC",
+        "reactionStart": "2022-06-12",
+        "types": [
+            "price",
+            "oi",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "3ac",
+        "year": 2022,
+        "symbol": "BTC",
+        "reactionStart": "2022-06-15",
+        "types": [
+            "price",
+            "oi",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "sec-coinbase",
+        "year": 2023,
+        "symbol": "BTC",
+        "reactionStart": "2023-06-06",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "xrp-ruling",
+        "year": 2023,
+        "symbol": "BTC",
+        "reactionStart": "2023-07-13",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "cz",
+        "year": 2023,
+        "symbol": "BTC",
+        "reactionStart": "2023-11-21",
+        "types": [
+            "price",
+            "oi"
+        ]
+    },
+    {
+        "slug": "yen-carry",
+        "year": 2024,
+        "symbol": "BTC",
+        "reactionStart": "2024-08-05",
+        "types": [
+            "price",
+            "oi",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "german-selloff",
+        "year": 2024,
+        "symbol": "BTC",
+        "reactionStart": "2024-07-08",
+        "types": [
+            "price",
+            "oi",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "iran-conflict",
+        "year": 2024,
+        "symbol": "BTC",
+        "reactionStart": "2024-04-13",
+        "types": [
+            "price",
+            "oi",
+            "fgi"
+        ]
+    },
+    {
+        "slug": "2021-may-crash",
+        "year": 2021,
+        "symbol": "BTC",
+        "reactionStart": "2021-05-12",
+        "types": [
+            "price",
+            "oi",
+            "fgi",
+            "funding",
+            "liquidation",
+            "longShort"
+        ]
+    },
+    {
+        "slug": "2024-ath-pullback",
+        "year": 2024,
+        "symbol": "BTC",
+        "reactionStart": "2024-03-14",
+        "types": [
+            "price",
+            "oi",
+            "fgi",
+            "funding"
+        ]
+    },
+    {
+        "slug": "2021-nov-top",
+        "year": 2021,
+        "symbol": "BTC",
+        "reactionStart": "2021-11-10",
+        "types": [
+            "price",
+            "oi",
+            "fgi",
+            "basis"
+        ]
+    },
+    {
+        "slug": "2022-june-deleverage",
+        "year": 2022,
+        "symbol": "BTC",
+        "reactionStart": "2022-06-12",
+        "types": [
+            "price",
+            "oi",
+            "fgi",
+            "stablecoin"
+        ]
+    },
+    {
+        "slug": "2023-march-squeeze",
+        "year": 2023,
+        "symbol": "BTC",
+        "reactionStart": "2023-03-10",
+        "types": [
+            "price",
+            "oi",
+            "fgi",
+            "longShort"
+        ]
+    }
+]

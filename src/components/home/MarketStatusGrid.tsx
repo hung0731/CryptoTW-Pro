@@ -113,9 +113,9 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
     const warnCount = checks.filter(c => c.icon === 'warn').length
 
     return (
-        <div className={cn(CARDS.secondary, "p-4")}>
+        <div className={cn(CARDS.secondary, "p-5")}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-bold text-white">市場快照</h3>
                 {dangerCount > 0 ? (
                     <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
@@ -147,7 +147,7 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
             {/* CTA */}
             <Link
                 href="/prediction"
-                className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-neutral-400 hover:text-white hover:bg-white/10"
+                className="mt-auto flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-neutral-400 hover:text-white hover:bg-white/10"
             >
                 <span>檢查風險訊號</span>
                 <ChevronRight className="w-3.5 h-3.5" />

@@ -13,6 +13,7 @@ import {
     MacroEventOccurrence,
     MacroReaction
 } from '@/lib/macro-events'
+import { CARDS, COLORS } from '@/lib/design-tokens'
 
 interface UpcomingEventsCardProps {
     reactions: Record<string, MacroReaction>
@@ -103,14 +104,14 @@ function PastEventChip({ occ, reaction }: { occ: MacroEventOccurrence, reaction?
             <span className="text-neutral-600">{monthDay}</span>
             <span className={cn(
                 "font-bold",
-                isBeat ? "text-red-400" : isMiss ? "text-emerald-400" : "text-neutral-400"
+                isBeat ? COLORS.negative : isMiss ? COLORS.positive : "text-neutral-400"
             )}>
                 {isBeat ? '超預期' : isMiss ? '低預期' : '符合'}
             </span>
             {btcChange !== undefined && btcChange !== null && (
                 <span className={cn(
                     "font-mono",
-                    btcChange >= 0 ? "text-emerald-400" : "text-red-400"
+                    btcChange >= 0 ? COLORS.positive : COLORS.negative
                 )}>
                     {btcChange >= 0 ? '+' : ''}{btcChange.toFixed(1)}%
                 </span>
@@ -149,41 +150,46 @@ export function UpcomingEventsCard({ reactions }: UpcomingEventsCardProps) {
                             href={`/calendar/${def.key}`}
                             className={cn(
                                 "snap-start flex-none w-[280px]",
-                                "bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl p-3",
-                                "hover:bg-[#141414] hover:border-[#2A2A2A]"
+                                CARDS.secondary
                             )}
                         >
                             <div className="flex items-start gap-3">
                                 {/* Left: Calendar Icon */}
                                 <CalendarIcon month={month} day={day} />
 
-                                {/* Right: Event Info */}
-                                <div className="flex-1 min-w-0">
-                                    {/* Event Name + T-x */}
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h4 className="text-sm font-bold text-white truncate">{def.name}</h4>
-                                        <span className={cn(
-                                            "shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded",
-                                            days <= 3
-                                                ? "bg-white/10 text-white"
-                                                : "bg-[#1A1A1A] text-neutral-500"
-                                        )}>
-                                            {days === 0 ? '今天' : days === 1 ? '明天' : `${days}天`}
-                                        </span>
-                                    </div>
+                                {/* Right: Split into Main Info and Side Anchor */}
+                                <div className="flex-1 min-w-0 flex justify-between gap-2 h-[44px]">
+                                    {/* Middle Column: Title + Win Rate */}
+                                    <div className="flex flex-col justify-between min-w-0">
+                                        <h4 className="text-sm font-bold text-white truncate pr-1">{def.name}</h4>
 
-                                    {/* Countdown Timer + Win Rate */}
-                                    <Countdown targetDate={occ.occursAt} />
-                                    <div className="text-[10px] text-neutral-400 mt-1">
-                                        公布後 2 日｜
+                                        {/* Bottom: Win Rate Context */}
                                         <span className={cn(
-                                            "font-bold",
-                                            winRate >= 55 ? "text-emerald-400" :
-                                                winRate <= 45 ? "text-red-400" :
+                                            "text-[10px] font-bold w-fit",
+                                            winRate >= 55 ? COLORS.positive :
+                                                winRate <= 45 ? COLORS.negative :
                                                     "text-neutral-300"
                                         )}>
                                             上漲機率 {winRate}%
                                         </span>
+                                    </div>
+
+                                    {/* Right Column: Time Anchor (Fixed Width visuals) */}
+                                    <div className="shrink-0 flex flex-col items-end justify-between">
+                                        {/* Top: Days Badge */}
+                                        <span className={cn(
+                                            "text-[9px] font-bold px-1.5 py-0.5 rounded text-center min-w-[32px]",
+                                            days <= 3
+                                                ? "bg-white/10 text-white"
+                                                : "bg-[#1A1A1A] text-neutral-500"
+                                        )}>
+                                            {days === 0 ? '今天' : days === 1 ? '明天' : `T-${days}`}
+                                        </span>
+
+                                        {/* Bottom: Countdown */}
+                                        <div className="scale-95 origin-bottom-right">
+                                            <Countdown targetDate={occ.occursAt} />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

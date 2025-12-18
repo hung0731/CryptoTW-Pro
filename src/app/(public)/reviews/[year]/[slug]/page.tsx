@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { EvidenceCard } from '@/components/EvidenceCard';
 import { DecisionCard } from '@/components/DecisionCard';
 import { ContextBlock } from '@/components/ContextBlock';
+import { StrategyCard } from '@/components/StrategyCard';
 
 export default function ReviewDetailPage() {
     const params = useParams();
@@ -291,22 +292,23 @@ export default function ReviewDetailPage() {
 
                 {/* 7. 未來警訊 */}
                 <section className="p-4 pt-0">
-                    <div className={CARDS.base + " " + SPACING.cardPadding}>
+                    <div className={CARDS.primary}>
                         <div className="flex items-center gap-2 mb-3">
                             <Lightbulb className="w-3.5 h-3.5 text-white" />
                             <h2 className={TYPOGRAPHY.cardSubtitle + " text-neutral-300"}>
                                 下一次需要注意的不是價格，而是：
                             </h2>
                         </div>
-                        <div className="space-y-3">
+                        <div className="flex flex-col gap-3">
                             {review.actionableChecklist.map((item, idx) => (
-                                <div key={idx} className="flex items-start gap-3">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-600 mt-1.5 flex-shrink-0" />
-                                    <p className={TYPOGRAPHY.bodySmall + " text-neutral-400"}>
-                                        <span className="text-neutral-200 font-medium">{item.label}</span>
-                                        {item.desc && ` — ${item.desc}`}
-                                    </p>
-                                </div>
+                                <StrategyCard
+                                    key={idx}
+                                    type={item.type as 'alert' | 'check' | 'insight'}
+                                    title={item.label}
+                                    content={item.desc}
+                                    citation={item.citation}
+                                    className="w-full"
+                                />
                             ))}
                         </div>
                     </div>

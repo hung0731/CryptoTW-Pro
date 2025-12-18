@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { CARDS, COLORS } from '@/lib/design-tokens'
 
 import { MarketContext } from '@/lib/types'
 
@@ -43,7 +44,14 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
     }, [initialContext])
 
     if (loading) {
-        return <Skeleton className="h-24 w-full bg-[#0E0E0F] rounded-xl" />
+        return (
+            <div className={cn("overflow-hidden flex flex-col justify-center", CARDS.primaryCompact, "p-4 min-h-[90px]")}>
+                <div className="space-y-3">
+                    <Skeleton className="h-4 w-3/4 bg-[#1A1A1A]" />
+                    <Skeleton className="h-4 w-1/2 bg-[#1A1A1A]" />
+                </div>
+            </div>
+        )
     }
 
     // Only show top 2 highlights for homepage (compact mode)
@@ -52,9 +60,9 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
     // Bias styling
     const getBiasStyle = (bias: string) => {
         switch (bias) {
-            case '偏多': return 'text-green-400'
-            case '偏空': return 'text-red-400'
-            default: return 'text-neutral-400'
+            case '偏多': return COLORS.positive
+            case '偏空': return COLORS.negative
+            default: return COLORS.textSecondary
         }
     }
 
@@ -64,7 +72,7 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
     }
 
     return (
-        <div className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl overflow-hidden">
+        <div className={cn("overflow-hidden flex flex-col", CARDS.primaryCompact, "p-0")}>
             {/* Compact: Only 2 impact factors with direction */}
             <div className="divide-y divide-white/5">
                 {displayItems.map((item, index) => (

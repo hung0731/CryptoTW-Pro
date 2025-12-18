@@ -53,7 +53,7 @@ export function UnifiedHeader({
     if (level === 'primary') {
         return (
             <header className={cn(
-                "sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5",
+                "sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-[#1A1A1A]",
                 className
             )}>
                 <div className="grid grid-cols-3 items-center px-4 h-14 max-w-lg mx-auto">
@@ -85,7 +85,7 @@ export function UnifiedHeader({
     if (level === 'secondary') {
         return (
             <header className={cn(
-                "sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5",
+                "sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-[#1A1A1A]",
                 className
             )}>
                 <div className="flex items-center px-4 h-14 max-w-lg mx-auto">
@@ -94,7 +94,7 @@ export function UnifiedHeader({
                             <ArrowLeft className="w-4 h-4 text-neutral-400" />
                         </Link>
                     ) : (
-                        <button onClick={handleBack} className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center mr-3">
+                        <button onClick={handleBack} className="w-9 h-9 rounded-lg bg-neutral-900 border border-[#1A1A1A] flex items-center justify-center mr-3">
                             <ArrowLeft className="w-4 h-4 text-neutral-400" />
                         </button>
                     )}
@@ -115,7 +115,7 @@ export function UnifiedHeader({
     // Tertiary level - Minimal back + title
     return (
         <header className={cn(
-            "sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5",
+            "sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-[#1A1A1A]",
             className
         )}>
             <div className="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
@@ -125,7 +125,7 @@ export function UnifiedHeader({
                             <ArrowLeft className="w-4 h-4 text-neutral-400" />
                         </Link>
                     ) : (
-                        <button onClick={handleBack} className="w-9 h-9 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-center mr-3">
+                        <button onClick={handleBack} className="w-9 h-9 rounded-lg bg-neutral-900 border border-[#1A1A1A] flex items-center justify-center mr-3">
                             <ArrowLeft className="w-4 h-4 text-neutral-400" />
                         </button>
                     )}

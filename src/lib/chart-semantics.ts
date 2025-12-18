@@ -293,3 +293,45 @@ export function canUseFixedAxis(indicatorId: string): boolean {
     const model = CHART_SEMANTIC_MODELS[indicatorId]
     return model?.yAxis.type === 'fixed'
 }
+
+/**
+ * 取得語意顏色
+ */
+export function getSemanticColor(value: number, model: ChartSemanticModel): string {
+    const { type } = model.colorSemantic
+    if (type === 'emotion') {
+        // FGI: High = Greed (Green), Low = Fear (Red)
+        return value >= 50 ? '#22c55e' : '#ef4444'
+    }
+    if (type === 'crowding') {
+        // Funding: Positive = Crowded (Red/Warning), Negative = Discount (Green/Opportunity)
+        return value > 0 ? '#ef4444' : '#22c55e'
+    }
+    if (type === 'direction') {
+        // Flow/Premium: Positive = Inflow/Premium (Green), Negative = Outflow/Discount (Red)
+        return value > 0 ? '#22c55e' : '#ef4444'
+    }
+    if (type === 'intensity') {
+        return '#f59e0b' // Orange
+    }
+    return '#808080'
+}
+
+/**
+ * Map ReviewChart type to Semantic Model ID
+ */
+export function mapReviewTypeToSemanticId(type: string): string | null {
+    const map: Record<string, string> = {
+        'fgi': 'fgi',
+        'funding': 'fundingRate',
+        'longShort': 'longShortRatio',
+        'liquidation': 'liquidation',
+        'flow': 'etfFlow',
+        'oi': 'openInterest',
+        'premium': 'premium',
+        'basis': 'basis',
+        'stablecoin': 'stablecoin',
+        // 'price' and 'supply' have no semantic model yet
+    }
+    return map[type] || null
+}

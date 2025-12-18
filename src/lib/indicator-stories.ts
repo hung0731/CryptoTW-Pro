@@ -109,11 +109,21 @@ export const ZONE_COLORS: Record<ZoneKey, { bg: string; text: string; border: st
     greed: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
 };
 
-// 根據指數值判斷所屬區間
-export function getZoneFromValue(value: number): ZoneKey {
+// 根據指數值判斷所屬區間 (FGI 專用)
+export function getFgiZone(value: number): ZoneKey {
     if (value <= 25) return 'fear';
     if (value <= 50) return 'lean_fear';
     if (value <= 75) return 'lean_greed';
+    return 'greed';
+}
+
+// 根據 IndicatorStory 配置計算區間 (通用)
+export function calculateStoryZone(value: number, story: IndicatorStory): ZoneKey {
+    const zones = story.chart.zones;
+    // Handle infinite ranges safely
+    if (value <= zones.fear.max) return 'fear';
+    if (value <= zones.leanFear.max) return 'lean_fear';
+    if (value <= zones.leanGreed.max) return 'lean_greed';
     return 'greed';
 }
 

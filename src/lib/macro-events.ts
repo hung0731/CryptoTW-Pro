@@ -294,9 +294,25 @@ export const getNextOccurrence = (eventKey: string): MacroEventOccurrence | unde
     return getFutureOccurrences(eventKey, 1)[0]
 }
 
+export const getTimePeriod = (hour: number): string => {
+    if (hour >= 0 && hour < 5) return '凌晨'
+    if (hour >= 5 && hour < 11) return '早上'
+    if (hour >= 11 && hour < 13) return '中午'
+    if (hour >= 13 && hour < 17) return '下午'
+    if (hour >= 17 && hour < 19) return '傍晚'
+    if (hour >= 19 && hour < 23) return '晚上'
+    return '半夜' // 23-24
+}
+
 export const formatOccursAt = (occursAt: string): string => {
     const date = new Date(occursAt)
-    return date.toLocaleString('zh-TW', {
+    // Create a date object in ET timezone to get the correct hour for the period
+    const etDateStr = date.toLocaleString('en-US', { timeZone: 'America/New_York' })
+    const etDate = new Date(etDateStr)
+    const hour = etDate.getHours()
+    const period = getTimePeriod(hour)
+
+    const formattedDate = date.toLocaleString('zh-TW', {
         timeZone: 'America/New_York',
         year: 'numeric',
         month: '2-digit',
@@ -304,7 +320,12 @@ export const formatOccursAt = (occursAt: string): string => {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
-    }) + ' (美東)'
+    })
+
+    // Insert period before time (Assuming format YYYY/MM/DD HH:mm)
+    // We want YYYY/MM/DD [Period] HH:mm
+    const [d, t] = formattedDate.split(' ')
+    return `${d} ${period} ${t} (美東)`
 }
 
 export const getDaysUntil = (occursAt: string): number => {

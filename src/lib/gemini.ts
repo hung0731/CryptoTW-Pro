@@ -1,8 +1,39 @@
+
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { formatTaiwaneseText, formatObjectStrings } from './format-utils'
 
 const apiKey = process.env.GEMINI_API_KEY
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
 export const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
+
+const VOICE_PACK = `
+【CryptoTW 台灣用語 Voice Pack（MANDATORY）】
+你是在台灣幣圈做交易的資深人，寫給台灣用戶看。
+
+語氣：直白、冷靜、像群組裡的老手，不做作、不官腔。
+句型：短句為主，少形容詞，多結論 + 依據。
+用詞偏好（優先用這些）：
+- 「美元」不是「美金」
+- 「回調」不是「回撤」
+- 「爆倉」/「清算」都可，但用一次就好，別來回切換
+- 「槓桿」/「籌碼」/「費率」/「OI」/「多空比」/「主力」/「散戶」/「大戶」
+- 「偏多」「偏空」「震盪」「觀望」「結構未破」「動能轉弱」「擁擠」「燃料耗盡」「雙爆」
+
+禁用詞（出現就算失敗）：
+- 「投資建議」「操作策略」「建議買入/賣出」「目標價」「止損」
+- 過度文青或媒體腔：「值得關注」「引發市場關注」「反映投資人信心」「情緒升溫」「市場觀望氣氛」
+- 中國用語：回撤、承压、走強、走弱（可用「轉強/轉弱」但不要「走強/走弱」）
+
+台灣慣用寫法：
+- 數字要具體（$ 多少 M、% 多少），不要「大量」「明顯」
+- 能用「先…再…」「如果…那…」「目前…但…」就用，避免長句
+- 句末不要驚嘆號
+`
+
+const CONSISTENCY_CHECK = `
+【一致性檢查】
+輸出前自檢：是否像台灣幣圈群組會講的話？若像新聞稿或研究報告，重寫成更口語、更短句。
+`
 
 export interface MarketSummaryResult {
     emoji: string
@@ -33,6 +64,8 @@ export async function generateAlertExplanation(alert: any): Promise<string | nul
     try {
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
         const prompt = `
+${VOICE_PACK}
+
 你是一個加密貨幣市場快訊解讀 AI。
 請將以下「市場快訊事件」翻譯成白話文，並解釋其「常見市場含義」。
 
@@ -42,16 +75,28 @@ export async function generateAlertExplanation(alert: any): Promise<string | nul
 3. ❌ 禁止預測未來價格
 4. ❌ 禁止給予投資建議 (如買入、賣出、止損)
 5. ✅ 重點解釋：這個訊號通常代表什麼？(例如：OI 上升代表波動可能放大)
-【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
+
+【寫法模板（必用其一）】
+- 「通常代表…，常見情況是…」
+- 「多半是…在動，後面容易看到…」
+- 「代表市場在…，波動通常會…」
+
+【輸出限制補充】
+- 最多 2 句
+- 每句不超過 22 字
+
+
 【快訊事件】
 類型：${alert.type}
 摘要：${alert.summary}
 數據：${JSON.stringify(alert.metrics)}
 
+${CONSISTENCY_CHECK}
+
 【輸出】(直接輸出文字，不要有其他廢話)
 `
         const result = await model.generateContent(prompt)
-        return result.response.text().trim()
+        return formatTaiwaneseText(result.response.text().trim())
     } catch (e) {
         console.error('Gemini Alert Explainer Error:', e)
         return null // Fallback to static text
@@ -72,6 +117,8 @@ export async function generateMarketSummary(
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
         const prompt = `
+${VOICE_PACK}
+
 你是專業的加密貨幣市場分析師。你的任務是綜合「新聞脈絡」與「技術數據」來解讀市場。
 
 【嚴重警告：禁止提供交易建議】
@@ -79,7 +126,7 @@ export async function generateMarketSummary(
 ✅ 必須使用：「市場結構」、「關注區」、「結構失效」、「潛在壓力」、「流動性分佈」
 
 【語氣與內容規範】
-1. **精準具體**：雖然要總結脈絡，但**必須包含關鍵人名或項目名稱** (如：川普、馬斯克、Hyperliquid、Uniswap)，避免過於模糊。
+1. **精準具體**：若輸入新聞沒有具體人名/項目，不可硬塞；改用「交易所 / ETF / 監管」等類別描述。
 2. **完全改寫**：請將新聞內化後，用**台灣幣圈常用語**重寫，嚴禁直接翻譯或抄錄。
 3. **因果整合**：整合「新聞消息」與「數據變化」的因果關係。
 
@@ -90,6 +137,11 @@ Alert Events (12H): ${recentAlerts.length > 0 ? JSON.stringify(recentAlerts, nul
 
 【輸入數據 2：消息面 (過去 24 小時新聞快訊 - 標題與重點)】
 ${rssTitles || '無新聞數據'}
+
+【headline 模板（擇一）】
+- 「BTC 震盪偏空，費率高但量縮」
+- 「消息偏多但籌碼擁擠，先看回調」
+- 「聯準會 + ETF 牽動節奏，結構未破」
 
 【輸出格式】(Strict JSON)
 
@@ -111,7 +163,14 @@ ${rssTitles || '無新聞數據'}
    - summary: 1-2 句市場關注焦點總結，需包含關鍵詞 (如：Base 鏈、川普政策)。
    - highlights: Array of { theme: "主題 (含關鍵名詞)", impact: "影響層面" } (2-4 個)
 
-【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
+【思考流程（不要輸出）】
+Step 1：用台灣幣圈口吻寫一句話結論與一句話依據。
+Step 1.5：扮演「反向交易者」進行批判，確認是否有誘多/誘空陷阱，稍微修正結論使其更穩健。
+Step 2：把 Step 1 的內容改寫成指定 JSON 欄位。
+
+${CONSISTENCY_CHECK}
+
+【輸出】只輸出 JSON。
 
 【JSON 範例】
 Note: emoji 必須根據 sentiment 選擇，例如：
@@ -151,10 +210,10 @@ Note: emoji 必須根據 sentiment 選擇，例如：
 
         if (jsonMatch) {
             const jsonStr = jsonMatch[1]
-            return JSON.parse(jsonStr)
+            return formatObjectStrings(JSON.parse(jsonStr))
         }
 
-        return JSON.parse(text)
+        return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
         console.error('Gemini Generation Error:', e)
@@ -167,6 +226,8 @@ export async function generateDerivativesSummary(data: any): Promise<string | nu
     try {
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
         const prompt = `
+${VOICE_PACK}
+
 你是一個加密貨幣衍生品交易專家。
 請根據以下「合約數據」生成一段簡短的「短線快照分析」。
 
@@ -174,7 +235,7 @@ export async function generateDerivativesSummary(data: any): Promise<string | nu
 1. 資金費率 (Funding Rate): ${JSON.stringify(data.fundingRates?.extremePositive?.[0] || {}, null, 2)} (正值=多頭付費)
 2. 爆倉數據 (Liquidation): 多單爆倉 ${data.liquidations?.summary?.longLiquidatedFormatted || '0'}, 空單爆倉 ${data.liquidations?.summary?.shortLiquidatedFormatted || '0'}
 3. 多空比 (Long/Short): ${data.longShort?.global?.longShortRatio || '未知'} (散戶情緒)
-【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
+
 【輸出要求】
 1. **長度限制**：50-80 字 (繁體中文)
 2. **語氣**：戰術性、簡潔、直接 (像交易室裡的對話)
@@ -187,10 +248,12 @@ export async function generateDerivativesSummary(data: any): Promise<string | nu
 「費率飆升顯示多頭過熱，且大戶多空比下降，暗示主力正在出貨。即使價格硬撐，短線追高風險極大，偏向反彈找空點。」
 「空單爆倉量巨大，顯示燃料已被清空。費率回歸中性，結構轉強，短線適合回調接多。」
 
+${CONSISTENCY_CHECK}
+
 請直接輸出分析內容，不要標題。
 `
         const result = await model.generateContent(prompt)
-        return result.response.text().trim()
+        return formatTaiwaneseText(result.response.text().trim())
     } catch (e) {
         console.error('Gemini Derivatives Summary Error:', e)
         return null
@@ -218,6 +281,8 @@ export async function generateMarketContextBrief(
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
         const prompt = `
+${VOICE_PACK}
+
 你是「加密台灣」資深編輯，負責每日幣圈快訊精選。
 你的讀者是台灣的加密貨幣交易者，他們需要快速掌握市場動態。
 
@@ -249,13 +314,6 @@ export async function generateMarketContextBrief(
 標題：「貝萊德單日吸金逾 7 億美元」
 說明：「持倉量創歷史新高，機構買盤穩定支撐價格，回調空間有限。」
 
-【排版規範】
-• 中英文之間加空格（BTC 價格）
-• 數字與中文之間加空格（超過 10 億）
-• 數字與單位不加空格（10%、100萬）
-• 中文用全形標點（，、。）
-• 專有名詞用官方寫法（OKX, Binance, SEC）
-
 【加權】優先亞洲時段消息、台灣用戶常用交易所（幣安、OKX、MAX）
 
 【排除】純技術更新、小幣空投、廣告軟文、重複消息
@@ -265,6 +323,13 @@ ${JSON.stringify(newsItems.slice(0, 40).map(n => ({
             t: n.newsflash_title || n.title,
             c: (n.newsflash_content || n.content || '').slice(0, 150)
         })))}
+
+【思考流程（不要輸出）】
+Step 1：用台灣幣圈口吻寫 summary。
+Step 1.5：扮演「反向交易者」進行批判，確認是否有誘多/誘空陷阱，稍微修正結論使其更穩健。
+Step 2：把內容改寫成指定 JSON 欄位。
+
+${CONSISTENCY_CHECK}
 
 【輸出格式】JSON，繁體中文
 {
@@ -286,10 +351,10 @@ ${JSON.stringify(newsItems.slice(0, 40).map(n => ({
         const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
 
         if (jsonMatch) {
-            return JSON.parse(jsonMatch[1] || jsonMatch[0])
+            return formatObjectStrings(JSON.parse(jsonMatch[1] || jsonMatch[0]))
         }
 
-        return JSON.parse(text)
+        return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
         console.error('Gemini Market Context Brief Error:', e)
@@ -340,7 +405,10 @@ export async function generateAIDecision(
         const liqDominant = liqDiff > 0 ? '多單' : liqDiff < 0 ? '空單' : '均衡'
 
         const prompt = `
+${VOICE_PACK}
+
 你是交易室的市場判讀 AI，給出「像下單前一秒」的結論，不是分析報告。
+你是風控，不是喊單。用「風險動作」描述，不用「交易動作」描述。
 
 ❌禁止：投資建議、目標價、止損價
 ✅必須：狀態描述、風險提示、結構判讀
@@ -363,14 +431,20 @@ export async function generateAIDecision(
     - 單邊爆倉明顯多 = 該方向燃料已消耗
         - 散戶與頂級交易員方向背離 = 潛在反轉風險
 
-【action 必須是以下其一】
-    - 追價風險高，等待回調
-        - 反彈找空點
-        - 回調接多
-        - 結構混亂，觀望
-            - 順勢偏多 / 偏空
+【action 必須是以下其一（台灣用語版）】
+- 追價風險高，先等等
+- 反彈先減壓
+- 回調再看（別急）
+- 結構很亂，先觀望
+- 順勢偏多（但別追）
+- 順勢偏空（留意雙爆）
 
-【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
+【思考流程（不要輸出）】
+Step 1：用台灣幣圈口吻寫 action 與 reasoning。
+Step 1.5：扮演「反向交易者」進行批判，確認是否有誘多/誘空陷阱，稍微修正結論使其更穩健。
+Step 2：把內容改寫成指定 JSON 欄位。
+
+${CONSISTENCY_CHECK}
 
 【輸出】JSON，繁體中文
     { "conclusion": "10-15字狀態", "bias": "偏多|偏空|震盪|中性", "risk_level": "低|中|中高|高", "action": "上述選項之一", "reasoning": "50-80字，提到具體數據", "tags": { "btc": "4字", "alt": "4字", "sentiment": "4字" } }
@@ -382,10 +456,10 @@ export async function generateAIDecision(
         const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
 
         if (jsonMatch) {
-            return JSON.parse(jsonMatch[1] || jsonMatch[0])
+            return formatObjectStrings(JSON.parse(jsonMatch[1] || jsonMatch[0]))
         }
 
-        return JSON.parse(text)
+        return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
         console.error('Gemini AI Decision Error:', e)
@@ -460,7 +534,10 @@ export async function generateDailyBroadcastPolish(
                 ? `OI ${oiChange > 0 ? '+' : ''}${oiChange.toFixed(1)}%`
                 : '極度清淡'
 
-        const prompt = `你是一個加密市場風控分析師，專為交易型 App 日報設計內容。
+        const prompt = `
+${VOICE_PACK}
+
+你是一個加密市場風控分析師，專為交易型 App 日報設計內容。
 
 系統已透過規則判斷今日市場立場為：「${decision.stance}」
 
@@ -509,11 +586,7 @@ export async function generateDailyBroadcastPolish(
   - 範例：「沒有方向時，耐心比判斷更重要」
   - 範例：「趨勢確認前，控制倉位優先」
 
-【排版規範】
-• 中英文之間加空格（如：BTC 價格）
-• 數字與中文之間加空格（如：超過 10 億）
-• 數字與單位不加空格（如：10%、100萬）
-• 中文用全形標點（，、。）
+${CONSISTENCY_CHECK}
 
 輸出純 JSON，不要有其他文字。`
 
@@ -522,10 +595,10 @@ export async function generateDailyBroadcastPolish(
 
         const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
         if (jsonMatch) {
-            return JSON.parse(jsonMatch[1] || jsonMatch[0])
+            return formatObjectStrings(JSON.parse(jsonMatch[1] || jsonMatch[0]))
         }
 
-        return JSON.parse(text)
+        return formatObjectStrings(JSON.parse(text))
     } catch (e) {
         console.error('[Daily Broadcast] AI Polish Error:', e)
         return null
@@ -642,7 +715,10 @@ export async function generateIndicatorSummary(
 - 24 小時: ${formatChange(data.btcPrice.change24h)}
 ` : ''
 
-        const prompt = `你是「加密台灣」的技術分析師，根據鏈上指標與價格數據生成客觀市場解讀。
+        const prompt = `
+${VOICE_PACK}
+
+你是「加密台灣」的技術分析師，根據鏈上指標與價格數據生成客觀市場解讀。
 
 【重要限制 - 嚴格遵守】
 ❌ 禁止：任何投資建議、價格預測、買賣時機
@@ -677,14 +753,14 @@ ${data.etfNetFlow !== undefined ? `- ETF 淨流入: $${data.etfNetFlow.toFixed(0
 【範例】
 「BTC 現價 $104,200，短線 1H 下跌 0.8%，但 4H 仍維持上漲 1.2%。資金費率偏高（0.03%），爆倉以多單為主（$8M）。若短線跌勢擴大而費率未降，需關注多頭止損風險。」
 
-【排版】中英文/數字之間加空格。中文用全形標點。
+${CONSISTENCY_CHECK}
 
 僅輸出純文字總結，不需要 JSON 格式。`
 
         const result = await model.generateContent(prompt)
         const text = result.response.text().trim()
 
-        return { summary: text }
+        return { summary: formatTaiwaneseText(text) }
     } catch (e) {
         console.error('Gemini Indicator Summary Error:', e)
         return null
@@ -773,7 +849,10 @@ export async function generateCalendarSummary(
   ${e.lastEvent ? `上次結果: 預期 ${e.lastEvent.forecast ?? '-'} vs 實際 ${e.lastEvent.actual ?? '-'}，BTC D+1 ${e.lastEvent.d1Return !== undefined ? (e.lastEvent.d1Return > 0 ? '+' : '') + e.lastEvent.d1Return.toFixed(1) + '%' : '-'}` : ''}`
         }).join('\n\n')
 
-        const prompt = `你是「加密台灣」的宏觀事件分析師，專門為台灣交易者提供事件行情預判。
+        const prompt = `
+${VOICE_PACK}
+
+你是「加密台灣」的宏觀事件分析師，專門為台灣交易者提供事件行情預判。
 
 【今日日期】${todayStr}（台灣時間）
 
@@ -802,14 +881,14 @@ ${eventsDescription}
 
 「FOMC 利率決議將於後天凌晨 3:00 公布。過去 8 次紀錄顯示，BTC D+1 平均波動 4.2%。若維持利率不變且措辭偏鴿，歷史顯示市場反應偏正面。」
 
-【排版】中英文/數字之間加空格。
+${CONSISTENCY_CHECK}
 
 僅輸出純文字總結，不需要 JSON 格式。確保輸出完整，條件句不可截斷。`
 
         const result = await model.generateContent(prompt)
         const text = result.response.text().trim()
 
-        return { summary: text }
+        return { summary: formatTaiwaneseText(text) }
     } catch (e) {
         console.error('Gemini Calendar Summary Error:', e)
         return null

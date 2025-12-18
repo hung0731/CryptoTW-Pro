@@ -3,9 +3,10 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { CARDS } from '@/lib/design-tokens'
+import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { ChevronRight } from 'lucide-react'
-import { INDICATOR_STORIES, IndicatorStory, ZONE_COLORS, getZoneLabel } from '@/lib/indicator-stories'
+import { INDICATOR_STORIES, IndicatorStory, ZONE_COLORS, getZoneLabel, calculateStoryZone } from '@/lib/indicator-stories'
+import { formatLargeNumber, formatSmallPercent, formatRatio } from '@/lib/format-helpers'
 
 // 首頁精華：最重要的 5 個指標（按熱門程度排序）
 const TOP_INDICATORS = [
@@ -26,25 +27,6 @@ interface IndicatorStatus {
     loading: boolean
 }
 
-// 根據指標的 zones 配置計算 zone
-function calculateZone(value: number, story: IndicatorStory): 'fear' | 'lean_fear' | 'lean_greed' | 'greed' {
-    const zones = story.chart.zones;
-    if (value <= zones.fear.max) return 'fear';
-    if (value <= zones.leanFear.max) return 'lean_fear';
-    if (value <= zones.leanGreed.max) return 'lean_greed';
-    return 'greed';
-}
-
-// 格式化數值顯示
-function formatValue(value: number, story: IndicatorStory): string {
-    const format = story.chart.valueFormat;
-    const unit = story.chart.unit;
-    if (format === 'percent') return `${value.toFixed(3)}%`;
-    if (format === 'ratio') return value.toFixed(2);
-    if (unit === 'M') return `$${value.toFixed(0)}M`;
-    if (unit === 'B') return `$${value.toFixed(1)}B`;
-    return value.toFixed(0);
-}
 
 const CARD_WIDTH = 144; // w-36 = 9rem = 144px
 const GAP = 12; // gap-3 = 0.75rem = 12px
@@ -129,14 +111,26 @@ export function SentimentMatrix() {
                         value = json.history[json.history.length - 1].value
                     }
 
-                    const zone = calculateZone(value, story)
+
+                    const zone = calculateStoryZone(value, story)
                     const zoneLabel = getZoneLabel(story.id, zone)
+
+                    let displayValue = value.toFixed(0)
+                    const { valueFormat, unit } = story.chart
+
+                    if (valueFormat === 'percent') {
+                        displayValue = formatSmallPercent(value)
+                    } else if (valueFormat === 'ratio') {
+                        displayValue = formatRatio(value)
+                    } else if (unit === 'M' || unit === 'B') {
+                        displayValue = formatLargeNumber(value, '$')
+                    }
 
                     return {
                         slug,
                         name: story.name,
                         value,
-                        displayValue: formatValue(value, story),
+                        displayValue,
                         zone,
                         zoneLabel,
                         loading: false
@@ -164,11 +158,11 @@ export function SentimentMatrix() {
     }, [])
 
     return (
-        <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider">市場核心指標</h3>
-                <Link href="/indicators" className="text-[10px] text-neutral-600 hover:text-neutral-400 flex items-center gap-1">
-                    查看全部
+        <div className={CARDS.primary}>
+            <div className="flex items-center justify-between mb-4">
+                <h3 className={TYPOGRAPHY.cardTitle}>市場核心指標</h3>
+                <Link href="/indicators" className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-1">
+                    更多
                     <ChevronRight className="w-3 h-3" />
                 </Link>
             </div>
@@ -179,7 +173,10 @@ export function SentimentMatrix() {
                 onTouchStart={stopAutoScroll}
                 onMouseDown={stopAutoScroll}
                 onScroll={handleScroll}
-                className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory"
+                className={cn(
+                    "flex items-center overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory",
+                    SPACING.listGap
+                )}
             >
                 {indicators.map((item) => {
                     const colors = ZONE_COLORS[item.zone]
@@ -189,39 +186,39 @@ export function SentimentMatrix() {
                             key={item.slug}
                             className={cn(
                                 "flex-none w-36 h-28 relative overflow-hidden group snap-center",
-                                CARDS.secondary,
-                                "border border-[#1A1A1A]",
-                                "hover:border-[#3A3A3A]"
+                                "bg-[#141414] rounded-lg"
                             )}
                         >
-                            <Link href={`/indicators/${item.slug}`} className="block p-4 h-full w-full flex flex-col justify-between">
-                                {/* Header */}
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-medium text-neutral-400 truncate pr-2">
+                            <Link href={`/indicators/${item.slug}`} className="block p-3 h-full w-full relative group">
+                                {/* Header Row: Name vs Status (Right Anchor) */}
+                                <div className="flex items-start justify-between gap-2">
+                                    <span className="text-xs font-medium text-neutral-400 truncate leading-tight mt-0.5">
                                         {item.name}
                                     </span>
-                                    <ChevronRight className="w-3.5 h-3.5 text-[#808080] group-hover:text-white" />
+
+                                    {/* Status Badge - Moved to Top Right as Visual Anchor */}
+                                    <div className={cn(
+                                        "shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[9px] font-medium border",
+                                        colors.bg,
+                                        colors.text,
+                                        colors.border
+                                    )}>
+                                        <div className={cn("w-1 h-1 rounded-full", colors.text.replace('text-', 'bg-'))} />
+                                        {item.loading ? '...' : item.zoneLabel}
+                                    </div>
                                 </div>
 
-                                {/* Value */}
-                                <div className="mt-2">
+                                {/* Bottom Row: Large Value vs Action */}
+                                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
                                     <div className={cn(
-                                        "text-xl font-bold font-mono tracking-tight",
+                                        "text-xl font-bold font-mono tracking-tight leading-none",
                                         item.loading ? "animate-pulse bg-neutral-800 text-transparent rounded w-16" : "text-white"
                                     )}>
                                         {item.displayValue}
                                     </div>
-                                </div>
 
-                                {/* Status Bar - 使用語意化標籤 */}
-                                <div className={cn(
-                                    "flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium w-fit",
-                                    colors.bg,
-                                    colors.text,
-                                    "border", colors.border
-                                )}>
-                                    <div className={cn("w-1.5 h-1.5 rounded-full", colors.text.replace('text-', 'bg-'))} />
-                                    {item.loading ? '載入中...' : item.zoneLabel}
+                                    {/* Chevron as Bottom Right Anchor */}
+                                    <ChevronRight className="w-3.5 h-3.5 text-neutral-700 group-hover:text-neutral-400 transition-colors" />
                                 </div>
                             </Link>
                         </div>

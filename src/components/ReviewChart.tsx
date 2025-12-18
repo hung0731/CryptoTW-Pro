@@ -8,8 +8,9 @@ import {
 } from 'recharts'
 import { ZoomIn, RotateCcw } from 'lucide-react'
 import { format } from 'date-fns'
-import { CHART } from '@/lib/design-tokens'
-import { formatPercent, formatPrice } from '@/lib/format-helpers'
+import { CHART, COLORS } from '@/lib/design-tokens'
+import { formatPercent, formatPrice, formatSmallPercent, formatRatio } from '@/lib/format-helpers'
+import { getChartSemanticModel, getSemanticColor, mapReviewTypeToSemanticId } from '@/lib/chart-semantics'
 
 // Static Data Import
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
@@ -21,7 +22,7 @@ interface ReviewChartProps {
     eventStart: string;
     eventEnd: string;
     daysBuffer?: number; // Optional buffer days to show context
-    className?: string;
+    className?: string; // Default: CHART.heightDefault set in container
     reviewSlug?: string; // New prop to identify which review's data to pick
     focusWindow?: [number, number];
     isPercentage?: boolean;
@@ -174,56 +175,53 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     // Custom Tooltip
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
+            const val = Number(payload[0].value)
+            const semanticId = mapReviewTypeToSemanticId(type)
+            const model = semanticId ? getChartSemanticModel(semanticId) : null
+            const explanation = model ? model.getTooltipExplanation(val) : ''
+
             return (
                 <div className={CHART.tooltip.container}>
                     <p className={CHART.tooltip.date}>{label}</p>
                     <p className={CHART.tooltip.value}>
                         {type === 'price' && (
                             isPercentage
-                                ? <span className={payload[0].payload.percentage >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                ? <span className={payload[0].payload.percentage >= 0 ? COLORS.positive : COLORS.negative}>
                                     {formatPercent(payload[0].payload.percentage)}
                                 </span>
-                                : formatPrice(Number(payload[0].value))
+                                : formatPrice(val)
                         )}
-                        {type === 'flow' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
+                        {type === 'supply' && `${val.toLocaleString()}`}
+
+                        {model && (
+                            <>
+                                <span style={{ color: getSemanticColor(val, model) }}>
+                                    {type === 'funding' || type === 'premium' ? formatSmallPercent(val) :
+                                        type === 'fgi' ? val.toFixed(0) :
+                                            type === 'longShort' ? formatRatio(val) :
+                                                type === 'basis' ? `${val.toFixed(2)}%` :
+                                                    type === 'flow' || type === 'liquidation' ? `$${(val / 1000000).toFixed(1)}M` :
+                                                        type === 'stablecoin' ? `$${(val / 1000000000).toFixed(2)}B` :
+                                                            val}
+                                </span>
+                                {explanation && (
+                                    <span className="block text-[10px] text-neutral-500 mt-0.5">
+                                        {explanation}
+                                    </span>
+                                )}
+                            </>
+                        )}
+
+                        {/* Fallback for OI if no model logic matches exactly what we had (OI used logic inside tooltip previously?)
+                            OI maps to 'openInterest'. model.getTooltipExplanation handles it.
+                         */}
+
+                        {/* Specific fix for OI percentage display which is special in ReviewChart */}
                         {type === 'oi' && (
-                            <span className={payload[0].payload.percentage >= 0 ? 'text-green-400' : 'text-red-400'}>
+                            <span className={payload[0].payload.percentage >= 0 ? COLORS.positive : COLORS.negative}>
                                 {formatPercent(payload[0].payload.percentage)}
                             </span>
                         )}
-                        {type === 'supply' && `${Number(payload[0].value).toLocaleString()}`}
-                        {type === 'fgi' && `${Number(payload[0].value)}`}
-                        {type === 'funding' && (
-                            <>
-                                <span className={Number(payload[0].value) > 0 ? 'text-red-400' : 'text-green-400'}>
-                                    {Number(payload[0].value).toFixed(4)}%
-                                </span>
-                                <span className="block text-[10px] text-neutral-500 mt-0.5">
-                                    {Number(payload[0].value) > 0.05 ? '多頭擁擠（不利追多）' : Number(payload[0].value) < -0.02 ? '空頭擁擠（不利追空）' : '正常範圍'}
-                                </span>
-                            </>
-                        )}
-                        {type === 'liquidation' && `$${(Number(payload[0].value) / 1000000).toFixed(1)}M`}
-                        {type === 'longShort' && (
-                            <>
-                                <span>{Number(payload[0].value).toFixed(2)}</span>
-                                <span className="block text-[10px] text-neutral-500 mt-0.5">
-                                    {Number(payload[0].value) > 1.5 ? '散戶極端偏多' : Number(payload[0].value) > 1.2 ? '散戶偏多' : Number(payload[0].value) < 0.67 ? '散戶極端偏空' : Number(payload[0].value) < 0.83 ? '散戶偏空' : '多空均衡'}
-                                </span>
-                            </>
-                        )}
-                        {type === 'basis' && `${Number(payload[0].value).toFixed(2)}%`}
-                        {type === 'premium' && (
-                            <>
-                                <span className={Number(payload[0].value) > 0 ? 'text-green-400' : 'text-red-400'}>
-                                    {Number(payload[0].value).toFixed(4)}%
-                                </span>
-                                <span className="block text-[10px] text-neutral-500 mt-0.5">
-                                    {Number(payload[0].value) > 0.1 ? '美國機構需求強' : Number(payload[0].value) < -0.1 ? '亞洲主導或賣壓' : '區域均衡'}
-                                </span>
-                            </>
-                        )}
-                        {type === 'stablecoin' && `$${(Number(payload[0].value) / 1000000000).toFixed(2)}B`}
                     </p>
                     {isPercentage && type === 'price' && (
                         <p className="text-neutral-500 text-[10px] mt-1">
@@ -239,7 +237,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     if (!data || data.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">尚無數據</div>
 
     return (
-        <div className={`w-full h-full relative ${className}`}>
+        <div className={`w-full relative ${className || CHART.heightDefault}`}>
             {focusWindow && (
                 <div className="absolute top-2 right-2 z-20 flex gap-1 bg-black/50 backdrop-blur rounded-lg p-0.5 border border-white/10">
                     <button
@@ -387,12 +385,13 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
                         <Bar
                             dataKey="flow"
-                            fill="#ef4444" // Default color, using Cell for dynamic colors below if needed but simple for now to fix lint
+                            fill="#ef4444"
                         >
                             {
-                                data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.flow > 0 ? '#22c55e' : '#ef4444'} />
-                                ))
+                                data.map((entry, index) => {
+                                    const model = getChartSemanticModel('etfFlow')
+                                    return <Cell key={`cell-${index}`} fill={model ? getSemanticColor(entry.flow, model) : '#ef4444'} />
+                                })
                             }
                         </Bar>
                     </BarChart>
@@ -458,9 +457,10 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <ReferenceLine y={0.05} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '多頭擁擠', position: 'insideTopRight', fill: '#ef4444', fontSize: 8, opacity: 0.7 }} />
                         <ReferenceLine y={-0.02} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '空頭擁擠', position: 'insideBottomRight', fill: '#22c55e', fontSize: 8, opacity: 0.7 }} />
                         <Bar dataKey="fundingRate" fill="#eab308">
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fundingRate > 0 ? '#ef4444' : '#22c55e'} />
-                            ))}
+                            {data.map((entry, index) => {
+                                const model = getChartSemanticModel('fundingRate')
+                                return <Cell key={`cell-${index}`} fill={model ? getSemanticColor(entry.fundingRate, model) : '#eab308'} />
+                            })}
                         </Bar>
                     </BarChart>
                 ) : type === 'liquidation' ? (
@@ -580,9 +580,10 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
                         <ReferenceLine y={0} stroke="#333" />
                         <Bar dataKey="premium">
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.premium > 0 ? '#22c55e' : '#ef4444'} />
-                            ))}
+                            {data.map((entry, index) => {
+                                const model = getChartSemanticModel('premium')
+                                return <Cell key={`cell-${index}`} fill={model ? getSemanticColor(entry.premium, model) : '#22c55e'} />
+                            })}
                         </Bar>
                     </BarChart>
                 ) : type === 'stablecoin' ? (

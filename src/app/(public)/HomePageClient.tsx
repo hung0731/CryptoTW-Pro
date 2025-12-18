@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
+import { cn } from '@/lib/utils'
 import {
     Bell, Settings, ChevronRight, Sparkles
 } from 'lucide-react'
@@ -14,6 +15,7 @@ import { UpcomingEventsCard } from '@/components/home/UpcomingEventsCard'
 import { FeaturedReviewsCard } from '@/components/home/FeaturedReviewsCard'
 import { SentimentMatrix } from '@/components/home/SentimentMatrix'
 import { MacroReaction } from '@/lib/macro-events'
+import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens'
 
 import { ActionCard } from '@/components/home/ActionCard'
 import { CandlestickChart, Activity, DollarSign, Wallet } from 'lucide-react'
@@ -108,7 +110,7 @@ export function HomePageClient({
                 {/* Unlock CTA (Non-Pro Users) */}
                 {!isPro && (
                     <Link href="/join" className="block">
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-[#0A0A0A] border border-[#1A1A1A] hover:border-[#2A2A2A]">
+                        <div className={cn("flex items-center justify-between", CARDS.secondary)}>
                             <div className="flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-white" />
                                 <span className="text-sm font-medium text-white">解鎖完整 Pro 功能</span>
@@ -130,7 +132,7 @@ export function HomePageClient({
 
                 {/* ===== Context Section ===== */}
                 <section className="space-y-3">
-                    <h2 className="text-base font-bold text-white pl-1">📅 接下來會發生什麼</h2>
+                    <h2 className={cn(TYPOGRAPHY.sectionTitle, "pl-1")}>📅 接下來會發生什麼</h2>
                     <UpcomingEventsCard reactions={reactions} />
                     <FlashNewsFeed compact initialContext={initialContext} />
                     <FeaturedReviewsCard />
@@ -138,7 +140,7 @@ export function HomePageClient({
 
                 {/* ===== Discovery Section ===== */}
                 <section className="space-y-3">
-                    <h2 className="text-base font-bold text-white pl-1">🔍 挖更深</h2>
+                    <h2 className={cn(TYPOGRAPHY.sectionTitle, "pl-1")}>🔍 挖更深</h2>
 
                     {/* Instrument Tiles (No meta descriptions) */}
                     <div className="grid grid-cols-2 gap-3">

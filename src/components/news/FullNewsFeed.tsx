@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SkeletonCard } from '@/components/ui/SkeletonCard'
 import { AISummaryCard } from '@/components/ui/AISummaryCard'
+import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens'
 
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
@@ -44,9 +46,9 @@ export function FullNewsFeed() {
         return (
             <div className="space-y-4">
                 <AISummaryCard summary="" loading={true} />
-                <div className="space-y-2">
+                <div className="space-y-4">
                     {[1, 2, 3, 4, 5].map(i => (
-                        <Skeleton key={i} className="h-12 w-full bg-[#1A1A1A] rounded-lg" />
+                        <SkeletonCard key={i} />
                     ))}
                 </div>
             </div>
@@ -54,7 +56,7 @@ export function FullNewsFeed() {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             {/* AI Summary Card - Dedicated Component */}
             <AISummaryCard
                 summary={marketContext?.summary || '正在分析市場快訊...'}
@@ -62,7 +64,7 @@ export function FullNewsFeed() {
             />
 
             {/* Section Header */}
-            <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider px-1">
+            <h3 className={cn(TYPOGRAPHY.sectionLabel, "px-1")}>
                 今日重點快訊
             </h3>
 
@@ -71,7 +73,7 @@ export function FullNewsFeed() {
                 {marketContext?.highlights?.map((item, index) => (
                     <div
                         key={index}
-                        className="group bg-[#0A0A0A] hover:bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg px-4 py-3"
+                        className={cn("group flex flex-col", CARDS.secondary)}
                     >
                         <div className="flex items-center gap-3">
                             {/* Rank Number */}

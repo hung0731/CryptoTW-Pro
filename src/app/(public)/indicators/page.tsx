@@ -127,31 +127,40 @@ function IndicatorEntryCard({
     return (
         <Link href={`/indicators/${story.slug}`} className="block group">
             <div className={cn(
-                CARDS.primary,
-                "p-4 hover:bg-[#0E0E0F] hover:border-[#2A2A2A]"
+                CARDS.secondary,
+                "transition-colors duration-0 overflow-hidden relative"
             )}>
-                <div className="flex items-center justify-between">
-                    <div className="space-y-1 flex-1 min-w-0">
-                        <h3 className={cn(TYPOGRAPHY.cardTitle)}>{story.name}</h3>
-                        <p className={cn("text-xs truncate", COLORS.textSecondary)}>
-                            {liveData?.loading ? '載入中...' : description}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                        {liveData?.loading ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
-                        ) : liveData?.value !== undefined ? (
-                            <span className={cn("text-lg font-mono font-bold", zoneColors.text)}>
-                                {formatValue(liveData.value, story)}
+                <div className="flex flex-col gap-3">
+                    {/* Header Row: Name vs Status (Right Anchor) */}
+                    <div className="flex items-start justify-between">
+                        <h3 className={cn(TYPOGRAPHY.cardTitle, "mt-0.5")}>{story.name}</h3>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <span className={cn(
+                                "text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap border",
+                                zoneColors.bg, zoneColors.text, zoneColors.border
+                            )}>
+                                {liveData?.loading ? '...' : zoneLabel}
                             </span>
-                        ) : null}
-                        <span className={cn(
-                            "text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap",
-                            zoneColors.bg, zoneColors.text
-                        )}>
-                            {liveData?.loading ? '...' : zoneLabel}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-[#525252] group-hover:text-white" />
+                        </div>
+                    </div>
+
+                    {/* Bottom Row: Description vs Value (Diagonal Balance) */}
+                    <div className="flex items-end justify-between gap-4">
+                        <p className={cn("text-xs truncate text-neutral-500 max-w-[65%]", COLORS.textSecondary)}>
+                            {liveData?.loading ? '分析中...' : description}
+                        </p>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                            {liveData?.loading ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
+                            ) : liveData?.value !== undefined ? (
+                                <span className={cn("text-lg font-mono font-bold leading-none", zoneColors.text)}>
+                                    {formatValue(liveData.value, story)}
+                                </span>
+                            ) : null}
+                            <ChevronRight className="w-3.5 h-3.5 text-neutral-700 group-hover:text-neutral-400 mb-0.5" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -358,7 +367,7 @@ export default function IndicatorsPage() {
                 backLabel="返回"
             />
 
-            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+            <div className="max-w-3xl mx-auto px-4 pt-6 pb-24 space-y-6">
                 {/* AI 總結卡片 */}
                 <AISummaryCard
                     summary={aiSummary || '正在分析各項指標數據...'}

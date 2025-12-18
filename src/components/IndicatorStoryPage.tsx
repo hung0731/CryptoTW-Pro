@@ -8,6 +8,7 @@ import { CARDS, TYPOGRAPHY, COLORS, SPACING, CHART } from '@/lib/design-tokens';
 import { IndicatorStory, ZONE_COLORS, getZoneLabel, YAxisModel } from '@/lib/indicator-stories';
 import { REVIEWS_DATA } from '@/lib/reviews-data';
 import { getIndicatorExplanation, CHART_SEMANTIC_MODELS } from '@/lib/chart-semantics';
+import { getRelatedEvents } from '@/lib/semantic-linkage';
 
 // ================================================
 // SECTION CARD - 統一容器
@@ -719,19 +720,77 @@ function UseCaseList({ useCases }: UseCaseListProps) {
 }
 
 // ================================================
-// ③ HISTORICAL CASES - 例題：當這張圖長這樣時
+// ④ RELATED EVENT TYPES - 這個指標在哪些事件特別有用？ (Reverse Citation)
+// ================================================
+interface RelatedEventTypesProps {
+    indicatorSlug: string;
+}
+
+function RelatedEventTypes({ indicatorSlug }: RelatedEventTypesProps) {
+    const relatedEvents = getRelatedEvents(indicatorSlug);
+    if (relatedEvents.length === 0) return null;
+
+    return (
+        <SectionCard>
+            <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-3")}>此指標特別適用於</h2>
+            <div className="space-y-3">
+                {relatedEvents.map((evt, idx) => (
+                    <Link
+                        key={idx}
+                        href={`/reviews/2024/${evt.slug}`}
+                        className={cn(CARDS.secondary, "block group relative overflow-hidden")}
+                    >
+                        {/* Bg Gradient Hint */}
+                        <div className="absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-blue-500/10 to-transparent" />
+
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                {/* Event Thumbnail Mock */}
+                                <div className="w-10 h-10 rounded bg-[#1A1A1A] flex items-center justify-center border border-[#333]">
+                                    <span className="text-[10px] font-bold text-neutral-400">{evt.eventName}</span>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                        <span className={cn("text-xs font-bold", COLORS.textPrimary)}>
+                                            {evt.context}
+                                        </span>
+                                        <div className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[9px] font-bold border border-blue-500/30">
+                                            命中率 {evt.hitRate}
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-neutral-500">
+                                        點擊查看：回顧 {evt.eventName} 事件中的指標表現
+                                    </p>
+                                </div>
+                            </div>
+
+                            <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </SectionCard>
+    );
+}
+
+// ================================================
+// ③ HISTORICAL CASES - 指標實戰：這個指標在哪些事件特別有用？
 // ================================================
 interface HistoricalCasesProps {
     cases: IndicatorStory['historicalCases'];
+    storyName: string;
 }
 
-function HistoricalCases({ cases }: HistoricalCasesProps) {
+function HistoricalCases({ cases, storyName }: HistoricalCasesProps) {
     return (
         <SectionCard>
-            <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-1")}>當這張圖長這樣時</h2>
-            <p className={cn(TYPOGRAPHY.caption, "mb-4")}>歷史發生過什麼？</p>
+            <div className="mb-4">
+                <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-1 text-neutral-400")}>📌 這個指標，在哪些事件特別有用？</h2>
+                <p className={cn(TYPOGRAPHY.caption)}>點擊卡片，用「{storyName}」視角重看當次行情</p>
+            </div>
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {cases.map((c, idx) => {
                     const review = REVIEWS_DATA.find(r => r.id === c.reviewId);
 
@@ -739,9 +798,13 @@ function HistoricalCases({ cases }: HistoricalCasesProps) {
                         <Link
                             key={idx}
                             href={review ? `/reviews/${review.year}/${review.slug}` : '#'}
-                            className="block group"
+                            className="block group h-full"
                         >
                             <div className={cn(
+                                "h-full flex flex-col justify-between",
+                                "bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-4",
+                                "transition-all duration-300",
+                                "group-hover:border-[#333] group-hover:bg-[#0F0F10] group-hover:scale-[1.01]",
                                 CARDS.secondary,
                                 "p-4 border border-transparent hover:border-[#2A2A2A]"
                             )}>
@@ -798,7 +861,7 @@ function HistoricalCases({ cases }: HistoricalCasesProps) {
                                 {/* CTA */}
                                 <div className="mt-2 text-right">
                                     <span className={cn("text-[10px]", COLORS.textTertiary, "group-hover:text-white")}>
-                                        查看完整復盤 →
+                                        前往事件回測 &rarr;
                                     </span>
                                 </div>
                             </div>
@@ -895,8 +958,12 @@ export default function IndicatorStoryPage({ story }: IndicatorStoryPageProps) {
                 {/* ② 這個指標在判斷什麼？ */}
                 <UseCaseList useCases={story.useCases} />
 
+                {/* ④ Related Event Types (Reverse Citation) */}
+                <RelatedEventTypes indicatorSlug={story.id} />
+
                 {/* ③ 例題：歷史案例 */}
-                <HistoricalCases cases={story.historicalCases} />
+                {/* ⑤ 歷史案例 (Pattern 3: Reverse Citation) */}
+                <HistoricalCases cases={story.historicalCases} storyName={story.name} />
 
                 {/* ④ 行動指引 */}
                 <ActionGuidelines

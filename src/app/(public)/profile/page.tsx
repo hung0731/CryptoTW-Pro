@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useLiff } from '@/components/LiffProvider'
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -12,6 +13,7 @@ import {
     Bookmark, Settings, Shield
 } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
+import { CARDS, SPACING } from '@/lib/design-tokens'
 
 function MenuLink({
     icon: Icon,
@@ -27,7 +29,7 @@ function MenuLink({
     external?: boolean
 }) {
     const content = (
-        <div className="flex items-center justify-between p-4 hover:bg-[#0E0E0F] rounded-xl">
+        <div className="flex items-center justify-between p-4 hover:bg-[#0E0E0F] rounded-xl transition-colors">
             <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center">
                     <Icon className="w-4 h-4 text-neutral-400" />
@@ -112,11 +114,11 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-black text-white font-sans pb-24">
             <PageHeader showLogo />
 
-            <div className="px-4 py-6 max-w-lg mx-auto space-y-5">
+            <div className={`px-4 pt-6 max-w-lg mx-auto ${SPACING.sectionGap}`}>
 
                 {/* Profile Card */}
                 <section>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-neutral-900/50 border border-white/5">
+                    <div className={cn("flex items-center gap-4 p-4", CARDS.primary)}>
                         <Avatar className="h-16 w-16 ring-2 ring-white/10 shadow-lg">
                             <AvatarImage src={profile?.pictureUrl} />
                             <AvatarFallback><User className="h-8 w-8 text-neutral-500" /></AvatarFallback>
@@ -139,7 +141,7 @@ export default function ProfilePage() {
                 {/* Quick Actions */}
                 <section>
                     <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">設定</h2>
-                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 divide-y divide-white/5">
+                    <div className={cn("bg-neutral-900/50 rounded-xl border border-white/5 divide-y divide-white/5", CARDS.primary)}>
                         <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
                         <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
                         <MenuLink icon={Crown} label="VIP 計劃" href="/join" />
@@ -149,7 +151,7 @@ export default function ProfilePage() {
                 {/* More */}
                 <section>
                     <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3 px-1">更多</h2>
-                    <div className="bg-neutral-900/50 rounded-xl border border-white/5 divide-y divide-white/5">
+                    <div className={cn("bg-neutral-900/50 rounded-xl border border-white/5 divide-y divide-white/5", CARDS.primary)}>
                         <MenuLink icon={Bookmark} label="我的收藏" href="/bookmarks" badge="即將推出" />
                         <MenuLink icon={HelpCircle} label="幫助中心" href="https://line.me/R/ti/p/@cryptotw" external />
                     </div>

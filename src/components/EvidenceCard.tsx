@@ -1,12 +1,13 @@
-'use client'
-
 import React from 'react'
 import { TrendingUp, BarChart2, Activity } from 'lucide-react'
 import { ReviewChart } from './ReviewChart'
+import { getChartCitation } from '@/lib/citation-mapping'
+import { SemanticChartCTA } from '@/components/citation/SemanticChartCTA'
+import { ResponsibilityDisclaimer } from '@/components/citation/ResponsibilityDisclaimer'
 
 interface EvidenceCardProps {
     title: string
-    chartType: 'price' | 'flow' | 'oi' | 'supply' | 'fgi'
+    chartType: 'price' | 'flow' | 'oi' | 'supply' | 'fgi' | 'funding' | 'liquidation' | 'longShort' | 'basis' | 'premium' | 'stablecoin'
     symbol: string
     daysBuffer?: number
     eventStart: string
@@ -50,6 +51,9 @@ export function EvidenceCard({
     const cleanTitle = title.replace(/^[📈📊🔍🧠⚠️✅\s]+/, '')
     const displayTitle = `${symbol}/USDT ${cleanTitle}`
 
+    // Get Semantic Citation Data
+    const citation = getChartCitation(chartType)
+
     return (
         <div className="rounded-lg border border-white/5 overflow-hidden" style={{ backgroundColor: '#0E0E0F' }}>
             {/* Unified Header (Title + Brand) */}
@@ -61,7 +65,16 @@ export function EvidenceCard({
                 <span className="text-[10px] text-neutral-600">加密台灣 Pro</span>
             </div>
             {/* Chart Area */}
-            <div className="aspect-video w-full relative" style={{ backgroundColor: '#0B0B0C' }}>
+            <div className="aspect-video w-full relative group/chart" style={{ backgroundColor: '#0B0B0C' }}>
+                {/* Pattern 1: Embedded CTA */}
+                {citation && (
+                    <SemanticChartCTA
+                        label={citation.ctaLabel}
+                        indicatorSlug={citation.indicatorSlug}
+                        className="opacity-0 group-hover/chart:opacity-100 translate-y-2 group-hover/chart:translate-y-0"
+                    />
+                )}
+
                 <ReviewChart
                     type={chartType}
                     symbol={symbol}
@@ -84,6 +97,14 @@ export function EvidenceCard({
                 ) : caption ? (
                     <p className="text-xs text-neutral-400 leading-relaxed">{caption.replace('圖表解讀：', '')}</p>
                 ) : null}
+
+                {/* Pattern 2: Responsibility Disclaimer - ONLY show if we have a citation mapping */}
+                {citation && (
+                    <ResponsibilityDisclaimer
+                        indicatorName={citation.indicatorName}
+                        indicatorSlug={citation.indicatorSlug}
+                    />
+                )}
             </div>
         </div>
     )

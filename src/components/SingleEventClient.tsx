@@ -9,9 +9,13 @@ import {
     getPastOccurrences,
     formatValue,
     getSurprise,
+    formatOccursAt,
     MacroEventOccurrence
 } from '@/lib/macro-events'
 import { SURFACE, COLORS, CARDS } from '@/lib/design-tokens'
+import { SemanticChartCTA } from '@/components/citation/SemanticChartCTA'
+import { ResponsibilityDisclaimer } from '@/components/citation/ResponsibilityDisclaimer'
+import { getRelatedIndicator } from '@/lib/semantic-linkage'
 
 // Types
 interface MacroReaction {
@@ -31,11 +35,15 @@ interface MacroReaction {
 interface SingleEventClientProps {
     eventKey: string
     reactions: Record<string, MacroReaction>
+    isDrawer?: boolean
 }
 
-export default function SingleEventClient({ eventKey, reactions }: SingleEventClientProps) {
+export default function SingleEventClient({ eventKey, reactions, isDrawer = false }: SingleEventClientProps) {
     const eventDef = getMacroEventDef(eventKey)!
     const pastOccurrences = getPastOccurrences(eventKey, 36)
+
+    // Get Connected Indicator Context
+    const relatedIndicator = getRelatedIndicator(eventKey)
 
     // Pre-process occurrences with reactions
     const occurrencesWithData = useMemo(() => {
@@ -252,13 +260,20 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
     }
 
     return (
-        <div className="max-w-3xl mx-auto pb-20">
+        <div className={cn("max-w-3xl mx-auto h-full overflow-y-auto no-scrollbar", isDrawer ? "pb-8" : "pb-20")}>
             {/* Header */}
-            <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
-                <Link href="/calendar" className="text-[#808080] hover:text-white flex items-center gap-1">
-                    <ArrowLeft className="w-5 h-5" />
-                    <span className="text-xs">返回日曆</span>
-                </Link>
+            <div className={cn(
+                "sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between",
+                isDrawer && "bg-black"
+            )}>
+                {!isDrawer && (
+                    <Link href="/calendar" className="text-[#808080] hover:text-white flex items-center gap-1">
+                        <ArrowLeft className="w-5 h-5" />
+                        <span className="text-xs">返回日曆</span>
+                    </Link>
+                )}
+                {isDrawer && <div />} {/* Spacer if drawer */}
+
                 <div className="text-sm font-bold truncate max-w-[200px] text-white flex items-center gap-2">
                     <span className="text-base font-mono">{eventDef.icon}</span>
                     <div className="flex flex-col">
@@ -316,7 +331,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                 )}
 
                 {/* 2. Chart Section (MOVED UP) */}
-                <section className={cn(CARDS.base, "overflow-hidden")}>
+                <section className={cn(CARDS.primary, "overflow-hidden")}>
                     {/* Toolbar / Filters */}
                     <div className={cn("px-4 py-3 border-b flex flex-col gap-3", SURFACE.border)}>
                         <div className="flex items-center justify-between">
@@ -383,54 +398,82 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
 
                     {/* Chart Canvas */}
                     <div className="aspect-[21/10] w-full relative p-4 bg-[#050505]">
+
+                        {/* 1. CHART EMBEDDED CTA (Pattern 1) */}
+                        {relatedIndicator && (
+                            <SemanticChartCTA
+                                label={relatedIndicator.matchPattern || relatedIndicator.name}
+                                indicatorSlug={relatedIndicator.slug}
+                            />
+                        )}
+
                         {renderChart()}
                     </div>
 
                     {/* Dynamic Footer Info */}
                     {selectedOcc ? (
                         // Detail View
-                        <div className={cn("px-5 py-4 border-t flex items-center justify-between", SURFACE.border, SURFACE.card)}>
+                        // Detail View
+                        <div className={cn("px-5 py-4 border-t", SURFACE.border, SURFACE.card)}>
                             {selectedOcc.reaction ? (
-                                <>
-                                    <div className={CARDS.typeC}>
-                                        <div className={cn("text-[9px] mb-1", COLORS.textTertiary)}>日期</div>
-                                        <div className={cn("font-mono text-xs font-bold", COLORS.textPrimary)}>
-                                            {selectedOcc.occursAt.slice(0, 10)}
+                                <div className="space-y-3">
+                                    {/* Row 1: Date & Result */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-[10px] text-neutral-500">日期</div>
+                                            <div className={cn("font-mono text-xs font-bold", COLORS.textPrimary)}>
+                                                {formatOccursAt(selectedOcc.occursAt)}
+                                            </div>
+                                        </div>
+
+                                        {/* Right Anchor: D+1 Return */}
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-[10px] text-neutral-500">D+1 反應</div>
+                                            <div className={cn("font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-[#1A1A1A] border border-[#333]",
+                                                (selectedOcc.reaction.stats.d0d1Return || 0) > 0 ? COLORS.positive : COLORS.negative
+                                            )}>
+                                                {selectedOcc.reaction.stats.d0d1Return}%
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className={CARDS.typeC}>
-                                        <div className={cn("text-[9px] mb-1", COLORS.textTertiary)}>預測 vs 實際</div>
-                                        <div className="flex items-center gap-2 font-mono text-xs">
-                                            <span className={COLORS.textSecondary}>{formatValue(eventKey, selectedOcc.forecast)}</span>
-                                            <span className={COLORS.textTertiary}>→</span>
-                                            <span className={cn("font-bold", COLORS.textPrimary)}>
+
+                                    {/* Row 2: Forecast vs Actual Bar */}
+                                    <div className={cn("p-2.5 rounded-lg flex items-center justify-between mt-2", CARDS.secondary)}>
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-[9px] text-neutral-500">預測值</span>
+                                            <span className={cn("font-mono text-xs", COLORS.textSecondary)}>
+                                                {formatValue(eventKey, selectedOcc.forecast)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex-1 px-4 flex items-center justify-center">
+                                            <div className="h-[1px] w-full bg-[#333] relative">
+                                                <div className="absolute right-0 -top-1 w-1 h-1 rounded-full bg-[#666]" />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col items-end gap-0.5">
+                                            <span className="text-[9px] text-neutral-500">實際公布</span>
+                                            <span className={cn("font-mono text-xs font-bold", COLORS.textPrimary)}>
                                                 {formatValue(eventKey, selectedOcc.actual)}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className={CARDS.typeC}>
-                                        <div className={cn("text-[9px] mb-1", COLORS.textTertiary)}>D+1 反應</div>
-                                        <div className={cn("font-mono text-xs font-bold",
-                                            (selectedOcc.reaction.stats.d0d1Return || 0) > 0 ? COLORS.positive : COLORS.negative
-                                        )}>
-                                            {selectedOcc.reaction.stats.d0d1Return}%
-                                        </div>
-                                    </div>
-                                </>
+                                </div>
                             ) : (
-                                <div className="text-xs text-neutral-500">尚無數據</div>
+                                <div className="text-xs text-neutral-500 text-center py-2">尚無數據</div>
                             )}
                         </div>
                     ) : (
                         // Aggregate View Info
                         <div className={cn("px-5 py-4 border-t grid grid-cols-2 gap-4", SURFACE.border, SURFACE.card)}>
-                            <div className={CARDS.typeC}>
+                            <div className={CARDS.typeB}>
                                 <div className={cn("text-[9px] mb-1", COLORS.textTertiary)}>總樣本數</div>
                                 <div className={cn("font-mono text-xs font-bold", COLORS.textPrimary)}>
                                     {summaryStats?.count || 0} 次事件
                                 </div>
                             </div>
-                            <div className={CARDS.typeC}>
+                            <div className={CARDS.typeB}>
                                 <div className={cn("text-[9px] mb-1", COLORS.textTertiary)}>平均波動範圍</div>
                                 <div className={cn("font-mono text-xs font-bold", COLORS.textPrimary)}>
                                     {summaryStats?.avgRange}%
@@ -439,6 +482,14 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                         </div>
                     )}
                 </section>
+
+                {/* 2. RESPONSIBILITY DISCLAIMER (Pattern 2) */}
+                {relatedIndicator && (
+                    <ResponsibilityDisclaimer
+                        indicatorName={relatedIndicator.name}
+                        indicatorSlug={relatedIndicator.slug}
+                    />
+                )}
 
                 {/* 3. Historical Matrix (Type B) */}
                 <section>

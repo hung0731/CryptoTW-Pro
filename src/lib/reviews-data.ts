@@ -113,7 +113,11 @@ export interface MarketEvent {
     actionableChecklist: {
         label: string;
         desc: string;
-        type: 'check' | 'alert';
+        type: 'check' | 'alert' | 'insight'; // Added 'insight'
+        citation?: {
+            label: string;
+            href: string;
+        };
     }[];
     focusWindow?: [number, number];
 }
@@ -252,6 +256,15 @@ export const REVIEWS_DATA: MarketEvent[] = [
         },
 
         actionableChecklist: [
+            {
+                type: 'alert',
+                label: '新高警示',
+                desc: '創新高時若費率 > 0.02%，考慮減倉。',
+                citation: {
+                    label: '參考資金費率指標',
+                    href: '/indicators/funding-rate'
+                }
+            },
             {
                 type: 'check',
                 label: '確認資金流向本質',

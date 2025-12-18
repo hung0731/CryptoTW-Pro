@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CARDS } from '@/lib/design-tokens'
 
 interface ActionCardProps {
     title: string
@@ -21,10 +22,8 @@ export function ActionCard({
         <Link
             href={href}
             className={cn(
-                "group relative flex flex-col justify-between p-4 rounded-xl border",
-                "h-[100px] active:scale-[0.98]", // Compact height
-                isPrimary && "bg-[#1A1A1A] border-[#2A2A2A] hover:border-[#3A3A3A]",
-                !isPrimary && "bg-[#0A0A0A] border-[#1A1A1A] hover:bg-[#0E0E0F] hover:border-[#2A2A2A]"
+                "group relative flex flex-col justify-between h-[100px] active:scale-[0.98]",
+                isPrimary ? CARDS.primary : CARDS.secondary
             )}
         >
             {/* Top: Icon & Arrow */}

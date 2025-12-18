@@ -65,70 +65,79 @@ export const RADIUS = {
 } as const
 
 // ================================================
-// CARD SYSTEM (EXACTLY 4 TYPES - NO VARIANTS)
+// SPACING (Unified Scale v1.1)
 // ================================================
-export const CARDS = {
-    /**
-     * Type A: Primary Focus Card
-     * Use for: Hero content, decisions, key actions
-     * Padding: p-5 (default) or p-4 (compact)
-     */
-    primary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl',
+export const SPACING = {
+    // Page-level (Split for precision)
+    pageX: 'px-4',          // Standard horizontal padding
+    pageTop: 'pt-6',        // Standard top padding (Avoid py-4)
+    pageBottom: 'pb-24',    // Standard bottom padding (Nav safe area)
 
-    /**
-     * Type B: Secondary List Card  
-     * Use for: Lists, history, comparisons
-     * Padding: p-3 (default) or p-2 (tight)
-     * Hover: Instant background lift + border appear
-     */
-    secondary: 'bg-[#0A0A0A] hover:bg-[#0E0E0F] hover:border hover:border-[#1A1A1A] rounded-lg',
+    // Vertical Rhythm
+    sectionGap: 'space-y-6', // Between major sections
+    headerGap: 'mb-4',       // Between Header and first content
 
-    /**
-     * Type C: Inline Data Block
-     * Use for: Stats, KPIs, metrics inline
-     * Padding: pl-3 only
-     */
-    inline: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',
+    // Item Gaps
+    cardGap: 'space-y-4',    // Standard card stack
+    cardGapCompact: 'space-y-3', // Dense lists
+    listGap: 'gap-3',        // Horizontal lists
 
-    /**
-     * Type D: Passive Info Card
-     * Use for: Education, explanations, disclaimers
-     * Padding: p-4
-     */
-    passive: 'bg-[#080808] border border-dashed border-[#1A1A1A] rounded-xl',
-
-    // Legacy aliases (map to new system)
-    typeA: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl',
-    typeB: 'bg-[#0A0A0A] hover:bg-[#0E0E0F] hover:border hover:border-[#1A1A1A] rounded-lg',
-    typeC: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',
-    base: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl',
-    interactive: 'bg-[#0A0A0A] hover:bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl',
+    // Component Internal Padding
+    cardLarge: 'p-5',        // Primary
+    card: 'p-4',             // Primary Compact / Standard
+    cardCompact: 'p-3',      // Secondary
+    cardTight: 'p-2',        // Secondary Dense
+    inlineLeft: 'pl-3',      // Inline Data
 } as const
 
 // ================================================
-// SPACING (Unified Scale)
+// LAYOUT CONTAINERS (v1.1)
 // ================================================
-export const SPACING = {
-    // Page-level
-    pageX: 'px-4',
-    pageY: 'py-4',
-    page: 'p-4',
-    pageBottom: 'pb-24', // Only for pages with BottomNav
+export const LAYOUT = {
+    // Mobile First (Default)
+    mobile: 'w-full max-w-[480px] mx-auto',
 
-    // Section-level gaps
-    sectionGap: 'space-y-6',
-    cardGap: 'space-y-4',
-    cardGapCompact: 'space-y-3',
+    // Desktop Dashboard
+    desktop: 'w-full max-w-7xl mx-auto',
 
-    // Card padding
-    cardLarge: 'p-5',      // Primary cards default
-    card: 'p-4',           // Primary cards compact
-    cardCompact: 'p-3',    // Secondary cards default
-    cardTight: 'p-2',      // Secondary cards tight
-    inlineLeft: 'pl-3',    // Inline data blocks
+    // Landing / Marketing
+    full: 'w-full',
+} as const
 
-    // Legacy alias
-    cardPadding: 'p-4',
+// ================================================
+// CARD SYSTEM (STRICT TYPES v1.1)
+// ================================================
+export const CARDS = {
+    /**
+     * Primary Card (Focus)
+     * - Uses: Charts, Conclusions, Main Data
+     * - Style: Darkest, Big Padding, Rounded XL
+     */
+    primary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-5',
+
+    /**
+     * Primary Compact (Refined)
+     * - Uses: Complex lists, Dashboard items
+     * - Style: Primary look but tighter
+     */
+    primaryCompact: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-4',
+
+    /**
+     * List Card (Scan)
+     * - Uses: News, Events, Indicators Lists
+     * - Style: Compact, Interactive, Rounded LG
+     * - NO HOVER BORDER (Always Visible)
+     * - Active State for Touch
+     */
+    secondary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg p-3 transition-colors duration-75 active:bg-[#141414]',
+
+    // Aliases to enforce "2 Card Types" rule
+    typeA: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-5', // Alias to Primary
+    typeB: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg p-3 active:bg-[#141414]', // Alias to List
+
+    // Legacy / specialized
+    inline: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',
+    passive: 'bg-[#080808] border border-dashed border-[#1A1A1A] rounded-xl p-4',
 } as const
 
 // ================================================
@@ -156,11 +165,11 @@ export const TYPOGRAPHY = {
     micro: 'text-[9px] text-[#525252]',
 
     // Monospace (Data Display)
-    monoXL: 'text-2xl font-mono font-bold text-white',
-    monoLarge: 'text-lg font-mono font-bold text-white',
-    monoMedium: 'text-sm font-mono font-medium text-white',
-    monoSmall: 'text-xs font-mono text-[#A0A0A0]',
-    monoMicro: 'text-[10px] font-mono text-[#666666]',
+    monoXL: 'text-2xl font-mono font-bold text-white tabular-nums',
+    monoLarge: 'text-lg font-mono font-bold text-white tabular-nums',
+    monoMedium: 'text-sm font-mono font-medium text-white tabular-nums',
+    monoSmall: 'text-xs font-mono text-[#A0A0A0] tabular-nums',
+    monoMicro: 'text-[10px] font-mono text-[#666666] tabular-nums',
 } as const
 
 // ================================================
@@ -244,6 +253,11 @@ export const CHART = {
         src: '/logo.svg',
         className: 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-[0.03] w-48 h-48 grayscale',
     },
+
+    // Dimensions (v1.1)
+    heightDefault: 'h-[300px]',
+    heightSmall: 'h-[200px]',
+    heightMini: 'h-[120px]',
 } as const
 
 // ================================================

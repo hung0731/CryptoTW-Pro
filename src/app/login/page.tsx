@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Lock, AlertCircle, Loader2, ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -11,10 +11,9 @@ import { Label } from '@/components/ui/label'
 
 function LoginForm() {
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const router = useRouter()
+    const [sent, setSent] = useState(false)
     const searchParams = useSearchParams()
     const next = searchParams.get('next') || '/admin'
 
@@ -29,23 +28,48 @@ function LoginForm() {
         setError(null)
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithOtp({
                 email,
-                password
+                options: {
+                    emailRedirectTo: `${window.location.origin}/auth/callback?next=${next}`,
+                },
             })
 
             if (error) {
                 setError(error.message)
             } else {
-                // Successful login
-                router.replace(next)
-                router.refresh()
+                setSent(true)
             }
         } catch (e) {
             setError('發生未預期的錯誤')
         } finally {
             setLoading(false)
         }
+    }
+
+    if (sent) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                <div className="w-full max-w-md space-y-8 text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 mb-4">
+                        <ArrowRight className="w-8 h-8 text-green-500" />
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-white">Check Your Email</h1>
+                    <p className="text-neutral-400">
+                        我們已發送登入連結至 <span className="text-white">{email}</span>
+                        <br />
+                        請點擊信件中的連結以登入管理後台
+                    </p>
+                    <Button
+                        variant="outline"
+                        className="mt-8 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-900"
+                        onClick={() => setSent(false)}
+                    >
+                        返回登入頁面
+                    </Button>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -56,7 +80,7 @@ function LoginForm() {
                         <Lock className="w-8 h-8 text-neutral-400" />
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight text-white">Admin Access</h1>
-                    <p className="text-sm text-neutral-400">請輸入管理員憑證以繼續</p>
+                    <p className="text-sm text-neutral-400">請輸入 Email 以獲取 Magic Link</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -69,18 +93,6 @@ function LoginForm() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="name@example.com"
-                                className="bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-neutral-700 focus:ring-neutral-700"
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password" className="text-neutral-300">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
                                 className="bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-neutral-700 focus:ring-neutral-700"
                                 required
                             />
@@ -100,7 +112,7 @@ function LoginForm() {
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                        登入
+                        發送登入連結
                     </Button>
                 </form>
 
