@@ -581,3 +581,237 @@ export async function generateFallbackReply(userInput: string): Promise<Fallback
         return null
     }
 }
+
+// ============================================
+// Indicator Summary (Rigorous Market Analysis)
+// ============================================
+
+export interface IndicatorSummaryInput {
+    fearGreedIndex: { value: number; zone: string }
+    fundingRate: number          // e.g., 0.005 = 0.005%
+    longShortRatio: number       // e.g., 1.02
+    liquidation: {
+        total: number            // USD
+        long: number
+        short: number
+    }
+    oiChange24h?: number         // % change
+    etfNetFlow?: number          // USD millions
+    // BTC Price Changes
+    btcPrice?: {
+        current: number          // USD
+        change15m?: number       // %
+        change1h?: number        // %
+        change4h?: number        // %
+        change12h?: number       // %
+        change24h?: number       // %
+    }
+}
+
+export interface IndicatorSummaryResult {
+    summary: string
+}
+
+export async function generateIndicatorSummary(
+    data: IndicatorSummaryInput
+): Promise<IndicatorSummaryResult | null> {
+    if (!genAI) return null
+
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+
+        // Format values for display
+        const fgiZone = data.fearGreedIndex.zone
+        const fundingPct = (data.fundingRate * 100).toFixed(4)
+        const liqTotalM = (data.liquidation.total / 1_000_000).toFixed(1)
+        const liqLongM = (data.liquidation.long / 1_000_000).toFixed(1)
+        const liqShortM = (data.liquidation.short / 1_000_000).toFixed(1)
+
+        // Format BTC price changes
+        const formatChange = (val?: number) => val !== undefined
+            ? `${val > 0 ? '+' : ''}${val.toFixed(2)}%`
+            : '-'
+
+        const btcPriceSection = data.btcPrice ? `
+【BTC 價格走勢】
+- 現價: $${data.btcPrice.current.toLocaleString()}
+- 15 分鐘: ${formatChange(data.btcPrice.change15m)}
+- 1 小時: ${formatChange(data.btcPrice.change1h)}
+- 4 小時: ${formatChange(data.btcPrice.change4h)}
+- 12 小時: ${formatChange(data.btcPrice.change12h)}
+- 24 小時: ${formatChange(data.btcPrice.change24h)}
+` : ''
+
+        const prompt = `你是「加密台灣」的技術分析師，根據鏈上指標與價格數據生成客觀市場解讀。
+
+【重要限制 - 嚴格遵守】
+❌ 禁止：任何投資建議、價格預測、買賣時機
+❌ 禁止：「建議」「應該」「可以考慮」「適合」等誘導性用語
+❌ 禁止：「牛市」「熊市」等絕對論斷
+❌ 禁止：「機會」「風險」以外的情緒化詞彙
+✅ 必須：結合價格走勢與指標數據分析
+✅ 必須：使用條件語句（「若...則...」「當...時...」）
+✅ 必須：每個論點標明具體數據
+${btcPriceSection}
+【衍生品指標】
+- 恐懼貪婪指數: ${data.fearGreedIndex.value}/100（${fgiZone}區間）
+- 資金費率: ${fundingPct}%（正常範圍 ±0.01%）
+- 散戶多空比: ${data.longShortRatio.toFixed(2)}（>1.2 偏多, <0.8 偏空, 1.0 均衡）
+- 4H 爆倉: $${liqTotalM}M（多: $${liqLongM}M, 空: $${liqShortM}M）
+${data.oiChange24h !== undefined ? `- OI 24H 變化: ${data.oiChange24h > 0 ? '+' : ''}${data.oiChange24h.toFixed(1)}%` : ''}
+${data.etfNetFlow !== undefined ? `- ETF 淨流入: $${data.etfNetFlow.toFixed(0)}M` : ''}
+
+【分析邏輯提示】
+- 價格跌 + 爆倉多單 = 多頭止損潮
+- 價格漲 + 費率升高 = 追漲情緒升溫
+- 價格橫盤 + OI 上升 = 倉位累積中
+- 短線（15m/1h）與中線（4h/12h）方向背離 = 盤整訊號
+
+【輸出規則】
+- 字數: 60-85 字
+- 語氣: 像彭博終端機的簡報風格，冷靜客觀
+- 結構: [價格現況] + [指標狀態] + [條件性觀察]
+- 需提及至少一個時間框架的價格變化
+- 結尾用「若...」開頭的條件觀察
+
+【範例】
+「BTC 現價 $104,200，短線 1H 下跌 0.8%，但 4H 仍維持上漲 1.2%。資金費率偏高（0.03%），爆倉以多單為主（$8M）。若短線跌勢擴大而費率未降，需關注多頭止損風險。」
+
+【排版】中英文/數字之間加空格。中文用全形標點。
+
+僅輸出純文字總結，不需要 JSON 格式。`
+
+        const result = await model.generateContent(prompt)
+        const text = result.response.text().trim()
+
+        return { summary: text }
+    } catch (e) {
+        console.error('Gemini Indicator Summary Error:', e)
+        return null
+    }
+}
+
+// ============================================
+// Calendar Summary (Macro Event Prediction)
+// ============================================
+
+export interface CalendarSummaryInput {
+    events: Array<{
+        eventType: 'cpi' | 'nfp' | 'fomc'
+        eventName: string
+        nextDate: string           // ISO date
+        daysUntil: number
+        stats: {
+            avgD1Return: number    // %
+            winRate: number        // % (D+1 上漲機率)
+            avgRange: number       // %
+            sampleSize: number
+        }
+        lastEvent?: {
+            date: string
+            forecast?: number
+            actual?: number
+            d1Return?: number
+        }
+    }>
+}
+
+export interface CalendarSummaryResult {
+    summary: string
+}
+
+export async function generateCalendarSummary(
+    data: CalendarSummaryInput
+): Promise<CalendarSummaryResult | null> {
+    if (!genAI) return null
+
+    try {
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+
+        // Get today's date in Taiwan timezone
+        const now = new Date()
+        const taiwanTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }))
+        const todayStr = taiwanTime.toLocaleDateString('zh-TW', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long'
+        })
+
+        // Find the nearest event
+        const sortedEvents = [...data.events].sort((a, b) => a.daysUntil - b.daysUntil)
+        const nearestEvents = sortedEvents.slice(0, 3) // Top 3 nearest
+
+        // Generate relative time descriptions
+        const eventsDescription = nearestEvents.map(e => {
+            const eventDate = new Date(e.nextDate)
+            // Convert to Taiwan time (UTC+8)
+            const taiwanEventTime = new Date(eventDate.getTime() + 8 * 60 * 60 * 1000)
+            const hour = taiwanEventTime.getUTCHours()
+            const minute = taiwanEventTime.getUTCMinutes()
+            const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+
+            // Generate relative description
+            let relativeDesc = ''
+            if (e.daysUntil === 0) {
+                relativeDesc = `今天台灣時間 ${timeStr}`
+            } else if (e.daysUntil === 1) {
+                relativeDesc = `明天台灣時間 ${timeStr}`
+            } else if (e.daysUntil === 2) {
+                relativeDesc = `後天台灣時間 ${timeStr}`
+            } else if (e.daysUntil <= 7) {
+                relativeDesc = `${e.daysUntil} 天後（台灣時間 ${timeStr}）`
+            } else {
+                const dateStr = eventDate.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })
+                relativeDesc = `${dateStr}（${e.daysUntil} 天後）`
+            }
+
+            return `- ${e.eventName}: ${relativeDesc}
+  歷史 D+1 平均報酬: ${e.stats.avgD1Return > 0 ? '+' : ''}${e.stats.avgD1Return.toFixed(1)}%
+  歷史上漲機率: ${e.stats.winRate.toFixed(0)}%（樣本: ${e.stats.sampleSize} 次）
+  歷史平均波動: ${e.stats.avgRange.toFixed(1)}%
+  ${e.lastEvent ? `上次結果: 預期 ${e.lastEvent.forecast ?? '-'} vs 實際 ${e.lastEvent.actual ?? '-'}，BTC D+1 ${e.lastEvent.d1Return !== undefined ? (e.lastEvent.d1Return > 0 ? '+' : '') + e.lastEvent.d1Return.toFixed(1) + '%' : '-'}` : ''}`
+        }).join('\n\n')
+
+        const prompt = `你是「加密台灣」的宏觀事件分析師，專門為台灣交易者提供事件行情預判。
+
+【今日日期】${todayStr}（台灣時間）
+
+【重要限制 - 嚴格遵守】
+❌ 禁止：預測具體 CPI/NFP 數值或利率決定
+❌ 禁止：「一定會」「肯定」「必然」「建議」等確定性/誘導語言
+❌ 禁止：任何買賣建議、價格目標、「機會」「佈局」
+❌ 禁止：使用「樣本」這個詞彙
+✅ 必須：使用「過去 N 次紀錄」來描述樣本數
+✅ 必須：使用相對時間（今天/明天/後天/X 天後）
+✅ 必須：標註台灣時間
+✅ 必須：用完整的「若...則歷史顯示...」條件句結尾（不可截斷）
+
+【近期事件數據】
+${eventsDescription}
+
+【輸出規則】
+- 字數: 65-85 字（確保完整，不要被截斷）
+- 語氣: 像研究報告摘要，客觀中立
+- 只提及最近 1 個事件
+- 結構: [事件+時間] + [過去N次統計] + [若...則歷史顯示...]
+- 條件句必須完整，不可使用「若...則歷史顯示...」這種不完整的結尾
+
+【範例】
+「CPI 數據將於明天台灣時間 21:30 公布。過去 11 次紀錄中，BTC D+1 上漲機率 55%，平均波動 5.8%。若數據低於預期，歷史顯示 D+1 平均漲幅達 2.3%。」
+
+「FOMC 利率決議將於後天凌晨 3:00 公布。過去 8 次紀錄顯示，BTC D+1 平均波動 4.2%。若維持利率不變且措辭偏鴿，歷史顯示市場反應偏正面。」
+
+【排版】中英文/數字之間加空格。
+
+僅輸出純文字總結，不需要 JSON 格式。確保輸出完整，條件句不可截斷。`
+
+        const result = await model.generateContent(prompt)
+        const text = result.response.text().trim()
+
+        return { summary: text }
+    } catch (e) {
+        console.error('Gemini Calendar Summary Error:', e)
+        return null
+    }
+}

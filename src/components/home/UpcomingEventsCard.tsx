@@ -45,6 +45,45 @@ function CalendarIcon({ month, day }: { month: string, day: string }) {
     )
 }
 
+// 倒數計時器
+function Countdown({ targetDate }: { targetDate: string }) {
+    const [timeLeft, setTimeLeft] = React.useState({ days: 0, hours: 0, mins: 0, secs: 0 })
+
+    React.useEffect(() => {
+        const calculate = () => {
+            const now = new Date().getTime()
+            const target = new Date(targetDate).getTime()
+            const diff = target - now
+
+            if (diff <= 0) {
+                setTimeLeft({ days: 0, hours: 0, mins: 0, secs: 0 })
+                return
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+            const secs = Math.floor((diff % (1000 * 60)) / 1000)
+
+            setTimeLeft({ days, hours, mins, secs })
+        }
+
+        calculate()
+        const interval = setInterval(calculate, 1000) // 每秒更新
+
+        return () => clearInterval(interval)
+    }, [targetDate])
+
+    return (
+        <div className="inline-flex items-center gap-0.5 text-[9px] font-mono text-neutral-500 mt-0.5">
+            <span className="text-white font-bold">{timeLeft.days}</span>日
+            <span className="text-white font-bold ml-1">{timeLeft.hours}</span>時
+            <span className="text-white font-bold ml-1">{timeLeft.mins}</span>分
+            <span className="text-white font-bold ml-1">{String(timeLeft.secs).padStart(2, '0')}</span>秒
+        </div>
+    )
+}
+
 // Mini past event chip
 function PastEventChip({ occ, reaction }: { occ: MacroEventOccurrence, reaction?: MacroReaction }) {
     if (!occ.forecast || !occ.actual) return null
@@ -114,14 +153,14 @@ export function UpcomingEventsCard({ reactions }: UpcomingEventsCardProps) {
                                 "hover:bg-[#141414] hover:border-[#2A2A2A]"
                             )}
                         >
-                            <div className="flex gap-3">
+                            <div className="flex items-start gap-3">
                                 {/* Left: Calendar Icon */}
                                 <CalendarIcon month={month} day={day} />
 
                                 {/* Right: Event Info */}
                                 <div className="flex-1 min-w-0">
                                     {/* Event Name + T-x */}
-                                    <div className="flex items-center gap-2 mb-1.5">
+                                    <div className="flex items-center gap-2 mb-1">
                                         <h4 className="text-sm font-bold text-white truncate">{def.name}</h4>
                                         <span className={cn(
                                             "shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded",
@@ -129,12 +168,13 @@ export function UpcomingEventsCard({ reactions }: UpcomingEventsCardProps) {
                                                 ? "bg-white/10 text-white"
                                                 : "bg-[#1A1A1A] text-neutral-500"
                                         )}>
-                                            {days === 0 ? '今天' : days === 1 ? '明天' : `${days} 天後`}
+                                            {days === 0 ? '今天' : days === 1 ? '明天' : `${days}天`}
                                         </span>
                                     </div>
 
-                                    {/* Win Rate Summary */}
-                                    <div className="text-[10px] text-neutral-400 mb-2">
+                                    {/* Countdown Timer + Win Rate */}
+                                    <Countdown targetDate={occ.occursAt} />
+                                    <div className="text-[10px] text-neutral-400 mt-1">
                                         公布後 2 日｜
                                         <span className={cn(
                                             "font-bold",
@@ -145,23 +185,6 @@ export function UpcomingEventsCard({ reactions }: UpcomingEventsCardProps) {
                                             上漲機率 {winRate}%
                                         </span>
                                     </div>
-
-                                    {/* Past 2 Events Mini History */}
-                                    {pastOccs.length > 0 && (
-                                        <div className="space-y-0.5 border-t border-white/5 pt-1.5">
-                                            {pastOccs.slice(0, 2).map((pastOcc, i) => {
-                                                const keyDate = new Date(pastOcc.occursAt).toISOString().split('T')[0]
-                                                const reaction = reactions[`${def.key}-${keyDate}`]
-                                                return (
-                                                    <PastEventChip
-                                                        key={i}
-                                                        occ={pastOcc}
-                                                        reaction={reaction}
-                                                    />
-                                                )
-                                            })}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 

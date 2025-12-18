@@ -20,7 +20,7 @@ export default async function CalendarPage() {
 
     return (
         <main className="min-h-screen bg-black text-white pb-20">
-            <PageHeader title="事件" />
+            <PageHeader title="經濟日曆" />
             <CalendarClient reactions={reactions} />
         </main>
     )

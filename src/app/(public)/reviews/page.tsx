@@ -89,7 +89,7 @@ export default function ReviewsPage() {
 
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
-            <PageHeader title="市場復盤資料庫" showLogo={false} backHref="/" backLabel="返回" />
+            <PageHeader title="歷史事件" showLogo={false} backHref="/" backLabel="返回" />
 
             {/* 1. Editor's Picks (Carousel) */}
             {!hasActiveFilters && (

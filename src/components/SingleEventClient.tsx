@@ -454,7 +454,7 @@ export default function SingleEventClient({ eventKey, reactions }: SingleEventCl
                         </div>
                     </div>
 
-                    {[2024, 2023, 2022].map(year => {
+                    {[2025, 2024, 2023, 2022].map(year => {
                         const yearOccs = occurrencesWithData.filter(o => o.occursAt.startsWith(String(year)))
                         if (yearOccs.length === 0) return null
 

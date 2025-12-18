@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+// Using native img to avoid Next.js image optimization issues
 import { cn } from '@/lib/utils'
 import { getFeaturedReviews, MarketEvent } from '@/lib/reviews-data'
 
@@ -142,15 +142,14 @@ export function FeaturedReviewsCard() {
                                     <span className="text-[10px] font-bold text-neutral-400 bg-black border border-neutral-700 px-1.5 py-0.5 rounded">
                                         {event.year}
                                     </span>
-                                    <Image
+                                    <img
                                         src={`/tokens/${primaryToken}.png`}
                                         alt={primaryToken}
                                         width={20}
                                         height={20}
                                         className="rounded-full"
                                         onError={(e) => {
-                                            // Fallback to BTC if token image not found
-                                            (e.target as HTMLImageElement).src = '/tokens/btc.png'
+                                            (e.target as HTMLImageElement).style.display = 'none'
                                         }}
                                     />
                                 </div>

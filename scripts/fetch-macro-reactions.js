@@ -16,6 +16,18 @@ const BINANCE_API = 'https://api.binance.com/api/v3/klines'
 
 // Import occurrences from macro-events.ts (simplified version for script)
 const PAST_EVENTS = [
+    // CPI 2025 (past occurrences only)
+    { eventKey: 'cpi', occursAt: '2025-12-18T13:30:00Z' }, // Nov 2025 CPI (Delayed)
+    { eventKey: 'cpi', occursAt: '2025-10-15T12:30:00Z' }, // Sep 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-09-11T12:30:00Z' }, // Aug 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-08-12T12:30:00Z' }, // Jul 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-07-10T12:30:00Z' }, // Jun 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-06-11T12:30:00Z' }, // May 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-05-13T12:30:00Z' }, // Apr 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-04-10T12:30:00Z' }, // Mar 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-03-12T12:30:00Z' }, // Feb 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-02-12T13:30:00Z' }, // Jan 2025 CPI
+    { eventKey: 'cpi', occursAt: '2025-01-15T13:30:00Z' }, // Dec 2024 CPI
     // CPI 2024
     { eventKey: 'cpi', occursAt: '2024-12-11T13:30:00Z' },
     { eventKey: 'cpi', occursAt: '2024-11-13T13:30:00Z' },
@@ -40,6 +52,18 @@ const PAST_EVENTS = [
     { eventKey: 'cpi', occursAt: '2023-05-10T12:30:00Z' },
     { eventKey: 'cpi', occursAt: '2023-04-12T12:30:00Z' },
     { eventKey: 'cpi', occursAt: '2023-03-14T12:30:00Z' },
+    // NFP 2025 (past occurrences only)
+    { eventKey: 'nfp', occursAt: '2025-12-05T13:30:00Z' }, // Nov 2025
+    { eventKey: 'nfp', occursAt: '2025-10-03T12:30:00Z' }, // Sep 2025
+    { eventKey: 'nfp', occursAt: '2025-09-05T12:30:00Z' }, // Aug 2025
+    { eventKey: 'nfp', occursAt: '2025-08-01T12:30:00Z' }, // Jul 2025
+    { eventKey: 'nfp', occursAt: '2025-07-03T12:30:00Z' }, // Jun 2025
+    { eventKey: 'nfp', occursAt: '2025-06-06T12:30:00Z' }, // May 2025
+    { eventKey: 'nfp', occursAt: '2025-05-02T12:30:00Z' }, // Apr 2025
+    { eventKey: 'nfp', occursAt: '2025-04-04T12:30:00Z' }, // Mar 2025
+    { eventKey: 'nfp', occursAt: '2025-03-07T13:30:00Z' }, // Feb 2025
+    { eventKey: 'nfp', occursAt: '2025-02-07T13:30:00Z' }, // Jan 2025
+    { eventKey: 'nfp', occursAt: '2025-01-10T13:30:00Z' }, // Dec 2024
     // NFP 2024
     { eventKey: 'nfp', occursAt: '2024-12-06T13:30:00Z' },
     { eventKey: 'nfp', occursAt: '2024-11-01T12:30:00Z' },
@@ -62,6 +86,15 @@ const PAST_EVENTS = [
     { eventKey: 'nfp', occursAt: '2023-07-07T12:30:00Z' },
     { eventKey: 'nfp', occursAt: '2023-06-02T12:30:00Z' },
     { eventKey: 'nfp', occursAt: '2023-05-05T12:30:00Z' },
+    // FOMC 2025 (past occurrences only)
+    { eventKey: 'fomc', occursAt: '2025-12-10T19:00:00Z' }, // Dec 9-10
+    { eventKey: 'fomc', occursAt: '2025-10-29T18:00:00Z' }, // Oct 28-29
+    { eventKey: 'fomc', occursAt: '2025-09-17T18:00:00Z' }, // Sep 16-17
+    { eventKey: 'fomc', occursAt: '2025-07-30T18:00:00Z' }, // Jul 29-30
+    { eventKey: 'fomc', occursAt: '2025-06-18T18:00:00Z' }, // Jun 17-18
+    { eventKey: 'fomc', occursAt: '2025-05-07T18:00:00Z' }, // May 6-7
+    { eventKey: 'fomc', occursAt: '2025-03-19T18:00:00Z' }, // Mar 18-19
+    { eventKey: 'fomc', occursAt: '2025-01-29T19:00:00Z' }, // Jan 28-29
     // FOMC 2024
     { eventKey: 'fomc', occursAt: '2024-12-18T19:00:00Z' },
     { eventKey: 'fomc', occursAt: '2024-11-07T19:00:00Z' },

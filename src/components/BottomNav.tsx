@@ -23,19 +23,19 @@ export function BottomNav() {
             active: pathname === '/news'
         },
         {
-            label: '日曆',
-            icon: Calendar,
-            href: '/calendar',
-            active: pathname === '/calendar'
-        },
-        {
             label: '指標',
             icon: BarChart2,
             href: '/indicators',
             active: pathname.startsWith('/indicators')
         },
         {
-            label: '復盤',
+            label: '日曆',
+            icon: Calendar,
+            href: '/calendar',
+            active: pathname === '/calendar'
+        },
+        {
+            label: '事件',
             icon: BookOpen,
             href: '/reviews',
             active: pathname.startsWith('/reviews')

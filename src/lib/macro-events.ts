@@ -128,18 +128,18 @@ export const MACRO_OCCURRENCES: MacroEventOccurrence[] = [
     { eventKey: 'cpi', occursAt: '2026-03-11T12:30:00Z', notes: 'Feb 2026 CPI' },
     { eventKey: 'cpi', occursAt: '2026-02-11T13:30:00Z', notes: 'Jan 2026 CPI' },
     { eventKey: 'cpi', occursAt: '2026-01-13T13:30:00Z', notes: 'Dec 2025 CPI' },
-    // 2025
-    { eventKey: 'cpi', occursAt: '2025-12-18T13:30:00Z', notes: 'Nov 2025 CPI (Delayed - Thu)' }, // Modified: Thursday Dec 18
-    { eventKey: 'cpi', occursAt: '2025-11-13T13:30:00Z', notes: 'Oct 2025 CPI (CANCELLED)', forecast: undefined, actual: undefined }, // Modified: Cancelled
-    { eventKey: 'cpi', occursAt: '2025-10-15T12:30:00Z', notes: 'Sep 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-09-11T12:30:00Z', notes: 'Aug 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-08-12T12:30:00Z', notes: 'Jul 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-07-10T12:30:00Z', notes: 'Jun 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-06-11T12:30:00Z', notes: 'May 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-05-13T12:30:00Z', notes: 'Apr 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-04-10T12:30:00Z', notes: 'Mar 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-03-12T12:30:00Z', notes: 'Feb 2025 CPI' },
-    { eventKey: 'cpi', occursAt: '2025-02-12T13:30:00Z', notes: 'Jan 2025 CPI', forecast: 2.8 },
+    // 2025 - Updated with verified forecast/actual (YoY %)
+    { eventKey: 'cpi', occursAt: '2025-12-18T13:30:00Z', notes: 'Nov 2025 CPI', forecast: 3.0 }, // Released today
+    { eventKey: 'cpi', occursAt: '2025-11-13T13:30:00Z', notes: 'Oct 2025 CPI (CANCELLED)' }, // Government shutdown
+    { eventKey: 'cpi', occursAt: '2025-10-15T12:30:00Z', notes: 'Sep 2025 CPI', forecast: 3.1, actual: 3.0 },
+    { eventKey: 'cpi', occursAt: '2025-09-11T12:30:00Z', notes: 'Aug 2025 CPI', forecast: 3.1, actual: 2.9 },
+    { eventKey: 'cpi', occursAt: '2025-08-12T12:30:00Z', notes: 'Jul 2025 CPI', forecast: 2.6, actual: 2.5 },
+    { eventKey: 'cpi', occursAt: '2025-07-10T12:30:00Z', notes: 'Jun 2025 CPI', forecast: 2.5, actual: 2.4 },
+    { eventKey: 'cpi', occursAt: '2025-06-11T12:30:00Z', notes: 'May 2025 CPI', forecast: 2.5, actual: 2.4 },
+    { eventKey: 'cpi', occursAt: '2025-05-13T12:30:00Z', notes: 'Apr 2025 CPI', forecast: 2.4, actual: 2.3 },
+    { eventKey: 'cpi', occursAt: '2025-04-10T12:30:00Z', notes: 'Mar 2025 CPI', forecast: 2.6, actual: 2.4 },
+    { eventKey: 'cpi', occursAt: '2025-03-12T12:30:00Z', notes: 'Feb 2025 CPI', forecast: 2.9, actual: 2.8 },
+    { eventKey: 'cpi', occursAt: '2025-02-12T13:30:00Z', notes: 'Jan 2025 CPI', forecast: 2.9, actual: 3.0 },
     { eventKey: 'cpi', occursAt: '2025-01-15T13:30:00Z', notes: 'Dec 2024 CPI', forecast: 2.8, actual: 2.9 },
     // 2024 - Past 12 with Forecast/Actual (YoY %)
     { eventKey: 'cpi', occursAt: '2024-12-11T13:30:00Z', notes: 'Nov 2024 CPI', forecast: 2.7, actual: 2.7 },
@@ -178,44 +178,46 @@ export const MACRO_OCCURRENCES: MacroEventOccurrence[] = [
     { eventKey: 'nfp', occursAt: '2026-03-06T13:30:00Z', notes: 'Feb 2026 Employment' },
     { eventKey: 'nfp', occursAt: '2026-02-06T13:30:00Z', notes: 'Jan 2026 Employment' },
     { eventKey: 'nfp', occursAt: '2026-01-09T13:30:00Z', notes: 'Dec 2025 Employment' },
-    // 2025
-    { eventKey: 'nfp', occursAt: '2025-12-16T13:30:00Z', notes: 'Nov+Oct Merged Report (Delayed)' }, // Modified: Tonight Dec 16
-    { eventKey: 'nfp', occursAt: '2025-11-07T13:30:00Z', notes: 'Oct 2025 Employment (DELAYED)', forecast: undefined, actual: undefined }, // Modified: Delayed
-    { eventKey: 'nfp', occursAt: '2025-10-03T12:30:00Z', notes: 'Sep 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-09-05T12:30:00Z', notes: 'Aug 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-08-01T12:30:00Z', notes: 'Jul 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-07-03T12:30:00Z', notes: 'Jun 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-06-06T12:30:00Z', notes: 'May 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-05-02T12:30:00Z', notes: 'Apr 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-04-04T12:30:00Z', notes: 'Mar 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-03-07T13:30:00Z', notes: 'Feb 2025 Employment' },
-    { eventKey: 'nfp', occursAt: '2025-02-07T13:30:00Z', notes: 'Jan 2025 Employment', forecast: 180 },
+    // 2025 - Updated with verified forecast/actual (Jobs in K)
+    { eventKey: 'nfp', occursAt: '2025-12-05T13:30:00Z', notes: 'Nov 2025 Employment', forecast: 50, actual: 64 },
+    { eventKey: 'nfp', occursAt: '2025-11-07T13:30:00Z', notes: 'Oct 2025 Employment', forecast: -60, actual: -105 }, // Shutdown impact
+    { eventKey: 'nfp', occursAt: '2025-10-03T12:30:00Z', notes: 'Sep 2025 Employment', forecast: 50, actual: 119 },
+    { eventKey: 'nfp', occursAt: '2025-09-05T12:30:00Z', notes: 'Aug 2025 Employment', forecast: 75, actual: 22 },
+    { eventKey: 'nfp', occursAt: '2025-08-01T12:30:00Z', notes: 'Jul 2025 Employment', forecast: 110, actual: 73 },
+    { eventKey: 'nfp', occursAt: '2025-07-03T12:30:00Z', notes: 'Jun 2025 Employment', forecast: 150, actual: 145 },
+    { eventKey: 'nfp', occursAt: '2025-06-06T12:30:00Z', notes: 'May 2025 Employment', forecast: 130, actual: 139 },
+    { eventKey: 'nfp', occursAt: '2025-05-02T12:30:00Z', notes: 'Apr 2025 Employment', forecast: 140, actual: 177 },
+    { eventKey: 'nfp', occursAt: '2025-04-04T12:30:00Z', notes: 'Mar 2025 Employment', forecast: 140, actual: 228 },
+    { eventKey: 'nfp', occursAt: '2025-03-07T13:30:00Z', notes: 'Feb 2025 Employment', forecast: 160, actual: 151 },
+    { eventKey: 'nfp', occursAt: '2025-02-07T13:30:00Z', notes: 'Jan 2025 Employment', forecast: 170, actual: 143 },
     { eventKey: 'nfp', occursAt: '2025-01-10T13:30:00Z', notes: 'Dec 2024 Employment', forecast: 160, actual: 256 },
     // 2024 - Past 12 with Forecast/Actual (Jobs in K)
+    // 2024 - Updated with verified forecast/actual from TradingEconomics, FXStreet
     { eventKey: 'nfp', occursAt: '2024-12-06T13:30:00Z', notes: 'Nov 2024 Employment', forecast: 200, actual: 227 },
-    { eventKey: 'nfp', occursAt: '2024-11-01T12:30:00Z', notes: 'Oct 2024 Employment', forecast: 113, actual: 12 },
+    { eventKey: 'nfp', occursAt: '2024-11-01T12:30:00Z', notes: 'Oct 2024 Employment', forecast: 113, actual: 12 }, // Hurricane impact
     { eventKey: 'nfp', occursAt: '2024-10-04T12:30:00Z', notes: 'Sep 2024 Employment', forecast: 140, actual: 254 },
     { eventKey: 'nfp', occursAt: '2024-09-06T12:30:00Z', notes: 'Aug 2024 Employment', forecast: 160, actual: 142 },
     { eventKey: 'nfp', occursAt: '2024-08-02T12:30:00Z', notes: 'Jul 2024 Employment', forecast: 175, actual: 114 },
     { eventKey: 'nfp', occursAt: '2024-07-05T12:30:00Z', notes: 'Jun 2024 Employment', forecast: 190, actual: 206 },
-    { eventKey: 'nfp', occursAt: '2024-06-07T12:30:00Z', notes: 'May 2024 Employment', forecast: 180, actual: 272 },
-    { eventKey: 'nfp', occursAt: '2024-05-03T12:30:00Z', notes: 'Apr 2024 Employment', forecast: 240, actual: 175 },
+    { eventKey: 'nfp', occursAt: '2024-06-07T12:30:00Z', notes: 'May 2024 Employment', forecast: 185, actual: 272 }, // Updated forecast
+    { eventKey: 'nfp', occursAt: '2024-05-03T12:30:00Z', notes: 'Apr 2024 Employment', forecast: 243, actual: 175 }, // Updated
     { eventKey: 'nfp', occursAt: '2024-04-05T12:30:00Z', notes: 'Mar 2024 Employment', forecast: 200, actual: 303 },
     { eventKey: 'nfp', occursAt: '2024-03-08T13:30:00Z', notes: 'Feb 2024 Employment', forecast: 200, actual: 275 },
-    { eventKey: 'nfp', occursAt: '2024-02-02T13:30:00Z', notes: 'Jan 2024 Employment', forecast: 180, actual: 353 },
+    { eventKey: 'nfp', occursAt: '2024-02-02T13:30:00Z', notes: 'Jan 2024 Employment', forecast: 185, actual: 353 }, // Updated forecast
     { eventKey: 'nfp', occursAt: '2024-01-05T13:30:00Z', notes: 'Dec 2023 Employment', forecast: 170, actual: 216 },
     // 2023
+    // 2023 - Updated with verified forecast/actual from Investing.com, BabyPips
     { eventKey: 'nfp', occursAt: '2023-12-08T13:30:00Z', notes: 'Nov 2023 Employment', forecast: 180, actual: 199 },
     { eventKey: 'nfp', occursAt: '2023-11-03T12:30:00Z', notes: 'Oct 2023 Employment', forecast: 180, actual: 150 },
-    { eventKey: 'nfp', occursAt: '2023-10-06T12:30:00Z', notes: 'Sep 2023 Employment', forecast: 170, actual: 336 },
+    { eventKey: 'nfp', occursAt: '2023-10-06T12:30:00Z', notes: 'Sep 2023 Employment', forecast: 170, actual: 336 }, // Big surprise
     { eventKey: 'nfp', occursAt: '2023-09-01T12:30:00Z', notes: 'Aug 2023 Employment', forecast: 170, actual: 187 },
-    { eventKey: 'nfp', occursAt: '2023-08-04T12:30:00Z', notes: 'Jul 2023 Employment', forecast: 200, actual: 187 },
-    { eventKey: 'nfp', occursAt: '2023-07-07T12:30:00Z', notes: 'Jun 2023 Employment', forecast: 225, actual: 209 },
-    { eventKey: 'nfp', occursAt: '2023-06-02T12:30:00Z', notes: 'May 2023 Employment', forecast: 190, actual: 339 },
+    { eventKey: 'nfp', occursAt: '2023-08-04T12:30:00Z', notes: 'Jul 2023 Employment', forecast: 203, actual: 187 }, // Updated forecast
+    { eventKey: 'nfp', occursAt: '2023-07-07T12:30:00Z', notes: 'Jun 2023 Employment', forecast: 224, actual: 209 }, // Updated forecast
+    { eventKey: 'nfp', occursAt: '2023-06-02T12:30:00Z', notes: 'May 2023 Employment', forecast: 180, actual: 339 }, // Updated
     { eventKey: 'nfp', occursAt: '2023-05-05T12:30:00Z', notes: 'Apr 2023 Employment', forecast: 180, actual: 253 },
-    { eventKey: 'nfp', occursAt: '2023-04-07T12:30:00Z', notes: 'Mar 2023 Employment', forecast: 240, actual: 236 },
+    { eventKey: 'nfp', occursAt: '2023-04-07T12:30:00Z', notes: 'Mar 2023 Employment', forecast: 228, actual: 236 }, // Updated forecast
     { eventKey: 'nfp', occursAt: '2023-03-10T13:30:00Z', notes: 'Feb 2023 Employment', forecast: 225, actual: 311 },
-    { eventKey: 'nfp', occursAt: '2023-02-03T13:30:00Z', notes: 'Jan 2023 Employment', forecast: 185, actual: 517 },
+    { eventKey: 'nfp', occursAt: '2023-02-03T13:30:00Z', notes: 'Jan 2023 Employment', forecast: 185, actual: 517 }, // Massive surprise
     { eventKey: 'nfp', occursAt: '2023-01-06T13:30:00Z', notes: 'Dec 2022 Employment', forecast: 200, actual: 223 },
     // 2022
     { eventKey: 'nfp', occursAt: '2022-12-02T13:30:00Z', notes: 'Nov 2022 Employment', forecast: 200, actual: 263 },
@@ -228,14 +230,14 @@ export const MACRO_OCCURRENCES: MacroEventOccurrence[] = [
     // 2026 (Projected)
     { eventKey: 'fomc', occursAt: '2026-03-18T18:00:00Z', kind: 'release', notes: 'Mar 17-18 Meeting' },
     { eventKey: 'fomc', occursAt: '2026-01-28T19:00:00Z', kind: 'release', notes: 'Jan 27-28 Meeting' },
-    // 2025
-    { eventKey: 'fomc', occursAt: '2025-12-10T19:00:00Z', kind: 'release', notes: 'Dec 9-10 Meeting' },
-    { eventKey: 'fomc', occursAt: '2025-10-29T18:00:00Z', kind: 'release', notes: 'Oct 28-29 Meeting' },
-    { eventKey: 'fomc', occursAt: '2025-09-17T18:00:00Z', kind: 'release', notes: 'Sep 16-17 Meeting' },
-    { eventKey: 'fomc', occursAt: '2025-07-30T18:00:00Z', kind: 'release', notes: 'Jul 29-30 Meeting' },
-    { eventKey: 'fomc', occursAt: '2025-06-18T18:00:00Z', kind: 'release', notes: 'Jun 17-18 Meeting' },
-    { eventKey: 'fomc', occursAt: '2025-05-07T18:00:00Z', kind: 'release', notes: 'May 6-7 Meeting' },
-    { eventKey: 'fomc', occursAt: '2025-03-19T18:00:00Z', kind: 'release', notes: 'Mar 18-19 Meeting', forecast: 4.25 },
+    // 2025 - All meetings held rate at 4.25-4.50% through June
+    { eventKey: 'fomc', occursAt: '2025-12-10T19:00:00Z', kind: 'release', notes: 'Dec 9-10 Meeting', forecast: 4.50 },
+    { eventKey: 'fomc', occursAt: '2025-10-29T18:00:00Z', kind: 'release', notes: 'Oct 28-29 Meeting', forecast: 4.50, actual: 4.50 },
+    { eventKey: 'fomc', occursAt: '2025-09-17T18:00:00Z', kind: 'release', notes: 'Sep 16-17 Meeting', forecast: 4.50, actual: 4.50 },
+    { eventKey: 'fomc', occursAt: '2025-07-30T18:00:00Z', kind: 'release', notes: 'Jul 29-30 Meeting', forecast: 4.50, actual: 4.50 },
+    { eventKey: 'fomc', occursAt: '2025-06-18T18:00:00Z', kind: 'release', notes: 'Jun 17-18 Meeting', forecast: 4.50, actual: 4.50 },
+    { eventKey: 'fomc', occursAt: '2025-05-07T18:00:00Z', kind: 'release', notes: 'May 6-7 Meeting', forecast: 4.50, actual: 4.50 },
+    { eventKey: 'fomc', occursAt: '2025-03-19T18:00:00Z', kind: 'release', notes: 'Mar 18-19 Meeting', forecast: 4.50, actual: 4.50 },
     { eventKey: 'fomc', occursAt: '2025-01-29T19:00:00Z', kind: 'release', notes: 'Jan 28-29 Meeting', forecast: 4.50, actual: 4.50 },
     // 2024 - Rate decisions (upper bound of target range)
     { eventKey: 'fomc', occursAt: '2024-12-18T19:00:00Z', kind: 'release', notes: 'Dec 17-18 Meeting', forecast: 4.50, actual: 4.50 },

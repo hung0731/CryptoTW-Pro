@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Calendar, Activity, Briefcase, Landmark } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,7 @@ import {
     calculateEventStats
 } from '@/lib/macro-events'
 import { SURFACE, COLORS, CARDS } from '@/lib/design-tokens'
+import { AISummaryCard } from '@/components/ui/AISummaryCard'
 
 interface CalendarClientProps {
     reactions: Record<string, MacroReaction>
@@ -164,14 +165,112 @@ const getEventIcon = (key: string) => {
 }
 
 export default function CalendarClient({ reactions }: CalendarClientProps) {
-    const [alignMode, setAlignMode] = React.useState<'time' | 'reaction'>('time')
+    const [alignMode, setAlignMode] = useState<'time' | 'reaction'>('time')
+    const [aiSummary, setAiSummary] = useState<string>('')
+    const [aiLoading, setAiLoading] = useState(true)
 
     const getSummaryStats = (eventKey: string) => {
         return calculateEventStats(eventKey, reactions)
     }
 
+    // Fetch AI summary on mount (4 小時快取)
+    useEffect(() => {
+        const CACHE_KEY = 'calendar-ai-summary';
+        const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
+
+        const fetchAISummary = async () => {
+            // Check cache first
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    const { summary, timestamp } = JSON.parse(cached);
+                    if (Date.now() - timestamp < CACHE_TTL) {
+                        setAiSummary(summary);
+                        setAiLoading(false);
+                        return;
+                    }
+                } catch (e) {
+                    // Invalid cache, continue to fetch
+                }
+            }
+
+            try {
+                // Build event data for AI
+                const eventsData = MACRO_EVENT_DEFS.map(eventDef => {
+                    const nextOccurrence = getNextOccurrence(eventDef.key)
+                    const daysUntil = nextOccurrence ? getDaysUntil(nextOccurrence.occursAt) : 999
+                    const stats = calculateEventStats(eventDef.key, reactions)
+
+                    // Get last event with reaction data
+                    const pastEvents = getPastOccurrences(eventDef.key, 5)
+                    const lastWithData = pastEvents.find(occ => {
+                        const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
+                        const reactionKey = `${eventDef.key}-${keyDate}`
+                        return reactions[reactionKey]
+                    })
+
+                    let lastEvent = undefined
+                    if (lastWithData) {
+                        const keyDate = new Date(lastWithData.occursAt).toISOString().split('T')[0]
+                        const reactionKey = `${eventDef.key}-${keyDate}`
+                        const reaction = reactions[reactionKey]
+                        lastEvent = {
+                            date: lastWithData.occursAt,
+                            forecast: lastWithData.forecast,
+                            actual: lastWithData.actual,
+                            d1Return: reaction?.stats?.d0d1Return
+                        }
+                    }
+
+                    return {
+                        eventType: eventDef.key as 'cpi' | 'nfp' | 'fomc',
+                        eventName: eventDef.name,
+                        nextDate: nextOccurrence?.occursAt || '',
+                        daysUntil,
+                        stats: {
+                            avgD1Return: stats?.avgUp ?? 0, // Use avgUp as proxy
+                            winRate: stats?.d1WinRate ?? 50,
+                            avgRange: stats?.avgRange ?? 0,
+                            sampleSize: stats?.samples ?? 0
+                        },
+                        lastEvent
+                    }
+                }).filter(e => e.daysUntil < 365) // Only include events within a year
+
+                const res = await fetch('/api/ai/calendar-summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ events: eventsData })
+                })
+
+                const data = await res.json()
+                if (data.summary) {
+                    setAiSummary(data.summary)
+                    // Save to cache
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({
+                        summary: data.summary,
+                        timestamp: Date.now()
+                    }));
+                }
+            } catch (error) {
+                console.error('Failed to fetch calendar AI summary:', error)
+            } finally {
+                setAiLoading(false)
+            }
+        }
+
+        fetchAISummary()
+    }, [reactions])
+
     return (
         <div className="px-4 space-y-6 pb-20">
+            {/* AI Summary Card */}
+            <AISummaryCard
+                summary={aiSummary || '正在分析近期宏觀事件...'}
+                source="事件預測"
+                loading={aiLoading}
+            />
+
             {/* Mode Switch */}
             <div className="flex items-center justify-end px-2">
                 <div className={cn("flex rounded-lg p-0.5 border", SURFACE.card, SURFACE.border)}>
@@ -328,12 +427,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                 )
             })}
 
-            {/* Footer */}
-            <div className={cn("border border-[#2A2A2A] rounded-xl p-4 text-center", SURFACE.card)}>
-                <p className={cn("text-[10px]", COLORS.textTertiary)}>
-                    數據來源: BLS, Federal Reserve, Binance Spot
-                </p>
-            </div>
+
         </div>
     )
 }
