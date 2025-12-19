@@ -248,7 +248,7 @@ export function MasterTimelineChart({ onEventClick, selectedYear }: MasterTimeli
                                     alwaysShow
                                     shape={(props: any) => {
                                         const { cx, cy } = props;
-                                        if (!cx || !cy) return null;
+                                        if (!cx || !cy) return <g />;
 
                                         // V6: Increased Size
                                         const baseR = 12; // Was 8

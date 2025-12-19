@@ -110,6 +110,7 @@ export interface MarketEvent {
     type: 'leverage_cleanse' | 'policy_regulation' | 'market_structure' | 'exchange_event' | 'macro_shock' | 'tech_event' | 'supply_shock' | 'geopolitics';
     impactSummary: string; // "它對交易有什麼用"
     impactedTokens: string[];
+    sparklineData?: number[];
 
     // Level 1: Arsenal Metrics
     maxDrawdown?: string; // e.g. "-50%"
