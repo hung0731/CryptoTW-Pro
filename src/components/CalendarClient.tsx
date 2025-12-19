@@ -362,8 +362,8 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                 }
 
                 return (
-                    <div
-                        onClick={() => setSelectedEventKey(eventDef.key)}
+                    <Link
+                        href={`/calendar/${eventDef.key}`}
                         key={eventDef.key}
                         className={cn(
                             "cursor-pointer block group relative overflow-hidden active:opacity-90 transition-opacity",
@@ -444,26 +444,9 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                                 ))}
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 )
             })}
-
-
-            {/* Micro-Learning Drawer */}
-            <Sheet open={!!selectedEventKey} onOpenChange={(open) => !open && setSelectedEventKey(null)}>
-                <SheetContent side="bottom" className="h-[85vh] p-0 bg-[#0A0A0A] border-t-white/10">
-                    {selectedEventKey && (
-                        <SingleEventClient
-                            eventKey={selectedEventKey}
-                            reactions={Object.entries(reactions)
-                                .filter(([k, v]) => k.startsWith(selectedEventKey))
-                                .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
-                            }
-                            isDrawer
-                        />
-                    )}
-                </SheetContent>
-            </Sheet>
         </div >
     )
 }

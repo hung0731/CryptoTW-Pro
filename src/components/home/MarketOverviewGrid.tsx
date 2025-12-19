@@ -42,7 +42,7 @@ export function MarketOverviewGrid({ status, conclusion }: MarketOverviewGridPro
                     <div className="w-8 h-8 rounded-lg bg-[#111] flex items-center justify-center text-[#808080] group-hover:text-white transition-colors">
                         <Activity className="w-4 h-4" />
                     </div>
-                    <span className="text-[10px] font-mono text-[#525252]">SCORE: {score}</span>
+                    <span className="text-[10px] font-mono text-[#525252]">得分: {score}</span>
                 </div>
 
                 <div className="z-10">

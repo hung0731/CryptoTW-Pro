@@ -86,7 +86,7 @@ export function FeaturedReviewsCard() {
         <section className="mt-8">
             <div className="flex items-center gap-2 mb-2 px-1">
                 <Clock className="w-3 h-3 text-neutral-600" />
-                <span className="text-[10px] font-mono text-[#666666] tracking-widest">歷史回顧 (ARCHIVES)</span>
+                <span className="text-[10px] font-mono text-[#666666] tracking-widest">歷史回顧</span>
             </div>
 
             <div className="bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-2 relative overflow-hidden">

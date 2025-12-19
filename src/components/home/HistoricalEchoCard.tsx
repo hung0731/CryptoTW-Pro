@@ -19,7 +19,7 @@ export function HistoricalEchoCard({ match }: HistoricalEchoCardProps) {
             <div className="flex items-center justify-between px-1">
                 <h2 className={cn(TYPOGRAPHY.sectionTitle, "flex items-center gap-2")}>
                     <History className="w-4 h-4 text-neutral-400" />
-                    歷史映射 <span className="text-[10px] text-neutral-600 font-mono tracking-wider">HISTORICAL ECHO</span>
+                    歷史映射
                 </h2>
             </div>
 

@@ -27,7 +27,7 @@ export function MarketConditions({ status }: MarketConditionsProps) {
         <div className="space-y-2 mb-6">
             <div className="flex items-center gap-2 mb-2 px-1">
                 <ShieldCheck className="w-3 h-3 text-neutral-600" />
-                <span className="text-[10px] font-mono text-[#666666] tracking-widest">風控中心 (ALERTS)</span>
+                <span className="text-[10px] font-mono text-[#666666] tracking-widest">風控中心</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
