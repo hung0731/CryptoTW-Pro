@@ -111,6 +111,10 @@ export interface MarketEvent {
     impactSummary: string; // "它對交易有什麼用"
     impactedTokens: string[];
 
+    // Level 1: Arsenal Metrics
+    maxDrawdown?: string; // e.g. "-50%"
+    recoveryDays?: string; // e.g. "36 Days"
+
     actionableChecklist: {
         label: string;
         desc: string;
@@ -154,6 +158,9 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'policy_regulation',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-20%',
+        recoveryDays: '15 Days',
+        sparklineData: [42000, 44000, 46000, 48000, 49000, 46000, 44000, 42000, 40000, 39000, 38500, 39000, 40000, 41000, 42000, 43000, 45000, 48000, 50000, 52000],
         impactSummary: 'ETF 通過當日成為短期頂部，BTC 回調 20% 後才開啟主升段。',
 
         usageGuide: [
@@ -326,6 +333,9 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'exchange_event',
         impactedTokens: ['FTT', 'SOL', 'BTC'],
+        maxDrawdown: '-25%', // BTC specific
+        recoveryDays: '60 Days',
+        sparklineData: [21000, 21200, 20800, 20500, 19000, 18000, 17500, 17000, 16500, 16000, 15500, 15800, 16000, 16200, 16500, 16800, 17000, 16800, 16600, 16400],
         impactSummary: '信任崩潰引發連鎖去槓桿，BTC 跌破前低，唯有現貨流動性可信。',
 
         usageGuide: [
@@ -477,6 +487,9 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'leverage_cleanse',
         impactedTokens: ['LUNA', 'UST'],
+        maxDrawdown: '-50%',
+        recoveryDays: '90 Days',
+        sparklineData: [38000, 39000, 37000, 35000, 33000, 30000, 28000, 26000, 28000, 30000, 29000, 28000, 27000, 25000, 24000, 22000, 20000, 19000, 18000, 17500],
         impactSummary: '算法脫鉤引發 400 億美元資產歸零，恐慌擴散導致全市場修正 50%。',
 
         usageGuide: [
@@ -627,6 +640,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'macro_shock',
         impactedTokens: ['BTC', 'ETH'],
+        maxDrawdown: '-50%',
+        recoveryDays: '45 Days',
         impactSummary: '流動性枯竭導致各類資產無差別拋售，BTC 單日腰斬 50% 後 V 轉。',
 
         usageGuide: [
@@ -785,6 +800,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'exchange_event',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-80%',
+        recoveryDays: '700 Days',
         impactSummary: '最大交易所倒閉導致由比特幣主導的市場進入兩年熊市。',
 
         usageGuide: [

@@ -12,55 +12,46 @@ const getRichMenuObject = (liffId: string, chatBarText: string = "開啟選單")
     selected: true,
     name: "加密台灣 Pro Menu v5",
     chatBarText: chatBarText,
-    areas: [
-        // A1: Top Left (0,0) - 833x843 - Action: Open Home
+        // A1+A2: Top Left & Center (0,0) - 1667x843 - Action: Open Home
         {
-            bounds: { x: 0, y: 0, width: 833, height: 843 },
-            action: {
-                type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/`
-            }
-        },
-        // A2: Top Center (833,0) - 834x843 - Action: Open Home
-        {
-            bounds: { x: 833, y: 0, width: 834, height: 843 },
-            action: {
-                type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/`
-            }
-        },
-        // A3: Top Right (1667,0) - 833x843 - Action: Open Join Page (How to Pro)
-        {
-            bounds: { x: 1667, y: 0, width: 833, height: 843 },
-            action: {
-                type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/join`
-            }
-        },
-        // B1: Bottom Left (0,843) - 833x843 - Action: Send "快速查詢" message
-        {
-            bounds: { x: 0, y: 843, width: 833, height: 843 },
-            action: {
-                type: "message",
-                text: "快速查詢"
-            }
-        },
-        // B2: Bottom Center (833,843) - 834x843 - Action: Send "Pro 有什麼" message
-        {
-            bounds: { x: 833, y: 843, width: 834, height: 843 },
-            action: {
-                type: "message",
-                text: "Pro 有什麼"
-            }
-        },
-        // B3: Bottom Right (1667,843) - 833x843 - Action: Open Profile
-        {
-            bounds: { x: 1667, y: 843, width: 833, height: 843 },
-            action: {
-                type: "uri",
-                uri: `https://liff.line.me/${liffId}?path=/profile`
-            }
-        }
+    bounds: { x: 0, y: 0, width: 1667, height: 843 },
+    action: {
+        type: "uri",
+            uri: `https://liff.line.me/${liffId}?path=/`
+    }
+},
+// A3: Top Right (1667,0) - 833x843 - Action: Open Join Page (How to Pro)
+{
+    bounds: { x: 1667, y: 0, width: 833, height: 843 },
+    action: {
+        type: "uri",
+            uri: `https://liff.line.me/${liffId}?path=/join`
+    }
+},
+// B1: Bottom Left (0,843) - 833x843 - Action: Send "快速查詢" message
+{
+    bounds: { x: 0, y: 843, width: 833, height: 843 },
+    action: {
+        type: "message",
+            text: "快速查詢"
+    }
+},
+// B2: Bottom Center (833,843) - 834x843 - Action: Send "Pro 有什麼" message
+{
+    bounds: { x: 833, y: 843, width: 834, height: 843 },
+    action: {
+        type: "message",
+            text: "Pro 有什麼"
+    }
+},
+// B3: Bottom Right (1667,843) - 833x843 - Action: Open Profile
+{
+    bounds: { x: 1667, y: 843, width: 833, height: 843 },
+    action: {
+        type: "uri",
+            uri: `https://liff.line.me/${liffId}?path=/profile`
+    }
+}
     ]
 })
 

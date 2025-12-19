@@ -19,6 +19,8 @@ import {
     BookOpen,
     Filter
 } from 'lucide-react';
+import { Sparkline } from '@/components/ui/sparkline';
+import { MasterTimelineChart } from '@/components/reviews/MasterTimelineChart';
 
 // Icons for Types
 const TypeIcons: Record<string, any> = {
@@ -146,33 +148,15 @@ export function EventLibraryClient() {
                             );
                         })}
                     </div>
+                </div>
 
-                    {/* 4. Year Navigation */}
-                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 pt-1 border-t border-white/5 mt-2">
-                        <button
-                            onClick={() => setSelectedYear(null)}
-                            className={cn(
-                                "px-3 py-1 text-[11px] font-mono font-bold rounded shrink-0",
-                                selectedYear === null ? "text-white bg-[#1A1A1A]" : "text-[#525252]"
-                            )}
-                        >
-                            ALL
-                        </button>
-                        {AVAILABLE_YEARS.map(year => (
-                            <button
-                                key={year}
-                                onClick={() => setSelectedYear(selectedYear === year ? null : year)}
-                                className={cn(
-                                    "px-3 py-1 text-[11px] font-mono font-bold rounded shrink-0",
-                                    selectedYear === year
-                                        ? "text-white bg-[#1A1A1A] border border-[#2A2A2A]"
-                                        : "text-[#525252]"
-                                )}
-                            >
-                                {year}
-                            </button>
-                        ))}
-                    </div>
+                {/* 4. Timeline Rail (Level 2: Strategic Filter) */}
+                {/* 4. Master Timeline Chart (Level 3: Cockpit) */}
+                <div className="border-t border-white/5 bg-[#0A0A0A]">
+                    <MasterTimelineChart
+                        selectedYear={selectedYear}
+                        onEventClick={(year) => setSelectedYear(year)}
+                    />
                 </div>
             </div>
 
@@ -211,21 +195,46 @@ export function EventLibraryClient() {
                                     </div>
 
                                     {/* Right: Content */}
-                                    <div className="flex-1 min-w-0">
+                                    <div className="flex-1 min-w-0 relative">
                                         <div className="flex items-center justify-between gap-2 mb-1">
-                                            <span className="text-[10px] text-[#666] border border-[#222] px-1.5 rounded">{TypeLabels[review.type]}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] text-[#666] border border-[#222] px-1.5 rounded">{TypeLabels[review.type]}</span>
+                                                {/* Strategic Metrics (Cockpit Style) */}
+                                                {review.maxDrawdown && (
+                                                    <span className="text-[10px] font-mono font-bold text-red-500 bg-red-500/10 px-1.5 rounded">
+                                                        MDD: {review.maxDrawdown}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {review.recoveryDays && (
+                                                <span className="text-[10px] font-mono text-neutral-500">
+                                                    修復需 {review.recoveryDays}
+                                                </span>
+                                            )}
                                         </div>
 
-                                        <h3 className={cn(
-                                            "text-sm font-bold leading-tight mb-1.5",
-                                            "text-white group-hover:text-blue-400"
-                                        )}>
-                                            {review.title.split('：')[0]}
-                                        </h3>
+                                        <div className="flex items-end justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-sm font-bold leading-tight mb-1.5 text-white group-hover:text-blue-400">
+                                                    {review.title.split('：')[0]}
+                                                </h3>
+                                                <p className="text-xs text-[#666] line-clamp-2 leading-relaxed">
+                                                    {review.title.split('：')[1] || review.summary}
+                                                </p>
+                                            </div>
 
-                                        <p className="text-xs text-[#666] line-clamp-2 leading-relaxed">
-                                            {review.title.split('：')[1] || review.summary}
-                                        </p>
+                                            {/* Sparkline (Visual Cue) */}
+                                            {review.sparklineData && (
+                                                <div className="shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
+                                                    <Sparkline
+                                                        data={review.sparklineData}
+                                                        width={60}
+                                                        height={24}
+                                                        color={review.maxDrawdown?.includes('-') ? '#ef4444' : '#3b82f6'}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
 
                                         {/* Symptom Tags (Only show if searching or specific context needed) */}
                                         {review.behaviorTags && review.behaviorTags.length > 0 && (
