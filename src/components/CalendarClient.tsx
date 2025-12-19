@@ -2,7 +2,18 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Calendar, Activity, Briefcase, Landmark } from 'lucide-react'
+import {
+    ChevronRight,
+    Calendar,
+    Activity,
+    Briefcase,
+    Landmark,
+    BookOpen,
+    History,
+    AlertTriangle,
+    BarChart2,
+    Clock
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
     MACRO_EVENT_DEFS,
@@ -21,6 +32,9 @@ import { AISummaryCard } from '@/components/ui/AISummaryCard'
 import {
     Sheet,
     SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetDescription
 } from "@/components/ui/sheet"
 import SingleEventClient from '@/components/SingleEventClient'
 
@@ -28,7 +42,7 @@ interface CalendarClientProps {
     reactions: Record<string, MacroReaction>
 }
 
-// Mini Sparkline Card (Styled like Type B in SingleEvent)
+// Mini Sparkline Card (Educational Style)
 function MiniChartCard({
     occ,
     eventDef,
@@ -77,9 +91,8 @@ function MiniChartCard({
             return `${x},${y}`
         }).join(' ')
 
-        // Pro Style: Green/Red for Up/Down, otherwise Grey
-        const d1 = reaction.stats.d0d1Return || 0
-        const color = d1 > 0 ? '#4ADE80' : '#F87171' // Green : Red
+        // Neural Color for educational purpose (White/Grey) unless extreme
+        const color = '#A0A0A0'
         const centerIndex = -eventDef.windowDisplay.start
         const d0X = padding + (centerIndex / (prices.length - 1)) * (width - padding * 2)
 
@@ -105,7 +118,7 @@ function MiniChartCard({
                 <div className="flex flex-col">
                     <span className={cn(
                         "text-[10px] font-mono tracking-wide leading-tight",
-                        isNext ? COLORS.positive : COLORS.textSecondary
+                        isNext ? "text-white" : COLORS.textSecondary
                     )}>
                         {dateStr}
                     </span>
@@ -113,7 +126,6 @@ function MiniChartCard({
                         <span className={cn("text-[9px] font-mono", COLORS.textTertiary)}>
                             {(() => {
                                 const parts = formatOccursAt(occ.occursAt).split(' ')
-                                // [0]=Date, [1]=Period, [2]=Time, [3]=(Zone)
                                 return parts[1] && parts[2] ? `${parts[1]} ${parts[2]}` : '20:30'
                             })()}
                         </span>
@@ -121,15 +133,14 @@ function MiniChartCard({
                 </div>
 
                 {isNext ? (
-                    <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded ml-auto text-black bg-[#4ADE80]")}>
-                        下次
+                    <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded ml-auto text-white bg-[#2A2A2A] border border-[#333]")}>
+                        D-{daysUntil}
                     </span>
                 ) : (
-                    // D+1 Return Badge
+                    // D+1 Return Badge - Neutral Style
                     reaction?.stats?.d0d1Return !== null && (
                         <span className={cn(
-                            "text-[10px] font-mono font-bold ml-auto",
-                            reaction.stats.d0d1Return > 0 ? COLORS.positive : COLORS.negative
+                            "text-[10px] font-mono font-bold ml-auto text-neutral-400"
                         )}>
                             {reaction.stats.d0d1Return > 0 ? '+' : ''}{reaction.stats.d0d1Return}%
                         </span>
@@ -166,10 +177,10 @@ function MiniChartCard({
 // Helper to get Icon
 const getEventIcon = (key: string) => {
     switch (key) {
-        case 'cpi': return 'CPI'
-        case 'nfp': return 'NFP'
-        case 'fomc': return 'FED'
-        default: return 'EVT'
+        case 'cpi': return <Activity className="w-4 h-4" />
+        case 'nfp': return <Briefcase className="w-4 h-4" />
+        case 'fomc': return <Landmark className="w-4 h-4" />
+        default: return <Calendar className="w-4 h-4" />
     }
 }
 
@@ -273,16 +284,31 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
     }, [reactions])
 
     return (
-        <div className="px-4 space-y-6 pb-20 pt-6">
+        <div className="px-4 space-y-6 pb-20 pt-6 font-sans">
+            {/* 1. Page Header (Educational Context) */}
+            <div className="space-y-2">
+                <h1 className="text-xl font-black text-white flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-white" />
+                    經濟日曆
+                </h1>
+                <p className="text-xs text-[#A0A0A0] leading-relaxed max-w-sm">
+                    整理關鍵宏觀事件的公布時間，並回顧歷史上市場的典型反應行為。
+                </p>
+            </div>
+
             {/* AI Summary Card */}
             <AISummaryCard
-                summary={aiSummary || '正在分析近期宏觀事件...'}
-                source="事件預測"
+                summary={aiSummary || '正在分析近期宏觀事件結構...'}
+                source="事件結構分析"
                 loading={aiLoading}
             />
 
-            {/* Mode Switch */}
-            <div className="flex items-center justify-end px-2">
+            {/* Mode Switch & Filter */}
+            <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2 text-[10px] text-[#666]">
+                    <History className="w-3 h-3" />
+                    <span>點擊卡片查看歷史復盤</span>
+                </div>
                 <div className={cn("flex rounded-lg p-0.5 border", SURFACE.card, SURFACE.border)}>
                     <button
                         onClick={() => setAlignMode('time')}
@@ -344,46 +370,39 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                             CARDS.secondary
                         )}
                     >
-                        {/* 1. Header Section: Name vs Next Badge */}
+                        {/* 1. Header Section: Name + Icon */}
                         <div className={cn("px-4 py-3 border-b flex items-start justify-between", SURFACE.border)}>
                             <div className="flex items-center gap-3">
-                                <span className={cn("text-xs font-black tracking-tighter text-[#444] mt-0.5", COLORS.textPrimary)}>
+                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] text-white")}>
                                     {getEventIcon(eventDef.key)}
-                                </span>
+                                </div>
 
                                 <div>
                                     <div className="flex flex-col gap-0.5">
                                         <div className="flex items-center gap-2">
                                             <h2 className={cn("text-sm font-bold tracking-wide group-hover:text-white", COLORS.textPrimary)}>
-                                                {eventDef.name}
+                                                {eventDef.name} <span className="text-[#666] font-normal text-xs">{eventDef.key.toUpperCase()}</span>
                                             </h2>
                                             <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666]" />
                                         </div>
-                                        {/* Market Definition / Insight */}
+                                        {/* Educational Description - Neutral */}
                                         <p className={cn("text-[10px] truncate max-w-[200px]", COLORS.textTertiary)}>
-                                            {eventDef.insight.includes('⚠️') ? (
-                                                <span className="text-amber-500 font-medium">{eventDef.insight}</span>
-                                            ) : (
-                                                eventDef.listDescription
-                                            )}
+                                            {eventDef.listDescription}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Right Anchor: Next Occurrence Badge */}
+                            {/* Right Anchor: Time Indicator (Neutral) */}
                             {nextOccurrence ? (
-                                <div className={cn(
-                                    "flex flex-col items-end",
-                                    daysUntil <= 7 ? "text-white" : "text-[#666]"
-                                )}>
+                                <div className="flex flex-col items-end">
                                     <span className={cn(
-                                        "text-[10px] px-1.5 py-0.5 rounded font-bold border",
-                                        daysUntil <= 3
-                                            ? "bg-white/10 border-white/20 text-white"
+                                        "text-[10px] px-2 py-0.5 rounded font-mono border",
+                                        daysUntil === 0
+                                            ? "bg-white text-black border-white font-bold" // Today: White Highlight
                                             : "bg-[#0E0E0F] border-[#2A2A2A] text-[#666]"
                                     )}>
-                                        {daysUntil === 0 ? '今天' : `T-${daysUntil}`}
+                                        {daysUntil === 0 ? '今天' : `D-${daysUntil}`}
                                     </span>
                                 </div>
                             ) : (
@@ -393,41 +412,17 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                             )}
                         </div>
 
-                        {/* 2. Summary Stats Bar */}
-                        <div className="px-4 py-3 flex items-center justify-between text-[10px]">
-                            {/* Left: Chart Range / Next Date */}
-                            <div className="flex items-center gap-2 text-neutral-500">
-                                <span className="font-mono bg-[#1A1A1A] px-1 rounded">{eventDef.chartRange}</span>
-                                {nextOccurrence && (
-                                    <span>
-                                        {(() => {
-                                            const parts = formatOccursAt(nextOccurrence.occursAt).split(' ')
-                                            return parts[1] && parts[2] ? `${parts[1]} ${parts[2]}` : '20:30'
-                                        })()}
-                                    </span>
-                                )}
+                        {/* 2. Educational Context Bar (Impact Summary) */}
+                        <div className="px-4 py-3 bg-[#0A0A0A]/50">
+                            <div className="flex items-start gap-2">
+                                <BookOpen className="w-3 h-3 text-[#444] mt-0.5 flex-shrink-0" />
+                                <p className="text-[10px] text-[#808080] leading-relaxed">
+                                    {eventDef.impactSummary}
+                                </p>
                             </div>
-
-                            {/* Right: Stats Anchors */}
-                            {summaryStats && (
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className={COLORS.textTertiary}>波動</span>
-                                        <span className={cn("font-mono font-bold", COLORS.textPrimary)}>
-                                            {summaryStats.avgRange}%
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className={COLORS.textTertiary}>上漲</span>
-                                        <span className={cn("font-mono font-bold", summaryStats.d1WinRate >= 50 ? COLORS.positive : COLORS.negative)}>
-                                            {summaryStats.d1WinRate}%
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
-                        {/* 3. Horizontal Scroll Cards */}
+                        {/* 3. Horizontal Scroll Cards (History) */}
                         <div className="overflow-x-auto scrollbar-hide pb-4 pt-1 border-t border-[#2A2A2A] bg-[#0A0A0B]">
                             <div className="flex gap-2.5 px-4 min-w-max pt-3">
                                 {nextOccurrence && (
@@ -454,6 +449,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
             })}
 
 
+            {/* Micro-Learning Drawer */}
             <Sheet open={!!selectedEventKey} onOpenChange={(open) => !open && setSelectedEventKey(null)}>
                 <SheetContent side="bottom" className="h-[85vh] p-0 bg-[#0A0A0A] border-t-white/10">
                     {selectedEventKey && (

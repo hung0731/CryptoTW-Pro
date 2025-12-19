@@ -11,6 +11,11 @@ export interface MarketStatusData {
     sentiment: StatusItem
     whale: StatusItem
     volatility: StatusItem
+    // V2 Data Fields
+    market_structure?: { bias: string }
+    long_short?: { ratio: number }
+    funding_rates?: { average: number }
+    volatility_raw?: { value: number }
 }
 
 export interface Conclusion {
@@ -18,6 +23,7 @@ export interface Conclusion {
     action: string
     emoji: string
     reasoning: string
+    sentiment_score?: number
 }
 
 export interface MarketContext {

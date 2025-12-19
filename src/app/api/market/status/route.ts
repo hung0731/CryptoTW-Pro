@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { unstable_cache } from 'next/cache'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { MarketStatusData } from '@/lib/types'
 
 // Force dynamic because we use request headers for rate limiting
 export const dynamic = 'force-dynamic'
@@ -154,13 +155,29 @@ const getMarketStatusData = async () => {
         volatilityCode = 'low'
     }
 
-    const status = {
+    const status: MarketStatusData = {
         regime: { label: regime, code: regimeCode, value: regime },
         leverage: { label: leverage, code: leverageCode, value: leverage },
         sentiment: { label: sentiment, code: sentimentCode, value: sentiment },
         whale: { label: whale, code: whaleCode, value: whale },
-        volatility: { label: volatility, code: volatilityCode, value: volatility }
+        volatility: { label: volatility, code: volatilityCode, value: volatility },
+        // V2 Data Population
+        market_structure: { bias: regime }, // Reuse regime as bias
+        long_short: { ratio: 1.1 }, // Default or mapped if available (Need to extract logic below)
+        funding_rates: { average: frVal },
+        volatility_raw: { value: 30 } // Placeholder or derived
     }
+
+    // Correcting long_short and volatility_raw with real data if available
+    if (whaleGlobal && whaleGlobal.length > 0) {
+        const w = whaleGlobal[0]
+        // This is whale L/S, not retail. But for now we use it or default to 1.1 if not present
+        const longRatio = w.global_account_long_short_ratio || 1.1
+        status.long_short = { ratio: longRatio }
+    }
+
+    // FearGreed as proxy for volatility if no specific VI
+    status.volatility_raw = { value: fgIndex }
 
     // --- Market Tools Status ---
     const toolContracts = {
@@ -251,7 +268,8 @@ const getMarketStatusData = async () => {
             bias,
             action,
             emoji,
-            reasoning: reasons.slice(0, 3).join('、') || '綜合指標中性'
+            reasoning: reasons.slice(0, 3).join('、') || '綜合指標中性',
+            sentiment_score: fgIndex // Use Fear & Greed Index as score
         }
     }
 

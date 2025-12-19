@@ -7,48 +7,15 @@ import {
     MACRO_EVENT_DEFS,
     getNextOccurrence,
     getDaysUntil,
-    getPastOccurrences,
-    calculateEventStats,
     MacroEventDef,
     MacroEventOccurrence,
     MacroReaction
 } from '@/lib/macro-events'
-import { CARDS, COLORS } from '@/lib/design-tokens'
+import { Calendar } from 'lucide-react'
 
-interface UpcomingEventsCardProps {
-    reactions: Record<string, MacroReaction>
-}
-
-// Generate dynamic CTA for each event
-function getEventCTA(eventKey: string): string {
-    const ctaMap: Record<string, string> = {
-        cpi: '→ 每次 CPI 公布市場都!?',
-        nfp: '→ 非農數據真的重要嗎？',
-        fomc: '→ 升息降息怎麼看？',
-        ppi: '→ PPI 與 CPI 有何不同？',
-        jobless: '→ 失業金申請代表什麼？',
-        consumer_confidence: '→ 信心指數怎麼解讀？',
-    }
-    return ctaMap[eventKey] || '→ 為什麼重要？'
-}
-
-// Mini calendar icon (iOS-style)
-function CalendarIcon({ month, day }: { month: string, day: string }) {
-    return (
-        <div className="flex flex-col items-center rounded-lg overflow-hidden w-[44px] shrink-0 bg-[#1A1A1A] border border-[#2A2A2A]">
-            <div className="w-full text-center py-0.5 text-[8px] font-bold bg-neutral-700 text-neutral-300">
-                {month}
-            </div>
-            <div className="py-1 text-center">
-                <span className="text-base font-bold text-white leading-none">{day}</span>
-            </div>
-        </div>
-    )
-}
-
-// 倒數計時器
+// Countdown Component (Minimal)
 function Countdown({ targetDate }: { targetDate: string }) {
-    const [timeLeft, setTimeLeft] = React.useState({ days: 0, hours: 0, mins: 0, secs: 0 })
+    const [timeLeft, setTimeLeft] = React.useState('')
 
     React.useEffect(() => {
         const calculate = () => {
@@ -57,66 +24,80 @@ function Countdown({ targetDate }: { targetDate: string }) {
             const diff = target - now
 
             if (diff <= 0) {
-                setTimeLeft({ days: 0, hours: 0, mins: 0, secs: 0 })
+                setTimeLeft('NOW')
                 return
             }
 
             const days = Math.floor(diff / (1000 * 60 * 60 * 24))
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-            const secs = Math.floor((diff % (1000 * 60)) / 1000)
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000)
 
-            setTimeLeft({ days, hours, mins, secs })
+            // Format to 2 digits
+            const d = days.toString().padStart(2, '0')
+            const h = hours.toString().padStart(2, '0')
+            const m = minutes.toString().padStart(2, '0')
+            const s = seconds.toString().padStart(2, '0')
+
+            // Display format: 05d 12h 30m 05s
+            if (days > 0) setTimeLeft(`${d}天 ${h}時 ${m}分 ${s}秒`)
+            else setTimeLeft(`${h}時 ${m}分 ${s}秒`)
         }
 
         calculate()
-        const interval = setInterval(calculate, 1000) // 每秒更新
-
+        const interval = setInterval(calculate, 1000) // Update every second
         return () => clearInterval(interval)
     }, [targetDate])
 
-    return (
-        <div className="inline-flex items-center gap-0.5 text-[9px] font-mono text-neutral-500 mt-0.5">
-            <span className="text-white font-bold">{timeLeft.days}</span>日
-            <span className="text-white font-bold ml-1">{timeLeft.hours}</span>時
-            <span className="text-white font-bold ml-1">{timeLeft.mins}</span>分
-            <span className="text-white font-bold ml-1">{String(timeLeft.secs).padStart(2, '0')}</span>秒
-        </div>
-    )
+    return <span className="font-mono text-[10px] text-amber-500 font-bold tracking-wider">{timeLeft}</span>
 }
 
-// Mini past event chip
-function PastEventChip({ occ, reaction }: { occ: MacroEventOccurrence, reaction?: MacroReaction }) {
-    if (!occ.forecast || !occ.actual) return null
+interface UpcomingEventsCardProps {
+    reactions?: Record<string, MacroReaction>
+}
 
-    const isBeat = occ.actual > occ.forecast
-    const isMiss = occ.actual < occ.forecast
-    const isMeet = !isBeat && !isMiss
-
-    // Get BTC reaction from reactions data
-    const btcChange = reaction?.stats?.d0d1Return
-
+// Timeline Item
+function EventTimelineItem({ def, occ, days, isLast }: { def: MacroEventDef, occ: MacroEventOccurrence, days: number, isLast: boolean }) {
     const date = new Date(occ.occursAt)
     const monthDay = `${date.getMonth() + 1}/${date.getDate()}`
 
+    // Style logic
+    const isToday = days === 0
+    const dotClass = isToday ? 'bg-white animate-pulse' : 'bg-neutral-600'
+    const lineClass = isToday ? 'bg-neutral-600' : 'bg-neutral-800'
+
     return (
-        <div className="flex items-center gap-1.5 text-[9px]">
-            <span className="text-neutral-600">{monthDay}</span>
-            <span className={cn(
-                "font-bold",
-                isBeat ? COLORS.negative : isMiss ? COLORS.positive : "text-neutral-400"
-            )}>
-                {isBeat ? '超預期' : isMiss ? '低預期' : '符合'}
-            </span>
-            {btcChange !== undefined && btcChange !== null && (
-                <span className={cn(
-                    "font-mono",
-                    btcChange >= 0 ? COLORS.positive : COLORS.negative
-                )}>
-                    {btcChange >= 0 ? '+' : ''}{btcChange.toFixed(1)}%
-                </span>
-            )}
-        </div>
+        <Link href={`/calendar/${def.key}`} className="group relative flex gap-4 py-3 pl-2">
+            {/* Timeline Node */}
+            <div className="flex flex-col items-center shrink-0 w-6 relative">
+                <div className={cn(
+                    "w-2 h-2 rounded-full border border-black z-10 box-content ring-2 ring-black relative top-0.5",
+                    dotClass
+                )} />
+                {!isLast && (
+                    <div className={cn(
+                        "w-px absolute top-3 left-1/2 -translate-x-1/2 bottom-[-1rem] -z-0 transition-colors",
+                        lineClass
+                    )} />
+                )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0 pr-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-neutral-500 w-8">{monthDay}</span>
+                        <h4 className={cn(
+                            "text-sm font-bold truncate transition-colors",
+                            isToday ? "text-white" : "text-neutral-300 group-hover:text-white"
+                        )}>
+                            {def.name}
+                        </h4>
+                    </div>
+                    <Countdown targetDate={occ.occursAt} />
+                </div>
+            </div>
+        </Link>
     )
 }
 
@@ -125,83 +106,37 @@ export function UpcomingEventsCard({ reactions }: UpcomingEventsCardProps) {
         const occ = getNextOccurrence(def.key)
         if (!occ) return null
         const days = getDaysUntil(occ.occursAt)
-        const pastOccs = getPastOccurrences(def.key, 2)
-        return { def, occ, days, pastOccs }
+        return { def, occ, days }
     })
-        .filter((item): item is { def: MacroEventDef; occ: MacroEventOccurrence; days: number; pastOccs: MacroEventOccurrence[] } => item !== null)
+        .filter((item): item is { def: MacroEventDef; occ: MacroEventOccurrence; days: number } => item !== null)
         .sort((a, b) => a.days - b.days)
-        .slice(0, 5)
+        .slice(0, 4)
 
     if (upcomingEvents.length === 0) return null
 
     return (
-        <div className="overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
-            <div className="flex gap-3">
-                {upcomingEvents.map(({ def, occ, days, pastOccs }) => {
-                    const stats = calculateEventStats(def.key, reactions)
-                    const date = new Date(occ.occursAt)
-                    const month = `${date.getMonth() + 1}月`
-                    const day = date.getDate().toString().padStart(2, '0')
-                    const winRate = stats?.d1WinRate ?? 50
-
-                    return (
-                        <Link
-                            key={def.key}
-                            href={`/calendar/${def.key}`}
-                            className={cn(
-                                "snap-start flex-none w-[280px]",
-                                CARDS.secondary
-                            )}
-                        >
-                            <div className="flex items-start gap-3">
-                                {/* Left: Calendar Icon */}
-                                <CalendarIcon month={month} day={day} />
-
-                                {/* Right: Split into Main Info and Side Anchor */}
-                                <div className="flex-1 min-w-0 flex justify-between gap-2 h-[44px]">
-                                    {/* Middle Column: Title + Win Rate */}
-                                    <div className="flex flex-col justify-between min-w-0">
-                                        <h4 className="text-sm font-bold text-white truncate pr-1">{def.name}</h4>
-
-                                        {/* Bottom: Win Rate Context */}
-                                        <span className={cn(
-                                            "text-[10px] font-bold w-fit",
-                                            winRate >= 55 ? COLORS.positive :
-                                                winRate <= 45 ? COLORS.negative :
-                                                    "text-neutral-300"
-                                        )}>
-                                            上漲機率 {winRate}%
-                                        </span>
-                                    </div>
-
-                                    {/* Right Column: Time Anchor (Fixed Width visuals) */}
-                                    <div className="shrink-0 flex flex-col items-end justify-between">
-                                        {/* Top: Days Badge */}
-                                        <span className={cn(
-                                            "text-[9px] font-bold px-1.5 py-0.5 rounded text-center min-w-[32px]",
-                                            days <= 3
-                                                ? "bg-white/10 text-white"
-                                                : "bg-[#1A1A1A] text-neutral-500"
-                                        )}>
-                                            {days === 0 ? '今天' : days === 1 ? '明天' : `T-${days}`}
-                                        </span>
-
-                                        {/* Bottom: Countdown */}
-                                        <div className="scale-95 origin-bottom-right">
-                                            <Countdown targetDate={occ.occursAt} />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* CTA */}
-                            <div className="text-[10px] text-neutral-500 mt-2">
-                                {getEventCTA(def.key)}
-                            </div>
-                        </Link>
-                    )
-                })}
+        <section className="mt-8">
+            <div className="flex items-center gap-2 mb-2 px-1">
+                <Calendar className="w-3 h-3 text-neutral-600" />
+                <span className="text-[10px] font-mono text-[#666666] tracking-widest">重要時程</span>
             </div>
-        </div>
+
+            <div className="bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-2 relative overflow-hidden">
+                {/* Background Grid */}
+                <div className="absolute inset-0 z-0 opacity-[0.03]"
+                    style={{ backgroundImage: `linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)`, backgroundSize: '20px 20px' }}
+                />
+
+                <div className="relative z-10 flex flex-col">
+                    {upcomingEvents.map((event, i) => (
+                        <EventTimelineItem
+                            key={event.def.key}
+                            {...event}
+                            isLast={i === upcomingEvents.length - 1}
+                        />
+                    ))}
+                </div>
+            </div>
+        </section>
     )
 }

@@ -55,7 +55,7 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
     }
 
     // Only show top 2 highlights for homepage (compact mode)
-    const displayItems = compact ? marketContext?.highlights?.slice(0, 2) : marketContext?.highlights?.slice(0, 6)
+    const displayItems = compact ? marketContext?.highlights?.slice(0, 2) : marketContext?.highlights?.slice(0, 10)
 
     // Bias styling
     const getBiasStyle = (bias: string) => {

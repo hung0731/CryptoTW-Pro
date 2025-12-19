@@ -33,6 +33,7 @@ export interface MarketEvent {
     importance: MarketEventImportance;
     featuredRank?: number;
     tags: string[];
+    behaviorTags?: string[]; // [NEW] Symptom-based search tags
     marketStates: MarketState[];
     relatedMetrics: MetricType[];
     readingMinutes: number;
@@ -137,7 +138,10 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2024,
         importance: 'S',
         featuredRank: 1,
+        importance: 'S',
+        featuredRank: 1,
         tags: ['ETF', '機構資金', '市場結構'],
+        behaviorTags: ['利多出盡', '買預期賣事實', '機構進場'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['etfFlow', 'price', 'funding'],
         readingMinutes: 8,
@@ -308,7 +312,9 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2022,
         importance: 'S',
         featuredRank: 2,
+        featuredRank: 2,
         tags: ['系統性風險', '信任危機', '流動性'],
+        behaviorTags: ['連鎖爆倉', '流動性枯竭', '信任崩潰', '死亡螺旋'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'stablecoin', 'fearGreed'],
         readingMinutes: 8,
@@ -458,7 +464,9 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2022,
         importance: 'S',
         featuredRank: 3,
+        featuredRank: 3,
         tags: ['算法穩定幣', '機制風險', '死亡螺旋'],
+        behaviorTags: ['脫鉤', '死亡螺旋', '無限制印鈔', '歸零'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'stablecoin', 'fearGreed'],
         readingMinutes: 7,
@@ -607,7 +615,9 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2020,
         importance: 'S',
         featuredRank: 4,
+        featuredRank: 4,
         tags: ['黑天鵝', '流動性危機', '連鎖爆倉'],
+        behaviorTags: ['V型反轉', '插針', '無差別拋售', '流动性枯竭'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'oi', 'fearGreed'],
         readingMinutes: 5,
@@ -764,7 +774,9 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2014,
         importance: 'S',
         featuredRank: 5,
+        featuredRank: 5,
         tags: ['交易所風險', '資產遺失', '信任崩潰'],
+        behaviorTags: ['無法提幣', '交易所倒閉', '信任危機'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 6,

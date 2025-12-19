@@ -138,9 +138,9 @@ export function EconomicCalendar() {
                                             {/* Why Important */}
                                             {event.whyImportant && (
                                                 <div className="space-y-1">
-                                                    <div className="flex items-center gap-2 text-yellow-500 mb-1.5">
+                                                    <div className="flex items-center gap-2 text-neutral-400 mb-1.5">
                                                         <Info className="w-3.5 h-3.5" />
-                                                        <span className="text-xs font-bold">為什麼重要？</span>
+                                                        <span className="text-xs font-bold text-neutral-300">為什麼重要？</span>
                                                     </div>
                                                     <p className="text-xs text-neutral-300 leading-relaxed bg-black/20 p-2 rounded border border-white/5">
                                                         {event.whyImportant}

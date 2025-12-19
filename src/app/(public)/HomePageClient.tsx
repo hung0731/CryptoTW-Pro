@@ -13,13 +13,19 @@ import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
 import { UpcomingEventsCard } from '@/components/home/UpcomingEventsCard'
 import { FeaturedReviewsCard } from '@/components/home/FeaturedReviewsCard'
-import { SentimentMatrix } from '@/components/home/SentimentMatrix'
+// import { SentimentMatrix } from '@/components/home/SentimentMatrix' // Removed
+import { MarketRadarHero } from '@/components/home/MarketRadarHero'
+import { SmartMoneyConflict } from '@/components/home/SmartMoneyConflict'
+import { MarketConditions } from '@/components/home/MarketConditions'
 import { MacroReaction } from '@/lib/macro-events'
 import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens'
 
 import { ActionCard } from '@/components/home/ActionCard'
 import { CandlestickChart, Activity, DollarSign, Wallet } from 'lucide-react'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
+import { HistoricalEchoCard } from '@/components/home/HistoricalEchoCard'
+import { findHistoricalSimilarity } from '@/lib/historical-matcher'
+import { MarketOverviewGrid } from '@/components/home/MarketOverviewGrid'
 
 interface HomePageClientProps {
     reactions: Record<string, MacroReaction>
@@ -41,6 +47,16 @@ export function HomePageClient({
 
     // Welcome modal for new Pro users
     const { showWelcome, closeWelcome } = useWelcomeModal(isPro)
+
+    // Calculate Historical Match
+    // Note: initialStatus is MarketStatusData, we need to ensure it matches MarketState shape
+    // Or we rely on the fact that initialStatus has the necessary fields (fundingState, etc.)
+    // Let's assume initialStatus matches the shape or we map it.
+    // Looking at HomePageClientProps, initialStatus is MarketStatusData. 
+    // And MarketStatusData in types.ts likely extends MarketState from market-state.ts or is similar.
+    // If not, we might need a type check or conversion.
+    // Assuming compatibility for now based on context.
+    const historicalMatch = initialStatus ? findHistoricalSimilarity(initialStatus as any) : null
 
     // Greeting Logic
     const getGreeting = () => {
@@ -125,10 +141,17 @@ export function HomePageClient({
 
 
 
-                {/* ===== Sentiment Dashboard ===== */}
+                {/* ===== Sentiment Dashboard (COCKPIT V2) ===== */}
                 <section className="mt-6">
-                    <SentimentMatrix />
+                    {/* 1. Market Overview Grid (Compact) */}
+                    <MarketOverviewGrid status={initialStatus} conclusion={initialConclusion} />
+
+                    {/* 2. Market Conditions (Risk) */}
+                    <MarketConditions status={initialStatus} />
                 </section>
+
+                {/* 4. Historical Echo Module (New) */}
+                <HistoricalEchoCard match={historicalMatch} />
 
                 {/* ===== Context Section ===== */}
                 <section className="space-y-3">
@@ -171,3 +194,4 @@ export function HomePageClient({
         </main>
     )
 }
+

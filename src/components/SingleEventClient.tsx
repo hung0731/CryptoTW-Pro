@@ -323,7 +323,14 @@ export default function SingleEventClient({ eventKey, reactions, isDrawer = fals
                             <div className="flex items-start gap-2">
                                 <div className="w-0.5 h-3 bg-[#444] mt-1" />
                                 <p className={cn("text-xs leading-relaxed", COLORS.textSecondary)}>
-                                    {eventDef.insight.split('：')[1] || eventDef.narrative}
+                                    {eventDef.insight.includes('⚠️') ? (
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="text-red-500 font-bold">!</span>
+                                            <span className="text-neutral-300">{eventDef.insight.replace('⚠️ ', '')}</span>
+                                        </span>
+                                    ) : (
+                                        eventDef.insight.split('：')[1] || eventDef.narrative
+                                    )}
                                 </p>
                             </div>
                         </div>

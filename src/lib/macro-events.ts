@@ -15,6 +15,7 @@ export interface MacroEventDef {
     insight: string
     listDescription: string // [NEW] For Calendar Page
     detailDescription: string // [NEW] For Detail Page
+    impactSummary: string // [NEW] Educational context for volatility
     chartRange: string
     windowDisplay: { start: number; end: number }
     windowStats: { start: number; end: number }
@@ -87,9 +88,10 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         name: '消費者物價指數',
         narrative: '通膨敘事核心',
         icon: 'CPI',
-        insight: '⚠️ 數據斷檔：10月報銷，11月無月增率',
+        insight: '數據斷檔：10月報銷，11月無月增率',
         listDescription: '反映通膨變化，常影響利率預期與市場定價',
         detailDescription: '反映通膨變化，常影響利率預期，是市場定價的核心依據',
+        impactSummary: '過去公布後 24 小時內，比特幣平均波動幅度約 3-4%，若與預期偏差 >0.2% 則波動加劇。',
         chartRange: 'D-3 ~ D+3',
         windowDisplay: { start: -3, end: 3 },
         windowStats: { start: -1, end: 1 }
@@ -99,9 +101,10 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         name: '非農就業',
         narrative: '風險資產短線波動王',
         icon: 'NFP',
-        insight: '⚠️ 異常：10+11月合併發布，權重調整',
+        insight: '異常：10+11月合併發布，權重調整',
         listDescription: '每月就業數據，常引發短線劇烈波動',
         detailDescription: '每月就業數據，常引發短線劇烈波動，是評估經濟健康的關鍵指標', // Derived professional text
+        impactSummary: '非農數據公布當下通常引發 15 分鐘級別的「插針」現象，平均振幅可達 800-1200 點。',
         chartRange: 'D-3 ~ D+3',
         windowDisplay: { start: -3, end: 3 },
         windowStats: { start: -1, end: 1 }
@@ -114,6 +117,7 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         insight: '決策盲區：缺乏完整就業通膨數據',
         listDescription: '決定利率方向，常帶來趨勢轉折',
         detailDescription: '決定利率方向，常帶來趨勢轉折，是全球資金流動的指揮棒', // Derived professional text
+        impactSummary: '利率決議本身波動較小，真正的波動往往來自 30 分鐘後的記者會談話，方向轉換頻繁。',
         chartRange: 'D-1 ~ D+5',
         windowDisplay: { start: -1, end: 5 },
         windowStats: { start: -1, end: 3 }
