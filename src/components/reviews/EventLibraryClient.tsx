@@ -46,27 +46,6 @@ export function EventLibraryClient() {
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedYear, setSelectedYear] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [readReviewIds, setReadReviewIds] = useState<string[]>([]);
-
-    // Load Read Status from LocalStorage
-    useEffect(() => {
-        const stored = localStorage.getItem('read_reviews');
-        if (stored) {
-            try {
-                setReadReviewIds(JSON.parse(stored));
-            } catch (e) {
-                console.error("Failed to parse read reviews", e);
-            }
-        }
-    }, []);
-
-    const markAsRead = (id: string) => {
-        if (!readReviewIds.includes(id)) {
-            const newRead = [...readReviewIds, id];
-            setReadReviewIds(newRead);
-            localStorage.setItem('read_reviews', JSON.stringify(newRead));
-        }
-    };
 
     // Filter Logic
     const filteredReviews = useMemo(() => {
@@ -208,17 +187,15 @@ export function EventLibraryClient() {
 
                 {filteredReviews.length > 0 ? (
                     filteredReviews.map((review) => {
-                        const isRead = readReviewIds.includes(review.id);
                         const TypeIcon = TypeIcons[review.type] || Filter;
 
                         return (
                             <Link
                                 key={review.id}
                                 href={`/reviews/${review.year}/${review.slug}`}
-                                onClick={() => markAsRead(review.id)}
                                 className={cn(
                                     "block group relative overflow-hidden rounded-xl border border-transparent transition-all",
-                                    isRead ? "opacity-60 hover:opacity-100 bg-[#0A0A0A] border-[#1A1A1A]" : CARDS.secondary
+                                    CARDS.secondary
                                 )}
                             >
                                 <div className="p-4 flex items-start gap-4">
@@ -226,11 +203,9 @@ export function EventLibraryClient() {
                                     <div className="flex flex-col items-center gap-2 shrink-0 pt-1">
                                         <div className={cn(
                                             "w-10 h-10 rounded-full flex items-center justify-center border",
-                                            isRead
-                                                ? "bg-[#111] border-[#222] text-[#444]"
-                                                : "bg-[#1A1A1A] border-[#2A2A2A] text-white"
+                                            "bg-[#1A1A1A] border-[#2A2A2A] text-white"
                                         )}>
-                                            {isRead ? <CheckCircle2 className="w-5 h-5" /> : <TypeIcon className="w-5 h-5" />}
+                                            <TypeIcon className="w-5 h-5" />
                                         </div>
                                         <span className="text-[10px] font-mono text-[#525252]">{review.year}</span>
                                     </div>
@@ -239,12 +214,11 @@ export function EventLibraryClient() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between gap-2 mb-1">
                                             <span className="text-[10px] text-[#666] border border-[#222] px-1.5 rounded">{TypeLabels[review.type]}</span>
-                                            {isRead && <span className="text-[9px] text-[#444] font-medium">已讀</span>}
                                         </div>
 
                                         <h3 className={cn(
                                             "text-sm font-bold leading-tight mb-1.5",
-                                            isRead ? "text-[#888]" : "text-white group-hover:text-blue-400"
+                                            "text-white group-hover:text-blue-400"
                                         )}>
                                             {review.title.split('：')[0]}
                                         </h3>
