@@ -41,7 +41,7 @@ async function getVerificationConfig() {
 }
 
 // Allowed exchanges
-const ALLOWED_EXCHANGES = ['okx', 'binance', 'bybit']
+const ALLOWED_EXCHANGES = ['okx', 'binance', 'bybit', 'lbank']
 
 export async function POST(req: NextRequest) {
     // Rate limit: 5 binding requests per minute per IP

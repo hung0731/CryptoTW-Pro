@@ -50,7 +50,7 @@ function MenuLink({
 }
 
 export default function ProfilePage() {
-    const { isLoggedIn, profile, dbUser, isLoading: authLoading } = useLiff()
+    const { isLoggedIn, profile, dbUser, isLoading: authLoading, liffObject } = useLiff()
 
     if (authLoading) {
         return (
@@ -63,16 +63,40 @@ export default function ProfilePage() {
     }
 
     if (!isLoggedIn) {
+        const handleLogin = () => {
+            if (liffObject) {
+                liffObject.login()
+            }
+        }
+
         return (
             <div className="min-h-screen bg-black p-4 flex items-center justify-center">
-                <div className="text-center p-8 bg-neutral-900 border-white/5 border rounded-2xl shadow-lg max-w-sm">
-                    <div className="bg-neutral-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <User className="h-8 w-8 text-neutral-400" />
+                <div className="w-full max-w-sm space-y-6 text-center">
+                    <div className="space-y-2">
+                        <div className="bg-neutral-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5 shadow-2xl">
+                            <User className="h-10 w-10 text-neutral-400" />
+                        </div>
+                        <h2 className="text-xl font-bold text-white">歡迎回來</h2>
+                        <p className="text-neutral-400 text-sm">登入後即可查看個人帳務、<br />綁定交易所並解鎖專屬指標。</p>
                     </div>
-                    <p className="mb-6 text-neutral-400 font-medium">請登入以查看個人檔案。</p>
-                    <Link href="/">
-                        <Button className="w-full rounded-full bg-white text-black hover:bg-neutral-200">回到首頁</Button>
-                    </Link>
+
+                    <div className="space-y-3 pt-4">
+                        <Button
+                            onClick={handleLogin}
+                            className="w-full h-12 rounded-xl bg-[#06C755] hover:bg-[#05B34C] text-white border-none font-bold"
+                        >
+                            使用 LINE 快速登入
+                        </Button>
+                        <Link href="/" className="block">
+                            <Button variant="ghost" className="w-full h-12 rounded-xl text-neutral-500 hover:text-white hover:bg-white/5">
+                                回到首頁
+                            </Button>
+                        </Link>
+                    </div>
+
+                    <p className="text-[10px] text-neutral-600 px-6">
+                        登入即代表您同意本站之服務條款與隱私權政策。
+                    </p>
                 </div>
             </div>
         )
@@ -87,6 +111,12 @@ export default function ProfilePage() {
                         PRO 會員
                     </Badge>
                 )
+            case 'pending':
+                return (
+                    <Badge variant="outline" className="text-yellow-500 border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-xs">
+                        審核中
+                    </Badge>
+                )
             default:
                 // Handle 'vip' and other cases
                 if ((dbUser?.membership_status as string) === 'vip') {
@@ -99,12 +129,6 @@ export default function ProfilePage() {
                 return (
                     <Badge variant="secondary" className="bg-neutral-800 text-neutral-400 border border-white/5 px-2 py-0.5 text-xs">
                         免費會員
-                    </Badge>
-                )
-            case 'pending':
-                return (
-                    <Badge variant="outline" className="text-yellow-500 border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-xs">
-                        審核中
                     </Badge>
                 )
         }

@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { MarketStatusData } from '@/lib/types'
 import { Zap, Activity, AlertTriangle, Lock, Eye, ShieldCheck } from 'lucide-react'
@@ -36,16 +37,29 @@ export function MarketConditions({ status }: MarketConditionsProps) {
                     const borderColor = isHigh ? 'border-red-600/50' : 'border-[#1A1A1A]'
                     const textColor = isHigh ? 'text-red-500' : 'text-neutral-400'
                     const Icon = isHigh ? AlertTriangle : (i === 0 ? Lock : Eye)
+                    const isLocked = !isHigh && i === 0
 
-                    return (
+                    const card = (
                         <div key={i} className={cn(
-                            "bg-[#0A0A0A] border rounded-lg p-3 flex items-center justify-between",
-                            borderColor
+                            "bg-[#0A0A0A] border rounded-lg p-3 flex items-center justify-between transition-colors",
+                            borderColor,
+                            isLocked && "hover:bg-neutral-900 group"
                         )}>
-                            <span className={cn("text-xs font-bold", textColor)}>{w.label}</span>
-                            <Icon className={cn("w-3.5 h-3.5", textColor)} />
+                            <div className="flex flex-col">
+                                <span className={cn("text-xs font-bold", textColor)}>{w.label}</span>
+                                {isLocked && (
+                                    <span className="text-[8px] text-neutral-600 mt-0.5 group-hover:text-white/40">點擊解鎖</span>
+                                )}
+                            </div>
+                            <Icon className={cn("w-3.5 h-3.5", textColor, isLocked && "group-hover:text-white")} />
                         </div>
                     )
+
+                    if (isLocked) {
+                        return <Link href="/join" key={i} className="block">{card}</Link>
+                    }
+
+                    return card
                 })}
             </div>
         </div>

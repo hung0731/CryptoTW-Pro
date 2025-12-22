@@ -30,16 +30,18 @@ export class MetricLogger {
                     : entry.text_raw
 
                 await supabase.from('line_events').insert({
-                    user_id: entry.userId, // Should ideally be hashed or reference a users table
-                    event_type: entry.event_type,
-                    trigger: entry.trigger,
-                    text_raw: safeText,
-                    intent: entry.intent,
-                    extracted_symbol: entry.symbol,
-                    api_calls: entry.api_calls,
-                    latency_ms: Math.round(entry.latency_ms),
-                    success: entry.success,
-                    error_message: entry.error,
+                    user_id: entry.userId,
+                    type: entry.event_type || 'interaction', // Schema requires 'type'
+                    message: safeText || entry.trigger || 'No content', // Schema requires 'message'
+                    metadata: {
+                        trigger: entry.trigger,
+                        intent: entry.intent,
+                        symbol: entry.symbol,
+                        api_calls: entry.api_calls,
+                        latency_ms: Math.round(entry.latency_ms),
+                        success: entry.success,
+                        error: entry.error
+                    },
                     created_at: new Date().toISOString()
                 })
             } catch (e) {

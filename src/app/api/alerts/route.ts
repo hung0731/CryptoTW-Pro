@@ -18,9 +18,9 @@ export async function GET(req: NextRequest) {
     // Fetch Recent Alerts
     const { data: alerts, error: alertsError } = await supabase
         .from('alert_events')
-        .select('id, market, alert_type, summary, severity, metrics_snapshot, created_at')
-        .gte('created_at', since)
-        .order('created_at', { ascending: false })
+        .select('id, market, alert_type, summary, severity, metrics_snapshot, detected_at')
+        .gte('detected_at', since)
+        .order('detected_at', { ascending: false })
         .limit(limit)
 
     if (alertsError) {

@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
     const { data: alerts, error: alertsError } = await supabase
         .from('alert_events')
         .select('*')
-        .gte('created_at', since)
-        .order('created_at', { ascending: false })
+        .gte('detected_at', since)
+        .order('detected_at', { ascending: false })
         .limit(limit)
 
     if (alertsError) {

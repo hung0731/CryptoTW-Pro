@@ -40,10 +40,11 @@ export function HomePageClient({
     initialConclusion,
     initialContext
 }: HomePageClientProps) {
-    const { profile, dbUser, isLoading: isAuthLoading } = useLiff()
+    const { profile, dbUser, isLoading: isAuthLoading, liffObject } = useLiff()
 
     // Check if user is Pro
     const isPro = dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime'
+    const isPending = dbUser?.membership_status === 'pending'
 
     // Welcome modal for new Pro users
     const { showWelcome, closeWelcome } = useWelcomeModal(isPro)
@@ -94,24 +95,36 @@ export function HomePageClient({
 
                 {/* Welcome Component */}
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        {profile?.pictureUrl ? (
-                            <img
-                                src={profile.pictureUrl}
-                                alt="Avatar"
-                                className="w-10 h-10 rounded-full border border-white/20"
-                            />
-                        ) : (
-                            <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
-                                <span className="text-lg">👋</span>
-                            </div>
-                        )}
-                        <div>
-                            <p className="text-xs text-neutral-500">{greeting}</p>
-                            <h1 className="text-base font-bold text-white">
-                                {profile?.displayName || 'Pro 會員'}
-                            </h1>
+                    {!profile ? (
+                        <div
+                            onClick={() => liffObject?.login()}
+                            className="w-10 h-10 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
+                        >
+                            <span className="text-sm">登入</span>
                         </div>
+                    ) : profile?.pictureUrl ? (
+                        <img
+                            src={profile.pictureUrl}
+                            alt="Avatar"
+                            className="w-10 h-10 rounded-full border border-white/20"
+                        />
+                    ) : (
+                        <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
+                            <span className="text-lg">👋</span>
+                        </div>
+                    )}
+                    <div>
+                        <p className="text-xs text-neutral-500">{greeting}</p>
+                        <h1 className="text-base font-bold text-white">
+                            {profile?.displayName || (
+                                <span
+                                    onClick={() => liffObject?.login()}
+                                    className="cursor-pointer hover:text-white/80"
+                                >
+                                    立即登入
+                                </span>
+                            )}
+                        </h1>
                     </div>
                     <div className="flex items-center gap-2">
                         <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
@@ -126,15 +139,22 @@ export function HomePageClient({
                 {/* Unlock CTA (Non-Pro Users) */}
                 {!isPro && (
                     <Link href="/join" className="block">
-                        <div className={cn("flex items-center justify-between", CARDS.secondary)}>
+                        <div className={cn(
+                            "flex items-center justify-between",
+                            CARDS.secondary,
+                            isPending && "bg-yellow-500/10 border-yellow-500/30"
+                        )}>
                             <div className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-white" />
-                                <span className="text-sm font-medium text-white">解鎖完整 Pro 功能</span>
+                                {isPending ? (
+                                    <div className="w-4 h-4 rounded-full border-2 border-yellow-500/30 border-t-yellow-500 animate-spin" />
+                                ) : (
+                                    <Sparkles className="w-4 h-4 text-white" />
+                                )}
+                                <span className={cn("text-sm font-medium", isPending ? "text-yellow-500" : "text-white")}>
+                                    {isPending ? 'Pro 會員資格審核中' : '解鎖完整 Pro 功能'}
+                                </span>
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-neutral-400">
-                                <span>免費</span>
-                                <ChevronRight className="w-3.5 h-3.5" />
-                            </div>
+                            <ChevronRight className={cn("w-4 h-4", isPending ? "text-yellow-500" : "text-white/40")} />
                         </div>
                     </Link>
                 )}

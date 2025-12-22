@@ -111,6 +111,9 @@ function getZoneDescription(id: string, zone: string): string {
     return descriptions[id]?.[zone] || '—';
 }
 
+// Premium indicators that require Pro membership
+const PRO_INDICATORS = ['etf-flow', 'coinbase-premium', 'futures-basis', 'stablecoin-supply'];
+
 // 入口卡片組件
 function IndicatorEntryCard({
     story,
@@ -123,17 +126,26 @@ function IndicatorEntryCard({
     const zoneColors = ZONE_COLORS[zone];
     const zoneLabel = getZoneLabel(story.id, zone);
     const description = getZoneDescription(story.id, zone);
+    const isProFeature = PRO_INDICATORS.includes(story.id);
 
     return (
         <Link href={`/indicators/${story.slug}`} className="block group">
             <div className={cn(
                 CARDS.secondary,
-                "transition-colors duration-0 overflow-hidden relative"
+                "transition-colors duration-0 overflow-hidden relative",
+                isProFeature && "border-white/10"
             )}>
                 <div className="flex flex-col gap-3">
                     {/* Header Row: Name vs Status (Right Anchor) */}
                     <div className="flex items-start justify-between">
-                        <h3 className={cn(TYPOGRAPHY.cardTitle, "mt-0.5")}>{story.name}</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className={cn(TYPOGRAPHY.cardTitle, "mt-0.5")}>{story.name}</h3>
+                            {isProFeature && (
+                                <span className="bg-amber-500/10 text-amber-500 text-[8px] font-bold px-1 py-0.5 rounded border border-amber-500/20">
+                                    PRO
+                                </span>
+                            )}
+                        </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
                             <span className={cn(

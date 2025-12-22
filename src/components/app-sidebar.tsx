@@ -10,6 +10,8 @@ import {
   Newspaper,
   Settings,
   Command,
+  Megaphone,
+  LineChart,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -22,6 +24,8 @@ const menuSections = [
       { title: "用戶中心 (Users)", url: "/admin/users", icon: Users },
       { title: "市場訊號 (Signals)", url: "/admin/signals", icon: Radio },
       { title: "內容管理 (Content)", url: "/admin/content", icon: Newspaper },
+      { title: "行銷推播 (Marketing)", url: "/admin/marketing", icon: Megaphone },
+      { title: "數據分析 (Analytics)", url: "/admin/analytics", icon: LineChart },
       { title: "系統設定 (System)", url: "/admin/system", icon: Settings },
     ]
   },
