@@ -33,7 +33,7 @@ function mapToNewsFlashItem(item: CoinglassNewsItem, index: number): NewsFlashIt
 
 export async function GET(req: NextRequest) {
     // Rate limit: 60 requests per minute per IP
-    const rateLimited = simpleApiRateLimit(req, 'cg-news', 60, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'cg-news', 60, 60)
     if (rateLimited) return rateLimited
 
     try {

@@ -12,7 +12,7 @@ const CACHE_KEY = 'coinglass_dashboard'
 // Reduces frontend API calls from 4 → 1
 export async function GET(req: NextRequest) {
     // Rate limit: 60 requests per minute per IP
-    const rateLimited = simpleApiRateLimit(req, 'cg-dashboard', 60, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'cg-dashboard', 60, 60)
     if (rateLimited) return rateLimited
 
     try {

@@ -284,7 +284,7 @@ const getCachedMarketStatusData = unstable_cache(
 )
 
 export async function GET(req: NextRequest) {
-    const rateLimited = simpleApiRateLimit(req, 'market-status', 60, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'market-status', 60, 60)
     if (rateLimited) return rateLimited
 
     try {

@@ -1,6 +1,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { formatTaiwaneseText, formatObjectStrings } from './format-utils'
+import { acquireLock, releaseLock } from './cache'
 
 const apiKey = process.env.GEMINI_API_KEY
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
@@ -113,6 +114,12 @@ export async function generateMarketSummary(
         return null
     }
 
+    const lockKey = 'lock:gemini:market_summary'
+    if (!await acquireLock(lockKey, 60)) {
+        console.warn('Gemini Busy: Market Summary generation locked')
+        return null
+    }
+
     try {
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
 
@@ -218,6 +225,8 @@ Note: emoji 必須根據 sentiment 選擇，例如：
     } catch (e) {
         console.error('Gemini Generation Error:', e)
         return null
+    } finally {
+        await releaseLock('lock:gemini:market_summary')
     }
 }
 
@@ -276,6 +285,12 @@ export async function generateMarketContextBrief(
     newsItems: any[]
 ): Promise<MarketContextBrief | null> {
     if (!genAI) return null
+
+    const lockKey = 'lock:gemini:market_context'
+    if (!await acquireLock(lockKey, 60)) {
+        console.warn('Gemini Busy: Market Context generation locked')
+        return null
+    }
 
     try {
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
@@ -362,6 +377,8 @@ ${CONSISTENCY_CHECK}
     } catch (e) {
         console.error('Gemini Market Context Brief Error:', e)
         return null
+    } finally {
+        await releaseLock('lock:gemini:market_context')
     }
 }
 
@@ -397,6 +414,12 @@ export async function generateAIDecision(
     newsHighlights: string[] = []
 ): Promise<AIDecision | null> {
     if (!genAI) return null
+
+    const lockKey = 'lock:gemini:ai_decision'
+    if (!await acquireLock(lockKey, 60)) {
+        console.warn('Gemini Busy: AI Decision generation locked')
+        return null
+    }
 
     try {
         const model = genAI.getGenerativeModel({ model: MODEL_NAME })
@@ -467,6 +490,8 @@ ${CONSISTENCY_CHECK}
     } catch (e) {
         console.error('Gemini AI Decision Error:', e)
         return null
+    } finally {
+        await releaseLock('lock:gemini:ai_decision')
     }
 }
 

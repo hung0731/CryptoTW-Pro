@@ -135,6 +135,81 @@ export async function getCacheStats(): Promise<{ size: number; keys: string[] }>
 }
 
 /**
+ * Increment a key (Atomic) - For Rate Limiting
+ * Returns the new value
+ */
+export async function increment(key: string, ttlSeconds: number): Promise<number> {
+    if (redis) {
+        try {
+            const multi = redis.multi()
+            multi.incr(key)
+            multi.expire(key, ttlSeconds)
+            const results = await multi.exec()
+            if (results && results[0]) {
+                return results[0][1] as number
+            }
+            return 1
+        } catch (e) {
+            // Fallback to local memory (Not truly distributed but better than fail)
+        }
+    }
+
+    // Local Fallback
+    const entry = localCache.get(key)
+    let val = 1
+    if (entry && Date.now() < entry.expiry) {
+        val = (entry.data as number) + 1
+    }
+    localCache.set(key, {
+        data: val,
+        expiry: Date.now() + ttlSeconds * 1000
+    })
+    return val
+}
+
+/**
+ * Acquire a Lock (Mutex) - For Cache Stampede Protection
+ * Returns true if lock acquired, false if already locked
+ */
+export async function acquireLock(key: string, ttlSeconds: number): Promise<boolean> {
+    const lockKey = `lock:${key}`
+    if (redis) {
+        try {
+            // SET lockKey "locked" EX ttl NX
+            // Returns 'OK' if set, null if not set (already exists)
+            const res = await redis.set(lockKey, '1', 'EX', ttlSeconds, 'NX')
+            return res === 'OK'
+        } catch (e) {
+            return true // Fail open (allow execution) if Redis errors to prevent deadlock
+        }
+    }
+
+    // Local Fallback (Single instance locking)
+    const entry = localCache.get(lockKey)
+    if (entry && Date.now() < entry.expiry) {
+        return false // Already locked
+    }
+    localCache.set(lockKey, {
+        data: '1',
+        expiry: Date.now() + ttlSeconds * 1000
+    })
+    return true
+}
+
+/**
+ * Release a Lock
+ */
+export async function releaseLock(key: string): Promise<void> {
+    const lockKey = `lock:${key}`
+    if (redis) {
+        try {
+            await redis.del(lockKey)
+        } catch (e) { }
+    }
+    localCache.delete(lockKey)
+}
+
+/**
  * Check Cache Status (Redis vs Memory)
  */
 export async function getCacheStatus() {
@@ -160,4 +235,5 @@ export const CacheTTL = {
     MEDIUM: 300,       // Funding, LSR, Heatmap (5 min)
     SLOW: 900,         // Fear/Greed, ETF (15 min)
     HOURLY: 3600,      // Calendar, Exchange list (1 hour)
+    MINUTE: 60         // Rate limit window
 } as const

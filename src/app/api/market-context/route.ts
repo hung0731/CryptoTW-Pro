@@ -10,7 +10,7 @@ const CACHE_KEY = 'market_context'
 
 export async function GET(req: NextRequest) {
     // Rate limit: 30 requests per minute per IP
-    const rateLimited = simpleApiRateLimit(req, 'market-context', 30, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'market-context', 30, 60)
     if (rateLimited) return rateLimited
 
     try {

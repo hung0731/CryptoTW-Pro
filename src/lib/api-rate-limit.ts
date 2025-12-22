@@ -39,46 +39,37 @@ export async function apiRateLimit(
 }
 
 /**
- * Simple in-memory rate limiter (fallback when DB unavailable)
- * Does not persist across server restarts or scale horizontally
+ * Distributed Rate Limiting using Redis (via cache.ts)
  */
-const memoryStore = new Map<string, { count: number; resetAt: number }>()
+import { increment } from '@/lib/cache'
 
-export function simpleRateLimit(
+export async function simpleRateLimit(
     identifier: string,
     limit: number = 60,
     windowSeconds: number = 60
-): { success: boolean } {
-    const now = Date.now()
-    const key = identifier
-    const record = memoryStore.get(key)
+): Promise<{ success: boolean; count: number }> {
+    const key = `ratelimit:${identifier}`
+    const count = await increment(key, windowSeconds)
 
-    if (!record || now > record.resetAt) {
-        memoryStore.set(key, { count: 1, resetAt: now + windowSeconds * 1000 })
-        return { success: true }
+    return {
+        success: count <= limit,
+        count
     }
-
-    if (record.count >= limit) {
-        return { success: false }
-    }
-
-    record.count++
-    return { success: true }
 }
 
 /**
  * Wrapper for simple rate limit that returns response
  */
-export function simpleApiRateLimit(
+export async function simpleApiRateLimit(
     req: NextRequest,
     prefix: string,
     limit: number = 60,
     windowSeconds: number = 60
-): NextResponse | null {
+): Promise<NextResponse | null> {
     const ip = getClientIP(req)
     const identifier = `${prefix}:${ip}`
 
-    const { success } = simpleRateLimit(identifier, limit, windowSeconds)
+    const { success } = await simpleRateLimit(identifier, limit, windowSeconds)
 
     if (!success) {
         return NextResponse.json(
