@@ -67,8 +67,16 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({
             context: {
                 sentiment: '中性',
-                summary: '市場資訊暫時無法取得，請稍後再試。',
-                highlights: []
+                summary: 'AI 正在分析最新市場數據，這可能需要幾秒鐘...',
+                highlights: [
+                    {
+                        title: '⚡️ AI 分析運算中...',
+                        reason: '正在解讀最新市場新聞與數據，請稍後刷新頁面查看結果。',
+                        impact: '中',
+                        bias: '中性',
+                        impact_note: 'Analyzing...'
+                    }
+                ]
             },
             error: true
         }, { status: 500 })
