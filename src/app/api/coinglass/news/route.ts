@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
 
     try {
         // Check cache first
-        const cached = getCache<NewsFlashItem[]>(CACHE_KEY)
+        // Check cache first
+        const cached = await getCache<NewsFlashItem[]>(CACHE_KEY)
         if (cached) {
             console.log('[Cache HIT] coinglass_news')
             return NextResponse.json({ news: cached })
@@ -76,7 +77,8 @@ export async function GET(req: NextRequest) {
         const news: NewsFlashItem[] = json.data.map(mapToNewsFlashItem)
 
         // Cache for 1 minute
-        setCache(CACHE_KEY, news, CacheTTL.FAST)
+        // Cache for 1 minute
+        await setCache(CACHE_KEY, news, CacheTTL.FAST)
 
         return NextResponse.json({ news })
 

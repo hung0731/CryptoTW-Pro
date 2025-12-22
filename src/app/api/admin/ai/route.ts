@@ -14,9 +14,9 @@ export async function GET(req: NextRequest) {
 
     try {
         // Get cache status for AI content
-        const marketContext = getCache('market_context')
-        const aiDecision = getCache('ai_decision')
-        const coinglassNews = getCache('coinglass_news')
+        const marketContext = await getCache('market_context')
+        const aiDecision = await getCache('ai_decision')
+        const coinglassNews = await getCache('coinglass_news')
 
         return NextResponse.json({
             caches: {
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
                 // Regenerate market context
                 const result = await generateMarketContextBrief(newsItems)
                 if (result) {
-                    setCache('market_context', result, CacheTTL.SLOW) // 15 min
+                    await setCache('market_context', result, CacheTTL.SLOW) // 15 min
                 }
             }
 
@@ -111,12 +111,12 @@ export async function POST(req: NextRequest) {
                     whaleStatus: '觀望中'
                 }
 
-                const marketContext = getCache<{ highlights?: { title: string }[] }>('market_context')
+                const marketContext = await getCache<{ highlights?: { title: string }[] }>('market_context')
                 const newsHighlights = marketContext?.highlights?.slice(0, 3).map(h => h.title) || []
 
                 const result = await generateAIDecision(marketData, newsHighlights)
                 if (result) {
-                    setCache('ai_decision', result, CacheTTL.MEDIUM) // 5 min
+                    await setCache('ai_decision', result, CacheTTL.MEDIUM) // 5 min
                 }
             }
 
@@ -130,13 +130,13 @@ export async function POST(req: NextRequest) {
         if (action === 'clear') {
             // Clear specific cache
             if (type === 'market_context' || type === 'all') {
-                clearCache('market_context')
+                await clearCache('market_context')
             }
             if (type === 'ai_decision' || type === 'all') {
-                clearCache('ai_decision')
+                await clearCache('ai_decision')
             }
             if (type === 'coinglass_news' || type === 'all') {
-                clearCache('coinglass_news')
+                await clearCache('coinglass_news')
             }
 
             return NextResponse.json({

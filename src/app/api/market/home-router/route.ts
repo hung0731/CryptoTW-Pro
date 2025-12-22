@@ -20,8 +20,8 @@ export async function GET() {
         ])
 
         // --- Market Context + AI Decision Logic ---
-        let marketContext: MarketContextBrief | null = getCache('market_context_brief')
-        let aiDecision: AIDecision | null = getCache('ai_decision')
+        let marketContext: MarketContextBrief | null = await getCache('market_context_brief')
+        let aiDecision: AIDecision | null = await getCache('ai_decision')
 
         // Fetch news for both AI models
         const news = await cachedCoinglassV4Request<any[]>('/api/newsflash/list', {
@@ -29,11 +29,12 @@ export async function GET() {
         }, 300)
 
         // Generate Market Context (for news highlights)
+        let contextPromise = Promise.resolve(marketContext)
         if (!marketContext && news && Array.isArray(news)) {
-            marketContext = await generateMarketContextBrief(news)
-            if (marketContext) {
-                setCache('market_context_brief', marketContext, 1800) // 30 mins
-            }
+            contextPromise = generateMarketContextBrief(news).then(async res => {
+                if (res) await setCache('market_context_brief', res, 1800) // 30 mins
+                return res
+            })
         }
 
         // Generate AI Decision (main conclusion - first screen)
@@ -44,21 +45,29 @@ export async function GET() {
         const sentimentScore = sentimentReport?.sentiment_score || 50
         const whaleStatus = sentimentReport?.metadata?.market_structure?.bias || '中性'
 
+        let decisionPromise = Promise.resolve(aiDecision)
         if (!aiDecision) {
-            const newsHighlights = marketContext?.highlights?.slice(0, 3).map(h => h.title) || []
+            // Use raw news titles immediately to allow parallel execution
+            const rawNewsTitles = Array.isArray(news)
+                ? news.slice(0, 5).map(n => n.newsflash_title || n.title || "").filter(Boolean)
+                : []
 
-            aiDecision = await generateAIDecision({
+            decisionPromise = generateAIDecision({
                 fundingRate,
                 longShortRatio: lsRatio,
                 totalLiquidation: totalLiq,
                 sentimentScore,
                 whaleStatus
-            }, newsHighlights)
-
-            if (aiDecision) {
-                setCache('ai_decision', aiDecision, 900) // 15 mins cache
-            }
+            }, rawNewsTitles).then(async res => {
+                if (res) await setCache('ai_decision', res, 900) // 15 mins cache
+                return res
+            })
         }
+
+        // Await parallel execution
+        const [newContext, newDecision] = await Promise.all([contextPromise, decisionPromise])
+        marketContext = newContext
+        aiDecision = newDecision
         // -----------------------------------------
 
         // 1. Build Mainline Status

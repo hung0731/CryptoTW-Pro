@@ -74,7 +74,8 @@ const CACHE_TTL = 300 // 5 分鐘
 
 export async function getMarketState(symbol: 'BTC' = 'BTC'): Promise<MarketState | null> {
     // 檢查快取
-    const cached = getCache<MarketState>(CACHE_KEY)
+    // 檢查快取
+    const cached = await getCache<MarketState>(CACHE_KEY)
     if (cached) {
         return cached
     }
@@ -95,7 +96,8 @@ export async function getMarketState(symbol: 'BTC' = 'BTC'): Promise<MarketState
         }
 
         // 設定快取
-        setCache(CACHE_KEY, state, CACHE_TTL)
+        // 設定快取
+        await setCache(CACHE_KEY, state, CACHE_TTL)
 
         return state
     } catch (error) {

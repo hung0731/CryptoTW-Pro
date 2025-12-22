@@ -161,7 +161,7 @@ export async function cachedCoinglassV4Request<T>(
     const cacheKey = `coinglass:${endpoint}:${JSON.stringify(params || {})}`
 
     // Check cache first
-    const cached = getCache<T>(cacheKey)
+    const cached = await getCache<T>(cacheKey)
     if (cached !== null) {
         return cached
     }
@@ -171,7 +171,7 @@ export async function cachedCoinglassV4Request<T>(
 
     // Cache successful responses
     if (data !== null) {
-        setCache(cacheKey, data, ttlSeconds)
+        await setCache(cacheKey, data, ttlSeconds)
     }
 
     return data

@@ -74,7 +74,8 @@ ${JSON.stringify(top20, null, 2)}
 
 export async function getWhaleData() {
     // Check cache first
-    const cached = getCache<any>(CACHE_KEY)
+    // Check cache first
+    const cached = await getCache<any>(CACHE_KEY)
     if (cached) {
         console.log('[Cache HIT] whales_data')
         return cached
@@ -100,7 +101,8 @@ export async function getWhaleData() {
     }
 
     // Cache for 2 minutes
-    setCache(CACHE_KEY, result, CACHE_TTL)
+    // Cache for 2 minutes
+    await setCache(CACHE_KEY, result, CACHE_TTL)
 
     return result
 }

@@ -11,7 +11,8 @@ const CACHE_KEY = 'derivatives_data'
 
 export async function getDerivativesData() {
     // Check cache first
-    const cached = getCache<any>(CACHE_KEY)
+    // Check cache first
+    const cached = await getCache<any>(CACHE_KEY)
     if (cached) {
         console.log('[Cache HIT] derivatives_data')
         return cached
@@ -80,7 +81,8 @@ export async function getDerivativesData() {
     }
 
     // Cache result for 5 minutes
-    setCache(CACHE_KEY, result, CacheTTL.MEDIUM)
+    // Cache result for 5 minutes
+    await setCache(CACHE_KEY, result, CacheTTL.MEDIUM)
 
     return result
 }

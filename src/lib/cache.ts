@@ -1,7 +1,11 @@
+import Redis from 'ioredis'
+
 /**
- * Simple In-Memory Cache for API responses
- * Note: In Vercel Serverless, cache is per-instance and may not persist across requests.
- * For production with high traffic, consider Upstash Redis.
+ * Hybrid Cache: Redis (Primary) -> In-Memory (Fallback)
+ * 
+ * Behavior:
+ * - If process.env.REDIS_URL is set, uses Redis.
+ * - If not set (or connection fails), falls back to In-Memory Map.
  */
 
 type CacheEntry<T> = {
@@ -9,17 +13,60 @@ type CacheEntry<T> = {
     expiry: number
 }
 
-const cache = new Map<string, CacheEntry<any>>()
+// In-Memory Fallback
+const localCache = new Map<string, CacheEntry<any>>()
+
+// Redis Client
+let redis: Redis | null = null
+
+// Support various env var names (Zeabur uses REDIS_URI or REDIS_CONNECTION_STRING)
+const REDIS_URL = process.env.REDIS_URL || process.env.REDIS_URI || process.env.REDIS_CONNECTION_STRING
+
+if (REDIS_URL) {
+    console.log('Initializing Redis Cache...')
+    redis = new Redis(REDIS_URL, {
+        maxRetriesPerRequest: 1, // Fail fast on dev
+        connectTimeout: 2000,
+        retryStrategy: (times) => {
+            if (times > 3) {
+                console.warn('Redis connection failed, switching to in-memory mode.')
+                return null // Stop retrying
+            }
+            return Math.min(times * 50, 2000)
+        }
+    })
+
+    redis.on('error', (err) => {
+        // Suppress loud errors in dev if Redis isn't running
+        if (process.env.NODE_ENV === 'development') return
+        console.error('Redis Error:', err)
+    })
+}
 
 /**
- * Get cached data if valid
+ * Get cached data (Async)
  */
-export function getCache<T>(key: string): T | null {
-    const entry = cache.get(key)
+export async function getCache<T>(key: string): Promise<T | null> {
+    // 1. Try Redis
+    if (redis) {
+        try {
+            const result = await redis.get(key)
+            if (result) {
+                return JSON.parse(result) as T
+            }
+            return null
+        } catch (e) {
+            // Redis failed, fall through to local
+            // console.warn('Redis get failed', e)
+        }
+    }
+
+    // 2. Fallback to Local
+    const entry = localCache.get(key)
     if (!entry) return null
 
     if (Date.now() > entry.expiry) {
-        cache.delete(key)
+        localCache.delete(key)
         return null
     }
 
@@ -27,10 +74,23 @@ export function getCache<T>(key: string): T | null {
 }
 
 /**
- * Set cache with TTL in seconds
+ * Set cache (Async but void promise)
  */
-export function setCache<T>(key: string, data: T, ttlSeconds: number): void {
-    cache.set(key, {
+export async function setCache<T>(key: string, data: T, ttlSeconds: number): Promise<void> {
+    // 1. Try Redis
+    if (redis) {
+        try {
+            await redis.set(key, JSON.stringify(data), 'EX', ttlSeconds)
+            // Also update local for redundancy? No, stick to one source of truth per key preferably, 
+            // but for fallback safety we COULD. For now, Keep it simple: Redis OR Local.
+            return
+        } catch (e) {
+            // Redis failed, fall through
+        }
+    }
+
+    // 2. Fallback to Local
+    localCache.set(key, {
         data,
         expiry: Date.now() + ttlSeconds * 1000
     })
@@ -39,27 +99,38 @@ export function setCache<T>(key: string, data: T, ttlSeconds: number): void {
 /**
  * Invalidate a specific cache key
  */
-export function invalidateCache(key: string): void {
-    cache.delete(key)
+export async function invalidateCache(key: string): Promise<void> {
+    if (redis) {
+        try {
+            await redis.del(key)
+        } catch (e) { }
+    }
+    localCache.delete(key)
 }
 
-// Alias for invalidateCache
+// Alias
 export const clearCache = invalidateCache
 
 /**
- * Clear all cache (useful for admin/debug)
+ * Clear all cache (admin)
  */
-export function clearAllCache(): void {
-    cache.clear()
+export async function clearAllCache(): Promise<void> {
+    if (redis) {
+        try {
+            await redis.flushdb()
+        } catch (e) { }
+    }
+    localCache.clear()
 }
 
 /**
- * Get cache statistics
+ * Get cache statistics (Local only, Redis stat is expensive)
  */
-export function getCacheStats(): { size: number; keys: string[] } {
+export async function getCacheStats(): Promise<{ size: number; keys: string[] }> {
+    // Note: This only returns local cache stats since scanning Redis is heavy
     return {
-        size: cache.size,
-        keys: Array.from(cache.keys())
+        size: localCache.size,
+        keys: Array.from(localCache.keys())
     }
 }
 

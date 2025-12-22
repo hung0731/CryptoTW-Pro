@@ -17,7 +17,8 @@ export async function GET(req: NextRequest) {
 
     try {
         // Check cache first
-        const cached = getCache(CACHE_KEY)
+        // Check cache first
+        const cached = await getCache(CACHE_KEY)
         if (cached) {
             return NextResponse.json({ dashboard: cached, cached: true })
         }
@@ -153,7 +154,8 @@ export async function GET(req: NextRequest) {
         }
 
         // Cache result
-        setCache(CACHE_KEY, dashboard, CacheTTL.MEDIUM) // 5 mins
+        // Cache result
+        await setCache(CACHE_KEY, dashboard, CacheTTL.MEDIUM) // 5 mins
 
         return NextResponse.json({ dashboard })
     } catch (error) {

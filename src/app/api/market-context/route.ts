@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
 
     try {
         // Check cache first
-        const cached = getCache(CACHE_KEY)
+        // Check cache first
+        const cached = await getCache(CACHE_KEY)
         if (cached) {
             console.log('[Cache HIT] market_context')
             return NextResponse.json({ context: cached, cached: true })
@@ -54,7 +55,8 @@ export async function GET(req: NextRequest) {
         }
 
         // Cache the result
-        setCache(CACHE_KEY, context, CacheTTL.SLOW) // 15 min
+        // Cache the result
+        await setCache(CACHE_KEY, context, CacheTTL.SLOW) // 15 min
 
         return NextResponse.json({ context })
 
