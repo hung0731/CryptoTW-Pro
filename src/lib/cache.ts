@@ -134,6 +134,25 @@ export async function getCacheStats(): Promise<{ size: number; keys: string[] }>
     }
 }
 
+/**
+ * Check Cache Status (Redis vs Memory)
+ */
+export async function getCacheStatus() {
+    if (redis) {
+        try {
+            const pong = await redis.ping()
+            return {
+                mode: 'Redis',
+                connected: pong === 'PONG',
+                url: process.env.REDIS_URL || process.env.REDIS_URI ? 'Configured' : 'Auto-Detected'
+            }
+        } catch (e: any) {
+            return { mode: 'Redis (Error)', connected: false, error: e.message }
+        }
+    }
+    return { mode: 'In-Memory', connected: true }
+}
+
 // TTL Presets (in seconds)
 export const CacheTTL = {
     REALTIME: 30,      // BTC Price, critical data
