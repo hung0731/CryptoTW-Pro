@@ -8,7 +8,7 @@ export const revalidate = 60
 // Bull/Bear Index: Now uses Coinglass Fear & Greed (V4)
 export async function GET(req: NextRequest) {
     // Rate limit: 60 requests per minute per IP
-    const rateLimited = simpleApiRateLimit(req, 'cg-bullbear', 60, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'cg-bullbear', 60, 60)
     if (rateLimited) return rateLimited
 
     try {

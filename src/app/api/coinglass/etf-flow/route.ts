@@ -5,7 +5,7 @@ const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
 const CG_BASE = 'https://open-api-v4.coinglass.com'
 
 export async function GET(req: NextRequest) {
-    const rateLimited = simpleApiRateLimit(req, 'cg-etf-flow', 20, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'cg-etf-flow', 20, 60)
     if (rateLimited) return rateLimited
 
     const { searchParams } = new URL(req.url)

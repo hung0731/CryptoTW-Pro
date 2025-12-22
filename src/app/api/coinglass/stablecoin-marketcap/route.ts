@@ -22,7 +22,7 @@ function sumMarketCap(data: Record<string, number> | number): number {
 }
 
 export async function GET(req: NextRequest) {
-    const rateLimited = simpleApiRateLimit(req, 'cg-stablecoin', 20, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'cg-stablecoin', 20, 60)
     if (rateLimited) return rateLimited
 
     try {

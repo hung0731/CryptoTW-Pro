@@ -9,7 +9,7 @@ const TOP_TOKENS = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'BNB', 'SUI', 'ADA', 'AV
 
 export async function GET(request: NextRequest) {
     // Rate limit: 60 requests per minute per IP
-    const rateLimited = simpleApiRateLimit(request, 'cg-funding', 60, 60)
+    const rateLimited = await simpleApiRateLimit(request, 'cg-funding', 60, 60)
     if (rateLimited) return rateLimited
 
     const { searchParams } = new URL(request.url)

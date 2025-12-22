@@ -21,7 +21,7 @@ interface FGIDataPoint {
 
 export async function GET(req: NextRequest) {
     // Rate limit: 20 requests per minute per IP
-    const rateLimited = simpleApiRateLimit(req, 'cg-fgi-history', 20, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'cg-fgi-history', 20, 60)
     if (rateLimited) return rateLimited
 
     const { searchParams } = new URL(req.url)

@@ -45,7 +45,7 @@ const ALLOWED_EXCHANGES = ['okx', 'binance', 'bybit']
 
 export async function POST(req: NextRequest) {
     // Rate limit: 5 binding requests per minute per IP
-    const rateLimited = simpleApiRateLimit(req, 'binding', 5, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'binding', 5, 60)
     if (rateLimited) return rateLimited
 
     try {

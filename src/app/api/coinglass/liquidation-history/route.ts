@@ -20,7 +20,7 @@ interface HistoryDataPoint {
 }
 
 export async function GET(req: NextRequest) {
-    const rateLimited = simpleApiRateLimit(req, 'cg-liquidation-history', 20, 60)
+    const rateLimited = await simpleApiRateLimit(req, 'cg-liquidation-history', 20, 60)
     if (rateLimited) return rateLimited
 
     const { searchParams } = new URL(req.url)

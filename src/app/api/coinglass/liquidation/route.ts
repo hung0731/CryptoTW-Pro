@@ -7,7 +7,7 @@ export const revalidate = 60
 
 export async function GET(request: NextRequest) {
     // Rate limit: 60 requests per minute per IP
-    const rateLimited = simpleApiRateLimit(request, 'cg-liq', 60, 60)
+    const rateLimited = await simpleApiRateLimit(request, 'cg-liq', 60, 60)
     if (rateLimited) return rateLimited
 
     const { searchParams } = new URL(request.url)
