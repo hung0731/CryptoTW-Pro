@@ -1,7 +1,7 @@
 // Coinglass API Configuration
 // API Documentation: https://docs.coinglass.com
 
-import { getCache, setCache, CacheTTL } from './cache'
+import { getCache, setCache, CacheTTL, acquireLock, releaseLock } from './cache'
 
 // V2 API (legacy)
 const COINGLASS_V2_URL = 'https://open-api.coinglass.com'
@@ -159,22 +159,41 @@ export async function cachedCoinglassV4Request<T>(
     ttlSeconds: number = CacheTTL.FAST
 ): Promise<T | null> {
     const cacheKey = `coinglass:${endpoint}:${JSON.stringify(params || {})}`
+    const lockKey = `lock:${cacheKey}`
 
-    // Check cache first
+    // Check cache first (Fast path)
     const cached = await getCache<T>(cacheKey)
     if (cached !== null) {
         return cached
     }
 
-    // Fetch from API
-    const data = await coinglassV4Request<T>(endpoint, params)
+    // Acquire lock to prevent stampede (1 winner, others wait/fail)
+    // If locked, we could implement wait logic, but for now we'll fail fast or retry
+    // Ideally: If locked, wait 100ms and retry cache check. 
+    // Simplified logic: If locked, return null (upstream can handle or retry) OR just proceed (race condition allowed but minimized)
+    // Strong logic: if (!lock) return null; -> This might break UI if many users hit.
+    // Better logic for API Data: Simple spin-lock or just 'if locked, return null'? 
+    // Coinglass Logic: If locked, it means someone else is fetching. We can just return null and let frontend show 'loading' or stale data?
+    // User wants to SAVE MONEY/QUOTA.
 
-    // Cache successful responses
-    if (data !== null) {
-        await setCache(cacheKey, data, ttlSeconds)
+    // Implementation: Try lock. If fail, wait 200ms and check cache again.
+    if (!await acquireLock(lockKey, 10)) {
+        // Wait and retry cache check once
+        await new Promise(r => setTimeout(r, 500))
+        return await getCache<T>(cacheKey)
     }
 
-    return data
+    try {
+        // Fetch from API
+        const data = await coinglassV4Request<T>(endpoint, params)
+        // Cache successful responses
+        if (data !== null) {
+            await setCache(cacheKey, data, ttlSeconds)
+        }
+        return data
+    } finally {
+        await releaseLock(lockKey)
+    }
 }
 
 // ============================================
