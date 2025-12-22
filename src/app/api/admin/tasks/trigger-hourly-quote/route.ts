@@ -35,102 +35,33 @@ export async function POST(req: NextRequest) {
 
         // 2. Fetch BTC Data
         const snapshot = await getMarketSnapshot('BTC')
-        const btc = snapshot.btc
-        const price = btc.price.toLocaleString('en-US', { maximumFractionDigits: 0 })
-        const change = btc.change_24h.toFixed(2)
-        const emoji = btc.change_24h >= 0 ? '🟢' : '🔴'
-        const trend = btc.change_24h >= 0 ? '上漲' : '下跌'
 
-        // 3. Format LINE Message
-        const message = {
-            type: 'flex',
-            altText: `BTC 報價: $${price} (${change}%)`,
-            contents: {
-                "type": "bubble",
-                "size": "giga",
-                "body": {
-                    "type": "box",
-                    "layout": "vertical",
-                    "backgroundColor": "#171717",
-                    "paddingAll": "20px",
-                    "contents": [
-                        {
-                            "type": "text",
-                            "text": "BTC 每小時報價",
-                            "color": "#888888",
-                            "size": "xs",
-                            "weight": "bold",
-                            "align": "center"
-                        },
-                        {
-                            "type": "separator",
-                            "margin": "md",
-                            "color": "#333333"
-                        },
-                        {
-                            "type": "box",
-                            "layout": "vertical",
-                            "margin": "lg",
-                            "contents": [
-                                {
-                                    "type": "text",
-                                    "text": "Bitcoin",
-                                    "color": "#ffffff",
-                                    "size": "md",
-                                    "weight": "bold"
-                                },
-                                {
-                                    "type": "text",
-                                    "text": `$${price}`,
-                                    "color": btc.change_24h >= 0 ? "#22c55e" : "#ef4444",
-                                    "size": "4xl",
-                                    "weight": "bold",
-                                    "margin": "sm"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "box",
-                            "layout": "horizontal",
-                            "margin": "md",
-                            "contents": [
-                                {
-                                    "type": "text",
-                                    "text": `${emoji} ${change}% (24h)`,
-                                    "color": btc.change_24h >= 0 ? "#86efac" : "#fca5a5",
-                                    "size": "sm"
-                                },
-                                {
-                                    "type": "text",
-                                    "text": `Vol: ${(btc.volume_24h / 1000000).toFixed(0)}M`,
-                                    "color": "#888888",
-                                    "size": "sm",
-                                    "align": "end"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                "footer": {
-                    "type": "box",
-                    "layout": "vertical",
-                    "backgroundColor": "#171717",
-                    "paddingAll": "15px",
-                    "contents": [
-                        {
-                            "type": "button",
-                            "action": {
-                                "type": "uri",
-                                "label": "查看詳細圖表",
-                                "uri": "https://cryptotw.app/" // TODO: Deep link
-                            },
-                            "color": "#3b82f6",
-                            "style": "secondary"
-                        }
-                    ]
-                }
-            }
+        console.log('[TriggerQuote] Snapshot:', JSON.stringify(snapshot, null, 2))
+
+        const btc = snapshot?.btc || { price: 0, change_24h: 0, high_24h: 0, low_24h: 0, volume_24h: 0 }
+
+        if (!btc.price) {
+            console.warn('[TriggerQuote] BTC Price missing, using default')
+            btc.price = 0
+            btc.change_24h = 0
         }
+
+        const price = (btc.price || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })
+        const change = (btc.change_24h || 0).toFixed(2)
+        const emoji = (btc.change_24h || 0) >= 0 ? '🟢' : '🔴'
+        const trend = (btc.change_24h || 0) >= 0 ? '上漲' : '下跌'
+
+        // 3. Format LINE Message (Branded)
+        const { createBrandedFlexMessage } = require('@/lib/bot/ui/base')
+
+        const message = createBrandedFlexMessage({
+            title: '每小時行情速報',
+            mainText: `BTC: $${price} ${emoji}`,
+            subText: `24h 漲跌幅: ${change}% | 趨勢: ${trend}\n成交量: ${(btc.volume_24h / 1000000).toFixed(0)}M USDT`,
+            actionLabel: '查看完整圖表',
+            actionUrl: 'https://cryptotw.app/dashboard',
+            theme: btc.change_24h >= 0 ? 'success' : 'alert'
+        })
 
         // 4. Send
         // Simple chunking for Alpha (assuming < 450 users)

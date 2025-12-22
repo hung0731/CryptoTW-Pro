@@ -37,29 +37,19 @@ export async function POST(req: NextRequest) {
         console.log(`[Push] Target User Count: ${userIds.length}`)
 
         // 2. Construct LINE Message
+        const { createBrandedFlexMessage } = require('@/lib/bot/ui/base')
         const messages: any[] = []
 
-        if (image_url) {
-            messages.push({
-                type: 'image',
-                originalContentUrl: image_url,
-                previewImageUrl: image_url,
-            })
-        }
+        // Use branded flex message for the main content
+        const flexMessage = createBrandedFlexMessage({
+            title: 'CryptoTW 公告', // Default title
+            mainText: message_content || (image_url ? '圖片訊息' : '無內容'),
+            heroImageUrl: image_url,
+            actionLabel: action_link ? '前往查看' : undefined,
+            actionUrl: action_link
+        })
 
-        if (message_content) {
-            messages.push({
-                type: 'text',
-                text: message_content,
-            })
-        }
-
-        if (action_link) {
-            messages.push({
-                type: 'text',
-                text: `👉 查看詳情: ${action_link}`,
-            })
-        }
+        messages.push(flexMessage)
 
         // 3. Send via Multicast (Batch of 450 max per request)
         const CHUNK_SIZE = 450 // Safe limit below 500

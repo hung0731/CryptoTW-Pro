@@ -87,41 +87,41 @@ export default function AnalyticsPage() {
     return (
         <div className="space-y-6">
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
-                Bot Analytics
+                機器人數據分析 (Bot Analytics)
             </h1>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="bg-neutral-900 border-neutral-800 text-white">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">Total Interactions</CardTitle>
+                        <CardTitle className="text-sm font-medium text-neutral-400">總互動次數 (Total Interactions)</CardTitle>
                         <Activity className="h-4 w-4 text-green-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.totalQueries}</div>
-                        <p className="text-xs text-neutral-500">Recent sample size</p>
+                        <p className="text-xs text-neutral-500">近 7 日數據</p>
                     </CardContent>
                 </Card>
 
                 <Card className="bg-neutral-900 border-neutral-800 text-white">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">Unique Users</CardTitle>
+                        <CardTitle className="text-sm font-medium text-neutral-400">活躍用戶數 (Unique Users)</CardTitle>
                         <Users className="h-4 w-4 text-blue-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.activeUsers}</div>
-                        <p className="text-xs text-neutral-500">Active in period</p>
+                        <p className="text-xs text-neutral-500">不重複 ID 統計</p>
                     </CardContent>
                 </Card>
 
                 <Card className="bg-neutral-900 border-neutral-800 text-white">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">Error Rate</CardTitle>
+                        <CardTitle className="text-sm font-medium text-neutral-400">錯誤率 (Error Rate)</CardTitle>
                         <AlertCircle className="h-4 w-4 text-red-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.errorRate}%</div>
-                        <p className="text-xs text-neutral-500">Failed interactions</p>
+                        <p className="text-xs text-neutral-500">互動失敗比例</p>
                     </CardContent>
                 </Card>
             </div>
@@ -132,9 +132,9 @@ export default function AnalyticsPage() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-yellow-400" />
-                            Top Queried Symbols
+                            熱門查詢幣種 (Top Symbols)
                         </CardTitle>
-                        <CardDescription>Most popular items users are asking for</CardDescription>
+                        <CardDescription>用戶最常關注的加密貨幣</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
