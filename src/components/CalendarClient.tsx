@@ -35,7 +35,8 @@ function MiniChartCard({
     eventKey,
     windowDisplayStart,
     isNext = false,
-    isLatest = false
+    isLatest = false,
+    daysUntil
 }: {
     occ: MacroEventOccurrence
     reaction?: MacroReaction
@@ -43,9 +44,9 @@ function MiniChartCard({
     windowDisplayStart: number
     isNext?: boolean
     isLatest?: boolean
+    daysUntil?: number
 }) {
     const dateStr = occ.occursAt.slice(5, 10).replace('-', '/')
-    const daysUntil = isNext ? Math.ceil((new Date(occ.occursAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
     const chartContent = (() => {
         if (!reaction?.priceData || reaction.priceData.length === 0) {
@@ -116,7 +117,7 @@ function MiniChartCard({
 
                 {isNext ? (
                     <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded ml-auto text-white bg-[#2A2A2A] border border-[#333]")}>
-                        D-{daysUntil}
+                        D-{daysUntil ?? 0}
                     </span>
                 ) : (
                     // D+1 Return Badge - Neutral Style
@@ -346,6 +347,7 @@ export default function CalendarClient({ enrichedEvents }: CalendarClientProps) 
                                             eventKey={def.key}
                                             windowDisplayStart={def.windowDisplay.start}
                                             isNext={true}
+                                            daysUntil={daysUntil}
                                         />
                                     )}
                                     {displayOccurrences.map((occ, index) => (

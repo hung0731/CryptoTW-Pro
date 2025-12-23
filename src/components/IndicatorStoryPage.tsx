@@ -96,33 +96,30 @@ function UseCaseList({ useCases }: UseCaseListProps) {
 // ③ RELATED EVENTS - 相關歷史事件
 // ================================================
 function RelatedEvents({ storyId }: { storyId: string }) {
-    // 獲取相關事件（自動關聯）
-    const relatedEvents = getRelatedEvents(storyId);
+    // Filter REVIEWS_DATA for relevant events
+    // Match against relatedIndicators (explicit link) or relatedMetrics (implicit link)
+    const matchedReviews = REVIEWS_DATA
+        .filter(r => {
+            const hasExplicitLink = r.relatedIndicators?.some(ri => ri.slug === storyId);
 
-    // 如果沒有關聯事件，則看是否有直接定義的 reviews
-    const manualReviews = relatedEvents.length === 0
-        ? Object.values(REVIEWS_DATA)
-            .filter(r => r.tags.includes(storyId))
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .slice(0, 3)
-        : [];
+            // Simple implicit mapping for common indicators if explicit link missing
+            const hasImplicitLink = r.relatedMetrics?.some(m => {
+                if (storyId === 'fear-greed' && m === 'fearGreed') return true;
+                if (storyId === 'funding-rate' && m === 'funding') return true;
+                if (storyId === 'open-interest' && m === 'oi') return true;
+                if (storyId === 'liquidation' && m === 'liquidation') return true;
+                if (storyId === 'long-short-ratio' && m === 'longShort') return true;
+                if (storyId === 'stablecoin-supply' && m === 'stablecoin') return true;
+                if (storyId === 'etf-flow' && m === 'etfFlow') return true;
+                return false;
+            });
 
-    // 優先顯示自動關聯，其次手動
-    const displayEvents = relatedEvents.length > 0
-        ? relatedEvents.map(rev => ({
-            id: rev.id,
-            date: rev.date,
-            title: rev.title,
-            impact: rev.impact
-        }))
-        : manualReviews.map(rev => ({
-            id: rev.id,
-            date: rev.date,
-            title: rev.title,
-            impact: 100 // Default placeholder
-        }));
+            return hasExplicitLink || hasImplicitLink;
+        })
+        .sort((a, b) => new Date(b.eventStartAt).getTime() - new Date(a.eventStartAt).getTime())
+        .slice(0, 3);
 
-    if (displayEvents.length === 0) return null;
+    if (matchedReviews.length === 0) return null;
 
     return (
         <SectionCard>
@@ -133,7 +130,7 @@ function RelatedEvents({ storyId }: { storyId: string }) {
                 </Link>
             </div>
             <div className="space-y-0 divide-y divide-white/5">
-                {displayEvents.map((evt) => (
+                {matchedReviews.map((evt) => (
                     <Link
                         key={evt.id}
                         href={`/reviews/${evt.id}`}
@@ -143,7 +140,7 @@ function RelatedEvents({ storyId }: { storyId: string }) {
                             <span className="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors">
                                 {evt.title}
                             </span>
-                            <span className="text-xs text-neutral-500">{evt.date}</span>
+                            <span className="text-xs text-neutral-500">{evt.eventStartAt}</span>
                         </div>
                         <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-neutral-400" />
                     </Link>
@@ -174,10 +171,10 @@ function KnowledgeGraph({ storyId }: { storyId: string }) {
                             {prerequisiteConcepts.map((concept, i) => (
                                 <Link
                                     key={i}
-                                    href={`/dictionary/${concept.slug}`}
+                                    href={`/dictionary/${concept.id}`}
                                     className="px-3 py-1.5 rounded-md bg-neutral-900 border border-white/5 text-xs text-neutral-400 hover:text-white hover:border-white/20 transition-all"
                                 >
-                                    {concept.title}
+                                    {concept.term}
                                 </Link>
                             ))}
                         </div>
@@ -192,17 +189,17 @@ function KnowledgeGraph({ storyId }: { storyId: string }) {
                             {relatedIndicators.map((ind, i) => (
                                 <Link
                                     key={i}
-                                    href={`/indicators/${ind.id}`}
+                                    href={`/indicators/${ind.slug}`}
                                     className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50 border border-white/5 hover:bg-white/5 transition-all group"
                                 >
                                     <div>
                                         <div className="text-xs font-bold text-neutral-300 group-hover:text-white flex items-center gap-2">
-                                            {ind.title}
+                                            {ind.name}
                                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-500 font-normal">
-                                                關聯度：{ind.relevance}%
+                                                關聯度：{ind.reason}
                                             </span>
                                         </div>
-                                        <p className="text-[10px] text-neutral-500 mt-0.5 line-clamp-1">{ind.relation}</p>
+                                        {/* Removed redundant line */}
                                     </div>
                                     <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
                                 </Link>
@@ -252,7 +249,7 @@ export function IndicatorStoryPage({ story }: IndicatorStoryPageProps) {
                         <span className="text-[10px] text-neutral-500 flex items-center gap-1">
                             <Link href={getBackLink()} className="hover:underline">{getBackLabel()}</Link>
                             <ChevronRight className="w-3 h-3" />
-                            {story.category.split(' ')[0]}
+                            指標
                         </span>
                     </div>
                 </div>
@@ -264,7 +261,7 @@ export function IndicatorStoryPage({ story }: IndicatorStoryPageProps) {
                 <ChartHero story={story} />
 
                 {/* 1. Callout (Interpretation) */}
-                <ChartCallout points={story.chart.calloutPoints} />
+                <ChartCallout points={story.chartCallout.points} />
 
                 {/* 2. Use Cases */}
                 <UseCaseList useCases={story.useCases} />
@@ -275,13 +272,7 @@ export function IndicatorStoryPage({ story }: IndicatorStoryPageProps) {
                 {/* 4. Knowledge Graph (Semantic Links) */}
                 <KnowledgeGraph storyId={story.id} />
 
-                {/* 5. Definition (Bottom) */}
-                <SectionCard className="border-t border-white/5 pt-6 mt-8">
-                    <h2 className={TYPOGRAPHY.sectionLabel}>指標定義</h2>
-                    <p className={cn("mt-2 text-xs leading-relaxed", COLORS.textTertiary)}>
-                        {story.definition}
-                    </p>
-                </SectionCard>
+                {/* Definition section removed - property does not exist on IndicatorStory */}
 
             </main>
         </div>
