@@ -165,6 +165,7 @@ export interface IndicatorStory {
 
     // ③ 圖表設定
     chart: {
+        type?: 'line' | 'heatmap';
         unit?: string;                 // '', '%', 'B', etc.
         valueFormat?: 'number' | 'percent' | 'ratio';
         // Y 軸模型（核心修復）
@@ -820,6 +821,66 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         relatedLinks: [
             { label: '查看比特幣價格', href: '/prediction?tab=price' },
             { label: '市場復盤資料庫', href: '/reviews' },
+        ],
+    },
+    // ================================================
+    // A-Tier: 季節性熱力圖 Seasonality Heatmap
+    // ================================================
+    {
+        id: 'seasonality',
+        slug: 'seasonality',
+        name: '季節性熱力圖',
+
+        positionHeadline: '歷史 1 月上漲機率 60%',
+        positionRationale: '比特幣具有顯著的季節性效應（如 Q4 行情），歷史數據可作為擇時參考。',
+        zone: 'lean_greed',
+
+        useCases: [
+            { type: 'observe', description: '識別特定月份的漲跌規律（如 9 月魔咒）' },
+            { type: 'timing', description: '輔助判斷中長線進出場的最佳月份' },
+            { type: 'risk', description: '避開歷史上高概率下跌的季節' },
+        ],
+
+        chart: {
+            type: 'heatmap',
+            unit: '%',
+            valueFormat: 'percent',
+            yAxisModel: { type: 'auto' }, // Heatmap 不使用此模型，但需填寫以符合型別
+            zones: {
+                fear: { min: -Infinity, max: 0 },
+                leanFear: { min: 0, max: 0 },
+                leanGreed: { min: 0, max: 20 },
+                greed: { min: 20, max: Infinity },
+            },
+            api: {
+                endpoint: '/api/binance/seasonality',
+                params: {},
+            },
+        },
+
+        chartCallout: {
+            points: [
+                '綠色越深代表該月漲幅越大，紅色越深代表跌幅越大',
+                '關注橫向（同一年）的連漲/連跌趨勢',
+                '關注縱向（同一月）的歷史重複性（如 9 月常跌）',
+            ],
+        },
+
+        historicalCases: [
+            {
+                reviewId: 'review-seasonality-q4',
+                label: 'Q4 傳統旺季',
+                takeaway: '歷史上 Q4（10-12月）是比特幣勝率最高的季度。',
+            },
+        ],
+
+        actionGuidelines: [
+            '季節性僅供參考，不應作為單一買賣依據',
+            '結合當年宏觀環境判斷季節性是否失效',
+            '留意「Sell in May」等傳統金融諺語在幣圈的適用性',
+        ],
+        relatedLinks: [
+            { label: '查看歷史復盤', href: '/reviews' },
         ],
     },
 ];

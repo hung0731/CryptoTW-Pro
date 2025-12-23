@@ -10,6 +10,7 @@ import { IndicatorStory, ZONE_COLORS, getZoneLabel, YAxisModel } from '@/lib/ind
 import { REVIEWS_DATA } from '@/lib/reviews-data';
 import { getIndicatorExplanation, CHART_SEMANTIC_MODELS } from '@/lib/chart-semantics';
 import { getRelatedEvents, getRelatedIndicators, getPrerequisiteConcepts } from '@/lib/semantic-linkage';
+import { SeasonalityHeatmap } from '@/components/indicators/SeasonalityHeatmap';
 
 // ================================================
 // SECTION CARD - 統一容器
@@ -231,6 +232,32 @@ function ChartHero({ story }: ChartHeroProps) {
 
     // Hover info
     const hoverData = hoverIndex !== null && chartData[hoverIndex] ? chartData[hoverIndex] : null;
+
+    if (story.chart.type === 'heatmap') {
+        return (
+            <div className="space-y-4">
+                <SeasonalityHeatmap />
+                {/* Position Statement - Below Chart (Reused) */}
+                <div className="px-1 pt-2">
+                    <div className="flex items-start gap-4">
+                        <div className="flex-1 space-y-1.5">
+                            <span className={cn(
+                                "inline-block text-[11px] px-2.5 py-1 rounded-full font-medium border",
+                                zoneColors.bg, zoneColors.text, zoneColors.border
+                            )}>
+                                {zoneLabel}
+                            </span>
+                            {story.positionRationale && (
+                                <p className={cn("text-sm leading-relaxed", COLORS.textSecondary)}>
+                                    {story.positionRationale}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-4">
