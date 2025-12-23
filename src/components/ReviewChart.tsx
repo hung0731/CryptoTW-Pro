@@ -1,20 +1,20 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     BarChart, Bar, LineChart, Line, Cell, ReferenceArea, ReferenceLine
 } from 'recharts'
-import { ZoomIn, RotateCcw } from 'lucide-react'
-import { format } from 'date-fns'
 import { CHART, COLORS } from '@/lib/design-tokens'
-import { formatPercent, formatPrice, formatSmallPercent, formatRatio } from '@/lib/format-helpers'
-import { getChartSemanticModel, getSemanticColor, mapReviewTypeToSemanticId } from '@/lib/chart-semantics'
-
-// Static Data Import
-import REVIEWS_HISTORY from '@/data/reviews-history.json'
+import { formatPercent } from '@/lib/format-helpers'
+import { getChartSemanticModel, getSemanticColor } from '@/lib/chart-semantics'
 import { SkeletonReviewChart } from '@/components/SkeletonReviewChart'
+
+// Extracted Components
+import { ReviewChartTooltip } from '@/components/reviews/ReviewChartTooltip'
+import { ReviewChartControls } from '@/components/reviews/ReviewChartControls'
+import { useReviewChartData } from '@/hooks/useReviewChartData'
 
 interface ReviewChartProps {
     type: 'price' | 'flow' | 'oi' | 'supply' | 'fgi' | 'funding' | 'liquidation' | 'longShort' | 'basis' | 'premium' | 'stablecoin';
@@ -31,235 +31,35 @@ interface ReviewChartProps {
 }
 
 export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false, newsDate, overrideData }: ReviewChartProps) {
-    const [data, setData] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
     const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
-    const [yDomain, setYDomain] = useState<any>(['auto', 'auto'])
 
-    const getDaysDiff = (dateStr: string) => {
-        const date = new Date(dateStr)
-        const start = new Date(eventStart)
-        const diffTime = date.getTime() - start.getTime()
-        return Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    }
-
-    const getDateFromDaysDiff = (diff: number) => {
-        const start = new Date(eventStart)
-        const target = new Date(start)
-        target.setDate(start.getDate() + diff)
-        return format(target, 'yyyy-MM-dd')
-    }
-
-    useEffect(() => {
-        const loadData = () => {
-            try {
-                let chartData: any[] = []
-
-                if (overrideData) {
-                    chartData = overrideData
-                } else {
-                    if (!reviewSlug) {
-                        setLoading(false)
-                        return
-                    }
-                    // @ts-expect-error: Dynamic property access on imported JSON
-                    const reviewData = REVIEWS_HISTORY[reviewSlug]
-                    if (!reviewData) {
-                        setLoading(false)
-                        return
-                    }
-
-                    if (type === 'price' || type === 'supply') {
-                        chartData = reviewData.price || []
-                    } else if (type === 'flow') {
-                        chartData = reviewData.flow || []
-                    } else if (type === 'oi') {
-                        chartData = reviewData.oi || []
-                    } else if (type === 'fgi') {
-                        chartData = reviewData.fgi || []
-                    } else if (type === 'funding') {
-                        chartData = reviewData.funding || []
-                    } else if (type === 'liquidation') {
-                        chartData = reviewData.liquidation || []
-                    } else if (type === 'longShort') {
-                        chartData = reviewData.longShort || []
-                    } else if (type === 'basis') {
-                        chartData = reviewData.basis || []
-                    } else if (type === 'premium') {
-                        chartData = reviewData.premium || []
-                    } else if (type === 'stablecoin') {
-                        chartData = reviewData.stablecoin || []
-                    }
-                }
-
-                // Client-side filtering if needed, though data is already roughly cut by generator
-                // We should ensure we show what we need.
-                // Generator adds 15 days buffer. Component asks for 'daysBuffer'.
-                // We can just set data directly.
-                // Filter based on View Mode
-                const filteredData = chartData.filter((item: any) => {
-                    const daysDiff = getDaysDiff(item.date)
-                    if (viewMode === 'focus' && focusWindow) {
-                        return daysDiff >= focusWindow[0] && daysDiff <= focusWindow[1]
-                    }
-                    // Standard: T-30 ~ T+30
-                    return daysDiff >= -30 && daysDiff <= 30
-                })
-
-                // Normalization Logic (Price & OI)
-                const shouldNormalize = (isPercentage && type === 'price') || type === 'oi'
-
-                if (shouldNormalize && filteredData.length > 0) {
-                    // Normalize to Percentage Change from D0 (eventStart)
-                    const startTimestamp = new Date(eventStart).getTime()
-                    // Find D0 item
-                    let baseItem = filteredData.find((item: any) => new Date(item.date).getTime() === startTimestamp)
-                    if (!baseItem) {
-                        const dates = filteredData.map((d: any) => Math.abs(new Date(d.date).getTime() - startTimestamp))
-                        const minIdx = dates.indexOf(Math.min(...dates))
-                        baseItem = filteredData[minIdx]
-                    }
-
-                    const valKey = type === 'oi' ? 'oi' : 'price'
-                    const baseVal = baseItem?.[valKey] || 1
-
-                    // Processing Loop & MaxAbs Calculation
-                    let maxAbs = 0
-
-                    const processedData = filteredData.map((item: any) => {
-                        const val = item[valKey]
-                        const pct = ((val - baseVal) / baseVal) * 100
-                        if (!isNaN(pct)) maxAbs = Math.max(maxAbs, Math.abs(pct))
-                        return {
-                            ...item,
-                            percentage: pct,
-                            displayValue: val // Keep original for tooltip
-                        }
-                    })
-
-                    setData(processedData)
-
-                    // Adaptive Domain for OI
-                    if (type === 'oi') {
-                        let limit = maxAbs * 1.25
-                        if (limit < 15) limit = 15
-                        // Round to nearest 5
-                        limit = Math.ceil(limit / 5) * 5
-                        setYDomain([-limit, limit])
-                    } else {
-                        // Price usually keeps auto or custom logic, but for now strict 'auto' for basic area
-                        // If we needed symmetric for price percentage, we'd do it here. 
-                        // But current request is only strict for OI.
-                        setYDomain(['auto', 'auto'])
-                    }
-
-                } else {
-                    setData(filteredData)
-                    setYDomain(['auto', 'auto'])
-                }
-            } catch (e) {
-                console.error('Error loading static chart data', e)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        loadData()
-    }, [type, symbol, eventStart, eventEnd, daysBuffer, reviewSlug, viewMode, focusWindow])
+    const { data, loading, yDomain, getDateFromDaysDiff } = useReviewChartData({
+        type,
+        eventStart,
+        reviewSlug,
+        viewMode,
+        focusWindow,
+        isPercentage,
+        overrideData
+    })
 
     if (loading) {
         return <SkeletonReviewChart />
     }
 
+    if (!data || data.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">尚無數據</div>
+
     // Gradient Definitions
     const gradientId = `gradient-${type}-${symbol}`
 
-    // Custom Tooltip
-    const CustomTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-            const val = Number(payload[0].value)
-            const semanticId = mapReviewTypeToSemanticId(type)
-            const model = semanticId ? getChartSemanticModel(semanticId) : null
-            const explanation = model ? model.getTooltipExplanation(val) : ''
-
-            return (
-                <div className={CHART.tooltip.container}>
-                    <p className={CHART.tooltip.date}>{label}</p>
-                    <p className={CHART.tooltip.value}>
-                        {type === 'price' && (
-                            isPercentage
-                                ? <span className={payload[0].payload.percentage >= 0 ? COLORS.positive : COLORS.negative}>
-                                    {formatPercent(payload[0].payload.percentage)}
-                                </span>
-                                : formatPrice(val)
-                        )}
-                        {type === 'supply' && `${val.toLocaleString()}`}
-
-                        {model && (
-                            <>
-                                <span style={{ color: getSemanticColor(val, model) }}>
-                                    {type === 'funding' || type === 'premium' ? formatSmallPercent(val) :
-                                        type === 'fgi' ? val.toFixed(0) :
-                                            type === 'longShort' ? formatRatio(val) :
-                                                type === 'basis' ? `${val.toFixed(2)}%` :
-                                                    type === 'flow' || type === 'liquidation' ? `$${(val / 1000000).toFixed(1)}M` :
-                                                        type === 'stablecoin' ? `$${(val / 1000000000).toFixed(2)}B` :
-                                                            val}
-                                </span>
-                                {explanation && (
-                                    <span className="block text-[10px] text-neutral-500 mt-0.5">
-                                        {explanation}
-                                    </span>
-                                )}
-                            </>
-                        )}
-
-                        {/* Fallback for OI if no model logic matches exactly what we had (OI used logic inside tooltip previously?)
-                            OI maps to 'openInterest'. model.getTooltipExplanation handles it.
-                         */}
-
-                        {/* Specific fix for OI percentage display which is special in ReviewChart */}
-                        {type === 'oi' && (
-                            <span className={payload[0].payload.percentage >= 0 ? COLORS.positive : COLORS.negative}>
-                                {formatPercent(payload[0].payload.percentage)}
-                            </span>
-                        )}
-                    </p>
-                    {isPercentage && type === 'price' && (
-                        <p className="text-neutral-500 text-[10px] mt-1">
-                            {formatPrice(Number(payload[0].payload.price))}
-                        </p>
-                    )}
-                </div>
-            )
-        }
-        return null
-    }
-
-    if (!data || data.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">尚無數據</div>
-
     return (
         <div className={`w-full relative ${className || CHART.heightDefault}`}>
-            {focusWindow && (
-                <div className="absolute top-2 right-2 z-20 flex gap-1 bg-black/50 backdrop-blur rounded-lg p-0.5 border border-white/10">
-                    <button
-                        onClick={() => setViewMode('standard')}
-                        className={`p-1.5 rounded ${viewMode === 'standard' ? 'bg-[#1A1A1A] text-white' : 'text-[#666666] hover:text-[#A0A0A0]'}`}
-                        title="全域視角"
-                    >
-                        <RotateCcw className="w-3 h-3" />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('focus')}
-                        className={`p-1.5 rounded ${viewMode === 'focus' ? 'bg-[#3B82F6]/20 text-[#3B82F6]' : 'text-[#666666] hover:text-[#A0A0A0]'}`}
-                        title="重點視角"
-                    >
-                        <ZoomIn className="w-3 h-3" />
-                    </button>
-                </div>
-            )}
+            <ReviewChartControls
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                focusWindow={focusWindow}
+            />
 
-            {/* Watermark */}
             {/* Watermark */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 select-none opacity-[0.03]">
                 <img
@@ -356,7 +156,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 return value
                             }}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
                             dataKey={isPercentage && type === 'price' ? "percentage" : "price"}
@@ -384,7 +184,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ fill: '#ffffff10' }} />
                         <Bar
                             dataKey="flow"
                             fill="#ef4444"
@@ -424,7 +224,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
                             dataKey="fgi"
@@ -452,7 +252,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ fill: '#ffffff10' }} />
                         {/* Y=0 中軸線 */}
                         <ReferenceLine y={0} stroke="#666" strokeWidth={1.5} label={{ value: '中性', position: 'insideRight', fill: '#666', fontSize: 9 }} />
                         {/* 擁擠警戒區間 */}
@@ -484,7 +284,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ fill: '#ffffff10' }} />
                         <Bar dataKey="liquidation" fill="#f59e0b" />
                     </BarChart>
                 ) : type === 'longShort' ? (
@@ -517,7 +317,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
                             dataKey="longShortRatio"
@@ -551,7 +351,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
                             dataKey="basis"
@@ -579,7 +379,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff10' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ fill: '#ffffff10' }} />
                         <ReferenceLine y={0} stroke="#333" />
                         <Bar dataKey="premium">
                             {data.map((entry, index) => {
@@ -614,7 +414,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
                             dataKey="stablecoin"
@@ -660,7 +460,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20' }} />
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ stroke: '#ffffff20' }} />
                         <Area
                             type="monotone"
                             dataKey="percentage"

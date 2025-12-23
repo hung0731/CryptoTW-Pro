@@ -8,7 +8,8 @@ import { SPACING, SURFACE, BORDER } from '@/lib/design-tokens'
 import { UniversalCard, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/UniversalCard'
 import { ChevronRight, Check, AlertTriangle, X } from 'lucide-react'
 
-import { MarketStatusData, Conclusion } from '@/lib/types'
+import { MarketStatusData, Conclusion } from '@/lib/schemas/market'
+import { getMarketStatusAction } from '@/app/actions/market'
 
 interface MarketStatusGridProps {
     initialStatus: MarketStatusData | null
@@ -70,9 +71,8 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
         if (initialStatus) {
             const interval = setInterval(async () => {
                 try {
-                    const res = await fetch('/api/market/status')
-                    const json = await res.json()
-                    if (json.status) setData(json.status)
+                    const data = await getMarketStatusAction()
+                    if (data?.status) setData(data.status)
                 } catch (e) { console.error(e) }
             }, 60000)
             return () => clearInterval(interval)
@@ -80,10 +80,8 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
 
         const fetchStatus = async () => {
             try {
-                const res = await fetch('/api/market/status')
-                if (!res.ok) throw new Error('API Error')
-                const json = await res.json()
-                if (json.status) setData(json.status)
+                const data = await getMarketStatusAction()
+                if (data?.status) setData(data.status)
             } catch (e) {
                 console.error(e)
             } finally {

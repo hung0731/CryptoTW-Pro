@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { getMarketStatusAction } from '@/app/actions/market'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { CARDS } from '@/lib/design-tokens'
@@ -70,11 +71,12 @@ export function MarketEntryWidgets() {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
-                const res = await fetch('/api/market/status')
-                if (!res.ok) throw new Error('API Fail')
-                const json = await res.json()
-                if (json.tools && json.tools.length > 0) {
-                    setTools(json.tools)
+                const res = await getMarketStatusAction()
+                // Check if res matches { status, conclusion, tools? }
+                // Actually MarketAction may not return 'tools', let's check MarketStatusService
+                // But previously it was /api/market/status, which returned 'tools'
+                if (res && 'tools' in res && Array.isArray((res as any).tools)) {
+                    setTools((res as any).tools)
                 }
             } catch (e) {
                 console.error(e)

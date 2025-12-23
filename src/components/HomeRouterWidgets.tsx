@@ -2,6 +2,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { getHomeRouterAction } from '@/app/actions/home-router'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, Activity, Anchor, BarChart2, Info, ChevronRight, Zap, RefreshCcw } from 'lucide-react'
 import Link from 'next/link'
@@ -11,72 +12,21 @@ import { MarketContextCard } from '@/components/home/MarketContextCard'
 import { CARDS, SPACING, TYPOGRAPHY, COLORS } from '@/lib/design-tokens'
 
 // AI Decision type (from backend)
-interface AIDecisionData {
-    conclusion: string
-    bias: '偏多' | '偏空' | '震盪' | '中性'
-    risk_level: '低' | '中' | '中高' | '高'
-    action: string
-    reasoning: string
-    tags?: {
-        btc: string
-        alt: string
-        sentiment: string
-    }
-}
+import { HomeRouterData } from '@/lib/services/home-router'
 
-interface RouterData {
-    aiDecision?: AIDecisionData  // NEW: First screen
-    mainline: {
-        headline: string
-        actionHint: string
-        actionColor: string
-        dimensions: {
-            name: string
-            status: string
-            color: string
-        }[]
-    }
-    anomaly: {
-        type: string
-        title: string
-        message: string
-        reason: string
-        risk: string
-        link: string
-    } | null
-    crossRefs: {
-        source: string
-        implication: string
-        link: string
-    }[]
-    focusToday: {
-        name: string
-        status: string
-        link: string
-        statusColor?: string
-    }[]
-    marketContext?: {
-        sentiment: '樂觀' | '保守' | '恐慌' | '中性'
-        summary: string
-        highlights: {
-            title: string
-            reason: string
-            impact: '高' | '中' | '低'
-        }[]
-    }
-}
+// Removed local AIDecisionData and RouterData definitions in favor of shared type from service
+
 
 export function HomeRouterWidget() {
-    const [data, setData] = useState<RouterData | null>(null)
+    const [data, setData] = useState<HomeRouterData | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch('/api/market/home-router')
-                const json = await res.json()
-                if (json.router) {
-                    setData(json.router)
+                const res = await getHomeRouterAction()
+                if (res.success && res.data) {
+                    setData(res.data)
                 }
             } catch (e) {
                 console.error(e)
@@ -171,19 +121,10 @@ export function HomeRouterWidget() {
                         </div>
 
                         <Link
-                            href={data.anomaly.type === 'funding_rate' ? '/prediction?tab=arbitrage' : data.anomaly.link}
-                            className={cn(
-                                "flex items-center justify-center w-full py-2 border rounded-lg text-xs font-bold",
-                                data.anomaly.type === 'funding_rate'
-                                    ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
-                                    : "bg-[#0E0E0F] border-[#1A1A1A] hover:bg-neutral-700 text-neutral-300"
-                            )}
+                            href={data.anomaly.link}
+                            className="flex items-center justify-center w-full py-2 border rounded-lg text-xs font-bold bg-[#0E0E0F] border-[#1A1A1A] hover:bg-neutral-700 text-neutral-300"
                         >
-                            {data.anomaly.type === 'funding_rate' ? (
-                                <>查看套利機會 <RefreshCcw className="w-3 h-3 ml-1" /></>
-                            ) : (
-                                <>查看圖表確認 <ArrowRight className="w-3 h-3 ml-1" /></>
-                            )}
+                            <>查看圖表確認 <ArrowRight className="w-3 h-3 ml-1" /></>
                         </Link>
                     </div>
                 </div>
