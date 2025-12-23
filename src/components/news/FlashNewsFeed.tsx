@@ -13,33 +13,34 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
     const [marketContext, setMarketContext] = useState<MarketContext | null>(initialContext)
     const [loading, setLoading] = useState(!initialContext)
 
+    // If initialContext is provided, we don't need to fetch immediately.
+    // However, we might want to keep polling for fresh updates every 5 mins.
     useEffect(() => {
-        if (initialContext) {
-            const interval = setInterval(async () => {
+        if (!initialContext && !marketContext) {
+            const fetchContext = async () => {
+                setLoading(true)
                 try {
                     const res = await fetch(`/api/market-context?t=${Date.now()}`)
                     const json = await res.json()
                     if (json.context) setMarketContext(json.context)
-                } catch (e) { console.error(e) }
-            }, 300000)
-            return () => clearInterval(interval)
+                } catch (e) {
+                    console.error('Market context fetch error:', e)
+                } finally {
+                    setLoading(false)
+                }
+            }
+            void fetchContext()
         }
 
-        const fetchContext = async () => {
+        // Polling interval (e.g., 5 mins)
+        const interval = setInterval(async () => {
             try {
                 const res = await fetch(`/api/market-context?t=${Date.now()}`)
                 const json = await res.json()
-                if (json.context) {
-                    setMarketContext(json.context)
-                }
-            } catch (e) {
-                console.error('Market context fetch error:', e)
-            } finally {
-                setLoading(false)
-            }
-        }
-        void fetchContext()
-        const interval = setInterval(fetchContext, 300000)
+                if (json.context) setMarketContext(json.context)
+            } catch (e) { console.error(e) }
+        }, 300000)
+
         return () => clearInterval(interval)
     }, [initialContext])
 

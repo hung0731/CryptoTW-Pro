@@ -3,6 +3,8 @@ import path from 'path'
 import { HomePageClient } from './HomePageClient'
 import { MacroReaction } from '@/lib/macro-events'
 import { logger } from '@/lib/logger'
+import { getMarketStatusAction } from '@/app/actions/market'
+import { getMarketContextAction } from '@/app/actions/news'
 
 // Server Component
 export default async function HomePage() {
@@ -27,19 +29,21 @@ export default async function HomePage() {
 
     try {
         const [statusRes, contextRes] = await Promise.all([
-            fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:3000'}/api/market/status`, { next: { revalidate: 60 } }),
-            fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:3000'}/api/market-context`, { next: { revalidate: 300 } })
+            getMarketStatusAction(),
+            getMarketContextAction()
         ])
 
-        if (statusRes.ok) {
-            const statusJson = await statusRes.json()
-            marketStatus = statusJson.status
-            marketConclusion = statusJson.conclusion
+        if (statusRes && 'status' in statusRes) {
+            // Check type safety - if it's the direct return object or {success, data} wrapper?
+            // Market Action returns direct object (cached)
+            // Let's verify usage in MarketStatusGrid
+            // Actually getMarketStatusAction returns `MarketStatusResponse | null` directly based on previous file view
+            marketStatus = (statusRes as any)?.status
+            marketConclusion = (statusRes as any)?.conclusion
         }
 
-        if (contextRes.ok) {
-            const contextJson = await contextRes.json()
-            marketContext = contextJson.context
+        if (contextRes.success && contextRes.data) {
+            marketContext = contextRes.data
         }
     } catch (error) {
         logger.error('Failed to prefetch homepage data:', error, { feature: 'home-page' })

@@ -1,28 +1,16 @@
 import { PageHeader } from '@/components/PageHeader'
-import { logger } from '@/lib/logger'
 import CalendarClient from '@/components/CalendarClient'
-import fs from 'fs'
-import path from 'path'
+import { MacroEventsService } from '@/lib/services/macro-events'
 
-// Server Component - reads JSON directly
+// Server Component
 export default async function CalendarPage() {
-    // Read JSON file on server
-    const filePath = path.join(process.cwd(), 'src/data/macro-reactions.json')
-    let reactions = {}
-
-    try {
-        const fileContent = fs.readFileSync(filePath, 'utf-8')
-        const data = JSON.parse(fileContent)
-        reactions = data.data || {}
-        // loaded data
-    } catch (error) {
-        logger.error('Failed to load reactions:', error, { feature: 'calendar' })
-    }
+    // Pre-calculate view model on server
+    const enrichedEvents = MacroEventsService.getCalendarViewModel()
 
     return (
         <main className="min-h-screen bg-black text-white pb-20">
             <PageHeader title="經濟日曆" />
-            <CalendarClient reactions={reactions} />
+            <CalendarClient enrichedEvents={enrichedEvents} />
         </main>
     )
 }

@@ -14,47 +14,40 @@ import {
 import { cn } from '@/lib/utils'
 import {
     MACRO_EVENT_DEFS,
-    getNextOccurrence,
-    getPastOccurrences,
-    getDaysUntil,
-    getSurprise,
     formatValue,
     formatOccursAt,
     MacroEventOccurrence,
-    MacroReaction,
-    calculateEventStats
+    MacroReaction
 } from '@/lib/macro-events'
 import { SPACING, TYPOGRAPHY, COLORS } from '@/lib/design-tokens'
 import { AISummaryCard } from '@/components/ui/AISummaryCard'
-import { UniversalCard, CardContent } from '@/components/ui/UniversalCard'
-import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { UniversalCard } from '@/components/ui/UniversalCard'
+import { EnrichedMacroEvent } from '@/lib/services/macro-events'
 
 interface CalendarClientProps {
-    reactions: Record<string, MacroReaction>
+    enrichedEvents: EnrichedMacroEvent[]
 }
 
 // Mini Sparkline Card (Educational Style)
 function MiniChartCard({
     occ,
-    eventDef,
-    reactions,
+    reaction,
+    eventKey,
+    windowDisplayStart,
     isNext = false,
     isLatest = false
 }: {
     occ: MacroEventOccurrence
-    eventDef: typeof MACRO_EVENT_DEFS[0]
-    reactions: Record<string, MacroReaction>
+    reaction?: MacroReaction
+    eventKey: string
+    windowDisplayStart: number
     isNext?: boolean
     isLatest?: boolean
 }) {
     const dateStr = occ.occursAt.slice(5, 10).replace('-', '/')
-    const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
-    const reactionKey = `${occ.eventKey}-${keyDate}`
-    const reaction = reactions[reactionKey]
-    const daysUntil = getDaysUntil(occ.occursAt)
+    const daysUntil = isNext ? Math.ceil((new Date(occ.occursAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
-    // Chart rendering
-    const renderChart = () => {
+    const chartContent = (() => {
         if (!reaction?.priceData || reaction.priceData.length === 0) {
             return (
                 <div className="w-full h-12 flex items-center justify-center opacity-30">
@@ -83,7 +76,7 @@ function MiniChartCard({
 
         // Neural Color for educational purpose (White/Grey) unless extreme
         const color = '#A0A0A0'
-        const centerIndex = -eventDef.windowDisplay.start
+        const centerIndex = -windowDisplayStart
         const d0X = padding + (centerIndex / (prices.length - 1)) * (width - padding * 2)
 
         return (
@@ -93,7 +86,7 @@ function MiniChartCard({
                 <polyline fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={points} />
             </svg>
         )
-    }
+    })();
 
     return (
         <div className={cn(
@@ -127,7 +120,7 @@ function MiniChartCard({
                     </span>
                 ) : (
                     // D+1 Return Badge - Neutral Style
-                    reaction?.stats?.d0d1Return !== null && (
+                    reaction?.stats?.d0d1Return !== null && reaction?.stats?.d0d1Return !== undefined && (
                         <span className={cn(
                             "text-[10px] font-mono font-bold ml-auto text-neutral-400"
                         )}>
@@ -139,7 +132,7 @@ function MiniChartCard({
 
             {/* Chart Area */}
             <div className="relative h-12 w-full px-1 my-1 opacity-80">
-                {renderChart()}
+                {chartContent}
             </div>
 
             {/* Footer: Quiet Metrics */}
@@ -147,14 +140,14 @@ function MiniChartCard({
                 <div className="flex items-center gap-1">
                     <span className={cn("scale-90 origin-left opacity-60 font-mono", COLORS.textTertiary)}>預測</span>
                     <span className={cn("font-medium tracking-tight font-mono", COLORS.textSecondary)}>
-                        {formatValue(eventDef.key, occ.forecast)}
+                        {formatValue(eventKey, occ.forecast)}
                     </span>
                 </div>
                 {!isNext && (
                     <div className="flex items-center gap-1">
                         <span className={cn("scale-90 origin-right opacity-60 font-mono", COLORS.textTertiary)}>實際</span>
                         <span className={cn("font-medium tracking-tight font-mono", COLORS.textPrimary)}>
-                            {formatValue(eventDef.key, occ.actual)}
+                            {formatValue(eventKey, occ.actual)}
                         </span>
                     </div>
                 )}
@@ -173,7 +166,7 @@ const getEventIcon = (key: string) => {
     }
 }
 
-export default function CalendarClient({ reactions }: CalendarClientProps) {
+export default function CalendarClient({ enrichedEvents }: CalendarClientProps) {
     const [alignMode, setAlignMode] = useState<'time' | 'reaction'>('time')
     const [aiSummary, setAiSummary] = useState<string>('')
     const [aiLoading, setAiLoading] = useState(true)
@@ -200,47 +193,10 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
             }
 
             try {
-                // Build event data for AI
-                const eventsData = MACRO_EVENT_DEFS.map(eventDef => {
-                    const nextOccurrence = getNextOccurrence(eventDef.key)
-                    const daysUntil = nextOccurrence ? getDaysUntil(nextOccurrence.occursAt) : 999
-                    const stats = calculateEventStats(eventDef.key, reactions)
-
-                    // Get last event with reaction data
-                    const pastEvents = getPastOccurrences(eventDef.key, 5)
-                    const lastWithData = pastEvents.find(occ => {
-                        const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
-                        const reactionKey = `${eventDef.key}-${keyDate}`
-                        return reactions[reactionKey]
-                    })
-
-                    let lastEvent = undefined
-                    if (lastWithData) {
-                        const keyDate = new Date(lastWithData.occursAt).toISOString().split('T')[0]
-                        const reactionKey = `${eventDef.key}-${keyDate}`
-                        const reaction = reactions[reactionKey]
-                        lastEvent = {
-                            date: lastWithData.occursAt,
-                            forecast: lastWithData.forecast,
-                            actual: lastWithData.actual,
-                            d1Return: reaction?.stats?.d0d1Return
-                        }
-                    }
-
-                    return {
-                        eventType: eventDef.key as 'cpi' | 'nfp' | 'fomc',
-                        eventName: eventDef.name,
-                        nextDate: nextOccurrence?.occursAt || '',
-                        daysUntil,
-                        stats: {
-                            avgD1Return: stats?.avgUp ?? 0, // Use avgUp as proxy
-                            winRate: stats?.d1WinRate ?? 50,
-                            avgRange: stats?.avgRange ?? 0,
-                            sampleSize: stats?.samples ?? 0
-                        },
-                        lastEvent
-                    }
-                }).filter(e => e.daysUntil < 365) // Only include events within a year
+                // Use pre-calculated payloads
+                const eventsData = enrichedEvents
+                    .filter(e => e.daysUntil < 365)
+                    .map(e => e.aiPayload)
 
                 const res = await fetch('/api/ai/calendar-summary', {
                     method: 'POST',
@@ -265,7 +221,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
         }
 
         void fetchAISummary()
-    }, [reactions])
+    }, [enrichedEvents])
 
     return (
         <div className={cn(SPACING.pageX, SPACING.pageTop, "pb-20 space-y-6 font-sans")}>
@@ -309,35 +265,23 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                 </div>
             </div>
 
-            {MACRO_EVENT_DEFS.map((eventDef) => {
-                const nextOccurrence = getNextOccurrence(eventDef.key)
-                const daysUntil = nextOccurrence ? getDaysUntil(nextOccurrence.occursAt) : 999
+            {enrichedEvents.map((item) => {
+                const { def, nextOccurrence, daysUntil, pastOccurrences } = item
 
-                // Get past occurrences
-                const allPastOccurrences = getPastOccurrences(eventDef.key, 36)
-                let pastOccurrences = allPastOccurrences
-                    .filter(occ => {
-                        const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
-                        const reactionKey = `${eventDef.key}-${keyDate}`
-                        return !!reactions[reactionKey]
-                    })
-                    .slice(0, 11)
-
+                // Local sorting for display only
+                const displayOccurrences = [...pastOccurrences]
                 if (alignMode === 'reaction') {
-                    pastOccurrences = [...pastOccurrences].sort((a, b) => {
-                        const getDate = (occ: typeof a) => new Date(occ.occursAt).toISOString().split('T')[0]
-                        const rA = reactions[`${eventDef.key}-${getDate(a)}`]
-                        const rB = reactions[`${eventDef.key}-${getDate(b)}`]
-                        const valA = rA?.stats?.d0d1Return ? Math.abs(rA.stats.d0d1Return) : 0
-                        const valB = rB?.stats?.d0d1Return ? Math.abs(rB.stats.d0d1Return) : 0
+                    displayOccurrences.sort((a, b) => {
+                        const valA = a.reaction?.stats?.d0d1Return ? Math.abs(a.reaction.stats.d0d1Return) : 0
+                        const valB = b.reaction?.stats?.d0d1Return ? Math.abs(b.reaction.stats.d0d1Return) : 0
                         return valB - valA
                     })
                 }
 
                 return (
                     <Link
-                        href={`/calendar/${eventDef.key}`}
-                        key={eventDef.key}
+                        href={`/calendar/${def.key}`}
+                        key={def.key}
                         className="block group"
                     >
                         <UniversalCard variant="clickable" size="M" className="p-0 overflow-hidden">
@@ -345,20 +289,20 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                             <div className="px-4 py-3 border-b border-white/5 flex items-start justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={cn("w-8 h-8 rounded-full flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] text-white")}>
-                                        {getEventIcon(eventDef.key)}
+                                        {getEventIcon(def.key)}
                                     </div>
 
                                     <div>
                                         <div className="flex flex-col gap-0.5">
                                             <div className="flex items-center gap-2">
                                                 <h2 className={cn(TYPOGRAPHY.cardTitle, "group-hover:text-white transition-colors")}>
-                                                    {eventDef.name} <span className="text-[#666] font-normal text-xs">{eventDef.key.toUpperCase()}</span>
+                                                    {def.name} <span className="text-[#666] font-normal text-xs">{def.key.toUpperCase()}</span>
                                                 </h2>
                                                 <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666]" />
                                             </div>
                                             {/* Educational Description - Neutral */}
                                             <p className={cn(TYPOGRAPHY.bodySmall, "truncate max-w-[200px]")}>
-                                                {eventDef.listDescription}
+                                                {def.listDescription}
                                             </p>
                                         </div>
                                     </div>
@@ -388,7 +332,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                                 <div className="flex items-start gap-2">
                                     <BookOpen className="w-3 h-3 text-[#444] mt-0.5 flex-shrink-0" />
                                     <p className="text-[10px] text-[#808080] leading-relaxed">
-                                        {eventDef.impactSummary}
+                                        {def.impactSummary}
                                     </p>
                                 </div>
                             </div>
@@ -399,17 +343,18 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                                     {nextOccurrence && (
                                         <MiniChartCard
                                             occ={nextOccurrence}
-                                            eventDef={eventDef}
-                                            reactions={reactions}
+                                            eventKey={def.key}
+                                            windowDisplayStart={def.windowDisplay.start}
                                             isNext={true}
                                         />
                                     )}
-                                    {pastOccurrences.map((occ, index) => (
+                                    {displayOccurrences.map((occ, index) => (
                                         <MiniChartCard
                                             key={occ.occursAt}
                                             occ={occ}
-                                            eventDef={eventDef}
-                                            reactions={reactions}
+                                            reaction={occ.reaction}
+                                            eventKey={def.key}
+                                            windowDisplayStart={def.windowDisplay.start}
                                             isLatest={alignMode === 'time' && index === 0}
                                         />
                                     ))}

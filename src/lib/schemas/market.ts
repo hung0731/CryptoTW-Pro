@@ -35,7 +35,7 @@ export const MarketStatusDataSchema = z.object({
 
 export const MarketStatusResponseSchema = z.object({
     status: MarketStatusDataSchema,
-    tools: z.array(ToolItemSchema),
+    tools: z.array(ToolItemSchema).optional(),
     conclusion: ConclusionSchema,
     lastUpdated: z.number().optional()
 });
