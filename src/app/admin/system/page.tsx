@@ -63,7 +63,7 @@ function SettingsTab() {
     }
 
     useEffect(() => {
-        fetchConfig()
+        void fetchConfig()
     }, [])
 
     const handleSave = async () => {
@@ -242,7 +242,7 @@ function LogsTab() {
     }
 
     useEffect(() => {
-        fetchLogs()
+        void fetchLogs()
     }, [filterLevel])
 
     const getLevelIcon = (level: string) => {

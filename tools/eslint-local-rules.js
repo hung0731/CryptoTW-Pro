@@ -1,4 +1,4 @@
-export default {
+const localRules = {
     rules: {
         "no-hardcoded-colors": {
             meta: {
@@ -33,3 +33,4 @@ export default {
         },
     },
 };
+export default localRules;

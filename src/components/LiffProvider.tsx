@@ -145,7 +145,7 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
             }
         }
 
-        initLiff()
+        void initLiff()
     }, [liffId])
 
     return (

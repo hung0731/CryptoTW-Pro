@@ -37,7 +37,7 @@ export default function AdminDashboard() {
         }
     }
 
-    useEffect(() => { loadData() }, [])
+    useEffect(() => { void loadData() }, [])
 
     const formatCurrency = (val?: number) => {
         if (!val) return '$0'

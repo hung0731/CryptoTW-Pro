@@ -90,8 +90,8 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
                 setLoading(false)
             }
         }
-        fetchStatus()
-        const interval = setInterval(fetchStatus, 60000)
+        void fetchStatus()
+        const interval = setInterval(() => void fetchStatus(), 60000)
         return () => clearInterval(interval)
     }, [initialStatus])
 

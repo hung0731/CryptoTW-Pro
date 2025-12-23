@@ -244,7 +244,7 @@ export default function JoinPage() {
 
                             {/* Icon - Smaller with more whitespace */}
                             <div className="relative z-10 h-5 mb-3 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
+
                                 <img
                                     src={EXCHANGE_CONFIG[ex].icon}
                                     alt={EXCHANGE_CONFIG[ex].name}

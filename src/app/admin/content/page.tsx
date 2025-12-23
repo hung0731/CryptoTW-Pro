@@ -376,6 +376,7 @@ function BotTab() {
         if (res.ok) setTriggers(await res.json())
     }, [])
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => { void fetchTriggers() }, [fetchTriggers])
 
     // ... (Bot Logic Shortened for Brevity - assuming full logic transfer)

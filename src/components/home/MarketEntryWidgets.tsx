@@ -84,7 +84,7 @@ export function MarketEntryWidgets() {
                 setLoading(false)
             }
         }
-        fetchStatus()
+        void fetchStatus()
     }, [])
 
     // Only show skeleton on initial mount if really needed, but defaults are better

@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }
         }
 
-        checkAuth()
+        void checkAuth()
     }, [router, supabase])
 
     if (isLoading) {

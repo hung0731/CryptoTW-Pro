@@ -236,7 +236,7 @@ function BindingsTab() {
         }
     }
 
-    useEffect(() => { fetchBindings() }, [])
+    useEffect(() => { void fetchBindings() }, [])
 
     const handleAction = async (id: string, action: 'verify' | 'reject') => {
         const reason = action === 'reject' ? prompt('拒絕原因(可選):') : null
@@ -423,7 +423,7 @@ export default function UsersPage() {
         finally { setIsLoading(false) }
     }
 
-    useEffect(() => { fetchUsers() }, [debouncedSearch])
+    useEffect(() => { void fetchUsers() }, [debouncedSearch])
 
     const openEdit = (u: UserWithBinding) => {
         setSelectedUser(u)
@@ -440,7 +440,7 @@ export default function UsersPage() {
                 body: JSON.stringify({ id: selectedUser.id, membership_status: selectedUser.membership_status })
             })
             toast({ title: '已儲存' })
-            fetchUsers()
+            void fetchUsers()
             setIsSheetOpen(false)
         } catch { toast({ title: 'Error' }) }
         finally { setIsSaving(false) }
@@ -449,7 +449,7 @@ export default function UsersPage() {
     const handleDeleteUser = async () => {
         if (!selectedUser || !confirm('Delete user?')) return
         await fetch(`/api/admin/users?id=${selectedUser.id}`, { method: 'DELETE' })
-        fetchUsers()
+        void fetchUsers()
         setIsSheetOpen(false)
     }
 

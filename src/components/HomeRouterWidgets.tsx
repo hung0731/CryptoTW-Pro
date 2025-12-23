@@ -84,7 +84,7 @@ export function HomeRouterWidget() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />

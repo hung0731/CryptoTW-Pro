@@ -30,7 +30,7 @@ interface HalvingAPIResponse {
 // Sub-Component: Countdown Card
 // ----------------------------------------------------------------------
 function HalvingCountdown({ currentHeight }: { currentHeight: number }) {
-    const [now] = useState(Date.now())
+    const [now] = useState(() => Date.now())
     const blocksLeft = NEXT_HALVING_BLOCK - currentHeight
     const secondsLeft = blocksLeft * BLOCK_TIME_SEC
     const daysLeft = Math.floor(secondsLeft / (3600 * 24))
@@ -149,7 +149,7 @@ export function HalvingCycleChart() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     // Prepare Chart Data with Projection
@@ -161,7 +161,6 @@ export function HalvingCycleChart() {
             if (cycle.name === 'Cycle 1 (2012)') return; // Ignore Cycle 1 for projection avg
             cycle.data.forEach(d => {
                 const existing = dataMap.get(d.day) || { day: d.day }
-                // @ts-ignore
                 existing[cycle.name] = d.roi
                 dataMap.set(d.day, existing)
             })

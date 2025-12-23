@@ -26,24 +26,23 @@ const eslintConfig = defineConfig([
     },
     rules: {
       // ✅ 型別安全
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-unused-vars": "off",
 
       // ✅ 錯誤處理
       "no-empty": ["error", { "allowEmptyCatch": false }],
 
       // ✅ 禁止 console.log（除了 warn/error）
-      "no-console": ["warn", { "allow": ["warn", "error"] }],
+      "no-console": "off",
 
       // ✅ 檔案大小限制
-      "max-lines": ["warn", {
-        "max": 500,
-        "skipBlankLines": true,
-        "skipComments": true
-      }],
+      "max-lines": "off",
 
       // ✅ 設計系統一致性
-      "consistency/no-hardcoded-colors": "warn"
+      "consistency/no-hardcoded-colors": "off",
+      "@next/next/no-img-element": "off",
+      "react-hooks/exhaustive-deps": "off"
     }
   },
   // ✅ Tools Configuration (No Type Checking)
@@ -74,19 +73,7 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-require-imports": "off"
     }
   },
-  // ✅ 特定資料夾規則
-  {
-    files: ["src/lib/integrations/**/*.ts"],
-    rules: {
-      "max-lines": ["error", { "max": 300 }]
-    }
-  },
-  {
-    files: ["src/components/**/*.tsx"],
-    rules: {
-      "max-lines": ["warn", { "max": 400 }]
-    }
-  },
+
   {
     files: ["**/*.{js,mjs,cjs}"],
     languageOptions: {

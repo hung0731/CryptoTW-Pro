@@ -71,7 +71,7 @@ function AlertsTab() {
     }
 
     useEffect(() => {
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -217,7 +217,7 @@ function AIStatusTab() {
         }
     }
 
-    useEffect(() => { fetchStatus() }, [])
+    useEffect(() => { void fetchStatus() }, [])
 
     const handleAction = async (action: 'regenerate' | 'clear', type: string) => {
         setActionLoading(`${action}-${type}`)
@@ -231,7 +231,7 @@ function AIStatusTab() {
             const json = await res.json()
             if (json.success) {
                 setMessage({ type: 'success', text: json.message })
-                fetchStatus()
+                void fetchStatus()
             } else {
                 setMessage({ type: 'error', text: json.error || '操作失敗' })
             }

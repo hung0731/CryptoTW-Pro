@@ -71,7 +71,7 @@ export function HomePageClient({
 
     if (isAuthLoading) {
         return <div className="min-h-screen bg-black flex items-center justify-center">
-            <img src="/logo.svg" className="h-8 w-auto opacity-50" />
+            <img src="/logo.svg" alt="CryptoTW Logo" className="h-8 w-auto opacity-50" />
         </div>
     }
 

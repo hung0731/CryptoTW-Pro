@@ -21,7 +21,7 @@ export async function GET(
             }, { status: 400 })
         }
 
-        // @ts-ignore - JSON import typing
+        // @ts-expect-error: Known issue with dynamic property access - JSON import typing
         const eventData = MACRO_HISTORY[key]
 
         if (!eventData) {

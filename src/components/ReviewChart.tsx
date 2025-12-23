@@ -62,7 +62,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         setLoading(false)
                         return
                     }
-                    // @ts-ignore
+                    // @ts-expect-error: Dynamic property access on imported JSON
                     const reviewData = REVIEWS_HISTORY[reviewSlug]
                     if (!reviewData) {
                         setLoading(false)

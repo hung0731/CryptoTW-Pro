@@ -55,7 +55,7 @@ export function MarketRadarHero({ status, conclusion }: MarketRadarHeroProps) {
                     "inline-block px-3 py-1 bg-black/50 backdrop-blur border rounded text-xs font-bold tracking-widest mt-2",
                     themeColor.split(' ')[1] // Get border color
                 )}>
-                    得分: {score} // {riskStatus}
+                    得分: {score} | {riskStatus}
                 </div>
             </div>
 

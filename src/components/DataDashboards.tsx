@@ -32,7 +32,7 @@ export function DerivativesView() {
                 setLoading(false)
             }
         }
-        fetchDashboard()
+        void fetchDashboard()
         const interval = setInterval(fetchDashboard, 120000) // Refresh every 2 min
         return () => clearInterval(interval)
     }, [])

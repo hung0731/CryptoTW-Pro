@@ -93,7 +93,7 @@ export function SimilarHistoryCard() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {

@@ -200,11 +200,11 @@ function ChartHero({ story }: ChartHeroProps) {
 
     // 初始加載和自動刷新
     React.useEffect(() => {
-        fetchData(true); // 初始加載
+        void fetchData(true); // 初始加載
 
         // 設置 60 秒自動刷新
         refreshIntervalRef.current = setInterval(() => {
-            fetchData(false); // 背景刷新（不顯示 loading）
+            void fetchData(false); // 背景刷新（不顯示 loading）
         }, AUTO_REFRESH_INTERVAL);
 
         return () => {

@@ -199,7 +199,7 @@ export default function MarketingPage() {
 
                                 <Button
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6"
-                                    onClick={handlePreview}
+                                    onClick={() => void handlePreview()}
                                     disabled={isLoading}
                                 >
                                     {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : (
@@ -248,7 +248,7 @@ export default function MarketingPage() {
                                 <Button
                                     variant="outline"
                                     className="border-neutral-700 hover:bg-neutral-800 text-green-400"
-                                    onClick={() => handleTestAutomation('BTC Hourly')}
+                                    onClick={() => void handleTestAutomation('BTC Hourly')}
                                     disabled={isTesting}
                                 >
                                     {isTesting ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 mr-2" />}
@@ -322,7 +322,7 @@ export default function MarketingPage() {
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsPreviewOpen(false)} className="border-neutral-700">返回修改</Button>
-                        <Button onClick={handleConfirmSend} className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                        <Button onClick={() => void handleConfirmSend()} className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
                             確認並發送
                         </Button>
                     </DialogFooter>

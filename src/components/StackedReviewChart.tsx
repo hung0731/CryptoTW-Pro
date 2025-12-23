@@ -130,9 +130,9 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                 setIsAsymmetric(false)
             }
 
-            // @ts-ignore
+            // @ts-expect-error: Dynamic property access on imported JSON
             const leftHistory = REVIEWS_HISTORY[`${leftInfo.slug}-${leftInfo.year}`]
-            // @ts-ignore
+            // @ts-expect-error: Dynamic property access on imported JSON
             const rightHistory = REVIEWS_HISTORY[`${rightInfo.slug}-${rightInfo.year}`]
 
             if (!leftHistory || !rightHistory) {
@@ -249,7 +249,6 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             setDeathPoints({ left: leftDeathPoint, right: rightDeathPoint })
 
             // 2. Determine Scale & Process Data (Normal or Asymmetric)
-            let finalData
 
             // Asymmetric Impact Normalization
             // Find max impact (absolute) for each valid series
@@ -263,7 +262,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
             upperBound = Math.ceil(upperBound / 5) * 5
             setPctDomain([lowerBound, upperBound])
 
-            finalData = rawData.map(d => ({
+            const finalData = rawData.map(d => ({
                 ...d,
                 // Absolute Percentage (Clamped)
                 leftPctDisplay: d.leftPct !== null ? clamp(d.leftPct, lowerBound, upperBound) : null,
@@ -387,7 +386,6 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                                 ? `${(val * 100).toFixed(0)}%`
                                 : `${Number(val).toFixed(0)}%`
                         }
-                        // 5. Apply Visual Domain
                         domain={viewType === 'impact' ? [-1.1, 1.1] : (viewType === 'pct' ? pctDomain : DD_DOMAIN)}
                         allowDataOverflow={true} // Important: Force clip at domain
                     />

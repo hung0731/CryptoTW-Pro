@@ -20,7 +20,7 @@ export default function AnnouncementBanner() {
                 logger.error('Failed to fetch announcement', e as Error, { feature: 'announcement-banner' })
             }
         }
-        fetchAnnouncement()
+        void fetchAnnouncement()
     }, [])
 
     if (!announcement || !isVisible) return null

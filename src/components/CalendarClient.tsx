@@ -264,7 +264,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
             }
         }
 
-        fetchAISummary()
+        void fetchAISummary()
     }, [reactions])
 
     return (

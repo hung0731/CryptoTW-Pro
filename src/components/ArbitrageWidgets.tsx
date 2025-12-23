@@ -68,7 +68,7 @@ export function ArbitrageView() {
         }
 
         // Debounce fetch if inputs change frequently? For now simpler effect.
-        fetchData()
+        void fetchData()
     }, [principal, selectedExchanges]) // In real app, debounce this.
 
     // Calculate Net Profit for Display
