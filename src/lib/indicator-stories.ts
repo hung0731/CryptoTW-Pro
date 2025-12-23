@@ -165,7 +165,7 @@ export interface IndicatorStory {
 
     // ③ 圖表設定
     chart: {
-        type?: 'line' | 'heatmap';
+        type?: 'line' | 'heatmap' | 'halving' | 'screener';
         unit?: string;                 // '', '%', 'B', etc.
         valueFormat?: 'number' | 'percent' | 'ratio';
         // Y 軸模型（核心修復）
@@ -881,6 +881,126 @@ export const INDICATOR_STORIES: IndicatorStory[] = [
         ],
         relatedLinks: [
             { label: '查看歷史復盤', href: '/reviews' },
+        ],
+    },
+    // ================================================
+    // A-Tier: 減半週期對比 Halving Cycles
+    // ================================================
+    {
+        id: 'halving-cycles',
+        slug: 'halving-cycles',
+        name: '減半週期對比',
+
+        positionHeadline: '當前 ROI 1.4x（Day 200）',
+        positionRationale: '本輪週期（2024）截至目前的走勢，與 2016 週期高度重合，顯示典型的「慢牛」特徵。',
+        zone: 'lean_greed',
+
+        useCases: [
+            { type: 'observe', description: '比較本輪週期與歷史週期的快慢節奏' },
+            { type: 'timing', description: '判斷牛市是否已經過熱或滯後' },
+            { type: 'risk', description: '當走勢遠低於歷史平均時，可能是結構性疲軟' },
+        ],
+
+        chart: {
+            type: 'halving',
+            unit: 'x',
+            valueFormat: 'number',
+            yAxisModel: { type: 'auto' },
+            zones: {
+                fear: { min: -Infinity, max: 0 },
+                leanFear: { min: 0, max: 1 },
+                leanGreed: { min: 1, max: 3 },
+                greed: { min: 3, max: Infinity },
+            },
+            api: {
+                endpoint: '/api/market/halving-status',
+                params: {},
+            },
+        },
+
+        chartCallout: {
+            points: [
+                'X 軸為「減半後天數」，將不同年份的週期對齊比較',
+                'Y 軸為「投資回報倍數 (ROI)」，以減半日價格為 1.0x 基準',
+                '黃色線為本輪週期，觀察其是否偏離歷史軌道',
+            ],
+        },
+
+        historicalCases: [
+            {
+                reviewId: 'review-halving-2016',
+                label: '2016 慢牛',
+                takeaway: '減半後經歷了漫長的震盪洗盤，直到 Day 300 才開啟主升浪。',
+            },
+        ],
+
+        actionGuidelines: [
+            '若本輪走勢滯後於 2016，可能代表需要更多耐心',
+            '若 ROI 快速飆升超越 2020，警惕過早透支行情',
+            '減半後 12-18 個月通常是週期高點',
+        ],
+        relatedLinks: [
+            { label: '查看歷史復盤', href: '/reviews' },
+        ],
+    },
+    // ================================================
+    // A-Tier: 多空掃描器 Divergence Screener (Smart Score)
+    // ================================================
+    {
+        id: 'divergence-screener',
+        slug: 'divergence-screener',
+        name: '多空掃描器',
+
+        positionHeadline: '主力意圖掃描中',
+        positionRationale: '基於「價格」與「持倉量」背離的智慧選幣系統，自動過濾出具有「吸籌」或「出貨」特徵的幣種。',
+        zone: 'lean_greed', // Placeholder
+
+        useCases: [
+            { type: 'observe', description: '識別主力資金在「偷買」或「偷賣」的跡象' },
+            { type: 'timing', description: '當價格下跌但 OI 大幅增加時，可能是反彈前兆（吸籌）' },
+            { type: 'risk', description: '當價格上漲但 OI 下降時，警惕上漲動能不足（出貨）' },
+        ],
+
+        chart: {
+            type: 'screener',
+            unit: 'pts',
+            valueFormat: 'number',
+            yAxisModel: { type: 'auto' },
+            zones: {
+                fear: { min: -Infinity, max: 0 },
+                leanFear: { min: 0, max: 1 },
+                leanGreed: { min: 1, max: 3 },
+                greed: { min: 3, max: Infinity },
+            },
+            api: {
+                endpoint: '/api/alpha/divergence', // Just for check
+                params: {},
+            },
+        },
+
+        chartCallout: {
+            points: [
+                '吸籌信號 (Bullish)：主力頂著賣壓吸貨，通常發生在下跌末端',
+                '出貨信號 (Bearish)：主力邊拉邊出，通常發生在上漲末端',
+                '過熱信號 (Risk)：多頭過度擁擠，隨時可能發生多殺多',
+            ],
+        },
+
+        historicalCases: [
+            {
+                reviewId: 'review-divergence-sample',
+                label: '經典案例',
+                takeaway: '2023 年底 SOL 在 $20 附近出現連續 3 天的「吸籌」信號，隨後開啟 10 倍漲幅。',
+            },
+        ],
+
+        actionGuidelines: [
+            '不要僅憑單一信號梭哈，需結合 K 線形態確認',
+            '「吸籌」信號出現後，若價格突破關鍵壓力位，勝率更高',
+            '注意 OI 增加可能是因為對沖需求，而非純粹的方向性押注',
+        ],
+        relatedLinks: [
+            { label: '查看合約數據', href: 'https://www.coinglass.com' },
         ],
     },
 ];

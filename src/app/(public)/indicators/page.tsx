@@ -20,6 +20,9 @@ const POPULARITY_ORDER = [
     'coinbase-premium', // 7. CB 溢價 - 區域需求
     'futures-basis',    // 8. 基差 - 結構指標
     'stablecoin-supply',// 9. 穩定幣 - 長期指標
+    'seasonality',      // 10. 季節性 - 歷史規律
+    'halving-cycles',   // 11. 減半週期 - 宏觀對比
+    'divergence-screener', // 12. 多空掃描 - 交易機會
 ];
 
 // 即時數據類型
@@ -185,10 +188,24 @@ export default function IndicatorsPage() {
     const [aiSummary, setAiSummary] = useState<string>('');
     const [aiLoading, setAiLoading] = useState(true);
 
+    // Split indicators into Tools and Metrics
+    const alphaTools = useMemo(() => {
+        return ['seasonality', 'halving-cycles', 'divergence-screener']
+            .map(id => INDICATOR_STORIES.find(s => s.id === id))
+            .filter(Boolean) as IndicatorStory[];
+    }, []);
+
+    const marketMetrics = useMemo(() => {
+        const metricIds = POPULARITY_ORDER.filter(id => !['seasonality', 'halving-cycles', 'divergence-screener'].includes(id));
+        return metricIds
+            .map(id => INDICATOR_STORIES.find(s => s.id === id))
+            .filter(Boolean) as IndicatorStory[];
+    }, []);
+
     useEffect(() => {
         // 初始化所有指標為 loading 狀態
         const initialState: Record<string, LiveIndicatorData> = {};
-        INDICATOR_STORIES.forEach(story => {
+        marketMetrics.forEach(story => {
             initialState[story.id] = {
                 value: 0,
                 zone: story.zone,
@@ -199,7 +216,7 @@ export default function IndicatorsPage() {
         setLiveData(initialState);
 
         // 並行獲取所有指標的即時數據
-        INDICATOR_STORIES.forEach(story => {
+        marketMetrics.forEach(story => {
             const endpoint = story.chart.api.endpoint;
             const params = new URLSearchParams({
                 range: '1M',
@@ -249,7 +266,7 @@ export default function IndicatorsPage() {
                     }));
                 });
         });
-    }, []);
+    }, [marketMetrics]);
 
     // 當指標數據載入完成後，生成 AI 總結 (10 分鐘快取)
     useEffect(() => {
@@ -379,29 +396,58 @@ export default function IndicatorsPage() {
                 backLabel="返回"
             />
 
-            <div className="max-w-3xl mx-auto px-4 pt-6 pb-24 space-y-6">
+            <div className="max-w-3xl mx-auto px-4 pt-6 pb-24 space-y-8">
                 {/* AI 總結卡片 */}
                 <AISummaryCard
-                    summary={aiSummary || '正在分析各項指標數據...'}
-                    source="指標總覽"
+                    summary={aiSummary || '正在分析各項市場數據...'}
+                    source="AI 市場觀察"
                     loading={aiLoading}
                 />
 
-                {/* 指標列表 - 按熱門程度排序 */}
+                {/* Alpha Tools Section (New) */}
                 <section>
-                    <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-3")}>可用指標（即時）</h2>
+                    <div className="flex items-center justify-between mb-3 px-1">
+                        <h2 className={cn(TYPOGRAPHY.sectionLabel)}>Alpha 工具箱</h2>
+                        <span className="text-[10px] text-neutral-500 font-mono">POWERED BY CryptoTW</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {alphaTools.map(story => (
+                            <Link key={story.id} href={`/indicators/${story.slug}`} className="group block">
+                                <div className={cn(
+                                    "h-full p-4 rounded-xl border border-white/[0.08] bg-[#0A0A0A] hover:bg-white/[0.03] transition-colors flex flex-col justify-between"
+                                )}>
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                                                {/* Simple Icon Mapping based on ID */}
+                                                {story.id === 'seasonality' && <span className="text-indigo-400 text-lg">📅</span>}
+                                                {story.id === 'halving-cycles' && <span className="text-orange-400 text-lg">⏳</span>}
+                                                {story.id === 'divergence-screener' && <span className="text-cyan-400 text-lg">🔍</span>}
+                                            </div>
+                                            <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">ALPHA</span>
+                                        </div>
+                                        <h3 className="text-sm font-bold text-white mb-1 group-hover:text-indigo-400 transition-colors">{story.name}</h3>
+                                    </div>
+                                    <div className="mt-3 flex items-center text-[10px] text-neutral-600 font-medium group-hover:text-neutral-400">
+                                        立即使用 <ChevronRight className="w-3 h-3 ml-0.5" />
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Market Metrics Section (Existing) */}
+                <section>
+                    <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-3 px-1")}>市場數據指標</h2>
                     <div className="space-y-3">
-                        {POPULARITY_ORDER.map((id) => {
-                            const story = INDICATOR_STORIES.find(s => s.id === id);
-                            if (!story) return null;
-                            return (
-                                <IndicatorEntryCard
-                                    key={story.id}
-                                    story={story}
-                                    liveData={liveData[story.id]}
-                                />
-                            );
-                        })}
+                        {marketMetrics.map((story) => (
+                            <IndicatorEntryCard
+                                key={story.id}
+                                story={story}
+                                liveData={liveData[story.id]}
+                            />
+                        ))}
                     </div>
                 </section>
             </div>

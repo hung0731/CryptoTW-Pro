@@ -11,6 +11,8 @@ import { REVIEWS_DATA } from '@/lib/reviews-data';
 import { getIndicatorExplanation, CHART_SEMANTIC_MODELS } from '@/lib/chart-semantics';
 import { getRelatedEvents, getRelatedIndicators, getPrerequisiteConcepts } from '@/lib/semantic-linkage';
 import { SeasonalityHeatmap } from '@/components/indicators/SeasonalityHeatmap';
+import { HalvingCycleChart } from '@/components/indicators/HalvingCycleChart';
+import { DivergenceScreener } from '@/components/indicators/DivergenceScreener';
 
 // ================================================
 // SECTION CARD - 統一容器
@@ -237,6 +239,58 @@ function ChartHero({ story }: ChartHeroProps) {
         return (
             <div className="space-y-4">
                 <SeasonalityHeatmap />
+                {/* Position Statement - Below Chart (Reused) */}
+                <div className="px-1 pt-2">
+                    <div className="flex items-start gap-4">
+                        <div className="flex-1 space-y-1.5">
+                            <span className={cn(
+                                "inline-block text-[11px] px-2.5 py-1 rounded-full font-medium border",
+                                zoneColors.bg, zoneColors.text, zoneColors.border
+                            )}>
+                                {zoneLabel}
+                            </span>
+                            {story.positionRationale && (
+                                <p className={cn("text-sm leading-relaxed", COLORS.textSecondary)}>
+                                    {story.positionRationale}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (story.chart.type === 'halving') {
+        return (
+            <div className="space-y-4">
+                <HalvingCycleChart />
+                {/* Position Statement - Below Chart (Reused) */}
+                <div className="px-1 pt-2">
+                    <div className="flex items-start gap-4">
+                        <div className="flex-1 space-y-1.5">
+                            <span className={cn(
+                                "inline-block text-[11px] px-2.5 py-1 rounded-full font-medium border",
+                                zoneColors.bg, zoneColors.text, zoneColors.border
+                            )}>
+                                {zoneLabel}
+                            </span>
+                            {story.positionRationale && (
+                                <p className={cn("text-sm leading-relaxed", COLORS.textSecondary)}>
+                                    {story.positionRationale}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (story.chart.type === 'screener') {
+        return (
+            <div className="space-y-4">
+                <DivergenceScreener />
                 {/* Position Statement - Below Chart (Reused) */}
                 <div className="px-1 pt-2">
                     <div className="flex items-start gap-4">

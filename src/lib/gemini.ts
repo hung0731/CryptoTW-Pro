@@ -5,7 +5,7 @@ import { acquireLock, releaseLock } from './cache'
 
 const apiKey = process.env.GEMINI_API_KEY
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
-export const MODEL_NAME = 'gemini-3-flash-preview'
+export const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
 
 const VOICE_PACK = `
 【CryptoTW 台灣用語 Voice Pack（MANDATORY）】
