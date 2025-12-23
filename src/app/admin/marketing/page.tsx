@@ -111,8 +111,10 @@ export default function MarketingPage() {
             if (!res.ok) throw new Error(data.error)
 
             toast({
-                title: "測試成功",
-                description: `已觸發 ${taskName}，發送對象: ${data.count} (Admin)，最新BTC價格: $${data.data.price}`,
+                title: data.data ? "測試成功" : "測試完成 (無發送對象)",
+                description: data.data
+                    ? `已觸發 ${taskName}，發送對象: ${data.count} (Admin)，最新BTC價格: $${data.data.price}`
+                    : `API 回傳訊息: ${data.message || '無詳細資訊'}`,
             })
         } catch (e: any) {
             toast({
