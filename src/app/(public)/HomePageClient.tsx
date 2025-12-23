@@ -6,22 +6,20 @@ import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
 import {
-    Bell, Settings, ChevronRight, Sparkles
+    Bell, Settings, ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet
 } from 'lucide-react'
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
 import { UpcomingEventsCard } from '@/components/home/UpcomingEventsCard'
 import { FeaturedReviewsCard } from '@/components/home/FeaturedReviewsCard'
-// import { SentimentMatrix } from '@/components/home/SentimentMatrix' // Removed
-import { MarketRadarHero } from '@/components/home/MarketRadarHero'
-import { SmartMoneyConflict } from '@/components/home/SmartMoneyConflict'
 import { MarketConditions } from '@/components/home/MarketConditions'
 import { MacroReaction } from '@/lib/macro-events'
-import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens'
+import { SPACING } from '@/lib/design-tokens'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { UniversalCard } from '@/components/ui/UniversalCard'
 
 import { ActionCard } from '@/components/home/ActionCard'
-import { CandlestickChart, Activity, DollarSign, Wallet } from 'lucide-react'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
 import { HistoricalEchoCard } from '@/components/home/HistoricalEchoCard'
 import { findHistoricalSimilarity } from '@/lib/historical-matcher'
@@ -46,17 +44,11 @@ export function HomePageClient({
     const isPro = dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime'
     const isPending = dbUser?.membership_status === 'pending'
 
-    // Welcome modal for new Pro users
+    // Welcome modal
     const { showWelcome, closeWelcome } = useWelcomeModal(isPro)
 
-    // Calculate Historical Match
-    // Note: initialStatus is MarketStatusData, we need to ensure it matches MarketState shape
-    // Or we rely on the fact that initialStatus has the necessary fields (fundingState, etc.)
-    // Let's assume initialStatus matches the shape or we map it.
-    // Looking at HomePageClientProps, initialStatus is MarketStatusData. 
-    // And MarketStatusData in types.ts likely extends MarketState from market-state.ts or is similar.
-    // If not, we might need a type check or conversion.
-    // Assuming compatibility for now based on context.
+    // Historical Match
+    // Cast strict type if needed, assuming compat for now
     const historicalMatch = initialStatus ? findHistoricalSimilarity(initialStatus as any) : null
 
     // Greeting Logic
@@ -88,105 +80,110 @@ export function HomePageClient({
         <main className="min-h-screen font-sans bg-black text-white">
             <PageHeader showLogo />
 
-            {/* Welcome Modal for new Pro users */}
             <WelcomeModal isOpen={showWelcome} onClose={closeWelcome} />
 
-            <MobileOptimizedLayout className="mt-4 space-y-6">
+            <MobileOptimizedLayout className={SPACING.classes.mtHeader}>
 
-                {/* Welcome Component */}
-                <div className="flex items-center justify-between">
-                    {!profile ? (
-                        <div
-                            onClick={() => liffObject?.login()}
-                            className="w-10 h-10 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
-                        >
-                            <span className="text-sm">登入</span>
-                        </div>
-                    ) : profile?.pictureUrl ? (
-                        <img
-                            src={profile.pictureUrl}
-                            alt="Avatar"
-                            className="w-10 h-10 rounded-full border border-white/20"
-                        />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
-                            <span className="text-lg">👋</span>
-                        </div>
-                    )}
-                    <div>
-                        <p className="text-xs text-neutral-500">{greeting}</p>
-                        <h1 className="text-base font-bold text-white">
-                            {profile?.displayName || (
-                                <span
+                {/* ===== FIRST SCREEN: Greetings & Key Status ===== */}
+                <section className={SPACING.classes.gapCards}>
+                    {/* Welcome Component */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            {!profile ? (
+                                <div
                                     onClick={() => liffObject?.login()}
-                                    className="cursor-pointer hover:text-white/80"
+                                    className="w-10 h-10 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
                                 >
-                                    立即登入
-                                </span>
+                                    <span className="text-sm">登入</span>
+                                </div>
+                            ) : profile?.pictureUrl ? (
+                                <img
+                                    src={profile.pictureUrl}
+                                    alt="Avatar"
+                                    className="w-10 h-10 rounded-full border border-white/20"
+                                />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center">
+                                    <span className="text-lg">👋</span>
+                                </div>
                             )}
-                        </h1>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
-                            <Bell className="w-4 h-4 text-[#808080]" />
-                        </Link>
-                        <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
-                            <Settings className="w-4 h-4 text-[#808080]" />
-                        </Link>
-                    </div>
-                </div>
-
-                {/* Unlock CTA (Non-Pro Users) */}
-                {!isPro && (
-                    <Link href="/join" className="block">
-                        <div className={cn(
-                            "flex items-center justify-between",
-                            CARDS.secondary,
-                            isPending && "bg-yellow-500/10 border-yellow-500/30"
-                        )}>
-                            <div className="flex items-center gap-2">
-                                {isPending ? (
-                                    <div className="w-4 h-4 rounded-full border-2 border-yellow-500/30 border-t-yellow-500 animate-spin" />
-                                ) : (
-                                    <Sparkles className="w-4 h-4 text-white" />
-                                )}
-                                <span className={cn("text-sm font-medium", isPending ? "text-yellow-500" : "text-white")}>
-                                    {isPending ? 'Pro 會員資格審核中' : '解鎖完整 Pro 功能'}
-                                </span>
+                            <div>
+                                <p className="text-xs text-neutral-500">{greeting}</p>
+                                <h1 className="text-base font-bold text-white">
+                                    {profile?.displayName || (
+                                        <span
+                                            onClick={() => liffObject?.login()}
+                                            className="cursor-pointer hover:text-white/80"
+                                        >
+                                            立即登入
+                                        </span>
+                                    )}
+                                </h1>
                             </div>
-                            <ChevronRight className={cn("w-4 h-4", isPending ? "text-yellow-500" : "text-white/40")} />
                         </div>
-                    </Link>
-                )}
+                        <div className="flex items-center gap-2">
+                            <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
+                                <Bell className="w-4 h-4 text-[#808080]" />
+                            </Link>
+                            <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
+                                <Settings className="w-4 h-4 text-[#808080]" />
+                            </Link>
+                        </div>
+                    </div>
 
+                    {/* Pro CTA (Non-Pro) */}
+                    {!isPro && (
+                        <Link href="/join" className="block mb-4">
+                            <UniversalCard
+                                variant="highlight"
+                                size="S"
+                                className={cn("flex items-center justify-between", isPending && "border-yellow-500/30")}
+                            >
+                                <div className="flex items-center gap-2">
+                                    {isPending ? (
+                                        <div className="w-4 h-4 rounded-full border-2 border-yellow-500/30 border-t-yellow-500 animate-spin" />
+                                    ) : (
+                                        <Sparkles className="w-4 h-4 text-white" />
+                                    )}
+                                    <span className={cn("text-sm font-bold", isPending ? "text-yellow-500" : "text-white")}>
+                                        {isPending ? 'Pro 會員資格審核中' : '解鎖完整 Pro 功能'}
+                                    </span>
+                                </div>
+                                <ChevronRight className={cn("w-4 h-4", isPending ? "text-yellow-500" : "text-white/40")} />
+                            </UniversalCard>
+                        </Link>
+                    )}
 
-
-                {/* ===== Sentiment Dashboard (COCKPIT V2) ===== */}
-                <section className="mt-6">
-                    {/* 1. Market Overview Grid (Compact) */}
+                    {/* 1. Market Snapshot (Decision Card) */}
                     <MarketOverviewGrid status={initialStatus} conclusion={initialConclusion} />
 
-                    {/* 2. Market Conditions (Risk) */}
-                    <MarketConditions status={initialStatus} />
+                    {/* 2. Secondary Context (Conditions) */}
+                    <div className="mt-3">
+                        <MarketConditions status={initialStatus} />
+                    </div>
                 </section>
 
-                {/* 4. Historical Echo Module (New) */}
-                <HistoricalEchoCard match={historicalMatch} />
+                {/* 3. Historical Echo */}
+                <section>
+                    <HistoricalEchoCard match={historicalMatch} />
+                </section>
 
-                {/* ===== Context Section ===== */}
-                <section className="space-y-3">
-                    <h2 className={cn(TYPOGRAPHY.sectionTitle, "pl-1")}>📅 接下來會發生什麼</h2>
+                {/* ===== BELOW THE FOLD: Detailed Context ===== */}
+                <section className={SPACING.classes.gapCards}>
+                    <SectionHeaderCard
+                        title="接下來會發生什麼"
+                        description="市場關注焦點與即將發生的事件"
+                    />
                     <UpcomingEventsCard reactions={reactions} />
                     <FlashNewsFeed compact initialContext={initialContext} />
                     <FeaturedReviewsCard />
                 </section>
 
                 {/* ===== Discovery Section ===== */}
-                <section className="space-y-3">
-                    <h2 className={cn(TYPOGRAPHY.sectionTitle, "pl-1")}>🔍 挖更深</h2>
+                <section className={SPACING.classes.gapCards}>
+                    <SectionHeaderCard title="探索更多" />
 
-                    {/* Instrument Tiles (No meta descriptions) */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className={cn("grid grid-cols-2", SPACING.classes.gapCards)}>
                         <ActionCard
                             title="財經日曆"
                             href="/calendar"
@@ -214,4 +211,3 @@ export function HomePageClient({
         </main>
     )
 }
-

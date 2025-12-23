@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
             range,
         })
     } catch (error) {
-        console.error('FGI History API error:', error)
+        logger.error('FGI History API error', error, { feature: 'coinglass-api', endpoint: 'fear-greed' })
         return NextResponse.json({ error: 'Failed to fetch FGI history' }, { status: 500 })
     }
 }

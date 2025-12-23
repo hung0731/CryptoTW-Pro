@@ -89,7 +89,7 @@ function ChartCard({ title, index, children, color = '#3B82F6' }: { title: strin
                 <span style={{ color }}>{index}</span>
                 {title}
             </h2>
-            <div className={cn(CARDS.primary, SPACING.card)}>
+            <div className={cn(CARDS.primary)}>
                 <div className="h-[280px]">
                     {children}
                 </div>

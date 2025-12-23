@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -45,13 +46,13 @@ export async function GET(req: NextRequest) {
         })
 
         if (!res.ok) {
-            console.error(`Funding V4 API error: ${res.status}`)
+            logger.error(`Funding V4 API error: ${res.status}`, undefined, { feature: 'coinglass-api', endpoint: 'funding-history' })
             return NextResponse.json({ error: 'Upstream API error' }, { status: 502 })
         }
 
         const json = await res.json()
         if (json.code !== '0' || !json.data || !Array.isArray(json.data)) {
-            console.error('Funding V4 API error:', json.msg)
+            logger.error('Funding V4 API error', new Error(json.msg), { feature: 'coinglass-api', endpoint: 'funding-history' })
             return NextResponse.json({ error: 'No data available' }, { status: 500 })
         }
 
@@ -93,7 +94,7 @@ export async function GET(req: NextRequest) {
             symbol,
         })
     } catch (error) {
-        console.error('Funding Rate History API error:', error)
+        logger.error('Funding Rate History API error', error, { feature: 'coinglass-api', endpoint: 'funding-history' })
         return NextResponse.json({ error: 'Failed to fetch funding rate history' }, { status: 500 })
     }
 }

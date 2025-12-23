@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
@@ -62,7 +63,7 @@ export async function GET(req: NextRequest) {
             range,
         })
     } catch (e) {
-        console.error('ETF Flow API error:', e)
+        logger.error('ETF Flow API error:', e as Error)
         return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
     }
 }

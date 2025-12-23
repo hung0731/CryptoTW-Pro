@@ -8,6 +8,7 @@ import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { DashboardData } from './types'
 import { CARDS, SPACING } from '@/lib/design-tokens'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // Liquidation Waterfall Component
@@ -24,7 +25,7 @@ export function LiquidationWaterfall() {
                 const res = await fetch(`/api/coinglass/liquidation?symbol=BTC&limit=20&timeframe=${timeframe}`)
                 const json = await res.json()
                 setData(json.liquidations)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch liquidation data', e as Error, { feature: 'liquidation-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()

@@ -41,7 +41,7 @@ export function ReviewCarousel({ items }: ReviewCarouselProps) {
                             )}
                         </div>
 
-                        <div className={cn(SPACING.cardLarge, "relative flex flex-col h-full")}>
+                        <div className={cn(SPACING.card, "relative flex flex-col h-full")}>
                             {/* Top Badge */}
                             <div className="flex items-start justify-between mb-3">
                                 <span className={cn(

@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { generateDerivativesSummary } from '@/lib/gemini'
@@ -14,11 +15,11 @@ export async function getDerivativesData() {
     // Check cache first
     const cached = await getCache<any>(CACHE_KEY)
     if (cached) {
-        console.log('[Cache HIT] derivatives_data')
+        logger.debug('[Cache HIT] derivatives_data', { feature: 'market-api', endpoint: 'derivatives' })
         return cached
     }
 
-    console.log('[Cache MISS] derivatives_data - fetching fresh data')
+    logger.debug('[Cache MISS] derivatives_data - fetching fresh data', { feature: 'market-api', endpoint: 'derivatives' })
 
     // Fetch key metrics (BTC only as market proxy)
     const [fundingData, liqData, lsData] = await Promise.all([
@@ -92,7 +93,7 @@ export async function GET() {
         const data = await getDerivativesData()
         return NextResponse.json(data)
     } catch (error) {
-        console.error('Derivatives API Error:', error)
+        logger.error('Derivatives API Error', error, { feature: 'market-api', endpoint: 'derivatives' })
         return NextResponse.json({ summary: null, error: 'Internal server error' })
     }
 }

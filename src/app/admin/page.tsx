@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Users, TrendingUp, Radio, Newspaper, Settings, Activity, Clock, RefreshCw, Loader2, ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +31,7 @@ export default function AdminDashboard() {
             if (pendingRes.bindings) setRecentBindings(pendingRes.bindings.slice(0, 5))
 
         } catch (e) {
-            console.error('Dashboard load error:', e)
+            logger.error('Dashboard load error:', e, { feature: 'admin-dashboard' })
         } finally {
             setLoading(false)
         }

@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 // GET: Fetch recent alerts and current market state
@@ -23,7 +24,8 @@ export async function GET(req: NextRequest) {
         .limit(limit)
 
     if (alertsError) {
-        console.error('Error fetching alerts:', alertsError)
+        const err = alertsError instanceof Error ? alertsError : new Error(String(alertsError))
+        logger.error('Error fetching alerts', err, { feature: 'admin-api', endpoint: 'alerts' })
         return NextResponse.json({ error: alertsError.message }, { status: 500 })
     }
 
@@ -37,7 +39,8 @@ export async function GET(req: NextRequest) {
         .single()
 
     if (stateError && stateError.code !== 'PGRST116') {
-        console.error('Error fetching market state:', stateError)
+        const err = stateError instanceof Error ? stateError : new Error(String(stateError))
+        logger.error('Error fetching market state', err, { feature: 'admin-api', endpoint: 'alerts' })
     }
 
     return NextResponse.json({

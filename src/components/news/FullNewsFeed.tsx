@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Skeleton } from '@/components/ui/skeleton'
 import { SkeletonCard } from '@/components/ui/SkeletonCard'
 import { AISummaryCard } from '@/components/ui/AISummaryCard'
-import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens'
+import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { UniversalCard, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/UniversalCard'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
@@ -44,9 +45,9 @@ export function FullNewsFeed() {
 
     if (loading) {
         return (
-            <div className="space-y-4">
+            <div className={SPACING.classes.gapCards}>
                 <AISummaryCard summary="" loading={true} />
-                <div className="space-y-4">
+                <div className={SPACING.classes.gapCards}>
                     {[1, 2, 3, 4, 5].map(i => (
                         <SkeletonCard key={i} />
                     ))}
@@ -56,44 +57,46 @@ export function FullNewsFeed() {
     }
 
     return (
-        <div className="space-y-3">
-            {/* AI Summary Card - Dedicated Component */}
+        <div className={SPACING.classes.gapCards}>
+            {/* AI Summary Card */}
             <AISummaryCard
                 summary={marketContext?.summary || '正在分析市場快訊...'}
                 source="幣圈快訊"
             />
 
             {/* Section Header */}
-            <h3 className={cn(TYPOGRAPHY.sectionLabel, "px-1")}>
-                今日重點快訊
-            </h3>
+            <div className="mt-6">
+                <SectionHeaderCard title="今日重點快訊" />
+            </div>
 
             {/* Professional One-Line News List */}
-            <div className="space-y-1">
+            <div className={SPACING.classes.gapCards}>
                 {marketContext?.highlights?.map((item, index) => (
-                    <div
+                    <UniversalCard
                         key={index}
-                        className={cn("group flex flex-col", CARDS.secondary)}
+                        variant="default" // Using default border but UniversalCard handles it
+                        size="M"
+                        className="group flex flex-col justify-center"
                     >
                         <div className="flex items-center gap-3">
                             {/* Rank Number */}
-                            <span className="shrink-0 font-mono text-[10px] text-neutral-600 w-4">
+                            <span className="shrink-0 font-mono text-[10px] text-neutral-600 w-4 text-center">
                                 {String(index + 1).padStart(2, '0')}
                             </span>
 
                             {/* Title - One Line */}
-                            <h4 className="flex-1 text-sm font-medium text-[#E0E0E0] group-hover:text-white truncate">
+                            <h4 className={cn(TYPOGRAPHY.cardTitle, "flex-1 text-[#E0E0E0] group-hover:text-white truncate")}>
                                 {item.title}
                             </h4>
                         </div>
 
                         {/* Reason - Shown below, muted */}
                         {item.reason && (
-                            <p className="text-xs text-neutral-500 mt-1.5 ml-7 line-clamp-1">
+                            <p className={cn(TYPOGRAPHY.bodySmall, "mt-1.5 ml-7 line-clamp-1 text-neutral-500")}>
                                 {item.reason}
                             </p>
                         )}
-                    </div>
+                    </UniversalCard>
                 )) || (
                         <div className="p-8 text-center text-neutral-500 text-sm">
                             尚無相關數據

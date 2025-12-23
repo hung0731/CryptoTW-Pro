@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { multicastMessage } from '@/lib/line-bot'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
@@ -32,7 +33,8 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (dbError) {
-            console.error('DB Error:', dbError)
+            const err = dbError instanceof Error ? dbError : new Error(String(dbError))
+            logger.error('DB Error', err, { feature: 'admin-api', endpoint: 'push' })
             return NextResponse.json({ error: 'Database error' }, { status: 500 })
         }
 
@@ -80,7 +82,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, count: successCount })
 
     } catch (e: any) {
-        console.error('API Error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('API Error', err, { feature: 'admin-api', endpoint: 'push' })
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
 }

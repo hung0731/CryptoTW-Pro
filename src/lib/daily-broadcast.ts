@@ -9,6 +9,7 @@
  */
 
 import { FlexMessage, FlexBubble, FlexBox, FlexText, FlexSeparator } from '@line/bot-sdk'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // Type Definitions
@@ -179,7 +180,7 @@ export async function polishWithAI(
             return result
         }
     } catch (e) {
-        console.error('[Daily Broadcast] AI polish failed:', e)
+        logger.error('[Daily Broadcast] AI polish failed:', e as Error, { feature: 'daily-broadcast' })
     }
 
     // Fallback: Use raw reasons to construct indicator cards
@@ -344,7 +345,7 @@ function getStanceColor(stance: Stance): string {
 export async function generateDailyBroadcast(metrics: MarketMetrics): Promise<DailyBroadcastContent> {
     // Step 1: Rule-based stance decision
     const decision = decideStance(metrics)
-    console.log(`[Daily Broadcast] Stance: ${decision.stance}`, decision.rawReasons)
+    logger.info(`[Daily Broadcast] Stance: ${decision.stance}`, { feature: 'daily-broadcast', reasons: decision.rawReasons })
 
     // Step 2: AI polish（生成 oneLiner, indicatorCards, suggestion, mindset）
     const polished = await polishWithAI(decision)

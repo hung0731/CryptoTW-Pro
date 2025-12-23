@@ -2,6 +2,7 @@ import { cachedCoinglassV4Request } from './coinglass'
 import { CacheTTL } from './cache'
 import { fetchBinanceRSI } from './technical-analysis'
 import { generateMarketSignals, type MarketSignals, type RawMarketData } from './signal-engine'
+import { logger } from '@/lib/logger'
 
 // CoinGecko for BTC price (more reliable)
 // Binance for BTC price & volatility data (High/Low)
@@ -20,7 +21,7 @@ async function fetchBtcTicker() {
             volume_24h: parseFloat(data.quoteVolume) // USDT volume
         }
     } catch (e) {
-        console.error('Binance BTC Ticker fetch error', e)
+        logger.error('Binance BTC Ticker fetch error', e as Error, { feature: 'market-aggregator' })
         return null
     }
 }

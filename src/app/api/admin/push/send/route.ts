@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { multicastMessage } from '@/lib/line-bot'
 
 export async function POST(req: NextRequest) {
@@ -7,7 +8,7 @@ export async function POST(req: NextRequest) {
         const supabase = createAdminClient()
         const { message_content, target_audience, image_url, action_link } = await req.json()
 
-        console.log('[Push] Request:', { message_content, target_audience })
+        logger.info('[Push] Request', { feature: 'push-notification', message_content, target_audience })
 
         // 1. Determine Audience
         let userQuery = supabase.from('users').select('line_user_id')
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'No users found for this audience' }, { status: 200 })
         }
 
-        console.log(`[Push] Target User Count: ${userIds.length}`)
+        logger.info(`[Push] Target User Count: ${userIds.length}`, { feature: 'push-notification' })
 
         // 2. Construct LINE Message
         const { createBrandedFlexMessage } = require('@/lib/bot/ui/base')
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
                     successCount += chunk.length;
                 }
             } catch (e) {
-                console.error('[Push] Multicast Error:', e)
+                logger.error('[Push] Multicast Error', e, { feature: 'push-notification' })
             }
         }
 
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, count: successCount })
     } catch (error) {
-        console.error('[Push] Fatal Error:', error)
+        logger.error('[Push] Fatal Error', error, { feature: 'push-notification' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

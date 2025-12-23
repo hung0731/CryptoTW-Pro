@@ -3,9 +3,11 @@
 
 type AnalyticsEvent = 'join_view' | 'join_click' | 'pro_complete'
 
+import { logger } from '@/lib/logger'
+
 export function trackEvent(event: AnalyticsEvent, data?: Record<string, any>) {
     // Console log for debugging
-    console.log(`[Analytics] ${event}`, data || '')
+    logger.debug(`[Analytics] ${event}`, { feature: 'analytics', event, data })
 
     // If you have Google Analytics, Facebook Pixel, etc:
     // gtag('event', event, data)

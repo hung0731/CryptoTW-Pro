@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -45,13 +46,13 @@ export async function GET(req: NextRequest) {
         })
 
         if (!res.ok) {
-            console.error(`Long/Short V4 API error: ${res.status}`)
+            logger.error(`Long/Short V4 API error: ${res.status}`)
             return NextResponse.json({ error: 'Upstream API error' }, { status: 502 })
         }
 
         const json = await res.json()
         if (json.code !== '0' || !json.data || !Array.isArray(json.data)) {
-            console.error('Long/Short V4 API error:', json.msg)
+            logger.error('Long/Short V4 API error:', { msg: json.msg })
             return NextResponse.json({ error: 'No data available' }, { status: 500 })
         }
 
@@ -92,7 +93,7 @@ export async function GET(req: NextRequest) {
             symbol,
         })
     } catch (error) {
-        console.error('Long/Short Ratio History API error:', error)
+        logger.error('Long/Short Ratio History API error:', error as Error)
         return NextResponse.json({ error: 'Failed to fetch long/short ratio history' }, { status: 500 })
     }
 }

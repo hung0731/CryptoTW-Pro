@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/PageHeader'
+import { logger } from '@/lib/logger'
 import CalendarClient from '@/components/CalendarClient'
 import fs from 'fs'
 import path from 'path'
@@ -13,9 +14,9 @@ export default async function CalendarPage() {
         const fileContent = fs.readFileSync(filePath, 'utf-8')
         const data = JSON.parse(fileContent)
         reactions = data.data || {}
-        console.log('Server: Loaded', Object.keys(reactions).length, 'reactions')
+        // loaded data
     } catch (error) {
-        console.error('Failed to load reactions:', error)
+        logger.error('Failed to load reactions:', error, { feature: 'calendar' })
     }
 
     return (

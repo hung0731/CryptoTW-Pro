@@ -4,6 +4,8 @@
  * Currently stubbed to console.log for Development.
  */
 
+import { logger } from '@/lib/logger'
+
 export async function sendAdminNotification(message: string) {
     if (process.env.LINE_NOTIFY_TOKEN) {
         try {
@@ -19,10 +21,10 @@ export async function sendAdminNotification(message: string) {
                 body: params
             })
         } catch (error) {
-            console.error('Failed to send LINE Notify:', error)
+            logger.error('Failed to send LINE Notify:', error as Error, { feature: 'notify' })
         }
     } else {
         // Fallback for Dev / Missing Config
-        console.log('🔔 [ADMIN NOTIFICATION]:', message)
+        logger.info('🔔 [ADMIN NOTIFICATION]:', { feature: 'notify', message })
     }
 }

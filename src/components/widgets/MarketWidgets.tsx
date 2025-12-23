@@ -8,6 +8,7 @@ import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { formatPercent, formatPrice } from '@/lib/format-helpers'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // Exchange Transparency Component
@@ -22,7 +23,7 @@ export function ExchangeTransparency() {
                 const res = await fetch('/api/coinglass/exchange?symbol=BTC')
                 const json = await res.json()
                 setData(json.exchange)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch exchange data', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -119,7 +120,7 @@ export function ETFFlowCard() {
                 const res = await fetch('/api/coinglass/etf-flow')
                 const json = await res.json()
                 if (!json.error) setData(json)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch ETF flow', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -192,7 +193,7 @@ export function BubbleIndexCard() {
                 const res = await fetch('/api/coinglass/bubble-index')
                 const json = await res.json()
                 if (!json.error) setData(json)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch bubble index', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -258,7 +259,7 @@ export function TakerVolumeCard() {
                 const res = await fetch('/api/coinglass/taker-volume')
                 const json = await res.json()
                 if (!json.error) setData(json)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch taker volume', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -328,7 +329,7 @@ export function StablecoinCard() {
                 const res = await fetch('/api/coinglass/stablecoin')
                 const json = await res.json()
                 if (!json.error) setData(json)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch stablecoin data', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -396,7 +397,7 @@ export function CoinbasePremiumCard() {
                 const res = await fetch('/api/coinglass/coinbase-premium')
                 const json = await res.json()
                 if (!json.error) setData(json)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch coinbase premium', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()

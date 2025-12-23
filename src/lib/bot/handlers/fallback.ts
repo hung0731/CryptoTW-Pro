@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { BotContext, BotHandler, HandlerResult } from './base'
 import { generateFallbackReply } from '@/lib/gemini'
 import { fetchStockTicker, createStockCard } from '@/lib/stocks'
@@ -58,7 +59,7 @@ export class FallbackHandler implements BotHandler {
                 }
 
             } catch (e) {
-                console.error('Stock Fallback Error:', e)
+                logger.error('Stock Fallback Error:', e as Error)
             }
         }
 

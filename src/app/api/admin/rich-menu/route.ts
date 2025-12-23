@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
@@ -57,10 +58,10 @@ const getRichMenuObject = (liffId: string, chatBarText: string = "開啟選單")
 })
 
 export async function POST(req: NextRequest) {
-    console.log('[RichMenu] Starting update process...')
+    logger.info('[RichMenu] Starting update process...', { feature: 'rich-menu' })
     const admin = await verifyAdmin()
     if (!admin) {
-        console.log('[RichMenu] Unauthorized')
+        logger.warn('[RichMenu] Unauthorized', { feature: 'rich-menu' })
         return unauthorizedResponse()
     }
 
@@ -69,11 +70,11 @@ export async function POST(req: NextRequest) {
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID
 
         if (!token) {
-            console.error('[RichMenu] Missing LINE_CHANNEL_ACCESS_TOKEN')
+            logger.error('[RichMenu] Missing LINE_CHANNEL_ACCESS_TOKEN', { feature: 'rich-menu' })
             return NextResponse.json({ error: 'Missing LINE_CHANNEL_ACCESS_TOKEN' }, { status: 500 })
         }
         if (!liffId) {
-            console.error('[RichMenu] Missing NEXT_PUBLIC_LIFF_ID')
+            logger.error('[RichMenu] Missing NEXT_PUBLIC_LIFF_ID', { feature: 'rich-menu' })
             return NextResponse.json({ error: 'Missing NEXT_PUBLIC_LIFF_ID' }, { status: 500 })
         }
 
@@ -81,13 +82,13 @@ export async function POST(req: NextRequest) {
         let { chatBarText } = body
         // Ensure max length 14
         if (chatBarText && chatBarText.length > 14) {
-            console.warn('[RichMenu] chatBarText too long, truncating to 14 chars')
+            logger.warn('[RichMenu] chatBarText too long, truncating to 14 chars', { feature: 'rich-menu' })
             chatBarText = chatBarText.substring(0, 14)
         }
-        console.log('[RichMenu] Target Text:', chatBarText)
+        logger.debug('[RichMenu] Target Text', { feature: 'rich-menu', chatBarText })
 
         // 1. Create Rich Menu
-        console.log('[RichMenu] Creating menu object...')
+        logger.debug('[RichMenu] Creating menu object...', { feature: 'rich-menu' })
         const createRes = await fetch('https://api.line.me/v2/bot/richmenu', {
             method: 'POST',
             headers: {
@@ -99,27 +100,27 @@ export async function POST(req: NextRequest) {
 
         if (!createRes.ok) {
             const err = await createRes.text()
-            console.error('[RichMenu] Create failed:', err)
+            logger.error('[RichMenu] Create failed', new Error(err), { feature: 'rich-menu' })
             return NextResponse.json({ error: `Failed to create rich menu: ${err}` }, { status: 500 })
         }
 
         const { richMenuId } = await createRes.json()
-        console.log('[RichMenu] Created ID:', richMenuId)
+        logger.info('[RichMenu] Created ID', { feature: 'rich-menu', richMenuId })
 
         // 2. Upload Image
-        console.log('[RichMenu] Reading image file...')
+        logger.debug('[RichMenu] Reading image file...', { feature: 'rich-menu' })
         const imagePath = path.join(process.cwd(), 'public', 'richmenu.png')
 
         if (!fs.existsSync(imagePath)) {
-            console.error('[RichMenu] Image not found at:', imagePath)
-            console.log('[RichMenu] CWD contents:', fs.readdirSync(process.cwd()))
+            logger.error('[RichMenu] Image not found', new Error(`Path: ${imagePath}`), { feature: 'rich-menu' })
+            logger.debug('[RichMenu] CWD contents', { feature: 'rich-menu', cwd: fs.readdirSync(process.cwd()) })
             // Try looking into .next/server or other places if specific to Vercel?
             // Usually public files are copied to root in standalone mode, but let's stick to standard first.
             return NextResponse.json({ error: `richmenu.png not found at ${imagePath}` }, { status: 404 })
         }
 
         const imageBuffer = fs.readFileSync(imagePath)
-        console.log('[RichMenu] Image read success, size:', imageBuffer.length)
+        logger.debug('[RichMenu] Image read success', { feature: 'rich-menu', size: imageBuffer.length })
 
         const uploadRes = await fetch(`https://api-data.line.me/v2/bot/richmenu/${richMenuId}/content`, {
             method: 'POST',
@@ -132,10 +133,10 @@ export async function POST(req: NextRequest) {
 
         if (!uploadRes.ok) {
             const err = await uploadRes.text()
-            console.error('[RichMenu] Upload failed:', err)
+            logger.error('[RichMenu] Upload failed', new Error(err), { feature: 'rich-menu' })
             return NextResponse.json({ error: `Failed to upload image: ${err}` }, { status: 500 })
         }
-        console.log('[RichMenu] Image uploaded.')
+        logger.info('[RichMenu] Image uploaded.', { feature: 'rich-menu' })
 
         // 3. Set Default
         const defaultRes = await fetch(`https://api.line.me/v2/bot/user/all/richmenu/${richMenuId}`, {
@@ -147,15 +148,16 @@ export async function POST(req: NextRequest) {
 
         if (!defaultRes.ok) {
             const err = await defaultRes.text()
-            console.error('[RichMenu] Set default failed:', err)
+            logger.error('[RichMenu] Set default failed', new Error(err), { feature: 'rich-menu' })
             return NextResponse.json({ error: `Failed to set default: ${err}` }, { status: 500 })
         }
-        console.log('[RichMenu] Default set success.')
+        logger.info('[RichMenu] Default set success.', { feature: 'rich-menu' })
 
         return NextResponse.json({ success: true, richMenuId })
 
     } catch (e: any) {
-        console.error('[RichMenu] Exception:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('[RichMenu] Exception', err, { feature: 'admin-api', endpoint: 'rich-menu' })
         return NextResponse.json({ error: e.message, stack: e.stack }, { status: 500 })
     }
 }

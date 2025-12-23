@@ -1,6 +1,7 @@
 
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -66,7 +67,7 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ logs })
     } catch (error) {
-        console.error('Error fetching logs:', error)
+        logger.error('Error fetching logs', error, { feature: 'admin-api', endpoint: 'logs' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

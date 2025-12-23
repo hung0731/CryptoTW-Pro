@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 
 const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
@@ -36,7 +37,8 @@ export async function GET() {
             history
         })
     } catch (e) {
-        console.error('Bubble Index API error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Bubble Index API error', err, { feature: 'coinglass-api', endpoint: 'bubble-index' })
         return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
     }
 }

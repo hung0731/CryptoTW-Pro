@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
             }
         })
     } catch (error) {
-        console.error('Bull/Bear API error:', error)
+        logger.error('Bull/Bear API error', error, { feature: 'coinglass-api', endpoint: 'bull-bear' })
         return NextResponse.json({
             error: 'Internal server error',
             bullBear: getDemoData() // Fallback

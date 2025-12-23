@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { CARDS, SPACING } from '@/lib/design-tokens'
+import { logger } from '@/lib/logger'
 
 interface ArbitrageItem {
     symbol: string
@@ -60,7 +61,7 @@ export function ArbitrageView() {
                     setData(json.arbitrage)
                 }
             } catch (e) {
-                console.error(e)
+                logger.error('Failed to fetch arbitrage data', e as Error, { feature: 'arbitrage-widget' })
             } finally {
                 setLoading(false)
             }

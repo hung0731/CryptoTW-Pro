@@ -1,7 +1,9 @@
 import { AlertEvent } from './alert-engine'
 import { multicastMessage } from './line-bot'
-import { createAdminClient } from './supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
+import { supabase } from './supabase'
 import { generateAlertExplanation } from './gemini'
+import { logger } from '@/lib/logger'
 
 /**
  * 負責將 AlertEvent 轉換為 LINE Flex Message 並發送
@@ -9,7 +11,7 @@ import { generateAlertExplanation } from './gemini'
 export async function sendAlertNotifications(events: AlertEvent[]) {
     if (events.length === 0) return
 
-    console.log(`[Notification] Preparing to send ${events.length} alerts`)
+    logger.info(`[Notification] Preparing to send ${events.length} alerts`, { feature: 'notification-service', count: events.length })
 
     // 1. Get Target Users
     const supabase = createAdminClient()
@@ -20,14 +22,14 @@ export async function sendAlertNotifications(events: AlertEvent[]) {
         .not('line_user_id', 'is', null)
 
     if (error) {
-        console.error('[Notification] Error fetching users:', error)
+        logger.error('[Notification] Error fetching users:', error as Error, { feature: 'notification-service' })
         return
     }
 
     const targetIds = users.map(u => u.line_user_id)
 
     if (targetIds.length === 0) {
-        console.log('[Notification] No target users found')
+        logger.info('[Notification] No target users found', { feature: 'notification-service' })
         return
     }
 
@@ -42,7 +44,7 @@ export async function sendAlertNotifications(events: AlertEvent[]) {
     for (let i = 0; i < targetIds.length; i += chunkSize) {
         const chunk = targetIds.slice(i, i + chunkSize)
         await multicastMessage(chunk, messages)
-        console.log(`[Notification] Sent to ${chunk.length} users`)
+        logger.info(`[Notification] Sent to ${chunk.length} users`, { feature: 'notification-service', chunk_size: chunk.length })
     }
 }
 

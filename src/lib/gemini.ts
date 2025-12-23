@@ -2,6 +2,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { formatTaiwaneseText, formatObjectStrings } from './format-utils'
 import { acquireLock, releaseLock } from './cache'
+import { logger } from '@/lib/logger'
 
 const apiKey = process.env.GEMINI_API_KEY
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
@@ -99,7 +100,7 @@ ${CONSISTENCY_CHECK}
         const result = await model.generateContent(prompt)
         return formatTaiwaneseText(result.response.text().trim())
     } catch (e) {
-        console.error('Gemini Alert Explainer Error:', e)
+        logger.error('Gemini Alert Explainer Error:', e, { feature: 'gemini' })
         return null // Fallback to static text
     }
 }
@@ -110,13 +111,13 @@ export async function generateMarketSummary(
     rssTitles: string = '' // New parameter for unified context
 ): Promise<MarketSummaryResult | null> {
     if (!genAI) {
-        console.error('Gemini API Key is missing')
+        logger.error('Gemini API Key is missing', { feature: 'gemini' })
         return null
     }
 
     const lockKey = 'lock:gemini:market_summary'
     if (!await acquireLock(lockKey, 60)) {
-        console.warn('Gemini Busy: Market Summary generation locked')
+        logger.warn('Gemini Busy: Market Summary generation locked', { feature: 'gemini' })
         return null
     }
 
@@ -223,7 +224,7 @@ Note: emoji 必須根據 sentiment 選擇，例如：
         return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
-        console.error('Gemini Generation Error:', e)
+        logger.error('Gemini Generation Error:', e, { feature: 'gemini' })
         return null
     } finally {
         await releaseLock('lock:gemini:market_summary')
@@ -264,7 +265,7 @@ ${CONSISTENCY_CHECK}
         const result = await model.generateContent(prompt)
         return formatTaiwaneseText(result.response.text().trim())
     } catch (e) {
-        console.error('Gemini Derivatives Summary Error:', e)
+        logger.error('Gemini Derivatives Summary Error:', e, { feature: 'gemini' })
         return null
     }
 }
@@ -288,7 +289,7 @@ export async function generateMarketContextBrief(
 
     const lockKey = 'lock:gemini:market_context'
     if (!await acquireLock(lockKey, 60)) {
-        console.warn('Gemini Busy: Market Context generation locked')
+        logger.warn('Gemini Busy: Market Context generation locked', { feature: 'gemini' })
         return null
     }
 
@@ -375,7 +376,7 @@ ${CONSISTENCY_CHECK}
         return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
-        console.error('Gemini Market Context Brief Error:', e)
+        logger.error('Gemini Market Context Brief Error:', e, { feature: 'gemini' })
         return null
     } finally {
         await releaseLock('lock:gemini:market_context')
@@ -417,7 +418,7 @@ export async function generateAIDecision(
 
     const lockKey = 'lock:gemini:ai_decision'
     if (!await acquireLock(lockKey, 60)) {
-        console.warn('Gemini Busy: AI Decision generation locked')
+        logger.warn('Gemini Busy: AI Decision generation locked', { feature: 'gemini' })
         return null
     }
 
@@ -488,7 +489,7 @@ ${CONSISTENCY_CHECK}
         return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
-        console.error('Gemini AI Decision Error:', e)
+        logger.error('Gemini AI Decision Error:', e, { feature: 'gemini' })
         return null
     } finally {
         await releaseLock('lock:gemini:ai_decision')
@@ -628,7 +629,7 @@ ${CONSISTENCY_CHECK}
 
         return formatObjectStrings(JSON.parse(text))
     } catch (e) {
-        console.error('[Daily Broadcast] AI Polish Error:', e)
+        logger.error('[Daily Broadcast] AI Polish Error:', e, { feature: 'gemini' })
         return null
     }
 }
@@ -678,7 +679,7 @@ export async function generateFallbackReply(userInput: string): Promise<Fallback
 
         return JSON.parse(text)
     } catch (e) {
-        console.error('Gemini Fallback Error:', e)
+        logger.error('Gemini Fallback Error:', e, { feature: 'gemini' })
         return null
     }
 }
@@ -790,7 +791,7 @@ ${CONSISTENCY_CHECK}
 
         return { summary: formatTaiwaneseText(text) }
     } catch (e) {
-        console.error('Gemini Indicator Summary Error:', e)
+        logger.error('Gemini Indicator Summary Error:', e, { feature: 'gemini' })
         return null
     }
 }
@@ -918,7 +919,7 @@ ${CONSISTENCY_CHECK}
 
         return { summary: formatTaiwaneseText(text) }
     } catch (e) {
-        console.error('Gemini Calendar Summary Error:', e)
+        logger.error('Gemini Calendar Summary Error:', e, { feature: 'gemini' })
         return null
     }
 }

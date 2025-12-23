@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -112,7 +113,7 @@ export async function GET(req: NextRequest) {
             lastUpdated: new Date().toISOString(),
         })
     } catch (error) {
-        console.error('Indicators API error:', error)
+        logger.error('Indicators API error', error, { feature: 'coinglass-api', endpoint: 'indicators' })
         return NextResponse.json({ error: 'Failed to fetch indicators' }, { status: 500 })
     }
 }

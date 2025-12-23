@@ -4,6 +4,9 @@ import { ReviewChart } from './ReviewChart'
 import { getChartCitation } from '@/lib/citation-mapping'
 import { SemanticChartCTA } from '@/components/citation/SemanticChartCTA'
 import { ResponsibilityDisclaimer } from '@/components/citation/ResponsibilityDisclaimer'
+import { cn } from '@/lib/utils'
+import { UniversalCard } from '@/components/ui/UniversalCard'
+import { SURFACE, BORDER, TYPOGRAPHY, SPACING } from '@/lib/design-tokens'
 
 interface EvidenceCardProps {
     title: string
@@ -55,17 +58,26 @@ export function EvidenceCard({
     const citation = getChartCitation(chartType)
 
     return (
-        <div className="rounded-lg border border-white/5 overflow-hidden" style={{ backgroundColor: '#0E0E0F' }}>
+        <UniversalCard
+            variant="default"
+            size="M"
+            className="p-0 overflow-hidden flex flex-col" // Reset padding for custom internal layout
+        >
             {/* Unified Header (Title + Brand) */}
-            <div className="px-3.5 py-2.5 border-b border-white/5 flex items-center justify-between">
+            <div className={cn(
+                "px-3.5 py-2.5 flex items-center justify-between border-b",
+                SURFACE.tertiary, // Use tertiary bg for header
+                BORDER.divider
+            )}>
                 <div className="flex items-center gap-2">
                     {getChartIcon(chartType)}
-                    <span className="text-sm text-neutral-300">{displayTitle}</span>
+                    <span className={cn(TYPOGRAPHY.cardTitle, "font-medium text-neutral-300")}>{displayTitle}</span>
                 </div>
-                <span className="text-[10px] text-neutral-600">加密台灣 Pro</span>
+                <span className={cn(TYPOGRAPHY.micro, "text-neutral-600")}>加密台灣 Pro</span>
             </div>
+
             {/* Chart Area */}
-            <div className="aspect-video w-full relative group/chart" style={{ backgroundColor: '#0B0B0C' }}>
+            <div className="aspect-video w-full relative group/chart bg-[#0B0B0C]">
                 {/* Pattern 1: Embedded CTA */}
                 {citation && (
                     <SemanticChartCTA
@@ -85,27 +97,34 @@ export function EvidenceCard({
                     newsDate={newsDate}
                 />
             </div>
+
             {/* Evidence Interpretation (Narrative Style) */}
-            <div className="px-3.5 py-3 border-t border-white/5" style={{ backgroundColor: '#101012' }}>
+            <div className={cn(
+                "px-3.5 py-3 border-t",
+                SURFACE.elevated,
+                BORDER.divider
+            )}>
                 {interpretation ? (
                     <div className="space-y-2">
-                        <p className="text-xs text-neutral-400 leading-relaxed">{interpretation.whatItMeans}</p>
+                        <p className={TYPOGRAPHY.bodyDefault}>{interpretation.whatItMeans}</p>
                         {interpretation.whatToWatch && (
-                            <p className="text-xs text-neutral-500 leading-relaxed">{interpretation.whatToWatch}</p>
+                            <p className={cn(TYPOGRAPHY.bodyDefault, "text-neutral-500")}>{interpretation.whatToWatch}</p>
                         )}
                     </div>
                 ) : caption ? (
-                    <p className="text-xs text-neutral-400 leading-relaxed">{caption.replace('圖表解讀：', '')}</p>
+                    <p className={TYPOGRAPHY.bodyDefault}>{caption.replace('圖表解讀：', '')}</p>
                 ) : null}
 
                 {/* Pattern 2: Responsibility Disclaimer - ONLY show if we have a citation mapping */}
                 {citation && (
-                    <ResponsibilityDisclaimer
-                        indicatorName={citation.indicatorName}
-                        indicatorSlug={citation.indicatorSlug}
-                    />
+                    <div className="mt-3 pt-2 border-t border-white/5">
+                        <ResponsibilityDisclaimer
+                            indicatorName={citation.indicatorName}
+                            indicatorSlug={citation.indicatorSlug}
+                        />
+                    </div>
                 )}
             </div>
-        </div>
+        </UniversalCard>
     )
 }

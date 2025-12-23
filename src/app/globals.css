@@ -89,6 +89,26 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.12 0 0);
   --sidebar-ring: oklch(1 0 0);
+
+  /* CryptoTW Pro Design System */
+  --bg-base: #09090B;
+  --bg-surface-1: #18181B;
+  --bg-surface-2: #27272A;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #52525B;
+  --text-inverse: #09090B;
+
+  --border-subtle: #27272A;
+  --border-strong: #3F3F46;
+
+  --signal-bull: #10B981;
+  --signal-bear: #EF4444;
+  --signal-warn: #F59E0B;
+  --signal-neutral: #71717A;
+  --signal-critical: #D946EF;
 }
 
 .dark {

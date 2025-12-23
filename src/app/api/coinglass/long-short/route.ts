@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
             }
         })
     } catch (error) {
-        console.error('Long/Short API error:', error)
+        logger.error('Long/Short API error', error, { feature: 'coinglass-api', endpoint: 'long-short' })
         return NextResponse.json({
             error: 'Internal server error',
             longShort: getDemoData()

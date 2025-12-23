@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
             }
         })
     } catch (error) {
-        console.error('Liquidation API error:', error)
+        logger.error('Liquidation API error', error, { feature: 'coinglass-api', endpoint: 'liquidation' })
         return NextResponse.json({
             error: 'Internal server error',
             liquidations: getDemoData()

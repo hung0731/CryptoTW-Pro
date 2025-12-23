@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
+import { logger } from "@/lib/logger"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -26,7 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 const data = await res.json()
 
                 if (!data.isAdmin) {
-                    console.warn('Unauthorized admin access attempt')
+                    logger.warn('Unauthorized admin access attempt', { uid: session.user.id })
                     await supabase.auth.signOut()
                     router.replace('/login?error=unauthorized')
                 } else {

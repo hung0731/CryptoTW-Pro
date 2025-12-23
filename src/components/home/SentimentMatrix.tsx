@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { ChevronRight } from 'lucide-react'
 import { INDICATOR_STORIES, IndicatorStory, ZONE_COLORS, getZoneLabel, calculateStoryZone } from '@/lib/indicator-stories'
@@ -136,7 +137,7 @@ export function SentimentMatrix() {
                         loading: false
                     } as IndicatorStatus
                 } catch (e) {
-                    console.error(`Failed to fetch ${slug}`, e)
+                    logger.error(`Failed to fetch ${slug}`, e, { feature: 'sentiment-matrix' })
                     return {
                         slug,
                         name: story.name,
@@ -175,7 +176,7 @@ export function SentimentMatrix() {
                 onScroll={handleScroll}
                 className={cn(
                     "flex items-center overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory",
-                    SPACING.listGap
+                    SPACING.classes.gapCards
                 )}
             >
                 {indicators.map((item) => {

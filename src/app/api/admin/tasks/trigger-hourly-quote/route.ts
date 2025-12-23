@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { multicastMessage } from '@/lib/line-bot'
 import { getMarketSnapshot } from '@/lib/market-aggregator'
 
@@ -36,12 +37,12 @@ export async function POST(req: NextRequest) {
         // 2. Fetch BTC Data
         const snapshot = await getMarketSnapshot('BTC')
 
-        console.log('[TriggerQuote] Snapshot:', JSON.stringify(snapshot, null, 2))
+        logger.info('[TriggerQuote] Snapshot', { feature: 'tasks', snapshot: JSON.stringify(snapshot, null, 2) })
 
         const btc = snapshot?.btc || { price: 0, change_24h: 0, high_24h: 0, low_24h: 0, volume_24h: 0 }
 
         if (!btc.price) {
-            console.warn('[TriggerQuote] BTC Price missing, using default')
+            logger.warn('[TriggerQuote] BTC Price missing, using default', { feature: 'tasks' })
             btc.price = 0
             btc.change_24h = 0
         }
@@ -74,7 +75,8 @@ export async function POST(req: NextRequest) {
         })
 
     } catch (e: any) {
-        console.error('[TriggerQuote] Error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('[TriggerQuote] Error', err, { feature: 'tasks' })
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
 }

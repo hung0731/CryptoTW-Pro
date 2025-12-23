@@ -15,6 +15,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
+import { UniversalCard } from '@/components/ui/UniversalCard';
 
 function CompareContent() {
     const searchParams = useSearchParams();
@@ -169,7 +170,6 @@ function CompareContent() {
 
     return (
         <main className="min-h-screen bg-black text-white font-sans pb-20">
-            {/* ... component content ... */}
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -231,9 +231,6 @@ function CompareContent() {
                     {/* Left Panel */}
                     <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
                         <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
-                            {/* Watermark (Center Logo) */}
-
-
                             {leftEvent && (
                                 <ReviewChart
                                     type="price"
@@ -252,9 +249,6 @@ function CompareContent() {
                     {/* Right Panel */}
                     <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
                         <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
-                            {/* Watermark (Center Logo) */}
-
-
                             {rightEvent && (
                                 <ReviewChart
                                     type="price"
@@ -285,33 +279,32 @@ function CompareContent() {
             {/* Unified Event Summary Section - Below Charts */}
             <div className="p-4 space-y-4 bg-black">
                 {/* Event Summaries */}
-                {/* Event Summaries */}
                 <div className="flex flex-col gap-3">
                     {/* Base Event Summary */}
-                    <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
+                    <UniversalCard variant="subtle" size="M" className="border-blue-500/20 bg-blue-500/5">
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 bg-neutral-800 rounded border border-white/5">基準</span>
+                            <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 bg-blue-500/10 rounded border border-blue-500/20">基準</span>
                             <span className="text-xs font-bold text-white">{leftEvent?.title}</span>
                         </div>
                         <p className="text-xs text-neutral-400 leading-relaxed">
                             {leftEvent?.summary}
                         </p>
-                    </div>
+                    </UniversalCard>
 
                     {/* Compare Event Summary */}
-                    <div className="bg-neutral-900/50 border border-white/5 rounded-xl p-4">
+                    <UniversalCard variant="subtle" size="M" className="border-amber-500/20 bg-amber-500/5">
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] text-amber-400 font-bold px-2 py-0.5 bg-neutral-800 rounded border border-white/5">對照</span>
+                            <span className="text-[10px] text-amber-400 font-bold px-2 py-0.5 bg-amber-500/10 rounded border border-amber-500/20">對照</span>
                             <span className="text-xs font-bold text-white">{rightEvent?.title}</span>
                         </div>
                         <p className="text-xs text-neutral-400 leading-relaxed">
                             {rightEvent?.summary}
                         </p>
-                    </div>
+                    </UniversalCard>
                 </div>
 
                 {/* Structure Difference Card */}
-                <div className="bg-neutral-900/30 border border-white/5 rounded-xl p-4">
+                <UniversalCard variant="default" size="M">
                     <div className="flex items-center gap-2 mb-3">
                         <Cpu className="w-3.5 h-3.5 text-blue-400" />
                         <span className="text-xs font-bold text-neutral-300">結構差異摘要</span>
@@ -338,7 +331,7 @@ function CompareContent() {
                             <span className="font-bold">結論：</span>雖然跌幅相似，但本質不同。建議關注鏈上資金留存率而非單純價格反彈。
                         </p>
                     </div>
-                </div>
+                </UniversalCard>
             </div>
         </main>
     );

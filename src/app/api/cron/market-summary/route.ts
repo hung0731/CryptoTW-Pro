@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { updateMarketSummary } from '@/lib/market-service'
 
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ success: true, report })
 
     } catch (error: any) {
-        console.error('[Cron] Exception:', error)
+        logger.error('[Cron] Exception:', error as Error)
         return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 })
     }
 }

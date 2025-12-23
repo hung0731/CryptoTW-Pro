@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -45,13 +46,13 @@ export async function GET(req: NextRequest) {
         })
 
         if (!res.ok) {
-            console.error(`Liquidation V4 API error: ${res.status}`)
+            logger.error(`Liquidation V4 API error: ${res.status}`, undefined, { feature: 'coinglass-api', endpoint: 'liquidation-history' })
             return NextResponse.json({ error: 'Upstream API error' }, { status: 502 })
         }
 
         const json = await res.json()
         if (json.code !== '0' || !json.data || !Array.isArray(json.data)) {
-            console.error('Liquidation V4 API error:', json.msg)
+            logger.error('Liquidation V4 API error', new Error(json.msg), { feature: 'coinglass-api', endpoint: 'liquidation-history' })
             return NextResponse.json({ error: 'No data available' }, { status: 500 })
         }
 
@@ -102,7 +103,7 @@ export async function GET(req: NextRequest) {
             symbol,
         })
     } catch (error) {
-        console.error('Liquidation History API error:', error)
+        logger.error('Liquidation History API error', error, { feature: 'coinglass-api', endpoint: 'liquidation-history' })
         return NextResponse.json({ error: 'Failed to fetch liquidation history' }, { status: 500 })
     }
 }

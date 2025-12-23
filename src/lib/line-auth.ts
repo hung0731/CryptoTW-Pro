@@ -2,6 +2,7 @@
  * LINE Access Token verification utilities
  * Used to authenticate requests from LIFF applications
  */
+import { logger } from '@/lib/logger'
 
 interface TokenVerificationResult {
     valid: boolean
@@ -32,7 +33,8 @@ export async function verifyLineAccessToken(accessToken: string): Promise<TokenV
         // 2. Verify client_id matches our LINE channel (prevent token from other apps)
         const expectedChannelId = process.env.LINE_CHANNEL_ID
         if (expectedChannelId && verifyData.client_id !== expectedChannelId) {
-            console.warn('[LINE Auth] Token client_id mismatch:', {
+            logger.warn('[LINE Auth] Token client_id mismatch:', {
+                feature: 'line-auth',
                 expected: expectedChannelId,
                 received: verifyData.client_id
             })
@@ -61,7 +63,7 @@ export async function verifyLineAccessToken(accessToken: string): Promise<TokenV
 
         return { valid: true, userId: profile.userId }
     } catch (e) {
-        console.error('[LINE Auth] Verification error:', e instanceof Error ? e.message : 'Unknown error')
+        logger.error('[LINE Auth] Verification error:', e instanceof Error ? e : new Error('Unknown error'), { feature: 'line-auth' })
         return { valid: false, error: 'Verification error' }
     }
 }

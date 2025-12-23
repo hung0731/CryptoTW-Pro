@@ -1,9 +1,10 @@
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { getMarketSnapshot } from '@/lib/market-aggregator'
 import { detectAlerts, MarketStateRecord } from '@/lib/alert-engine'
 import { generateMarketSignals, RawMarketData } from '@/lib/signal-engine'
 // LINE Notification temporarily disabled
 // import { sendAlertNotifications } from '@/lib/notification-service'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // Enum Mappers (Signal Engine uses Chinese, DB uses English)
@@ -59,7 +60,7 @@ export async function runAlertCheck() {
     const signals = generateMarketSignals(rawData)
 
     if (!btc.price) {
-        console.warn('Skipping alert check: No BTC Price')
+        logger.warn('Skipping alert check: No BTC Price', { feature: 'alert-service' })
         return
     }
 
@@ -85,7 +86,7 @@ export async function runAlertCheck() {
     } : null
 
     if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('Error fetching market state:', fetchError)
+        logger.error('Error fetching market state:', fetchError as Error, { feature: 'alert-service' })
     }
 
     // 3. Detect Alerts
@@ -128,12 +129,12 @@ export async function runAlertCheck() {
     })
 
     if (insertError) {
-        console.error('Error saving market state:', insertError)
+        logger.error('Error saving market state:', insertError as Error, { feature: 'alert-service' })
     }
 
     // 5. Processing Alerts
     if (alerts.length > 0) {
-        console.log(`[Alert] Detected ${alerts.length} alerts for BTC`)
+        logger.info(`[Alert] Detected ${alerts.length} alerts for BTC`, { feature: 'alert-service', count: alerts.length })
 
         // Save to DB
         const eventsToInsert = alerts.map(alert => ({
@@ -147,7 +148,7 @@ export async function runAlertCheck() {
         const { error: alertError } = await supabase.from('alert_events').insert(eventsToInsert)
 
         if (alertError) {
-            console.error('Error saving alerts:', alertError)
+            logger.error('Error saving alerts:', alertError as Error, { feature: 'alert-service' })
         }
         // LINE Notification temporarily disabled
         // else {

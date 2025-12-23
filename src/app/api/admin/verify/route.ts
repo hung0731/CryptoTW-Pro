@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export async function GET() {
@@ -30,7 +31,8 @@ export async function GET() {
 
         return NextResponse.json({ bindings })
     } catch (e) {
-        console.error('Verify GET Error', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Verify GET Error', err, { feature: 'admin-api', endpoint: 'verify' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }
@@ -66,12 +68,13 @@ export async function POST(req: NextRequest) {
 
                     if (okxData) {
                         okxUpdateData = parseOkxData(okxData)
-                        console.log('[Verify] OKX data fetched for UID:', bindingData.exchange_uid)
+                        logger.info('[Verify] OKX data fetched for UID', { feature: 'admin-api', uid: bindingData.exchange_uid })
                     } else {
-                        console.warn('[Verify] No OKX data returned for UID:', bindingData.exchange_uid)
+                        logger.warn('[Verify] No OKX data returned for UID', { feature: 'admin-api', uid: bindingData.exchange_uid })
                     }
                 } catch (okxError) {
-                    console.error('[Verify] OKX API error (non-blocking):', okxError)
+                    const err = okxError instanceof Error ? okxError : new Error(String(okxError))
+                    logger.error('[Verify] OKX API error (non-blocking)', err, { feature: 'admin-api', endpoint: 'verify' })
                     // Continue with verification even if OKX API fails
                 }
             }
@@ -278,7 +281,8 @@ export async function POST(req: NextRequest) {
         }
 
     } catch (e) {
-        console.error('Verify API Error', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Verify API Error', err, { feature: 'admin-api', endpoint: 'verify' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

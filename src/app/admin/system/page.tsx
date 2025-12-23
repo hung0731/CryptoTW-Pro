@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { logger } from '@/lib/logger'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Settings, Shield, Terminal } from 'lucide-react'
@@ -55,7 +56,7 @@ function SettingsTab() {
                 setConfig({ ...DEFAULT_CONFIG, ...data.config })
             }
         } catch (e) {
-            console.error('Failed to fetch config:', e)
+            logger.error('Failed to fetch config:', e, { feature: 'admin-system' })
         } finally {
             setLoading(false)
         }
@@ -234,7 +235,7 @@ function LogsTab() {
                 setLogs(data.logs)
             }
         } catch (e) {
-            console.error(e)
+            logger.error('Failed to fetch logs', e, { feature: 'admin-system' })
         } finally {
             setLoading(false)
         }

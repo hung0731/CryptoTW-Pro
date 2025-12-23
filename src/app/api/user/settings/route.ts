@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
@@ -19,13 +20,14 @@ export async function POST(req: NextRequest) {
             .single()
 
         if (error) {
-            console.error('Error updating settings:', error)
+            logger.error('Error updating settings', error, { feature: 'user-settings' })
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 
         return NextResponse.json({ success: true, user: data })
     } catch (e: any) {
-        console.error('Settings API Error', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Settings API Error', err, { feature: 'user-settings' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

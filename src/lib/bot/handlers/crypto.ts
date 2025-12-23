@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { BotContext, BotHandler, HandlerResult } from './base'
 import { parseCoinSymbol } from '../utils/parsers'
 import { getMarketSnapshot } from '@/lib/market-aggregator'
@@ -32,7 +33,7 @@ export class CryptoHandler implements BotHandler {
                         analysisBubble = createMiniAnalysisCard(marketData)
                     }
                 } catch (err) {
-                    console.error('Advanced data fetch error:', err)
+                    logger.warn('Advanced data fetch error:', { error: err })
                     // Continue without advanced data
                 }
             }
@@ -91,7 +92,7 @@ export class CryptoHandler implements BotHandler {
             }
 
         } catch (e: any) {
-            console.error('CryptoHandler Error:', e)
+            logger.error('CryptoHandler Error:', e)
             return {
                 message: null,
                 metadata: {

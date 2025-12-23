@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
             }
         })
     } catch (error) {
-        console.error('Exchange API error:', error)
+        logger.error('Exchange API error', error, { feature: 'coinglass-api', endpoint: 'exchange' })
         return NextResponse.json({
             exchange: getDemoData()
         })

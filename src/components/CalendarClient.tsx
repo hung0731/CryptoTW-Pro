@@ -10,9 +10,6 @@ import {
     Landmark,
     BookOpen,
     History,
-    AlertTriangle,
-    BarChart2,
-    Clock
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -27,16 +24,10 @@ import {
     MacroReaction,
     calculateEventStats
 } from '@/lib/macro-events'
-import { SURFACE, COLORS, CARDS } from '@/lib/design-tokens'
+import { SPACING, TYPOGRAPHY, COLORS } from '@/lib/design-tokens'
 import { AISummaryCard } from '@/components/ui/AISummaryCard'
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetDescription
-} from "@/components/ui/sheet"
-import SingleEventClient from '@/components/SingleEventClient'
+import { UniversalCard, CardContent } from '@/components/ui/UniversalCard'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 
 interface CalendarClientProps {
     reactions: Record<string, MacroReaction>
@@ -60,7 +51,6 @@ function MiniChartCard({
     const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
     const reactionKey = `${occ.eventKey}-${keyDate}`
     const reaction = reactions[reactionKey]
-    const surprise = getSurprise(occ)
     const daysUntil = getDaysUntil(occ.occursAt)
 
     // Chart rendering
@@ -107,11 +97,10 @@ function MiniChartCard({
 
     return (
         <div className={cn(
-            CARDS.typeB,
-            "flex-shrink-0 w-[130px] rounded-lg relative overflow-hidden flex flex-col justify-between border border-transparent",
+            "flex-shrink-0 w-[130px] rounded-lg relative overflow-hidden flex flex-col justify-between border",
             isNext
                 ? "bg-[#1A1A1A] border-[#2A2A2A]" // Highlight Next
-                : SURFACE.card // Standard Dark
+                : "bg-[#0A0A0A] border-transparent" // Standard Dark
         )}>
             {/* Header: Date + Time + Badge */}
             <div className="flex items-center justify-between px-2.5 pt-2 pb-1">
@@ -188,11 +177,6 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
     const [alignMode, setAlignMode] = useState<'time' | 'reaction'>('time')
     const [aiSummary, setAiSummary] = useState<string>('')
     const [aiLoading, setAiLoading] = useState(true)
-    const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null)
-
-    const getSummaryStats = (eventKey: string) => {
-        return calculateEventStats(eventKey, reactions)
-    }
 
     // Fetch AI summary on mount (4 小時快取)
     useEffect(() => {
@@ -284,17 +268,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
     }, [reactions])
 
     return (
-        <div className="px-4 space-y-6 pb-20 pt-6 font-sans">
-            {/* 1. Page Header (Educational Context) */}
-            <div className="space-y-2">
-                <h1 className="text-xl font-black text-white flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-white" />
-                    經濟日曆
-                </h1>
-                <p className="text-xs text-[#A0A0A0] leading-relaxed max-w-sm">
-                    整理關鍵宏觀事件的公布時間，並回顧歷史上市場的典型反應行為。
-                </p>
-            </div>
+        <div className={cn(SPACING.pageX, SPACING.pageTop, "pb-20 space-y-6 font-sans")}>
 
             {/* AI Summary Card */}
             <AISummaryCard
@@ -309,11 +283,11 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                     <History className="w-3 h-3" />
                     <span>點擊卡片查看歷史復盤</span>
                 </div>
-                <div className={cn("flex rounded-lg p-0.5 border", SURFACE.card, SURFACE.border)}>
+                <div className="flex rounded-lg p-0.5 border border-[#1A1A1A] bg-[#0A0A0A]">
                     <button
                         onClick={() => setAlignMode('time')}
                         className={cn(
-                            "px-3 py-1 text-[10px] rounded",
+                            "px-3 py-1 text-[10px] rounded transition-colors",
                             alignMode === 'time'
                                 ? "text-white bg-[#1A1A1A]"
                                 : "text-[#666] hover:text-[#999]"
@@ -324,7 +298,7 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                     <button
                         onClick={() => setAlignMode('reaction')}
                         className={cn(
-                            "px-3 py-1 text-[10px] rounded",
+                            "px-3 py-1 text-[10px] rounded transition-colors",
                             alignMode === 'reaction'
                                 ? "text-white bg-[#1A1A1A]"
                                 : "text-[#666] hover:text-[#999]"
@@ -338,7 +312,6 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
             {MACRO_EVENT_DEFS.map((eventDef) => {
                 const nextOccurrence = getNextOccurrence(eventDef.key)
                 const daysUntil = nextOccurrence ? getDaysUntil(nextOccurrence.occursAt) : 999
-                const summaryStats = getSummaryStats(eventDef.key)
 
                 // Get past occurrences
                 const allPastOccurrences = getPastOccurrences(eventDef.key, 36)
@@ -365,85 +338,84 @@ export default function CalendarClient({ reactions }: CalendarClientProps) {
                     <Link
                         href={`/calendar/${eventDef.key}`}
                         key={eventDef.key}
-                        className={cn(
-                            "cursor-pointer block group relative overflow-hidden active:opacity-90 transition-opacity",
-                            CARDS.secondary
-                        )}
+                        className="block group"
                     >
-                        {/* 1. Header Section: Name + Icon */}
-                        <div className={cn("px-4 py-3 border-b flex items-start justify-between", SURFACE.border)}>
-                            <div className="flex items-center gap-3">
-                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] text-white")}>
-                                    {getEventIcon(eventDef.key)}
-                                </div>
+                        <UniversalCard variant="clickable" size="M" className="p-0 overflow-hidden">
+                            {/* 1. Header Section: Name + Icon */}
+                            <div className="px-4 py-3 border-b border-white/5 flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] text-white")}>
+                                        {getEventIcon(eventDef.key)}
+                                    </div>
 
-                                <div>
-                                    <div className="flex flex-col gap-0.5">
-                                        <div className="flex items-center gap-2">
-                                            <h2 className={cn("text-sm font-bold tracking-wide group-hover:text-white", COLORS.textPrimary)}>
-                                                {eventDef.name} <span className="text-[#666] font-normal text-xs">{eventDef.key.toUpperCase()}</span>
-                                            </h2>
-                                            <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666]" />
+                                    <div>
+                                        <div className="flex flex-col gap-0.5">
+                                            <div className="flex items-center gap-2">
+                                                <h2 className={cn(TYPOGRAPHY.cardTitle, "group-hover:text-white transition-colors")}>
+                                                    {eventDef.name} <span className="text-[#666] font-normal text-xs">{eventDef.key.toUpperCase()}</span>
+                                                </h2>
+                                                <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666]" />
+                                            </div>
+                                            {/* Educational Description - Neutral */}
+                                            <p className={cn(TYPOGRAPHY.bodySmall, "truncate max-w-[200px]")}>
+                                                {eventDef.listDescription}
+                                            </p>
                                         </div>
-                                        {/* Educational Description - Neutral */}
-                                        <p className={cn("text-[10px] truncate max-w-[200px]", COLORS.textTertiary)}>
-                                            {eventDef.listDescription}
-                                        </p>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Right Anchor: Time Indicator (Neutral) */}
-                            {nextOccurrence ? (
-                                <div className="flex flex-col items-end">
-                                    <span className={cn(
-                                        "text-[10px] px-2 py-0.5 rounded font-mono border",
-                                        daysUntil === 0
-                                            ? "bg-white text-black border-white font-bold" // Today: White Highlight
-                                            : "bg-[#0E0E0F] border-[#2A2A2A] text-[#666]"
-                                    )}>
-                                        {daysUntil === 0 ? '今天' : `D-${daysUntil}`}
+                                {/* Right Anchor: Time Indicator (Neutral) */}
+                                {nextOccurrence ? (
+                                    <div className="flex flex-col items-end">
+                                        <span className={cn(
+                                            "text-[10px] px-2 py-0.5 rounded font-mono border",
+                                            daysUntil === 0
+                                                ? "bg-white text-black border-white font-bold" // Today: White Highlight
+                                                : "bg-[#0E0E0F] border-[#2A2A2A] text-[#666]"
+                                        )}>
+                                            {daysUntil === 0 ? '今天' : `D-${daysUntil}`}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F]", COLORS.textTertiary)}>
+                                        待定
                                     </span>
-                                </div>
-                            ) : (
-                                <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F]", COLORS.textTertiary)}>
-                                    待定
-                                </span>
-                            )}
-                        </div>
-
-                        {/* 2. Educational Context Bar (Impact Summary) */}
-                        <div className="px-4 py-3 bg-[#0A0A0A]/50">
-                            <div className="flex items-start gap-2">
-                                <BookOpen className="w-3 h-3 text-[#444] mt-0.5 flex-shrink-0" />
-                                <p className="text-[10px] text-[#808080] leading-relaxed">
-                                    {eventDef.impactSummary}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* 3. Horizontal Scroll Cards (History) */}
-                        <div className="overflow-x-auto scrollbar-hide pb-4 pt-1 border-t border-[#2A2A2A] bg-[#0A0A0B]">
-                            <div className="flex gap-2.5 px-4 min-w-max pt-3">
-                                {nextOccurrence && (
-                                    <MiniChartCard
-                                        occ={nextOccurrence}
-                                        eventDef={eventDef}
-                                        reactions={reactions}
-                                        isNext={true}
-                                    />
                                 )}
-                                {pastOccurrences.map((occ, index) => (
-                                    <MiniChartCard
-                                        key={occ.occursAt}
-                                        occ={occ}
-                                        eventDef={eventDef}
-                                        reactions={reactions}
-                                        isLatest={alignMode === 'time' && index === 0}
-                                    />
-                                ))}
                             </div>
-                        </div>
+
+                            {/* 2. Educational Context Bar (Impact Summary) */}
+                            <div className="px-4 py-3 bg-[#0A0A0A]/50">
+                                <div className="flex items-start gap-2">
+                                    <BookOpen className="w-3 h-3 text-[#444] mt-0.5 flex-shrink-0" />
+                                    <p className="text-[10px] text-[#808080] leading-relaxed">
+                                        {eventDef.impactSummary}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* 3. Horizontal Scroll Cards (History) */}
+                            <div className="overflow-x-auto scrollbar-hide pb-4 pt-1 border-t border-[#2A2A2A] bg-[#0A0A0B]">
+                                <div className="flex gap-2.5 px-4 min-w-max pt-3">
+                                    {nextOccurrence && (
+                                        <MiniChartCard
+                                            occ={nextOccurrence}
+                                            eventDef={eventDef}
+                                            reactions={reactions}
+                                            isNext={true}
+                                        />
+                                    )}
+                                    {pastOccurrences.map((occ, index) => (
+                                        <MiniChartCard
+                                            key={occ.occursAt}
+                                            occ={occ}
+                                            eventDef={eventDef}
+                                            reactions={reactions}
+                                            isLatest={alignMode === 'time' && index === 0}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </UniversalCard>
                     </Link>
                 )
             })}

@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
         const { data, error } = await query
 
         if (error) {
-            console.error('Fetch Bindings Error', error)
+            logger.error('Fetch Bindings Error', error instanceof Error ? error : new Error(String(error)), { feature: 'admin-api', endpoint: 'bindings' })
             return NextResponse.json({ error: 'Database error' }, { status: 500 })
         }
 
@@ -97,7 +98,8 @@ export async function PUT(req: NextRequest) {
                         okxUpdateData = parseOkxData(okxData)
                     }
                 } catch (e) {
-                    console.error('OKX API error:', e)
+                    const err = e instanceof Error ? e : new Error(String(e))
+                    logger.error('OKX API error', err, { feature: 'admin-api', endpoint: 'bindings' })
                 }
             }
 
@@ -174,7 +176,8 @@ export async function PUT(req: NextRequest) {
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     } catch (e: any) {
-        console.error('Binding PUT error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Binding PUT error', err, { feature: 'admin-api', endpoint: 'bindings' })
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
 }

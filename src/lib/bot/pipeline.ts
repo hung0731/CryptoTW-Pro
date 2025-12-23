@@ -1,5 +1,6 @@
 
 import { FlexMessage, TextMessage } from '@line/bot-sdk'
+import { logger } from '@/lib/logger'
 import { BotContext, BotHandler, HandlerResult } from './handlers/base'
 import { ExactCommandHandler } from './handlers/exact-command'
 import { CurrencyHandler } from './handlers/currency'
@@ -71,8 +72,9 @@ export class BotPipeline {
                 return null
             }
 
+
         } catch (e: any) {
-            console.error('[BotPipeline] Critical Error:', e)
+            logger.error('[BotPipeline] Critical Error:', e)
             MetricLogger.log({
                 userId: context.userId,
                 event_type: 'error',
@@ -98,7 +100,7 @@ export class BotPipeline {
         if (lastRec) {
             // Deduplication: Same text within 1.5 seconds
             if (context.userMessage === lastRec.lastText && (now - lastRec.timestamp) < 1500) {
-                console.log(`[RateLimit] Dedup: ${key}`)
+                logger.debug(`[RateLimit] Dedup: ${key}`, { feature: 'bot_ratelimit' })
                 return true
             }
             // Rate Limit: Any text within 500ms (Hyper spam)

@@ -4,10 +4,13 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ChevronRight, TrendingUp, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CARDS, TYPOGRAPHY, COLORS } from '@/lib/design-tokens';
+import { TYPOGRAPHY, SPACING, COLORS } from '@/lib/design-tokens';
+import { logger } from '@/lib/logger';
 import { INDICATOR_STORIES, ZONE_COLORS, getZoneLabel, IndicatorStory } from '@/lib/indicator-stories';
 import { PageHeader } from '@/components/PageHeader';
 import { AISummaryCard } from '@/components/ui/AISummaryCard';
+import { UniversalCard, CardHeader, CardTitle, CardContent } from '@/components/ui/UniversalCard';
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 
 // 按熱門程度排序（最知名/最常用的在前）
 const POPULARITY_ORDER = [
@@ -117,7 +120,7 @@ function getZoneDescription(id: string, zone: string): string {
 // Premium indicators that require Pro membership
 const PRO_INDICATORS = ['etf-flow', 'coinbase-premium', 'futures-basis', 'stablecoin-supply'];
 
-// 入口卡片組件
+// 入口卡片組件 (Refactored to UniversalCard)
 function IndicatorEntryCard({
     story,
     liveData,
@@ -132,53 +135,54 @@ function IndicatorEntryCard({
     const isProFeature = PRO_INDICATORS.includes(story.id);
 
     return (
-        <Link href={`/indicators/${story.slug}`} className="block group">
-            <div className={cn(
-                CARDS.secondary,
-                "transition-colors duration-0 overflow-hidden relative",
-                isProFeature && "border-white/10"
-            )}>
-                <div className="flex flex-col gap-3">
-                    {/* Header Row: Name vs Status (Right Anchor) */}
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                            <h3 className={cn(TYPOGRAPHY.cardTitle, "mt-0.5")}>{story.name}</h3>
-                            {isProFeature && (
-                                <span className="bg-amber-500/10 text-amber-500 text-[8px] font-bold px-1 py-0.5 rounded border border-amber-500/20">
-                                    PRO
-                                </span>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0">
-                            <span className={cn(
-                                "text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap border",
-                                zoneColors.bg, zoneColors.text, zoneColors.border
-                            )}>
-                                {liveData?.loading ? '...' : zoneLabel}
+        <Link href={`/indicators/${story.slug}`} className="block h-full">
+            <UniversalCard
+                variant="clickable"
+                size="M"
+                className={cn(
+                    "h-full flex flex-col justify-between",
+                    isProFeature && "border-white/10"
+                )}
+            >
+                {/* Header Row */}
+                <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                        <h3 className={TYPOGRAPHY.cardTitle}>{story.name}</h3>
+                        {isProFeature && (
+                            <span className="bg-amber-500/10 text-amber-500 text-[8px] font-bold px-1.5 py-0.5 rounded border border-amber-500/20">
+                                PRO
                             </span>
-                        </div>
+                        )}
                     </div>
 
-                    {/* Bottom Row: Description vs Value (Diagonal Balance) */}
-                    <div className="flex items-end justify-between gap-4">
-                        <p className={cn("text-xs truncate text-neutral-500 max-w-[65%]", COLORS.textSecondary)}>
-                            {liveData?.loading ? '分析中...' : description}
-                        </p>
-
-                        <div className="flex items-center gap-1 shrink-0">
-                            {liveData?.loading ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
-                            ) : liveData?.value !== undefined ? (
-                                <span className={cn("text-lg font-mono font-bold leading-none", zoneColors.text)}>
-                                    {formatValue(liveData.value, story)}
-                                </span>
-                            ) : null}
-                            <ChevronRight className="w-3.5 h-3.5 text-neutral-700 group-hover:text-neutral-400 mb-0.5" />
-                        </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className={cn(
+                            "text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap border",
+                            zoneColors.bg, zoneColors.text, zoneColors.border
+                        )}>
+                            {liveData?.loading ? '...' : zoneLabel}
+                        </span>
                     </div>
                 </div>
-            </div>
+
+                {/* Bottom Row: Description vs Value */}
+                <div className="flex items-end justify-between gap-4 mt-auto">
+                    <p className={cn(TYPOGRAPHY.bodySmall, "line-clamp-2 max-w-[65%]")}>
+                        {liveData?.loading ? '分析中...' : description}
+                    </p>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                        {liveData?.loading ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
+                        ) : liveData?.value !== undefined ? (
+                            <span className={cn("text-lg font-mono font-bold leading-none", zoneColors.text)}>
+                                {formatValue(liveData.value, story)}
+                            </span>
+                        ) : null}
+                        <ChevronRight className="w-3.5 h-3.5 text-neutral-700 group-hover:text-neutral-400 mb-0.5" />
+                    </div>
+                </div>
+            </UniversalCard>
         </Link>
     );
 }
@@ -345,7 +349,7 @@ export default function IndicatorsPage() {
                                 change24h
                             };
                         } catch (e) {
-                            console.error('Failed to fetch BTC price:', e);
+                            logger.error('Failed to fetch BTC price:', e as Error);
                         }
 
                         const res = await fetch('/api/ai/indicator-summary', {
@@ -376,7 +380,7 @@ export default function IndicatorsPage() {
                             }));
                         }
                     } catch (e) {
-                        console.error('Failed to fetch AI summary:', e);
+                        logger.error('Failed to fetch AI summary:', e as Error);
                     } finally {
                         setAiLoading(false);
                     }
@@ -396,51 +400,56 @@ export default function IndicatorsPage() {
                 backLabel="返回"
             />
 
-            <div className="max-w-3xl mx-auto px-4 pt-6 pb-24 space-y-8">
-                {/* AI 總結卡片 */}
-                <AISummaryCard
-                    summary={aiSummary || '正在分析各項市場數據...'}
-                    source="AI 市場觀察"
-                    loading={aiLoading}
-                />
+            <div className={cn("max-w-3xl mx-auto", SPACING.pageX, SPACING.pageTop)}>
 
-                {/* Alpha Tools Section (New) */}
-                <section>
-                    <div className="flex items-center justify-between mb-3 px-1">
-                        <h2 className={cn(TYPOGRAPHY.sectionLabel)}>Alpha 工具箱</h2>
-                        <span className="text-[10px] text-neutral-500 font-mono">POWERED BY CryptoTW</span>
-                    </div>
+                {/* AI 總結卡片 */}
+                <div className="mb-4">
+                    <AISummaryCard
+                        summary={aiSummary || '正在分析各項市場數據...'}
+                        source="AI 市場觀察"
+                        loading={aiLoading}
+                    />
+                </div>
+
+                {/* Alpha Tools Section (Size S Grid) */}
+                <section className={cn(SPACING.sectionGap)}>
+                    <SectionHeaderCard
+                        title="Alpha 工具箱"
+                        rightElement={<span className="text-[10px] text-neutral-500 font-mono">POWERED BY CryptoTW</span>}
+                    />
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {alphaTools.map(story => (
-                            <Link key={story.id} href={`/indicators/${story.slug}`} className="group block">
-                                <div className={cn(
-                                    "h-full p-4 rounded-xl border border-white/[0.08] bg-[#0A0A0A] hover:bg-white/[0.03] transition-colors flex flex-col justify-between"
-                                )}>
+                            <Link key={story.id} href={`/indicators/${story.slug}`} className="block h-full">
+                                <UniversalCard
+                                    variant="clickable"
+                                    size="S"
+                                    className="h-full flex flex-col justify-between"
+                                >
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                                                {/* Simple Icon Mapping based on ID */}
                                                 {story.id === 'seasonality' && <span className="text-indigo-400 text-lg">📅</span>}
                                                 {story.id === 'halving-cycles' && <span className="text-orange-400 text-lg">⏳</span>}
                                                 {story.id === 'divergence-screener' && <span className="text-cyan-400 text-lg">🔍</span>}
                                             </div>
                                             <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">ALPHA</span>
                                         </div>
-                                        <h3 className="text-sm font-bold text-white mb-1 group-hover:text-indigo-400 transition-colors">{story.name}</h3>
+                                        <h3 className={cn(TYPOGRAPHY.cardTitle, "mb-1 group-hover:text-indigo-400")}>{story.name}</h3>
                                     </div>
                                     <div className="mt-3 flex items-center text-[10px] text-neutral-600 font-medium group-hover:text-neutral-400">
                                         立即使用 <ChevronRight className="w-3 h-3 ml-0.5" />
                                     </div>
-                                </div>
+                                </UniversalCard>
                             </Link>
                         ))}
                     </div>
                 </section>
 
-                {/* Market Metrics Section (Existing) */}
-                <section>
-                    <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-3 px-1")}>市場數據指標</h2>
-                    <div className="space-y-3">
+                {/* Market Metrics Section (Size M Stack) */}
+                <section className={cn(SPACING.sectionGap, "mt-8")}>
+                    <SectionHeaderCard title="市場數據指標" />
+                    <div className={SPACING.classes.gapCards}>
                         {marketMetrics.map((story) => (
                             <IndicatorEntryCard
                                 key={story.id}
@@ -454,4 +463,3 @@ export default function IndicatorsPage() {
         </main>
     );
 }
-

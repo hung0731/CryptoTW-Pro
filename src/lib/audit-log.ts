@@ -5,7 +5,8 @@
  * In production, consider using a dedicated logging service (e.g., Datadog, Sentry).
  */
 
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
+import { logger } from '@/lib/logger'
 
 export type AuditAction =
     | 'binding.create'
@@ -61,7 +62,7 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
             })
     } catch (e) {
         // Don't throw - audit logging should never break the main flow
-        console.error('[AuditLog] Failed to log:', entry.action, e)
+        logger.error('[AuditLog] Failed to log:', e as Error, { feature: 'audit-log', action: entry.action })
     }
 }
 

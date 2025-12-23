@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Unified Crypto Price Prediction API
@@ -96,7 +97,7 @@ async function fetchPriceData(crypto: string) {
             topPredictions
         }
     } catch (error) {
-        console.error(`Crypto Price API Error (${crypto}):`, error)
+        logger.error(`Crypto Price API Error (${crypto})`, error, { feature: 'prediction-api', endpoint: 'btc-price' })
         return null
     }
 }

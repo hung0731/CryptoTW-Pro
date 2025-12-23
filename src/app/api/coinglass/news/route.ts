@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { NewsFlashItem, getCoinglassApiKey } from '@/lib/coinglass'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -41,16 +42,16 @@ export async function GET(req: NextRequest) {
         // Check cache first
         const cached = await getCache<NewsFlashItem[]>(CACHE_KEY)
         if (cached) {
-            console.log('[Cache HIT] coinglass_news')
+            logger.debug('[Cache HIT] coinglass_news', { feature: 'coinglass-api', endpoint: 'news' })
             return NextResponse.json({ news: cached })
         }
 
-        console.log('[Cache MISS] coinglass_news - fetching fresh data')
+        logger.debug('[Cache MISS] coinglass_news - fetching fresh data', { feature: 'coinglass-api', endpoint: 'news' })
 
         const apiKey = getCoinglassApiKey()
 
         if (!apiKey) {
-            console.error('COINGLASS_API_KEY not configured')
+            logger.error('COINGLASS_API_KEY not configured', { feature: 'coinglass-api', endpoint: 'news' })
             throw new Error('API Key missing')
         }
 
@@ -63,14 +64,14 @@ export async function GET(req: NextRequest) {
         const response = await fetch(url, options)
 
         if (!response.ok) {
-            console.error('Coinglass News API error:', response.status, response.statusText)
+            logger.error('Coinglass News API error', { feature: 'coinglass-api', endpoint: 'news', status: response.status, statusText: response.statusText })
             throw new Error(`API returned ${response.status}`)
         }
 
         const json = await response.json()
 
         if (json.code !== '0' || !Array.isArray(json.data)) {
-            console.warn('Coinglass News API returned error:', json.msg)
+            logger.warn('Coinglass News API returned error', { feature: 'coinglass-api', endpoint: 'news', errorMsg: json.msg })
             throw new Error(json.msg || 'Invalid response')
         }
 
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ news })
 
     } catch (error) {
-        console.error('News API Error:', error)
+        logger.error('News API Error', error, { feature: 'coinglass-api', endpoint: 'news' })
 
         const now = Date.now()
         const mockNews: NewsFlashItem[] = [

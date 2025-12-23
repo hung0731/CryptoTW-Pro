@@ -5,6 +5,7 @@ import liff from '@line/liff'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database'
 import GlobalLoader from './GlobalLoader'
+import { logger } from '@/lib/logger'
 
 type DBUser = Database['public']['Tables']['users']['Row']
 
@@ -43,7 +44,7 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
 
     useEffect(() => {
         if (!liffId) {
-            console.warn('LIFF ID is not provided.')
+            logger.warn('LIFF ID is not provided.', { feature: 'liff-provider' })
             setIsLoading(false)
             return
         }
@@ -67,12 +68,12 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
 
                         if (isPro) {
                             setIsLoading(false)
-                            console.log('Optimistic load success (Pro)')
+                            logger.info('Optimistic load success (Pro)', { feature: 'liff-provider', status: 'pro' })
                         } else {
-                            console.log('Optimistic load success (Basic - waiting for verify)')
+                            logger.info('Optimistic load success (Basic - waiting for verify)', { feature: 'liff-provider', status: 'basic' })
                         }
                     } catch (e) {
-                        console.error('Cache parse error', e)
+                        logger.error('Cache parse error', e as Error, { feature: 'liff-provider' })
                     }
                 }
 
@@ -112,16 +113,16 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                                 if (data.session) {
                                     const { error: sessionError } = await supabase.auth.setSession(data.session)
                                     if (sessionError) {
-                                        console.error('Supabase SetSession Error:', sessionError)
+                                        logger.error('Supabase SetSession Error:', sessionError, { feature: 'liff-provider' })
                                     }
                                 }
                             } else {
-                                console.error('Failed to sync user with backend')
+                                logger.error('Failed to sync user with backend', new Error('Auth API failed'), { feature: 'liff-provider', status: res.status })
                                 // If sync failed and we have 'basic' cache, we might want to retry or clear?
                                 // For now, keep as is, but maybe force reload?
                             }
                         } catch (err) {
-                            console.error('Auth API Error', err)
+                            logger.error('Auth API Error', err as Error, { feature: 'liff-provider' })
                         }
                     }
                 } else {
@@ -130,14 +131,14 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                     // we MUST clear it. Otherwise user appears as "Basic" (from cache) but effectively logged out relative to Line.
                     // This prevents "Basic" state triggering Gate when they should just be "Guest" (Login Page).
                     if (cachedUser) {
-                        console.log('Clearing stale cache - LIFF not logged in')
+                        logger.info('Clearing stale cache - LIFF not logged in', { feature: 'liff-provider' })
                         setDbUser(null)
                         setIsLoggedIn(false)
                         localStorage.removeItem('dbUser')
                     }
                 }
             } catch (e) {
-                console.error('LIFF Initialization failed', e)
+                logger.error('LIFF Initialization failed', e as Error, { feature: 'liff-provider' })
                 setError(e)
             } finally {
                 setIsLoading(false)

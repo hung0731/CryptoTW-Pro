@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { logger } from '@/lib/logger'
 
 const OKX_API_BASE = 'https://www.okx.com'
 
@@ -86,7 +87,7 @@ async function okxRequest<T>(
 
     if (!res.ok) {
         const errorText = await res.text()
-        console.error('[OKX API] Error response:', errorText)
+        logger.error('[OKX API] Error response:', new Error(errorText), { feature: 'okx-affiliate', errorText })
         throw new Error(`OKX API error: ${res.status} ${res.statusText}`)
     }
 
@@ -106,7 +107,7 @@ export async function getInviteeDetail(uid: string): Promise<OkxInviteeData | nu
         )
 
         if (response.code !== '0') {
-            console.error('[OKX API] Error:', response.msg)
+            logger.error('[OKX API] Error:', new Error(response.msg), { feature: 'okx-affiliate', msg: response.msg })
             return null
         }
 
@@ -116,7 +117,7 @@ export async function getInviteeDetail(uid: string): Promise<OkxInviteeData | nu
 
         return null
     } catch (error) {
-        console.error('[OKX API] getInviteeDetail error:', error)
+        logger.error('[OKX API] getInviteeDetail error:', error as Error, { feature: 'okx-affiliate' })
         return null
     }
 }

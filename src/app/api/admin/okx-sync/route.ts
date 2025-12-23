@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/admin-auth'
 
@@ -26,7 +27,7 @@ export async function POST() {
         const data = await res.json()
         return NextResponse.json(data, { status: res.status })
     } catch (error) {
-        console.error('[admin/okx-sync] Error:', error)
+        logger.error('[admin/okx-sync] Error', error, { feature: 'admin-api', endpoint: 'okx-sync' })
         return NextResponse.json({ error: 'Sync failed' }, { status: 500 })
     }
 }

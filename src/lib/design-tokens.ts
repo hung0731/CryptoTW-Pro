@@ -25,11 +25,18 @@ export const SURFACE = {
     // Level 2: Passive/Muted Card Background
     cardPassive: 'bg-[#080808]',
 
-    // Level 3: Elevated / Hover State
-    elevated: 'bg-[#0E0E0F]',
+    // Level 3: Tertiary (Section Headers)
+    tertiary: 'bg-[#0F0F10]',
 
-    // Level 4: Highlight / Selected
+    // Level 4: Elevated / Hover State
+    elevated: 'bg-[#141414]',
+
+    // Level 5: Highlight / Selected
     highlight: 'bg-[#1A1A1A]',
+
+    // State-based Surfaces
+    danger: 'bg-[#1C0F0F]', // Red tint
+    success: 'bg-[#0F1C12]', // Green tint
 
     // Legacy aliases
     card: 'bg-[#0A0A0A]',
@@ -44,7 +51,7 @@ export const BORDER = {
     primary: 'border border-[#1A1A1A]',
 
     // Hover-only border (appears on hover)
-    hover: 'hover:border hover:border-[#1A1A1A]',
+    hover: 'hover:border hover:border-[#2A2A2A]',
 
     // Dashed border (passive cards)
     dashed: 'border border-dashed border-[#1A1A1A]',
@@ -54,6 +61,11 @@ export const BORDER = {
 
     // Divider
     divider: 'border-[#1A1A1A]',
+
+    // Status Borders
+    highlight: 'border border-[#333333]',
+    danger: 'border border-[#331111]',
+    success: 'border border-[#113311]',
 } as const
 
 // ================================================
@@ -61,33 +73,45 @@ export const BORDER = {
 // ================================================
 export const RADIUS = {
     xl: 'rounded-xl',  // 12px - Primary/Passive cards
-    lg: 'rounded-lg',  // 8px - Secondary cards
+    lg: 'rounded-lg',  // 8px - Secondary cards & Generic Elements
+    md: 'rounded-md',  // 6px - Small interactive elements
 } as const
 
 // ================================================
-// SPACING (Unified Scale v1.1)
+// SPACING (Strict Rules - NO MAGIC NUMBERS)
 // ================================================
 export const SPACING = {
-    // Page-level (Split for precision)
-    pageX: 'px-4',          // Standard horizontal padding
-    pageTop: 'pt-6',        // Standard top padding (Avoid py-4)
-    pageBottom: 'pb-24',    // Standard bottom padding (Nav safe area)
+    // Global Rhythm
+    pageToSection: 16,     // Header -> First Section
+    sectionGap: 16,        // Section -> Section
+    cardGap: 12,           // Card -> Card
 
-    // Vertical Rhythm
-    sectionGap: 'space-y-6', // Between major sections
-    headerGap: 'mb-4',       // Between Header and first content
+    // Component Internals
+    cardPadding: 16,       // Standard Internal Padding
+    cardPaddingSmall: 12,  // Small Card Internal Padding
 
-    // Item Gaps
-    cardGap: 'space-y-4',    // Standard card stack
-    cardGapCompact: 'space-y-3', // Dense lists
-    listGap: 'gap-3',        // Horizontal lists
+    // Utility Classes
+    card: 'p-4',
+    cardCompact: 'p-3',
+    cardTight: 'p-2',
 
-    // Component Internal Padding
-    cardLarge: 'p-5',        // Primary
-    card: 'p-4',             // Primary Compact / Standard
-    cardCompact: 'p-3',      // Secondary
-    cardTight: 'p-2',        // Secondary Dense
-    inlineLeft: 'pl-3',      // Inline Data
+    // Internal Vertical Rhythm
+    cardInternal: {
+        tight: 'space-y-2',   // Header -> Body, Footer -> CTA
+        normal: 'space-y-3',  // Body -> Main Content
+    },
+
+    // Legacy Tailwind Classes (mapped to strict values)
+    pageX: 'px-4',
+    pageTop: 'pt-6',
+    pageBottom: 'pb-24',
+
+    // Helper Maps (for className usage)
+    classes: {
+        gapCards: 'gap-3',      // 12px
+        gapSections: 'gap-4',   // 16px
+        mtHeader: 'mt-4',       // 16px
+    }
 } as const
 
 // ================================================
@@ -113,27 +137,23 @@ export const CARDS = {
      * - Uses: Charts, Conclusions, Main Data
      * - Style: Darkest, Big Padding, Rounded XL
      */
-    primary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-5',
+    primary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-4',
 
     /**
-     * Primary Compact (Refined)
-     * - Uses: Complex lists, Dashboard items
-     * - Style: Primary look but tighter
-     */
-    primaryCompact: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-4',
-
-    /**
-     * List Card (Scan)
+     * Secondary Card (List Item)
      * - Uses: News, Events, Indicators Lists
-     * - Style: Compact, Interactive, Rounded LG
-     * - NO HOVER BORDER (Always Visible)
-     * - Active State for Touch
      */
     secondary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg p-3 transition-colors duration-75 active:bg-[#141414]',
 
-    // Aliases to enforce "2 Card Types" rule
-    typeA: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-5', // Alias to Primary
-    typeB: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg p-3 active:bg-[#141414]', // Alias to List
+    /**
+     * Tertiary / Section Header
+     * - Uses: Section Headers, Grouping
+     */
+    tertiary: 'bg-[#0F0F10] border border-transparent rounded-lg p-3',
+
+    // Aliases
+    typeA: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-4',
+    typeB: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg p-3 active:bg-[#141414]',
 
     // Legacy / specialized
     inline: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',

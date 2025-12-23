@@ -1,5 +1,5 @@
-
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
+import { logger, logBotEvent } from '@/lib/logger'
 
 export interface LogEntry {
     userId: string
@@ -16,10 +16,21 @@ export interface LogEntry {
 
 export class MetricLogger {
     static async log(entry: LogEntry) {
-        // Non-blocking log
-        // In a real production env, this might push to a queue.
-        // For now, we fire-and-forget to Supabase, with a timeout to prevent hanging.
+        // 1. Log to unified logger (stdout with requestId)
+        logBotEvent({
+            event: 'message_received',
+            feature: 'bot_metric',
+            user: entry.userId,
+            latency_ms: entry.latency_ms,
+            success: entry.success,
+            error: entry.error,
+            // Include extra metadata
+            trigger: entry.trigger,
+            intent: entry.intent,
+            symbol: entry.symbol
+        })
 
+        // 2. Persist to Supabase (Async, fire-and-forget)
         const logPromise = async () => {
             try {
                 const supabase = createAdminClient()
@@ -31,8 +42,8 @@ export class MetricLogger {
 
                 await supabase.from('line_events').insert({
                     user_id: entry.userId,
-                    type: entry.event_type || 'interaction', // Schema requires 'type'
-                    message: safeText || entry.trigger || 'No content', // Schema requires 'message'
+                    type: entry.event_type || 'interaction',
+                    message: safeText || entry.trigger || 'No content',
                     metadata: {
                         trigger: entry.trigger,
                         intent: entry.intent,
@@ -45,14 +56,14 @@ export class MetricLogger {
                     created_at: new Date().toISOString()
                 })
             } catch (e) {
-                console.error('[MetricLogger] Failed to log:', e)
+                // Silently fail for metrics to not impact user experience
+                logger.error('[MetricLogger] Failed to persist to Supabase', e as Error, {
+                    feature: 'bot_metric_persist'
+                })
             }
         }
 
-        // Fire and forget (don't await)
+        // Fire and forget
         logPromise()
-
-        // Debug Log
-        console.log(`[BotEvent] ${entry.trigger} (${entry.latency_ms}ms) - ${entry.symbol || ''}`)
     }
 }

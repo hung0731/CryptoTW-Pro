@@ -3,10 +3,11 @@ const CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN
 const CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET
 
 import crypto from 'crypto'
+import { logger } from '@/lib/logger'
 
 export async function pushMessage(userId: string, messages: any[]) {
     if (!CHANNEL_ACCESS_TOKEN) {
-        console.warn('LINE_CHANNEL_ACCESS_TOKEN is not set. Skipping push message.')
+        logger.warn('LINE_CHANNEL_ACCESS_TOKEN is not set. Skipping push message.', { feature: 'line-bot' })
         return false
     }
 
@@ -25,20 +26,20 @@ export async function pushMessage(userId: string, messages: any[]) {
 
         if (!res.ok) {
             const error = await res.text()
-            console.error('Failed to send LINE push message:', error)
+            logger.error('Failed to send LINE push message:', { error }, { feature: 'line-bot' })
             return false
         }
 
         return true
     } catch (e) {
-        console.error('Error sending LINE push message:', e)
+        logger.error('Error sending LINE push message:', e, { feature: 'line-bot' })
         return false
     }
 }
 
 export async function multicastMessage(userIds: string[], messages: any[]) {
     if (!CHANNEL_ACCESS_TOKEN) {
-        console.warn('LINE_CHANNEL_ACCESS_TOKEN is not set. Skipping multicast message.')
+        logger.warn('LINE_CHANNEL_ACCESS_TOKEN is not set. Skipping multicast message.', { feature: 'line-bot' })
         return false
     }
 
@@ -57,20 +58,20 @@ export async function multicastMessage(userIds: string[], messages: any[]) {
 
         if (!res.ok) {
             const error = await res.text()
-            console.error('Failed to send LINE multicast message:', error)
+            logger.error('Failed to send LINE multicast message:', { error }, { feature: 'line-bot' })
             return false
         }
 
         return true
     } catch (e) {
-        console.error('Error sending LINE multicast message:', e)
+        logger.error('Error sending LINE multicast message:', e, { feature: 'line-bot' })
         return false
     }
 }
 
 export async function replyMessage(replyToken: string, messages: any[]) {
     if (!CHANNEL_ACCESS_TOKEN) {
-        console.warn('LINE_CHANNEL_ACCESS_TOKEN is not set. Skipping reply message.')
+        logger.warn('LINE_CHANNEL_ACCESS_TOKEN is not set. Skipping reply message.', { feature: 'line-bot' })
         return false
     }
 
@@ -89,13 +90,13 @@ export async function replyMessage(replyToken: string, messages: any[]) {
 
         if (!res.ok) {
             const error = await res.text()
-            console.error('Failed to send LINE reply message:', error)
+            logger.error('Failed to send LINE reply message:', { error }, { feature: 'line-bot' })
             return false
         }
 
         return true
     } catch (e) {
-        console.error('Error sending LINE reply message:', e)
+        logger.error('Error sending LINE reply message:', e, { feature: 'line-bot' })
         return false
     }
 }

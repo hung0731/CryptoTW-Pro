@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
+import { logger } from '@/lib/logger'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -229,7 +230,7 @@ function BindingsTab() {
             const data = await res.json()
             if (data.bindings) setBindings(data.bindings)
         } catch (e) {
-            console.error(e)
+            logger.error('Failed to bindings', e, { feature: 'admin-users' })
         } finally {
             setLoading(false)
         }
@@ -418,7 +419,7 @@ export default function UsersPage() {
                 })
                 setUsers(flatUsers)
             }
-        } catch (e) { console.error(e) }
+        } catch (e) { logger.error('Failed to fetch users', e, { feature: 'admin-users' }) }
         finally { setIsLoading(false) }
     }
 

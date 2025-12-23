@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 
 // In-memory cache
@@ -65,7 +66,7 @@ async function fetchCoinGeckoMarketData() {
         }
         return null
     } catch (e) {
-        console.error('[Market API] CoinGecko Markets Error:', e)
+        logger.error('[Market API] CoinGecko Markets Error:', e as Error)
         return null
     }
 }
@@ -87,7 +88,7 @@ async function fetchFearGreedIndex() {
         }
         return null
     } catch (e) {
-        console.error('[Market API] FGI Error:', e)
+        logger.error('[Market API] FGI Error:', e as Error)
         return null
     }
 }
@@ -111,7 +112,7 @@ async function fetchGlobalData() {
         }
         return null
     } catch (e) {
-        console.error('[Market API] CoinGecko Error:', e)
+        logger.error('[Market API] CoinGecko Error:', e as Error)
         return null
     }
 }
@@ -121,21 +122,21 @@ export async function GET() {
 
     // Check market cache
     if (!marketCache || now - marketCache.timestamp > MARKET_CACHE_TTL) {
-        console.log('[Market API] Fetching fresh CoinGecko market data...')
+        logger.info('[Market API] Fetching fresh CoinGecko market data...')
         const data = await fetchCoinGeckoMarketData()
         if (data) marketCache = { data, timestamp: now }
     }
 
     // Check FGI cache
     if (!fgiCache || now - fgiCache.timestamp > FGI_CACHE_TTL) {
-        console.log('[Market API] Fetching fresh FGI data...')
+        logger.info('[Market API] Fetching fresh FGI data...')
         const data = await fetchFearGreedIndex()
         if (data) fgiCache = { data, timestamp: now }
     }
 
     // Check global cache
     if (!globalCache || now - globalCache.timestamp > GLOBAL_CACHE_TTL) {
-        console.log('[Market API] Fetching fresh CoinGecko global data...')
+        logger.info('[Market API] Fetching fresh CoinGecko global data...')
         const data = await fetchGlobalData()
         if (data) globalCache = { data, timestamp: now }
     }

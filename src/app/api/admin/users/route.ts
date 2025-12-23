@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
         const { data: users, error, count } = await query
 
         if (error) {
-            console.error('Fetch users error:', error)
+            logger.error('Fetch users error', error, { feature: 'admin-api', endpoint: 'users' })
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 

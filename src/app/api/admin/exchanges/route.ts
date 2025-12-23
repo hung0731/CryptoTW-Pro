@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -44,7 +45,8 @@ export async function POST(req: NextRequest) {
         if (error) throw error
         return NextResponse.json({ exchange: data })
     } catch (e: any) {
-        console.error(e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Exchange POST Error', err, { feature: 'admin-api', endpoint: 'exchanges' })
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
 }
@@ -76,7 +78,8 @@ export async function PUT(req: NextRequest) {
         if (error) throw error
         return NextResponse.json({ exchange: data })
     } catch (e) {
-        console.error(e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Exchange PUT Error', err, { feature: 'admin-api', endpoint: 'exchanges' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

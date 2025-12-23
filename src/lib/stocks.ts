@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import yahooFinance from 'yahoo-finance2'
 
 export async function fetchStockTicker(symbol: string) {
@@ -27,7 +28,7 @@ export async function fetchStockTicker(symbol: string) {
             currency: quote.currency
         }
     } catch (e) {
-        // console.error('Yahoo Finance Error:', e)
+        logger.warn('Yahoo Finance Error:', { error: e, feature: 'yahoo' })
         // Silent fail is fine, means symbol not found
         return null
     }

@@ -1,5 +1,6 @@
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 import { cachedCoinglassV4Request } from '@/lib/coinglass'
+import { logger } from '@/lib/logger'
 
 // ============================================================================
 // Service: Seasonality Heatmap
@@ -208,7 +209,7 @@ export async function getDivergenceData() {
         return { data: results, isDemo: false }
 
     } catch (error) {
-        console.error('Divergence Fetch Error:', error)
+        logger.error('Divergence Fetch Error:', error as Error, { feature: 'market-data' })
         throw error
     }
 }

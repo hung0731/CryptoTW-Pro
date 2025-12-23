@@ -1,7 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { CARDS } from '@/lib/design-tokens'
+import { UniversalCard, CardTitle } from '@/components/ui/UniversalCard'
+import { TYPOGRAPHY } from '@/lib/design-tokens'
 
 interface ActionCardProps {
     title: string
@@ -19,31 +22,39 @@ export function ActionCard({
     const isPrimary = variant === 'primary'
 
     return (
-        <Link
-            href={href}
-            className={cn(
-                "group relative flex flex-col justify-between h-[100px] active:scale-[0.98]",
-                isPrimary ? CARDS.primary : CARDS.secondary
-            )}
-        >
-            {/* Top: Icon & Arrow */}
-            <div className="flex items-start justify-between">
-                <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center",
-                    isPrimary ? "bg-white text-black" : "bg-[#1A1A1A] text-[#808080] group-hover:text-white"
-                )}>
-                    <Icon className="w-4 h-4" />
+        <Link href={href} className="flex-1 block h-full">
+            <UniversalCard
+                variant={isPrimary ? 'default' : 'clickable'}
+                size="S"
+                className="h-full flex flex-col justify-between group"
+            >
+                {/* Top: Icon & Arrow */}
+                <div className="flex items-start justify-between mb-3">
+                    <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                        isPrimary
+                            ? "bg-white text-black"
+                            : "bg-[#1A1A1A] text-[#808080] group-hover:text-white"
+                    )}>
+                        <Icon className="w-4 h-4" />
+                    </div>
+                    <ArrowUpRight className={cn(
+                        "w-4 h-4 transition-colors",
+                        isPrimary
+                            ? "text-[#404040]"
+                            : "text-[#404040] group-hover:text-white"
+                    )} />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#404040] group-hover:text-white" />
-            </div>
 
-            {/* Bottom: Title Only (No meta) */}
-            <h3 className={cn(
-                "text-sm font-bold tracking-tight",
-                isPrimary ? "text-white" : "text-[#A0A0A0] group-hover:text-white"
-            )}>
-                {title}
-            </h3>
+                {/* Bottom: Title */}
+                <CardTitle className={cn(
+                    isPrimary
+                        ? "text-white"
+                        : "text-[#A0A0A0] group-hover:text-white"
+                )}>
+                    {title}
+                </CardTitle>
+            </UniversalCard>
         </Link>
     )
 }

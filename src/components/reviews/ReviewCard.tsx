@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { MarketEvent } from '@/lib/reviews-data';
-import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
+import { UniversalCard, CardContent } from '@/components/ui/UniversalCard';
 
 export function ReviewCard({ review }: { review: MarketEvent }) {
     const getTypeConfig = (type: string) => {
@@ -20,9 +21,9 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
     const typeConfig = getTypeConfig(review.type || 'market_structure');
 
     return (
-        <article className={cn(CARDS.secondary, "group relative overflow-hidden")}>
+        <UniversalCard variant="clickable" size="S" className="group relative overflow-hidden">
             {/* Watermark Logo */}
-            <div className="absolute -right-4 -bottom-4 opacity-[0.20] group-hover:opacity-[0.30] rotate-12 pointer-events-none">
+            <div className="absolute -right-4 -bottom-4 opacity-[0.20] group-hover:opacity-[0.30] rotate-12 pointer-events-none z-0">
                 {review.impactedTokens?.[0] && (
                     <img
                         src={`/tokens/${review.impactedTokens[0]}.png`}
@@ -33,7 +34,7 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
                 )}
             </div>
 
-            <div className={cn(SPACING.cardCompact, "relative")}>
+            <CardContent className="relative z-10">
                 {/* Meta Header */}
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -58,8 +59,7 @@ export function ReviewCard({ review }: { review: MarketEvent }) {
                         {review.impactSummary || review.summary}
                     </p>
                 </Link>
-            </div>
-        </article>
+            </CardContent>
+        </UniversalCard>
     )
 }
-

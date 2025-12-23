@@ -1,4 +1,5 @@
-import { createAdminClient } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { rateLimit } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 import { sendAdminNotification } from '@/lib/notify'
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true })
     } catch (error) {
-        console.error('VIP Application Error:', error)
+        logger.error('VIP Application Error', error, { feature: 'vip-apply-api' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

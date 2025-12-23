@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 
@@ -80,7 +81,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ arbitrage: filtered })
 
     } catch (error) {
-        console.error('Arbitrage API Error:', error)
+        logger.error('Arbitrage API Error', error, { feature: 'market-api', endpoint: 'arbitrage' })
         return NextResponse.json({ error: 'Failed to fetch arbitrage data' }, { status: 500 })
     }
 }

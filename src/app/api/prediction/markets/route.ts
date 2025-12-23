@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const revalidate = 1800 // 30 minutes cache
@@ -92,7 +93,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ markets })
 
     } catch (e: any) {
-        console.error('Prediction API Error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Prediction API Error', err, { feature: 'prediction-api', endpoint: 'markets' })
         return NextResponse.json({ error: 'Failed to fetch prediction markets' }, { status: 500 })
     }
 }

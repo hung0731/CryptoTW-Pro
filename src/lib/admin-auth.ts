@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createSafeServerClient } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 
 /**
  * Verifies that the request is from an authenticated admin user.
@@ -30,7 +31,7 @@ export async function verifyAdmin(): Promise<{ id: string; email: string } | nul
 
         return { id: user.id, email: user.email }
     } catch (e) {
-        console.error('Admin verification error:', e)
+        logger.error('Admin verification error:', e as Error, { feature: 'admin-auth' })
         return null
     }
 }

@@ -1,5 +1,8 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
+
+
 import { createClient } from '@/lib/supabase'
 
 // Event whitelist - only these events are allowed
@@ -68,7 +71,7 @@ export async function POST(req: NextRequest) {
             })
 
         if (error) {
-            console.error('Analytics Insert Error:', error)
+            logger.error('Analytics Insert Error', error, { feature: 'analytics-api' })
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 

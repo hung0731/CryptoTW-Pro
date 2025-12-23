@@ -1,4 +1,5 @@
 import Redis from 'ioredis'
+import { logger } from "@/lib/logger"
 
 /**
  * Hybrid Cache: Redis (Primary) -> In-Memory (Fallback)
@@ -22,14 +23,21 @@ let redis: Redis | null = null
 // Support various env var names (Zeabur uses REDIS_URI or REDIS_CONNECTION_STRING)
 const REDIS_URL = process.env.REDIS_URL || process.env.REDIS_URI || process.env.REDIS_CONNECTION_STRING
 
+// Strict check moved to runtime to allow build process to succeed without Redis env var
+const checkRedisConfig = () => {
+    if (process.env.NODE_ENV === 'production' && !REDIS_URL) {
+        throw new Error('CRITICAL: REDIS_URL is not defined in production. In-memory cache is unstable in serverless environments.')
+    }
+}
+
 if (REDIS_URL) {
-    console.log('Initializing Redis Cache...')
+    logger.info('Initializing Redis Cache...')
     redis = new Redis(REDIS_URL, {
         maxRetriesPerRequest: 1, // Fail fast on dev
         connectTimeout: 2000,
         retryStrategy: (times) => {
             if (times > 3) {
-                console.warn('Redis connection failed, switching to in-memory mode.')
+                logger.warn('Redis connection failed, switching to in-memory mode.', { times })
                 return null // Stop retrying
             }
             return Math.min(times * 50, 2000)
@@ -39,7 +47,7 @@ if (REDIS_URL) {
     redis.on('error', (err) => {
         // Suppress loud errors in dev if Redis isn't running
         if (process.env.NODE_ENV === 'development') return
-        console.error('Redis Error:', err)
+        logger.error('Redis Error', err, { feature: 'cache' })
     })
 }
 
@@ -47,6 +55,7 @@ if (REDIS_URL) {
  * Get cached data (Async)
  */
 export async function getCache<T>(key: string): Promise<T | null> {
+    checkRedisConfig()
     // 1. Try Redis
     if (redis) {
         try {
@@ -57,7 +66,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
             return null
         } catch (e) {
             // Redis failed, fall through to local
-            // console.warn('Redis get failed', e)
+            logger.warn('Redis get failed', { key, error: String(e) })
         }
     }
 
@@ -77,6 +86,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
  * Set cache (Async but void promise)
  */
 export async function setCache<T>(key: string, data: T, ttlSeconds: number): Promise<void> {
+    checkRedisConfig()
     // 1. Try Redis
     if (redis) {
         try {
@@ -85,7 +95,7 @@ export async function setCache<T>(key: string, data: T, ttlSeconds: number): Pro
             // but for fallback safety we COULD. For now, Keep it simple: Redis OR Local.
             return
         } catch (e) {
-            // Redis failed, fall through
+            logger.warn('Redis set failed', { key, error: String(e) })
         }
     }
 
@@ -100,10 +110,13 @@ export async function setCache<T>(key: string, data: T, ttlSeconds: number): Pro
  * Invalidate a specific cache key
  */
 export async function invalidateCache(key: string): Promise<void> {
+    checkRedisConfig()
     if (redis) {
         try {
             await redis.del(key)
-        } catch (e) { }
+        } catch (e) {
+            logger.warn('Redis del failed', { key, error: String(e) })
+        }
     }
     localCache.delete(key)
 }
@@ -115,10 +128,13 @@ export const clearCache = invalidateCache
  * Clear all cache (admin)
  */
 export async function clearAllCache(): Promise<void> {
+    checkRedisConfig()
     if (redis) {
         try {
             await redis.flushdb()
-        } catch (e) { }
+        } catch (e) {
+            logger.error('Redis flush failed', e as Error)
+        }
     }
     localCache.clear()
 }
@@ -139,6 +155,7 @@ export async function getCacheStats(): Promise<{ size: number; keys: string[] }>
  * Returns the new value
  */
 export async function increment(key: string, ttlSeconds: number): Promise<number> {
+    checkRedisConfig()
     if (redis) {
         try {
             const multi = redis.multi()
@@ -150,7 +167,8 @@ export async function increment(key: string, ttlSeconds: number): Promise<number
             }
             return 1
         } catch (e) {
-            // Fallback to local memory (Not truly distributed but better than fail)
+            // Fallback to local memory
+            logger.warn('Redis incr failed', { key, error: String(e) })
         }
     }
 
@@ -172,6 +190,7 @@ export async function increment(key: string, ttlSeconds: number): Promise<number
  * Returns true if lock acquired, false if already locked
  */
 export async function acquireLock(key: string, ttlSeconds: number): Promise<boolean> {
+    checkRedisConfig()
     const lockKey = `lock:${key}`
     if (redis) {
         try {
@@ -180,6 +199,7 @@ export async function acquireLock(key: string, ttlSeconds: number): Promise<bool
             const res = await redis.set(lockKey, '1', 'EX', ttlSeconds, 'NX')
             return res === 'OK'
         } catch (e) {
+            logger.warn('Redis lock failed', { key, error: String(e) })
             return true // Fail open (allow execution) if Redis errors to prevent deadlock
         }
     }
@@ -200,11 +220,14 @@ export async function acquireLock(key: string, ttlSeconds: number): Promise<bool
  * Release a Lock
  */
 export async function releaseLock(key: string): Promise<void> {
+    checkRedisConfig()
     const lockKey = `lock:${key}`
     if (redis) {
         try {
             await redis.del(lockKey)
-        } catch (e) { }
+        } catch (e) {
+            // Ignore error for unlock
+        }
     }
     localCache.delete(lockKey)
 }

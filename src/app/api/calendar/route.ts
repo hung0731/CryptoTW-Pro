@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { cachedCoinglassV4Request, EconomicData } from '@/lib/coinglass'
 
@@ -12,7 +13,7 @@ export async function GET() {
 
         return NextResponse.json({ data: data || [] })
     } catch (error) {
-        console.error('Error fetching economic calendar:', error)
+        logger.error('Error fetching economic calendar', error, { feature: 'calendar-api' })
         return NextResponse.json({ data: [] }, { status: 500 })
     }
 }

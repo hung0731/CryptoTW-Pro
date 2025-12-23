@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
 
         // If no data fetched (API failure or empty)
         if (processed.length === 0) {
-            console.warn('Funding Rate API returned empty')
+            logger.warn('Funding Rate API returned empty', { feature: 'coinglass-api', endpoint: 'funding-rate' })
             return NextResponse.json(
                 { error: '資料存取失敗 (API Empty)' },
                 { status: 503 }
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
             }
         })
     } catch (error) {
-        console.error('Funding rate API error:', error)
+        logger.error('Funding rate API error', error, { feature: 'coinglass-api', endpoint: 'funding-rate' })
         return NextResponse.json(
             { error: '資料存取失敗 (Server Error)' },
             { status: 500 }

@@ -2,12 +2,27 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+    // ==========================================
+    // Request ID Injection & Logging Context
+    // ==========================================
+    const requestId = crypto.randomUUID()
+
+    // Create new headers with requestId
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-request-id', requestId)
+
     let response = NextResponse.next({
         request: {
-            headers: request.headers,
+            headers: requestHeaders,
         },
     })
 
+    // Add requestId to response headers for client-side debugging
+    response.headers.set('x-request-id', requestId)
+
+    // ==========================================
+    // Supabase Auth
+    // ==========================================
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -21,8 +36,13 @@ export async function middleware(request: NextRequest) {
                         request.cookies.set(name, value)
                     })
                     response = NextResponse.next({
-                        request,
+                        request: {
+                            headers: requestHeaders, // Keep requestId
+                        },
                     })
+                    // Restore response headers
+                    response.headers.set('x-request-id', requestId)
+
                     cookiesToSet.forEach(({ name, value, options }) =>
                         response.cookies.set(name, value, options)
                     )
@@ -36,14 +56,12 @@ export async function middleware(request: NextRequest) {
     // ==========================================
     const isLockPage = request.nextUrl.pathname === '/lock'
     const isApiAuth_SiteLock = request.nextUrl.pathname === '/api/auth/site-lock'
-    const isLineWebhook = request.nextUrl.pathname.startsWith('/api/webhook/line') // Allow LINE bot
-    // const isOtherPublicApi = ... (Add if needed)
+    const isLineWebhook = request.nextUrl.pathname.startsWith('/api/webhook/line')
 
     // Check access cookie
     const hasAccess = request.cookies.get('site_access_token')?.value === 'granted'
 
     // If not locked and no access -> Redirect to /lock
-    // Exclude: API routes (except site-lock itself is an API but handled above), static files are already excluded by matcher
     if (!hasAccess && !isLockPage && !isApiAuth_SiteLock && !isLineWebhook && !request.nextUrl.pathname.startsWith('/api')) {
         const lockUrl = new URL('/lock', request.url)
         lockUrl.searchParams.set('next', request.nextUrl.pathname)
@@ -58,11 +76,10 @@ export async function middleware(request: NextRequest) {
     // Refresh Session
     const { data: { user } } = await supabase.auth.getUser()
 
-
     // Handle "path" query param redirect (Fix for LIFF Concatenate issue)
     const { searchParams } = request.nextUrl
     const path = searchParams.get('path')
-    if (path && path.startsWith('/')) {
+    if (path && path.startsWith('/') && !path.startsWith('//')) {
         return NextResponse.redirect(new URL(path, request.url))
     }
 
@@ -80,11 +97,8 @@ export async function middleware(request: NextRequest) {
         }
 
         // RBAC: Check for admin role
-        // Prioritize app_metadata (secure) over user_metadata
         const role = user.app_metadata?.role || user.user_metadata?.role || 'user'
         if (role !== 'admin' && role !== 'super_admin') {
-            // Log unauthorized access attempt if needed
-            // console.warn(`Unauthorized admin access attempt by ${user.id} (${user.email})`) // optional
             return NextResponse.redirect(new URL('/', request.url))
         }
     }
@@ -94,15 +108,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico).*)', // Removed 'api' exclusion to protect API routes if needed, but logic above handles it. 
-        // Actually, let's keep the user's original matcher or modify it slightly?
-        // Original: '/((?!api|_next/static|_next/image|favicon.ico).*)'
-        // If we want to protect the "site" (pages), usually we exclude API from middleware for perf, unless we want to protect API too.
-        // The user said "pro website ... mask", implying UI.
-        // Let's stick to protecting pages. APIs are usually protected by Auth headers anyway.
-        // If I use the original matcher, API requests won't reach middleware, so they won't be blocked by this lock. That's probably fine for "visual mask".
-        // However, if I want to "cut" the site, maybe blocking API is good too?
-        // Let's keep API excluded for now to avoid breaking the LINE bot or other integrations that might fetch data.
-        '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        /*
+         * Match all request paths except:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         */
+        '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
 }

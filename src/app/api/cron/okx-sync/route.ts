@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { getInviteeDetail, parseOkxData, batchSyncInvitees } from '@/lib/okx-affiliate'
 
 export const dynamic = 'force-dynamic'
@@ -60,14 +61,14 @@ export async function GET(req: NextRequest) {
         }
 
         syncResults.total = bindings.length
-        console.log(`[OKX Sync] Starting sync for ${bindings.length} bindings`)
+        logger.info(`[OKX Sync] Starting sync for ${bindings.length} bindings`, { feature: 'cron-job', task: 'okx-sync' })
 
         // 2. Extract UIDs
         const uids = bindings.map(b => b.exchange_uid)
 
         // 3. Batch sync with OKX API
         const okxResults = await batchSyncInvitees(uids, (completed, total) => {
-            console.log(`[OKX Sync] Progress: ${completed}/${total}`)
+            logger.debug(`[OKX Sync] Progress: ${completed}/${total}`, { feature: 'cron-job', task: 'okx-sync' })
         })
 
         // 4. Update database with results
@@ -91,12 +92,12 @@ export async function GET(req: NextRequest) {
             } else {
                 // OKX API returned null - user might not be a valid invitee
                 syncResults.skipped++
-                console.warn(`[OKX Sync] No data for UID: ${binding.exchange_uid}`)
+                logger.warn(`[OKX Sync] No data for UID: ${binding.exchange_uid}`, { feature: 'cron-job', task: 'okx-sync', uid: binding.exchange_uid })
             }
         }
 
         const duration = Date.now() - startTime
-        console.log(`[OKX Sync] Completed in ${duration}ms:`, syncResults)
+        logger.info(`[OKX Sync] Completed in ${duration}ms`, { feature: 'cron-job', task: 'okx-sync', results: syncResults })
 
         // 5. Log sync result to system_logs if table exists
         try {
@@ -118,7 +119,8 @@ export async function GET(req: NextRequest) {
         })
 
     } catch (e: any) {
-        console.error('[OKX Sync] Fatal error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('[OKX Sync] Fatal error', err, { feature: 'cron-job', task: 'okx-sync' })
         return NextResponse.json({
             error: e.message,
             ...syncResults,

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
@@ -10,7 +11,7 @@ export async function GET() {
 
         return NextResponse.json(data)
     } catch (error) {
-        console.error('Failed to load macro reactions:', error)
+        logger.error('Failed to load macro reactions', error, { feature: 'macro-api', endpoint: 'reactions' })
         return NextResponse.json({ data: {} }, { status: 500 })
     }
 }

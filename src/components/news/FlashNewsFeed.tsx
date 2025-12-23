@@ -45,7 +45,7 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
 
     if (loading) {
         return (
-            <div className={cn("overflow-hidden flex flex-col justify-center", CARDS.primaryCompact, "p-4 min-h-[90px]")}>
+            <div className={cn("overflow-hidden flex flex-col justify-center", CARDS.primary, "p-4 min-h-[90px]")}>
                 <div className="space-y-3">
                     <Skeleton className="h-4 w-3/4 bg-[#1A1A1A]" />
                     <Skeleton className="h-4 w-1/2 bg-[#1A1A1A]" />
@@ -72,7 +72,7 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
     }
 
     return (
-        <div className={cn("overflow-hidden flex flex-col", CARDS.primaryCompact, "p-0")}>
+        <div className={cn("overflow-hidden flex flex-col", CARDS.primary, "p-0")}>
             {/* Compact: Only 2 impact factors with direction */}
             <div className="divide-y divide-white/5">
                 {displayItems.map((item, index) => (

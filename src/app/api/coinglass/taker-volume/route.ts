@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 
 const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
@@ -39,7 +40,8 @@ export async function GET() {
             }))
         })
     } catch (e) {
-        console.error('Taker Volume API error:', e)
+        const error = e instanceof Error ? e : new Error(String(e))
+        logger.error('Taker Volume API error', error, { feature: 'coinglass-api', endpoint: 'taker-volume' })
         return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
     }
 }

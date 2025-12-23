@@ -9,6 +9,7 @@ import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { DashboardData } from './types'
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { formatPercent } from '@/lib/format-helpers'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // Derivatives AI Summary Card
@@ -26,7 +27,7 @@ export function DerivativesAiSummaryCard() {
                     setSummary(data.summary)
                 }
             } catch (e) {
-                console.error('Failed to fetch derivatives summary', e)
+                logger.error('Failed to fetch derivatives summary', e as Error, { feature: 'dashboard-widgets' })
             } finally {
                 setLoading(false)
             }

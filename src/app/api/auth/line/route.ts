@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { rateLimit } from '@/lib/rate-limit'
 import jwt from 'jsonwebtoken'
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
         // 3. Anti-replay: Check if token was already used
         const tokenHash = accessToken.substring(0, 32) // Use prefix as identifier
         if (usedTokens.has(tokenHash)) {
-            console.warn('[Auth/Line] Token replay detected')
+            logger.warn('[Auth/Line] Token replay detected', { feature: 'auth-line' })
             return NextResponse.json({ error: 'Token already used' }, { status: 400 })
         }
 
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
             .single()
 
         if (upsertError || !publicUser) {
-            console.error('Supabase Upsert Error:', upsertError)
+            logger.error('Supabase Upsert Error', upsertError instanceof Error ? upsertError : new Error(String(upsertError)), { feature: 'auth-line' })
             return NextResponse.json({ error: 'Database error' }, { status: 500 })
         }
 
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
             })
 
             if (createAuthError) {
-                console.error('Create Auth User Error:', createAuthError)
+                logger.error('Create Auth User Error', createAuthError instanceof Error ? createAuthError : new Error(String(createAuthError)), { feature: 'auth-line' })
                 return NextResponse.json({ error: 'Auth creation failed' }, { status: 500 })
             }
         }
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
         // 8. Mint Supabase JWT
         const jwtSecret = process.env.SUPABASE_JWT_SECRET
         if (!jwtSecret) {
-            console.error('Missing SUPABASE_JWT_SECRET')
+            logger.error('Missing SUPABASE_JWT_SECRET', { feature: 'auth-line' })
             return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
         }
 
@@ -148,7 +149,8 @@ export async function POST(req: NextRequest) {
         })
 
     } catch (e) {
-        console.error('Auth Error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Auth Error', err, { feature: 'auth-line' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

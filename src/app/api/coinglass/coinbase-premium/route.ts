@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -56,7 +57,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ history })
 
     } catch (error) {
-        console.error('Premium API Error:', error)
+        logger.error('Premium API Error', error, { feature: 'coinglass-api', endpoint: 'premium' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

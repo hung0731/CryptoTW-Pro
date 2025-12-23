@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger'
+
 export function calculateRSI(closes: number[], period: number = 14): number {
     if (closes.length < period + 1) return 50
 
@@ -49,7 +51,7 @@ export async function fetchBinanceRSI(symbol: string = 'BTCUSDT', interval: stri
 
         return parseFloat(calculateRSI(closes).toFixed(2))
     } catch (e) {
-        console.error('Binance RSI fetch error', e)
+        logger.error('Binance RSI fetch error', e as Error, { feature: 'technical-analysis' })
         return 50 // Default neutral
     }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { MACRO_EVENT_DEFS, getNextOccurrence } from '@/lib/macro-events'
 
@@ -37,7 +38,7 @@ export async function GET() {
             data: upcoming
         })
     } catch (error) {
-        console.error('Error fetching macro events:', error)
+        logger.error('Error fetching macro events', error, { feature: 'macro-api', endpoint: 'events' })
         return NextResponse.json({
             success: false,
             error: 'Failed to fetch macro events'

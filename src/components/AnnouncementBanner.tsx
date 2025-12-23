@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { AlertTriangle, Info, X } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 export default function AnnouncementBanner() {
     const [announcement, setAnnouncement] = useState<any>(null)
@@ -16,7 +17,7 @@ export default function AnnouncementBanner() {
                     setAnnouncement(data.announcement)
                 }
             } catch (e) {
-                console.error('Failed to fetch announcement', e)
+                logger.error('Failed to fetch announcement', e as Error, { feature: 'announcement-banner' })
             }
         }
         fetchAnnouncement()

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { getSeasonalityData } from '@/lib/services/market-data'
 
@@ -8,7 +9,7 @@ export async function GET() {
         const data = await getSeasonalityData()
         return NextResponse.json({ data })
     } catch (error) {
-        console.error('Seasonality API Error:', error)
+        logger.error('Seasonality API Error', error, { feature: 'market-api', endpoint: 'seasonality' })
         return NextResponse.json({ error: 'Failed to fetch seasonality data' }, { status: 500 })
     }
 }

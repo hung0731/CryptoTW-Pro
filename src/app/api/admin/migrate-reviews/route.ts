@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase'; // Using the service role client if available or default
 import { REVIEWS_DATA } from '@/lib/reviews-data';
@@ -15,7 +16,7 @@ export async function GET() {
         // But since we are backend, we can try using the standard client or createAdminClient if exported
 
         // Dynamic import to avoid circular dep issues if any, though likely fine
-        const { createAdminClient } = await import('@/lib/supabase');
+        const { createAdminClient } = await import('@/lib/supabase-admin');
         const adminClient = createAdminClient();
 
         for (const review of REVIEWS_DATA) {
@@ -37,7 +38,7 @@ export async function GET() {
                 .select();
 
             if (error) {
-                console.error(`Error migrating ${slug}:`, error);
+                logger.error(`Error migrating ${slug}`, error, { feature: 'admin-api', endpoint: 'migrate-reviews' });
                 results.push({ slug, status: 'error', error: error.message });
             } else {
                 results.push({ slug, status: 'success', id: data[0].id });

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { getHalvingData } from '@/lib/services/market-data'
 
@@ -8,7 +9,7 @@ export async function GET() {
         const data = await getHalvingData()
         return NextResponse.json(data)
     } catch (error) {
-        console.error('Halving API Error:', error)
+        logger.error('Halving API Error', error, { feature: 'market-api', endpoint: 'halving-status' })
         return NextResponse.json({ error: 'Failed to fetch halving data' }, { status: 500 })
     }
 }

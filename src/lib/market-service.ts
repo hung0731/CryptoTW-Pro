@@ -1,10 +1,12 @@
 import { getMarketSnapshot } from '@/lib/market-aggregator'
 import { generateMarketSummary } from '@/lib/gemini'
-import { createAdminClient, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { fetchRSSTitles } from '@/lib/rss'
+import { logger } from '@/lib/logger'
 
 export async function updateMarketSummary() {
-    console.log('[MarketService] Starting Market Summary Generation...')
+    logger.info('[MarketService] Starting Market Summary Generation...', { feature: 'market-service' })
 
     // 1. Aggregate Data
     const snapshot = await getMarketSnapshot()
@@ -15,7 +17,7 @@ export async function updateMarketSummary() {
         try {
             dbClient = createAdminClient()
         } catch (e) {
-            console.warn('Failed to create Admin Client, falling back to public client', e)
+            logger.warn('Failed to create Admin Client, falling back to public client', { feature: 'market-service', error: e })
         }
     }
 
@@ -44,7 +46,7 @@ export async function updateMarketSummary() {
         rssTitles = titles
 
     } catch (e) {
-        console.warn('[MarketService] Failed to fetch context data:', e)
+        logger.warn('[MarketService] Failed to fetch context data:', { feature: 'market-service', error: e })
     }
 
     // 2. Generate AI Report (Unified: Technical + Context)
@@ -54,7 +56,7 @@ export async function updateMarketSummary() {
         throw new Error('Failed to generate report')
     }
 
-    console.log('[MarketService] Report Generated. Saving...')
+    logger.info('[MarketService] Report Generated. Saving...', { feature: 'market-service' })
 
     // 3. Save to Supabase
     // dbClient is already initialized above
@@ -78,7 +80,7 @@ export async function updateMarketSummary() {
     })
 
     if (error) {
-        console.error('DB Insert Error:', error)
+        logger.error('DB Insert Error:', error as Error, { feature: 'market-service' })
         throw new Error(`Database save failed: ${error.message}`)
     }
 

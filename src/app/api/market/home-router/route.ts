@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { getDerivativesData } from '../derivatives/route'
 import { getWhaleData } from '../whales/route'
@@ -185,7 +186,7 @@ export async function GET() {
         })
 
     } catch (error) {
-        console.error('Home Router API Error:', error)
+        logger.error('Home Router API Error:', error as Error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { generateIndicatorSummary, IndicatorSummaryInput } from '@/lib/gemini'
 
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json(result)
     } catch (error) {
-        console.error('Indicator Summary API Error:', error)
+        logger.error('Indicator Summary API Error', error, { feature: 'ai-api', endpoint: 'indicator-summary' })
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

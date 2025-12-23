@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 import { generateMarketContextBrief, generateAIDecision } from '@/lib/gemini'
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
                         newsItems = json.data
                     }
                 } catch (e) {
-                    console.error('News fetch error:', e)
+                    logger.error('News fetch error', e instanceof Error ? e : new Error(String(e)), { feature: 'admin-api', endpoint: 'ai' })
                 }
             }
 
@@ -149,7 +150,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 
     } catch (e: any) {
-        console.error('AI Admin API Error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('AI Admin API Error', err, { feature: 'admin-api', endpoint: 'ai' })
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
 }

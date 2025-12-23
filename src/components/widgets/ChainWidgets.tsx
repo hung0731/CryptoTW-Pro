@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { Radar, Users, Newspaper } from 'lucide-react'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // Whale Watch Components
@@ -25,7 +26,7 @@ export function WhaleAlertFeed() {
                     setAlerts(json.whales.alerts)
                 }
             } catch (e) {
-                console.error('API Error:', e)
+                logger.error('API Error:', e as Error, { feature: 'chain-widgets' })
             }
             finally { setLoading(false) }
         }
@@ -246,7 +247,7 @@ export function WhaleAiSummaryCard() {
                 if (json.whales?.summary) {
                     setFetchedSummary(json.whales.summary)
                 }
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Whale Alert API Error:', e as Error, { feature: 'chain-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -296,7 +297,7 @@ export function WhalePositionsList() {
                 if (json.whales?.summary) {
                     setFetchedSummary(json.whales.summary)
                 }
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Whale Positions API Error:', e as Error, { feature: 'chain-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -353,7 +354,7 @@ export function IndicatorsGrid({ compact = false }: { compact?: boolean }) {
                 const res = await fetch('/api/coinglass/indicators')
                 const json = await res.json()
                 setData(json.indicators)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Indicators API Error:', e as Error, { feature: 'chain-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()

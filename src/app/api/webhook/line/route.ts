@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { Client, MiddlewareConfig, WebhookEvent, FlexMessage, TextMessage } from '@line/bot-sdk'
 import { BotPipeline } from '@/lib/bot/pipeline'
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
             .digest('base64')
 
         if (hash !== signature) {
-            console.error('Invalid signature')
+            logger.error('Invalid signature', new Error('Invalid signature'), { feature: 'webhook' })
             return NextResponse.json({ message: 'Invalid signature' }, { status: 401 })
         }
 
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'OK' })
 
     } catch (e) {
-        console.error('Webhook Error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Webhook Error', err, { feature: 'webhook' })
         return NextResponse.json({ message: 'Error' }, { status: 500 })
     }
 }

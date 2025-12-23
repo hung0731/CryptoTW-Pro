@@ -8,6 +8,7 @@ import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { DashboardData } from './types'
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // Bull/Bear Index Component
@@ -22,7 +23,7 @@ export function BullBearIndex() {
                 const res = await fetch('/api/coinglass/bull-bear')
                 const json = await res.json()
                 setData(json.bullBear)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch bull bear index', e as Error, { feature: 'sentiment-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()
@@ -131,7 +132,7 @@ export function FundingRateRankings() {
                     setData(json.fundingRates)
                 }
             } catch (e) {
-                console.error(e)
+                logger.error('Failed to fetch funding rate', e as Error, { feature: 'sentiment-widgets' })
                 setError('資料存取失敗')
             } finally {
                 setLoading(false)
@@ -243,7 +244,7 @@ export function LongShortRatio() {
                 const res = await fetch('/api/coinglass/long-short?symbol=BTC')
                 const json = await res.json()
                 setData(json.longShort)
-            } catch (e) { console.error(e) }
+            } catch (e) { logger.error('Failed to fetch long short ratio', e as Error, { feature: 'sentiment-widgets' }) }
             finally { setLoading(false) }
         }
         fetchData()

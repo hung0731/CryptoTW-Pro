@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { getSeasonalityData, getHalvingData, getDivergenceData } from '@/lib/services/market-data'
 
@@ -5,7 +6,7 @@ export const dynamic = 'force-dynamic' // Ensure this always runs when called
 
 export async function GET() {
     try {
-        console.log('🔥 System Warmup Triggered...')
+        logger.info('🔥 System Warmup Triggered...', { feature: 'system-warmup' })
         const start = Date.now()
 
         // Run fetches in parallel
@@ -20,7 +21,7 @@ export async function GET() {
         const summary = results.map(r => r.status === 'fulfilled' ? r.value : `Failed: ${r.reason}`)
         const duration = Date.now() - start
 
-        console.log(`✅ System Warmup Complete in ${duration}ms`, summary)
+        logger.info(`✅ System Warmup Complete in ${duration}ms`, { feature: 'system-warmup', summary })
 
         return NextResponse.json({
             message: 'System warmup complete',
@@ -29,7 +30,7 @@ export async function GET() {
         })
 
     } catch (error) {
-        console.error('Warmup Critical Failure:', error)
+        logger.error('Warmup Critical Failure', error, { feature: 'system-warmup' })
         return NextResponse.json({ error: 'Warmup failed' }, { status: 500 })
     }
 }

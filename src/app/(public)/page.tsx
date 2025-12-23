@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { HomePageClient } from './HomePageClient'
 import { MacroReaction } from '@/lib/macro-events'
+import { logger } from '@/lib/logger'
 
 // Server Component
 export default async function HomePage() {
@@ -16,7 +17,7 @@ export default async function HomePage() {
             reactions = data.data || {}
         }
     } catch (error) {
-        console.error('Failed to load reactions:', error)
+        logger.error('Failed to load reactions:', error, { feature: 'home-page' })
     }
 
     // Prefetch Market Status & Context
@@ -41,7 +42,7 @@ export default async function HomePage() {
             marketContext = contextJson.context
         }
     } catch (error) {
-        console.error('Failed to prefetch homepage data:', error)
+        logger.error('Failed to prefetch homepage data:', error, { feature: 'home-page' })
     }
 
     return (

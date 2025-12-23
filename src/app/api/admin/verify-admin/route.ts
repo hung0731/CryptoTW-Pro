@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { createSafeServerClient } from '@/lib/supabase'
 import { cookies } from 'next/headers'
@@ -20,7 +21,7 @@ export async function GET() {
 
         return NextResponse.json({ isAdmin })
     } catch (error) {
-        console.error('[verify-admin] Error:', error)
+        logger.error('[verify-admin] Error', error, { feature: 'admin-api', endpoint: 'verify-admin' })
         return NextResponse.json({ isAdmin: false }, { status: 500 })
     }
 }

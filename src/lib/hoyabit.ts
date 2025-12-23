@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 
 export interface HoyabitTicker {
     buy: number | null
@@ -24,7 +25,7 @@ export async function getHoyabitPrices(): Promise<HoyabitTicker> {
         ])
 
         if (!buyRes.ok || !sellRes.ok) {
-            console.error('[Hoyabit] API error:', { buyStatus: buyRes.status, sellStatus: sellRes.status })
+            logger.warn('[Hoyabit] API error:', { buyStatus: buyRes.status, sellStatus: sellRes.status, feature: 'hoyabit' })
             return { buy: null, sell: null, timestamp: Date.now() }
         }
 
@@ -53,7 +54,7 @@ export async function getHoyabitPrices(): Promise<HoyabitTicker> {
         }
 
     } catch (error) {
-        console.error('[Hoyabit] Fetch error:', error)
+        logger.error('[Hoyabit] Fetch error:', error as Error, { feature: 'hoyabit' })
         return { buy: null, sell: null, timestamp: Date.now() }
     }
 }

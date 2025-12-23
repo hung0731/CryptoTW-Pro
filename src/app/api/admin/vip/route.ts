@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -23,7 +24,7 @@ export async function GET() {
 
         return NextResponse.json({ applications: data })
     } catch (error) {
-        console.error('Admin VIP Fetch Error:', error)
+        logger.error('Admin VIP Fetch Error', error, { feature: 'admin-api', endpoint: 'vip' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

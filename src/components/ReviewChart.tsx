@@ -27,9 +27,10 @@ interface ReviewChartProps {
     focusWindow?: [number, number];
     isPercentage?: boolean;
     newsDate?: string;
+    overrideData?: any[]; // Allow direct data injection
 }
 
-export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false, newsDate }: ReviewChartProps) {
+export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false, newsDate, overrideData }: ReviewChartProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
@@ -50,44 +51,45 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     }
 
     useEffect(() => {
-        if (!reviewSlug) {
-            console.warn('ReviewChart missing reviewSlug prop')
-            setLoading(false)
-            return
-        }
-
         const loadData = () => {
             try {
-                // @ts-ignore
-                const reviewData = REVIEWS_HISTORY[reviewSlug]
-                if (!reviewData) {
-                    setLoading(false)
-                    return
-                }
+                let chartData: any[] = []
 
-                let chartData = []
-                if (type === 'price' || type === 'supply') {
-                    chartData = reviewData.price || []
-                } else if (type === 'flow') {
-                    // Special case for LUNA where we mapped flow to supply mock data in generator
-                    // Or for ETF where flow is flow
-                    chartData = reviewData.flow || []
-                } else if (type === 'oi') {
-                    chartData = reviewData.oi || []
-                } else if (type === 'fgi') {
-                    chartData = reviewData.fgi || []
-                } else if (type === 'funding') {
-                    chartData = reviewData.funding || []
-                } else if (type === 'liquidation') {
-                    chartData = reviewData.liquidation || []
-                } else if (type === 'longShort') {
-                    chartData = reviewData.longShort || []
-                } else if (type === 'basis') {
-                    chartData = reviewData.basis || []
-                } else if (type === 'premium') {
-                    chartData = reviewData.premium || []
-                } else if (type === 'stablecoin') {
-                    chartData = reviewData.stablecoin || []
+                if (overrideData) {
+                    chartData = overrideData
+                } else {
+                    if (!reviewSlug) {
+                        setLoading(false)
+                        return
+                    }
+                    // @ts-ignore
+                    const reviewData = REVIEWS_HISTORY[reviewSlug]
+                    if (!reviewData) {
+                        setLoading(false)
+                        return
+                    }
+
+                    if (type === 'price' || type === 'supply') {
+                        chartData = reviewData.price || []
+                    } else if (type === 'flow') {
+                        chartData = reviewData.flow || []
+                    } else if (type === 'oi') {
+                        chartData = reviewData.oi || []
+                    } else if (type === 'fgi') {
+                        chartData = reviewData.fgi || []
+                    } else if (type === 'funding') {
+                        chartData = reviewData.funding || []
+                    } else if (type === 'liquidation') {
+                        chartData = reviewData.liquidation || []
+                    } else if (type === 'longShort') {
+                        chartData = reviewData.longShort || []
+                    } else if (type === 'basis') {
+                        chartData = reviewData.basis || []
+                    } else if (type === 'premium') {
+                        chartData = reviewData.premium || []
+                    } else if (type === 'stablecoin') {
+                        chartData = reviewData.stablecoin || []
+                    }
                 }
 
                 // Client-side filtering if needed, though data is already roughly cut by generator

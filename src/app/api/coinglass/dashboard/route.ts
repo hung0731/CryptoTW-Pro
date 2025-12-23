@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
@@ -159,7 +160,7 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ dashboard })
     } catch (error) {
-        console.error('Dashboard API error:', error)
+        logger.error('Dashboard API error:', error as Error)
         return NextResponse.json({
             error: 'Failed to fetch dashboard data',
             dashboard: getDemoData()

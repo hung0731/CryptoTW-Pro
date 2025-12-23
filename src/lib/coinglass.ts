@@ -1,6 +1,7 @@
 // Coinglass API Configuration
 // API Documentation: https://docs.coinglass.com
 
+import { logger } from '@/lib/logger'
 import { getCache, setCache, CacheTTL, acquireLock, releaseLock } from './cache'
 
 // V2 API (legacy)
@@ -12,7 +13,7 @@ const COINGLASS_V4_URL = 'https://open-api-v4.coinglass.com'
 export const getCoinglassApiKey = () => {
     const key = process.env.COINGLASS_API_KEY
     if (!key) {
-        console.warn('COINGLASS_API_KEY not configured')
+        logger.warn('COINGLASS_API_KEY not configured', { feature: 'coinglass' })
         return null
     }
     return key
@@ -43,7 +44,7 @@ export async function coinglassRequest<T>(
 ): Promise<T | null> {
     const apiKey = getCoinglassApiKey()
     if (!apiKey) {
-        console.error('Coinglass API key not configured')
+        logger.error('Coinglass API key not configured', { feature: 'coinglass' })
         return null
     }
 
@@ -67,14 +68,14 @@ export async function coinglassRequest<T>(
             })
 
             if (!response.ok) {
-                console.error(`Coinglass V2 API error: ${response.status} ${response.statusText}`)
+                logger.error(`Coinglass V2 API error: ${response.status} ${response.statusText}`, { feature: 'coinglass' })
                 return null
             }
 
             const data = await response.json()
 
             if (data.code !== '0') {
-                console.error(`Coinglass V2 API error: ${data.msg}`)
+                logger.error(`Coinglass V2 API error: ${data.msg}`, { feature: 'coinglass' })
                 return null
             }
 
@@ -84,9 +85,9 @@ export async function coinglassRequest<T>(
         }
     } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
-            console.error('Coinglass V2 API request timed out')
+            logger.warn('Coinglass V2 API request timed out', { feature: 'coinglass' })
         } else {
-            console.error('Coinglass V2 API request failed:', error)
+            logger.error('Coinglass V2 API request failed:', error, { feature: 'coinglass' })
         }
         return null
     }
@@ -100,7 +101,7 @@ export async function coinglassV4Request<T>(
 ): Promise<T | null> {
     const apiKey = getCoinglassApiKey()
     if (!apiKey) {
-        console.error('Coinglass API key not configured')
+        logger.error('Coinglass API key not configured', { feature: 'coinglass' })
         return null
     }
 
@@ -124,14 +125,14 @@ export async function coinglassV4Request<T>(
             })
 
             if (!response.ok) {
-                console.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`)
+                logger.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`, { feature: 'coinglass' })
                 return null
             }
 
             const data = await response.json()
 
             if (data.code !== '0') {
-                console.error(`Coinglass V4 API error [${endpoint}]: ${data.msg}`)
+                logger.error(`Coinglass V4 API error [${endpoint}]: ${data.msg}`, { feature: 'coinglass' })
                 return null
             }
 
@@ -141,9 +142,9 @@ export async function coinglassV4Request<T>(
         }
     } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
-            console.error(`Coinglass V4 API request timed out [${endpoint}]`)
+            logger.warn(`Coinglass V4 API request timed out [${endpoint}]`, { feature: 'coinglass' })
         } else {
-            console.error('Coinglass V4 API request failed:', error)
+            logger.error('Coinglass V4 API request failed:', error, { feature: 'coinglass' })
         }
         return null
     }

@@ -18,6 +18,8 @@ export type FundingState = '偏多' | '中性' | '偏空'
 export type LongShortState = '多方佔優' | '相對平衡' | '空方佔優'
 export type LiquidationState = '高' | '中' | '低'
 
+import { logger } from '@/lib/logger'
+
 export interface MarketState {
     fundingState: FundingState
     longShortState: LongShortState
@@ -101,7 +103,7 @@ export async function getMarketState(symbol: 'BTC' = 'BTC'): Promise<MarketState
 
         return state
     } catch (error) {
-        console.error('[MarketState] Error fetching data:', error)
+        logger.error('[MarketState] Error fetching data:', error as Error, { feature: 'market-state' })
         return null
     }
 }
@@ -130,7 +132,7 @@ async function fetchFundingRate(symbol: string): Promise<number> {
 
         return avgRate
     } catch (error) {
-        console.error('[MarketState] Funding rate error:', error)
+        logger.error('[MarketState] Funding rate error:', error as Error, { feature: 'market-state' })
         return 0
     }
 }
@@ -154,7 +156,7 @@ async function fetchLongShortRatio(symbol: string): Promise<number> {
 
         return longRate
     } catch (error) {
-        console.error('[MarketState] Long/Short error:', error)
+        logger.error('[MarketState] Long/Short error:', error as Error, { feature: 'market-state' })
         return 50
     }
 }
@@ -175,7 +177,7 @@ async function fetchLiquidation(symbol: string): Promise<number> {
         // 回傳總清算金額（不區分方向）
         return longLiq + shortLiq
     } catch (error) {
-        console.error('[MarketState] Liquidation error:', error)
+        logger.error('[MarketState] Liquidation error:', error as Error, { feature: 'market-state' })
         return 0
     }
 }

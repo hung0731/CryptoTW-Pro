@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
@@ -54,13 +55,13 @@ export async function GET(req: NextRequest) {
         })
 
         if (!res.ok) {
-            console.error(`OI V3 API error: ${res.status}`)
+            logger.error(`OI V3 API error: ${res.status}`, { feature: 'coinglass-api', endpoint: 'open-interest-history' })
             return NextResponse.json({ error: 'Upstream API error' }, { status: 502 })
         }
 
         const json = await res.json()
         if (json.code !== '0' || !json.data) {
-            console.error('OI V3 API error:', json.msg)
+            logger.error('OI V3 API error', { feature: 'coinglass-api', endpoint: 'open-interest-history', errorMsg: json.msg })
             return NextResponse.json({ error: 'No data available' }, { status: 500 })
         }
 
@@ -107,7 +108,7 @@ export async function GET(req: NextRequest) {
             symbol,
         })
     } catch (error) {
-        console.error('Open Interest History API error:', error)
+        logger.error('Open Interest History API error', error, { feature: 'coinglass-api', endpoint: 'open-interest-history' })
         return NextResponse.json({ error: 'Failed to fetch open interest history' }, { status: 500 })
     }
 }

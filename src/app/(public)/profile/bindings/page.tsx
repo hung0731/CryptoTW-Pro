@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 import { useLiff } from '@/components/LiffProvider'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -8,7 +9,10 @@ import Link from 'next/link'
 import { Link2, RefreshCw, AlertCircle, CheckCircle, XCircle, ChevronRight, Plus } from 'lucide-react'
 import { UnifiedHeader } from '@/components/UnifiedHeader'
 import { SingleColumnLayout } from '@/components/layout/PageLayout'
-import { Section } from '@/components/layout/Section'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { UniversalCard, CardContent } from '@/components/ui/UniversalCard'
+import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { cn } from '@/lib/utils'
 
 interface Binding {
     id: string
@@ -42,7 +46,7 @@ export default function BindingsPage() {
                 setBindings(data.bindings)
             }
         } catch (e) {
-            console.error(e)
+            logger.error('Failed to fetch bindings', e, { feature: 'profile-bindings' })
         } finally {
             setLoading(false)
         }
@@ -77,16 +81,18 @@ export default function BindingsPage() {
                 }
             />
 
-            <SingleColumnLayout className="max-w-lg py-6">
+            <SingleColumnLayout className="max-w-lg py-6 space-y-6">
                 {/* Bindings List */}
-                <Section title="已綁定帳戶">
+                <div>
+                    <SectionHeaderCard title="已綁定帳戶" className="px-0 mb-3" />
+
                     {loading ? (
                         <div className="space-y-2">
                             <Skeleton className="h-16 w-full rounded-xl bg-neutral-900" />
                             <Skeleton className="h-16 w-full rounded-xl bg-neutral-900" />
                         </div>
                     ) : bindings.length === 0 ? (
-                        <div className="border border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center text-center gap-3">
+                        <UniversalCard variant="default" size="L" className="border-dashed border-white/10 flex flex-col items-center text-center gap-3 py-8">
                             <div className="p-3 bg-white/5 rounded-full">
                                 <AlertCircle className="h-6 w-6 text-neutral-500" />
                             </div>
@@ -99,11 +105,11 @@ export default function BindingsPage() {
                                     立即綁定
                                 </Button>
                             </Link>
-                        </div>
+                        </UniversalCard>
                     ) : (
                         <div className="space-y-2">
                             {bindings.map(b => (
-                                <div key={b.id} className="group flex items-center justify-between p-4 rounded-xl bg-[#0A0A0A] border border-[#1A1A1A] hover:bg-[#0E0E0F]">
+                                <UniversalCard key={b.id} variant="default" size="M" className="p-4 flex items-center justify-between group">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center border border-white/10 text-xs font-bold uppercase text-neutral-400">
                                             {b.exchange_name.slice(0, 2)}
@@ -112,17 +118,17 @@ export default function BindingsPage() {
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm font-medium text-white">{b.exchange_name}</span>
                                                 {b.status === 'verified' && (
-                                                    <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">
+                                                    <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full border border-green-500/20">
                                                         <CheckCircle className="w-3 h-3" /> 已驗證
                                                     </span>
                                                 )}
                                                 {b.status === 'pending' && (
-                                                    <span className="flex items-center gap-1 text-[10px] text-yellow-400 bg-yellow-500/10 px-1.5 py-0.5 rounded-full">
+                                                    <span className="flex items-center gap-1 text-[10px] text-yellow-400 bg-yellow-500/10 px-1.5 py-0.5 rounded-full border border-yellow-500/20">
                                                         <RefreshCw className="w-3 h-3 animate-spin" /> 審核中
                                                     </span>
                                                 )}
                                                 {b.status === 'rejected' && (
-                                                    <span className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">
+                                                    <span className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full border border-red-500/20">
                                                         <XCircle className="w-3 h-3" /> 已拒絕
                                                     </span>
                                                 )}
@@ -131,7 +137,7 @@ export default function BindingsPage() {
                                                 UID: {b.exchange_uid}
                                             </div>
                                             {b.status === 'rejected' && b.rejection_reason && (
-                                                <div className="text-[10px] text-red-400 mt-1">
+                                                <div className="text-[10px] text-red-400 mt-1 bg-red-900/10 px-2 py-1 rounded">
                                                     原因: {b.rejection_reason}
                                                 </div>
                                             )}
@@ -145,14 +151,14 @@ export default function BindingsPage() {
                                             </Button>
                                         </Link>
                                     )}
-                                </div>
+                                </UniversalCard>
                             ))}
                         </div>
                     )}
-                </Section>
+                </div>
 
                 {/* Add New Binding Button */}
-                <Link href="/join">
+                <Link href="/join" className="block">
                     <Button variant="outline" className="w-full border-dashed border border-[#1A1A1A] bg-transparent py-6 text-[#808080] hover:text-white hover:border-[#2A2A2A] hover:bg-[#0E0E0F] rounded-xl">
                         <Plus className="w-4 h-4 mr-2" />
                         綁定其他交易所

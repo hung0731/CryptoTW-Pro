@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { unstable_cache } from 'next/cache'
@@ -15,7 +16,7 @@ const getMarketStatusData = async () => {
         try {
             return await fn
         } catch (error) {
-            console.error(`[MarketStatus] Error fetching ${name}:`, error)
+            logger.error(`[MarketStatus] Error fetching ${name}`, error, { feature: 'market-status', task: name })
             return [] // Return empty array on failure
         }
     }
@@ -291,7 +292,7 @@ export async function GET(req: NextRequest) {
         const data = await getCachedMarketStatusData()
         return NextResponse.json(data)
     } catch (e) {
-        console.error('Market Status API Error:', e)
+        logger.error('Market Status API Error', e, { feature: 'market-status' })
         return NextResponse.json({ error: 'Failed to fetch status' }, { status: 500 })
     }
 }

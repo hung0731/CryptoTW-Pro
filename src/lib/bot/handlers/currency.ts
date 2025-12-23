@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { BotContext, BotHandler } from './base'
 import { parseCurrencyAmount } from '../utils/parsers'
 import { createCurrencyCard } from '../ui/flex-generator'
@@ -14,11 +15,21 @@ async function fetchExchangeRates() {
     // In a real refactor, this should be in a Service
     const [hoyaPrices, bitoRes] = await Promise.all([
         getHoyabitPrices(),
-        fetch('https://api.bitopro.com/v3/tickers/usdt_twd').then(r => r.json()).catch(() => null)
+        fetch('https://api.bitopro.com/v3/tickers/usdt_twd')
+            .then(r => r.json())
+            .catch(e => {
+                logger.warn('Bitopro API Error', { error: e })
+                return null
+            })
     ])
 
     // MAX API
-    const maxRes = await fetch('https://max-api.maicoin.com/api/v2/tickers/usdttwd').then(r => r.json()).catch(() => null)
+    const maxRes = await fetch('https://max-api.maicoin.com/api/v2/tickers/usdttwd')
+        .then(r => r.json())
+        .catch(e => {
+            logger.warn('MAX API Error', { error: e })
+            return null
+        })
 
     return {
         hoya: hoyaPrices?.buy || null,

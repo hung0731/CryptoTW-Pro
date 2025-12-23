@@ -11,6 +11,7 @@
 
 import { cachedCoinglassV4Request } from './coinglass'
 import { CacheTTL } from './cache'
+import { logger } from '@/lib/logger'
 
 export interface DailyBroadcastMetrics {
     fundingRate: number
@@ -41,7 +42,8 @@ export async function fetchDailyBroadcastMetrics(): Promise<DailyBroadcastMetric
     ])
 
     // Debug logging
-    console.log('[Daily Broadcast] Raw API data:', {
+    logger.debug('[Daily Broadcast] Raw API data:', {
+        feature: 'daily-broadcast-data',
         funding: fundingData,
         lsr: lsrData,
         liquidation: liqData,
@@ -59,7 +61,7 @@ export async function fetchDailyBroadcastMetrics(): Promise<DailyBroadcastMetric
         btcPriceChanges: priceData ?? { h1: 0, h4: 0, h12: 0, h24: 0 }
     }
 
-    console.log('[Daily Broadcast] Final metrics:', result)
+    logger.debug('[Daily Broadcast] Final metrics:', { feature: 'daily-broadcast-data', result })
 
     return result
 }
@@ -85,7 +87,7 @@ async function fetchFundingRate(): Promise<{ rate: number } | null> {
         }
         return null
     } catch (e) {
-        console.error('[Daily Broadcast] Funding rate fetch error:', e)
+        logger.error('[Daily Broadcast] Funding rate fetch error:', e as Error, { feature: 'daily-broadcast-data' })
         return null
     }
 }
@@ -109,7 +111,7 @@ async function fetchLongShortRatio(): Promise<{ longRate: number } | null> {
         }
         return null
     } catch (e) {
-        console.error('[Daily Broadcast] Long/Short ratio fetch error:', e)
+        logger.error('[Daily Broadcast] Long/Short ratio fetch error:', e as Error, { feature: 'daily-broadcast-data' })
         return null
     }
 }
@@ -143,7 +145,7 @@ async function fetchLiquidations(): Promise<{ bias: 'long' | 'short' | 'neutral'
         }
         return null
     } catch (e) {
-        console.error('[Daily Broadcast] Liquidation fetch error:', e)
+        logger.error('[Daily Broadcast] Liquidation fetch error:', e as Error, { feature: 'daily-broadcast-data' })
         return null
     }
 }
@@ -172,7 +174,7 @@ async function fetchOpenInterestChange(): Promise<{ change24h: number } | null> 
         }
         return null
     } catch (e) {
-        console.error('[Daily Broadcast] OI fetch error:', e)
+        logger.error('[Daily Broadcast] OI fetch error:', e as Error, { feature: 'daily-broadcast-data' })
         return null
     }
 }
@@ -210,7 +212,7 @@ async function fetchBtcPriceChanges(): Promise<{ h1: number, h4: number, h12: nu
             h24: calcChange(candles1h, 23)   // 24h ago
         }
     } catch (e) {
-        console.error('[Daily Broadcast] Price fetch error:', e)
+        logger.error('[Daily Broadcast] Price fetch error:', e as Error, { feature: 'daily-broadcast-data' })
         return null
     }
 }

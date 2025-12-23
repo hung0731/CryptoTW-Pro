@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import MACRO_HISTORY from '@/data/macro-history.json'
 
@@ -35,7 +36,7 @@ export async function GET(
             data: eventData
         })
     } catch (error) {
-        console.error('Error fetching macro event history:', error)
+        logger.error('Error fetching macro event history', error, { feature: 'macro-api', endpoint: 'history' })
         return NextResponse.json({
             success: false,
             error: 'Failed to fetch event history'

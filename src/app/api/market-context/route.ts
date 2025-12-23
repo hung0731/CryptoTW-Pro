@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateMarketContextBrief } from '@/lib/gemini'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
@@ -18,11 +19,11 @@ export async function GET(req: NextRequest) {
         // Check cache first
         const cached = await getCache(CACHE_KEY)
         if (cached) {
-            console.log('[Cache HIT] market_context')
+            logger.info('[Cache HIT] market_context', { feature: 'market-context' })
             return NextResponse.json({ context: cached, cached: true })
         }
 
-        console.log('[Cache MISS] market_context - generating fresh AI context')
+        logger.info('[Cache MISS] market_context - generating fresh AI context', { feature: 'market-context' })
 
         // Fetch news from Coinglass API (NOT RSS)
         const apiKey = process.env.COINGLASS_API_KEY
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ context })
 
     } catch (error) {
-        console.error('Market Context API Error:', error)
+        logger.error('Market Context API Error', error, { feature: 'market-context' })
 
         // Return fallback
         return NextResponse.json({

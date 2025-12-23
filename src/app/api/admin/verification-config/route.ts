@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -33,7 +34,8 @@ export async function GET() {
 
         return NextResponse.json({ config: data.value })
     } catch (e) {
-        console.error('Config GET error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Config GET error', err, { feature: 'admin-api', endpoint: 'verification-config' })
         return NextResponse.json({ config: DEFAULT_CONFIG })
     }
 }
@@ -70,7 +72,8 @@ export async function PUT(req: NextRequest) {
 
         return NextResponse.json({ success: true, config })
     } catch (e: any) {
-        console.error('Config PUT error:', e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Config PUT error', err, { feature: 'admin-api', endpoint: 'verification-config' })
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
 }

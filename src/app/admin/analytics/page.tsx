@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { logger } from '@/lib/logger'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase"
 import { Loader2, Activity, TrendingUp, Users, AlertCircle } from "lucide-react"
@@ -67,7 +68,7 @@ export default function AnalyticsPage() {
                 })
 
             } catch (e) {
-                console.error('Failed to fetch analytics:', e)
+                logger.error('Failed to fetch analytics:', e, { feature: 'admin-analytics' })
             } finally {
                 setIsLoading(false)
             }

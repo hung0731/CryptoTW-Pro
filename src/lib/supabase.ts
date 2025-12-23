@@ -32,22 +32,7 @@ export const createSafeServerClient = (cookieStore: any) => {
     })
 }
 
-export const createAdminClient = () => {
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!serviceRoleKey) {
-        throw new Error('Server Security Violation: SUPABASE_SERVICE_ROLE_KEY is required for AdminClient.')
-    }
-    // Strict Input Validation: Ensure we are not in browser
-    if (typeof window !== 'undefined') {
-        throw new Error('Security Violation: AdminClient cannot be initialized in browser.')
-    }
-    return _createClient(supabaseUrl, serviceRoleKey, {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false
-        }
-    })
-}
+// createAdminClient has been moved to @/lib/supabase-admin.ts to enforce server-only usage
 
 export const supabase = createClient()
 

@@ -40,7 +40,7 @@ const BiasConfig = {
 
 function AIDecisionSkeleton() {
     return (
-        <div className={cn(CARDS.primary, SPACING.cardLarge)}>
+        <div className={cn(CARDS.primary, SPACING.card)}>
             <div className="flex items-center gap-2 mb-4">
                 <Skeleton className="w-5 h-5 rounded bg-[#1A1A1A]" />
                 <Skeleton className="h-4 w-32 bg-[#1A1A1A]" />

@@ -1,18 +1,11 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import {
-    LiquidationWaterfall,
-    LongShortRatio,
-    WhaleAlertFeed,
-    IndicatorsGrid,
-    DerivativesAiSummaryCard,
-    // New compact card components
-    LiquidationSummary,
-    LongShortSummary,
-    OpenInterestCard,
-    TakerVolumeCard
-} from '@/components/CoinglassWidgets'
+import { LiquidationWaterfall, LiquidationSummary } from '@/components/widgets/LiquidationWidgets'
+import { LongShortRatio, LongShortSummary } from '@/components/widgets/SentimentWidgets'
+import { WhaleAlertFeed, IndicatorsGrid } from '@/components/widgets/ChainWidgets'
+import { DerivativesAiSummaryCard, OpenInterestCard } from '@/components/widgets/DashboardWidgets'
+import { TakerVolumeCard } from '@/components/widgets/MarketWidgets'
 import { ExplainTooltip } from '@/components/ExplainTooltip'
 import { INDICATOR_KNOWLEDGE } from '@/lib/indicator-knowledge'
 import { Flame, TrendingUp, Radar, Users, Building2, BarChart3 } from 'lucide-react'

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { logger } from '@/lib/logger'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
-import { createAdminClient } from '@/lib/supabase' // Note: This is client component, might need API or use client supabase. 
+
 // Actually reviews uses direct DB access in Server Component. We must adapt it to Client Component or fetch via API.
 // Existing reviews/page.tsx was a Server Component.
 // To make Tabs work, we need a Client Component.
@@ -52,7 +53,7 @@ function ReviewsTab() {
                 setReviews(data.reviews || [])
             }
         } catch (e) {
-            console.error(e)
+            logger.error('Failed to fetch reviews', e, { feature: 'admin-content' })
         } finally {
             setLoading(false)
         }
@@ -161,7 +162,7 @@ function PushTab() {
             const data = await res.json()
             if (data.history) setHistory(data.history)
         } catch (e) {
-            console.error(e)
+            logger.error('Failed to fetch push history', e, { feature: 'admin-content' })
         } finally {
             setLoadingHistory(false)
         }
@@ -309,7 +310,7 @@ function AnnouncementManager() {
             setIsActive(true)
             fetchAnnouncements()
         } catch (e) {
-            console.error(e)
+            logger.error('Failed to save announcement', e, { feature: 'admin-content' })
         } finally {
             setLoading(false)
         }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server';
 import { getApiUsageStats } from '@/lib/api-usage';
 
@@ -13,7 +14,7 @@ export async function GET() {
             timestamp: new Date().toISOString(),
         });
     } catch (error) {
-        console.error('Error fetching API usage stats:', error);
+        logger.error('Error fetching API usage stats', error, { feature: 'admin-api', endpoint: 'api-usage' });
         return NextResponse.json(
             { success: false, error: 'Failed to fetch API usage stats' },
             { status: 500 }

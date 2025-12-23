@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/PageHeader'
+import { logger } from '@/lib/logger'
 import SingleEventClient from '@/components/SingleEventClient'
 import fs from 'fs'
 import path from 'path'
@@ -24,9 +25,9 @@ export default async function MacroEventDetailPage({ params }: { params: Promise
             .filter(([k, v]: [string, any]) => v.eventKey === key)
             .reduce((obj, [k, v]) => ({ ...obj, [k]: v }), {})
 
-        console.log(`Server: Loaded ${Object.keys(reactions).length} reactions for ${key}`)
+        // loaded data
     } catch (error) {
-        console.error('Failed to load reactions:', error)
+        logger.error('Failed to load reactions:', error, { feature: 'calendar', page: 'detail', key })
     }
 
     if (!eventDef) {

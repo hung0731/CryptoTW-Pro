@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +19,7 @@ export async function GET() {
             .order('created_at', { ascending: false })
 
         if (error) {
-            console.error('Reviews Fetch Error:', error)
+            logger.error('Reviews Fetch Error', error instanceof Error ? error : new Error(String(error)), { feature: 'admin-api', endpoint: 'content/reviews' })
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 

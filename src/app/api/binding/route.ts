@@ -1,5 +1,7 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { getInviteeDetail, parseOkxData } from '@/lib/okx-affiliate'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 import { verifyLineAccessToken } from '@/lib/line-auth'
@@ -35,7 +37,7 @@ async function getVerificationConfig() {
             return data.value as VerificationConfig
         }
     } catch (e) {
-        console.error('[Binding] Failed to fetch config:', e)
+        logger.error('[Binding] Failed to fetch config', e, { feature: 'binding-api' })
     }
     return null // No fallback to hardcoded insecure defaults
 }
@@ -57,7 +59,7 @@ export async function POST(req: NextRequest) {
         const accessToken = authHeader.slice(7)
         const tokenVerification = await verifyLineAccessToken(accessToken)
         if (!tokenVerification.valid || !tokenVerification.userId) {
-            console.warn('[Binding] Token verification failed:', tokenVerification.error)
+            logger.warn('[Binding] Token verification failed', { feature: 'binding-api', errorMsg: tokenVerification.error })
             return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 })
         }
         const verifiedLineUserId = tokenVerification.userId
@@ -116,14 +118,14 @@ export async function POST(req: NextRequest) {
             const config = await getVerificationConfig()
 
             if (!config) {
-                console.error('[Binding] Critical: Verification config missing')
+                logger.error('[Binding] Critical: Verification config missing', { feature: 'binding-api' })
                 // Fail safe: Don't auto-verify if we can't check rules
                 rejectionReason = '系統暫時無法驗證，將轉為人工審核'
             } else if (!config.auto_verify_enabled) {
-                console.log('[Binding] Auto-verify disabled by config')
+                logger.info('[Binding] Auto-verify disabled by config', { feature: 'binding-api' })
             } else {
                 try {
-                    console.log('[Binding] Checking OKX API for UID:', trimmedUid)
+                    logger.debug('[Binding] Checking OKX API for UID', { feature: 'binding-api', uid: trimmedUid })
                     const okxData = await getInviteeDetail(trimmedUid)
 
                     if (okxData) {
@@ -146,7 +148,7 @@ export async function POST(req: NextRequest) {
                         rejectionReason = `OKX API 查無此 UID`
                     }
                 } catch (okxError) {
-                    console.error('[Binding] OKX API error:', okxError)
+                    logger.error('[Binding] OKX API error', okxError, { feature: 'binding-api' })
                     rejectionReason = null
                 }
             }
@@ -172,7 +174,7 @@ export async function POST(req: NextRequest) {
             if (error.code === '23505') {
                 return NextResponse.json({ error: '您已提交過此交易所的 UID' }, { status: 409 })
             }
-            console.error('Binding Error', error)
+            logger.error('Binding Error', error, { feature: 'binding-api' })
             return NextResponse.json({ error: 'Failed to submit binding' }, { status: 500 })
         }
 
@@ -193,7 +195,7 @@ export async function POST(req: NextRequest) {
                 await pushMessage(verifiedLineUserId, [{
                     type: 'text',
                     text: '🎉 恭喜！您的 OKX 帳號已自動驗證通過，Pro 會員資格已開通！'
-                }]).catch(e => console.error('Push error:', e))
+                }]).catch(e => logger.error('Push error', e, { feature: 'binding-api' }))
 
                 return NextResponse.json({
                     success: true,
@@ -202,7 +204,7 @@ export async function POST(req: NextRequest) {
                     message: '🎉 驗證通過！Pro 會員已開通'
                 })
             } catch (upgradeError) {
-                console.error('[Binding] Upgrade failed:', upgradeError)
+                logger.error('[Binding] Upgrade failed', upgradeError, { feature: 'binding-api' })
                 // If upgrade fails, we still returned success for binding, but user isn't upgraded.
                 // Ideally we should transaction this, but Supabase HTTP API doesn't support easy transactions across calls.
                 // We will log critical error.
@@ -239,7 +241,7 @@ export async function POST(req: NextRequest) {
             })
         }
     } catch (e) {
-        console.error('[Binding] API Error:', e)
+        logger.error('[Binding] API Error', e, { feature: 'binding-api' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

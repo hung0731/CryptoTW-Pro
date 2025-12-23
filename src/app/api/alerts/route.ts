@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 
@@ -24,7 +25,8 @@ export async function GET(req: NextRequest) {
         .limit(limit)
 
     if (alertsError) {
-        console.error('Error fetching public alerts:', alertsError)
+        const err = alertsError instanceof Error ? alertsError : new Error(String(alertsError))
+        logger.error('Error fetching public alerts', err, { feature: 'alerts-api' })
         return NextResponse.json({ alerts: [], error: alertsError.message }, { status: 500 })
     }
 

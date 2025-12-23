@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { CARDS, SPACING } from '@/lib/design-tokens'
+import { SPACING, SURFACE, BORDER } from '@/lib/design-tokens'
+import { UniversalCard, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/UniversalCard'
 import { ChevronRight, Check, AlertTriangle, X } from 'lucide-react'
 
 import { MarketStatusData, Conclusion } from '@/lib/types'
@@ -44,9 +45,9 @@ const getSemanticStatus = (code: string, type: string): { icon: 'ok' | 'warn' | 
 
 const StatusBadge = ({ type, text }: { type: 'ok' | 'warn' | 'danger', text: string }) => {
     const config = {
-        ok: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/30', Icon: Check },
-        warn: { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-500/30', Icon: AlertTriangle },
-        danger: { bg: 'bg-red-500/15', text: 'text-red-400', border: 'border-red-500/30', Icon: X },
+        ok: { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20', Icon: Check },
+        warn: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', Icon: AlertTriangle },
+        danger: { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20', Icon: X },
     }
     const c = config[type]
 
@@ -95,7 +96,7 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
     }, [initialStatus])
 
     if (loading && !data) {
-        return <Skeleton className="h-28 w-full bg-[#0A0A0A] rounded-xl" />
+        return <Skeleton className="h-48 w-full bg-[#0A0A0A] rounded-xl" />
     }
 
     if (!data) return null
@@ -113,45 +114,54 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
     const warnCount = checks.filter(c => c.icon === 'warn').length
 
     return (
-        <div className={cn(CARDS.secondary, "p-5")}>
+        <UniversalCard variant="default" size="M">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-white">市場快照</h3>
+            <CardHeader className="flex flex-row items-center justify-between mb-3 space-y-0">
+                <CardTitle>市場快照</CardTitle>
                 {dangerCount > 0 ? (
-                    <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
                         {dangerCount} 項警示
                     </span>
                 ) : warnCount > 0 ? (
-                    <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                         {warnCount} 項留意
                     </span>
                 ) : (
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                         全部正常
                     </span>
                 )}
-            </div>
+            </CardHeader>
 
-            {/* Status Grid - 填滿空白 */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
-                {checks.slice(0, 3).map((check) => (
-                    <StatusBadge key={check.type} type={check.icon} text={check.text} />
-                ))}
-            </div>
-            <div className="grid grid-cols-2 gap-2 mb-4">
-                {checks.slice(3).map((check) => (
-                    <StatusBadge key={check.type} type={check.icon} text={check.text} />
-                ))}
-            </div>
+            {/* Status Grid */}
+            <CardContent>
+                <div className={cn("grid grid-cols-3", SPACING.classes.gapCards, "mb-3")}>
+                    {checks.slice(0, 3).map((check) => (
+                        <StatusBadge key={check.type} type={check.icon} text={check.text} />
+                    ))}
+                </div>
+                <div className={cn("grid grid-cols-2", SPACING.classes.gapCards)}>
+                    {checks.slice(3).map((check) => (
+                        <StatusBadge key={check.type} type={check.icon} text={check.text} />
+                    ))}
+                </div>
+            </CardContent>
 
             {/* CTA */}
-            <Link
-                href="/prediction"
-                className="mt-auto flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-neutral-400 hover:text-white hover:bg-white/10"
-            >
-                <span>檢查風險訊號</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-        </div>
+            <CardFooter className="mt-4 pt-0">
+                <Link
+                    href="/prediction"
+                    className={cn(
+                        "w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors",
+                        SURFACE.elevated,
+                        BORDER.primary,
+                        "text-neutral-400 hover:text-white hover:bg-[#1A1A1A]"
+                    )}
+                >
+                    <span>檢查詳細風險訊號</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+            </CardFooter>
+        </UniversalCard>
     )
 }

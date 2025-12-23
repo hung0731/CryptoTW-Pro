@@ -1,4 +1,5 @@
 
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { rateLimit } from '@/lib/rate-limit'
@@ -33,13 +34,14 @@ export async function POST(req: NextRequest) {
             })
 
         if (error) {
-            console.error('Tracking Error:', error)
+            logger.error('Tracking Error', error instanceof Error ? error : new Error(String(error)), { feature: 'track-api' })
             return NextResponse.json({ error: 'Failed' }, { status: 500 })
         }
 
         return NextResponse.json({ success: true })
     } catch (e) {
-        console.error(e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Internal Server Error', err, { feature: 'track-api' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

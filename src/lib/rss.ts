@@ -1,11 +1,12 @@
 export const RSS_URL = 'https://www.panewslab.com/zh/rss/newsflash.xml'
+import { logger } from '@/lib/logger'
 
 export async function fetchRSSTitles(limit: number = 30): Promise<string> {
     try {
-        console.log('Fetching RSS from:', RSS_URL)
+        logger.debug('Fetching RSS from:', { feature: 'rss', url: RSS_URL })
         const rssRes = await fetch(RSS_URL, { next: { revalidate: 300 } }) // Lower cache time to 5m for "News Flash"
         if (!rssRes.ok) {
-            console.error(`Failed to fetch RSS: ${rssRes.status}`)
+            logger.error(`Failed to fetch RSS: ${rssRes.status}`, new Error('RSS fetch failed'), { feature: 'rss', status: rssRes.status })
             return ''
         }
         const xmlText = await rssRes.text()
@@ -38,7 +39,7 @@ export async function fetchRSSTitles(limit: number = 30): Promise<string> {
 
         return items.join('\n\n')
     } catch (error) {
-        console.error('RSS Fetch Error:', error)
+        logger.error('RSS Fetch Error:', error as Error, { feature: 'rss' })
         return ''
     }
 }

@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
@@ -48,7 +49,8 @@ export async function GET(req: NextRequest) {
         })
 
     } catch (e) {
-        console.error(e)
+        const err = e instanceof Error ? e : new Error(String(e))
+        logger.error('Export API Error', err, { feature: 'admin-api', endpoint: 'export' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

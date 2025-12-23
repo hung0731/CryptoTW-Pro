@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 
 const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
@@ -24,7 +25,7 @@ export async function GET() {
 
         const json = await res.json()
         if (json.code !== '0' || !json.data) {
-            console.error('Stablecoin API error response:', json)
+            logger.error('Stablecoin API error response', { feature: 'coinglass-api', endpoints: 'stablecoin', response: json })
             return NextResponse.json({ error: 'API error' }, { status: 500 })
         }
 
@@ -33,7 +34,7 @@ export async function GET() {
         const { data_list, time_list } = rawData
 
         if (!data_list || !time_list || data_list.length === 0) {
-            console.error('Stablecoin missing fields:', Object.keys(rawData || {}))
+            logger.error('Stablecoin missing fields', { feature: 'coinglass-api', endpoints: 'stablecoin', missingFields: Object.keys(rawData || {}) })
             return NextResponse.json({ error: 'Invalid data format' }, { status: 500 })
         }
 
@@ -75,7 +76,8 @@ export async function GET() {
             }))
         })
     } catch (e) {
-        console.error('Stablecoin API error:', e)
+        const error = e instanceof Error ? e : new Error(String(e))
+        logger.error('Stablecoin API error', error, { feature: 'coinglass-api', endpoints: 'stablecoin' })
         return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
     }
 }

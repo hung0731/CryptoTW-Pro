@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { GoogleGenerativeAI } from '@google/generative-ai'
@@ -66,7 +67,7 @@ ${JSON.stringify(top20, null, 2)}
         const result = await model.generateContent(prompt)
         return result.response.text().trim()
     } catch (e) {
-        console.error('Whale Summary AI Error:', e)
+        logger.error('Whale Summary AI Error', e, { feature: 'market-api', endpoint: 'whales' })
         return null
     }
 }
@@ -77,11 +78,11 @@ export async function getWhaleData() {
     // Check cache first
     const cached = await getCache<any>(CACHE_KEY)
     if (cached) {
-        console.log('[Cache HIT] whales_data')
+        logger.debug('[Cache HIT] whales_data', { feature: 'market-api', endpoint: 'whales' })
         return cached
     }
 
-    console.log('[Cache MISS] whales_data - fetching fresh data')
+    logger.debug('[Cache MISS] whales_data - fetching fresh data', { feature: 'market-api', endpoint: 'whales' })
 
     const [alerts, positions] = await Promise.all([
         coinglassV4Request<any[]>('/api/hyperliquid/whale-alert', {}),
@@ -112,7 +113,7 @@ export async function GET() {
         const data = await getWhaleData()
         return NextResponse.json({ whales: data })
     } catch (error) {
-        console.error('Whale Watch API Error:', error)
+        logger.error('Whale Watch API Error', error, { feature: 'market-api', endpoint: 'whales' })
         return NextResponse.json({ error: 'Failed to fetch whale data' }, { status: 500 })
     }
 }

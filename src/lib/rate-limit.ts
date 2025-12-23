@@ -1,4 +1,5 @@
-import { createAdminClient } from '@/lib/supabase'
+import { createAdminClient } from '@/lib/supabase-admin'
+import { logger } from '@/lib/logger'
 
 export async function rateLimit(identifier: string, limit: number, windowSeconds: number): Promise<{ success: boolean }> {
     try {
@@ -11,14 +12,14 @@ export async function rateLimit(identifier: string, limit: number, windowSeconds
         })
 
         if (error) {
-            console.error('Rate Limit RPC Error:', error)
+            logger.error('Rate Limit RPC Error:', error as Error, { feature: 'rate-limit' })
             // Fail open (allow request) if rate limiter fails, to avoid blocking legit users during outage
             return { success: true }
         }
 
         return { success: data as boolean }
     } catch (e) {
-        console.error('Rate Limit Exception:', e)
+        logger.error('Rate Limit Exception:', e as Error, { feature: 'rate-limit' })
         return { success: true }
     }
 }

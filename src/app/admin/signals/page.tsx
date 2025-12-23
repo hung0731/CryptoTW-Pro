@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { logger } from '@/lib/logger'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Activity, Bot, AlertTriangle, TrendingUp, TrendingDown, Zap, Users, RefreshCw, Loader2, Newspaper, CheckCircle, AlertCircle, Trash2 } from 'lucide-react'
@@ -63,7 +64,7 @@ function AlertsTab() {
             setAlerts(data.alerts || [])
             setMarketState(data.marketState || null)
         } catch (e) {
-            console.error('Failed to fetch alerts:', e)
+            logger.error('Failed to fetch alerts:', e, { feature: 'admin-signals' })
         } finally {
             setLoading(false)
         }
@@ -210,7 +211,7 @@ function AIStatusTab() {
             const json = await res.json()
             setStatus(json)
         } catch (e) {
-            console.error('Fetch error:', e)
+            logger.error('Fetch error:', e, { feature: 'admin-signals-ai' })
         } finally {
             setLoading(false)
         }
