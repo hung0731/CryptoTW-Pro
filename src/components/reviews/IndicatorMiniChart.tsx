@@ -76,7 +76,7 @@ export function IndicatorMiniChart({
             }
         };
 
-        fetchData();
+        void fetchData();
     }, [indicatorSlug, daysRange]);
 
     // 計算 SVG 路徑

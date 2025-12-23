@@ -4,7 +4,7 @@ import yahooFinance from 'yahoo-finance2'
 
 export async function fetchStockTicker(symbol: string) {
     try {
-        // @ts-ignore
+
         const yf = new yahooFinance()
         const quote = await yf.quote(symbol) as any
 

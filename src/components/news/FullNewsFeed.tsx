@@ -38,7 +38,7 @@ export function FullNewsFeed() {
                 setLoading(false)
             }
         }
-        fetchContext()
+        void fetchContext()
         const interval = setInterval(fetchContext, 300000)
         return () => clearInterval(interval)
     }, [])

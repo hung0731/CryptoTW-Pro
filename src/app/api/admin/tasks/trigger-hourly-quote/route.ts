@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { multicastMessage } from '@/lib/line-bot'
 import { getMarketSnapshot } from '@/lib/market-aggregator'
+import { createBrandedFlexMessage } from '@/lib/bot/ui/base'
 
 export async function POST(req: NextRequest) {
     try {
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
         const trend = (btc.change_24h || 0) >= 0 ? '上漲' : '下跌'
 
         // 3. Format LINE Message (Branded)
-        const { createBrandedFlexMessage } = require('@/lib/bot/ui/base')
+        // const { createBrandedFlexMessage } = require('@/lib/bot/ui/base')
 
         const message = createBrandedFlexMessage({
             title: '每小時行情速報',

@@ -1,7 +1,9 @@
+import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CHART } from "@/lib/design-tokens"
 
 export function SkeletonReviewChart() {
+    const [bars] = useState(() => [...Array(20)].map(() => 20 + Math.random() * 60))
     return (
         <div className="relative w-full h-[300px] bg-[#0A0A0A] rounded-lg p-4 overflow-hidden border border-white/[0.05]">
             {/* Header */}
@@ -40,7 +42,7 @@ export function SkeletonReviewChart() {
                         <div
                             key={i}
                             className="flex-1 bg-white/[0.03] rounded-sm"
-                            style={{ height: `${20 + Math.random() * 60}%` }}
+                            style={{ height: `${bars[i]}%` }}
                         />
                     ))}
                 </div>

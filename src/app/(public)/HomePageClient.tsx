@@ -52,7 +52,7 @@ export function HomePageClient({
     const historicalMatch = initialStatus ? findHistoricalSimilarity(initialStatus as any) : null
 
     // Greeting Logic
-    const getGreeting = () => {
+    const [greeting] = React.useState(() => {
         const hour = new Date().getHours()
         const greetings = {
             morning: ["👋 早安", "🌅 早上好", "☀️ 早安", "💪 早安，戰神", "🥐 吃早餐了嗎"],
@@ -67,8 +67,7 @@ export function HomePageClient({
         else if (hour >= 14 && hour < 18) list = greetings.afternoon
         else if (hour >= 18 && hour < 23) list = greetings.evening
         return list[Math.floor(Math.random() * list.length)]
-    }
-    const greeting = getGreeting()
+    })
 
     if (isAuthLoading) {
         return <div className="min-h-screen bg-black flex items-center justify-center">

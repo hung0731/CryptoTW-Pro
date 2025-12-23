@@ -28,8 +28,8 @@ export function LiquidationWaterfall() {
             } catch (e) { logger.error('Failed to fetch liquidation data', e as Error, { feature: 'liquidation-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
-        const interval = setInterval(fetchData, 30000)
+        void fetchData()
+        const interval = setInterval(() => { void fetchData() }, 30000)
         return () => clearInterval(interval)
     }, [timeframe])
 

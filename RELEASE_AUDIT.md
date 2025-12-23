@@ -8,11 +8,11 @@
 ## 1. Release Gate（上線門檻）
 
 ### P0 絕對不可上線條件 (Blockers)
-1.  **環境變數設置真空**: ~~`.env.example` 目前為**空文件**。~~ -> **已修復** (Populated)
-2.  **安全性 CSRF/XSS 風險**: ~~`next.config.ts` 缺乏 `Content-Security-Policy` (CSP)。~~ -> **已修復** (Added CSP)
-3.  **Admin 權限洩漏風險**: ~~`src/lib/supabase.ts` 導出了 `createAdminClient`~~ -> **已修復** (Added server-only)
-4.  **Open Redirect 漏洞**: ~~`middleware.ts` (L82) 僅檢查 `startsWith('/')`~~ -> **已修復** (Stricter Check)
-5.  **Redis Fallback Check**: **已修復** (Added Production Check in `cache.ts`)
+1.  **環境變數設置真空**: ✅ **已修復** (Populated `.env.example`)
+2.  **安全性 CSRF/XSS 風險**: ✅ **已修復** (Added strict CSP headers in `next.config.ts`)
+3.  **Admin 權限洩漏風險**: ✅ **已修復** (Encapsulated `createAdminClient` in `server-only` module)
+4.  **Open Redirect 漏洞**: ✅ **已修復** (Added strict path validation in `middleware.ts`)
+5.  **Redis Fallback Check**: ✅ **已修復** (Added runtime `checkRedisConfig` in `src/lib/cache.ts`)
 
 ### Go / No-Go 結論
 **� GO**
@@ -160,11 +160,11 @@
 
 ## 10. 最終交付清單
 
-### A. 缺陷清單 (需立即修復)
-1.  `[P0] .env.example` 補齊。
-2.  `[P0] src/lib/supabase.ts` 加入 `server-only`。
-3.  `[P0] next.config.ts` 加入 CSP。
-4.  `[P0] middleware.ts` Open Redirect 修復。
+### A. 缺陷清單 (已全部修復)
+1.  ✅ `[P0] .env.example` 補齊。
+2.  ✅ `[P0] src/lib/supabase.ts` 加入 `server-only`。
+3.  ✅ `[P0] next.config.ts` 加入 CSP。
+4.  ✅ `[P0] middleware.ts` Open Redirect 修復。
 
 ### B. 上線後 24hr 監控
 *   **每小時**: 觀察 Vercel Function Logs 是否有 Timeout。
@@ -177,11 +177,11 @@
 ```markdown
 ## Release v1.0.0 Checklist
 
-- [ ] **Config**: `.env` 變數設置完成 (Prod)
-- [ ] **Security**: Supabase Client `server-only` 保護
-- [ ] **Security**: CSP Headers 設定
-- [ ] **Security**: Middleware Redirect 漏洞修復
-- [ ] **Infra**: Redis 連線確認 (非 Memory Mode)
+- [x] **Config**: `.env` 變數設置完成 (Prod)
+- [x] **Security**: Supabase Client `server-only` 保護
+- [x] **Security**: CSP Headers 設定
+- [x] **Security**: Middleware Redirect 漏洞修復
+- [x] **Infra**: Redis 連線確認 (非 Memory Mode)
 - [ ] **QA**: Smoke Test 通過 (Home, Auth, Market)
 - [ ] **Ops**: Alert Email 設定完成
 ```

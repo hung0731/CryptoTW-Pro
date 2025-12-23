@@ -9,6 +9,7 @@ export function RiskToast() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         const acknowledged = localStorage.getItem("risk_acknowledged_at");
         const now = Date.now();

@@ -30,10 +30,11 @@ interface HalvingAPIResponse {
 // Sub-Component: Countdown Card
 // ----------------------------------------------------------------------
 function HalvingCountdown({ currentHeight }: { currentHeight: number }) {
+    const [now] = useState(Date.now())
     const blocksLeft = NEXT_HALVING_BLOCK - currentHeight
     const secondsLeft = blocksLeft * BLOCK_TIME_SEC
     const daysLeft = Math.floor(secondsLeft / (3600 * 24))
-    const dateEstimated = new Date(Date.now() + secondsLeft * 1000)
+    const dateEstimated = new Date(now + secondsLeft * 1000)
 
     return (
         <div className="bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden group">

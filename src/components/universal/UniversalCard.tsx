@@ -14,13 +14,9 @@ interface CardHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'ti
     icon?: React.ReactNode;
 }
 
-interface CardBodyProps extends React.HTMLAttributes<HTMLDivElement> {
-    // Just a wrapper for consistent spacing
-}
+type CardBodyProps = React.HTMLAttributes<HTMLDivElement>
 
-interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-    // Just a wrapper
-}
+type CardFooterProps = React.HTMLAttributes<HTMLDivElement>    // Just a wrapper
 
 const variantStyles: Record<CardVariant, string> = {
     default: 'bg-surface-1 border border-border-subtle shadow-sm',

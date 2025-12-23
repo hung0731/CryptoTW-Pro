@@ -32,7 +32,7 @@ export function DerivativesAiSummaryCard() {
                 setLoading(false)
             }
         }
-        fetchSummary()
+        void fetchSummary()
     }, [])
 
     // Loading Skeleton

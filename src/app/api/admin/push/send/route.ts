@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { multicastMessage } from '@/lib/line-bot'
+import { createBrandedFlexMessage } from '@/lib/bot/ui/base'
 
 export async function POST(req: NextRequest) {
     try {
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
         logger.info(`[Push] Target User Count: ${userIds.length}`, { feature: 'push-notification' })
 
         // 2. Construct LINE Message
-        const { createBrandedFlexMessage } = require('@/lib/bot/ui/base')
+        // const { createBrandedFlexMessage } = require('@/lib/bot/ui/base')
         const messages: any[] = []
 
         // Use branded flex message for the main content

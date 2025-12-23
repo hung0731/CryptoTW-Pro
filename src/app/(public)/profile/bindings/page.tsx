@@ -30,7 +30,7 @@ export default function BindingsPage() {
 
     useEffect(() => {
         if (profile?.userId) {
-            fetchBindings(profile.userId)
+            void fetchBindings(profile.userId)
         }
     }, [profile])
 
@@ -73,7 +73,7 @@ export default function BindingsPage() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => profile?.userId && fetchBindings(profile.userId)}
+                        onClick={() => { if (profile?.userId) void fetchBindings(profile.userId) }}
                         className="hover:bg-white/10 text-white rounded-full h-8 w-8 p-0"
                     >
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />

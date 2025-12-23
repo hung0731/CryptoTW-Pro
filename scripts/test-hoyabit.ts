@@ -31,4 +31,4 @@ async function test() {
     }
 }
 
-test();
+test().catch(console.error);

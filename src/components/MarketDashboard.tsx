@@ -52,7 +52,7 @@ export default function MarketDashboard() {
             }
         }
 
-        fetchData()
+        void fetchData()
         // Refresh every 60 seconds
         const interval = setInterval(fetchData, 60000)
         return () => clearInterval(interval)

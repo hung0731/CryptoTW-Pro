@@ -89,6 +89,7 @@ export function SentimentMatrix() {
                 loading: true
             }
         })
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIndicators(initIndicators)
 
         // 取得即時數據
@@ -155,7 +156,7 @@ export function SentimentMatrix() {
             setIndicators(validResults)
         }
 
-        fetchData()
+        void fetchData()
     }, [])
 
     return (

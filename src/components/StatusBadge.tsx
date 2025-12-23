@@ -94,6 +94,7 @@ export function IndicatorStatusBadge({
     size = 'sm'
 }: IndicatorStatusBadgeProps) {
     // 動態載入知識庫以避免循環依賴
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { INDICATOR_KNOWLEDGE } = require('@/lib/indicator-knowledge')
     const knowledge = INDICATOR_KNOWLEDGE[indicatorId]
 

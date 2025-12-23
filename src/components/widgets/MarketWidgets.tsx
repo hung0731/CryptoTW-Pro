@@ -26,7 +26,7 @@ export function ExchangeTransparency() {
             } catch (e) { logger.error('Failed to fetch exchange data', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -123,7 +123,7 @@ export function ETFFlowCard() {
             } catch (e) { logger.error('Failed to fetch ETF flow', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -196,7 +196,7 @@ export function BubbleIndexCard() {
             } catch (e) { logger.error('Failed to fetch bubble index', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -262,7 +262,7 @@ export function TakerVolumeCard() {
             } catch (e) { logger.error('Failed to fetch taker volume', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -332,7 +332,7 @@ export function StablecoinCard() {
             } catch (e) { logger.error('Failed to fetch stablecoin data', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -400,7 +400,7 @@ export function CoinbasePremiumCard() {
             } catch (e) { logger.error('Failed to fetch coinbase premium', e as Error, { feature: 'market-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {

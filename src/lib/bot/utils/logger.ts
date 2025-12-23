@@ -64,6 +64,6 @@ export class MetricLogger {
         }
 
         // Fire and forget
-        logPromise()
+        void logPromise()
     }
 }

@@ -153,13 +153,13 @@ export async function getDivergenceData() {
             .slice(0, 50)
 
         // 3. Fetch OI Data (Try Coinglass)
-        let oiDataMap: Record<string, number> = {}
+        const oiDataMap: Record<string, number> = {}
         try {
             const oiRank = await cachedCoinglassV4Request<any[]>('/api/futures/open-interest/rank', { interval: 'h24' })
             if (oiRank && Array.isArray(oiRank)) {
                 oiRank.forEach(item => oiDataMap[item.symbol] = item.h24Change)
             }
-        } catch (e) { }
+        } catch (e) { /* ignore */ }
 
         const results: DivergenceItem[] = topCoins.map((t: any) => {
             const symbol = t.symbol.replace('USDT', '')

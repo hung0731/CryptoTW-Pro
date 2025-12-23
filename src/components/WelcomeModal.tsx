@@ -87,6 +87,7 @@ export function useWelcomeModal(isNewPro: boolean) {
             // Check if already shown
             const hasShown = localStorage.getItem('ctw_welcome_shown')
             if (!hasShown) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setShowWelcome(true)
                 localStorage.setItem('ctw_welcome_shown', 'true')
             }

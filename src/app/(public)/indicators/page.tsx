@@ -304,7 +304,7 @@ export default function IndicatorsPage() {
             // Only call if we have the key indicators
             if (fgi && funding && lsRatio) {
                 // Use IIFE for async operations
-                (async () => {
+                void (async () => {
                     try {
                         // First fetch BTC price data
                         let btcPrice = undefined;

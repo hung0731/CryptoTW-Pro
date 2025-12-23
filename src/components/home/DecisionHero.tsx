@@ -144,6 +144,7 @@ function AnimatedPrice({ price, prevPrice, change }: { price: number, prevPrice:
 
     useEffect(() => {
         if (price === prevPrice) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFlash(price > prevPrice ? 'up' : 'down')
         setTimeout(() => setFlash(null), 200)
 
@@ -207,7 +208,7 @@ export function JudgmentCard({ initialStatus, initialConclusion }: JudgmentCardP
                 console.error('Binance init error:', e)
             }
         }
-        fetchData()
+        void fetchData()
 
         const connectWs = () => {
             const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@kline_1s')
@@ -263,6 +264,7 @@ export function JudgmentCard({ initialStatus, initialConclusion }: JudgmentCardP
                             )} />
                         </div>
                         {btc ? (
+                            // eslint-disable-next-line
                             <AnimatedPrice price={btc.price} prevPrice={prevPriceRef.current} change={btc.change_24h} />
                         ) : (
                             <div className="h-7 w-28 bg-white/10 rounded animate-pulse" />

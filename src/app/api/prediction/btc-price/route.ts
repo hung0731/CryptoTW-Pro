@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 // Unified Crypto Price Prediction API
 // Supports: BTC, ETH from Polymarket
 // Cache for 5 minutes
-let priceCache: { [key: string]: { data: any, timestamp: number } } = {}
+const priceCache: { [key: string]: { data: any, timestamp: number } } = {}
 const CACHE_TTL = 5 * 60 * 1000
 
 interface PriceTarget {

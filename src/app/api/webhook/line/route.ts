@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Client, MiddlewareConfig, WebhookEvent, FlexMessage, TextMessage } from '@line/bot-sdk'
 import { BotPipeline } from '@/lib/bot/pipeline'
 import { createHmac } from 'crypto'
+import { WELCOME_FLEX_MESSAGE } from '@/lib/bot/ui/flex-generator'
 
 // LINE Config
 const config: MiddlewareConfig = {
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
                 // For simplicity, let's keep it here or move to pipeline?
                 // Pipeline is currently message-focused.
                 // Let's just import the WELCOME message.
-                const { WELCOME_FLEX_MESSAGE } = require('@/lib/bot/ui/flex-generator')
+                // const { WELCOME_FLEX_MESSAGE } = require('@/lib/bot/ui/flex-generator')
                 await client.replyMessage(event.replyToken, WELCOME_FLEX_MESSAGE)
             }
         }))

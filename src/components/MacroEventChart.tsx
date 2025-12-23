@@ -26,6 +26,31 @@ interface MacroEventChartProps {
     className?: string
 }
 
+// Custom Tooltip
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className={CHART.tooltip.container}>
+                <p className="text-neutral-400 mb-2 font-mono">
+                    D{label >= 0 ? `+${label}` : label}
+                </p>
+                {payload.map((p: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between gap-4">
+                        <span style={{ color: p.color }}>{p.name}</span>
+                        <span className={cn(
+                            "font-mono font-bold",
+                            p.value >= 0 ? "text-green-400" : "text-red-400"
+                        )}>
+                            {p.value !== null ? formatPercent(p.value) : '—'}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+    return null
+}
+
 export function MacroEventChart({
     priceData,
     selectedDate,
@@ -88,33 +113,9 @@ export function MacroEventChart({
         return result
     })()
 
+    // Custom Tooltip used to be here
     // Calculate final return for display
     const finalReturn = chartData.find(d => d.t === (range === 'short' ? 3 : 5))?.active
-
-    // Custom Tooltip
-    const CustomTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className={CHART.tooltip.container}>
-                    <p className="text-neutral-400 mb-2 font-mono">
-                        D{label >= 0 ? `+${label}` : label}
-                    </p>
-                    {payload.map((p: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between gap-4">
-                            <span style={{ color: p.color }}>{p.name}</span>
-                            <span className={cn(
-                                "font-mono font-bold",
-                                p.value >= 0 ? "text-green-400" : "text-red-400"
-                            )}>
-                                {p.value !== null ? formatPercent(p.value) : '—'}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            )
-        }
-        return null
-    }
 
     return (
         <div className={cn("w-full", className)}>

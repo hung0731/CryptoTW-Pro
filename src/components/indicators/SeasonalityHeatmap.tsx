@@ -85,7 +85,7 @@ export function SeasonalityHeatmap() {
                 setLoading(false)
             }
         }
-        fetchSeasonality()
+        void fetchSeasonality()
     }, [])
 
     const stats = useMemo(() => {

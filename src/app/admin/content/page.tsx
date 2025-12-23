@@ -60,7 +60,7 @@ function ReviewsTab() {
     }
 
     useEffect(() => {
-        fetchReviews()
+        void fetchReviews()
     }, [])
 
     return (
@@ -68,7 +68,7 @@ function ReviewsTab() {
             <div className="flex justify-between items-center">
                 <CardDescription>管理長篇市場分析文章</CardDescription>
                 <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={fetchReviews}><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => void fetchReviews()}><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /></Button>
                     <Link href="/admin/content/reviews/new">
                         <Button className="bg-white text-black hover:bg-neutral-200 h-8 text-sm">
                             <Plus className="w-4 h-4 mr-2" /> New Review
@@ -168,7 +168,7 @@ function PushTab() {
         }
     }
 
-    useEffect(() => { fetchHistory() }, [])
+    useEffect(() => { void fetchHistory() }, [])
 
     const handleSend = async () => {
         if (!message.trim()) return
@@ -188,7 +188,7 @@ function PushTab() {
             if (res.ok) {
                 toast({ title: `訊息已發送給 ${data.count} 位用戶` })
                 setMessage('')
-                fetchHistory()
+                void fetchHistory()
             } else {
                 toast({ title: '發送失敗', description: data.error, variant: 'destructive' })
             }
@@ -249,7 +249,7 @@ function PushTab() {
             <div>
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="font-bold text-white">發送紀錄</h3>
-                    <Button variant="ghost" size="icon" onClick={fetchHistory}><RefreshCw className="w-3 h-3 text-neutral-400" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => void fetchHistory()}><RefreshCw className="w-3 h-3 text-neutral-400" /></Button>
                 </div>
                 <div className="space-y-3">
                     {loadingHistory ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : history.map(msg => (
@@ -293,7 +293,7 @@ function AnnouncementManager() {
         if (data.announcements) setAnnouncements(data.announcements)
     }
 
-    useEffect(() => { fetchAnnouncements() }, [])
+    useEffect(() => { void fetchAnnouncements() }, [])
 
     const handleSave = async () => {
         if (!message) return
@@ -308,7 +308,7 @@ function AnnouncementManager() {
             setMessage('')
             setEditingId(null)
             setIsActive(true)
-            fetchAnnouncements()
+            void fetchAnnouncements()
         } catch (e) {
             logger.error('Failed to save announcement', e, { feature: 'admin-content' })
         } finally {
@@ -319,7 +319,7 @@ function AnnouncementManager() {
     const handleDelete = async (id: string) => {
         if (!confirm('刪除此公告？')) return
         await fetch(`/api/admin/announcements?id=${id}`, { method: 'DELETE' })
-        fetchAnnouncements()
+        void fetchAnnouncements()
     }
 
     return (
@@ -376,7 +376,7 @@ function BotTab() {
         if (res.ok) setTriggers(await res.json())
     }, [])
 
-    useEffect(() => { fetchTriggers() }, [fetchTriggers])
+    useEffect(() => { void fetchTriggers() }, [fetchTriggers])
 
     // ... (Bot Logic Shortened for Brevity - assuming full logic transfer)
     // To save tokens, I'll simplify the rendering but assume full functionality is needed.
@@ -394,7 +394,7 @@ function BotTab() {
             body: JSON.stringify({ ...editData, keywords: keywordsArray, reply_content: contentJson, id: editData.id })
         })
         setIsEditing(false)
-        fetchTriggers()
+        void fetchTriggers()
     }
 
     function openEdit(trigger?: any) {
@@ -415,7 +415,7 @@ function BotTab() {
     async function handleDelete(id: string) {
         if (confirm('Delete?')) {
             await fetch(`/api/admin/bot/triggers?id=${id}`, { method: 'DELETE' })
-            fetchTriggers()
+            void fetchTriggers()
         }
     }
 
@@ -445,7 +445,7 @@ function BotTab() {
                         <CardDescription>更新 LINE 官方帳號圖文選單</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <Button onClick={handleDeployRM} disabled={rmLoading} className="w-full bg-white text-black hover:bg-neutral-200">
+                        <Button onClick={() => void handleDeployRM()} disabled={rmLoading} className="w-full bg-white text-black hover:bg-neutral-200">
                             {rmLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UploadCloud className="w-4 h-4 mr-2" />} 部署預設選單
                         </Button>
                         <div className="flex gap-2">

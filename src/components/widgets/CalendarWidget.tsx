@@ -23,7 +23,7 @@ export function EconomicCalendar() {
             } catch (e) { console.error(e) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     const toggleExpand = (id: string) => {

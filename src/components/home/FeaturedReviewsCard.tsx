@@ -75,7 +75,7 @@ function ReviewTimelineItem({ event, isLast }: { event: MarketEvent, isLast: boo
 }
 
 export function FeaturedReviewsCard() {
-    let reviews = getFeaturedReviews().slice(0, 4)
+    const reviews = getFeaturedReviews().slice(0, 4)
 
     // Fallback if no reviews
     if (reviews.length === 0) {

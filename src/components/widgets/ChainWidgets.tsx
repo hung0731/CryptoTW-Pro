@@ -30,8 +30,8 @@ export function WhaleAlertFeed() {
             }
             finally { setLoading(false) }
         }
-        fetchAlerts()
-        const interval = setInterval(fetchAlerts, 30000)
+        void fetchAlerts()
+        const interval = setInterval(() => { void fetchAlerts() }, 30000)
         return () => clearInterval(interval)
     }, [])
 
@@ -40,7 +40,7 @@ export function WhaleAlertFeed() {
     const filteredAlerts = alerts.filter(a => Math.abs(a.position_value_usd || 0) >= 1000000)
 
     // Generate Context Insight (More narrative structure)
-    let contextTitle = "市場脈絡"
+    const contextTitle = "市場脈絡"
     let contextText = "巨鯨都在睡覺，市場無顯著大額異動。"
     let contextEmoji = "💤"
 
@@ -250,7 +250,7 @@ export function WhaleAiSummaryCard() {
             } catch (e) { logger.error('Whale Alert API Error:', e as Error, { feature: 'chain-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) return <Skeleton className="h-24 w-full bg-neutral-900/50 rounded-xl" />
@@ -300,7 +300,7 @@ export function WhalePositionsList() {
             } catch (e) { logger.error('Whale Positions API Error:', e as Error, { feature: 'chain-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     const data = fetchedPositions || []
@@ -357,7 +357,7 @@ export function IndicatorsGrid({ compact = false }: { compact?: boolean }) {
             } catch (e) { logger.error('Indicators API Error:', e as Error, { feature: 'chain-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {

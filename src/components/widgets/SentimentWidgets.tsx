@@ -26,7 +26,7 @@ export function BullBearIndex() {
             } catch (e) { logger.error('Failed to fetch bull bear index', e as Error, { feature: 'sentiment-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -138,7 +138,7 @@ export function FundingRateRankings() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {
@@ -247,7 +247,7 @@ export function LongShortRatio() {
             } catch (e) { logger.error('Failed to fetch long short ratio', e as Error, { feature: 'sentiment-widgets' }) }
             finally { setLoading(false) }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     if (loading) {

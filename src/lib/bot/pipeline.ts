@@ -45,7 +45,7 @@ export class BotPipeline {
             const latency = performance.now() - startTime
 
             if (result) {
-                MetricLogger.log({
+                void MetricLogger.log({
                     userId: context.userId,
                     event_type: 'message',
                     text_raw: context.userMessage,
@@ -61,7 +61,7 @@ export class BotPipeline {
                 return result.message
             } else {
                 // No handler matched (ignore)
-                MetricLogger.log({
+                void MetricLogger.log({
                     userId: context.userId,
                     event_type: 'message',
                     text_raw: context.userMessage,
@@ -75,7 +75,7 @@ export class BotPipeline {
 
         } catch (e: any) {
             logger.error('[BotPipeline] Critical Error:', e)
-            MetricLogger.log({
+            void MetricLogger.log({
                 userId: context.userId,
                 event_type: 'error',
                 trigger: 'pipeline_crash',

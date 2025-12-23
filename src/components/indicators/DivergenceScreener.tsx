@@ -78,7 +78,7 @@ export function DivergenceScreener() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [])
 
     const stats = useMemo(() => {

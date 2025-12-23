@@ -38,7 +38,7 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
                 setLoading(false)
             }
         }
-        fetchContext()
+        void fetchContext()
         const interval = setInterval(fetchContext, 300000)
         return () => clearInterval(interval)
     }, [initialContext])

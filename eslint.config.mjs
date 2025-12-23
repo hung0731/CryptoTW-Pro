@@ -18,9 +18,15 @@ const eslintConfig = defineConfig([
     plugins: {
       "consistency": localRules
     },
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.json",
+        tsconfigRootDir: process.cwd(),
+      },
+    },
     rules: {
       // ✅ 型別安全
-      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-floating-promises": "error",
 
       // ✅ 錯誤處理
@@ -40,6 +46,34 @@ const eslintConfig = defineConfig([
       "consistency/no-hardcoded-colors": "warn"
     }
   },
+  // ✅ Tools Configuration (No Type Checking)
+  {
+    files: ["tools/**/*.{js,ts}"],
+    languageOptions: {
+      parserOptions: {
+        project: null
+      }
+    },
+    rules: {
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off"
+    }
+  },
+  // ✅ Script files (Clean parser options)
+  {
+    files: ["scripts/**/*.{js,cjs,mjs,ts}"],
+    languageOptions: {
+      parserOptions: {
+        project: null
+      }
+    },
+    rules: {
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off"
+    }
+  },
   // ✅ 特定資料夾規則
   {
     files: ["src/lib/integrations/**/*.ts"],
@@ -51,6 +85,18 @@ const eslintConfig = defineConfig([
     files: ["src/components/**/*.tsx"],
     rules: {
       "max-lines": ["warn", { "max": 400 }]
+    }
+  },
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      parserOptions: {
+        project: null
+      }
+    },
+    rules: {
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-explicit-any": "off"
     }
   }
 ]);

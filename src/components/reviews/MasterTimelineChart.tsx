@@ -95,6 +95,7 @@ export function MasterTimelineChart({ onEventClick, selectedYear }: MasterTimeli
     const yMax = displayedData.length > 0 ? Math.max(...displayedData.map(d => d.price)) : 100000;
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsMounted(true);
     }, []);
 

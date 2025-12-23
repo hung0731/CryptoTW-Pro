@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
             }
         }
 
-        fetchStats()
+        void fetchStats()
     }, [supabase])
 
     if (isLoading) {
