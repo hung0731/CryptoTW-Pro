@@ -178,6 +178,32 @@
   h6 {
     @apply font-sans font-bold tracking-tight;
   }
+
+  /* 1. Brand Selection Color */
+  ::selection {
+    background-color: #6366f1;
+    /* Indigo-500 */
+    color: white;
+  }
+
+  /* 2. Custom Minimal Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #444;
+  }
 }
 
 /* Mobile Optimization Utilities */

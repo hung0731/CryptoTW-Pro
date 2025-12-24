@@ -11,7 +11,7 @@ export const ReviewChartControls: React.FC<ReviewChartControlsProps> = ({ viewMo
     if (!focusWindow) return null
 
     return (
-        <div className="absolute top-2 right-2 z-20 flex gap-1 bg-black/50 backdrop-blur rounded-lg p-0.5 border border-white/10">
+        <div className="absolute top-2 right-2 z-20 flex gap-1 bg-[#0F0F10]/60 backdrop-blur-xl p-1 rounded-xl border border-white/10 shadow-lg">
             <button
                 onClick={() => setViewMode('standard')}
                 className={`p-1.5 rounded ${viewMode === 'standard' ? 'bg-[#1A1A1A] text-white' : 'text-[#666666] hover:text-[#A0A0A0]'}`}

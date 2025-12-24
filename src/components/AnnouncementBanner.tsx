@@ -27,9 +27,9 @@ export default function AnnouncementBanner() {
 
     const getStyles = (level: string) => {
         switch (level) {
-            case 'alert': return 'bg-red-600 text-white'
-            case 'warning': return 'bg-yellow-500 text-black'
-            case 'info': default: return 'bg-indigo-600 text-white'
+            case 'alert': return 'bg-red-500/20 backdrop-blur-md border-b border-red-500/20 text-red-200'
+            case 'warning': return 'bg-yellow-500/20 backdrop-blur-md border-b border-yellow-500/20 text-yellow-200'
+            case 'info': default: return 'bg-indigo-500/20 backdrop-blur-md border-b border-indigo-500/20 text-indigo-200'
         }
     }
 

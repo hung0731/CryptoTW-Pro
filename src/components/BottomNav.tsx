@@ -49,7 +49,7 @@ export function BottomNav() {
     ]
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-t border-white/5 pb-safe">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0F0F10]/70 backdrop-blur-xl border-t border-white/10 pb-safe shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.5)]">
             <nav className="flex items-center justify-between h-16 max-w-md mx-auto px-4">
                 {navItems.map((item) => (
                     <Link
