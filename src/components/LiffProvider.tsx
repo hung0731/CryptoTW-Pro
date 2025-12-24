@@ -80,10 +80,14 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                 // 2. LIFF Inspector (Dev Only)
                 if (process.env.NODE_ENV === 'development') {
                     try {
-                        const { LiffInspector } = await import('@line/liff-inspector')
-                        // @ts-ignore - LIFF Inspector types can be finicky
-                        liff.use(new LiffInspector())
-                        logger.info('LIFF Inspector initialized', { feature: 'liff-provider' })
+                        // Fix: Cast module to any to bypass TS check failure on default/named export
+                        const inspectorModule = await import('@line/liff-inspector') as any
+                        const LiffInspector = inspectorModule.LiffInspector || inspectorModule.default
+
+                        if (LiffInspector) {
+                            liff.use(new LiffInspector())
+                            logger.info('LIFF Inspector initialized', { feature: 'liff-provider' })
+                        }
                     } catch (err) {
                         logger.warn('Failed to load LIFF Inspector', err as Error, { feature: 'liff-provider' })
                     }

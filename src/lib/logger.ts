@@ -69,8 +69,31 @@ class Logger {
         this.log('info', message, context)
     }
 
-    warn(message: string, context?: LogContext) {
-        this.log('warn', message, context)
+    warn(message: string, errorOrContext?: Error | unknown | LogContext, context?: LogContext) {
+        let finalContext = context || {}
+        let errorData = {}
+
+        // Overload handling: if 2nd arg is Error or has 'message'/'stack', treat as error
+        if (errorOrContext instanceof Error) {
+            errorData = { error: errorOrContext.message }
+            finalContext = { ...finalContext, ...context } // context passed as 3rd arg
+        } else if (errorOrContext && typeof errorOrContext === 'object' && !('userId' in errorOrContext || 'feature' in errorOrContext)) {
+            // Heuristic: if it looks like an error object (not context)
+            // or simply allow passing context as 2nd arg if 3rd is undefined
+            if (!context) {
+                finalContext = errorOrContext as LogContext
+            } else {
+                errorData = { error: String(errorOrContext) }
+            }
+        } else if (errorOrContext) {
+            // Assume it's context if it matches context shape or is undefined
+            finalContext = errorOrContext as LogContext
+        }
+
+        this.log('warn', message, {
+            ...finalContext,
+            ...errorData
+        })
     }
 
     error(message: string, error?: Error | unknown, context?: LogContext) {
