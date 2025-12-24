@@ -19,7 +19,7 @@ export const ReviewChartTooltip: React.FC<ReviewChartTooltipProps> = ({ active, 
         const explanation = model ? model.getTooltipExplanation(val) : ''
 
         return (
-            <div className={CHART.tooltip.container}>
+            <div className="bg-[#0F0F10]/80 backdrop-blur-md border border-white/10 p-3 rounded-lg shadow-xl min-w-[140px]">
                 <p className={CHART.tooltip.date}>{label}</p>
                 <p className={CHART.tooltip.value}>
                     {type === 'price' && (
@@ -38,9 +38,10 @@ export const ReviewChartTooltip: React.FC<ReviewChartTooltipProps> = ({ active, 
                                     type === 'fgi' ? val.toFixed(0) :
                                         type === 'longShort' ? formatRatio(val) :
                                             type === 'basis' ? `${val.toFixed(2)}%` :
-                                                type === 'flow' || type === 'liquidation' ? `$${(val / 1000000).toFixed(1)}M` :
-                                                    type === 'stablecoin' ? `$${(val / 1000000000).toFixed(2)}B` :
-                                                        val}
+                                                type === 'basis' ? `${val.toFixed(2)}%` :
+                                                    type === 'flow' || type === 'liquidation' ? (Math.abs(val) > 1000000000 ? `$${(val / 1000000000).toFixed(2)}B` : `$${(val / 1000000).toFixed(2)}M`) :
+                                                        type === 'stablecoin' ? `$${(val / 1000000000).toFixed(2)}B` :
+                                                            val}
                             </span>
                             {explanation && (
                                 <span className="block text-[10px] text-neutral-500 mt-0.5">

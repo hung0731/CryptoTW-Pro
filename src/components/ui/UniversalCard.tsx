@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { SURFACE, BORDER, RADIUS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 
 // Strict Variant Types
-export type CardVariant = 'default' | 'subtle' | 'highlight' | 'danger' | 'clickable'
+export type CardVariant = 'default' | 'subtle' | 'highlight' | 'danger' | 'clickable' | 'ghost'
 export type CardSize = 'S' | 'M' | 'L'
 export type CardTone = 'neutral' | 'positive' | 'negative'
 
@@ -39,7 +39,8 @@ export function UniversalCard({
         subtle: cn(SURFACE.cardPassive, BORDER.dashed),
         highlight: cn(SURFACE.highlight, BORDER.highlight),
         danger: cn(SURFACE.danger, BORDER.danger),
-        clickable: cn(SURFACE.cardPrimary, BORDER.primary, "hover:bg-[#141414] hover:border-[#2A2A2A] transition-colors cursor-pointer group"),
+        clickable: cn(SURFACE.cardPrimary, BORDER.primary, "hover:bg-[#141414] hover:border-[#2A2A2A] transition-all duration-200 cursor-pointer group active:scale-[0.98]"),
+        ghost: cn(SURFACE.ghost, BORDER.ghost, "hover:bg-[#1A1A1A]/30 transition-colors"),
     }
 
     // Resolve Radius & Padding based on Size

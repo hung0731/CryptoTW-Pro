@@ -146,7 +146,7 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans pb-24">
-            <PageHeader showLogo />
+            <PageHeader title="個人檔案" showLogo={false} backHref="/" backLabel="返回" />
 
             <div className={cn("pt-6 max-w-lg mx-auto", SPACING.pageX, SPACING.classes.gapCards)}>
                 {/* Profile Card */}

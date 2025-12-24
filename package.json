@@ -55,6 +55,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@line/liff-inspector": "^1.0.3",
     "@tailwindcss/postcss": "^4",
     "@types/lodash": "^4.17.21",
     "@types/node": "^20.19.27",

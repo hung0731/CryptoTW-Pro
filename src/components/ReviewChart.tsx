@@ -134,7 +134,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             strokeOpacity={0.1}
                             label={{ value: 'D+30', position: 'insideTopRight', fill: '#ffffff', fontSize: 9, opacity: 0.3 }}
                         />
-                        <CartesianGrid strokeDasharray="3 3" stroke="#111111" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <XAxis
                             dataKey="date"
                             tick={{ fontSize: 10, fill: '#525252' }}
@@ -167,7 +167,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     </AreaChart>
                 ) : type === 'flow' ? (
                     <BarChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}
@@ -207,7 +207,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         </defs>
                         <ReferenceLine y={20} stroke="#ef4444" strokeDasharray="3 3" opacity={0.5} label={{ value: '極恐', position: 'insideRight', fill: '#ef4444', fontSize: 10 }} />
                         <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="3 3" opacity={0.5} label={{ value: '極貪', position: 'insideRight', fill: '#22c55e', fontSize: 10 }} />
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}
@@ -235,7 +235,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     </AreaChart>
                 ) : type === 'funding' ? (
                     <BarChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={45}
@@ -267,7 +267,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     </BarChart>
                 ) : type === 'liquidation' ? (
                     <BarChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}
@@ -300,7 +300,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         {/* 失衡警戒線 */}
                         <ReferenceLine y={1.5} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.4} label={{ value: '偏多', position: 'insideTopRight', fill: '#ef4444', fontSize: 8, opacity: 0.6 }} />
                         <ReferenceLine y={0.67} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.4} label={{ value: '偏空', position: 'insideBottomRight', fill: '#22c55e', fontSize: 8, opacity: 0.6 }} />
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}
@@ -334,7 +334,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}
@@ -362,7 +362,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                     </AreaChart>
                 ) : type === 'premium' ? (
                     <BarChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}
@@ -396,7 +396,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}
@@ -442,7 +442,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             />
                         )}
 
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
                             width={40}

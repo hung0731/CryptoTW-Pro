@@ -12,6 +12,8 @@ import {
     MacroReaction
 } from '@/lib/macro-events'
 import { Calendar } from 'lucide-react'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { UniversalCard } from '@/components/ui/UniversalCard'
 
 // Countdown Component (Minimal)
 function Countdown({ targetDate }: { targetDate: string }) {
@@ -67,25 +69,28 @@ function EventTimelineItem({ def, occ, days, isLast }: { def: MacroEventDef, occ
     const lineClass = isToday ? 'bg-neutral-600' : 'bg-neutral-800'
 
     return (
-        <Link href={`/calendar/${def.key}`} className="group relative flex gap-4 py-3 pl-2">
+        <Link
+            href={`/calendar/${def.key}`}
+            className="group relative flex gap-4 px-5 py-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors"
+        >
             {/* Timeline Node */}
-            <div className="flex flex-col items-center shrink-0 w-6 relative">
+            <div className="flex flex-col items-center shrink-0 w-6 relative pt-1">
                 <div className={cn(
-                    "w-2 h-2 rounded-full border border-black z-10 box-content ring-2 ring-black relative top-0.5",
+                    "w-2 h-2 rounded-full border border-black z-10 box-content ring-2 ring-black relative",
                     dotClass
                 )} />
                 {!isLast && (
                     <div className={cn(
-                        "w-px absolute top-3 left-1/2 -translate-x-1/2 bottom-[-1rem] -z-0 transition-colors",
+                        "w-px absolute top-3 left-1/2 -translate-x-1/2 bottom-[-1.5rem] -z-0 transition-colors",
                         lineClass
                     )} />
                 )}
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0 pr-2">
+            <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <span className="text-[10px] font-mono text-neutral-500 w-8">{monthDay}</span>
                         <h4 className={cn(
                             "text-sm font-bold truncate transition-colors",
@@ -115,28 +120,34 @@ export function UpcomingEventsCard({ reactions }: UpcomingEventsCardProps) {
     if (upcomingEvents.length === 0) return null
 
     return (
-        <section className="mt-8">
-            <div className="flex items-center gap-2 mb-2 px-1">
-                <Calendar className="w-3 h-3 text-neutral-600" />
-                <span className="text-[10px] font-mono text-[#666666] tracking-widest">重要時程</span>
-            </div>
-
-            <div className="bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-2 relative overflow-hidden">
-                {/* Background Grid */}
-                <div className="absolute inset-0 z-0 opacity-[0.03]"
-                    style={{ backgroundImage: `linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)`, backgroundSize: '20px 20px' }}
-                />
-
-                <div className="relative z-10 flex flex-col">
-                    {upcomingEvents.map((event, i) => (
-                        <EventTimelineItem
-                            key={event.def.key}
-                            {...event}
-                            isLast={i === upcomingEvents.length - 1}
-                        />
-                    ))}
+        <div className="w-full">
+            <UniversalCard variant="default" className="p-0 overflow-hidden">
+                {/* Header */}
+                <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                    <SectionHeaderCard
+                        title="重要時程"
+                        icon={Calendar}
+                    />
                 </div>
-            </div>
-        </section>
+
+                {/* List Container */}
+                <div className="flex flex-col relative">
+                    {/* Background Grid */}
+                    <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
+                        style={{ backgroundImage: `linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)`, backgroundSize: '20px 20px' }}
+                    />
+
+                    <div className="relative z-10">
+                        {upcomingEvents.map((event, i) => (
+                            <EventTimelineItem
+                                key={event.def.key}
+                                {...event}
+                                isLast={i === upcomingEvents.length - 1}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </UniversalCard>
+        </div>
     )
 }

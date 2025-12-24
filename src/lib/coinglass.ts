@@ -125,14 +125,14 @@ export async function coinglassV4Request<T>(
             })
 
             if (!response.ok) {
-                logger.error(`Coinglass V4 API error: ${response.status} ${response.statusText}`, { feature: 'coinglass' })
+                logger.error(`Coinglass V4 API error: ${response.status} ${response.statusText} [${endpoint}]`, { feature: 'coinglass', endpoint, params })
                 return null
             }
 
             const data = await response.json()
 
             if (data.code !== '0') {
-                logger.error(`Coinglass V4 API error [${endpoint}]: ${data.msg}`, { feature: 'coinglass' })
+                logger.error(`Coinglass V4 API error [${endpoint}]: ${data.msg}`, { feature: 'coinglass', endpoint, data })
                 return null
             }
 
@@ -144,7 +144,7 @@ export async function coinglassV4Request<T>(
         if (error instanceof Error && error.name === 'AbortError') {
             logger.warn(`Coinglass V4 API request timed out [${endpoint}]`, { feature: 'coinglass' })
         } else {
-            logger.error('Coinglass V4 API request failed:', error, { feature: 'coinglass' })
+            logger.error(`Coinglass V4 API request failed [${endpoint}]:`, error, { feature: 'coinglass' })
         }
         return null
     }

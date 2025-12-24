@@ -5,6 +5,8 @@ import { ChevronRight, Activity, Shield, Newspaper, TrendingUp, Sparkles } from 
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { UniversalCard } from '@/components/ui/UniversalCard'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 
 interface Highlight {
     title: string
@@ -77,31 +79,34 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
     const contextText = data.summary || `市場整體呈現${data.sentiment}態勢。`
 
     return (
-        <div className={cn(CARDS.primary, SPACING.card, "overflow-hidden")}>
-            {/* AI Context Card */}
+        <UniversalCard variant="default" size="S" className="overflow-hidden">
+            {/* Header */}
             <div className="mb-3">
-                <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg">{contextEmoji}</span>
-                    <span className="text-sm font-bold text-blue-200 tracking-wider">AI 速覽</span>
-                </div>
-                <p className="text-xs text-neutral-300 leading-relaxed font-medium">
+                <SectionHeaderCard
+                    title="AI 速覽"
+                    icon={Sparkles}
+                    className="!p-0 !bg-transparent mb-2" // Minimal, integrated header
+                    rightElement={<span className="text-lg">{contextEmoji}</span>}
+                />
+
+                <p className="text-xs text-neutral-300 leading-relaxed font-medium pl-1">
                     {contextText}
                 </p>
             </div>
 
             {/* Highlights List - Show top 3 on homepage */}
             {data.highlights && data.highlights.length > 0 && (
-                <div className="px-3 py-2 space-y-1">
+                <div className="space-y-1 mb-3">
                     {data.highlights.slice(0, 3).map((item, idx) => (
                         <div
                             key={idx}
-                            className="flex items-start justify-between py-2 px-2 -mx-2 rounded-lg hover:bg-[#0E0E0F] cursor-pointer group"
+                            className="flex items-start justify-between py-2 px-2 rounded-lg hover:bg-[#1A1A1A] cursor-pointer group transition-colors"
                             onClick={() => router.push('/news')}
                         >
                             <div className="flex items-start gap-2 flex-1 min-w-0">
                                 <span className="text-[10px] text-neutral-600 font-mono w-4 pt-0.5">{idx + 1}</span>
                                 <div className="flex-1 min-w-0">
-                                    <span className="text-xs text-[#A0A0A0] group-hover:text-white line-clamp-2">
+                                    <span className="text-xs text-[#A0A0A0] group-hover:text-white transition-colors line-clamp-2">
                                         {item.title}
                                     </span>
                                     <p className="text-[10px] text-neutral-500 mt-0.5 line-clamp-1">
@@ -120,15 +125,15 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
                 </div>
             )}
 
-            {/* Branding Footer */}
-            <div className="mt-4 border-t border-[#1A1A1A] flex items-center justify-between text-[11px] bg-[#0A1628] -mx-4 -mb-4 px-4 py-2.5">
+            {/* Branding Footer - Standardized */}
+            <div className="border-t border-[#1A1A1A] pt-3 flex items-center justify-between text-[11px]">
                 <div className="flex items-center gap-2 text-neutral-400">
                     <Newspaper className="w-3.5 h-3.5 text-blue-400" />
                     <span className="font-medium">市場重點</span>
                 </div>
                 <span className="text-blue-300 font-bold tracking-wide">加密台灣 Pro</span>
             </div>
-        </div>
+        </UniversalCard>
     )
 }
 

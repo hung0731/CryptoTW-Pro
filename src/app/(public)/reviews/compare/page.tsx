@@ -16,6 +16,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 import { UniversalCard } from '@/components/ui/UniversalCard';
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 
 function CompareContent() {
     const searchParams = useSearchParams();
@@ -305,10 +306,11 @@ function CompareContent() {
 
                 {/* Structure Difference Card */}
                 <UniversalCard variant="default" size="M">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Cpu className="w-3.5 h-3.5 text-blue-400" />
-                        <span className="text-xs font-bold text-neutral-300">結構差異摘要</span>
-                    </div>
+                    <SectionHeaderCard
+                        title="結構差異摘要"
+                        icon={Cpu}
+                        className="mb-3 pl-0 bg-transparent"
+                    />
                     <div className="space-y-2 text-xs text-neutral-400">
                         <div className="flex items-start gap-3">
                             <span className="text-blue-400 font-bold min-w-[32px]">基準</span>

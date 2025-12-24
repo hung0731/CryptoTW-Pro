@@ -20,7 +20,8 @@ export class MarketStatusService {
             };
 
             const [tickerData, fundingData, liquidation24h, liquidation1h, fearGreed, whaleGlobal] = await Promise.all([
-                fetchSafe(coinglassV4Request<any[]>('/api/futures/ticker', { symbol: 'BTCUSDT', exchange: 'Binance' }), 'Ticker'),
+                // fetchSafe(coinglassV4Request<any[]>('/api/futures/ticker', { symbol: 'BTCUSDT', exchange: 'Binance' }), 'Ticker'),
+                Promise.resolve([] as any[]), // V4 Ticker endpoint /api/futures/ticker is 404. Disabling to prevent error logs.
                 fetchSafe(coinglassV4Request<any[]>('/api/futures/funding-rate/exchange-list', { symbol: 'BTC' }), 'Funding'),
                 fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1d', limit: 1, exchange_list: 'Binance' }), 'Liquidation 24H'),
                 fetchSafe(coinglassV4Request<any[]>('/api/futures/liquidation/aggregated-history', { symbol: 'BTC', interval: '1h', limit: 1, exchange_list: 'Binance' }), 'Liquidation 1H'),

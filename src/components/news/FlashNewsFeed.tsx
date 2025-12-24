@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { CARDS, COLORS } from '@/lib/design-tokens'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { UniversalCard } from '@/components/ui/UniversalCard'
 
 import { MarketContext } from '@/lib/types'
 
@@ -73,40 +75,53 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
     }
 
     return (
-        <div className={cn("overflow-hidden flex flex-col", CARDS.primary, "p-0")}>
-            {/* Compact: Only 2 impact factors with direction */}
-            <div className="divide-y divide-white/5">
-                {displayItems.map((item, index) => (
-                    <div
-                        key={index}
-                        className="px-4 py-3 flex items-center gap-3"
+        <div className="w-full">
+            <UniversalCard variant="default" className="p-0 overflow-hidden">
+                {/* Header (Integrated if needed, or just content for minimal feed) */}
+                {/* Since it's often used between two other titled cards, let's give it a title too or keep it minimal? */}
+                {/* The user didn't ask for a title here but consistent style. Let's add a small header "重點快訊" if standalone, or just keep it list style. */}
+                {/* Current implementation: No header. Let's add one to match others "快訊預覽" */}
+
+                <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                    <SectionHeaderCard
+                        title="市場快訊"
+                        icon={Zap}
+                    />
+                </div>
+
+                <div className="divide-y divide-[#1A1A1A]">
+                    {displayItems.map((item, index) => (
+                        <div
+                            key={index}
+                            className="px-5 py-4 flex items-center gap-3 hover:bg-[#1A1A1A] transition-colors"
+                        >
+                            {/* Bias Direction */}
+                            <span className={cn(
+                                "text-sm font-bold shrink-0 w-6 text-center tabular-nums",
+                                getBiasStyle(item.bias)
+                            )}>
+                                {item.bias === '偏多' ? '↑' : item.bias === '偏空' ? '↓' : '→'}
+                            </span>
+
+                            {/* One Line Description */}
+                            <p className="text-sm text-neutral-300 truncate flex-1 font-medium">
+                                {item.title}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Single Cognitive CTA */}
+                {compact && (
+                    <Link
+                        href="/news"
+                        className="flex items-center justify-center gap-1.5 py-3 text-xs text-neutral-500 hover:text-white border-t border-[#1A1A1A] bg-[#0F0F10] hover:bg-[#141414] transition-colors"
                     >
-                        {/* Bias Direction */}
-                        <span className={cn(
-                            "text-sm font-bold shrink-0",
-                            getBiasStyle(item.bias)
-                        )}>
-                            {item.bias === '偏多' ? '↑' : item.bias === '偏空' ? '↓' : '→'}
-                        </span>
-
-                        {/* One Line Description */}
-                        <p className="text-sm text-neutral-300 truncate flex-1">
-                            {item.title}
-                        </p>
-                    </div>
-                ))}
-            </div>
-
-            {/* Single Cognitive CTA */}
-            {compact && (
-                <Link
-                    href="/reviews"
-                    className="flex items-center justify-center gap-1.5 py-2.5 text-xs text-neutral-500 hover:text-white border-t border-[#1A1A1A] hover:bg-[#0A0A0A]"
-                >
-                    <span>這類事件過去如何影響市場？</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                </Link>
-            )}
+                        <span>查看更多快訊</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                )}
+            </UniversalCard>
         </div>
     )
 }

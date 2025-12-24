@@ -41,6 +41,8 @@ export const SURFACE = {
     // Legacy aliases
     card: 'bg-[#0A0A0A]',
     border: 'border-[#1A1A1A]',
+    // Level 6: Ghost (Transparent)
+    ghost: 'bg-transparent',
 } as const
 
 // ================================================
@@ -66,6 +68,9 @@ export const BORDER = {
     highlight: 'border border-[#333333]',
     danger: 'border border-[#331111]',
     success: 'border border-[#113311]',
+
+    // Ghost (No Border)
+    ghost: 'border border-transparent',
 } as const
 
 // ================================================
@@ -158,6 +163,9 @@ export const CARDS = {
     // Legacy / specialized
     inline: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',
     passive: 'bg-[#080808] border border-dashed border-[#1A1A1A] rounded-xl p-4',
+
+    // Lu.ma Style (Ghost/Flat)
+    ghost: 'bg-transparent border border-transparent p-0',
 } as const
 
 // ================================================

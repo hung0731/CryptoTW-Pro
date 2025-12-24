@@ -10,22 +10,8 @@ import { IndicatorStory } from '@/lib/indicator-stories';
 import { REVIEWS_DATA } from '@/lib/reviews-data';
 import { getRelatedEvents, getRelatedIndicators, getPrerequisiteConcepts } from '@/lib/semantic-linkage';
 import { ChartHero } from '@/components/indicators/ChartHero';
-
-// ================================================
-// SECTION CARD - 統一容器
-// ================================================
-interface SectionCardProps {
-    children: React.ReactNode;
-    className?: string;
-}
-
-function SectionCard({ children, className }: SectionCardProps) {
-    return (
-        <section className={cn(CARDS.primary, SPACING.card, className)}>
-            {children}
-        </section>
-    );
-}
+import { UniversalCard } from '@/components/ui/UniversalCard';
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 
 // ================================================
 // ① CHART CALLOUT - 怎麼看這張圖？
@@ -36,13 +22,13 @@ interface ChartCalloutProps {
 
 function ChartCallout({ points }: ChartCalloutProps) {
     return (
-        <SectionCard className="bg-[#080808] border-dashed">
+        <UniversalCard variant="subtle" className="bg-[#0A0A0B]/50">
             <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
                     <Info className="w-4 h-4 text-neutral-500" />
                 </div>
-                <div>
-                    <h2 className={cn(TYPOGRAPHY.cardSubtitle, "mb-3")}>怎麼看這張圖？</h2>
+                <div className="flex-1">
+                    <h2 className={cn(TYPOGRAPHY.cardSubtitle, "mb-3 text-neutral-400")}>怎麼看這張圖？</h2>
                     <ul className="space-y-2">
                         {points.map((point, idx) => (
                             <li key={idx} className="flex items-start gap-2">
@@ -55,7 +41,7 @@ function ChartCallout({ points }: ChartCalloutProps) {
                     </ul>
                 </div>
             </div>
-        </SectionCard>
+        </UniversalCard>
     );
 }
 
@@ -74,8 +60,10 @@ const USE_CASE_TYPE_LABELS: Record<string, string> = {
 
 function UseCaseList({ useCases }: UseCaseListProps) {
     return (
-        <SectionCard>
-            <h2 className={cn(TYPOGRAPHY.sectionLabel, "mb-3")}>這個指標在判斷什麼？</h2>
+        <UniversalCard>
+            <div className="mb-4">
+                <SectionHeaderCard title="這個指標在判斷什麼？" />
+            </div>
             <div className="space-y-3">
                 {useCases.map((uc, idx) => (
                     <div key={idx} className="flex items-start gap-3">
@@ -88,7 +76,7 @@ function UseCaseList({ useCases }: UseCaseListProps) {
                     </div>
                 ))}
             </div>
-        </SectionCard>
+        </UniversalCard>
     );
 }
 
@@ -122,12 +110,16 @@ function RelatedEvents({ storyId }: { storyId: string }) {
     if (matchedReviews.length === 0) return null;
 
     return (
-        <SectionCard>
-            <div className="flex items-center justify-between mb-3">
-                <h2 className={TYPOGRAPHY.sectionLabel}>相關歷史事件回顧</h2>
-                <Link href="/reviews" className="text-xs text-neutral-500 hover:text-white flex items-center">
-                    更多 <ChevronRight className="w-3 h-3" />
-                </Link>
+        <UniversalCard>
+            <div className="mb-2">
+                <SectionHeaderCard
+                    title="相關歷史事件回顧"
+                    rightElement={
+                        <Link href="/reviews" className="text-xs text-neutral-500 hover:text-white flex items-center gap-1">
+                            更多 <ChevronRight className="w-3 h-3" />
+                        </Link>
+                    }
+                />
             </div>
             <div className="space-y-0 divide-y divide-white/5">
                 {matchedReviews.map((evt) => (
@@ -146,7 +138,7 @@ function RelatedEvents({ storyId }: { storyId: string }) {
                     </Link>
                 ))}
             </div>
-        </SectionCard>
+        </UniversalCard>
     );
 }
 
@@ -160,8 +152,10 @@ function KnowledgeGraph({ storyId }: { storyId: string }) {
     if (relatedIndicators.length === 0 && prerequisiteConcepts.length === 0) return null;
 
     return (
-        <SectionCard>
-            <h2 className={TYPOGRAPHY.sectionLabel}>知識圖譜：延伸閱讀</h2>
+        <UniversalCard>
+            <div className="mb-4">
+                <SectionHeaderCard title="知識圖譜：延伸閱讀" />
+            </div>
             <div className="space-y-4 pt-2">
                 {/* 1. 先備知識 (Concepts) */}
                 {prerequisiteConcepts.length > 0 && (
@@ -199,7 +193,6 @@ function KnowledgeGraph({ storyId }: { storyId: string }) {
                                                 關聯度：{ind.reason}
                                             </span>
                                         </div>
-                                        {/* Removed redundant line */}
                                     </div>
                                     <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
                                 </Link>
@@ -208,7 +201,7 @@ function KnowledgeGraph({ storyId }: { storyId: string }) {
                     </div>
                 )}
             </div>
-        </SectionCard>
+        </UniversalCard>
     );
 }
 

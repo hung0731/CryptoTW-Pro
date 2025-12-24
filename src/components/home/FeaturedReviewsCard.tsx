@@ -5,75 +5,11 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { getFeaturedReviews, MarketEvent } from '@/lib/reviews-data'
 import { Scale, ChevronRight, Clock } from 'lucide-react'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { UniversalCard } from '@/components/ui/UniversalCard'
 
 // --- COMPARISON ENTRY POINT (Special Card) ---
-function ComparisonEntry() {
-    return (
-        <Link href="/reviews/compare" className="group relative flex items-center gap-4 py-3 pl-2">
-            {/* Timeline Node */}
-            <div className="flex flex-col items-center shrink-0 w-6 relative">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-black shadow-[0_0_10px_rgba(59,130,246,0.5)] z-10 relative top-0.5" />
-                <div className="w-px absolute top-3 left-1/2 -translate-x-1/2 bottom-[-1rem] bg-neutral-800 -z-0" />
-            </div>
-
-            {/* Card Content */}
-            <div className="flex-1 bg-gradient-to-r from-blue-950/20 to-transparent border border-blue-900/30 rounded-lg p-3 group-hover:border-blue-500/50 transition-colors">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Scale className="w-4 h-4 text-blue-400" />
-                        <span className="text-sm font-bold text-blue-400 tracking-wide">進入歷史比對模式</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-blue-500/50 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <p className="text-[10px] text-blue-300/60 mt-1 pl-6">
-                    兩段歷史行情疊加，尋找相似性
-                </p>
-            </div>
-        </Link>
-    )
-}
-
-// --- REVIEW ITEM (Timeline Style) ---
-function ReviewTimelineItem({ event, isLast }: { event: MarketEvent, isLast: boolean }) {
-    const isBull = ['priced_in', 'supply_shock'].includes(event.reactionType)
-    const colorClass = isBull ? 'text-emerald-500' : 'text-neutral-400'
-    const dotClass = isBull ? 'bg-emerald-500' : 'bg-neutral-600'
-
-    return (
-        <Link href={`/reviews/${event.year}/${event.slug}`} className="group relative flex gap-4 py-3 pl-2">
-
-            {/* Timeline Node */}
-            <div className="flex flex-col items-center shrink-0 w-6 relative">
-                <div className={cn(
-                    "w-2 h-2 rounded-full border border-black z-10 box-content ring-2 ring-black relative top-0.5",
-                    dotClass
-                )} />
-                {!isLast && (
-                    <div className={cn(
-                        "w-px absolute top-3 left-1/2 -translate-x-1/2 bottom-[-1rem] -z-0 transition-colors bg-neutral-800 group-hover:bg-neutral-700"
-                    )} />
-                )}
-            </div>
-
-            {/* Content Content */}
-            <div className="flex-1 min-w-0 pr-2">
-                <div className="flex items-baseline justify-between mb-0.5">
-                    <h4 className="text-sm font-bold text-neutral-200 group-hover:text-white transition-colors truncate">
-                        {event.title.split('：')[0]}
-                    </h4>
-                    <span className="text-[10px] font-mono text-neutral-600 shrink-0 ml-2">
-                        {event.year}
-                    </span>
-                </div>
-
-                <p className="text-[11px] text-neutral-500 line-clamp-1 group-hover:text-neutral-400 transition-colors">
-                    {event.impactSummary}
-                </p>
-            </div>
-        </Link>
-    )
-}
-
+// --- REVIEW COMPONENT ---
 export function FeaturedReviewsCard() {
     const reviews = getFeaturedReviews().slice(0, 4)
 
@@ -83,32 +19,64 @@ export function FeaturedReviewsCard() {
     }
 
     return (
-        <section className="mt-8">
-            <div className="flex items-center gap-2 mb-2 px-1">
-                <Clock className="w-3 h-3 text-neutral-600" />
-                <span className="text-[10px] font-mono text-[#666666] tracking-widest">歷史回顧</span>
-            </div>
-
-            <div className="bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-2 relative overflow-hidden">
-                {/* Background Grid */}
-                <div className="absolute inset-0 z-0 opacity-[0.03]"
-                    style={{ backgroundImage: `linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)`, backgroundSize: '20px 20px' }}
-                />
-
-                <div className="relative z-10 flex flex-col">
-                    {/* 1. Comparison Entry */}
-                    <ComparisonEntry />
-
-                    {/* 2. Reviews List */}
-                    {reviews.map((event, i) => (
-                        <ReviewTimelineItem
-                            key={event.id}
-                            event={event}
-                            isLast={i === reviews.length - 1}
-                        />
-                    ))}
+        <div className="w-full mt-6">
+            <UniversalCard variant="default" className="p-0 overflow-hidden">
+                {/* Header */}
+                <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                    <SectionHeaderCard
+                        title="歷史回顧"
+                        icon={Clock}
+                    />
                 </div>
-            </div>
-        </section>
+
+                {/* List Content */}
+                <div className="flex flex-col relative">
+                    {/* Background Grid */}
+                    <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
+                        style={{ backgroundImage: `linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)`, backgroundSize: '20px 20px' }}
+                    />
+
+                    <div className="relative z-10">
+                        {/* 1. Comparison Entry */}
+                        <Link href="/reviews/compare" className="group flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A] hover:bg-[#141414] transition-colors relative overflow-hidden">
+                            <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
+                            <div className="flex items-center gap-3 relative z-10">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                    <Scale className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-blue-400">進入歷史比對模式</h4>
+                                    <p className="text-[10px] text-blue-300/60">兩段歷史行情疊加，尋找相似性</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-blue-500/50 group-hover:translate-x-1 transition-transform relative z-10" />
+                        </Link>
+
+                        {/* 2. Reviews List */}
+                        {reviews.map((event) => (
+                            <Link
+                                key={event.id}
+                                href={`/reviews/${event.year}/${event.slug}`}
+                                className="group flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors"
+                            >
+                                <div className="flex flex-col gap-1 min-w-0 pr-4">
+                                    <h4 className="text-sm font-bold text-[#E0E0E0] group-hover:text-white truncate transition-colors">
+                                        {event.title.split('：')[0]}
+                                    </h4>
+                                    <p className="text-[11px] text-[#666] group-hover:text-[#888] line-clamp-1 truncate">
+                                        {event.impactSummary}
+                                    </p>
+                                </div>
+                                <div className="shrink-0 flex items-center gap-2">
+                                    <span className="text-[10px] font-mono text-[#525252] bg-[#1A1A1A] px-1.5 py-0.5 rounded border border-[#2A2A2A]">
+                                        {event.year}
+                                    </span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </UniversalCard>
+        </div>
     )
 }

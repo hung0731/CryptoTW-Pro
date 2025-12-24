@@ -7,6 +7,7 @@ import { SURFACE, RADIUS, TYPOGRAPHY, SPACING } from '@/lib/design-tokens'
 interface SectionHeaderCardProps {
     title: string
     description?: string
+    icon?: React.ElementType
     rightElement?: React.ReactNode
     className?: string
 }
@@ -20,24 +21,23 @@ interface SectionHeaderCardProps {
 export function SectionHeaderCard({
     title,
     description,
+    icon: Icon,
     rightElement,
     className
 }: SectionHeaderCardProps) {
     return (
         <div
             className={cn(
-                SURFACE.tertiary,
-                RADIUS.lg,
-                "px-3 py-2 flex items-center justify-between",
-                // Enforce margin bottom via token-based className if needed, 
-                // but usually handled by parent <Section> gap. 
-                // We keep it neutral here.
+                "px-5 py-4 flex items-center justify-between",
+                // Deep Tech Blue as requested
+                "bg-[#0A0B14]",
                 className
             )}
         >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+                {Icon && <Icon className="w-5 h-5 text-neutral-400" />}
                 <div className="flex flex-col">
-                    <h2 className={cn(TYPOGRAPHY.sectionTitle, "leading-tight")}>
+                    <h2 className={cn(TYPOGRAPHY.sectionTitle, "leading-tight text-base font-bold")}>
                         {title}
                     </h2>
                     {description && (

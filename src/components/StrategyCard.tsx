@@ -19,70 +19,36 @@ interface StrategyCardProps {
 }
 
 export function StrategyCard({ type, title, content, citation, className }: StrategyCardProps) {
-    const config = {
-        alert: {
-            icon: AlertTriangle,
-            baseColor: 'text-[#EF4444]', // Red
-            bgColor: 'bg-[#EF4444]/10',
-            borderColor: 'border-[#EF4444]/20',
-            highlightColor: 'text-[#EF4444]'
-        },
-        check: {
-            icon: CheckCircle,
-            baseColor: 'text-[#22C55E]', // Green
-            bgColor: 'bg-[#22C55E]/10',
-            borderColor: 'border-[#22C55E]/20',
-            highlightColor: 'text-[#22C55E]'
-        },
-        insight: {
-            icon: Lightbulb,
-            baseColor: 'text-[#F59E0B]', // Amber
-            bgColor: 'bg-[#F59E0B]/10',
-            borderColor: 'border-[#F59E0B]/20',
-            highlightColor: 'text-[#F59E0B]'
-        }
-    }[type]
-
-    const Icon = config.icon
-
     return (
         <div className={cn(
-            "relative group overflow-hidden rounded-xl border p-4 transition-all duration-300",
-            "bg-[#0A0A0A] hover:bg-[#0E0E0F]",
-            "border-[#1A1A1A] hover:border-[#2A2A2A]",
+            "group overflow-hidden  p-5 transition-all duration-300",
+            // Removed colored borders/bg, keeping it clean
+            "hover:bg-[#111]",
             className
         )}>
-            {/* Left Accent Bar */}
-            <div className={cn(
-                "absolute left-0 top-0 bottom-0 w-1",
-                config.bgColor.replace('/10', '')
-            )} />
-
             <div className="flex gap-4">
-                {/* Icon Container */}
+                {/* Icon Container - Monochrome */}
                 <div className={cn(
                     "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center",
-                    config.bgColor,
-                    config.borderColor,
-                    "border"
+                    "bg-[#151515] border border-[#222]",
+                    "text-neutral-400 group-hover:text-white transition-colors"
                 )}>
-                    <Icon className={cn("w-4 h-4", config.baseColor)} />
+                    {type === 'alert' && <AlertTriangle className="w-4 h-4" />}
+                    {type === 'check' && <CheckCircle className="w-4 h-4" />}
+                    {type === 'insight' && <Lightbulb className="w-4 h-4" />}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0 pt-0.5">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-1.5">
-                        <h4 className={cn("text-xs font-bold tracking-wide uppercase", config.highlightColor)}>
+                        <h4 className="text-sm font-bold text-[#E0E0E0] group-hover:text-white transition-colors">
                             {title}
                         </h4>
-
-                        {/* Type Label (Optional, maybe for consistency) */}
-                        {/* <span className="text-[9px] text-neutral-600 font-mono uppercase opacity-50">{type}</span> */}
                     </div>
 
                     {/* Body */}
-                    <p className={cn("text-sm leading-relaxed font-medium mb-3", COLORS.textSecondary)}>
+                    <p className={cn("text-sm leading-relaxed mb-3", COLORS.textSecondary)}>
                         {content}
                     </p>
 

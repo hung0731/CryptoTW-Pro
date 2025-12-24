@@ -22,6 +22,7 @@ import {
 import { SPACING, TYPOGRAPHY, COLORS } from '@/lib/design-tokens'
 import { AISummaryCard } from '@/components/ui/AISummaryCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { EnrichedMacroEvent } from '@/lib/services/macro-events'
 
 interface CalendarClientProps {
@@ -234,138 +235,133 @@ export default function CalendarClient({ enrichedEvents }: CalendarClientProps) 
                 loading={aiLoading}
             />
 
-            {/* Mode Switch & Filter */}
-            <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2 text-[10px] text-[#666]">
-                    <History className="w-3 h-3" />
-                    <span>點擊卡片查看歷史復盤</span>
+            {/* Unified Calendar Container */}
+            <UniversalCard className="w-full p-0 overflow-hidden">
+                {/* Header */}
+                <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                    <SectionHeaderCard
+                        title="經濟日曆"
+                        icon={Calendar}
+                        rightElement={
+                            <div className="flex rounded-lg p-0.5 border border-[#1A1A1A] bg-[#0A0A0A]">
+                                <button
+                                    onClick={() => setAlignMode('time')}
+                                    className={cn(
+                                        "px-3 py-1 text-[10px] rounded transition-colors",
+                                        alignMode === 'time'
+                                            ? "text-white bg-[#1A1A1A]"
+                                            : "text-[#666] hover:text-[#999]"
+                                    )}
+                                >
+                                    依日期
+                                </button>
+                                <button
+                                    onClick={() => setAlignMode('reaction')}
+                                    className={cn(
+                                        "px-3 py-1 text-[10px] rounded transition-colors",
+                                        alignMode === 'reaction'
+                                            ? "text-white bg-[#1A1A1A]"
+                                            : "text-[#666] hover:text-[#999]"
+                                    )}
+                                >
+                                    依波動
+                                </button>
+                            </div>
+                        }
+                    />
                 </div>
-                <div className="flex rounded-lg p-0.5 border border-[#1A1A1A] bg-[#0A0A0A]">
-                    <button
-                        onClick={() => setAlignMode('time')}
-                        className={cn(
-                            "px-3 py-1 text-[10px] rounded transition-colors",
-                            alignMode === 'time'
-                                ? "text-white bg-[#1A1A1A]"
-                                : "text-[#666] hover:text-[#999]"
-                        )}
-                    >
-                        依日期
-                    </button>
-                    <button
-                        onClick={() => setAlignMode('reaction')}
-                        className={cn(
-                            "px-3 py-1 text-[10px] rounded transition-colors",
-                            alignMode === 'reaction'
-                                ? "text-white bg-[#1A1A1A]"
-                                : "text-[#666] hover:text-[#999]"
-                        )}
-                    >
-                        依波動
-                    </button>
-                </div>
-            </div>
 
-            {enrichedEvents.map((item) => {
-                const { def, nextOccurrence, daysUntil, pastOccurrences } = item
+                {/* Event List */}
+                <div className="flex flex-col">
+                    {enrichedEvents.map((item) => {
+                        const { def, nextOccurrence, daysUntil, pastOccurrences } = item
 
-                // Local sorting for display only
-                const displayOccurrences = [...pastOccurrences]
-                if (alignMode === 'reaction') {
-                    displayOccurrences.sort((a, b) => {
-                        const valA = a.reaction?.stats?.d0d1Return ? Math.abs(a.reaction.stats.d0d1Return) : 0
-                        const valB = b.reaction?.stats?.d0d1Return ? Math.abs(b.reaction.stats.d0d1Return) : 0
-                        return valB - valA
-                    })
-                }
+                        // Local sorting for display only
+                        const displayOccurrences = [...pastOccurrences]
+                        if (alignMode === 'reaction') {
+                            displayOccurrences.sort((a, b) => {
+                                const valA = a.reaction?.stats?.d0d1Return ? Math.abs(a.reaction.stats.d0d1Return) : 0
+                                const valB = b.reaction?.stats?.d0d1Return ? Math.abs(b.reaction.stats.d0d1Return) : 0
+                                return valB - valA
+                            })
+                        }
 
-                return (
-                    <Link
-                        href={`/calendar/${def.key}`}
-                        key={def.key}
-                        className="block group"
-                    >
-                        <UniversalCard variant="clickable" size="M" className="p-0 overflow-hidden">
-                            {/* 1. Header Section: Name + Icon */}
-                            <div className="px-4 py-3 border-b border-white/5 flex items-start justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] text-white")}>
-                                        {getEventIcon(def.key)}
+                        return (
+                            <div key={def.key} className="group border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors">
+                                <Link
+                                    href={`/calendar/${def.key}`}
+                                    className="block px-5 py-4"
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] text-white group-hover:border-[#333]")}>
+                                                {getEventIcon(def.key)}
+                                            </div>
+
+                                            <div>
+                                                <div className="flex flex-col gap-0.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <h2 className={cn("text-sm font-bold text-[#E0E0E0] group-hover:text-white transition-colors")}>
+                                                            {def.name}
+                                                        </h2>
+                                                        <span className="text-[10px] font-mono text-[#666] bg-[#1A1A1A] px-1.5 py-0.5 rounded border border-[#2A2A2A]">{def.key.toUpperCase()}</span>
+                                                    </div>
+                                                    <p className="text-xs text-[#666] truncate max-w-[240px]">
+                                                        {def.impactSummary}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Right Anchor: Time Indicator */}
+                                        {nextOccurrence ? (
+                                            <div className="flex flex-col items-end gap-1">
+                                                <span className={cn(
+                                                    "text-[10px] px-2 py-0.5 rounded font-mono border font-medium",
+                                                    daysUntil === 0
+                                                        ? "bg-white text-black border-white"
+                                                        : "bg-[#0E0E0F] border-[#2A2A2A] text-[#888]"
+                                                )}>
+                                                    {daysUntil === 0 ? '今天' : `D-${daysUntil}`}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F] text-[#666]")}>
+                                                待定
+                                            </span>
+                                        )}
                                     </div>
 
-                                    <div>
-                                        <div className="flex flex-col gap-0.5">
-                                            <div className="flex items-center gap-2">
-                                                <h2 className={cn(TYPOGRAPHY.cardTitle, "group-hover:text-white transition-colors")}>
-                                                    {def.name} <span className="text-[#666] font-normal text-xs">{def.key.toUpperCase()}</span>
-                                                </h2>
-                                                <ChevronRight className="w-3 h-3 text-[#444] group-hover:text-[#666]" />
-                                            </div>
-                                            {/* Educational Description - Neutral */}
-                                            <p className={cn(TYPOGRAPHY.bodySmall, "truncate max-w-[200px]")}>
-                                                {def.listDescription}
-                                            </p>
+                                    {/* Horizontal Scroll Cards (History) - Integrated darker area */}
+                                    <div className="rounded-lg bg-[#050505] border border-[#1A1A1A] p-3 overflow-hidden">
+                                        <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
+                                            {nextOccurrence && (
+                                                <MiniChartCard
+                                                    occ={nextOccurrence}
+                                                    eventKey={def.key}
+                                                    windowDisplayStart={def.windowDisplay.start}
+                                                    isNext={true}
+                                                    daysUntil={daysUntil}
+                                                />
+                                            )}
+                                            {displayOccurrences.map((occ, index) => (
+                                                <MiniChartCard
+                                                    key={occ.occursAt}
+                                                    occ={occ}
+                                                    reaction={occ.reaction}
+                                                    eventKey={def.key}
+                                                    windowDisplayStart={def.windowDisplay.start}
+                                                    isLatest={alignMode === 'time' && index === 0}
+                                                />
+                                            ))}
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* Right Anchor: Time Indicator (Neutral) */}
-                                {nextOccurrence ? (
-                                    <div className="flex flex-col items-end">
-                                        <span className={cn(
-                                            "text-[10px] px-2 py-0.5 rounded font-mono border",
-                                            daysUntil === 0
-                                                ? "bg-white text-black border-white font-bold" // Today: White Highlight
-                                                : "bg-[#0E0E0F] border-[#2A2A2A] text-[#666]"
-                                        )}>
-                                            {daysUntil === 0 ? '今天' : `D-${daysUntil}`}
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F]", COLORS.textTertiary)}>
-                                        待定
-                                    </span>
-                                )}
+                                </Link>
                             </div>
-
-                            {/* 2. Educational Context Bar (Impact Summary) */}
-                            <div className="px-4 py-3 bg-[#0A0A0A]/50">
-                                <div className="flex items-start gap-2">
-                                    <BookOpen className="w-3 h-3 text-[#444] mt-0.5 flex-shrink-0" />
-                                    <p className="text-[10px] text-[#808080] leading-relaxed">
-                                        {def.impactSummary}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* 3. Horizontal Scroll Cards (History) */}
-                            <div className="overflow-x-auto scrollbar-hide pb-4 pt-1 border-t border-[#2A2A2A] bg-[#0A0A0B]">
-                                <div className="flex gap-2.5 px-4 min-w-max pt-3">
-                                    {nextOccurrence && (
-                                        <MiniChartCard
-                                            occ={nextOccurrence}
-                                            eventKey={def.key}
-                                            windowDisplayStart={def.windowDisplay.start}
-                                            isNext={true}
-                                            daysUntil={daysUntil}
-                                        />
-                                    )}
-                                    {displayOccurrences.map((occ, index) => (
-                                        <MiniChartCard
-                                            key={occ.occursAt}
-                                            occ={occ}
-                                            reaction={occ.reaction}
-                                            eventKey={def.key}
-                                            windowDisplayStart={def.windowDisplay.start}
-                                            isLatest={alignMode === 'time' && index === 0}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </UniversalCard>
-                    </Link>
-                )
-            })}
+                        )
+                    })}
+                </div>
+            </UniversalCard>
         </div >
     )
 }

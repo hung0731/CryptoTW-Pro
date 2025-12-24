@@ -7,7 +7,7 @@ import { SPACING } from '@/lib/design-tokens'
 export default function NewsPage() {
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
-            <PageHeader title="快訊中心" />
+            <PageHeader title="快訊中心" showLogo={false} backHref="/" backLabel="返回" />
 
             <div className={`p-4 ${SPACING.cardGap}`}>
 

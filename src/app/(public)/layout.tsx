@@ -3,6 +3,7 @@ import AnnouncementBanner from "@/components/AnnouncementBanner";
 import { RiskToast } from "@/components/RiskToast";
 import { Suspense } from "react";
 import { BottomNav } from "@/components/BottomNav";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export default function PublicLayout({
     children,
@@ -15,6 +16,7 @@ export default function PublicLayout({
 
                 <AnnouncementBanner />
                 {children}
+                <SiteFooter />
             </div>
             <RiskToast />
             <BottomNav />

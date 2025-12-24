@@ -143,7 +143,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2024,
         importance: 'S',
         featuredRank: 1,
-        tags: ['ETF', '機構資金', '市場結構'],
+        tags: ['ETF', '機構資金', '利多出盡', '買預期賣事實'],
         behaviorTags: ['利多出盡', '買預期賣事實', '機構進場'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['etfFlow', 'price', 'funding'],
@@ -318,7 +318,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2022,
         importance: 'S',
         featuredRank: 2,
-        tags: ['系統性風險', '信任危機', '流動性'],
+        tags: ['系統性風險', '信任危機', '流動性', '連鎖爆倉'],
         behaviorTags: ['連鎖爆倉', '流動性枯竭', '信任崩潰', '死亡螺旋'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'stablecoin', 'fearGreed'],
@@ -472,7 +472,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2022,
         importance: 'S',
         featuredRank: 3,
-        tags: ['算法穩定幣', '機制風險', '死亡螺旋'],
+        tags: ['算法穩定幣', '機制風險', '死亡螺旋', '脫鉤'],
         behaviorTags: ['脫鉤', '死亡螺旋', '無限制印鈔', '歸零'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'stablecoin', 'fearGreed'],
@@ -625,7 +625,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2020,
         importance: 'S',
         featuredRank: 4,
-        tags: ['黑天鵝', '流動性危機', '連鎖爆倉'],
+        tags: ['黑天鵝', '流動性危機', '連鎖爆倉', 'V型反轉'],
         behaviorTags: ['V型反轉', '插針', '無差別拋售', '流动性枯竭'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'oi', 'fearGreed'],
@@ -785,7 +785,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2014,
         importance: 'S',
         featuredRank: 5,
-        tags: ['交易所風險', '資產遺失', '信任崩潰'],
+        tags: ['交易所風險', '資產遺失', '信任崩潰', '無法提幣'],
         behaviorTags: ['無法提幣', '交易所倒閉', '信任危機'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'fearGreed'],
@@ -907,7 +907,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2016,
         importance: 'S',
         featuredRank: 6,
-        tags: ['智能合約', '治理分歧', '硬分叉'],
+        tags: ['智能合約', '治理分歧', '硬分叉', '代碼即法律'],
         marketStates: ['崩跌', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 7,
@@ -922,6 +922,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'tech_event',
         impactedTokens: ['ETH', 'ETC'],
+        maxDrawdown: '-30%',
+        recoveryDays: '40 Days',
         impactSummary: '智能合約漏洞導致以太坊硬分叉，確立了回滾機制的可能性。',
 
         usageGuide: [
@@ -1025,7 +1027,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2017 ICO 狂潮：散戶風險教育的起點',
         year: 2017,
         importance: 'A',
-        tags: ['ICO', '散戶狂熱', '熊市前兆'],
+        tags: ['ICO', '散戶狂熱', '泡沫破裂', '價值回歸'],
         marketStates: ['過熱', '崩跌'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -1040,6 +1042,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['ETH', 'BTC'],
+        maxDrawdown: '-90%',
+        recoveryDays: '1000+ Days',
         impactSummary: 'ICO 狂熱導致 ETH 需求激增，泡沫破裂後 90% 項目歸零。',
 
         usageGuide: [
@@ -1137,7 +1141,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2021 中國全面禁令：算力遷徙與供給端重塑',
         year: 2021,
         importance: 'A',
-        tags: ['監管政策', '算力遷徙', '供給衝擊'],
+        tags: ['監管政策', '算力遷徙', '供給衝擊', '去中心化驗證'],
         marketStates: ['崩跌', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -1152,6 +1156,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'policy_regulation',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-50%',
+        recoveryDays: '150 Days',
         impactSummary: '算力暴跌 50% 後迅速遷徙，展現了比特幣網絡的極強韌性。',
 
         usageGuide: [
@@ -1257,7 +1263,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2022 以太坊 The Merge：共識機制轉換的歷史時刻',
         year: 2022,
         importance: 'A',
-        tags: ['以太坊', '共識機制', 'PoS'],
+        tags: ['以太坊', 'PoS', '利多出盡', '買預期賣事實'],
         marketStates: ['觀望', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -1272,6 +1278,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'tech_event',
         impactedTokens: ['ETH'],
+        maxDrawdown: '-20%',
+        recoveryDays: '120 Days',
         impactSummary: 'PoS 升級成功但呈現利多出盡，價格未漲反跌。',
 
         usageGuide: [
@@ -1362,7 +1370,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2012 第一次減半：稀缺性程式碼的首次驗證',
         year: 2012,
         importance: 'A',
-        tags: ['減半', '供給衝擊', '稀缺性'],
+        tags: ['減半', '供給衝擊', '稀缺性', '早期紅利'],
         marketStates: ['修復', '過熱'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -1377,6 +1385,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-30%',
+        recoveryDays: '60 Days',
         impactSummary: '首次減半驗證了稀缺性模型，開啟了比特幣的首個大週期。',
 
         usageGuide: [
@@ -1479,7 +1489,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2016 第二次減半：減半週期敘事的確立',
         year: 2016,
         importance: 'A',
-        tags: ['減半', '週期', '機構關注'],
+        tags: ['減半', '週期', '機構關注', '利多出盡'],
         marketStates: ['觀望', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -1494,6 +1504,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-28%',
+        recoveryDays: '180 Days',
         impactSummary: '減半週期理論成形，市場開始學會等待供應衝擊。',
 
         usageGuide: [
@@ -1597,7 +1609,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2020,
         importance: 'A',
         featuredRank: 7,
-        tags: ['減半', '機構入場', '供給衝擊'],
+        tags: ['減半', '機構入場', '供給衝擊', '數位黃金'],
         marketStates: ['修復', '過熱'],
         relatedMetrics: ['price', 'oi', 'fearGreed'],
         readingMinutes: 6,
@@ -1612,6 +1624,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-20%',
+        recoveryDays: '150 Days',
         impactSummary: '機構資金首次大規模參與減半，推動價格突破 2017 高點。',
 
         usageGuide: [
@@ -1724,7 +1738,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2024,
         importance: 'S',
         featuredRank: 8,
-        tags: ['減半', 'ETF', '機構需求', '供給衝擊'],
+        tags: ['減半', 'ETF', '供給衝擊', '結構性改變'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['price', 'oi', 'etfFlow', 'funding'],
         readingMinutes: 7,
@@ -1739,6 +1753,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-18%',
+        recoveryDays: 'Pending',
         impactSummary: 'ETF 需求提前透支減半紅利，打破了減半後才創新高的慣例。',
 
         usageGuide: [
@@ -1871,7 +1887,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2020 DeFi Summer：流動性挖礦與鏈上金融的爆發',
         year: 2020,
         importance: 'A',
-        tags: ['DeFi', '流動性挖礦', 'TVL'],
+        tags: ['DeFi', '流動性挖礦', 'TVL', '泡沫狂熱'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 6,
@@ -1886,6 +1902,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['ETH', 'UNI', 'COMP'],
+        maxDrawdown: '-30%',
+        recoveryDays: '90 Days',
         impactSummary: '流動性挖礦開啟了 DeFi 熱潮，TVL 暴增重新定義了 ETH 的價值。',
 
         usageGuide: [
@@ -1990,7 +2008,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2021 Tesla 購買比特幣：企業資產配置敘事的高峰',
         year: 2021,
         importance: 'A',
-        tags: ['機構入場', '企業配置', 'Elon Musk'],
+        tags: ['機構入場', '名人效應', '馬斯克', '情緒波動'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -2005,6 +2023,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-25%',
+        recoveryDays: '90 Days',
         impactSummary: '企業資產配置敘事達到頂峰，但名人效應也帶來了巨大的雙向波動。',
 
         usageGuide: [
@@ -2102,7 +2122,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2021 Coinbase 直接上市：加密產業納入主流金融',
         year: 2021,
         importance: 'A',
-        tags: ['IPO', '合規', '機構化'],
+        tags: ['IPO', '合規', '利多出盡', '頂部訊號'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -2117,6 +2137,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'market_structure',
         impactedTokens: ['BTC', 'COIN'],
+        maxDrawdown: '-50%',
+        recoveryDays: '200 Days',
         impactSummary: '上市日即頂部，合規里程碑往往是利多出盡的信號。',
 
         usageGuide: [
@@ -2206,7 +2228,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2021 薩爾瓦多：比特幣成為法定貨幣',
         year: 2021,
         importance: 'A',
-        tags: ['國家採用', '法規', '實驗'],
+        tags: ['國家採用', '法規', '利多出盡', '預期落地'],
         marketStates: ['觀望', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -2221,6 +2243,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'policy_regulation',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-18%',
+        recoveryDays: '30 Days',
         impactSummary: '國家級採用雷聲大雨點小，執行日的閃崩提醒了現實與敘事的落差。',
 
         usageGuide: [
@@ -2319,7 +2343,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2022 Celsius 破產：CeFi 借貸平台的擠兌模板',
         year: 2022,
         importance: 'A',
-        tags: ['CeFi', '擠兌', '借貸危機'],
+        tags: ['CeFi', '擠兌', '借貸危機', '流動性枯竭'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -2334,6 +2358,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'leverage_cleanse',
         impactedTokens: ['CEL', 'ETH'],
+        maxDrawdown: '-40%',
+        recoveryDays: '800+ Days',
         impactSummary: 'CeFi 借貸平台挪用資產導致擠兌，揭開了機構去槓桿的序幕。',
 
         usageGuide: [
@@ -2444,7 +2470,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2022 三箭資本 (3AC) 清算：高槓桿基金的爆倉連鎖',
         year: 2022,
         importance: 'A',
-        tags: ['對沖基金', '槓桿', '清算'],
+        tags: ['對沖基金', '高槓桿', '連鎖清算', '機構爆倉'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -2459,6 +2485,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'leverage_cleanse',
         impactedTokens: ['BTC', 'ETH'],
+        maxDrawdown: '-35%',
+        recoveryDays: '600+ Days',
         impactSummary: '百億基金爆倉引發連鎖清算，多個借貸平台因此破產。',
 
         usageGuide: [
@@ -2570,7 +2598,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2023 SEC 起訴 Coinbase：監管清算之戰',
         year: 2023,
         importance: 'A',
-        tags: ['監管', 'SEC', '合規'],
+        tags: ['監管', 'SEC', '合規', '壓力測試'],
         marketStates: ['觀望', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -2585,6 +2613,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'policy_regulation',
         impactedTokens: ['BTC', 'COIN'],
+        maxDrawdown: '-5%',
+        recoveryDays: '7 Days',
         impactSummary: 'SEC 對合規龍頭的起訴標誌著監管執法時代的全面來臨。',
 
         usageGuide: [
@@ -2674,7 +2704,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         title: '2023 Ripple 案裁決：代幣證券性的切分判定',
         year: 2023,
         importance: 'A',
-        tags: ['監管', 'SEC', 'XRP'],
+        tags: ['監管', 'SEC', 'XRP', '軋空'],
         marketStates: ['修復', '過熱'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 5,
@@ -2689,6 +2719,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'policy_regulation',
         impactedTokens: ['XRP'],
+        maxDrawdown: '-15%',
+        recoveryDays: '60 Days',
         impactSummary: '法院對證券性的切分裁決引發山寨幣暴漲，但法律戰仍未終結。',
 
         usageGuide: [
@@ -2779,7 +2811,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         year: 2023,
         importance: 'S',
         featuredRank: 9,
-        tags: ['交易所', '合規', '和解'],
+        tags: ['交易所', '合規', '利空出盡', '和解'],
         marketStates: ['觀望', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 6,
@@ -2794,6 +2826,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         // Trading Perspective
         type: 'exchange_event',
         impactedTokens: ['BNB'],
+        maxDrawdown: '-4%',
+        recoveryDays: '3 Days',
         impactSummary: '以歷史性罰款換取持續運營，最大交易所的合規轉型消除了重大尾部風險。',
 
         usageGuide: [
@@ -2899,7 +2933,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         impactSummary: '日銀升息引發全球去槓桿，比特幣暴跌 25%',
         importance: 'S',
         featuredRank: 1,
-        tags: ['Macro Shock', 'Black Swan', 'Liquidity Crisis'],
+        tags: ['宏觀衝擊', '黑天鵝', 'V型反轉', '流動性危機'],
         marketStates: ['崩跌', '極恐', '修復'],
         relatedMetrics: ['price', 'fearGreed', 'oi'],
         readingMinutes: 8,
@@ -2911,6 +2945,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2024-08-05T00:00:00Z',
         reactionType: 'external_shock',
         impactedTokens: ['BTC', 'ETH', 'SOL'],
+        maxDrawdown: '-25%',
+        recoveryDays: '7 Days',
         usageGuide: [
             '當宏觀利率發生劇烈變化時參考',
             '理解「套利交易解除 (Carry Trade Unwind)」的威力',
@@ -3036,7 +3072,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         type: 'supply_shock',
         impactSummary: '德國政府拋售 5 萬枚 BTC，市場承受 30 億美元賣壓',
         importance: 'A',
-        tags: ['Supply Shock', 'Government Selling'],
+        tags: ['供給衝擊', '政府拋售', '鏈上監控'],
         marketStates: ['觀望', '修復'],
         relatedMetrics: ['etfFlow', 'price'],
         readingMinutes: 5,
@@ -3048,6 +3084,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2024-07-08T00:00:00Z',
         reactionType: 'trust_collapse',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-16%',
+        recoveryDays: '3 Days',
         usageGuide: [
             '學習如何分析鏈上大額轉移',
             '理解供應衝擊 (Supply Shock) 的短期影響'
@@ -3142,7 +3180,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         type: 'geopolitics',
         impactSummary: '地緣衝突引發週末流動性閃崩',
         importance: 'B',
-        tags: ['Geopolitics', 'Flash Crash'],
+        tags: ['地緣政治', '閃崩', '恐慌拋售'],
         marketStates: ['崩跌', '修復'],
         relatedMetrics: ['price', 'fearGreed'],
         readingMinutes: 4,
@@ -3154,6 +3192,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2024-04-13T00:00:00Z',
         reactionType: 'external_shock',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-15%',
+        recoveryDays: '2 Days',
         usageGuide: [
             '觀察週末流動性不足時的極端波動',
             '理解比特幣在戰爭初期的「風險資產」屬性'
@@ -3226,7 +3266,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         type: 'leverage_cleanse',
         impactSummary: '長期偏正費率 + 高 OI，回調時形成連環爆倉',
         importance: 'B',
-        tags: ['槓桿崩盤', '多殺多', '連鎖爆倉'],
+        tags: ['槓桿崩盤', '多殺多', '連鎖爆倉', '監管雙擊'],
         marketStates: ['崩跌', '過熱'],
         relatedMetrics: ['funding', 'oi', 'fearGreed'],
         readingMinutes: 4,
@@ -3238,6 +3278,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2021-05-12',
         reactionType: 'trust_collapse',
         impactedTokens: ['BTC', 'ETH'],
+        maxDrawdown: '-50%',
+        recoveryDays: '180 Days',
         usageGuide: [
             '當資金費率持續偏高時（>0.01%）',
             '當 OI 累積過高且價格開始走弱時'
@@ -3343,7 +3385,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         type: 'leverage_cleanse',
         impactSummary: '新高附近槓桿升溫，費率偏高引發回調',
         importance: 'B',
-        tags: ['新高', '回調', '清算'],
+        tags: ['新高回調', '槓桿清洗', '獲利了結'],
         marketStates: ['過熱', '修復'],
         relatedMetrics: ['funding', 'oi', 'price'],
         readingMinutes: 3,
@@ -3355,6 +3397,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2024-03-14',
         reactionType: 'priced_in',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-17%',
+        recoveryDays: '60 Days',
         usageGuide: [
             '當價格創新高但費率急升時',
             '當 OI 快速堆積時警惕回調'
@@ -3436,7 +3480,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         type: 'market_structure',
         impactSummary: '高位 OI + 價格走弱 = 典型頂部結構',
         importance: 'B',
-        tags: ['頂部', 'OI', '分配'],
+        tags: ['週期頂部', '頂背離', '趨勢反轉'],
         marketStates: ['過熱', '觀望'],
         relatedMetrics: ['oi', 'price', 'fearGreed'],
         readingMinutes: 3,
@@ -3448,6 +3492,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2021-11-10',
         reactionType: 'priced_in',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-77%',
+        recoveryDays: '1000+ Days',
         usageGuide: [
             '當 OI 創新高但價格無法跟進時',
             '當價格走弱但 OI 不降時',
@@ -3531,7 +3577,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         type: 'leverage_cleanse',
         impactSummary: 'OI 持續下滑的槓桿去化期',
         importance: 'B',
-        tags: ['去槓桿', '3AC', 'Celsius'],
+        tags: ['去槓桿', '連鎖清算', '信心崩潰'],
         marketStates: ['崩跌', '極恐'],
         relatedMetrics: ['oi', 'price', 'stablecoin'],
         readingMinutes: 4,
@@ -3543,6 +3589,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2022-06-12',
         reactionType: 'trust_collapse',
         impactedTokens: ['BTC', 'ETH', 'stETH'],
+        maxDrawdown: '-40%',
+        recoveryDays: '200 Days',
         usageGuide: [
             '當 OI 持續下滑配合價格下跌時',
             '當流動性危機蔓延時',
@@ -3626,7 +3674,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         type: 'leverage_cleanse',
         impactSummary: '極端偏空後的情緒反轉型反彈',
         importance: 'B',
-        tags: ['軋空', '銀行危機', '反彈'],
+        tags: ['銀行危機', '軋空', '避險屬性'],
         marketStates: ['修復', '觀望'],
         relatedMetrics: ['funding', 'fearGreed', 'price'],
         readingMinutes: 3,
@@ -3638,6 +3686,8 @@ export const REVIEWS_DATA: MarketEvent[] = [
         reactionStartAt: '2023-03-10',
         reactionType: 'external_shock',
         impactedTokens: ['BTC'],
+        maxDrawdown: '-20%',
+        recoveryDays: '14 Days',
         usageGuide: [
             '當多空比極端偏空時（< 0.7）',
             '當傳統金融出現危機時'

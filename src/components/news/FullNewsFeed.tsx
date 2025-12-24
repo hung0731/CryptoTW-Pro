@@ -57,52 +57,89 @@ export function FullNewsFeed() {
     }
 
     return (
-        <div className={SPACING.classes.gapCards}>
+        <div className="flex flex-col gap-6">
             {/* AI Summary Card */}
             <AISummaryCard
                 summary={marketContext?.summary || '正在分析市場快訊...'}
                 source="幣圈快訊"
             />
 
-            {/* Section Header */}
-            <div className="mt-6">
-                <SectionHeaderCard title="今日重點快訊" />
-            </div>
-
-            {/* Professional One-Line News List */}
-            <div className={SPACING.classes.gapCards}>
-                {marketContext?.highlights?.map((item, index) => (
-                    <UniversalCard
-                        key={index}
-                        variant="default" // Using default border but UniversalCard handles it
-                        size="M"
-                        className="group flex flex-col justify-center"
-                    >
-                        <div className="flex items-center gap-3">
-                            {/* Rank Number */}
-                            <span className="shrink-0 font-mono text-[10px] text-neutral-600 w-4 text-center">
-                                {String(index + 1).padStart(2, '0')}
+            {/* Unified News Section */}
+            <UniversalCard variant="default" className="p-0 overflow-hidden">
+                {/* Header Section */}
+                {/* Header Section */}
+                <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                    <SectionHeaderCard
+                        title="今日重點快訊"
+                        rightElement={
+                            <span className="text-[10px] font-normal text-[#666666] bg-[#1A1A1A] px-2 py-0.5 rounded-full border border-[#2A2A2A]">
+                                Live
                             </span>
+                        }
+                    />
+                </div>
 
-                            {/* Title - One Line */}
-                            <h4 className={cn(TYPOGRAPHY.cardTitle, "flex-1 text-[#E0E0E0] group-hover:text-white truncate")}>
-                                {item.title}
-                            </h4>
+                {/* News List */}
+                <div className="flex flex-col">
+                    {marketContext?.highlights?.map((item, index) => (
+                        <div
+                            key={index}
+                            className="group relative px-5 py-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors duration-200"
+                        >
+                            <div className="flex items-start gap-4">
+                                {/* Rank Number - Stylish & Integrated */}
+                                <div className={cn(
+                                    "hidden sm:flex shrink-0 w-8 h-8 items-center justify-center rounded-lg font-mono text-xs border transition-colors",
+                                    item.bias === '偏多'
+                                        ? "bg-emerald-950/40 text-emerald-400 border-emerald-900/50"
+                                        : item.bias === '偏空'
+                                            ? "bg-red-950/40 text-red-400 border-red-900/50"
+                                            : "bg-[#111111] text-[#A0A0A0] border-[#1A1A1A] group-hover:border-[#2A2A2A] group-hover:text-white"
+                                )}>
+                                    {String(index + 1).padStart(2, '0')}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    {/* Mobile Rank (Inline) */}
+                                    <span className={cn(
+                                        "sm:hidden font-mono text-[10px] mr-2",
+                                        item.bias === '偏多' ? "text-emerald-500" :
+                                            item.bias === '偏空' ? "text-red-500" :
+                                                "text-[#666666]"
+                                    )}>
+                                        #{String(index + 1).padStart(2, '0')}
+                                    </span>
+
+                                    {/* Title */}
+                                    <h4 className="text-sm font-medium text-[#E0E0E0] group-hover:text-white leading-snug transition-colors">
+                                        {item.title}
+                                    </h4>
+
+                                    {/* Reason / Subtitle */}
+                                    {item.reason && (
+                                        <p className="mt-1.5 text-xs text-[#666666] group-hover:text-[#A0A0A0] line-clamp-2 leading-relaxed transition-colors">
+                                            {item.reason}
+                                        </p>
+                                    )}
+
+                                    {/* Impact Badge - Only show if Neutral or not colored, replacing logic as requested */}
+                                    {item.impact === '高' && item.bias !== '偏多' && item.bias !== '偏空' && (
+                                        <div className="mt-2 flex items-center gap-2">
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-900/20 text-red-500 border border-red-900/30">
+                                                高影響
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-
-                        {/* Reason - Shown below, muted */}
-                        {item.reason && (
-                            <p className={cn(TYPOGRAPHY.bodySmall, "mt-1.5 ml-7 line-clamp-1 text-neutral-500")}>
-                                {item.reason}
-                            </p>
+                    )) || (
+                            <div className="p-12 text-center text-[#525252] text-sm">
+                                尚無相關數據
+                            </div>
                         )}
-                    </UniversalCard>
-                )) || (
-                        <div className="p-8 text-center text-neutral-500 text-sm">
-                            尚無相關數據
-                        </div>
-                    )}
-            </div>
+                </div>
+            </UniversalCard>
         </div>
     )
 }

@@ -6,14 +6,13 @@ import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
 import {
-    Bell, Settings, ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet
+    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight
 } from 'lucide-react'
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
 import { UpcomingEventsCard } from '@/components/home/UpcomingEventsCard'
 import { FeaturedReviewsCard } from '@/components/home/FeaturedReviewsCard'
-import { MarketConditions } from '@/components/home/MarketConditions'
 import { MacroReaction } from '@/lib/macro-events'
 import { SPACING } from '@/lib/design-tokens'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
@@ -23,7 +22,6 @@ import { ActionCard } from '@/components/home/ActionCard'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
 import { HistoricalEchoCard } from '@/components/home/HistoricalEchoCard'
 import { findHistoricalSimilarity } from '@/lib/historical-matcher'
-import { MarketOverviewGrid } from '@/components/home/MarketOverviewGrid'
 
 interface HomePageClientProps {
     reactions: Record<string, MacroReaction>
@@ -153,13 +151,7 @@ export function HomePageClient({
                         </Link>
                     )}
 
-                    {/* 1. Market Snapshot (Decision Card) */}
-                    <MarketOverviewGrid status={initialStatus} conclusion={initialConclusion} />
 
-                    {/* 2. Secondary Context (Conditions) */}
-                    <div className="mt-3">
-                        <MarketConditions status={initialStatus} />
-                    </div>
                 </section>
 
                 {/* 3. Historical Echo */}
@@ -168,43 +160,35 @@ export function HomePageClient({
                 </section>
 
                 {/* ===== BELOW THE FOLD: Detailed Context ===== */}
-                <section className={SPACING.classes.gapCards}>
-                    <SectionHeaderCard
-                        title="接下來會發生什麼"
-                        description="市場關注焦點與即將發生的事件"
-                    />
+                <section className="flex flex-col gap-6">
+                    {/* Explore More Grid */}
+                    <UniversalCard variant="default" className="p-0 overflow-hidden">
+                        <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                            <SectionHeaderCard title="探索更多" />
+                        </div>
+                        <div className="grid grid-cols-4 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
+                            {[
+                                { href: '/calendar', label: '財經日曆', icon: Calendar },
+                                { href: '/price-prediction', label: '價格預測', icon: Wallet },
+                                { href: '/reviews', label: '歷史復盤', icon: LineChart },
+                                { href: '/news', label: '快訊中心', icon: DollarSign },
+                            ].map((item) => (
+                                <Link key={item.href} href={item.href} className="group bg-[#0A0A0A] hover:bg-[#141414] transition-colors p-3 flex flex-col items-center justify-center gap-2 aspect-square">
+                                    <div className="w-10 h-10 rounded-2xl bg-[#151515] flex items-center justify-center border border-[#2A2A2A] text-[#666] group-hover:text-white group-hover:border-[#444] transition-all">
+                                        <item.icon className="w-5 h-5" />
+                                    </div>
+                                    <span className="text-xs font-bold text-[#888] group-hover:text-white transition-colors">{item.label}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </UniversalCard>
+
                     <UpcomingEventsCard reactions={reactions} />
                     <FlashNewsFeed compact initialContext={initialContext} />
                     <FeaturedReviewsCard />
                 </section>
 
-                {/* ===== Discovery Section ===== */}
-                <section className={SPACING.classes.gapCards}>
-                    <SectionHeaderCard title="探索更多" />
 
-                    <div className={cn("grid grid-cols-2", SPACING.classes.gapCards)}>
-                        <ActionCard
-                            title="財經日曆"
-                            href="/calendar"
-                            icon={CandlestickChart}
-                        />
-                        <ActionCard
-                            title="價格預測"
-                            href="/prediction"
-                            icon={Wallet}
-                        />
-                        <ActionCard
-                            title="歷史復盤"
-                            href="/reviews"
-                            icon={Activity}
-                        />
-                        <ActionCard
-                            title="快訊中心"
-                            href="/news"
-                            icon={DollarSign}
-                        />
-                    </div>
-                </section>
 
             </MobileOptimizedLayout>
         </main>

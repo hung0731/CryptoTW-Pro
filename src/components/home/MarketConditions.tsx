@@ -25,7 +25,7 @@ export function MarketConditions({ status }: MarketConditionsProps) {
     else warnings.push({ label: '波動收斂', level: 'low' })
 
     return (
-        <div className="space-y-2 mb-6">
+        <div className="space-y-2">
             <div className="flex items-center gap-2 mb-2 px-1">
                 <ShieldCheck className="w-3 h-3 text-neutral-600" />
                 <span className="text-[10px] font-mono text-[#666666] tracking-widest">風控中心</span>
@@ -41,7 +41,7 @@ export function MarketConditions({ status }: MarketConditionsProps) {
 
                     const card = (
                         <div key={i} className={cn(
-                            "bg-[#0A0A0A] border rounded-lg p-3 flex items-center justify-between transition-colors",
+                            "bg-[#0A0A0A] border rounded-xl p-3 flex items-center justify-between transition-colors",
                             borderColor,
                             isLocked && "hover:bg-neutral-900 group"
                         )}>

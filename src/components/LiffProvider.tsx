@@ -77,6 +77,18 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                     }
                 }
 
+                // 2. LIFF Inspector (Dev Only)
+                if (process.env.NODE_ENV === 'development') {
+                    try {
+                        const { LiffInspector } = await import('@line/liff-inspector')
+                        // @ts-ignore - LIFF Inspector types can be finicky
+                        liff.use(new LiffInspector())
+                        logger.info('LIFF Inspector initialized', { feature: 'liff-provider' })
+                    } catch (err) {
+                        logger.warn('Failed to load LIFF Inspector', err as Error, { feature: 'liff-provider' })
+                    }
+                }
+
                 await liff.init({ liffId })
                 setLiffObject(liff)
 
@@ -138,7 +150,12 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                     }
                 }
             } catch (e) {
-                logger.error('LIFF Initialization failed', e as Error, { feature: 'liff-provider' })
+                const errMsg = (e as Error).message
+                if (errMsg.includes('Failed to fetch')) {
+                    logger.warn('LIFF Connect Failed (likely network/blocker). Running in Guest Mode.', { feature: 'liff-provider' })
+                } else {
+                    logger.error('LIFF Initialization failed', e as Error, { feature: 'liff-provider' })
+                }
                 setError(e)
             } finally {
                 setIsLoading(false)

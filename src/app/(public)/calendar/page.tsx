@@ -9,7 +9,7 @@ export default async function CalendarPage() {
 
     return (
         <main className="min-h-screen bg-black text-white pb-20">
-            <PageHeader title="經濟日曆" />
+            <PageHeader title="經濟日曆" showLogo={false} backHref="/" backLabel="返回" />
             <CalendarClient enrichedEvents={enrichedEvents} />
         </main>
     )

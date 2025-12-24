@@ -35,7 +35,7 @@ export function MarketOverviewGrid({ status, conclusion }: MarketOverviewGridPro
     }
 
     return (
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3">
             {/* 1. Market Radar (Compact) */}
             <div className="bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-3 flex flex-col justify-between h-[100px] relative overflow-hidden group">
                 <div className="flex items-start justify-between z-10">

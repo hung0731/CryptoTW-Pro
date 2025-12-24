@@ -46,9 +46,9 @@ export function UnifiedChartSection({
     const activeIndicator = availableTabs.find(t => t.id === activeTab) || availableTabs[0];
 
     return (
-        <div className="rounded-xl border border-white/5 overflow-hidden" style={{ backgroundColor: '#0A0A0B' }}>
-            {/* Header */}
-            <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+        <div className="flex flex-col">
+            {/* Header - kept as a sub-header or merged */}
+            <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between bg-[#0A0A0B]">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-white">{symbol}/USDT</span>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400">
