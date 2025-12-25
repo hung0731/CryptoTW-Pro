@@ -32,7 +32,7 @@ import { UniversalCard, CardContent, CardHeader, CardTitle } from '@/components/
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { EventNarrativeTimeline } from './calendar/EventNarrativeTimeline'
 
-interface SingleEventClientProps {
+interface EventDetailClientProps {
     eventKey: string
     reactions: Record<string, MacroReaction>
 }
@@ -124,7 +124,7 @@ function NextEventCard({ nextOcc, eventDef }: { nextOcc: MacroEventOccurrence | 
 
 }
 
-export default function SingleEventClient({ eventKey, reactions }: SingleEventClientProps) {
+export default function EventDetailClient({ eventKey, reactions }: EventDetailClientProps) {
     const eventDef = MACRO_EVENT_DEFS.find(d => d.key === eventKey)
     const [overlayType, setOverlayType] = useState<'oi' | 'funding' | null>(null)
 

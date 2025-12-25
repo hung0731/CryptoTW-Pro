@@ -19,7 +19,7 @@ interface AIDecisionData {
     }
 }
 
-interface AIDecisionCardProps {
+interface AIStrategyDecisionCardProps {
     data: AIDecisionData | null
     isLoading?: boolean
 }
@@ -55,7 +55,7 @@ function AIDecisionSkeleton() {
     )
 }
 
-export function AIDecisionCard({ data, isLoading }: AIDecisionCardProps) {
+export function AIAnalysisCard({ data, isLoading }: AIStrategyDecisionCardProps) {
     const [isExpanded, setIsExpanded] = useState(false)
 
     if (isLoading) return <AIDecisionSkeleton />

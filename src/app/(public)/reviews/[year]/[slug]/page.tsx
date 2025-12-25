@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { getReview, getRelatedReviews } from '@/lib/reviews-data';
 import { ArrowLeft, Share2, ChevronRight, Lightbulb, BookOpen, Zap, LineChart, GitMerge } from 'lucide-react';
 import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens';
@@ -13,9 +14,18 @@ import { QuickReadHero } from '@/components/QuickReadHero';
 import { DeepDiveTabs } from '@/components/DeepDiveTabs';
 import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { JudgmentReplay } from '@/components/JudgmentReplay'; // [NEW]
-import { EventAnalysisDashboard } from '@/components/reviews/EventAnalysisDashboard';
+
+// Dynamic import for heavy chart component
+const EventAnalysisDashboard = dynamic(
+    () => import('@/components/reviews/EventAnalysisDashboard').then(mod => ({ default: mod.EventAnalysisDashboard })),
+    {
+        loading: () => <Skeleton className="h-[400px] w-full rounded-xl" />,
+        ssr: false,  // Disable SSR for chart components
+    }
+);
 
 export default function ReviewDetailPage() {
     const params = useParams();

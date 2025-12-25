@@ -12,7 +12,7 @@ interface QuestionCardProps {
     onAnswer: (score: any) => void
 }
 
-export function QuestionCard({ question, total, index, onAnswer }: QuestionCardProps) {
+export function QuizQuestionCard({ question, total, index, onAnswer }: QuestionCardProps) {
     return (
         <motion.div
             initial={{ opacity: 0, x: 50 }}

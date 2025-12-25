@@ -173,20 +173,28 @@ export default function ProfilePage() {
 
                 {/* Quick Actions */}
                 <div className="space-y-3">
-                    <SectionHeaderCard title="設定" />
-                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden divide-y divide-white/5">
-                        <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
-                        <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
-                        <MenuLink icon={Crown} label="VIP 計劃" href="/join" />
+                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden">
+                        <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                            <SectionHeaderCard title="設定" />
+                        </div>
+                        <div className="divide-y divide-white/5">
+                            <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
+                            <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
+                            <MenuLink icon={Crown} label="VIP 計劃" href="/join" />
+                        </div>
                     </UniversalCard>
                 </div>
 
                 {/* More */}
                 <div className="space-y-3">
-                    <SectionHeaderCard title="更多" />
-                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden divide-y divide-white/5">
-                        <MenuLink icon={Bookmark} label="我的收藏" href="/bookmarks" badge="即將推出" />
-                        <MenuLink icon={HelpCircle} label="幫助中心" href="https://line.me/R/ti/p/@cryptotw" external />
+                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden">
+                        <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                            <SectionHeaderCard title="更多" />
+                        </div>
+                        <div className="divide-y divide-white/5">
+                            <MenuLink icon={Bookmark} label="我的收藏" href="/bookmarks" badge="即將推出" />
+                            <MenuLink icon={HelpCircle} label="幫助中心" href="https://line.me/R/ti/p/@cryptotw" external />
+                        </div>
                     </UniversalCard>
                 </div>
 

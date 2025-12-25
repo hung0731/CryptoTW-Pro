@@ -10,7 +10,7 @@ import { UniversalCard } from '@/components/ui/UniversalCard'
 
 // --- COMPARISON ENTRY POINT (Special Card) ---
 // --- REVIEW COMPONENT ---
-export function FeaturedReviewsCard() {
+export function ReviewsFeaturedCard() {
     const reviews = getFeaturedReviews().slice(0, 4)
 
     // Fallback if no reviews

@@ -27,12 +27,17 @@ import { UniversalCard } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { EnrichedMacroEvent } from '@/lib/services/macro-events'
 
-interface CalendarClientProps {
+interface CalendarPageClientProps {
     enrichedEvents: EnrichedMacroEvent[]
 }
 
 
-
+/**
+ * @utility-component
+ * @description Custom card for calendar event grid only.
+ * Does not use UniversalCard due to specific chart layout requirements.
+ * NOT FOR GENERAL USE - Calendar page specific implementation.
+ */
 function MiniChartCard({
     occ,
     reaction,
@@ -191,7 +196,7 @@ const getEventIcon = (key: string) => {
     }
 }
 
-export default function CalendarClient({ enrichedEvents }: CalendarClientProps) {
+export default function CalendarPageClient({ enrichedEvents }: CalendarPageClientProps) {
     const [alignMode, setAlignMode] = useState<'time' | 'reaction'>('time')
     const [aiSummary, setAiSummary] = useState<string>('')
     const [aiLoading, setAiLoading] = useState(true)

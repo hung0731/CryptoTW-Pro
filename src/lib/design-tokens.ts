@@ -348,3 +348,34 @@ export const chartTooltipProps = {
     labelStyle: { color: '#666666', fontSize: '10px' },
     itemStyle: { color: '#FFFFFF', fontSize: '12px', fontFamily: 'monospace' },
 }
+
+// ================================================
+// ANIMATION SYSTEM (Card System v3.0 - Chapter 12)
+// ================================================
+export const ANIMATION = {
+    micro: 'duration-75',
+    standard: 'duration-150',
+    complex: 'duration-300',
+    easeOut: 'ease-out',
+    easeIn: 'ease-in',
+    easeInOut: 'ease-in-out',
+    hoverCard: 'transition-colors duration-75',
+    hoverBorder: 'transition-border duration-75',
+    activePress: 'active:scale-[0.98] transition-transform duration-75',
+    expandCollapse: 'transition-all duration-150 ease-out',
+    fadeIn: 'transition-opacity duration-150',
+    buttonHover: 'transition-all duration-75 hover:scale-105',
+    iconSpin: 'transition-transform duration-150',
+} as const
+
+// ================================================
+// FOCUS SYSTEM (Accessibility - Chapter 7)
+// ================================================
+export const FOCUS = {
+    ring: 'focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none',
+    ringDanger: 'focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none',
+    ringSuccess: 'focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none',
+    ringSubtle: 'focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none',
+    ringHigh: 'focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-black outline-none',
+} as const
+

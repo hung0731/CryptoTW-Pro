@@ -6,19 +6,19 @@ import { cn } from '@/lib/utils'
 import { UniversalCard, CardTitle } from '@/components/ui/UniversalCard'
 import { TYPOGRAPHY } from '@/lib/design-tokens'
 
-interface ActionCardProps {
+interface QuickActionCardProps {
     title: string
     href: string
     icon: React.ElementType
     variant?: 'primary' | 'secondary'
 }
 
-export function ActionCard({
+export function QuickActionCard({
     title,
     href,
     icon: Icon,
     variant = 'secondary'
-}: ActionCardProps) {
+}: QuickActionCardProps) {
     const isPrimary = variant === 'primary'
 
     return (

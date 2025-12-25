@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, Activity, Anchor, BarChart2, Info, ChevronRight, Zap, RefreshCcw } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { AIDecisionCard } from '@/components/home/AIDecisionCard'
+import { AIAnalysisCard } from '@/components/home/AIAnalysisCard'
 import { MarketContextCard } from '@/components/home/MarketContextCard'
 import { CARDS, SPACING, TYPOGRAPHY, COLORS } from '@/lib/design-tokens'
 
@@ -44,7 +44,7 @@ export function HomeRouterWidget() {
         <div className="space-y-5">
 
             {/* 0. AI Decision Card (First Screen - Conclusion First) */}
-            <AIDecisionCard data={data.aiDecision || null} isLoading={loading} />
+            <AIAnalysisCard data={data.aiDecision || null} isLoading={loading} />
 
             {/* 1. Market Context (News Highlights) - Collapsed by default */}
             <MarketContextCard data={data.marketContext || null} isLoading={loading} />

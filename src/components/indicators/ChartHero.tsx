@@ -1,14 +1,31 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { CARDS, TYPOGRAPHY, COLORS, SPACING, CHART } from '@/lib/design-tokens';
 import { IndicatorStory, ZONE_COLORS, getZoneLabel, YAxisModel } from '@/lib/indicator-stories';
 import { getIndicatorExplanation } from '@/lib/chart-semantics';
 import { useIndicatorChart, ChartDataPoint } from '@/hooks/useIndicatorChart';
 import { SeasonalityHeatmap } from '@/components/indicators/SeasonalityHeatmap';
-import { HalvingCycleChart } from '@/components/indicators/HalvingCycleChart';
-import { DivergenceScreener } from '@/components/indicators/DivergenceScreener';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Dynamic import for heavy chart components
+const HalvingCycleChart = dynamic(
+    () => import('@/components/indicators/HalvingCycleChart').then(mod => ({ default: mod.HalvingCycleChart })),
+    {
+        ssr: false,
+        loading: () => <Skeleton className="h-[400px] w-full rounded-xl" />
+    }
+);
+
+const DivergenceScreener = dynamic(
+    () => import('@/components/indicators/DivergenceScreener').then(mod => ({ default: mod.DivergenceScreener })),
+    {
+        ssr: false,
+        loading: () => <Skeleton className="h-[600px] w-full rounded-xl" />
+    }
+);
 
 // ================================================
 // HLPER FUNCTIONS

@@ -1,6 +1,6 @@
 import { PageHeader } from '@/components/PageHeader'
 import { logger } from '@/lib/logger'
-import SingleEventClient from '@/components/SingleEventClient'
+import EventDetailClient from '@/components/EventDetailClient'
 import fs from 'fs'
 import path from 'path'
 import { getMacroEventDef } from '@/lib/macro-events'
@@ -48,7 +48,7 @@ export default async function MacroEventDetailPage({ params }: { params: Promise
 
     return (
         <main className="min-h-screen bg-black text-white">
-            <SingleEventClient eventKey={key} reactions={reactions} />
+            <EventDetailClient eventKey={key} reactions={reactions} />
         </main>
     )
 }

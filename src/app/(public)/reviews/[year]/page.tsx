@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getReviewsByYear } from '@/lib/reviews-data';
-import { ReviewCard } from '@/components/reviews/ReviewCard';
+import { EventCard } from '@/components/reviews/EventCard';
 
 export default function ReviewYearPage() {
     const params = useParams();
@@ -33,7 +33,7 @@ export default function ReviewYearPage() {
                 <div className="space-y-3">
                     {reviews.length > 0 ? (
                         reviews.map((review) => (
-                            <ReviewCard key={review.id} review={review} />
+                            <EventCard key={review.id} review={review} />
                         ))
                     ) : (
                         <div className="text-center py-20 bg-neutral-900/20 rounded-2xl border border-white/5 text-neutral-500 text-sm">

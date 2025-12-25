@@ -3,8 +3,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QUIZ_QUESTIONS, calculateQuizResult, QuizResult } from '@/lib/quiz-data'
-import { QuestionCard } from './QuestionCard'
-import { ResultCard } from './ResultCard'
+import { QuizQuestionCard } from './QuizQuestionCard'
+import { QuizResultCard } from './QuizResultCard'
 import { Button } from '@/components/ui/button'
 import { Sparkles, ArrowRight } from 'lucide-react'
 
@@ -74,7 +74,7 @@ export function QuizShell() {
                 )}
 
                 {mode === 'quiz' && (
-                    <QuestionCard
+                    <QuizQuestionCard
                         key={`q-${currentQIndex}`}
                         question={QUIZ_QUESTIONS[currentQIndex]}
                         total={QUIZ_QUESTIONS.length}
@@ -84,7 +84,7 @@ export function QuizShell() {
                 )}
 
                 {mode === 'result' && result && (
-                    <ResultCard
+                    <QuizResultCard
                         result={result}
                         onRetry={resetQuiz}
                     />

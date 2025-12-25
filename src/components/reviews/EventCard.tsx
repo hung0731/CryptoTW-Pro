@@ -4,7 +4,7 @@ import { TYPOGRAPHY } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
 import { UniversalCard, CardContent } from '@/components/ui/UniversalCard';
 
-export function ReviewCard({ review }: { review: MarketEvent }) {
+export function EventCard({ review }: { review: MarketEvent }) {
     const getTypeConfig = (type: string) => {
         switch (type) {
             case 'leverage_cleanse': return { label: '槓桿清算' };

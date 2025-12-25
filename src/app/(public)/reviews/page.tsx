@@ -1,7 +1,7 @@
 'use client';
 
 import { PageHeader } from '@/components/PageHeader';
-import { EventLibraryClient } from '@/components/reviews/EventLibraryClient';
+import { ReviewsPageClient } from '@/components/reviews/ReviewsPageClient';
 
 export default function ReviewsPage() {
     return (
@@ -9,7 +9,7 @@ export default function ReviewsPage() {
             <PageHeader title="市場事件庫" showLogo={false} backHref="/" backLabel="返回" />
 
             {/* Main Library Client */}
-            <EventLibraryClient />
+            <ReviewsPageClient />
         </main>
     );
 }

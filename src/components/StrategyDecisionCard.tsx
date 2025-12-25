@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-interface DecisionCardProps {
+interface StrategyDecisionCardProps {
     /** 🧠 市場目前在做什麼？ */
     marketState: string
     /** ⚠️ 現在最大的風險是什麼？ */
@@ -11,7 +11,7 @@ interface DecisionCardProps {
     action: string
 }
 
-export function DecisionCard({ marketState, risk, action }: DecisionCardProps) {
+export function StrategyDecisionCard({ marketState, risk, action }: StrategyDecisionCardProps) {
     return (
         <section className="px-5 mb-4">
             <div className="rounded-lg p-4 border border-white/5" style={{ backgroundColor: '#0F0F10' }}>

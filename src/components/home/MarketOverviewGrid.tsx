@@ -1,4 +1,4 @@
-import { ActionCard } from '@/components/home/ActionCard'
+import { QuickActionCard } from '@/components/home/QuickActionCard'
 import { Activity, Users, BrainCircuit, TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { MarketStatusData, Conclusion } from '@/lib/types'
 import { cn } from '@/lib/utils'

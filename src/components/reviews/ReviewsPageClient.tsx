@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { REVIEWS_DATA } from '@/lib/reviews-data';
 import { cn } from '@/lib/utils';
 import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
@@ -46,11 +47,14 @@ const TypeLabels: Record<string, string> = {
 
 const DEFAULT_SPARKLINE = [42000, 41000, 39000, 38000, 39500, 41000, 43000, 42500, 44000, 46000, 45000, 47000];
 
-export function EventLibraryClient() {
+export function ReviewsPageClient() {
     // State
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedYear, setSelectedYear] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Virtual scrolling ref
+    const parentRef = useRef<HTMLDivElement>(null);
 
     // Filter Logic
     const filteredReviews = useMemo(() => {
@@ -78,6 +82,14 @@ export function EventLibraryClient() {
         // Sort by Date Descending (Timeline View)
         return filtered.sort((a, b) => new Date(b.eventEndAt).getTime() - new Date(a.eventEndAt).getTime());
     }, [selectedYear, selectedType, searchQuery]);
+
+    // Virtual scrolling setup
+    const rowVirtualizer = useVirtualizer({
+        count: filteredReviews.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 180, // Estimated row height
+        overscan: 5, // Render 5 extra items above/below viewport
+    });
 
     const clearFilters = () => {
         setSelectedType(null);
@@ -216,76 +228,105 @@ export function EventLibraryClient() {
                                 />
                             </div>
 
-                            {/* Event List - Single Column View */}
-                            <div className="grid grid-cols-1 divide-y divide-[#1A1A1A] bg-[#1A1A1A]">
-                                {filteredReviews.map((review) => {
-                                    const TypeIcon = TypeIcons[review.type] || Filter;
-                                    const displaySparkline = review.sparklineData || DEFAULT_SPARKLINE;
+                            {/* Event List - Virtual Scrolling Enabled */}
+                            <div
+                                ref={parentRef}
+                                className="overflow-auto"
+                                style={{
+                                    height: `${Math.min(filteredReviews.length * 180, 800)}px`,
+                                    maxHeight: '800px'
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        height: `${rowVirtualizer.getTotalSize()}px`,
+                                        width: '100%',
+                                        position: 'relative',
+                                    }}
+                                >
+                                    {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                        const review = filteredReviews[virtualRow.index];
+                                        if (!review) return null;
 
-                                    return (
-                                        <div
-                                            key={review.id}
-                                            className="group relative block px-5 py-6 bg-[#0A0A0A] hover:bg-[#141414] transition-colors h-full flex flex-col"
-                                        >
-                                            {/* Main Click Target */}
-                                            <Link
-                                                href={`/reviews/${review.year}/${review.slug}`}
-                                                className="absolute inset-0 z-0"
-                                            />
+                                        const TypeIcon = TypeIcons[review.type] || Filter;
 
-                                            <div className="relative z-0 pointer-events-none flex items-start justify-between mb-4">
-                                                {/* Left: Type Icon & Year */}
-                                                <div className="flex items-center gap-3">
-                                                    <div className={cn(
-                                                        "w-10 h-10 rounded-lg flex items-center justify-center border",
-                                                        "bg-[#111] border-[#2A2A2A] text-neutral-500 group-hover:text-white group-hover:border-neutral-500 transition-colors"
-                                                    )}>
-                                                        <TypeIcon className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[10px] font-mono text-[#444] group-hover:text-[#666] transition-colors">{review.year}</div>
-                                                        <span className="text-[10px] text-[#666] bg-[#151515] border border-[#222] px-1.5 py-0.5 rounded">
-                                                            {TypeLabels[review.type]}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Content */}
-                                            <div className="relative z-0 pointer-events-none flex-1 min-w-0 mb-4">
-                                                <h3 className="text-lg font-bold text-[#E0E0E0] group-hover:text-white mb-1 transition-colors line-clamp-1">
-                                                    {review.title.split('：')[0]}
-                                                </h3>
-                                                <p className="text-xs text-[#525252] group-hover:text-[#888] line-clamp-2 leading-relaxed">
-                                                    {review.title.split('：')[1] || review.summary}
-                                                </p>
-                                            </div>
-
-                                            {/* Footer: Stats & VS Button */}
-                                            <div className="relative z-10 mt-auto pt-4 border-t border-[#1A1A1A] flex items-center justify-between pointer-events-none">
-                                                <div className="flex items-center gap-2">
-                                                    {review.maxDrawdown && (
-                                                        <span className="text-[10px] font-mono font-medium text-red-500">
-                                                            DD {review.maxDrawdown}
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex items-center gap-3">
-                                                    {/* VS Button (Interactive) */}
+                                        return (
+                                            <div
+                                                key={virtualRow.key}
+                                                data-index={virtualRow.index}
+                                                ref={rowVirtualizer.measureElement}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    transform: `translateY(${virtualRow.start}px)`,
+                                                }}
+                                            >
+                                                <div
+                                                    className="group relative block px-5 py-6 bg-[#0A0A0A] hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0"
+                                                >
+                                                    {/* Main Click Target */}
                                                     <Link
-                                                        href={`/reviews/compare?event=${review.slug}-${review.year}`}
-                                                        className="pointer-events-auto opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 flex items-center gap-1 text-[10px] font-bold text-neutral-500 hover:text-white bg-[#1A1A1A] hover:bg-neutral-800 px-2 py-1 rounded-md border border-neutral-800"
-                                                    >
-                                                        <GitCompare className="w-3 h-3" />
-                                                        VS
-                                                    </Link>
-                                                    <ChevronRight className="w-4 h-4 text-[#333] group-hover:text-white transition-colors" />
+                                                        href={`/reviews/${review.year}/${review.slug}`}
+                                                        className="absolute inset-0 z-0"
+                                                    />
+
+                                                    <div className="relative z-0 pointer-events-none flex items-start justify-between mb-4">
+                                                        {/* Left: Type Icon & Year */}
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={cn(
+                                                                "w-10 h-10 rounded-lg flex items-center justify-center border",
+                                                                "bg-[#111] border-[#2A2A2A] text-neutral-500 group-hover:text-white group-hover:border-neutral-500 transition-colors"
+                                                            )}>
+                                                                <TypeIcon className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-[10px] font-mono text-[#444] group-hover:text-[#666] transition-colors">{review.year}</div>
+                                                                <span className="text-[10px] text-[#666] bg-[#151515] border border-[#222] px-1.5 py-0.5 rounded">
+                                                                    {TypeLabels[review.type]}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="relative z-0 pointer-events-none flex-1 min-w-0 mb-4">
+                                                        <h3 className="text-lg font-bold text-[#E0E0E0] group-hover:text-white mb-1 transition-colors line-clamp-1">
+                                                            {review.title.split('：')[0]}
+                                                        </h3>
+                                                        <p className="text-xs text-[#525252] group-hover:text-[#888] line-clamp-2 leading-relaxed">
+                                                            {review.title.split('：')[1] || review.summary}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Footer: Stats & VS Button */}
+                                                    <div className="relative z-10 mt-auto pt-4 border-t border-[#1A1A1A] flex items-center justify-between pointer-events-none">
+                                                        <div className="flex items-center gap-2">
+                                                            {review.maxDrawdown && (
+                                                                <span className="text-[10px] font-mono font-medium text-red-500">
+                                                                    DD {review.maxDrawdown}
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="flex items-center gap-3">
+                                                            {/* VS Button (Interactive) */}
+                                                            <Link
+                                                                href={`/reviews/compare?event=${review.slug}-${review.year}`}
+                                                                className="pointer-events-auto opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 flex items-center gap-1 text-[10px] font-bold text-neutral-500 hover:text-white bg-[#1A1A1A] hover:bg-neutral-800 px-2 py-1 rounded-md border border-neutral-800"
+                                                            >
+                                                                <GitCompare className="w-3 h-3" />
+                                                                VS
+                                                            </Link>
+                                                            <ChevronRight className="w-4 h-4 text-[#333] group-hover:text-white transition-colors" />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </UniversalCard>
                     ) : (

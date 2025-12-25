@@ -6,11 +6,11 @@ import { HistoricalMatch } from '@/lib/historical-matcher'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
 
-interface HistoricalEchoCardProps {
+interface HistoryEchoCardProps {
     match: HistoricalMatch | null
 }
 
-export function HistoricalEchoCard({ match }: HistoricalEchoCardProps) {
+export function HistoryEchoCard({ match }: HistoryEchoCardProps) {
     if (!match) return null
 
     return (

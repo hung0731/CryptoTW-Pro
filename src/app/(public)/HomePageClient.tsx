@@ -11,16 +11,16 @@ import {
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
 import { WelcomeModal, useWelcomeModal } from '@/components/WelcomeModal'
-import { UpcomingEventsCard } from '@/components/home/UpcomingEventsCard'
-import { FeaturedReviewsCard } from '@/components/home/FeaturedReviewsCard'
+import { EventsUpcomingCard } from '@/components/home/EventsUpcomingCard'
+import { ReviewsFeaturedCard } from '@/components/home/ReviewsFeaturedCard'
 import { MacroReaction } from '@/lib/macro-events'
 import { SPACING } from '@/lib/design-tokens'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
 
-import { ActionCard } from '@/components/home/ActionCard'
+import { QuickActionCard } from '@/components/home/QuickActionCard'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
-import { HistoricalEchoCard } from '@/components/home/HistoricalEchoCard'
+import { HistoryEchoCard } from '@/components/home/HistoryEchoCard'
 import { findHistoricalSimilarity } from '@/lib/historical-matcher'
 
 interface HomePageClientProps {
@@ -133,7 +133,7 @@ export function HomePageClient({
                         <Link href="/join" className="block mb-4">
                             <UniversalCard
                                 variant="highlight"
-                                size="S"
+                                size="M"
                                 className={cn("flex items-center justify-between", isPending && "border-yellow-500/30")}
                             >
                                 <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export function HomePageClient({
 
                 {/* 3. Historical Echo */}
                 <section>
-                    <HistoricalEchoCard match={historicalMatch} />
+                    <HistoryEchoCard match={historicalMatch} />
                 </section>
 
                 {/* ===== BELOW THE FOLD: Detailed Context ===== */}
@@ -183,9 +183,9 @@ export function HomePageClient({
                         </div>
                     </UniversalCard>
 
-                    <UpcomingEventsCard reactions={reactions} />
+                    <EventsUpcomingCard reactions={reactions} />
                     <FlashNewsFeed compact initialContext={initialContext} />
-                    <FeaturedReviewsCard />
+                    <ReviewsFeaturedCard />
                 </section>
 
 

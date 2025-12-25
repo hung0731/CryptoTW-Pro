@@ -6,7 +6,7 @@ import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CARDS, SPACING } from '@/lib/design-tokens'
 
-interface ContentCardProps {
+interface DeepDiveContentCardProps {
     // Card variant
     variant?: 'article' | 'event' | 'prediction' | 'whale' | 'default'
 
@@ -44,7 +44,7 @@ const badgeColors = {
     purple: 'bg-purple-500/20 text-purple-400',
 }
 
-export function ContentCard({
+export function DeepDiveContentCard({
     variant = 'default',
     title,
     description,
@@ -57,7 +57,7 @@ export function ContentCard({
     onClick,
     className,
     children
-}: ContentCardProps) {
+}: DeepDiveContentCardProps) {
 
     const content = (
         <div className={cn(

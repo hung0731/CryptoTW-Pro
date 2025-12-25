@@ -23,10 +23,15 @@ let redis: Redis | null = null
 // Support various env var names (Zeabur uses REDIS_URI or REDIS_CONNECTION_STRING)
 const REDIS_URL = process.env.REDIS_URL || process.env.REDIS_URI || process.env.REDIS_CONNECTION_STRING
 
-// Strict check moved to runtime to allow build process to succeed without Redis env var
+// Runtime warning for production without Redis (non-blocking)
+let redisWarningShown = false
 const checkRedisConfig = () => {
-    if (process.env.NODE_ENV === 'production' && !REDIS_URL) {
-        throw new Error('CRITICAL: REDIS_URL is not defined in production. In-memory cache is unstable in serverless environments.')
+    if (process.env.NODE_ENV === 'production' && !REDIS_URL && !redisWarningShown) {
+        redisWarningShown = true
+        logger.warn('Redis not configured in production. Using in-memory cache (not recommended for serverless).', {
+            feature: 'cache',
+            env: process.env.NODE_ENV
+        })
     }
 }
 

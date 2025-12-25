@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { UniversalCard } from '@/components/ui/UniversalCard'
 import { SURFACE, BORDER, TYPOGRAPHY, SPACING } from '@/lib/design-tokens'
 
-interface EvidenceCardProps {
+interface ProofEvidenceCardProps {
     title: string
     chartType: 'price' | 'flow' | 'oi' | 'supply' | 'fgi' | 'funding' | 'liquidation' | 'longShort' | 'basis' | 'premium' | 'stablecoin'
     symbol: string
@@ -38,7 +38,7 @@ function getChartIcon(type: string) {
     }
 }
 
-export function EvidenceCard({
+export function ProofEvidenceCard({
     title,
     chartType,
     symbol,
@@ -49,7 +49,7 @@ export function EvidenceCard({
     interpretation,
     caption,
     newsDate,
-}: EvidenceCardProps) {
+}: ProofEvidenceCardProps) {
     // Build title text (remove emoji, add symbol)
     const cleanTitle = title.replace(/^[📈📊🔍🧠⚠️✅\s]+/, '')
     const displayTitle = `${symbol}/USDT ${cleanTitle}`

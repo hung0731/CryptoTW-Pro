@@ -59,12 +59,8 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
     const [aiSummary, setAiSummary] = useState<string>('');
     const [aiLoading, setAiLoading] = useState(true);
 
-    // Initial load AI summary effect can be added back if needed, 
-    // or we can pass it from server if performant.
-    // For now, let's render the list immediately which is the LCP goal.
-
-    // Simulating AI Loading for visual consistency, or implementing real fetch if required.
-    // Since we have all data in viewModel, we can call the summary API immediately.
+    // Load AI summary immediately - no artificial delay
+    // Cache will make this instant on subsequent loads
     React.useEffect(() => {
         const CACHE_KEY = 'indicator-ai-summary-v2';
         const CACHE_TTL = 10 * 60 * 1000;
@@ -86,7 +82,6 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
 
             try {
                 // Map view model back to payload structure required by API
-                // This is a simplified reconstruction
                 const fgi = viewModel.marketMetrics.find(m => m.id === 'fear-greed')
                 const funding = viewModel.marketMetrics.find(m => m.id === 'funding-rate')
                 const lsRatio = viewModel.marketMetrics.find(m => m.id === 'long-short-ratio')
@@ -122,9 +117,8 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
             }
         }
 
-        // Slight delay to not block hydration
-        const t = setTimeout(fetchSummary, 500)
-        return () => clearTimeout(t)
+        // Execute immediately - cache will make this instant
+        void fetchSummary()
     }, [viewModel])
 
     return (

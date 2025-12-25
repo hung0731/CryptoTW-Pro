@@ -15,7 +15,7 @@ interface ResultCardProps {
     onRetry: () => void
 }
 
-export function ResultCard({ result, onRetry }: ResultCardProps) {
+export function QuizResultCard({ result, onRetry }: ResultCardProps) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

@@ -54,7 +54,7 @@ function Countdown({ targetDate }: { targetDate: string }) {
     return <span className="font-mono text-[10px] text-amber-500 font-bold tracking-wider">{timeLeft}</span>
 }
 
-interface UpcomingEventsCardProps {
+interface EventsUpcomingCardProps {
     reactions?: Record<string, MacroReaction>
 }
 
@@ -106,7 +106,7 @@ function EventTimelineItem({ def, occ, days, isLast }: { def: MacroEventDef, occ
     )
 }
 
-export function UpcomingEventsCard({ reactions }: UpcomingEventsCardProps) {
+export function EventsUpcomingCard({ reactions }: EventsUpcomingCardProps) {
     const upcomingEvents = MACRO_EVENT_DEFS.map(def => {
         const occ = getNextOccurrence(def.key)
         if (!occ) return null

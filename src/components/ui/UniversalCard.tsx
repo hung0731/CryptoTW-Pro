@@ -2,10 +2,10 @@
 
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { SURFACE, BORDER, RADIUS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
+import { SURFACE, BORDER, RADIUS, SPACING, TYPOGRAPHY, ANIMATION, FOCUS } from '@/lib/design-tokens'
 
 // Strict Variant Types
-export type CardVariant = 'default' | 'subtle' | 'highlight' | 'danger' | 'clickable' | 'ghost'
+export type CardVariant = 'default' | 'subtle' | 'highlight' | 'danger' | 'success' | 'clickable' | 'ghost'
 export type CardSize = 'S' | 'M' | 'L'
 export type CardTone = 'neutral' | 'positive' | 'negative'
 
@@ -39,8 +39,17 @@ export function UniversalCard({
         subtle: cn(SURFACE.cardPassive, BORDER.dashed),
         highlight: cn(SURFACE.highlight, BORDER.highlight),
         danger: cn(SURFACE.danger, BORDER.danger),
-        clickable: cn(SURFACE.cardPrimary, BORDER.primary, "hover:bg-[#141414] hover:border-[#2A2A2A] transition-all duration-200 cursor-pointer group active:scale-[0.98]"),
-        ghost: cn(SURFACE.ghost, BORDER.ghost, "hover:bg-[#1A1A1A]/30 transition-colors"),
+        success: cn('bg-[#0F1C12]', 'border border-[#113311]'), // Green tint per v3.0 spec
+        clickable: cn(
+            SURFACE.cardPrimary,
+            BORDER.primary,
+            "hover:bg-[#141414] hover:border-[#2A2A2A]",
+            ANIMATION.hoverCard,
+            ANIMATION.activePress,
+            FOCUS.ringSubtle,
+            "cursor-pointer group"
+        ),
+        ghost: cn(SURFACE.ghost, BORDER.ghost, "hover:bg-[#1A1A1A]/30", ANIMATION.hoverCard),
     }
 
     // Resolve Radius & Padding based on Size

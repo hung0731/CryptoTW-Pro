@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Card } from '@/components/universal/UniversalCard';
+import { UniversalCard } from '@/components/ui/UniversalCard';
 import { cn } from '@/lib/utils';
 import { type SignalType } from '@/theme/design-tokens';
 import { AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-interface MarketJudgmentCardProps {
+interface MarketDecisionCardProps {
     state: 'Risk-On' | 'Risk-Off' | 'Neutral';
     action: 'Accumulate' | 'Hold' | 'Reduce' | 'Wait';
     confidence: 'High' | 'Medium' | 'Low';
@@ -27,7 +27,7 @@ const actionIcons: Record<string, React.ElementType> = {
     'Wait': AlertTriangle, // Or use a pause icon
 };
 
-export function MarketJudgmentCard({
+export function MarketDecisionCard({
     state,
     action,
     confidence,
@@ -35,12 +35,12 @@ export function MarketJudgmentCard({
     counterThesis,
     invalidationLevel,
     timestamp,
-}: MarketJudgmentCardProps) {
+}: MarketDecisionCardProps) {
     const Icon = actionIcons[action] || Minus;
     const isEmergency = false; // logic hook for Break Glass
 
     return (
-        <Card variant={isEmergency ? 'danger' : 'default'} padding="m" className="h-full min-h-[300px]">
+        <UniversalCard variant={isEmergency ? 'danger' : 'default'} size="M" className="h-full min-h-[300px]">
             <div className="flex flex-col h-full">
                 {/* Top: State & Confidence */}
                 <div className="flex items-start justify-between mb-6">
@@ -104,6 +104,6 @@ export function MarketJudgmentCard({
                     </div>
                 </div>
             </div>
-        </Card>
+        </UniversalCard>
     );
 }
