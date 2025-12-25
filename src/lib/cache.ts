@@ -36,17 +36,77 @@ const checkRedisConfig = () => {
 }
 
 if (REDIS_URL) {
-    logger.info('Initializing Redis Cache...')
+    logger.info('Initializing Redis Cache with optimized configuration...')
     redis = new Redis(REDIS_URL, {
-        maxRetriesPerRequest: 1, // Fail fast on dev
-        connectTimeout: 2000,
+        // Connection Pool 設定
+        maxRetriesPerRequest: 3,  // 增加重試次數
+        connectTimeout: 5000,     // 延長連接超時
+        commandTimeout: 3000,     // 命令超時
+        enableReadyCheck: true,   // 確保連線就緒
+        enableOfflineQueue: true, // 離線時排隊
+
+        // Retry 策略優化（Exponential backoff）
         retryStrategy: (times) => {
-            if (times > 3) {
-                logger.warn('Redis connection failed, switching to in-memory mode.', { times })
+            if (times > 5) {
+                logger.error('Redis connection failed after 5 retries', {
+                    feature: 'cache',
+                    attempts: times
+                })
                 return null // Stop retrying
             }
-            return Math.min(times * 50, 2000)
-        }
+            // 50ms, 100ms, 200ms, 400ms, 800ms
+            const delay = Math.min(times * 50, 2000)
+            logger.warn(`Redis retry attempt ${times}, waiting ${delay}ms`, {
+                feature: 'cache',
+                delay
+            })
+            return delay
+        },
+
+        // Reconnect 策略（主從切換時重連）
+        reconnectOnError: (err) => {
+            const targetErrors = ['READONLY', 'MASTERDOWN']
+            if (targetErrors.some(target => err.message.includes(target))) {
+                logger.warn('Redis reconnecting due to master change', {
+                    feature: 'cache',
+                    error: err.message
+                })
+                return true
+            }
+            return false
+        },
+
+        // Keep-alive 設定
+        keepAlive: 30000,  // 30秒 keepalive
+        family: 4,         // IPv4
+
+        // Lazy Connect（立即連接）
+        lazyConnect: false,
+    })
+
+    // 設定 redis 實例到 cache-internal（供其他模組使用）
+    import('./cache-internal').then(module => {
+        module.setRedisInstance(redis)
+    })
+
+    // 監聽連線事件
+    redis.on('connect', () => {
+        logger.info('Redis connected successfully', { feature: 'cache' })
+    })
+
+    redis.on('ready', () => {
+        logger.info('Redis ready to accept commands', { feature: 'cache' })
+    })
+
+    redis.on('reconnecting', (delay: number) => {
+        logger.warn(`Redis reconnecting in ${delay}ms`, {
+            feature: 'cache',
+            delay
+        })
+    })
+
+    redis.on('close', () => {
+        logger.warn('Redis connection closed', { feature: 'cache' })
     })
 
     redis.on('error', (err) => {
@@ -55,6 +115,9 @@ if (REDIS_URL) {
         logger.error('Redis Error', err, { feature: 'cache' })
     })
 }
+
+// 導出 redis 以供需要直接訪問的場景使用
+export { redis }
 
 /**
  * Get cached data (Async)

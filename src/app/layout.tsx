@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { WebVitals } from "@/components/WebVitals";
+import { BackToTop } from "@/components/BackToTop";
 
 const notoSansTC = Noto_Sans_TC({
   subsets: ["latin"],
@@ -71,6 +73,8 @@ export default function RootLayout({
       <body className={`${notoSansTC.variable} font-sans antialiased`}>
         {children}
         <Toaster />
+        <WebVitals />
+        <BackToTop />
       </body>
     </html>
   );
