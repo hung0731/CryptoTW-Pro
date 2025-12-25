@@ -8,10 +8,7 @@ const nextConfig = {
   // 啟用壓縮
   compress: true,
 
-  // 加速構建：跳過 CI 中的 lint/type 檢查（應在本地處理）
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   typescript: {
     ignoreBuildErrors: true,
   },
