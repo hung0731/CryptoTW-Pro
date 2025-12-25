@@ -803,10 +803,22 @@ interface EventItem {
     id: string
     title: string
     slug: string
+    description?: string
     event_type: string
     start_date: string
+    end_date?: string
+    venue_name?: string
+    address?: string
     city?: string
+    latitude?: number
+    longitude?: number
+    location_type?: string
+    online_url?: string
+    registration_url?: string
+    is_free?: boolean
+    price_info?: string
     organizer_name: string
+    organizer_url?: string
     is_published: boolean
     is_featured: boolean
 }
@@ -976,43 +988,34 @@ function EventsTab() {
         void fetchEvents()
     }
 
-    const handleEdit = async (event: EventItem) => {
-        // Fetch full event details
-        try {
-            const res = await fetch(`/api/events/${event.slug}`)
-            if (res.ok) {
-                const data = await res.json()
-                const e = data.event
-                setFormData({
-                    title: e.title || '',
-                    slug: e.slug || '',
-                    description: e.description || '',
-                    event_type: e.event_type || 'meetup',
-                    start_date: e.start_date ? new Date(e.start_date).toISOString().slice(0, 16) : '',
-                    end_date: e.end_date ? new Date(e.end_date).toISOString().slice(0, 16) : '',
-                    venue_name: e.venue_name || '',
-                    address: e.address || '',
-                    city: e.city || '台北',
-                    latitude: e.latitude?.toString() || '',
-                    longitude: e.longitude?.toString() || '',
-                    location_type: e.location_type || 'physical',
-                    online_url: e.online_url || '',
-                    registration_url: e.registration_url || '',
-                    is_free: e.is_free ?? true,
-                    price_info: e.price_info || '',
-                    organizer_name: e.organizer_name || '',
-                    organizer_url: e.organizer_url || '',
-                    is_published: e.is_published ?? false,
-                    is_featured: e.is_featured ?? false
-                })
-                setEditingId(event.id)
-                setShowForm(true)
-                setShowAIImport(false)
-                setShowCSVImport(false)
-            }
-        } catch (e) {
-            toast({ title: '無法載入活動資料', variant: 'destructive' })
-        }
+    const handleEdit = (event: EventItem) => {
+        // Use the event object directly since it contains full data from the admin API
+        setFormData({
+            title: event.title || '',
+            slug: event.slug || '',
+            description: event.description || '',
+            event_type: event.event_type || 'meetup',
+            start_date: event.start_date ? new Date(event.start_date).toISOString().slice(0, 16) : '',
+            end_date: event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : '',
+            venue_name: event.venue_name || '',
+            address: event.address || '',
+            city: event.city || '台北',
+            latitude: event.latitude?.toString() || '',
+            longitude: event.longitude?.toString() || '',
+            location_type: event.location_type || 'physical',
+            online_url: event.online_url || '',
+            registration_url: event.registration_url || '',
+            is_free: event.is_free ?? true,
+            price_info: event.price_info || '',
+            organizer_name: event.organizer_name || '',
+            organizer_url: event.organizer_url || '',
+            is_published: event.is_published ?? false,
+            is_featured: event.is_featured ?? false
+        })
+        setEditingId(event.id)
+        setShowForm(true)
+        setShowAIImport(false)
+        setShowCSVImport(false)
     }
 
     const handleUpdate = async () => {

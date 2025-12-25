@@ -3,7 +3,7 @@ import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig = {
   // Zeabur 優化：移除 standalone，讓平台自動處理
-  // output: 'standalone',
+  output: 'standalone' as const,
 
   // 啟用壓縮
   compress: true,

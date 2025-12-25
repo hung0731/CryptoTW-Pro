@@ -449,9 +449,9 @@ CREATE POLICY "Allow public read access on published rewards"
     ON public.rewards FOR SELECT
     USING (is_published = true);
 
-CREATE POLICY "Allow admin all access on rewards"
+CREATE POLICY "Allow admin/service all access on rewards"
     ON public.rewards FOR ALL
-    USING (public.is_admin(auth.uid()));
+    USING (auth.role() = 'service_role');
 
 -- Add index
 CREATE INDEX idx_rewards_type ON public.rewards(reward_type);
