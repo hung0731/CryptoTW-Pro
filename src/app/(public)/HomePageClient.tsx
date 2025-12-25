@@ -24,6 +24,7 @@ import { HistoryEchoCard } from '@/components/home/HistoryEchoCard'
 import { findHistoricalSimilarity } from '@/lib/historical-matcher'
 import { LineConnectCard } from '@/components/home/LineConnectCard'
 import { SentimentDashboardCard } from '@/components/home/SentimentDashboardCard'
+import { CurrencyConverter } from '@/components/home/CurrencyConverter'
 // SiteFooter is rendered in layout.tsx, no need to duplicate here
 
 interface HomePageClientProps {
@@ -179,6 +180,7 @@ export function HomePageClient({
                         </div>
                         <div className="grid grid-cols-5 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
                             {[
+                                { href: '/converter', label: '匯率', icon: DollarSign },
                                 { href: '/events', label: '活動', icon: Sparkles },
                                 { href: '/calendar', label: '財經日曆', icon: Calendar },
                                 { href: '/articles', label: '深度文章', icon: FileText },
