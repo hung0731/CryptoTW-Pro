@@ -14,6 +14,7 @@ export async function GET(request: Request) {
         const limit = parseInt(searchParams.get('limit') || '20');
         const type = searchParams.get('type');
         const city = searchParams.get('city');
+        const organizer = searchParams.get('organizer');
         const upcoming = searchParams.get('upcoming') !== 'false'; // Default: only upcoming
 
         const offset = (page - 1) * limit;
@@ -25,7 +26,13 @@ export async function GET(request: Request) {
             .is('parent_event_id', null) // Only main events, not side events
             .order('start_date', { ascending: true });
 
-        if (upcoming) {
+        // Organizer filter (for organizer pages)
+        if (organizer) {
+            query = query.eq('organizer_name', organizer);
+        }
+
+        if (upcoming && !organizer) {
+            // Don't filter by upcoming if viewing organizer page (show all their events)
             query = query.gte('start_date', new Date().toISOString());
         }
 

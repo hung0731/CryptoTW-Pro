@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock, Sparkles } from 'lucide-react'
+import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock, Sparkles, Pencil } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
@@ -842,6 +842,7 @@ function EventsTab() {
         is_featured: false
     })
     const [saving, setSaving] = useState(false)
+    const [editingId, setEditingId] = useState<string | null>(null)
     const { toast } = useToast()
 
     const fetchEvents = async () => {
@@ -972,6 +973,83 @@ function EventsTab() {
         if (!confirm('確定要刪除此活動嗎？')) return
         await fetch(`/api/admin/events/${id}`, { method: 'DELETE' })
         void fetchEvents()
+    }
+
+    const handleEdit = async (event: EventItem) => {
+        // Fetch full event details
+        try {
+            const res = await fetch(`/api/events/${event.slug}`)
+            if (res.ok) {
+                const data = await res.json()
+                const e = data.event
+                setFormData({
+                    title: e.title || '',
+                    slug: e.slug || '',
+                    description: e.description || '',
+                    event_type: e.event_type || 'meetup',
+                    start_date: e.start_date ? new Date(e.start_date).toISOString().slice(0, 16) : '',
+                    end_date: e.end_date ? new Date(e.end_date).toISOString().slice(0, 16) : '',
+                    venue_name: e.venue_name || '',
+                    address: e.address || '',
+                    city: e.city || '台北',
+                    latitude: e.latitude?.toString() || '',
+                    longitude: e.longitude?.toString() || '',
+                    location_type: e.location_type || 'physical',
+                    online_url: e.online_url || '',
+                    registration_url: e.registration_url || '',
+                    is_free: e.is_free ?? true,
+                    price_info: e.price_info || '',
+                    organizer_name: e.organizer_name || '',
+                    organizer_url: e.organizer_url || '',
+                    is_published: e.is_published ?? false,
+                    is_featured: e.is_featured ?? false
+                })
+                setEditingId(event.id)
+                setShowForm(true)
+                setShowAIImport(false)
+                setShowCSVImport(false)
+            }
+        } catch (e) {
+            toast({ title: '無法載入活動資料', variant: 'destructive' })
+        }
+    }
+
+    const handleUpdate = async () => {
+        if (!editingId) return
+        setSaving(true)
+        try {
+            const res = await fetch(`/api/admin/events/${editingId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...formData,
+                    start_date: new Date(formData.start_date).toISOString(),
+                    end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
+                    latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+                    longitude: formData.longitude ? parseFloat(formData.longitude) : null
+                })
+            })
+            if (res.ok) {
+                toast({ title: '活動已更新！' })
+                setShowForm(false)
+                setEditingId(null)
+                setFormData({
+                    title: '', slug: '', description: '', event_type: 'meetup',
+                    start_date: '', end_date: '', venue_name: '', address: '', city: '台北',
+                    latitude: '', longitude: '', location_type: 'physical', online_url: '',
+                    registration_url: '', is_free: true, price_info: '', organizer_name: '',
+                    organizer_url: '', is_published: false, is_featured: false
+                })
+                void fetchEvents()
+            } else {
+                const data = await res.json()
+                toast({ title: '更新失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', variant: 'destructive' })
+        } finally {
+            setSaving(false)
+        }
     }
 
     const [showAIImport, setShowAIImport] = useState(false)
@@ -1164,7 +1242,7 @@ ETH Taipei 2024 冬季聚會
                                         ✅ 解析結果預覽
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-2 text-sm">
+                                <CardContent className="space-y-3 text-sm">
                                     <div className="grid grid-cols-2 gap-2">
                                         <div><span className="text-neutral-500">名稱：</span><span className="text-white">{importedEvent.title}</span></div>
                                         <div><span className="text-neutral-500">類型：</span><span className="text-white">{importedEvent.event_type}</span></div>
@@ -1173,8 +1251,38 @@ ETH Taipei 2024 冬季聚會
                                         <div><span className="text-neutral-500">主辦：</span><span className="text-white">{importedEvent.organizer_name}</span></div>
                                         <div><span className="text-neutral-500">議程：</span><span className="text-white">{importedEvent.schedule?.length || 0} 項</span></div>
                                     </div>
+
+                                    {/* Editable slug */}
+                                    <div className="pt-3 border-t border-white/10 space-y-3">
+                                        <div className="space-y-2">
+                                            <Label className="text-neutral-400">Slug (網址路徑) *</Label>
+                                            <Input
+                                                value={importedEvent.slug || ''}
+                                                onChange={e => setImportedEvent({ ...importedEvent, slug: e.target.value })}
+                                                className="bg-black border-white/10"
+                                                placeholder="eth-taipei-2024"
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={importedEvent.is_published || false}
+                                                    onCheckedChange={c => setImportedEvent({ ...importedEvent, is_published: c })}
+                                                />
+                                                <Label className="text-neutral-400">立即發布</Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={importedEvent.is_featured || false}
+                                                    onCheckedChange={c => setImportedEvent({ ...importedEvent, is_featured: c })}
+                                                />
+                                                <Label className="text-neutral-400">精選活動</Label>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {importedEvent.schedule?.length > 0 && (
-                                        <div className="mt-3 pt-3 border-t border-white/10">
+                                        <div className="pt-3 border-t border-white/10">
                                             <p className="text-neutral-500 mb-2">📋 議程時間軸：</p>
                                             <div className="space-y-1 text-xs">
                                                 {importedEvent.schedule.slice(0, 5).map((item: any, i: number) => (
@@ -1188,8 +1296,8 @@ ETH Taipei 2024 冬季聚會
                                             </div>
                                         </div>
                                     )}
-                                    <div className="flex gap-2 mt-4">
-                                        <Button onClick={handleConfirmImport} disabled={saving} className="bg-green-600 hover:bg-green-500">
+                                    <div className="flex gap-2 pt-3">
+                                        <Button onClick={handleConfirmImport} disabled={saving || !importedEvent.slug} className="bg-green-600 hover:bg-green-500">
                                             {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                                             確認建立活動
                                         </Button>
@@ -1205,7 +1313,7 @@ ETH Taipei 2024 冬季聚會
             {showForm && (
                 <Card className="bg-purple-950/20 border-purple-500/30">
                     <CardHeader>
-                        <CardTitle className="text-white text-base">🎉 新增活動</CardTitle>
+                        <CardTitle className="text-white text-base">{editingId ? '✏️ 編輯活動' : '🎉 新增活動'}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
@@ -1302,11 +1410,11 @@ ETH Taipei 2024 冬季聚會
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <Button onClick={handleSave} disabled={saving} className="bg-purple-600 hover:bg-purple-500">
+                            <Button onClick={editingId ? handleUpdate : handleSave} disabled={saving} className="bg-purple-600 hover:bg-purple-500">
                                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                                儲存活動
+                                {editingId ? '更新活動' : '儲存活動'}
                             </Button>
-                            <Button variant="outline" onClick={() => setShowForm(false)}>取消</Button>
+                            <Button variant="outline" onClick={() => { setShowForm(false); setEditingId(null) }}>取消</Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -1358,12 +1466,15 @@ ETH Taipei 2024 冬季聚會
                                                 </button>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
+                                                <div className="flex items-center justify-end gap-1">
                                                     <Link href={`/events/${event.slug}`} target="_blank">
                                                         <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-white">
                                                             <Eye className="w-4 h-4" />
                                                         </Button>
                                                     </Link>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-blue-400" onClick={() => handleEdit(event)}>
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Button>
                                                     <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-red-500" onClick={() => handleDelete(event.id)}>
                                                         <Trash2 className="w-4 h-4" />
                                                     </Button>

@@ -178,13 +178,11 @@ export function HomePageClient({
                                 icon={LayoutDashboard}
                             />
                         </div>
-                        <div className="grid grid-cols-5 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
+                        <div className="grid grid-cols-4 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
                             {[
                                 { href: '/converter', label: '匯率', icon: DollarSign },
                                 { href: '/events', label: '活動', icon: Sparkles },
-                                { href: '/calendar', label: '財經日曆', icon: Calendar },
                                 { href: '/articles', label: '深度文章', icon: FileText },
-                                { href: '/reviews', label: '歷史復盤', icon: LineChart },
                                 { href: '/learn', label: '學習', icon: School },
                             ].map((item) => (
                                 <Link key={item.href} href={item.href} className="group bg-[#0A0A0A] hover:bg-[#141414] transition-colors p-3 flex flex-col items-center justify-center gap-2 aspect-square">

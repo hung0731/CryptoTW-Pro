@@ -8,6 +8,9 @@ import { EventCard } from '@/components/events/EventCard';
 import { CalendarButtons } from '@/components/events/CalendarButtons';
 import { MapEmbed } from '@/components/events/MapEmbed';
 import { EventTimeline, TimelineItem } from '@/components/events/EventTimeline';
+import { ShareButtons } from '@/components/events/ShareButtons';
+import { CountdownTimer } from '@/components/events/CountdownTimer';
+import { EventQRCode } from '@/components/events/EventQRCode';
 import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout';
@@ -259,8 +262,26 @@ export default function EventDetailPage() {
 
                         {/* Calendar Buttons */}
                         <CalendarButtons event={event} />
+
+                        {/* Share Buttons */}
+                        <div className="pt-4 border-t border-[#1A1A1A]">
+                            <p className="text-xs text-[#666] mb-2">分享活動</p>
+                            <ShareButtons
+                                title={event.title}
+                                url={`/events/${event.slug}`}
+                            />
+                        </div>
                     </div>
                 </UniversalCard>
+
+                {/* Countdown Timer */}
+                {new Date(event.start_date) > new Date() && (
+                    <UniversalCard variant="default" className="mb-6">
+                        <div className="p-5">
+                            <CountdownTimer targetDate={event.start_date} />
+                        </div>
+                    </UniversalCard>
+                )}
 
                 {/* Map */}
                 {event.location_type !== 'online' && (
@@ -336,7 +357,7 @@ export default function EventDetailPage() {
 
                 {/* Tags */}
                 {event.tags && event.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-6">
                         {event.tags.map(tag => (
                             <span key={tag} className="text-xs px-2 py-1 rounded bg-[#1A1A1A] text-[#888] border border-[#2A2A2A]">
                                 #{tag}
@@ -344,6 +365,18 @@ export default function EventDetailPage() {
                         ))}
                     </div>
                 )}
+
+                {/* QR Code */}
+                <UniversalCard variant="default" className="mb-6">
+                    <div className="p-5 flex flex-col items-center">
+                        <p className="text-xs text-[#666] mb-3">掃描 QR Code 分享活動</p>
+                        <EventQRCode
+                            url={`/events/${event.slug}`}
+                            title={event.title}
+                            size={150}
+                        />
+                    </div>
+                </UniversalCard>
             </MobileOptimizedLayout>
         </main>
     );

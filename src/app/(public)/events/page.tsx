@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { EventCard, EventCardSkeleton } from '@/components/events/EventCard';
 import { EventCalendar } from '@/components/events/EventCalendar';
@@ -9,7 +9,7 @@ import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout';
 import { SPACING } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
-import { Calendar, LayoutGrid, Sparkles, List } from 'lucide-react';
+import { Calendar, LayoutGrid, Sparkles, List, Search, X } from 'lucide-react';
 
 interface Event {
     id: string;
@@ -58,6 +58,19 @@ export default function EventsPage() {
     const [cityFilter, setCityFilter] = useState('all');
     const [showPast, setShowPast] = useState(false);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Filter events based on search query
+    const filteredEvents = useMemo(() => {
+        if (!searchQuery.trim()) return events;
+        const query = searchQuery.toLowerCase();
+        return events.filter(event =>
+            event.title.toLowerCase().includes(query) ||
+            event.organizer_name.toLowerCase().includes(query) ||
+            (event.venue_name && event.venue_name.toLowerCase().includes(query)) ||
+            (event.city && event.city.toLowerCase().includes(query))
+        );
+    }, [events, searchQuery]);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -117,6 +130,28 @@ export default function EventsPage() {
                         </div>
                     </section>
                 )}
+
+                {/* Search Bar */}
+                <div className="mb-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666]" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="搜尋活動名稱、主辦方、地點..."
+                            className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-xl pl-10 pr-10 py-3 text-white text-sm placeholder:text-[#555] focus:border-blue-500 focus:outline-none"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-[#2A2A2A]"
+                            >
+                                <X className="w-4 h-4 text-[#666]" />
+                            </button>
+                        )}
+                    </div>
+                </div>
 
                 {/* View Toggle + Filters */}
                 <div className="mb-6 space-y-3">
@@ -218,7 +253,11 @@ export default function EventsPage() {
                                 title="活動列表"
                                 rightElement={
                                     <span className="text-[10px] text-[#666]">
-                                        {!loading && `${events.length} 場活動`}
+                                        {!loading && (
+                                            searchQuery
+                                                ? `找到 ${filteredEvents.length} 場`
+                                                : `${events.length} 場活動`
+                                        )}
                                     </span>
                                 }
                             />
@@ -230,16 +269,18 @@ export default function EventsPage() {
                                     <EventCardSkeleton key={i} />
                                 ))}
                             </div>
-                        ) : events.length === 0 ? (
+                        ) : filteredEvents.length === 0 ? (
                             <div className="p-12 text-center">
                                 <Calendar className="w-12 h-12 text-[#333] mx-auto mb-3" />
                                 <p className="text-[#666] text-sm">
-                                    {showPast ? '沒有找到過去的活動' : '目前沒有即將舉辦的活動'}
+                                    {searchQuery
+                                        ? `找不到「${searchQuery}」相關活動`
+                                        : showPast ? '沒有找到過去的活動' : '目前沒有即將舉辦的活動'}
                                 </p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                                {events.map(event => (
+                                {filteredEvents.map(event => (
                                     <EventCard key={event.id} event={event} />
                                 ))}
                             </div>

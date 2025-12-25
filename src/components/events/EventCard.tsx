@@ -171,10 +171,14 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
                             </span>
                         )}
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] text-[#666]">
+                    <Link
+                        href={`/organizers/${encodeURIComponent(event.organizer_name)}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1 text-[10px] text-[#666] hover:text-blue-400 transition-colors"
+                    >
                         <Users className="w-3 h-3" />
                         {event.organizer_name}
-                    </div>
+                    </Link>
                 </div>
             </div>
         </Link>
