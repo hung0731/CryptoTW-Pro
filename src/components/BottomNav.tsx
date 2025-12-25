@@ -49,14 +49,14 @@ export function BottomNav() {
     ]
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0F0F10]/70 backdrop-blur-xl border-t border-white/10 pb-safe shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.5)]">
-            <nav className="flex items-center justify-between h-16 max-w-md mx-auto px-4">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0F0F10]/70 backdrop-blur-xl border-t border-white/10 pb-[env(safe-area-inset-bottom)] shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.5)]">
+            <nav className="flex items-center justify-between h-16 max-w-md mx-auto px-6">
                 {navItems.map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
                         className={cn(
-                            "flex flex-col items-center justify-center space-y-1",
+                            "flex flex-col items-center justify-center space-y-1 py-1", // Added py-1
                             item.active
                                 ? "text-white"
                                 : "text-neutral-500 hover:text-neutral-300"

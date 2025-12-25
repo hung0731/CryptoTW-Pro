@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 
+import { useLiff } from "@/components/LiffProvider";
+
 export function RiskToast() {
+    const { liffObject, isLoading: liffLoading } = useLiff();
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
 
@@ -27,10 +30,16 @@ export function RiskToast() {
         localStorage.setItem("risk_acknowledged_at", Date.now().toString());
     };
 
-    if (!mounted || !isOpen) return null;
+    // 1. Wait for mount
+    // 2. Wait for LIFF to load
+    // 3. If NOT in Client (External Browser), hide RiskToast (Let LineConnectCard take over)
+    if (!mounted || liffLoading || !isOpen) return null;
+
+    const isInLine = liffObject?.isInClient() ?? false;
+    if (!isInLine) return null;
 
     return (
-        <div className="fixed inset-x-0 bottom-0 z-[60] flex justify-center pointer-events-none p-4 pb-24 md:pb-6">
+        <div className="fixed inset-x-0 bottom-0 z-[1001] flex justify-center pointer-events-none p-4 pb-24 md:pb-6">
             <div className="w-full max-w-[480px] pointer-events-auto">
                 <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 shadow-2xl rounded-xl p-4 ring-1 ring-black/5">
                     <div className="flex flex-col gap-3">

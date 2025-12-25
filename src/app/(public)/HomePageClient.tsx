@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
 import {
-    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight, School, LayoutDashboard
+    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight, School, LayoutDashboard, FileText
 } from 'lucide-react'
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
@@ -22,7 +22,9 @@ import { QuickActionCard } from '@/components/home/QuickActionCard'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
 import { HistoryEchoCard } from '@/components/home/HistoryEchoCard'
 import { findHistoricalSimilarity } from '@/lib/historical-matcher'
+import { LineConnectCard } from '@/components/home/LineConnectCard'
 import { SentimentDashboardCard } from '@/components/home/SentimentDashboardCard'
+import { SiteFooter } from '@/components/SiteFooter'
 
 interface HomePageClientProps {
     reactions: Record<string, MacroReaction>
@@ -171,14 +173,14 @@ export function HomePageClient({
                     <UniversalCard variant="default" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard
-                                title="探索更多"
+                                title="免費功能"
                                 icon={LayoutDashboard}
                             />
                         </div>
                         <div className="grid grid-cols-4 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
                             {[
                                 { href: '/calendar', label: '財經日曆', icon: Calendar },
-                                { href: '/price-prediction', label: '價格預測', icon: Wallet },
+                                { href: '/articles', label: '深度文章', icon: FileText },
                                 { href: '/reviews', label: '歷史復盤', icon: LineChart },
                                 { href: '/learn', label: '學習', icon: School },
                             ].map((item) => (
@@ -197,9 +199,12 @@ export function HomePageClient({
                     <ReviewsFeaturedCard />
                 </section>
 
-
+                <SiteFooter />
 
             </MobileOptimizedLayout>
+
+            {/* Conditional Global Popup */}
+            <LineConnectCard />
         </main>
     )
 }

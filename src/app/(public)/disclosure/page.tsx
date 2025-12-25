@@ -1,116 +1,134 @@
-"use client";
+'use client';
 
-import React from "react";
-import { PageHeader } from "@/components/PageHeader";
+import React from 'react';
+import { PageHeader } from '@/components/PageHeader';
+import {
+    UniversalCard,
+    CardHeader,
+    CardTitle,
+    CardContent
+} from '@/components/ui/UniversalCard';
 
 export default function DisclosurePage() {
     return (
         <div className="min-h-screen bg-black text-white font-sans">
             <PageHeader title="網站政策" backHref="/" backLabel="返回" />
 
-            <main className="p-4 pb-20 max-w-lg mx-auto">
-                {/* Header */}
-                <div className="mb-6 px-1">
-                    <h1 className="text-xl font-bold text-white tracking-tight">
+            <main className="p-4 pb-20 max-w-2xl mx-auto space-y-4">
+                {/* Page Intro */}
+                <div className="px-1 mb-2">
+                    <h1 className="text-2xl font-bold text-white tracking-tight">
                         法律聲明與隱私政策
                     </h1>
-                    <p className="text-[10px] text-neutral-500 font-mono mt-1">
+                    <p className="text-xs text-neutral-500 font-mono mt-2">
                         Last Updated: {new Date().toLocaleDateString('zh-TW')}
                     </p>
                 </div>
 
-                <div className="space-y-3">
-                    {/* Section 1: Non-investment advice */}
-                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
-                        <h2 className="font-bold text-sm text-white mb-2">
-                            非投資建議聲明
-                        </h2>
-                        <div className="space-y-3 text-xs leading-relaxed text-neutral-400">
+                {/* 1. 服務性質與免責聲明 (Consolidated 1 & 2) */}
+                <UniversalCard variant="subtle" size="M">
+                    <CardHeader>
+                        <CardTitle>1. 服務性質與免責聲明</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3 text-sm leading-relaxed text-neutral-300">
                             <p>
-                                <strong className="text-white">不構成投資建議</strong><br />
-                                加密台灣 Pro 所提供之所有內容，包括但不限於市場數據、圖表、歷史事件回顧、AI 生成摘要、風險狀態標示與研究觀點，
-                                僅作為市場資訊整理與研究用途，
-                                不構成任何形式之投資建議、買賣推薦、資產配置建議或投資顧問服務。
+                                <strong className="text-white">非投資建議：</strong>
+                                加密台灣 Pro 僅提供市場資訊整理、數據圖表與歷史回測研究，
+                                <span className="text-red-400 font-medium">不構成任何形式之投資建議、買賣推薦或資產配置建議</span>。
                             </p>
-                            <p>
-                                本平台不保證任何資訊之即時性、完整性或準確性，使用者應自行評估風險，並對其投資決策與結果自行負責。
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* Section 2: Data Source & AI */}
-                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
-                        <h2 className="font-bold text-sm text-white mb-2">資料來源與分析</h2>
-                        <div className="space-y-3 text-xs leading-relaxed text-neutral-400">
-                            <div>
-                                <h3 className="text-neutral-300 font-medium mb-1">數據來源說明</h3>
-                                <p>
-                                    本平台所顯示之市場數據，主要來自第三方公開資料來源（例如交易所 API、市場數據供應商、區塊鏈分析平台等），
-                                    包括但不限於價格、資金費率、持倉量、清算數據與市場新聞。
-                                </p>
-                            </div>
-                            <div className="pt-2 border-t border-white/5">
-                                <h3 className="text-neutral-300 font-medium mb-1">
-                                    AI 與分析說明
-                                </h3>
-                                <p>
-                                    平台部分內容由人工智慧模型輔助生成，其用途為協助整理資訊、歸納市場狀態與歷史脈絡，
-                                    <span className="text-white">不代表對未來價格或市場走勢之預測</span>。
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Section 3: Affiliate Marketing */}
-                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
-                        <h2 className="font-bold text-sm text-white mb-2">聯盟行銷揭露</h2>
-                        <div className="text-xs leading-relaxed text-neutral-400 space-y-2">
-                            <p>
-                                本平台部分連結可能包含聯盟行銷（Affiliate Marketing）合作。
-                                當使用者透過特定連結註冊或使用第三方服務時，本平台可能獲得一定形式之推廣回饋。
-                            </p>
-                            <p className="opacity-70">
-                                該等合作不影響平台內容之獨立性與研究立場，平台不會因聯盟合作而提供特定投資建議或保證任何投資結果。
+                            <p className="text-xs text-neutral-400">
+                                <strong className="text-neutral-300">非金融機構：</strong>
+                                本平台並非銀行、證券商或投信投顧機構，亦未取得投資顧問執照。我們不針對個別使用者之財務狀況提供量身建議。
                             </p>
                         </div>
-                    </section>
+                    </CardContent>
+                </UniversalCard>
 
-                    {/* Section 4: Cookie & LINE */}
-                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
-                        <h2 className="font-bold text-sm text-white mb-2">Cookie 與隱私</h2>
-                        <div className="grid grid-cols-1 gap-3 text-xs text-neutral-400 leading-relaxed">
-                            <div>
-                                <h3 className="text-neutral-300 font-medium mb-1">Cookie 使用</h3>
-                                <p>為提供更佳的使用體驗，本平台可能使用 Cookie 或類似技術，以記錄使用者偏好、風險提示確認狀態與功能使用狀況。</p>
-                            </div>
-                            <div className="pt-2 border-t border-white/5">
-                                <h3 className="text-neutral-300 font-medium mb-1">LINE 帳號連動</h3>
-                                <p>若使用者透過 LINE 進行互動，本平台僅會依照功能需求使用必要的帳號識別資訊，不會未經同意蒐集或揭露個人隱私資料。</p>
-                            </div>
-                        </div>
-                    </section>
+                {/* 2. 數據風險與回測聲明 (Consolidated 3 + Data Context) */}
+                <UniversalCard variant="subtle" size="M">
+                    <CardHeader>
+                        <CardTitle>2. 數據風險與回測聲明</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="list-disc pl-4 space-y-2 text-xs text-neutral-400 leading-relaxed marker:text-neutral-600">
+                            <li>
+                                <strong className="text-neutral-300">過去績效不代表未來：</strong>
+                                所有歷史回測、策略勝率與情境模擬僅供說明用途，不保證未來市場表現或收益。
+                            </li>
+                            <li>
+                                <strong className="text-neutral-300">數據來源：</strong>
+                                本平台數據源自第三方交易所 API 與鏈上數據，雖盡力確保準確，但不保證其即時性或無誤，使用者應自行查核。
+                            </li>
+                        </ul>
+                    </CardContent>
+                </UniversalCard>
 
-                    {/* Section 5: Server & Data */}
-                    <section className="bg-[#0E0E0F] border border-[#1A1A1A] rounded-lg p-4">
-                        <h2 className="font-bold text-sm text-white mb-2">資料儲存</h2>
-                        <div className="text-xs leading-relaxed text-neutral-400">
-                            <p>
-                                本平台之主要伺服器與資料處理服務，託管於 <span className="text-white">Amazon Web Services (AWS) 台灣區域</span>，
-                                並採取合理之資訊安全措施，以保護系統穩定性與資料安全。
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* Section 6: Responsibility */}
-                    <section className="border border-white/10 rounded-lg p-4">
-                        <h2 className="font-bold text-sm text-white mb-2">使用者責任與風險承擔</h2>
-                        <p className="text-xs text-neutral-400 leading-relaxed">
-                            使用本平台即表示您已理解並同意：
-                            加密資產市場具高度波動與風險，任何基於本平台資訊所做出的交易決策，
-                            <span className="text-white border-b border-neutral-600 pb-0.5">其風險與結果均由使用者自行承擔</span>。
+                {/* 3. 責任限制 (Original 4) */}
+                <UniversalCard variant="subtle" size="M">
+                    <CardHeader>
+                        <CardTitle>3. 責任限制 (Limitation of Liability)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-xs text-neutral-400 leading-relaxed mb-2">
+                            在法律許可之最大範圍內，本平台對於因下列情形所生之任何直接或間接損失，均不負賠償責任：
                         </p>
-                    </section>
-                </div>
+                        <ul className="list-disc pl-4 space-y-1 text-xs text-neutral-400 leading-relaxed marker:text-neutral-600">
+                            <li>市場價格波動、清算、爆倉或任何投資損失。</li>
+                            <li>第三方數據源中斷、系統維護、網路故障或不可抗力因素（如天災、戰爭）。</li>
+                            <li>使用者自身帳號保管不當或違法使用所致之損失。</li>
+                        </ul>
+                    </CardContent>
+                </UniversalCard>
+
+                {/* 4. 隱私權政策 (Original 7 + Cookie/LINE) */}
+                <UniversalCard variant="subtle" size="M">
+                    <CardHeader>
+                        <CardTitle>4. 隱私權與資料使用</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3 text-xs text-neutral-400 leading-relaxed">
+                            <p>
+                                <strong className="text-neutral-300 block mb-1">資料蒐集：</strong>
+                                我們使用 Cookie 優化瀏覽體驗，並可能在您授權下蒐集 LINE ID 以提供身分識別與通知功能。
+                            </p>
+                            <p>
+                                <strong className="text-neutral-300 block mb-1">使用承諾：</strong>
+                                您的個資僅用於平台服務運作，未經同意不會用於第三方行銷。資料將保留至您終止服務或依法律規定之保存年限為止。
+                            </p>
+                        </div>
+                    </CardContent>
+                </UniversalCard>
+
+                {/* 5. 一般條款 (Consolidated 5, 6, 9, 10) */}
+                <UniversalCard variant="subtle" size="M">
+                    <CardHeader>
+                        <CardTitle>5. 一般條款與聯繫方式</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="list-disc pl-4 space-y-2 text-xs text-neutral-400 leading-relaxed marker:text-neutral-600">
+                            <li>
+                                <strong className="text-neutral-300">變更權利：</strong>
+                                本平台保留隨時修改服務內容、條款與隱私政策之權利。重大變更將於網站公告，繼續使用即視為同意。
+                            </li>
+                            <li>
+                                <strong className="text-neutral-300">行為規範：</strong>
+                                禁止利用本平台從事洗錢、詐騙或任何非法活動，違者將終止服務並配合調查。
+                            </li>
+                            <li>
+                                <strong className="text-neutral-300">準據法：</strong>
+                                本聲明以中華民國法律為準據法，並以臺灣臺北地方法院為第一審管轄法院。
+                            </li>
+                        </ul>
+                        <div className="pt-3 mt-3 border-t border-white/5 text-xs text-neutral-500">
+                            聯繫我們：
+                            <a href="mailto:hi@cryptotw.io" className="text-blue-400 hover:text-blue-300 ml-1 transition-colors">
+                                hi@cryptotw.io
+                            </a>
+                        </div>
+                    </CardContent>
+                </UniversalCard>
+
             </main>
         </div>
     );

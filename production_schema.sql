@@ -275,3 +275,49 @@ CREATE POLICY "Allow public read push_messages" ON public.push_messages FOR SELE
 
 DROP POLICY IF EXISTS "Allow admin all push_messages" ON public.push_messages;
 CREATE POLICY "Allow admin all push_messages" ON public.push_messages FOR ALL USING (auth.role() = 'service_role');
+
+-- ==========================================
+-- 7. Deep Articles (CMS)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.articles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    
+    -- 核心欄位
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    summary TEXT,
+    content TEXT NOT NULL,
+    cover_image_url TEXT,
+    
+    -- 分類與標籤
+    category TEXT DEFAULT 'analysis',
+    tags TEXT[] DEFAULT '{}',
+    
+    -- 來源 (Source Attribution)
+    source_name TEXT NOT NULL,
+    source_url TEXT NOT NULL,
+    source_author TEXT,
+    source_published_at TIMESTAMPTZ,
+    
+    -- 管理欄位
+    is_published BOOLEAN DEFAULT FALSE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    reading_time_minutes INTEGER DEFAULT 5,
+    view_count INTEGER DEFAULT 0,
+    
+    -- 時間戳記
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    published_at TIMESTAMPTZ
+);
+ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_articles_slug ON public.articles(slug);
+CREATE INDEX IF NOT EXISTS idx_articles_published ON public.articles(is_published, published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_articles_category ON public.articles(category);
+
+DROP POLICY IF EXISTS "Public read published articles" ON public.articles;
+CREATE POLICY "Public read published articles" ON public.articles FOR SELECT USING (is_published = true);
+
+DROP POLICY IF EXISTS "Service/Admin all articles" ON public.articles;
+CREATE POLICY "Service/Admin all articles" ON public.articles FOR ALL USING (auth.role() = 'service_role');

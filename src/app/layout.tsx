@@ -17,7 +17,7 @@ const notoSansTC = Noto_Sans_TC({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://pro.cryptotw.com'),
   title: {
-    default: "加密台灣 Pro | 您的鏈上軍火庫",
+    default: "加密台灣 Pro - 你的 Web3 資料庫",
     template: "%s | 加密台灣 Pro"
   },
   description: "每日市場分析、獨家空投機會、專業交易指標。加密台灣 Pro 提供最即時的加密貨幣市場洞察。",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     locale: 'zh_TW',
     url: '/',
     siteName: '加密台灣 Pro',
-    title: '加密台灣 Pro | 您的鏈上軍火庫',
+    title: '加密台灣 Pro - 你的 Web3 資料庫',
     description: '每日市場分析、獨家空投機會、專業交易指標。',
     images: [
       {
