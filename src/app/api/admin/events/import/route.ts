@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-const IMPORT_MODEL = 'gemini-2.5-flash-preview-05-20';
+const IMPORT_MODEL = 'gemini-2.5-flash-preview-09-2025';
 
 const IMPORT_PROMPT = `
 你是活動資訊解析專家。請從以下活動資訊中提取結構化數據。

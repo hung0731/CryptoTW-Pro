@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { RefreshCw, ChevronDown } from 'lucide-react';
+import { RefreshCw, ChevronDown, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UniversalCard } from '@/components/ui/UniversalCard';
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 
 interface ExchangeRates {
     max: { buy: number; sell: number } | null;
@@ -192,11 +193,13 @@ export function CurrencyConverter() {
 
     if (loading) {
         return (
-            <UniversalCard variant="default" className="p-4">
-                <div className="animate-pulse space-y-3">
-                    <div className="h-8 bg-[#1A1A1A] rounded w-1/3" />
+            <UniversalCard variant="default" className="p-0 overflow-hidden">
+                <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                    <SectionHeaderCard title="匯率換算" icon={DollarSign} />
+                </div>
+                <div className="p-4 animate-pulse space-y-3">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-14 bg-[#1A1A1A] rounded" />
+                        <div key={i} className="h-14 bg-[#1A1A1A] rounded-xl" />
                     ))}
                 </div>
             </UniversalCard>
@@ -204,20 +207,25 @@ export function CurrencyConverter() {
     }
 
     return (
-        <UniversalCard variant="default" className="overflow-hidden">
+        <UniversalCard variant="default" className="p-0 overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-[#1A1A1A]">
-                <h3 className="text-base font-bold text-white">匯率換算</h3>
-                <button
-                    onClick={handleRefresh}
-                    disabled={refreshing}
-                    className="p-2 rounded-lg hover:bg-[#1A1A1A] transition-colors"
-                >
-                    <RefreshCw className={cn("w-4 h-4 text-[#666]", refreshing && "animate-spin")} />
-                </button>
+            <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                <SectionHeaderCard
+                    title="匯率換算"
+                    icon={DollarSign}
+                    rightElement={
+                        <button
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            className="p-1.5 rounded-lg hover:bg-[#1A1A1A] transition-colors"
+                        >
+                            <RefreshCw className={cn("w-4 h-4 text-[#666]", refreshing && "animate-spin")} />
+                        </button>
+                    }
+                />
             </div>
 
-            <div className="p-4 space-y-3">
+            <div className="p-4 space-y-2">
                 {/* Currency Rows */}
                 {rows.map((row) => {
                     const currencyInfo = AVAILABLE_CURRENCIES.find(c => c.key === row.currency);
@@ -264,30 +272,43 @@ export function CurrencyConverter() {
                     <div className="pt-3 border-t border-[#1A1A1A] mt-4">
                         <p className="text-xs text-[#666] mb-2">USDT / TWD 即時報價</p>
                         <div className="grid grid-cols-3 gap-2 text-center">
-                            {bestRate.all.map(exchange => {
-                                const isBest = bestRate.bestBuy.name === exchange.name;
-                                return (
-                                    <div
-                                        key={exchange.name}
-                                        className={cn(
-                                            "rounded-lg p-2",
-                                            isBest ? "bg-green-500/10 border border-green-500/30" : "bg-[#0A0A0A]"
-                                        )}
-                                    >
-                                        <p className="text-[10px] text-[#888]">{exchange.name}</p>
-                                        <p className={cn(
-                                            "text-sm font-bold font-mono",
-                                            isBest ? "text-green-400" : "text-white"
-                                        )}>
-                                            {exchange.buy?.toFixed(2) || '--'}
-                                        </p>
-                                    </div>
-                                );
-                            })}
+                            {(() => {
+                                const prices = bestRate.all.map(e => e.buy!).filter(Boolean);
+                                const minPrice = Math.min(...prices);
+                                const maxPrice = Math.max(...prices);
+
+                                return bestRate.all.map(exchange => {
+                                    const isLowest = exchange.buy === minPrice;
+                                    const isHighest = exchange.buy === maxPrice && minPrice !== maxPrice;
+
+                                    return (
+                                        <div
+                                            key={exchange.name}
+                                            className={cn(
+                                                "rounded-lg p-2 border",
+                                                isLowest ? "bg-green-500/10 border-green-500/30" :
+                                                    isHighest ? "bg-red-500/10 border-red-500/30" :
+                                                        "bg-[#0A0A0A] border-transparent"
+                                            )}
+                                        >
+                                            <p className="text-[10px] text-[#888]">{exchange.name}</p>
+                                            <p className={cn(
+                                                "text-sm font-bold font-mono",
+                                                isLowest ? "text-green-400" :
+                                                    isHighest ? "text-red-400" :
+                                                        "text-white"
+                                            )}>
+                                                {exchange.buy?.toFixed(2) || '--'}
+                                            </p>
+                                        </div>
+                                    );
+                                });
+                            })()}
                         </div>
-                        <p className="text-[10px] text-green-400 text-center mt-2">
-                            💡 買 USDT 最划算：{bestRate.bestBuy.name}
-                        </p>
+                        <div className="flex justify-center gap-4 mt-2 text-[10px]">
+                            <span className="text-green-400">🟢 最低價</span>
+                            <span className="text-red-400">🔴 最高價</span>
+                        </div>
                     </div>
                 )}
             </div>
