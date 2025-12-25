@@ -11,9 +11,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock, Sparkles, Pencil } from 'lucide-react'
+import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock, Sparkles, Pencil, Gift } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import { RewardsTab } from '@/components/admin/RewardsTab'
 
 // Actually reviews uses direct DB access in Server Component. We must adapt it to Client Component or fetch via API.
 // Existing reviews/page.tsx was a Server Component.
@@ -1507,6 +1508,10 @@ export default function ContentPage() {
                         <Megaphone className="w-4 h-4 mr-2" />
                         活動
                     </TabsTrigger>
+                    <TabsTrigger value="rewards" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
+                        <Gift className="w-4 h-4 mr-2" />
+                        福利
+                    </TabsTrigger>
                     <TabsTrigger value="articles" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
                         <BookOpen className="w-4 h-4 mr-2" />
                         深度文章
@@ -1527,6 +1532,9 @@ export default function ContentPage() {
                 <div className="mt-6">
                     <TabsContent value="events">
                         <EventsTab />
+                    </TabsContent>
+                    <TabsContent value="rewards">
+                        <RewardsTab />
                     </TabsContent>
                     <TabsContent value="articles">
                         <ArticlesTab />

@@ -405,5 +405,57 @@ ALTER TABLE public.event_bookmarks ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS idx_bookmarks_user ON public.event_bookmarks(user_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_event ON public.event_bookmarks(event_id);
 
+-- Rewards (Welfare Center) Table
+CREATE TABLE IF NOT EXISTS public.rewards (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    title TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    description TEXT,
+    reward_type TEXT NOT NULL CHECK (reward_type IN ('exchange_promo', 'raffle', 'airdrop', 'learn_earn', 'referral', 'other')),
+    
+    -- Source
+    source TEXT NOT NULL CHECK (source IN ('cryptotw', 'exchange', 'project', 'other')),
+    source_name TEXT NOT NULL, -- "MAX", "Binance", "CryptoTW"
+    source_logo_url TEXT,
+    
+    -- Timing
+    start_date TIMESTAMPTZ DEFAULT NOW(),
+    end_date TIMESTAMPTZ,
+    is_ongoing BOOLEAN DEFAULT FALSE, -- If true, end_date can be ignored (long-term promo)
+    
+    -- Reward Details
+    reward_value TEXT, -- "$100 USDT", "20% Off"
+    requirements TEXT, -- "Trade volume > $1000"
+    difficulty TEXT CHECK (difficulty IN ('easy', 'medium', 'hard')),
+    
+    -- Action
+    action_url TEXT NOT NULL,
+    action_label TEXT DEFAULT '立即參加',
+    
+    -- Status & Stats
+    is_featured BOOLEAN DEFAULT FALSE,
+    is_published BOOLEAN DEFAULT FALSE,
+    view_count INTEGER DEFAULT 0,
+    claim_count INTEGER DEFAULT 0, -- Number of clicks on action_url
+    
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS for rewards
+ALTER TABLE public.rewards ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access on published rewards"
+    ON public.rewards FOR SELECT
+    USING (is_published = true);
+
+CREATE POLICY "Allow admin all access on rewards"
+    ON public.rewards FOR ALL
+    USING (public.is_admin(auth.uid()));
+
+-- Add index
+CREATE INDEX idx_rewards_type ON public.rewards(reward_type);
+CREATE INDEX idx_rewards_is_published ON public.rewards(is_published);
+
 DROP POLICY IF EXISTS "Users manage own bookmarks" ON public.event_bookmarks;
 CREATE POLICY "Users manage own bookmarks" ON public.event_bookmarks FOR ALL USING (auth.role() = 'service_role');

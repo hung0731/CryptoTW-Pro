@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
 import {
-    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight, School, LayoutDashboard, FileText
+    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight, School, LayoutDashboard, FileText, Gift
 } from 'lucide-react'
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
@@ -178,10 +178,11 @@ export function HomePageClient({
                                 icon={LayoutDashboard}
                             />
                         </div>
-                        <div className="grid grid-cols-4 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
+                        <div className="grid grid-cols-5 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
                             {[
                                 { href: '/converter', label: '匯率', icon: DollarSign },
                                 { href: '/events', label: '活動', icon: Sparkles },
+                                { href: '/rewards', label: '福利中心', icon: Gift },
                                 { href: '/articles', label: '深度文章', icon: FileText },
                                 { href: '/learn', label: '學習', icon: School },
                             ].map((item) => (
