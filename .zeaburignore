@@ -1,0 +1,27 @@
+# Zeabur Ignore File
+# Exclude files not needed for production
+
+# Development files
+.git
+.github
+.vscode
+*.md
+!README.md
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+__tests__
+
+# Local config
+.env.local
+.env.development
+
+# Analysis tools
+.next/analyze
+
+# Editor configs
+.editorconfig
+.prettierrc
+eslint.config.mjs

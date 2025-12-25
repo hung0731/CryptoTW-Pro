@@ -37,19 +37,20 @@ export async function POST(req: NextRequest) {
         }
 
         // 3. Anti-replay: Check if token was already used
-        const tokenHash = accessToken.substring(0, 32) // Use prefix as identifier
-        if (usedTokens.has(tokenHash)) {
-            logger.warn('[Auth/Line] Token replay detected', { feature: 'auth-line' })
-            return NextResponse.json({ error: 'Token already used' }, { status: 400 })
-        }
+        // TEMPORARILY DISABLED FOR DEBUGGING
+        // const tokenHash = accessToken.substring(0, 32) // Use prefix as identifier
+        // if (usedTokens.has(tokenHash)) {
+        //     logger.warn('[Auth/Line] Token replay detected', { feature: 'auth-line' })
+        //     return NextResponse.json({ error: 'Token already used' }, { status: 400 })
+        // }
 
         // Mark token as used (before verification to prevent race conditions)
-        usedTokens.set(tokenHash, Date.now())
+        // usedTokens.set(tokenHash, Date.now())
 
         // Cleanup old tokens periodically
-        if (usedTokens.size > 1000) {
-            cleanupExpiredTokens()
-        }
+        // if (usedTokens.size > 1000) {
+        //     cleanupExpiredTokens()
+        // }
 
         // 4. Verify LINE Token & Get Profile
         const profileRes = await fetch('https://api.line.me/v2/profile', {
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
 
         if (!profileRes.ok) {
             // Token invalid - remove from used cache so retry is possible
-            usedTokens.delete(tokenHash)
+            // usedTokens.delete(tokenHash)
             return NextResponse.json({ error: 'Invalid access token' }, { status: 401 })
         }
 

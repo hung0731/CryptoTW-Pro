@@ -23,6 +23,15 @@ export function LineConnectCard() {
     // liff.isInClient() returns true if inside LINE App
     const isInLine = liffObject?.isInClient() ?? false;
 
+    // Debug: Log LIFF state for troubleshooting
+    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+        console.log('[LineConnectCard Debug]', {
+            liffObject: !!liffObject,
+            isInLine,
+            userAgent: navigator.userAgent.substring(0, 50)
+        });
+    }
+
     // If already in LINE, don't show this card
     if (isInLine) return null;
 

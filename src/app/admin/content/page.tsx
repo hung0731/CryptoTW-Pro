@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock } from 'lucide-react'
+import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock, Sparkles } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
@@ -797,6 +797,589 @@ function ArticlesTab() {
         </div>
     )
 }
+// --- Events Tab (Web3 活動) ---
+interface EventItem {
+    id: string
+    title: string
+    slug: string
+    event_type: string
+    start_date: string
+    city?: string
+    organizer_name: string
+    is_published: boolean
+    is_featured: boolean
+}
+
+function EventsTab() {
+    const [events, setEvents] = useState<EventItem[]>([])
+    const [loading, setLoading] = useState(true)
+    const [showForm, setShowForm] = useState(false)
+    const [showStats, setShowStats] = useState(true)
+    const [showCSVImport, setShowCSVImport] = useState(false)
+    const [stats, setStats] = useState<any>(null)
+    const [csvContent, setCSVContent] = useState('')
+    const [csvImporting, setCSVImporting] = useState(false)
+    const [formData, setFormData] = useState({
+        title: '',
+        slug: '',
+        description: '',
+        event_type: 'meetup',
+        start_date: '',
+        end_date: '',
+        venue_name: '',
+        address: '',
+        city: '台北',
+        latitude: '',
+        longitude: '',
+        location_type: 'physical',
+        online_url: '',
+        registration_url: '',
+        is_free: true,
+        price_info: '',
+        organizer_name: '',
+        organizer_url: '',
+        is_published: false,
+        is_featured: false
+    })
+    const [saving, setSaving] = useState(false)
+    const { toast } = useToast()
+
+    const fetchEvents = async () => {
+        setLoading(true)
+        try {
+            const res = await fetch('/api/admin/events')
+            if (res.ok) {
+                const data = await res.json()
+                setEvents(data.events || [])
+            }
+        } catch (e) {
+            logger.error('Failed to fetch events', e, { feature: 'admin-events' })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const fetchStats = async () => {
+        try {
+            const res = await fetch('/api/admin/events/stats')
+            if (res.ok) {
+                const data = await res.json()
+                setStats(data)
+            }
+        } catch (e) {
+            logger.error('Failed to fetch stats', e, { feature: 'admin-events' })
+        }
+    }
+
+    useEffect(() => {
+        void fetchEvents()
+        void fetchStats()
+    }, [])
+
+    const handleCSVImport = async () => {
+        if (!csvContent.trim()) {
+            toast({ title: '請貼上 CSV 內容', variant: 'destructive' })
+            return
+        }
+        setCSVImporting(true)
+        try {
+            // Parse CSV
+            const lines = csvContent.trim().split('\n')
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+            const events = lines.slice(1).map(line => {
+                const values = line.split(',')
+                const obj: Record<string, string> = {}
+                headers.forEach((h, i) => {
+                    obj[h] = values[i]?.trim() || ''
+                })
+                return obj
+            })
+
+            const res = await fetch('/api/admin/events/bulk-import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ events })
+            })
+            const data = await res.json()
+            if (res.ok) {
+                toast({ title: `成功匯入 ${data.results.success.length} 場活動` })
+                if (data.results.failed.length > 0) {
+                    toast({ title: `${data.results.failed.length} 場失敗`, variant: 'destructive' })
+                }
+                setShowCSVImport(false)
+                setCSVContent('')
+                void fetchEvents()
+                void fetchStats()
+            } else {
+                toast({ title: '匯入失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', variant: 'destructive' })
+        } finally {
+            setCSVImporting(false)
+        }
+    }
+
+    const handleSave = async () => {
+        if (!formData.title || !formData.slug || !formData.start_date || !formData.organizer_name) {
+            toast({ title: '請填寫必填欄位', variant: 'destructive' })
+            return
+        }
+        setSaving(true)
+        try {
+            const payload = {
+                ...formData,
+                latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+                longitude: formData.longitude ? parseFloat(formData.longitude) : null
+            }
+            const res = await fetch('/api/admin/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            if (res.ok) {
+                toast({ title: '活動已建立！' })
+                setShowForm(false)
+                setFormData({
+                    title: '', slug: '', description: '', event_type: 'meetup',
+                    start_date: '', end_date: '', venue_name: '', address: '', city: '台北',
+                    latitude: '', longitude: '', location_type: 'physical', online_url: '',
+                    registration_url: '', is_free: true, price_info: '', organizer_name: '',
+                    organizer_url: '', is_published: false, is_featured: false
+                })
+                void fetchEvents()
+            } else {
+                const data = await res.json()
+                toast({ title: '建立失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', variant: 'destructive' })
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleTogglePublish = async (event: EventItem) => {
+        await fetch(`/api/admin/events/${event.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_published: !event.is_published })
+        })
+        void fetchEvents()
+    }
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('確定要刪除此活動嗎？')) return
+        await fetch(`/api/admin/events/${id}`, { method: 'DELETE' })
+        void fetchEvents()
+    }
+
+    const [showAIImport, setShowAIImport] = useState(false)
+    const [aiImportContent, setAIImportContent] = useState('')
+    const [aiImporting, setAIImporting] = useState(false)
+    const [importedEvent, setImportedEvent] = useState<any>(null)
+
+    const handleAIImport = async () => {
+        if (!aiImportContent.trim()) {
+            toast({ title: '請貼上活動資訊', variant: 'destructive' })
+            return
+        }
+        setAIImporting(true)
+        try {
+            const res = await fetch('/api/admin/events/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ raw_content: aiImportContent })
+            })
+            const data = await res.json()
+            if (res.ok && data.event) {
+                setImportedEvent(data.event)
+                toast({ title: 'AI 解析成功！請確認資料' })
+            } else {
+                toast({ title: '解析失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', variant: 'destructive' })
+        } finally {
+            setAIImporting(false)
+        }
+    }
+
+    const handleConfirmImport = async () => {
+        if (!importedEvent) return
+        setSaving(true)
+        try {
+            const res = await fetch('/api/admin/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(importedEvent)
+            })
+            if (res.ok) {
+                toast({ title: '活動已建立！' })
+                setShowAIImport(false)
+                setAIImportContent('')
+                setImportedEvent(null)
+                void fetchEvents()
+            } else {
+                const data = await res.json()
+                toast({ title: '建立失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', variant: 'destructive' })
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center flex-wrap gap-2">
+                <CardDescription>管理 Web3 線上線下活動</CardDescription>
+                <div className="flex gap-2 flex-wrap">
+                    <Button variant="ghost" size="icon" onClick={() => { void fetchEvents(); void fetchStats() }}>
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="h-8 text-sm border-white/10"
+                        onClick={() => { setShowCSVImport(!showCSVImport); setShowForm(false); setShowAIImport(false) }}
+                    >
+                        <UploadCloud className="w-4 h-4 mr-2" /> CSV 匯入
+                    </Button>
+                    <Button
+                        className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white h-8 text-sm"
+                        onClick={() => { setShowAIImport(!showAIImport); setShowForm(false); setShowCSVImport(false) }}
+                    >
+                        <Sparkles className="w-4 h-4 mr-2" /> AI 導入
+                    </Button>
+                    <Button
+                        className="bg-purple-600 hover:bg-purple-500 text-white h-8 text-sm"
+                        onClick={() => { setShowForm(!showForm); setShowAIImport(false); setShowCSVImport(false) }}
+                    >
+                        <Plus className="w-4 h-4 mr-2" /> 手動新增
+                    </Button>
+                </div>
+            </div>
+
+            {/* Stats Dashboard */}
+            {stats && showStats && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Card className="bg-neutral-900/50 border-white/5 p-4">
+                        <div className="text-2xl font-bold text-white">{stats.overview.totalEvents}</div>
+                        <div className="text-xs text-neutral-400">總活動數</div>
+                    </Card>
+                    <Card className="bg-neutral-900/50 border-white/5 p-4">
+                        <div className="text-2xl font-bold text-green-400">{stats.overview.upcomingEvents}</div>
+                        <div className="text-xs text-neutral-400">即將舉辦</div>
+                    </Card>
+                    <Card className="bg-neutral-900/50 border-white/5 p-4">
+                        <div className="text-2xl font-bold text-blue-400">{stats.overview.totalBookmarks}</div>
+                        <div className="text-xs text-neutral-400">總收藏數</div>
+                    </Card>
+                    <Card className="bg-neutral-900/50 border-white/5 p-4">
+                        <div className="text-2xl font-bold text-purple-400">{stats.overview.totalViews}</div>
+                        <div className="text-xs text-neutral-400">總瀏覽數</div>
+                    </Card>
+                </div>
+            )}
+
+            {/* CSV Import Form */}
+            {showCSVImport && (
+                <Card className="bg-orange-950/20 border-orange-500/30">
+                    <CardHeader>
+                        <CardTitle className="text-white text-base flex items-center gap-2">
+                            <UploadCloud className="w-5 h-5 text-orange-400" />
+                            CSV 批量匯入
+                        </CardTitle>
+                        <CardDescription>貼上 CSV 格式的活動資料，批量建立活動</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="text-xs text-neutral-400 bg-black/30 p-3 rounded-lg font-mono">
+                            必要欄位：title, start_date, organizer_name<br />
+                            可選欄位：slug, description, event_type, end_date, venue_name, address, city, registration_url, is_free, parent_event_slug
+                        </div>
+                        <Textarea
+                            value={csvContent}
+                            onChange={e => setCSVContent(e.target.value)}
+                            placeholder={`title,start_date,organizer_name,venue_name,city,event_type
+ETH Taipei Winter Meetup,2024-12-28T14:00,Ethereum Taiwan,CLBC,台北,meetup
+BTC HODLer Night,2024-12-30T19:00,Bitcoin Taiwan,Crypto Bar,台北,meetup`}
+                            className="bg-black/50 border-white/10 min-h-[150px] text-xs font-mono"
+                        />
+                        <div className="flex gap-2">
+                            <Button onClick={handleCSVImport} disabled={csvImporting} className="bg-orange-600 hover:bg-orange-500">
+                                {csvImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UploadCloud className="w-4 h-4 mr-2" />}
+                                開始匯入
+                            </Button>
+                            <Button variant="outline" onClick={() => { setShowCSVImport(false); setCSVContent('') }}>取消</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* AI Import Form */}
+            {showAIImport && (
+                <Card className="bg-gradient-to-br from-cyan-950/30 to-blue-950/30 border-cyan-500/30">
+                    <CardHeader>
+                        <CardTitle className="text-white text-base flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-cyan-400" />
+                            AI 智能導入
+                        </CardTitle>
+                        <CardDescription>貼上活動資訊，AI 自動解析並填入欄位</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Textarea
+                            value={aiImportContent}
+                            onChange={e => setAIImportContent(e.target.value)}
+                            placeholder="貼上活動頁面文字、lu.ma 連結內容、或任何活動資訊...
+
+例如：
+ETH Taipei 2024 冬季聚會
+日期：2024/12/28 (六) 14:00-18:00
+地點：CLBC 大安本館（台北市大安區...）
+主辦：Ethereum Taiwan
+免費報名：https://lu.ma/eth-taipei-winter
+
+議程：
+14:00-14:30 開場 & 自我介紹
+14:30-15:30 主題演講：DeFi 趨勢
+15:30-16:00 Tea Break
+16:00-17:30 Panel Discussion
+17:30-18:00 Networking"
+                            className="bg-black/50 border-white/10 min-h-[200px] text-sm"
+                        />
+                        <div className="flex gap-2">
+                            <Button onClick={handleAIImport} disabled={aiImporting} className="bg-cyan-600 hover:bg-cyan-500">
+                                {aiImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                                開始解析
+                            </Button>
+                            <Button variant="outline" onClick={() => { setShowAIImport(false); setAIImportContent(''); setImportedEvent(null) }}>取消</Button>
+                        </div>
+
+                        {/* AI Import Preview */}
+                        {importedEvent && (
+                            <Card className="bg-black/50 border-green-500/30 mt-4">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-green-400 text-sm flex items-center gap-2">
+                                        ✅ 解析結果預覽
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-2 text-sm">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div><span className="text-neutral-500">名稱：</span><span className="text-white">{importedEvent.title}</span></div>
+                                        <div><span className="text-neutral-500">類型：</span><span className="text-white">{importedEvent.event_type}</span></div>
+                                        <div><span className="text-neutral-500">時間：</span><span className="text-white">{importedEvent.start_date}</span></div>
+                                        <div><span className="text-neutral-500">地點：</span><span className="text-white">{importedEvent.venue_name || importedEvent.city || '線上'}</span></div>
+                                        <div><span className="text-neutral-500">主辦：</span><span className="text-white">{importedEvent.organizer_name}</span></div>
+                                        <div><span className="text-neutral-500">議程：</span><span className="text-white">{importedEvent.schedule?.length || 0} 項</span></div>
+                                    </div>
+                                    {importedEvent.schedule?.length > 0 && (
+                                        <div className="mt-3 pt-3 border-t border-white/10">
+                                            <p className="text-neutral-500 mb-2">📋 議程時間軸：</p>
+                                            <div className="space-y-1 text-xs">
+                                                {importedEvent.schedule.slice(0, 5).map((item: any, i: number) => (
+                                                    <div key={i} className="text-neutral-400">
+                                                        <span className="text-blue-400 font-mono">{item.time}</span> {item.title}
+                                                    </div>
+                                                ))}
+                                                {importedEvent.schedule.length > 5 && (
+                                                    <div className="text-neutral-500">...還有 {importedEvent.schedule.length - 5} 項</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="flex gap-2 mt-4">
+                                        <Button onClick={handleConfirmImport} disabled={saving} className="bg-green-600 hover:bg-green-500">
+                                            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                                            確認建立活動
+                                        </Button>
+                                        <Button variant="outline" onClick={() => setImportedEvent(null)}>重新解析</Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
+            {/* Event Form */}
+            {showForm && (
+                <Card className="bg-purple-950/20 border-purple-500/30">
+                    <CardHeader>
+                        <CardTitle className="text-white text-base">🎉 新增活動</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">活動名稱 *</Label>
+                                <Input value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="bg-black border-white/10" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">Slug *</Label>
+                                <Input value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} className="bg-black border-white/10" placeholder="eth-taipei-2024" />
+                            </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">活動類型</Label>
+                                <Select value={formData.event_type} onValueChange={v => setFormData({ ...formData, event_type: v })}>
+                                    <SelectTrigger className="bg-black border-white/10"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="conference">Conference</SelectItem>
+                                        <SelectItem value="meetup">Meetup</SelectItem>
+                                        <SelectItem value="workshop">Workshop</SelectItem>
+                                        <SelectItem value="hackathon">Hackathon</SelectItem>
+                                        <SelectItem value="online">Online</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">開始時間 *</Label>
+                                <Input type="datetime-local" value={formData.start_date} onChange={e => setFormData({ ...formData, start_date: e.target.value })} className="bg-black border-white/10" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">結束時間</Label>
+                                <Input type="datetime-local" value={formData.end_date} onChange={e => setFormData({ ...formData, end_date: e.target.value })} className="bg-black border-white/10" />
+                            </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">場地名稱</Label>
+                                <Input value={formData.venue_name} onChange={e => setFormData({ ...formData, venue_name: e.target.value })} className="bg-black border-white/10" placeholder="CLBC" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">地址</Label>
+                                <Input value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="bg-black border-white/10" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">城市</Label>
+                                <Select value={formData.city} onValueChange={v => setFormData({ ...formData, city: v })}>
+                                    <SelectTrigger className="bg-black border-white/10"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="台北">台北</SelectItem>
+                                        <SelectItem value="新竹">新竹</SelectItem>
+                                        <SelectItem value="台中">台中</SelectItem>
+                                        <SelectItem value="高雄">高雄</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">緯度 (Google Maps)</Label>
+                                <Input value={formData.latitude} onChange={e => setFormData({ ...formData, latitude: e.target.value })} className="bg-black border-white/10" placeholder="25.0330" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">經度</Label>
+                                <Input value={formData.longitude} onChange={e => setFormData({ ...formData, longitude: e.target.value })} className="bg-black border-white/10" placeholder="121.5654" />
+                            </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">報名連結</Label>
+                                <Input value={formData.registration_url} onChange={e => setFormData({ ...formData, registration_url: e.target.value })} className="bg-black border-white/10" placeholder="https://lu.ma/..." />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">主辦方名稱 *</Label>
+                                <Input value={formData.organizer_name} onChange={e => setFormData({ ...formData, organizer_name: e.target.value })} className="bg-black border-white/10" placeholder="Ethereum Taiwan" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-neutral-400">活動說明 (Markdown)</Label>
+                            <Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="bg-black border-white/10 min-h-[100px]" />
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-2">
+                                <Switch checked={formData.is_free} onCheckedChange={c => setFormData({ ...formData, is_free: c })} />
+                                <Label className="text-neutral-400">免費活動</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Switch checked={formData.is_published} onCheckedChange={c => setFormData({ ...formData, is_published: c })} />
+                                <Label className="text-neutral-400">立即發布</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Switch checked={formData.is_featured} onCheckedChange={c => setFormData({ ...formData, is_featured: c })} />
+                                <Label className="text-neutral-400">精選活動</Label>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button onClick={handleSave} disabled={saving} className="bg-purple-600 hover:bg-purple-500">
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                                儲存活動
+                            </Button>
+                            <Button variant="outline" onClick={() => setShowForm(false)}>取消</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Events Table */}
+            <Card className="bg-neutral-900/50 border-white/5">
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm text-neutral-400">
+                            <thead className="bg-neutral-900 border-b border-white/5 text-xs uppercase font-medium">
+                                <tr>
+                                    <th className="px-6 py-4">活動名稱</th>
+                                    <th className="px-6 py-4">類型</th>
+                                    <th className="px-6 py-4">時間</th>
+                                    <th className="px-6 py-4">地點</th>
+                                    <th className="px-6 py-4">狀態</th>
+                                    <th className="px-6 py-4 text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {loading ? (
+                                    <tr><td colSpan={6} className="p-6 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>
+                                ) : events.length === 0 ? (
+                                    <tr><td colSpan={6} className="p-6 text-center">尚無活動，點擊上方「新增活動」開始</td></tr>
+                                ) : (
+                                    events.map((event) => (
+                                        <tr key={event.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-white mb-0.5">{event.title}</div>
+                                                <div className="text-xs text-neutral-500">{event.organizer_name}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant="outline" className="border-purple-500/50 text-purple-400 bg-purple-500/10">
+                                                    {event.event_type}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-6 py-4 text-neutral-400">
+                                                {new Date(event.start_date).toLocaleDateString('zh-TW')}
+                                            </td>
+                                            <td className="px-6 py-4 text-neutral-400">{event.city || '線上'}</td>
+                                            <td className="px-6 py-4">
+                                                <button onClick={() => handleTogglePublish(event)}>
+                                                    {event.is_published ? (
+                                                        <Badge className="bg-green-500/20 text-green-400 border-0 cursor-pointer hover:bg-green-500/30">Published</Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="bg-neutral-800 text-neutral-400 cursor-pointer hover:bg-neutral-700">Draft</Badge>
+                                                    )}
+                                                </button>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Link href={`/events/${event.slug}`} target="_blank">
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-white">
+                                                            <Eye className="w-4 h-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-red-500" onClick={() => handleDelete(event.id)}>
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
 
 
 export default function ContentPage() {
@@ -804,29 +1387,36 @@ export default function ContentPage() {
         <div className="p-6 md:p-8 space-y-8 w-full max-w-6xl mx-auto">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight text-white">內容管理 (Content)</h1>
-                <p className="text-neutral-400 mt-2">管理文章、推播與機器人互動</p>
+                <p className="text-neutral-400 mt-2">管理文章、活動、推播與機器人互動</p>
             </div>
 
-            <Tabs defaultValue="articles" className="w-full">
+            <Tabs defaultValue="events" className="w-full">
                 <TabsList className="bg-neutral-900 border border-white/10 text-neutral-400">
+                    <TabsTrigger value="events" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
+                        <Megaphone className="w-4 h-4 mr-2" />
+                        活動
+                    </TabsTrigger>
                     <TabsTrigger value="articles" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
                         <BookOpen className="w-4 h-4 mr-2" />
                         深度文章
                     </TabsTrigger>
                     <TabsTrigger value="reviews" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
                         <BookOpen className="w-4 h-4 mr-2" />
-                        復盤 (Reviews)
+                        復盤
                     </TabsTrigger>
                     <TabsTrigger value="push" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
                         <Send className="w-4 h-4 mr-2" />
-                        推播 (Push)
+                        推播
                     </TabsTrigger>
                     <TabsTrigger value="bot" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
                         <Bot className="w-4 h-4 mr-2" />
-                        機器人 (Bot)
+                        機器人
                     </TabsTrigger>
                 </TabsList>
                 <div className="mt-6">
+                    <TabsContent value="events">
+                        <EventsTab />
+                    </TabsContent>
                     <TabsContent value="articles">
                         <ArticlesTab />
                     </TabsContent>

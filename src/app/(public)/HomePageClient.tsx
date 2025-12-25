@@ -24,7 +24,7 @@ import { HistoryEchoCard } from '@/components/home/HistoryEchoCard'
 import { findHistoricalSimilarity } from '@/lib/historical-matcher'
 import { LineConnectCard } from '@/components/home/LineConnectCard'
 import { SentimentDashboardCard } from '@/components/home/SentimentDashboardCard'
-import { SiteFooter } from '@/components/SiteFooter'
+// SiteFooter is rendered in layout.tsx, no need to duplicate here
 
 interface HomePageClientProps {
     reactions: Record<string, MacroReaction>
@@ -177,8 +177,9 @@ export function HomePageClient({
                                 icon={LayoutDashboard}
                             />
                         </div>
-                        <div className="grid grid-cols-4 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
+                        <div className="grid grid-cols-5 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
                             {[
+                                { href: '/events', label: '活動', icon: Sparkles },
                                 { href: '/calendar', label: '財經日曆', icon: Calendar },
                                 { href: '/articles', label: '深度文章', icon: FileText },
                                 { href: '/reviews', label: '歷史復盤', icon: LineChart },
@@ -199,7 +200,7 @@ export function HomePageClient({
                     <ReviewsFeaturedCard />
                 </section>
 
-                <SiteFooter />
+                {/* SiteFooter is rendered in layout.tsx */}
 
             </MobileOptimizedLayout>
 

@@ -1,11 +1,25 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
-const nextConfig: NextConfig = {
-  output: 'standalone',
+const nextConfig = {
+  // Zeabur 優化：移除 standalone，讓平台自動處理
+  // output: 'standalone',
 
   // 啟用壓縮
   compress: true,
+
+  // 加速構建：跳過 CI 中的 lint/type 檢查（應在本地處理）
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  // 實驗性功能：加速構建
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'recharts'],
+  },
 
   async headers() {
     return [

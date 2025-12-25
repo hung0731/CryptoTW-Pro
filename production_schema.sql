@@ -321,3 +321,89 @@ CREATE POLICY "Public read published articles" ON public.articles FOR SELECT USI
 
 DROP POLICY IF EXISTS "Service/Admin all articles" ON public.articles;
 CREATE POLICY "Service/Admin all articles" ON public.articles FOR ALL USING (auth.role() = 'service_role');
+
+-- ==========================================
+-- 8. Web3 Events (活動)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    
+    -- 核心
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    description TEXT,
+    cover_image_url TEXT,
+    event_type TEXT DEFAULT 'meetup',  -- 'conference'|'meetup'|'workshop'|'hackathon'|'online'
+    is_featured BOOLEAN DEFAULT FALSE,
+    
+    -- 時間
+    start_date TIMESTAMPTZ NOT NULL,
+    end_date TIMESTAMPTZ,
+    timezone TEXT DEFAULT 'Asia/Taipei',
+    
+    -- 地點 + 地圖
+    location_type TEXT DEFAULT 'physical',  -- 'physical'|'online'|'hybrid'
+    venue_name TEXT,
+    address TEXT,
+    city TEXT,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    online_url TEXT,
+    
+    -- 報名 (外部導流)
+    registration_url TEXT,
+    registration_deadline TIMESTAMPTZ,
+    is_free BOOLEAN DEFAULT TRUE,
+    price_info TEXT,
+    
+    -- 主辦方
+    organizer_name TEXT NOT NULL,
+    organizer_logo_url TEXT,
+    organizer_url TEXT,
+    co_organizers JSONB DEFAULT '[]',
+    
+    -- 關聯 (Side Events)
+    parent_event_id UUID REFERENCES public.events(id),
+    
+    -- 標籤
+    tags TEXT[] DEFAULT '{}',
+    
+    -- 議程時間軸
+    schedule JSONB DEFAULT '[]',
+    
+    -- 管理
+    is_published BOOLEAN DEFAULT FALSE,
+    view_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_events_slug ON public.events(slug);
+CREATE INDEX IF NOT EXISTS idx_events_start_date ON public.events(start_date DESC);
+CREATE INDEX IF NOT EXISTS idx_events_parent ON public.events(parent_event_id);
+CREATE INDEX IF NOT EXISTS idx_events_published ON public.events(is_published, start_date DESC);
+
+DROP POLICY IF EXISTS "Public read published events" ON public.events;
+CREATE POLICY "Public read published events" ON public.events FOR SELECT USING (is_published = true);
+
+DROP POLICY IF EXISTS "Service/Admin all events" ON public.events;
+CREATE POLICY "Service/Admin all events" ON public.events FOR ALL USING (auth.role() = 'service_role');
+
+-- 活動收藏表
+CREATE TABLE IF NOT EXISTS public.event_bookmarks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    event_id UUID REFERENCES public.events(id) ON DELETE CASCADE,
+    notify_before_hours INTEGER DEFAULT 24,
+    reminder_sent_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, event_id)
+);
+ALTER TABLE public.event_bookmarks ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_bookmarks_user ON public.event_bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_event ON public.event_bookmarks(event_id);
+
+DROP POLICY IF EXISTS "Users manage own bookmarks" ON public.event_bookmarks;
+CREATE POLICY "Users manage own bookmarks" ON public.event_bookmarks FOR ALL USING (auth.role() = 'service_role');
