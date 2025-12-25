@@ -1,9 +1,8 @@
-import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { CHART } from "@/lib/design-tokens"
+
+const bars = [45, 32, 60, 42, 75, 50, 28, 65, 40, 55, 35, 70, 48, 58, 30, 62, 45, 52, 38, 68];
 
 export function SkeletonReviewChart() {
-    const [bars] = useState(() => [...Array(20)].map(() => 20 + Math.random() * 60))
     return (
         <div className="relative w-full h-[300px] bg-[#0A0A0A] rounded-lg p-4 overflow-hidden border border-white/[0.05]">
             {/* Header */}
@@ -38,11 +37,11 @@ export function SkeletonReviewChart() {
                 {/* Graph Shape Mock */}
                 <div className="absolute left-10 right-0 top-4 bottom-8 flex items-end px-1 gap-1">
                     {/* Random bars to simulate data */}
-                    {[...Array(20)].map((_, i) => (
+                    {bars.map((height, i) => (
                         <div
                             key={i}
                             className="flex-1 bg-white/[0.03] rounded-sm"
-                            style={{ height: `${bars[i]}%` }}
+                            style={{ height: `${height}%` }}
                         />
                     ))}
                 </div>

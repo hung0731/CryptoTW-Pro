@@ -11,7 +11,7 @@ interface TimelineItem {
     title: string;
     description: string;
     marketImpact: string;
-    riskLevel: 'high' | 'medium' | 'low';
+    riskLevel: 'high' | 'medium' | 'low' | 'extreme';
 }
 
 interface Misconception {
@@ -109,9 +109,10 @@ export function DeepDiveTabs({
                                     </span>
                                     <div className={cn(
                                         "w-2 h-2 rounded-full mt-2",
-                                        item.riskLevel === 'high' ? "bg-white" :
-                                            item.riskLevel === 'medium' ? "bg-neutral-500" :
-                                                "bg-neutral-700"
+                                        item.riskLevel === 'extreme' ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" :
+                                            item.riskLevel === 'high' ? "bg-white" :
+                                                item.riskLevel === 'medium' ? "bg-neutral-500" :
+                                                    "bg-neutral-700"
                                     )} />
                                     {idx < timeline.length - 1 && (
                                         <div className="w-px flex-1 bg-neutral-800 mt-2" />

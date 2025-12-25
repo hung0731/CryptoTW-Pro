@@ -1,9 +1,9 @@
 
 export type MarketEventImportance = 'S' | 'A' | 'B';
-export type MarketState = '極恐' | '過熱' | '修復' | '崩跌' | '觀望';
+export type MarketState = '極恐' | '過熱' | '修復' | '崩跌' | '觀望' | '極度恐懼' | '去槓桿' | '橫盤';
 export type MetricType = 'fearGreed' | 'etfFlow' | 'oi' | 'funding' | 'price' | 'stablecoin' | 'liquidation' | 'longShort' | 'basis' | 'premium';
 
-export type TimelineRiskLevel = 'high' | 'medium' | 'low';
+export type TimelineRiskLevel = 'high' | 'medium' | 'low' | 'extreme';
 
 export interface TimelineItem {
     date: string; // YYYY-MM-DD
@@ -20,7 +20,54 @@ export interface ChartDef {
     interpretation?: { // New V2
         whatItMeans: string;
         whatToWatch: string;
+        citation?: {
+            label: string;
+            href: string;
+        };
     };
+}
+
+// New V3: Historical Context (Time Capsule)
+export interface HistoricalContext {
+    // 1. 市場週期定位 (Macro Cycle)
+    marketPhase: 'bull_early' | 'bull_run' | 'bull_peak' | 'bear_decline' | 'bear_capitulation' | 'accumulation' | 'chop';
+
+    // 2. 主流敘事 (Dominant Narrative)
+    primaryNarrative: string;
+    secondaryNarratives?: string[];
+
+    // 3. 央行態度 (Fed Stance)
+    fedStance: 'hawkish_peak' | 'hawkish' | 'neutral' | 'dovish' | 'dovish_cutting';
+    interestRateCtxt: string; // e.g. "Rates at 5.25%, market expects pause"
+
+    // 4. 市場情緒 (Sentiment & Positioning)
+    sentiment: {
+        score: number; // 0-100 (FGI)
+        description: string; // e.g. "Extreme Fear after Luna crash"
+        positioning: 'over-leveraged_long' | 'over-leveraged_short' | 'clean' | 'fearful_hedged';
+    };
+
+    // 5. 關鍵技術位 (Key Technical Levels)
+    technicalContext: {
+        keySupport: number;
+        keyResistance: number;
+        significantLevelLabel: string; // e.g. "20k Psychological Defense"
+    };
+
+    // 6. 轉向與預期 (Pivot & Expectation)
+    expectation: {
+        consensus: string; // "Market priced in 25bps hike"
+        surpriseType: 'none' | 'positive_shock' | 'negative_shock';
+        reality: string; // "Hiked 50bps unexpectedly"
+    };
+}
+
+// New V3: Training Metadata (Difficulty & Type)
+export interface TrainingMetadata {
+    difficulty: 'easy' | 'medium' | 'hard' | 'extreme';
+    tags: ('volatility' | 'liquidity' | 'narrative' | 'reversal' | 'breakout')[];
+    recommendedFor: string; // e.g., "適合練習插針接多"
+    historicalSimilarity?: string[]; // IDs
 }
 
 export interface MarketEvent {
@@ -53,12 +100,18 @@ export interface MarketEvent {
     // 1. One Sentence Summary
     summary: string;
 
-    // 2. Context
+    // 2. Context (Legacy)
     context: {
         what: string;
         narrative: string;
         realImpact: string;
     };
+
+    // [NEW] Structrued Historical Context (V3)
+    historicalContext?: HistoricalContext;
+
+    // [NEW] Training Metadata (V3)
+    trainingMeta?: TrainingMetadata;
 
     // 3. Market State Snapshot
     initialState: {
@@ -98,6 +151,7 @@ export interface MarketEvent {
         longShort?: ChartDef;   // 多空比
         basis?: ChartDef;       // 期貨基差
         premium?: ChartDef;     // Coinbase 溢價
+        etfFlow?: ChartDef;     // ETF 淨流量 (New)
     };
 
     // 7. Analysis Modules (New)
@@ -179,6 +233,35 @@ export const REVIEWS_DATA: MarketEvent[] = [
             realImpact: '此事件確認了資產類別的合法性，但市場明顯忽略了利多落地後的獲利了結賣壓 (GBTC)，以及機構建倉的漸進性質。'
         },
 
+        historicalContext: {
+            marketPhase: 'bull_early',
+            primaryNarrative: 'Spot ETF Anticipation (現貨 ETF 預期)',
+            secondaryNarratives: ['GBTC Unlocking (GBTC 解鎖拋壓)', 'Pre-Halving Rally (減半前行情)'],
+            fedStance: 'neutral',
+            interestRateCtxt: 'Rates at 5.25-5.50%, Market expects cuts in 2024',
+            sentiment: {
+                score: 76,
+                description: 'Extreme Greed - Anticipation Peak',
+                positioning: 'over-leveraged_long'
+            },
+            technicalContext: {
+                keySupport: 40000,
+                keyResistance: 48000,
+                significantLevelLabel: '$48k YTD High Resistance'
+            },
+            expectation: {
+                consensus: 'Super Bullish - God candle incoming',
+                surpriseType: 'negative_shock',
+                reality: 'Sell the news (-20% drop)'
+            }
+        },
+
+        trainingMeta: {
+            difficulty: 'medium',
+            tags: ['narrative', 'reversal'],
+            recommendedFor: '練習「買預期賣事實 (Sell the news)」的最佳案例。'
+        },
+
         initialState: {
             price: '價格處於預期兌現的高位區間，動能開始鈍化',
             fearGreed: '極度貪婪 (76) - 市場情緒處於高溫區',
@@ -226,7 +309,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 10
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -342,7 +425,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         usageGuide: [
             '當交易所傳出資產負債表疑慮時',
             '當市場出現大型機構流動性枯竭傳言時',
-            '當公鏈代幣與其生態系項目出現異常連動下跌時'
+            '當公鏈代幣與其生態系專案出現異常連動下跌時'
         ],
 
         summary: '當 FTX 宣佈破產時，市場真正面對的不是單純的資產跌價，而是中心化信任機制的全面崩潰與流動性真空。',
@@ -351,6 +434,35 @@ export const REVIEWS_DATA: MarketEvent[] = [
             what: '全球流動性第二大的加密貨幣交易所 FTX 因資產挪用與流動性枯竭宣告破產。',
             narrative: '事件初期，市場普遍認為 FTX 具備「大到不能倒」的系統重要性，並將流動性問題視為短期謠言。',
             realImpact: '該事件揭露了不透明的內部槓桿操作，引發了全產業的信用緊縮 (Credit Crunch) 與償付能力危機。'
+        },
+
+        historicalContext: {
+            marketPhase: 'bear_capitulation',
+            primaryNarrative: 'Exchange Solvency Crisis (交易所償付危機)',
+            secondaryNarratives: ['Alameda Depegging', 'Regulatory Crackdown'],
+            fedStance: 'hawkish_peak',
+            interestRateCtxt: 'Aggressive Hiking Cycle continuing',
+            sentiment: {
+                score: 20,
+                description: 'Extreme Fear - Trust Collapse',
+                positioning: 'fearful_hedged'
+            },
+            technicalContext: {
+                keySupport: 18000,
+                keyResistance: 21500,
+                significantLevelLabel: '$18k Cycle Low Defense'
+            },
+            expectation: {
+                consensus: 'Bearish but expecting consolidation',
+                surpriseType: 'negative_shock',
+                reality: 'Complete insolvency & Fraud revealed'
+            }
+        },
+
+        trainingMeta: {
+            difficulty: 'hard',
+            tags: ['volatility', 'breakout', 'narrative'],
+            recommendedFor: '練習在「黑天鵝」事件中識別流動性斷裂的信號。'
         },
 
         initialState: {
@@ -400,7 +512,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'FTT',
-            daysBuffer: 7
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -554,7 +666,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'LUNA',
-            daysBuffer: 5
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -585,7 +697,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         historicalComparison: {
             event: '2008 雷曼兄弟倒閉',
-            similarity: '兩者皆涉及高槓桿、結構複雜的金融產品崩潰，且投資人皆因「市場規模極大」而忽視了底層資產質量的脆弱性。'
+            similarity: '兩者皆涉及高槓桿、結構複雜的金融產品崩潰，且投資人皆因「市場規模極大」而忽視了底層資產品質的脆弱性。'
         },
 
         actionableChecklist: [
@@ -706,7 +818,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 10
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -864,7 +976,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -935,14 +1047,14 @@ export const REVIEWS_DATA: MarketEvent[] = [
         summary: '當 The DAO 被駭客盜取 360 萬枚 ETH 時，以太坊社群選擇硬分叉逆轉交易，這重新定義了「不可竄改」的邊界。',
 
         context: {
-            what: '史上最大的群眾募資項目 The DAO 因智能合約漏洞被盜取約 5,000 萬美元的以太幣。',
+            what: '史上最大的群眾募資專案 The DAO 因智能合約漏洞被盜取約 5,000 萬美元的以太幣。',
             narrative: '市場當時相信智能合約是「程式碼即法律」，無需人為干預。',
             realImpact: '事件導致以太坊硬分叉，分裂為 ETH 與 ETC，開創了社群可投票逆轉交易的先例。'
         },
 
         initialState: {
             price: 'ETH 約 $20，剛完成大型群募',
-            fearGreed: '極度恐慌 - 項目資金被盜'
+            fearGreed: '極度恐慌 - 專案資金被盜'
         },
 
         misconceptions: [
@@ -985,7 +1097,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'ETH',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1044,18 +1156,18 @@ export const REVIEWS_DATA: MarketEvent[] = [
         impactedTokens: ['ETH', 'BTC'],
         maxDrawdown: '-90%',
         recoveryDays: '1000+ Days',
-        impactSummary: 'ICO 狂熱導致 ETH 需求激增，泡沫破裂後 90% 項目歸零。',
+        impactSummary: 'ICO 狂熱導致 ETH 需求激增，泡沫破裂後 90% 專案歸零。',
 
         usageGuide: [
             '當新幣發行速度遠超市場資金承接能力時',
             '當「萬物皆可代幣化」成為主流敘事時'
         ],
 
-        summary: '當任何項目都能透過 ICO 募集數百萬美元時，市場過熱的訊號已非常明確。',
+        summary: '當任何專案都能透過 ICO 募集數百萬美元時，市場過熱的訊號已非常明確。',
 
         context: {
-            what: '2017 年 ICO 狂潮見證了超過 50 億美元透過代幣發行募集，多數項目最終歸零。',
-            narrative: '白皮書即正義，任何聽起來有區塊鏈概念的項目都能輕易募資。',
+            what: '2017 年 ICO 狂潮見證了超過 50 億美元透過代幣發行募集，多數專案最終歸零。',
+            narrative: '白皮書即正義，任何聽起來有區塊鏈概念的專案都能輕易募資。',
             realImpact: '這次泡沫教育了一整代散戶投資者，也催生了監管對證券型代幣的關注。'
         },
 
@@ -1067,7 +1179,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         misconceptions: [
             {
                 myth: '白皮書代表真實的商業計畫',
-                fact: '多數 ICO 項目僅有概念，缺乏可執行的產品或團隊，最終 80% 以上歸零。'
+                fact: '多數 ICO 專案僅有概念，缺乏可執行的產品或團隊，最終 80% 以上歸零。'
             },
             {
                 myth: '早期參與必定獲利',
@@ -1079,7 +1191,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
             {
                 date: '2017-06-01',
                 title: 'ICO 加速',
-                description: '大量項目透過以太坊發行代幣，募資金額屢創新高。',
+                description: '大量專案透過以太坊發行代幣，募資金額屢創新高。',
                 marketImpact: 'ETH 需求激增，價格飆升。',
                 riskState: '泡沫形成',
                 riskLevel: 'medium'
@@ -1104,7 +1216,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'ETH',
-            daysBuffer: 30
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1119,13 +1231,13 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         historicalComparison: {
             event: '2000 年網際網路泡沫',
-            similarity: '兩者都是新技術引發的過度投機，最終只有少數優質項目存活。'
+            similarity: '兩者都是新技術引發的過度投機，最終只有少數優質專案存活。'
         },
 
         actionableChecklist: [
             {
                 type: 'alert',
-                label: '審視項目基本面',
+                label: '審視專案基本面',
                 desc: '白皮書不等於產品，評估團隊背景與實際進展。'
             },
             {
@@ -1218,7 +1330,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1332,7 +1444,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'ETH',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1447,7 +1559,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 30
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1566,7 +1678,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 30
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1687,7 +1799,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 30
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1822,7 +1934,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 30
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -1965,7 +2077,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'ETH',
-            daysBuffer: 30
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2085,7 +2197,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2191,7 +2303,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2305,7 +2417,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2420,7 +2532,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2547,7 +2659,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2667,7 +2779,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2773,7 +2885,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -2888,7 +3000,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
 
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 14
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -3010,7 +3122,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         ],
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 10
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -3135,7 +3247,7 @@ export const REVIEWS_DATA: MarketEvent[] = [
         ],
         chartConfig: {
             symbol: 'BTC',
-            daysBuffer: 7
+            daysBuffer: 90
         },
         charts: {
             main: {
@@ -3194,6 +3306,11 @@ export const REVIEWS_DATA: MarketEvent[] = [
         impactedTokens: ['BTC'],
         maxDrawdown: '-15%',
         recoveryDays: '2 Days',
+        sparklineData: [
+            70000, 69000, 68000, 67000, 66000, // Pre-crash
+            62000, 60800, // Crash (Wick)
+            63000, 64000, 65000, 66000 // Recovery
+        ],
         usageGuide: [
             '觀察週末流動性不足時的極端波動',
             '理解比特幣在戰爭初期的「風險資產」屬性'
@@ -3261,117 +3378,191 @@ export const REVIEWS_DATA: MarketEvent[] = [
     {
         id: 'review-2021-05',
         slug: '2021-may-crash',
-        title: '2021/05 槓桿崩盤：多殺多連環爆倉',
+        title: '2021/05 519 崩盤：槓桿多頭的終極清洗',
         year: 2021,
-        type: 'leverage_cleanse',
-        impactSummary: '長期偏正費率 + 高 OI，回調時形成連環爆倉',
-        importance: 'B',
-        tags: ['槓桿崩盤', '多殺多', '連鎖爆倉', '監管雙擊'],
-        marketStates: ['崩跌', '過熱'],
-        relatedMetrics: ['funding', 'oi', 'fearGreed'],
-        readingMinutes: 4,
+        importance: 'S',
+        featuredRank: 2,
+        tags: ['流動性危機', '多殺多', '監管重拳', '負費率'],
+        behaviorTags: ['連鎖爆倉', '流動性枯竭', '恐慌拋售', 'V型反轉'],
+        marketStates: ['極度恐懼', '去槓桿', '崩跌'],
+        relatedMetrics: ['funding', 'oi', 'liquidation', 'fearGreed'],
+        readingMinutes: 10,
         isProOnly: false,
-        publishedAt: '2025-12-17',
-        updatedAt: '2025-12-17',
-        eventStartAt: '2021-05-12',
-        eventEndAt: '2021-05-19',
-        reactionStartAt: '2021-05-12',
-        reactionType: 'trust_collapse',
-        impactedTokens: ['BTC', 'ETH'],
-        maxDrawdown: '-50%',
-        recoveryDays: '180 Days',
-        usageGuide: [
-            '當資金費率持續偏高時（>0.01%）',
-            '當 OI 累積過高且價格開始走弱時'
+        publishedAt: '2025-12-25',
+        updatedAt: '2025-12-25',
+        eventStartAt: '2021-05-10', // Musk tweet
+        eventEndAt: '2021-07-20',   // Bottom formation
+        reactionStartAt: '2021-05-19', // The Crash Day
+        reactionType: 'liquidity_crisis',
+
+        // Trading Perspective
+        type: 'leverage_cleanse',
+        impactSummary: '長期正費率 + 擁擠 OI，典型的「多殺多」流動性螺旋，BTC 單日腰斬。',
+        impactedTokens: ['BTC', 'ETH', 'DOGE', 'SHIB', 'MATIC'], // Altcoins were heavy
+        maxDrawdown: '-54%', // 64k -> 29k
+        recoveryDays: '184 Days', // Until Nov ATH
+        sparklineData: [
+            57000, 58000, 56000, 55000, 54000, 49000, 48000, 46000, 43000, // Pre-crash
+            37000, 30000, // The Crash (Wick)
+            35000, 38000, 36000, 34000, 35000, 33000, 32000, 31000, 29000, // Bottoming
+            32000, 34000, 38000, 40000, 42000 // Recovery
         ],
-        summary: '牛市中後段，資金費率長期偏正 + 持倉量高位堆積，Elon Musk 推特成為導火索，引發多殺多連環爆倉。',
+
+        usageGuide: [
+            '當全網 OI 處於歷史高位且 Funding Rate 持續 > 0.03% 時，市場極度脆弱。',
+            '消息面（如 Musk 推文）只是導火索，真正的跌幅來自「連鎖爆倉」的流動性真空。',
+            '在流動性危機 (Liquidity Crisis) 中，價格會跌穿所有技術支撐，直到合約持倉被徹底清洗。'
+        ],
+
+        summary: '2021 年 5 月 19 日，加密貨幣市場經歷了歷史上最慘烈的單日崩盤之一。在長達數月的 Funding Rate 正費率與迷因幣 (Doge/Shib) 狂熱後，Elon Musk 的推文與中國監管禁令成為壓垮駱駝的稻草，引發了高達百億美元的連鎖爆倉。這不僅是一次價格修正，更是一次經典的「槓桿大清洗 (The Great Deleveraging)」，教導了市場關於流動性缺口的殘酷一課。',
+
         context: {
-            what: 'Tesla 暫停 BTC 支付 + 中國加強監管，引發槓桿多頭踩踏式出逃。',
-            narrative: '牛市還在繼續，買跌就對了。',
-            realImpact: '過度擁擠的多頭槓桿形成連鎖清算，單週跌幅超過 30%。'
+            what: 'Elon Musk 宣布 Tesla 暫停比特幣支付，隨後中國三大協會發布加密貨幣禁令。',
+            narrative: '當時市場普遍沉浸在「機構進場」的牛市敘事中，認為 $50,000 是堅不可摧的鐵底。零售投資人瘋狂追逐 Doge 等 Altcoins，忽視了比特幣在高位盤整時的量能萎縮與籌碼派發跡象。市場對於「利空」完全鈍化，處於典型的「安全錯覺 (Illusion of Safety)」階段。',
+            realImpact: '實際上，市場結構早已搖搖欲墜。高額的 Funding Rate 意味著多頭每天需支付巨額成本來維持倉位。當價格跌破關鍵的 $45,000 支撐位時，引發了第一波停損，隨後在 $40,000 與 $30,000 觸發了大規模的強平單，導致買盤簿 (Orderbook) 瞬間被擊穿，價格在數小時內腰斬。'
         },
+
         initialState: {
-            price: '$58,000 → $30,000',
-            fearGreed: '75（貪婪）→ 10（極度恐懼）',
-            funding: '持續 > 0.03% 偏高',
-            oi: '歷史高位'
+            price: '$58,000 (高位盤整)',
+            fearGreed: '70+ (Greed)',
+            funding: '持續 > 0.05% (極度過熱)',
+            oi: '$12B+ (當時的歷史高位)',
+            liquidation: '平日僅 $200M',
+            stablecoin: '流入趨緩'
         },
+
         misconceptions: [
             {
-                myth: '這是牛市正常回調，很快會反彈',
-                fact: '當槓桿過度擁擠時，回調會被放大成崩盤，恢復時間遠超預期。'
+                myth: '是因為中國禁令才跌這麼多',
+                fact: '禁令只是催化劑。高達 50% 的跌幅來自於「槓桿連鎖爆倉」，市場結構本身的脆弱性（高 OI、擁擠交易）才是主因。'
+            },
+            {
+                myth: '跌到 $30,000 就能馬上 V 轉創新高',
+                fact: '流動性重創後的修復期極長。519 後市場經歷了長達兩個月的「底部磨底 (Bottoming)」，直到 7 月底才真正確認反轉。'
             }
         ],
+
         timeline: [
             {
+                date: '2021 Feb-Apr',
+                title: 'T-Phase ❶: 醞釀期 (Build-up)',
+                description: 'BTC 在 60k 附近量縮盤整，但 Altcoins 狂飛。',
+                marketImpact: 'OI 持續攀升，主力開始在高位派發籌碼 (Distribution)。',
+                riskState: '結構脆弱',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2021-05-08',
+                title: 'T-Phase ❷: 預期泡沫 (Pre-FOMO)',
+                description: 'Doge 上 SNL 節目，零售情緒達到頂峰。',
+                marketImpact: 'Funding Rate 飆升，市場誤以為「牛市永不回頭」。',
+                riskState: '極度貪婪',
+                riskLevel: 'high'
+            },
+            {
                 date: '2021-05-12',
-                title: 'Elon Musk 推特',
-                description: 'Tesla 暫停接受 BTC 購車。',
-                marketImpact: 'BTC 單日跌 10%，情緒急轉。',
-                riskState: '恐慌開始',
+                title: 'T-Phase ❸: 引爆點 (Trigger)',
+                description: '!!! Elon Musk: Tesla Suspends BTC !!!',
+                marketImpact: '一小時內重挫 10%，多頭信心出現第一道裂痕。',
+                riskState: '警報響起',
                 riskLevel: 'high'
             },
             {
                 date: '2021-05-19',
-                title: '連環爆倉',
-                description: '價格跌破 $40,000 後觸發大規模清算。',
-                marketImpact: '單日清算超過 $8B，多殺多加劇。',
+                title: 'T-Phase ❹: 恐慌清算 (Flush)',
+                description: '中國禁令傳出，BTC 跌破 40k 引發連環爆倉。',
+                marketImpact: '單日爆倉 $88億，價格插針至 $30,000 (Crash Point)。',
                 riskState: '流動性危機',
-                riskLevel: 'high'
+                riskLevel: 'extreme'
+            },
+            {
+                date: '2021 May-Jul',
+                title: 'T-Phase ❺: 底部構築 (Bottoming)',
+                description: '多次下探 29k，市場情緒極度低迷。',
+                marketImpact: 'Funding 為負，空頭過度擁擠，籌碼從弱手轉移至強手。',
+                riskState: '絕望磨底',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2021-07-25',
+                title: 'T-Phase ❻: 修復期 (Recovery)',
+                description: '空頭擠壓 (Short Squeeze) 突破 40k。',
+                marketImpact: '確認底部結構完成，進入下半場牛市 (New Regime)。',
+                riskState: '趨勢反轉',
+                riskLevel: 'low'
             }
         ],
+
+        chartConfig: {
+            symbol: 'BTCUSDT',
+            daysBuffer: 90 // Unified Long Window [-90, +180] context
+        },
+
         charts: {
-            flow: {
-                url: '',
-                caption: '圖表解讀：ETF 凈流出入與價格呈現高度相關性。'
-            },
-            oi: {
-                url: '',
-                caption: '圖表解讀：OI 隨着 ETF 資金持續堆積，顯示機構持續加倉。',
+            main: {
+                url: '/images/reviews/519-main.png',
+                caption: 'BTC 價格日線圖：從高位派發到 519 閃崩插針的完整結構。',
                 interpretation: {
-                    whatItMeans: '持倉量驟降代表槓桿被強制去化。',
-                    whatToWatch: '當 OI 降至低點且費率轉負時，通常是階段性底部。'
+                    whatItMeans: '圖中標示了紅色的 D0 事件點，以及下影線的 $30,000 Liquidity Flush 點位。',
+                    whatToWatch: '注意 60k 附近的多次頂背離，以及 519 當日的歷史天量。'
                 }
             },
             funding: {
-                url: '',
-                caption: '圖表解讀：長期偏正費率，多頭過度擁擠，回調時形成連環爆倉。',
+                url: '/images/reviews/519-funding.png',
+                caption: '資金費率 (Funding Rate) 變化圖。',
                 interpretation: {
-                    whatItMeans: '費率過高代表槓桿過熱。',
-                    whatToWatch: '費率是否快速轉負（清洗完成）。'
+                    whatItMeans: '崩盤前費率長期 > 0.05% (紅色高危區)，崩盤後迅速轉為負值 (綠色機會區)。',
+                    whatToWatch: '當費率從「極正」轉為「極負」，通常是短期底部的最強訊號。'
                 }
             },
             liquidation: {
-                url: '',
-                caption: '圖表解讀：單日清算超過 $8B，多殺多加劇。',
+                url: '/images/reviews/519-liquidation.png',
+                caption: '全網爆倉量 (Total Liquidations)。',
                 interpretation: {
-                    whatItMeans: '清算量驟增是去槓桿的標誌。',
-                    whatToWatch: '清算峰值通常對應短期底部。'
+                    whatItMeans: '519 當日爆倉柱狀圖創下歷史新高 ($8.8B)，代表槓桿徹底清洗。',
+                    whatToWatch: '這種極端柱狀圖通常標誌著「Max Pain」已過。'
                 }
             },
-            longShort: {
-                url: '',
-                caption: '圖表解讀：長時間偏多，下跌時形成多殺多連環爆倉。',
+            oi: {
+                url: '/images/reviews/519-oi.png',
+                caption: '合約持倉量 (Open Interest)。',
                 interpretation: {
-                    whatItMeans: '高多空比 + 價格下跌 = 多殺多。',
-                    whatToWatch: '多空比回落至中性區域。'
+                    whatItMeans: 'OI 在 24 小時內腰斬 (-50%)，這是典型的「去槓桿」特徵。',
+                    whatToWatch: 'OI 暴跌但價格不再創新低，是底部背離的訊號。'
                 }
-            },
-            main: {
-                url: '',
-                caption: '圖表解讀：高位堆積的槓桿 + 突發利空 = 多殺多崩盤結構。'
             },
             sentiment: {
-                url: '',
-                caption: '圖表解讀：情緒從極度貪婪 (75) 直接墜入極度恐懼 (10)。'
+                url: '/images/reviews/519-fgi.png',
+                caption: '恐懼貪婪指數 (Fear & Greed)。',
+                interpretation: {
+                    whatItMeans: '指數從 70+ 直接跳水至 10，市場情緒瞬間結凍。',
+                    whatToWatch: '在 10 附近滯留超過 30 天，通常是長線買點。'
+                }
             }
         },
+
         historicalComparison: {
-            event: '2020/03 COVID',
-            similarity: '都是槓桿去化型崩盤，清算主導下跌。'
+            event: '2020/03 COVID (312)',
+            similarity: '兩者本質都是「流動性危機」。價格下跌觸發爆倉，爆倉進一步推低價格 (螺旋下跌)。'
         },
+
         actionableChecklist: [
-            { type: 'alert', label: '費率偏高警示', desc: '當費率 > 0.01% 持續多日，降低槓桿。' }
+            {
+                type: 'alert',
+                label: '費率過熱警報',
+                desc: '當 Funding Rate > 0.03% 持續一週以上，應主動降低槓桿，無論新聞面多好。',
+                citation: { label: 'Funding Heatmap', href: '/indicators/funding-rate' }
+            },
+            {
+                type: 'check',
+                label: '流動性缺口確認',
+                desc: '看到價格插針 (Wick) 且伴隨歷史天量時，不要急著殺跌，那通常是流動性釋放的終點。'
+            },
+            {
+                type: 'insight',
+                label: '消息面與結構',
+                desc: '記住：壞消息 (新聞) 只是點燃炸藥 (高槓桿結構) 的火柴。結構比消息更重要。'
+            }
         ]
     },
     // ================================================
@@ -3380,93 +3571,183 @@ export const REVIEWS_DATA: MarketEvent[] = [
     {
         id: 'review-2024-03',
         slug: '2024-ath-pullback',
-        title: '2024/03 新高回調：槓桿升溫後的典型清算',
+        title: '2024/03 73k 回調：ETF 買盤 vs 槓桿過熱',
         year: 2024,
-        type: 'leverage_cleanse',
-        impactSummary: '新高附近槓桿升溫，費率偏高引發回調',
-        importance: 'B',
-        tags: ['新高回調', '槓桿清洗', '獲利了結'],
-        marketStates: ['過熱', '修復'],
-        relatedMetrics: ['funding', 'oi', 'price'],
-        readingMinutes: 3,
+        importance: 'A',
+        featuredRank: 4,
+        tags: ['歷史新高', '槓桿清洗', 'ETF', '結構性回調'],
+        behaviorTags: ['高位盤整', '量價背離', '假突破', '多頭陷阱'],
+        marketStates: ['過熱', '修復', '橫盤'],
+        relatedMetrics: ['etfFlow', 'funding', 'oi', 'price'],
+        readingMinutes: 6,
         isProOnly: false,
-        publishedAt: '2025-12-17',
-        updatedAt: '2025-12-17',
-        eventStartAt: '2024-03-14',
-        eventEndAt: '2024-03-20',
-        reactionStartAt: '2024-03-14',
+        publishedAt: '2025-12-25',
+        updatedAt: '2025-12-25',
+        eventStartAt: '2024-03-01', // Runup
+        eventEndAt: '2024-05-15',   // Consolidation end
+        reactionStartAt: '2024-03-14', // ATH Day
         reactionType: 'priced_in',
-        impactedTokens: ['BTC'],
-        maxDrawdown: '-17%',
-        recoveryDays: '60 Days',
-        usageGuide: [
-            '當價格創新高但費率急升時',
-            '當 OI 快速堆積時警惕回調'
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactSummary: 'ETF 強勁買盤推動新高，但高達 0.08% 的年化資金費率顯示過熱，需透過深幅回調清洗合約槓桿。',
+        impactedTokens: ['BTC', 'ETH', 'SOL', 'MEME'],
+        maxDrawdown: '-23%', // 73.7k -> 56.5k
+        recoveryDays: '67 Days', // Until May breakout attempt
+        sparklineData: [
+            61000, 64000, 68000, 71000, 72000, 73700, // Pre-ATH
+            68000, 64000, 62000, 60800, // First Leg Down
+            65000, 67000, 64000, 60000, 56500, // Second Leg (Bottom)
+            58000, 61000, 63000, 65000 // Recovery
         ],
-        summary: 'BTC 創下 $73,000 新高後，資金費率飆升，槓桿過熱導致 15% 回調。',
+
+        usageGuide: [
+            '當價格創歷史新高 (ATH) 但 ETF 淨流入開始減緩時。',
+            '當 Funding Rate 超過 0.05% 且 OI 創歷史新高時，回調機率 > 80%。',
+            '牛市中的回調通常是「分批買入」的機會，而非熊市的開始 (Buy the Dip)。'
+        ],
+
+        summary: '2024 年 3 月，比特幣展現了前所未有的強勢，在減半前即創下 $73,777 的歷史新高。這背後是貝萊德 (IBIT) 等 ETF 的驚人買盤推動。然而，合約市場的貪婪程度也隨之飆升，Funding Rate 一度達到年化 100%。市場不得不經歷一場長達兩個月的「時間換空間」修正，透過 -23% 的回調來清洗過度槓桿化的多頭，重新建立健康的籌碼結構。',
+
         context: {
-            what: 'ETF 資金推動 BTC 創新高，但槓桿跟進速度過快。',
-            narrative: 'ETF 持續買入，上看 10 萬。',
-            realImpact: '費率偏高 + OI 急升 = 典型的清算前兆。'
+            what: '比特幣史上首次在減半前突破歷史前高 (ATH)。',
+            narrative: '「這次不一樣 (This time is different)」。市場認為 ETF 的持續買盤將帶來永不回頭的超級週期。',
+            realImpact: '雖然 ETF 提供了底層支撐，但合約市場的過度槓桿 (Leverage) 仍需物理釋放。這次回調證明了即使有機構買盤，市場規律（去槓桿）依然有效。'
         },
+
         initialState: {
-            price: '$73,000 → $62,000',
-            fearGreed: '85（極度貪婪）→ 65',
-            funding: '0.025% 偏高'
+            price: '$73,777 (New ATH)',
+            fearGreed: '88 (極度貪婪)',
+            funding: '0.08% (極度過熱)',
+            oi: '$36B (歷史新高)',
+            etfFlow: '單日流入 $1B (峰值)',
+            stablecoin: '流入趨緩'
         },
+
         misconceptions: [
             {
-                myth: '有 ETF 買盤，不會大跌',
-                fact: 'ETF 是現貨買盤，無法阻止合約市場的槓桿清算。'
+                myth: 'ETF 買盤會吃掉所有賣單，不會再有大跌',
+                fact: '合約市場規模遠大於現貨 ETF。當多頭清算發生時，機械式的市價拋售 (Market Sell) 能夠輕易擊穿 ETF 的掛單牆。'
+            },
+            {
+                myth: '減半前下跌代表牛市結束',
+                fact: '歷史上每次減半前後都會有「減半回調 (Halving Pullback)」，這是健康的籌碼換手，為了減半後的供應衝擊做準備。'
             }
         ],
+
         timeline: [
             {
-                date: '2024-03-14',
-                title: '創新高 $73,000',
-                description: '費率飆升至 0.03%。',
-                marketImpact: '槓桿過熱訊號明確。',
-                riskState: '過熱',
+                date: '2024 Feb-Mar',
+                title: 'T-Phase ❶: 醞釀期 (Build-up)',
+                description: 'ETF 買盤瘋狂湧入，BTC 從 42k 直衝 70k。',
+                marketImpact: '空頭被全數軋空，市場進入單邊上漲模式。',
+                riskState: '極度貪婪',
                 riskLevel: 'medium'
             },
             {
-                date: '2024-03-15',
-                title: '回調開始',
-                description: '多頭清算引發連鎖反應。',
-                marketImpact: '24H 清算超過 $1B。',
-                riskState: '去槓桿',
+                date: '2024-03-12',
+                title: 'T-Phase ❷: 預期泡沫 (Pre-FOMO)',
+                description: 'Funding Rate 飆升至 0.08%，零售大舉進場。',
+                marketImpact: 'Coinbase 出現當機，顯示散戶情緒過熱。',
+                riskState: '過熱警戒',
                 riskLevel: 'high'
+            },
+            {
+                date: '2024-03-14',
+                title: 'T-Phase ❸: 引爆點 (Trigger)',
+                description: 'PPI 數據高於預期 + 日本升息傳言。',
+                marketImpact: '觸及 73.7k 後無力上攻，美股開盤後 ETF 流入不如預期。',
+                riskState: '動能減弱',
+                riskLevel: 'high'
+            },
+            {
+                date: '2024-03-19',
+                title: 'T-Phase ❹: 恐慌清算 (Flush)',
+                description: 'BTC 跌破 65k 關鍵支撐。',
+                marketImpact: '單日爆倉 $6億，價格下探 $60,800 (Crash Point)。',
+                riskState: '去槓桿',
+                riskLevel: 'extreme'
+            },
+            {
+                date: '2024-04-30',
+                title: 'T-Phase ❺: 二次探底 (Bottoming)',
+                description: '香港 ETF 上線利多出盡，價格再次下殺至 56.5k。',
+                marketImpact: '徹底清洗了 60k 上方的最後一批多頭槓桿。',
+                riskState: '絕望磨底',
+                riskLevel: 'medium'
+            },
+            {
+                date: '2024-05-15',
+                title: 'T-Phase ❻: 結構修復 (Recovery)',
+                description: 'CPI 數據優於預期，價格重回 66k。',
+                marketImpact: 'ETF 重新恢復淨流入，確認調整結束。',
+                riskState: '趨勢重啟',
+                riskLevel: 'low'
             }
         ],
+
+        chartConfig: {
+            symbol: 'BTCUSDT',
+            daysBuffer: 90 // Quarterly view
+        },
+
         charts: {
-            main: { url: '', caption: '新高 + 高費率 = 回調風險升高' },
-            oi: {
-                url: '',
-                caption: '圖表解讀：OI 在新高處快速堆積，隨後隨價格回調而減少。',
+            main: {
+                url: '/images/reviews/2024-ath-main.png',
+                caption: 'BTC 日線圖：新高後的 ABC 修正波結構。',
                 interpretation: {
-                    whatItMeans: '這是典型的多頭獲利了結與追高者被清洗的過程。',
-                    whatToWatch: 'OI 是否回歸健康水位。'
+                    whatItMeans: '明顯的 73k 假突破，隨後進入兩個月的旗型整理 (Bull Flag)。',
+                    whatToWatch: '56k 的Wick Low 是這次回調的絕對底部 (Max Pain)。'
                 }
             },
-            sentiment: {
-                url: '',
-                caption: '圖表解讀：FGI 從極度貪婪回落至修復區間。'
+            etfFlow: {
+                url: '/images/reviews/2024-ath-etf.png',
+                caption: '比特幣現貨 ETF 淨流量。',
+                interpretation: {
+                    whatItMeans: '在回調期間，ETF 流入顯著停滯甚至轉為流出 (GBTC 拋壓主導)。',
+                    whatToWatch: '當 IBIT 與 FBTC 重新出現 >$100M 的單日流入時。'
+                }
             },
             funding: {
-                url: '',
-                caption: '圖表解讀：創新高時費率飆升，顯示突破是由高槓桿推動而非現貨。',
+                url: '/images/reviews/2024-ath-funding.png',
+                caption: '資金費率冷卻過程。',
                 interpretation: {
-                    whatItMeans: '高費率突破往往難以持續。',
-                    whatToWatch: '費率回落後的價格支撐測試。'
+                    whatItMeans: '費率從由紅 (0.05%+) 轉綠 (0.01%)，代表槓桿泡沫已消除。',
+                    whatToWatch: '費率長期維持中性是慢牛的基礎。'
+                }
+            },
+            oi: {
+                url: '/images/reviews/2024-ath-oi.png',
+                caption: '合約持倉量變化。',
+                interpretation: {
+                    whatItMeans: 'OI 在 73k 時創歷史新高，隨後在 56k 回落至健康水位。',
+                    whatToWatch: 'OI 是否隨價格緩步回升（健康），而非急劇飆升（投機）。'
                 }
             }
         },
+
         historicalComparison: {
-            event: '2021/04 ATH',
-            similarity: '新高附近槓桿過熱後的回調結構相似。'
+            event: '2020/11 突破 20k 前的震盪',
+            similarity: '都是在突破歷史新高前後的劇烈洗盤，為了甩轎不堅定的籌碼。'
         },
+
         actionableChecklist: [
-            { type: 'alert', label: '新高警示', desc: '創新高時若費率 > 0.02%，考慮減倉。' }
+            {
+                type: 'alert',
+                label: '費率過高不追多',
+                desc: '當 Funding Rate 年化超過 50% 時，市場回調風險極高，此時適合套保而非做多。',
+                citation: { label: 'Funding Rates', href: '/indicators/funding-rate' }
+            },
+            {
+                type: 'check',
+                label: 'ETF 流量監控',
+                desc: '關注美股開盤後 1 小時的 ETF 流量數據，這是當前市場及時的風向球。'
+            },
+            {
+                type: 'insight',
+                label: '牛市急跌',
+                desc: '牛市中的急跌 (Flash Dump) 且伴隨 V 轉，通常是加倉機會，不要被波動甩下車。'
+            }
         ]
     },
     // ================================================
@@ -3475,95 +3756,190 @@ export const REVIEWS_DATA: MarketEvent[] = [
     {
         id: 'review-2021-11',
         slug: '2021-nov-top',
-        title: '2021/11 高位接盤：OI 見頂訊號',
+        title: '2021/11 69k 雙頂：牛市終局的頂背離',
         year: 2021,
-        type: 'market_structure',
-        impactSummary: '高位 OI + 價格走弱 = 典型頂部結構',
-        importance: 'B',
-        tags: ['週期頂部', '頂背離', '趨勢反轉'],
-        marketStates: ['過熱', '觀望'],
-        relatedMetrics: ['oi', 'price', 'fearGreed'],
-        readingMinutes: 3,
+        importance: 'S',
+        featuredRank: 3,
+        tags: ['頂部結構', '假突破', '量價背離', '牛市陷阱'],
+        behaviorTags: ['高位出貨', '流動性誘捕', '趨勢反轉', '陰跌'],
+        marketStates: ['過熱', '觀望', '崩跌'],
+        relatedMetrics: ['oi', 'price', 'fearGreed', 'funding', 'etfFlow'],
+        readingMinutes: 8,
         isProOnly: false,
-        publishedAt: '2025-12-17',
-        updatedAt: '2025-12-17',
-        eventStartAt: '2021-11-10',
-        eventEndAt: '2021-11-14',
-        reactionStartAt: '2021-11-10',
+        publishedAt: '2025-12-25',
+        updatedAt: '2025-12-25',
+        eventStartAt: '2021-10-20', // ETF Launch / ATH 1
+        eventEndAt: '2022-01-05',   // Fed pivot confirmation
+        reactionStartAt: '2021-11-10', // 69k Day
         reactionType: 'priced_in',
-        impactedTokens: ['BTC'],
-        maxDrawdown: '-77%',
-        recoveryDays: '1000+ Days',
-        usageGuide: [
-            '當 OI 創新高但價格無法跟進時',
-            '當價格走弱但 OI 不降時',
-            '當期貨基差 (Basis) 異常飆升至 20% 以上時'
+
+        // Trading Perspective
+        type: 'market_structure',
+        impactSummary: '典型的「量價背離」與「高位分布 (Distribution)」，OI 創新高但價格推不動，是大戶離場的鐵證。',
+        impactedTokens: ['BTC', 'ETH', 'SOL', 'AVAX', 'LUNA'],
+        maxDrawdown: '-77%', // 69k -> 15k (Full Bear Cycle)
+        recoveryDays: '846 Days', // Until 2024 ATH
+        sparklineData: [
+            61000, 63000, 66000, 60000, 58000, 61000, 62000, 64000, 67000, 68000, // Pre-FOMO runup
+            69000, 68500, 64000, 63000, 60000, 58000, 56000, 57000, 54000, 53000, // The Top Drop
+            50000, 48000, 46000, 42000, 46000, 50000, 47000, 45000 // Bear Market start
         ],
-        summary: 'BTC 創下 $69,000 歷史新高後，OI 維持高位但價格開始走弱，形成典型的頂部分配結構。',
+
+        usageGuide: [
+            '當價格創歷史新高 (ATH) 但成交量顯著萎縮時 (量價背離)。',
+            '當 Funding Rate 為正，但現貨溢價 (Coinbase Premium) 持續為負（這代表散戶在買，機構在賣）。',
+            '當「利多消息 (ETF/Upgrade)」落地，價格卻不漲反跌 (Sell the News)。'
+        ],
+
+        summary: '2021 年 11 月 10 日，比特幣觸及 $69,000 的歷史頂峰，但這並非新一輪上漲的開始，而是漫長熊市的起點。相比於 519 的急促崩盤，69k 是一場精密的「誘多出貨 (Distribution)」。儘管期貨 OI 創下新高，但鏈上數據顯示長期持有者 (LTH) 早在 64k 雙頂時就已開始大量拋售。這是一個關於「瘋狂與貪婪」的教訓——當所有人都喊著年底 10 萬時，往往就是派對結束的時刻。',
+
         context: {
-            what: '牛市頂部，槓桿高位但現貨買盤不足。',
-            narrative: '年底上看 10 萬。',
-            realImpact: 'OI 高位 + 價格走弱 = 長達一年的熊市開端。'
+            what: '美國首檔比特幣期貨 ETF (BITO) 上線與 Taproot 升級落地，市場情緒亢奮。',
+            narrative: '「超級週期 (Supercycle)」理論盛行，大眾確信比特幣將在聖誕節前突破 $100,000，認為主要機構正在搶籌。',
+            realImpact: '這是一場經典的「流動性誘捕」。ETF 通過成為了機構（Smart Money）能夠合法、大量做空的工具。價格雖然突破前高，但卻是縮量的「假突破 (Fakeout)」，主力利用散戶的 FOMO 情緒在高位完成了籌碼換手。'
         },
+
         initialState: {
-            price: '$69,000 → $55,000 (一週)',
-            fearGreed: '84（極度貪婪）→ 50',
-            oi: '歷史新高'
+            price: '$69,000 (ATH)',
+            fearGreed: '84 (極度貪婪)',
+            funding: '0.01% - 0.03% (雖正但未極端，顯示猶豫)',
+            oi: '$23B+ (歷史新高 - 典型的頂部特徵)',
+            stablecoin: '開始淨流出',
+            liquidation: '低波動'
         },
+
         misconceptions: [
             {
-                myth: 'OI 增加代表市場看漲',
-                fact: '高 OI + 價格走弱代表槓桿多頭被套，是危險訊號。'
+                myth: '通膨高漲，比特幣是對抗通膨的最佳工具，所以只會漲',
+                fact: '當聯準會 (Fed) 轉向緊縮時，所有風險資產都會被拋售。市場選擇性忽視了宏觀流動性收緊的早期訊號。'
+            },
+            {
+                myth: 'OI 創新高代表主力強烈看漲',
+                fact: '錯誤。在高位的巨量 OI 往往代表「多空分歧巨大」且「潛在賣壓沈重」。如果價格推不動，這些高位 OI 就會變成未來的燃料。'
             }
         ],
+
         timeline: [
             {
-                date: '2021-11-10',
-                title: '創 $69,000 ATH',
-                description: 'OI 同步創新高。',
-                marketImpact: '表面強勢，實則分配開始。',
-                riskState: '表面樂觀',
+                date: '2021 Oct',
+                title: 'T-Phase ❶: 醞釀期 (Build-up)',
+                description: 'BITO ETF 通過，BTC 衝上 66k。',
+                marketImpact: '看似強勢，但鏈上 LTH 淨部位開始下降 (出貨)。',
+                riskState: '結構轉弱',
                 riskLevel: 'medium'
             },
             {
-                date: '2021-11-14',
-                title: '價格開始走弱',
-                description: 'OI 維持但價格下跌。',
-                marketImpact: '槓桿多頭開始被套。',
-                riskState: '分配階段',
+                date: '2021-11-08',
+                title: 'T-Phase ❷: 預期泡沫 (Pre-FOMO)',
+                description: 'Taproot 升級前夕，Funding Rate 溫和上升。',
+                marketImpact: '散戶押注升級後會有一波大漲，無視量能背離。',
+                riskState: '極度貪婪',
                 riskLevel: 'high'
+            },
+            {
+                date: '2021-11-10',
+                title: 'T-Phase ❸: 引爆點 (Trigger)',
+                description: 'CPI 數據爆表 + Taproot 落地。',
+                marketImpact: '價格觸及 69k 後迅速回落 (Sell the Fact)。',
+                riskState: '頂部確認',
+                riskLevel: 'extreme'
+            },
+            {
+                date: '2021-12-04',
+                title: 'T-Phase ❹: 恐慌清算 (Flush)',
+                description: 'Omicron 變種病毒恐慌，引發週末深夜大閃崩。',
+                marketImpact: 'BTC 從 52k 瞬間殺至 42k，頂部結構正式確立 (Structure Break)。',
+                riskState: '趨勢反轉',
+                riskLevel: 'extreme'
+            },
+            {
+                date: '2022 Jan-Mar',
+                title: 'T-Phase ❺: 底部構築失敗 (Fed Pivot)',
+                description: 'Fed 宣布將開始升息與縮表。',
+                marketImpact: '任何反彈都被視為逃命波 (Lower Highs)。',
+                riskState: '陰跌',
+                riskLevel: 'high'
+            },
+            {
+                date: '2022 Throughout',
+                title: 'T-Phase ❻: 熊市確認 (Bear Regime)',
+                description: '進入長達一年的去槓桿週期。',
+                marketImpact: '流動性枯竭，直到 FTX 事件才見終章。',
+                riskState: '熊市',
+                riskLevel: 'low'
             }
         ],
+
+        chartConfig: {
+            symbol: 'BTCUSDT',
+            daysBuffer: 90
+        },
+
         charts: {
-            main: { url: '', caption: 'OI 頂背離：價格走弱但 OI 不降' },
-            oi: {
-                url: '',
-                caption: '圖表解讀：OI 在高位維持不墜，顯示多頭不願離場，最終成為下跌燃料。',
+            main: {
+                url: '/images/reviews/69k-main.png',
+                caption: 'BTC 週線圖：教科書級別的「雙頂 (Double Top)」與量價背離。',
                 interpretation: {
-                    whatItMeans: '價格下跌但 OI 不降，代表主力出貨給槓桿散戶。',
-                    whatToWatch: 'OI 何時開始崩潰，通常伴隨大跌。'
+                    whatItMeans: '4 月與 11 月形成的雙頂結構，右肩雖創新高但成交量顯著低於左肩。',
+                    whatToWatch: '週線級別的 RSI 頂背離是長線離場的最強訊號。'
                 }
             },
-            basis: {
-                url: '',
-                caption: '圖表解讀：年化基差飆升至 25%，市場極度樂觀，典型的頂部特徵。',
+            oi: {
+                url: '/images/reviews/69k-oi.png',
+                caption: '合約持倉量 (Open Interest) 頂背離。',
                 interpretation: {
-                    whatItMeans: '過高的基差代表期貨市場過度擁擠。',
-                    whatToWatch: '基差快速收斂通常對應價格下跌。'
+                    whatItMeans: '價格在 11 月創新高，但 OI 相比 4 月其實並未顯著突破 (或突破後無量)。',
+                    whatToWatch: '高 OI + 價格停滯 = 派發 (Distribution)。'
+                }
+            },
+            funding: {
+                url: '/images/reviews/69k-funding.png',
+                caption: '資金費率與基差。',
+                interpretation: {
+                    whatItMeans: '不同於 519 的極端費率，69k 時費率相對溫和，顯示這不是散戶的瘋狂，而是機構的冷靜出貨。',
+                    whatToWatch: 'Coinbase Premium Index (CPI) 在衝頂時轉負。'
+                }
+            },
+            flow: {
+                url: '/images/reviews/69k-flow.png',
+                caption: '交易所凈流量 (Exchange Net Flow)。',
+                interpretation: {
+                    whatItMeans: '長期持有者 (LTH) 在 60k 上方持續將幣轉入交易所。',
+                    whatToWatch: '當 LTH 轉入量創 30 日新高，通常是週期頂部。'
                 }
             },
             sentiment: {
-                url: '',
-                caption: '圖表解讀：FGI 長期處於貪婪高位，隨後快速冷卻。'
-            },
+                url: '/images/reviews/69k-fgi.png',
+                caption: '恐懼貪婪指數滯留高位。',
+                interpretation: {
+                    whatItMeans: '市場在「極度貪婪」區域停留過久，這通常是反轉的前兆。',
+                    whatToWatch: '當指數無法再創新高並開始回落時。'
+                }
+            }
+        },
 
-        },
         historicalComparison: {
-            event: '2017/12 頂部',
-            similarity: '都是 OI/成交量頂背離後的長期熊市。'
+            event: '2017/12 20k Top',
+            similarity: '兩者都是期貨產品 (CME Futures / BITO ETF) 上線當日見頂。利多出盡的典型範例。'
         },
+
         actionableChecklist: [
-            { type: 'alert', label: 'OI 頂背離', desc: '價格走弱但 OI 不降時，警惕頂部。' }
+            {
+                type: 'alert',
+                label: '量價背離警示',
+                desc: '當價格創新高，但成交量(Volume)與 RSI 皆未創新高時，這是最強烈的賣出訊號。',
+                citation: { label: 'RSI Divergence', href: '/indicators/rsi' }
+            },
+            {
+                type: 'check',
+                label: 'Sell the News 確認',
+                desc: '重大歷史性利多（如 ETF 上線）落地時，若價格無法在 24H 內續強，應立即獲利了結。'
+            },
+            {
+                type: 'insight',
+                label: '機構出貨特徵',
+                desc: '機構出貨通常是「陰跌」而非「暴跌」。不要期待每次頂部都有像 519 那樣的明顯信號，69k 這種溫水煮青蛙更致命。'
+            }
         ]
     },
     // ================================================

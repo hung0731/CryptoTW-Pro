@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, LineChart, Line, Cell, ReferenceArea, ReferenceLine
+    BarChart, Bar, LineChart, Line, Cell, ReferenceArea, ReferenceLine, ComposedChart
 } from 'recharts'
 import { CHART, COLORS } from '@/lib/design-tokens'
 import { formatPercent } from '@/lib/format-helpers'
@@ -28,12 +28,14 @@ interface ReviewChartProps {
     isPercentage?: boolean;
     newsDate?: string;
     overrideData?: any[]; // Allow direct data injection
+    overlayType?: 'oi' | 'funding'; // [NEW] Overlay support
 }
 
-export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false, newsDate, overrideData }: ReviewChartProps) {
+export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false, newsDate, overrideData, overlayType }: ReviewChartProps) {
     const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
 
-    const { data, loading, yDomain, getDateFromDaysDiff } = useReviewChartData({
+    // 1. Fetch Main Data
+    const { data: mainData, loading: mainLoading, getDateFromDaysDiff } = useReviewChartData({
         type,
         eventStart,
         reviewSlug,
@@ -43,14 +45,72 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
         overrideData
     })
 
+    // 2. Fetch Overlay Data (if requested)
+    const { data: overlayDataRaw, loading: overlayLoading } = useReviewChartData({
+        type: overlayType || 'price', // fallback, won't use if null
+        eventStart,
+        reviewSlug,
+        viewMode,
+        focusWindow,
+        isPercentage: false,
+    })
+
+    // 3. Merge Data
+    const mergedData = useMemo(() => {
+        if (!mainData) return [];
+        if (!overlayType || !overlayDataRaw) return mainData;
+
+        return mainData.map((d: any) => {
+            const match = overlayDataRaw.find((o: any) => o.date === d.date);
+            return {
+                ...d,
+                [`overlay_${overlayType}`]: match ? (overlayType === 'oi' ? match.oi : match.fundingRate) : null
+            };
+        });
+    }, [mainData, overlayDataRaw, overlayType]);
+
+    const loading = mainLoading || (!!overlayType && overlayLoading);
+    const yDomain = type === 'price' ? ['auto', 'auto'] : ['auto', 'auto']; // Simplified for now
+
     if (loading) {
         return <SkeletonReviewChart />
     }
 
-    if (!data || data.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">尚無數據</div>
+    if (!mergedData || mergedData.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">尚無數據</div>
 
     // Gradient Definitions
     const gradientId = `gradient-${type}-${symbol}`
+
+    // Render Overlay
+    const renderOverlay = () => {
+        if (!overlayType) return null;
+        if (overlayType === 'oi') {
+            return (
+                <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="overlay_oi"
+                    stroke="#f59e0b" // Orange
+                    strokeWidth={2}
+                    dot={false}
+                    opacity={0.8}
+                />
+            );
+        }
+        if (overlayType === 'funding') {
+            // Funding Rate usually needs its own small domain or it gets invisible
+            // But let's try auto-scaled axis
+            return (
+                <Bar
+                    yAxisId="right"
+                    dataKey="overlay_funding"
+                    fill="#eab308"
+                    opacity={0.3}
+                />
+            );
+        }
+        return null;
+    };
 
     return (
         <div className={`w-full relative ${className || CHART.heightDefault}`}>
@@ -71,7 +131,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
 
             <ResponsiveContainer width="100%" height="100%" className="relative z-10">
                 {type === 'price' || type === 'supply' ? (
-                    <AreaChart data={data}>
+                    <ComposedChart data={mergedData}>
                         <defs>
                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#EDEDED" stopOpacity={0.2} />
@@ -143,7 +203,10 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             minTickGap={30}
                             tickFormatter={(str) => str.slice(5)} // MM-DD
                         />
+
+                        {/* MAIN AXIS */}
                         <YAxis
+                            yAxisId="left"
                             domain={['auto', 'auto']}
                             hide={false}
                             width={40}
@@ -156,17 +219,43 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                                 return value
                             }}
                         />
-                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ stroke: '#ffffff20' }} />
+
+                        {/* OVERLAY AXIS */}
+                        {overlayType && (
+                            <YAxis
+                                yAxisId="right"
+                                orientation="right"
+                                domain={['auto', 'auto']}
+                                hide={false}
+                                width={40}
+                                tick={{ fontSize: 10, fill: '#f59e0b' }}
+                                tickLine={false}
+                                axisLine={false}
+                                tickFormatter={(value) => {
+                                    if (overlayType === 'oi') return `${(value / 1000000000).toFixed(1)}B`
+                                    if (overlayType === 'funding') return `${value.toFixed(3)}%`
+                                    return value
+                                }}
+                            />
+                        )}
+
+                        {/* Needs custom tooltip to handle merged data and ignore missing props */}
+                        <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} overlayType={overlayType} />} cursor={{ stroke: '#ffffff20' }} />
+
                         <Area
+                            yAxisId="left"
                             type="monotone"
                             dataKey={isPercentage && type === 'price' ? "percentage" : "price"}
                             stroke="#EDEDED"
                             strokeWidth={2}
                             fill={`url(#${gradientId})`}
                         />
-                    </AreaChart>
+
+                        {renderOverlay()}
+
+                    </ComposedChart>
                 ) : type === 'flow' ? (
-                    <BarChart data={data}>
+                    <BarChart data={mergedData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
@@ -190,7 +279,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             fill="#ef4444"
                         >
                             {
-                                data.map((entry, index) => {
+                                mergedData.map((entry: any, index: number) => {
                                     const model = getChartSemanticModel('etfFlow')
                                     return <Cell key={`cell-${index}`} fill={model ? getSemanticColor(entry.flow, model) : '#ef4444'} />
                                 })
@@ -198,7 +287,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         </Bar>
                     </BarChart>
                 ) : type === 'fgi' ? (
-                    <AreaChart data={data}>
+                    <AreaChart data={mergedData}>
                         <defs>
                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
@@ -234,7 +323,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         />
                     </AreaChart>
                 ) : type === 'funding' ? (
-                    <BarChart data={data}>
+                    <BarChart data={mergedData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
@@ -259,14 +348,14 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <ReferenceLine y={0.05} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '多頭擁擠', position: 'insideTopRight', fill: '#ef4444', fontSize: 8, opacity: 0.7 }} />
                         <ReferenceLine y={-0.02} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '空頭擁擠', position: 'insideBottomRight', fill: '#22c55e', fontSize: 8, opacity: 0.7 }} />
                         <Bar dataKey="fundingRate" fill="#eab308">
-                            {data.map((entry, index) => {
+                            {mergedData.map((entry: any, index: number) => {
                                 const model = getChartSemanticModel('fundingRate')
                                 return <Cell key={`cell-${index}`} fill={model ? getSemanticColor(entry.fundingRate, model) : '#eab308'} />
                             })}
                         </Bar>
                     </BarChart>
                 ) : type === 'liquidation' ? (
-                    <BarChart data={data}>
+                    <BarChart data={mergedData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
@@ -288,7 +377,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <Bar dataKey="liquidation" fill="#f59e0b" />
                     </BarChart>
                 ) : type === 'longShort' ? (
-                    <AreaChart data={data}>
+                    <AreaChart data={mergedData}>
                         <defs>
                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -327,7 +416,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         />
                     </AreaChart>
                 ) : type === 'basis' ? (
-                    <AreaChart data={data}>
+                    <AreaChart data={mergedData}>
                         <defs>
                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
@@ -361,7 +450,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         />
                     </AreaChart>
                 ) : type === 'premium' ? (
-                    <BarChart data={data}>
+                    <BarChart data={mergedData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" strokeOpacity={0.05} vertical={false} />
                         <YAxis
                             hide={false}
@@ -382,14 +471,14 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} />} cursor={{ fill: '#ffffff10' }} />
                         <ReferenceLine y={0} stroke="#333" />
                         <Bar dataKey="premium">
-                            {data.map((entry, index) => {
+                            {mergedData.map((entry: any, index: number) => {
                                 const model = getChartSemanticModel('premium')
                                 return <Cell key={`cell-${index}`} fill={model ? getSemanticColor(entry.premium, model) : '#22c55e'} />
                             })}
                         </Bar>
                     </BarChart>
                 ) : type === 'stablecoin' ? (
-                    <AreaChart data={data}>
+                    <AreaChart data={mergedData}>
                         <defs>
                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -424,8 +513,8 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         />
                     </AreaChart>
                 ) : (
-                    // OI
-                    <AreaChart data={data}>
+                    // OI (Default fallback) - Wrapped in AreaChart like before
+                    <AreaChart data={mergedData}>
                         <defs>
                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#eab308" stopOpacity={0.3} />
@@ -449,7 +538,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             tick={{ fontSize: 10, fill: '#525252' }}
                             tickLine={false}
                             axisLine={false}
-                            domain={yDomain}
+                            domain={['auto', 'auto']}
                             tickFormatter={(value) => `${Number(value).toFixed(0)}%`}
                         />
                         <XAxis

@@ -42,6 +42,7 @@ export function UnifiedChartSection({
     eventLabel = 'D0',
 }: UnifiedChartSectionProps) {
     const [activeTab, setActiveTab] = useState(availableTabs[0]?.id || 'price');
+    const [overlayType, setOverlayType] = useState<'oi' | 'funding' | undefined>(undefined);
 
     const activeIndicator = availableTabs.find(t => t.id === activeTab) || availableTabs[0];
 
@@ -60,9 +61,37 @@ export function UnifiedChartSection({
 
             {/* 主圖：價格（固定） */}
             <div className="border-b border-white/5">
-                <div className="px-3 py-1.5 flex items-center gap-2 border-b border-white/10">
-                    <span className="text-[10px] text-neutral-500">主圖</span>
-                    <span className="text-xs text-neutral-400">價格走勢</span>
+                <div className="px-3 py-1.5 flex items-center justify-between border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-neutral-500">主圖</span>
+                        <span className="text-xs text-neutral-400">價格走勢</span>
+                    </div>
+
+                    {/* Overlay Toggles */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setOverlayType(overlayType === 'oi' ? undefined : 'oi')}
+                            className={cn(
+                                "text-[10px] px-2 py-0.5 rounded border transition-colors",
+                                overlayType === 'oi'
+                                    ? "bg-amber-500/10 text-amber-500 border-amber-500/50"
+                                    : "bg-transparent text-neutral-600 border-neutral-800 hover:border-neutral-600"
+                            )}
+                        >
+                            + 持倉 (OI)
+                        </button>
+                        <button
+                            onClick={() => setOverlayType(overlayType === 'funding' ? undefined : 'funding')}
+                            className={cn(
+                                "text-[10px] px-2 py-0.5 rounded border transition-colors",
+                                overlayType === 'funding'
+                                    ? "bg-yellow-400/10 text-yellow-400 border-yellow-400/50"
+                                    : "bg-transparent text-neutral-600 border-neutral-800 hover:border-neutral-600"
+                            )}
+                        >
+                            + 費率 (Funding)
+                        </button>
+                    </div>
                 </div>
                 <div className="aspect-[21/9] w-full relative" style={{ backgroundColor: '#080809' }}>
                     <ReviewChart
@@ -73,6 +102,7 @@ export function UnifiedChartSection({
                         eventEnd={eventEnd}
                         reviewSlug={reviewSlug}
                         newsDate={newsDate}
+                        overlayType={overlayType}
                     />
                 </div>
             </div>

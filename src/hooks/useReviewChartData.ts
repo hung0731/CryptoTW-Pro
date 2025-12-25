@@ -10,6 +10,7 @@ interface UseReviewChartDataProps {
     focusWindow?: [number, number]
     isPercentage?: boolean
     overrideData?: any[]
+    daysBuffer?: number // [NEW] Allow custom buffer
 }
 
 export function useReviewChartData({
@@ -19,7 +20,8 @@ export function useReviewChartData({
     viewMode,
     focusWindow,
     isPercentage = false,
-    overrideData
+    overrideData,
+    daysBuffer = 30 // Default to 30 days
 }: UseReviewChartDataProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -87,8 +89,14 @@ export function useReviewChartData({
                     if (viewMode === 'focus' && focusWindow) {
                         return daysDiff >= focusWindow[0] && daysDiff <= focusWindow[1]
                     }
-                    // Standard: T-30 ~ T+30
-                    return daysDiff >= -30 && daysDiff <= 30
+
+                    // Simple Logic: If daysBuffer is provided, assume symmetrical or expanded range
+                    // Replay Mode usually passes overrideData, but if fetching raw data, we need enough range.
+                    // Let's use [-daysBuffer, +daysBuffer * 2] as a heuristic for context.
+                    // For standard defaults (30), it's [-30, +60].
+                    // For replay (90), it's [-90, +180]. 
+                    // This covers the requirement.
+                    return daysDiff >= -daysBuffer && daysDiff <= daysBuffer * 2
                 })
 
                 // Normalization Logic (Price & OI)
@@ -147,7 +155,7 @@ export function useReviewChartData({
         }
 
         loadData()
-    }, [type, eventStart, reviewSlug, viewMode, focusWindow, isPercentage, overrideData])
+    }, [type, eventStart, reviewSlug, viewMode, focusWindow, isPercentage, overrideData, daysBuffer])
 
     return {
         data,

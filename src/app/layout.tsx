@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     default: "加密台灣 Pro | 您的鏈上軍火庫",
     template: "%s | 加密台灣 Pro"
   },
-  description: "每日市場分析、獨家空投機會、專業交易指標。CryptoTW Pro 提供最即時的加密貨幣市場洞察。",
+  description: "每日市場分析、獨家空投機會、專業交易指標。加密台灣 Pro 提供最即時的加密貨幣市場洞察。",
   keywords: ["加密貨幣", "比特幣", "區塊鏈", "交易訊號", "空投", "CryptoTW"],
   authors: [{ name: "CryptoTW Team" }],
   openGraph: {
     type: 'website',
     locale: 'zh_TW',
     url: '/',
-    siteName: 'CryptoTW Pro',
+    siteName: '加密台灣 Pro',
     title: '加密台灣 Pro | 您的鏈上軍火庫',
     description: '每日市場分析、獨家空投機會、專業交易指標。',
     images: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
         url: '/icon.png', // Temporary default
         width: 512,
         height: 512,
-        alt: 'CryptoTW Pro Logo',
+        alt: '加密台灣 Pro Logo',
       },
     ],
   },

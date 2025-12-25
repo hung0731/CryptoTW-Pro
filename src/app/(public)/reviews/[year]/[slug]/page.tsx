@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getReview, getRelatedReviews } from '@/lib/reviews-data';
@@ -14,16 +14,21 @@ import { DeepDiveTabs } from '@/components/DeepDiveTabs';
 import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 
+import { JudgmentReplay } from '@/components/JudgmentReplay'; // [NEW]
+import { EventAnalysisDashboard } from '@/components/reviews/EventAnalysisDashboard';
+
 export default function ReviewDetailPage() {
     const params = useParams();
     const slug = params.slug as string;
     const year = params.year as string;
     const review = getReview(slug, year);
 
+    // [NEW] Training Mode State
+    const [isTrainingMode, setIsTrainingMode] = useState(false);
+
     if (!review) {
         return <div className="min-h-screen bg-black text-white flex items-center justify-center">Event not found</div>;
     }
-
     const relatedReviews = getRelatedReviews(review.marketStates[0]).filter(r => r.id !== review.id);
 
     // 建立 QuickRead 的關鍵數據
@@ -50,82 +55,104 @@ export default function ReviewDetailPage() {
 
     return (
         <main className="min-h-screen bg-black text-white pb-24 font-sans">
-            {/* Header */}
-            <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
-                <Link href={`/reviews/${review.year}`} className="text-[#808080] hover:text-white flex items-center gap-2">
-                    <ArrowLeft className="w-5 h-5" />
-                    <span className="hidden sm:inline text-sm font-bold">返回事件庫</span>
-                </Link>
-                <div className="text-sm font-bold truncate max-w-[200px] text-white/80">{review.title.split('：')[0]}</div>
-                <button className="text-neutral-400 hover:text-white">
-                    <Share2 className="w-5 h-5" />
-                </button>
-            </div>
+            {/* ... Header ... */}
 
             <article className="max-w-4xl mx-auto p-4 sm:p-6 space-y-8">
-                {/* 1. HERO SECTION (Quick Read) - Standalone */}
-                <div className="mb-4">
-                    <QuickReadHero
-                        year={review.year}
-                        title={review.title}
-                        summary={review.summary}
-                        importance={review.importance}
-                        metrics={quickReadMetrics}
-                    />
-                </div>
+                {/* 1. HERO SECTION */}
+                {/* ... */}
 
-                {/* 2. Chart Section */}
+                {/* 2. Chart Section (Interactive) */}
                 <UniversalCard className="p-0 overflow-hidden">
-                    <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
-                        <SectionHeaderCard
-                            title="數據復盤"
-                            icon={LineChart}
-                        />
+                    <div className="border-b border-[#1A1A1A] bg-[#0F0F10] px-4 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <LineChart className="w-4 h-4 text-neutral-400" />
+                            <h2 className="text-sm font-bold text-neutral-200">
+                                {isTrainingMode ? '實戰模擬 (Training Mode)' : '數據復盤'}
+                            </h2>
+                        </div>
+
+                        {/* Toggle Button */}
+                        <button
+                            onClick={() => setIsTrainingMode(!isTrainingMode)}
+                            className={cn(
+                                "px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5",
+                                isTrainingMode
+                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50"
+                                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                            )}
+                        >
+                            {isTrainingMode ? (
+                                <>
+                                    <BookOpen className="w-3.5 h-3.5" />
+                                    回到閱讀模式
+                                </>
+                            ) : (
+                                <>
+                                    <Zap className="w-3.5 h-3.5 text-yellow-500" />
+                                    進入復盤訓練
+                                </>
+                            )}
+                        </button>
                     </div>
+
                     <div className="p-0">
-                        <UnifiedChartSection
-                            symbol={review.chartConfig?.symbol || 'BTC'}
-                            eventStart={review.reactionStartAt}
-                            eventEnd={review.eventEndAt}
-                            newsDate={review.eventStartAt}
-                            reviewSlug={`${review.slug}-${review.year}`}
-                            daysBuffer={review.chartConfig?.daysBuffer || 10}
-                            eventLabel={`D0: ${review.reactionStartAt.slice(5)}`}
-                            availableTabs={[
-                                ...(review.charts.flow ? [{
-                                    id: 'flow',
-                                    label: review.slug.includes('etf') ? 'ETF 資金流' : '資金流',
-                                    chartType: 'flow' as const,
-                                    interpretation: review.charts.flow.interpretation,
-                                }] : []),
-                                ...(review.charts.oi ? [{
-                                    id: 'oi',
-                                    label: '未平倉量',
-                                    chartType: 'oi' as const,
-                                    interpretation: review.charts.oi.interpretation,
-                                }] : []),
-                                ...(review.charts.sentiment ? [{
-                                    id: 'fgi',
-                                    label: '恐懼指數',
-                                    chartType: 'fgi' as const,
-                                    interpretation: review.charts.sentiment.interpretation,
-                                }] : []),
-                                ...(review.charts.funding ? [{
-                                    id: 'funding',
-                                    label: '資金費率',
-                                    chartType: 'funding' as const,
-                                    interpretation: review.charts.funding?.interpretation,
-                                }] : []),
-                                ...(review.charts.liquidation ? [{
-                                    id: 'liquidation',
-                                    label: '清算',
-                                    chartType: 'liquidation' as const,
-                                    interpretation: review.charts.liquidation?.interpretation,
-                                }] : []),
-                            ]}
-                        />
+                        {isTrainingMode ? (
+                            <JudgmentReplay
+                                symbol={review.chartConfig?.symbol || 'BTC'}
+                                eventStart={review.reactionStartAt}
+                                eventEnd={review.eventEndAt}
+                                reviewSlug={`${review.slug}-${review.year}`}
+                                daysBuffer={review.chartConfig?.daysBuffer || 90}
+                            />
+                        ) : (
+                            <UnifiedChartSection
+                                symbol={review.chartConfig?.symbol || 'BTC'}
+                                eventStart={review.reactionStartAt}
+                                eventEnd={review.eventEndAt}
+                                newsDate={review.eventStartAt}
+                                reviewSlug={`${review.slug}-${review.year}`}
+                                daysBuffer={review.chartConfig?.daysBuffer || 10}
+                                eventLabel={`D0: ${review.reactionStartAt.slice(5)}`}
+                                availableTabs={[
+                                    ...(review.charts.flow ? [{
+                                        id: 'flow',
+                                        label: review.slug.includes('etf') ? 'ETF 資金流' : '資金流',
+                                        chartType: 'flow' as const,
+                                        interpretation: review.charts.flow.interpretation,
+                                    }] : []),
+
+                                    ...(review.charts.oi ? [{
+                                        id: 'oi',
+                                        label: '未平倉量',
+                                        chartType: 'oi' as const,
+                                        interpretation: review.charts.oi.interpretation,
+                                    }] : []),
+                                    ...(review.charts.sentiment ? [{
+                                        id: 'fgi',
+                                        label: '恐懼指數',
+                                        chartType: 'fgi' as const,
+                                        interpretation: review.charts.sentiment.interpretation,
+                                    }] : []),
+                                    ...(review.charts.funding ? [{
+                                        id: 'funding',
+                                        label: '資金費率',
+                                        chartType: 'funding' as const,
+                                        interpretation: review.charts.funding?.interpretation,
+                                    }] : []),
+                                    ...(review.charts.liquidation ? [{
+                                        id: 'liquidation',
+                                        label: '清算',
+                                        chartType: 'liquidation' as const,
+                                        interpretation: review.charts.liquidation?.interpretation,
+                                    }] : []),
+                                ]}
+                            />
+                        )}
                     </div>
                 </UniversalCard>
+
+                {/* 2.5 Intelligence Layer (Event DNA & Patterns) */}
+                <EventAnalysisDashboard slug={`${review.slug}-${review.year}`} />
 
                 {/* 3. Deep Dive Tabs */}
                 <UniversalCard className="p-0 overflow-hidden">

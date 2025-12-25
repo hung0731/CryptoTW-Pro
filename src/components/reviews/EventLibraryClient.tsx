@@ -17,9 +17,10 @@ import {
     Filter,
     Zap,
     ChevronRight,
+    GitCompare,
 } from 'lucide-react';
 import { Sparkline } from '@/components/ui/sparkline';
-import { MasterTimelineChart } from '@/components/reviews/MasterTimelineChart';
+
 import { UniversalCard, CardContent } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { AISummaryCard } from '@/components/ui/AISummaryCard';
@@ -90,9 +91,48 @@ export function EventLibraryClient() {
         <div className="pb-24 font-sans text-white">
             {/* 1. Header (Library Context) */}
             <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-[#1A1A1A]">
-                <div className={cn(SPACING.pageX, "py-3 space-y-3")}>
-                    {/* 2. Search Bar */}
-                    <div className="relative">
+                {/* 2. Top Stats Row (Dashboard Style) */}
+                {/* 2. Top Stats Row (Unified Card) */}
+                <div className="px-4 pt-4 pb-2">
+                    <UniversalCard className="p-0 overflow-hidden bg-[#0F0F10] border-[#1A1A1A]">
+                        <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#1A1A1A]">
+                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
+                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">事件總數 (Total)</div>
+                                <div className="text-2xl font-bold text-white font-mono">{REVIEWS_DATA.length}</div>
+                            </div>
+                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
+                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">市場週期 (Cycles)</div>
+                                <div className="text-2xl font-bold text-white font-mono">3</div>
+                            </div>
+                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
+                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">平均修復期 (Avg)</div>
+                                <div className="text-2xl font-bold text-emerald-400 font-mono">14d</div>
+                            </div>
+
+                            {/* Random Replay Action */}
+                            <div
+                                onClick={() => {
+                                    const random = REVIEWS_DATA[Math.floor(Math.random() * REVIEWS_DATA.length)];
+                                    window.location.href = `/reviews/${random.year}/${random.slug}?mode=replay`;
+                                }}
+                                className="group relative p-5 flex flex-col items-center justify-center text-center cursor-pointer bg-blue-950/10 hover:bg-blue-900/20 transition-all"
+                            >
+                                <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors" />
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <Zap className="w-4 h-4 text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-bold text-blue-100 group-hover:text-white">隨機復盤</span>
+                                </div>
+                                <div className="text-[10px] text-blue-300/60 font-mono uppercase tracking-wider group-hover:text-blue-200/80">
+                                    Challenge History
+                                </div>
+                            </div>
+                        </div>
+                    </UniversalCard>
+                </div>
+
+                {/* 3. Search & Filters */}
+                <div className="px-4 pb-2 flex flex-col md:flex-row gap-3">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                         <input
                             type="text"
@@ -107,60 +147,39 @@ export function EventLibraryClient() {
                             </button>
                         )}
                     </div>
-
-                    {/* 3. Filter Chips (Horizontal) */}
-                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
-                        <button
-                            onClick={() => setSelectedType(null)}
-                            className={cn(
-                                "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
-                                selectedType === null
-                                    ? "bg-white text-black border-white"
-                                    : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
-                            )}
-                        >
-                            全部類型
-                        </button>
-                        {Object.entries(TypeLabels).map(([key, label]) => {
-                            const Icon = TypeIcons[key] || Filter;
-                            return (
-                                <button
-                                    key={key}
-                                    onClick={() => setSelectedType(selectedType === key ? null : key)}
-                                    className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
-                                        selectedType === key
-                                            ? "bg-white text-black border-white"
-                                            : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
-                                    )}
-                                >
-                                    <Icon className="w-3 h-3" />
-                                    {label}
-                                </button>
-                            );
-                        })}
-                    </div>
                 </div>
 
-                {/* 4. Master Timeline Chart */}
-                <div className="border-t border-white/5 bg-[#0A0A0A] py-6">
-                    <div className="max-w-7xl mx-auto px-4">
-                        <UniversalCard className="p-0 overflow-hidden bg-[#0A0A0A]">
-                            <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
-                                <SectionHeaderCard
-                                    title="市場事件時間軸"
-                                    description="拖曳查看完整歷史週期待"
-                                    icon={TrendingDown}
-                                />
-                            </div>
-                            <div className="p-0">
-                                <MasterTimelineChart
-                                    selectedYear={selectedYear}
-                                    onEventClick={(year) => setSelectedYear(year)}
-                                />
-                            </div>
-                        </UniversalCard>
-                    </div>
+                {/* 4. Filter Chips (Horizontal) */}
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide px-4 pb-3">
+                    <button
+                        onClick={() => setSelectedType(null)}
+                        className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
+                            selectedType === null
+                                ? "bg-white text-black border-white"
+                                : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
+                        )}
+                    >
+                        全部類型
+                    </button>
+                    {Object.entries(TypeLabels).map(([key, label]) => {
+                        const Icon = TypeIcons[key] || Filter;
+                        return (
+                            <button
+                                key={key}
+                                onClick={() => setSelectedType(selectedType === key ? null : key)}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
+                                    selectedType === key
+                                        ? "bg-white text-black border-white"
+                                        : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
+                                )}
+                            >
+                                <Icon className="w-3 h-3" />
+                                {label}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -182,47 +201,7 @@ export function EventLibraryClient() {
 
                 {/* Content Area */}
                 <div className="space-y-6">
-                    {/* Featured Event Card (Top of the List) */}
-                    {filteredReviews.length > 0 && (
-                        <Link
-                            href={`/reviews/${filteredReviews[0].year}/${filteredReviews[0].slug}`}
-                            className="block group relative overflow-hidden rounded-2xl border border-[#2A2A2A] bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] p-1"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="relative p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-                                {/* Icon */}
-                                <div className="shrink-0">
-                                    <div className="w-16 h-16 rounded-2xl bg-[#111] border border-[#333] flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-300">
-                                        <Zap className="w-8 h-8 text-yellow-500" />
-                                    </div>
-                                </div>
 
-                                {/* Content */}
-                                <div className="flex-1 min-w-0 space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                                            本週精選回顧
-                                        </span>
-                                        <span className="text-[10px] text-[#666] font-mono">
-                                            {filteredReviews[0].year}
-                                        </span>
-                                    </div>
-                                    <h2 className="text-xl font-bold text-white group-hover:text-yellow-500 transition-colors">
-                                        {filteredReviews[0].title.split('：')[0]}
-                                    </h2>
-                                    <p className="text-sm text-[#888] line-clamp-2 max-w-xl">
-                                        {filteredReviews[0].summary}
-                                    </p>
-                                </div>
-
-                                {/* Action */}
-                                <div className="shrink-0 hidden sm:flex items-center gap-2 text-xs font-bold text-[#E0E0E0] group-hover:translate-x-1 transition-transform">
-                                    <span>深度復盤</span>
-                                    <ChevronRight className="w-4 h-4" />
-                                </div>
-                            </div>
-                        </Link>
-                    )}
 
                     {filteredReviews.length > 0 ? (
                         <UniversalCard variant="default" className="p-0 overflow-hidden">
@@ -237,66 +216,74 @@ export function EventLibraryClient() {
                                 />
                             </div>
 
-                            {/* Event List - Flat Rows */}
-                            <div className="flex flex-col">
-                                {filteredReviews.slice(1).map((review) => {
+                            {/* Event List - Single Column View */}
+                            <div className="grid grid-cols-1 divide-y divide-[#1A1A1A] bg-[#1A1A1A]">
+                                {filteredReviews.map((review) => {
                                     const TypeIcon = TypeIcons[review.type] || Filter;
                                     const displaySparkline = review.sparklineData || DEFAULT_SPARKLINE;
 
                                     return (
-                                        <Link
+                                        <div
                                             key={review.id}
-                                            href={`/reviews/${review.year}/${review.slug}`}
-                                            className="group block px-5 py-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors"
+                                            className="group relative block px-5 py-6 bg-[#0A0A0A] hover:bg-[#141414] transition-colors h-full flex flex-col"
                                         >
-                                            <div className="flex items-center gap-5">
+                                            {/* Main Click Target */}
+                                            <Link
+                                                href={`/reviews/${review.year}/${review.slug}`}
+                                                className="absolute inset-0 z-0"
+                                            />
+
+                                            <div className="relative z-0 pointer-events-none flex items-start justify-between mb-4">
                                                 {/* Left: Type Icon & Year */}
-                                                <div className="flex flex-col items-center gap-2 shrink-0">
+                                                <div className="flex items-center gap-3">
                                                     <div className={cn(
-                                                        "w-12 h-12 rounded-full flex items-center justify-center border",
+                                                        "w-10 h-10 rounded-lg flex items-center justify-center border",
                                                         "bg-[#111] border-[#2A2A2A] text-neutral-500 group-hover:text-white group-hover:border-neutral-500 transition-colors"
                                                     )}>
                                                         <TypeIcon className="w-5 h-5" />
                                                     </div>
-                                                    <span className="text-[10px] font-mono text-[#444] group-hover:text-[#666] transition-colors">{review.year}</span>
-                                                </div>
-
-                                                {/* Content */}
-                                                <div className="flex-1 min-w-0">
-                                                    {/* Meta Row */}
-                                                    <div className="flex items-center gap-2 mb-1">
+                                                    <div>
+                                                        <div className="text-[10px] font-mono text-[#444] group-hover:text-[#666] transition-colors">{review.year}</div>
                                                         <span className="text-[10px] text-[#666] bg-[#151515] border border-[#222] px-1.5 py-0.5 rounded">
                                                             {TypeLabels[review.type]}
                                                         </span>
-                                                        {review.maxDrawdown && (
-                                                            <span className="text-[10px] font-mono font-medium text-red-500 bg-red-950/10 px-1.5 py-0.5 rounded border border-red-900/20">
-                                                                最大跌幅 {review.maxDrawdown}
-                                                            </span>
-                                                        )}
                                                     </div>
-
-                                                    {/* Title & Desc */}
-                                                    <div>
-                                                        <h3 className="text-base font-bold text-[#E0E0E0] group-hover:text-white mb-0.5 transition-colors">
-                                                            {review.title.split('：')[0]}
-                                                        </h3>
-                                                        <p className="text-xs text-[#525252] group-hover:text-[#888] line-clamp-1">
-                                                            {review.title.split('：')[1] || review.summary}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                {/* Sparkline (Right) */}
-                                                <div className="hidden sm:block shrink-0 w-32 opacity-40 group-hover:opacity-100 transition-all group-hover:scale-105 origin-right">
-                                                    <Sparkline
-                                                        data={displaySparkline}
-                                                        width={128}
-                                                        height={40}
-                                                        color="#ef4444"
-                                                    />
                                                 </div>
                                             </div>
-                                        </Link>
+
+                                            {/* Content */}
+                                            <div className="relative z-0 pointer-events-none flex-1 min-w-0 mb-4">
+                                                <h3 className="text-lg font-bold text-[#E0E0E0] group-hover:text-white mb-1 transition-colors line-clamp-1">
+                                                    {review.title.split('：')[0]}
+                                                </h3>
+                                                <p className="text-xs text-[#525252] group-hover:text-[#888] line-clamp-2 leading-relaxed">
+                                                    {review.title.split('：')[1] || review.summary}
+                                                </p>
+                                            </div>
+
+                                            {/* Footer: Stats & VS Button */}
+                                            <div className="relative z-10 mt-auto pt-4 border-t border-[#1A1A1A] flex items-center justify-between pointer-events-none">
+                                                <div className="flex items-center gap-2">
+                                                    {review.maxDrawdown && (
+                                                        <span className="text-[10px] font-mono font-medium text-red-500">
+                                                            DD {review.maxDrawdown}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex items-center gap-3">
+                                                    {/* VS Button (Interactive) */}
+                                                    <Link
+                                                        href={`/reviews/compare?event=${review.slug}-${review.year}`}
+                                                        className="pointer-events-auto opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 flex items-center gap-1 text-[10px] font-bold text-neutral-500 hover:text-white bg-[#1A1A1A] hover:bg-neutral-800 px-2 py-1 rounded-md border border-neutral-800"
+                                                    >
+                                                        <GitCompare className="w-3 h-3" />
+                                                        VS
+                                                    </Link>
+                                                    <ChevronRight className="w-4 h-4 text-[#333] group-hover:text-white transition-colors" />
+                                                </div>
+                                            </div>
+                                        </div>
                                     )
                                 })}
                             </div>

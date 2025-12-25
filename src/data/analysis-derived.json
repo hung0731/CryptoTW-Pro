@@ -1,0 +1,722 @@
+{
+  "etf-2024": {
+    "slug": "etf-2024",
+    "dna": {
+      "damage": 15,
+      "panic": 8,
+      "speed": 15,
+      "resilience": 36,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "ftx-2022",
+        "score": 97
+      },
+      {
+        "slug": "defi-summer-2020",
+        "score": 96
+      },
+      {
+        "slug": "halving-2012",
+        "score": 94
+      }
+    ]
+  },
+  "ftx-2022": {
+    "slug": "ftx-2022",
+    "dna": {
+      "damage": 94,
+      "panic": 75,
+      "speed": 94,
+      "resilience": 35,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "etf-2024",
+        "score": 97
+      },
+      {
+        "slug": "luna-2022",
+        "score": 92
+      },
+      {
+        "slug": "covid-2020",
+        "score": 91
+      }
+    ]
+  },
+  "luna-2022": {
+    "slug": "luna-2022",
+    "dna": {
+      "damage": 100,
+      "panic": 100,
+      "speed": 100,
+      "resilience": -30,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "ftx-2022",
+        "score": 92
+      },
+      {
+        "slug": "celsius-2022",
+        "score": 74
+      },
+      {
+        "slug": "2022-june-deleverage-2022",
+        "score": 74
+      }
+    ]
+  },
+  "covid-2020": {
+    "slug": "covid-2020",
+    "dna": {
+      "damage": 40,
+      "panic": 40,
+      "speed": 40,
+      "resilience": 30,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "etf-2024",
+        "score": 92
+      },
+      {
+        "slug": "ftx-2022",
+        "score": 91
+      },
+      {
+        "slug": "halving-2012",
+        "score": 90
+      }
+    ]
+  },
+  "mtgox-2014": {
+    "slug": "mtgox-2014",
+    "dna": {
+      "damage": 38,
+      "panic": 18,
+      "speed": 38,
+      "resilience": 29,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "dao-2016",
+        "score": 86
+      },
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 84
+      },
+      {
+        "slug": "coinbase-2021",
+        "score": 81
+      }
+    ]
+  },
+  "dao-2016": {
+    "slug": "dao-2016",
+    "dna": {
+      "damage": 30,
+      "panic": 11,
+      "speed": 30,
+      "resilience": 29,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "mtgox-2014",
+        "score": 86
+      },
+      {
+        "slug": "coinbase-2021",
+        "score": 85
+      },
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 85
+      }
+    ]
+  },
+  "ico-2017": {
+    "slug": "ico-2017",
+    "dna": {
+      "damage": 50,
+      "panic": 21,
+      "speed": 50,
+      "resilience": 64,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "sec-coinbase-2023",
+        "score": 87
+      },
+      {
+        "slug": "iran-conflict-2024",
+        "score": 84
+      },
+      {
+        "slug": "halving-2020",
+        "score": 76
+      }
+    ]
+  },
+  "china-ban-2021": {
+    "slug": "china-ban-2021",
+    "dna": {
+      "damage": 23,
+      "panic": 11,
+      "speed": 23,
+      "resilience": 33,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "2021-may-crash-2021",
+        "score": 100
+      },
+      {
+        "slug": "coinbase-2021",
+        "score": 87
+      },
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 84
+      }
+    ]
+  },
+  "the-merge-2022": {
+    "slug": "the-merge-2022",
+    "dna": {
+      "damage": 33,
+      "panic": 17,
+      "speed": 33,
+      "resilience": 25,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "ftx-2022",
+        "score": 87
+      },
+      {
+        "slug": "yen-carry-2024",
+        "score": 76
+      },
+      {
+        "slug": "halving-2024",
+        "score": 72
+      }
+    ]
+  },
+  "halving-2012": {
+    "slug": "halving-2012",
+    "dna": {
+      "damage": 3,
+      "panic": 3,
+      "speed": 3,
+      "resilience": 41,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "etf-2024",
+        "score": 94
+      },
+      {
+        "slug": "defi-summer-2020",
+        "score": 93
+      },
+      {
+        "slug": "covid-2020",
+        "score": 90
+      }
+    ]
+  },
+  "halving-2016": {
+    "slug": "halving-2016",
+    "dna": {
+      "damage": 21,
+      "panic": 11,
+      "speed": 21,
+      "resilience": 28,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "2021-nov-top-2021",
+        "score": 91
+      },
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 84
+      },
+      {
+        "slug": "coinbase-2021",
+        "score": 83
+      }
+    ]
+  },
+  "halving-2020": {
+    "slug": "halving-2020",
+    "dna": {
+      "damage": 12,
+      "panic": 7,
+      "speed": 12,
+      "resilience": 46,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "ico-2017",
+        "score": 76
+      },
+      {
+        "slug": "german-selloff-2024",
+        "score": 67
+      },
+      {
+        "slug": "mtgox-2014",
+        "score": 62
+      }
+    ]
+  },
+  "halving-2024": {
+    "slug": "halving-2024",
+    "dna": {
+      "damage": 13,
+      "panic": 5,
+      "speed": 13,
+      "resilience": 42,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "el-salvador-2021",
+        "score": 87
+      },
+      {
+        "slug": "iran-conflict-2024",
+        "score": 78
+      },
+      {
+        "slug": "etf-2024",
+        "score": 77
+      }
+    ]
+  },
+  "defi-summer-2020": {
+    "slug": "defi-summer-2020",
+    "dna": {
+      "damage": 9,
+      "panic": 4,
+      "speed": 9,
+      "resilience": 37,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "etf-2024",
+        "score": 96
+      },
+      {
+        "slug": "halving-2012",
+        "score": 93
+      },
+      {
+        "slug": "el-salvador-2021",
+        "score": 90
+      }
+    ]
+  },
+  "tesla-2021": {
+    "slug": "tesla-2021",
+    "dna": {
+      "damage": 21,
+      "panic": 10,
+      "speed": 21,
+      "resilience": 49,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "el-salvador-2021",
+        "score": 88
+      },
+      {
+        "slug": "etf-2024",
+        "score": 84
+      },
+      {
+        "slug": "2023-march-squeeze-2023",
+        "score": 84
+      }
+    ]
+  },
+  "coinbase-2021": {
+    "slug": "coinbase-2021",
+    "dna": {
+      "damage": 47,
+      "panic": 14,
+      "speed": 47,
+      "resilience": 20,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 96
+      },
+      {
+        "slug": "2021-nov-top-2021",
+        "score": 89
+      },
+      {
+        "slug": "ftx-2022",
+        "score": 88
+      }
+    ]
+  },
+  "el-salvador-2021": {
+    "slug": "el-salvador-2021",
+    "dna": {
+      "damage": 16,
+      "panic": 9,
+      "speed": 16,
+      "resilience": 45,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "etf-2024",
+        "score": 91
+      },
+      {
+        "slug": "3ac-2022",
+        "score": 91
+      },
+      {
+        "slug": "defi-summer-2020",
+        "score": 90
+      }
+    ]
+  },
+  "celsius-2022": {
+    "slug": "celsius-2022",
+    "dna": {
+      "damage": 29,
+      "panic": 15,
+      "speed": 29,
+      "resilience": 16,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "2022-june-deleverage-2022",
+        "score": 100
+      },
+      {
+        "slug": "ftx-2022",
+        "score": 89
+      },
+      {
+        "slug": "etf-2024",
+        "score": 83
+      }
+    ]
+  },
+  "3ac-2022": {
+    "slug": "3ac-2022",
+    "dna": {
+      "damage": 16,
+      "panic": 10,
+      "speed": 16,
+      "resilience": 29,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "etf-2024",
+        "score": 91
+      },
+      {
+        "slug": "el-salvador-2021",
+        "score": 91
+      },
+      {
+        "slug": "defi-summer-2020",
+        "score": 89
+      }
+    ]
+  },
+  "sec-coinbase-2023": {
+    "slug": "sec-coinbase-2023",
+    "dna": {
+      "damage": 8,
+      "panic": 4,
+      "speed": 8,
+      "resilience": 42,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "iran-conflict-2024",
+        "score": 93
+      },
+      {
+        "slug": "cz-2023",
+        "score": 88
+      },
+      {
+        "slug": "ico-2017",
+        "score": 87
+      }
+    ]
+  },
+  "xrp-ruling-2023": {
+    "slug": "xrp-ruling-2023",
+    "dna": {
+      "damage": 18,
+      "panic": 7,
+      "speed": 18,
+      "resilience": 30,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "coinbase-2021",
+        "score": 96
+      },
+      {
+        "slug": "ftx-2022",
+        "score": 90
+      },
+      {
+        "slug": "2021-nov-top-2021",
+        "score": 89
+      }
+    ]
+  },
+  "cz-2023": {
+    "slug": "cz-2023",
+    "dna": {
+      "damage": 12,
+      "panic": 8,
+      "speed": 12,
+      "resilience": 51,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "iran-conflict-2024",
+        "score": 89
+      },
+      {
+        "slug": "sec-coinbase-2023",
+        "score": 88
+      },
+      {
+        "slug": "2023-march-squeeze-2023",
+        "score": 85
+      }
+    ]
+  },
+  "yen-carry-2024": {
+    "slug": "yen-carry-2024",
+    "dna": {
+      "damage": 21,
+      "panic": 6,
+      "speed": 21,
+      "resilience": 22,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "ftx-2022",
+        "score": 82
+      },
+      {
+        "slug": "the-merge-2022",
+        "score": 76
+      },
+      {
+        "slug": "2021-nov-top-2021",
+        "score": 74
+      }
+    ]
+  },
+  "german-selloff-2024": {
+    "slug": "german-selloff-2024",
+    "dna": {
+      "damage": 22,
+      "panic": 5,
+      "speed": 22,
+      "resilience": 42,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "2024-ath-pullback-2024",
+        "score": 81
+      },
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 77
+      },
+      {
+        "slug": "mtgox-2014",
+        "score": 76
+      }
+    ]
+  },
+  "iran-conflict-2024": {
+    "slug": "iran-conflict-2024",
+    "dna": {
+      "damage": 15,
+      "panic": 8,
+      "speed": 15,
+      "resilience": 65,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "sec-coinbase-2023",
+        "score": 93
+      },
+      {
+        "slug": "cz-2023",
+        "score": 89
+      },
+      {
+        "slug": "ico-2017",
+        "score": 84
+      }
+    ]
+  },
+  "2021-may-crash-2021": {
+    "slug": "2021-may-crash-2021",
+    "dna": {
+      "damage": 22,
+      "panic": 11,
+      "speed": 22,
+      "resilience": 33,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "china-ban-2021",
+        "score": 100
+      },
+      {
+        "slug": "coinbase-2021",
+        "score": 84
+      },
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 81
+      }
+    ]
+  },
+  "2024-ath-pullback-2024": {
+    "slug": "2024-ath-pullback-2024",
+    "dna": {
+      "damage": 19,
+      "panic": 8,
+      "speed": 19,
+      "resilience": 28,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "coinbase-2021",
+        "score": 88
+      },
+      {
+        "slug": "ftx-2022",
+        "score": 86
+      },
+      {
+        "slug": "china-ban-2021",
+        "score": 83
+      }
+    ]
+  },
+  "2021-nov-top-2021": {
+    "slug": "2021-nov-top-2021",
+    "dna": {
+      "damage": 37,
+      "panic": 9,
+      "speed": 37,
+      "resilience": 16,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "halving-2016",
+        "score": 91
+      },
+      {
+        "slug": "coinbase-2021",
+        "score": 89
+      },
+      {
+        "slug": "xrp-ruling-2023",
+        "score": 89
+      }
+    ]
+  },
+  "2022-june-deleverage-2022": {
+    "slug": "2022-june-deleverage-2022",
+    "dna": {
+      "damage": 29,
+      "panic": 15,
+      "speed": 29,
+      "resilience": 16,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "celsius-2022",
+        "score": 100
+      },
+      {
+        "slug": "ftx-2022",
+        "score": 89
+      },
+      {
+        "slug": "etf-2024",
+        "score": 83
+      }
+    ]
+  },
+  "2023-march-squeeze-2023": {
+    "slug": "2023-march-squeeze-2023",
+    "dna": {
+      "damage": 11,
+      "panic": 5,
+      "speed": 11,
+      "resilience": 63,
+      "leverage": 0
+    },
+    "similarEvents": [
+      {
+        "slug": "cz-2023",
+        "score": 85
+      },
+      {
+        "slug": "tesla-2021",
+        "score": 84
+      },
+      {
+        "slug": "iran-conflict-2024",
+        "score": 81
+      }
+    ]
+  }
+}
