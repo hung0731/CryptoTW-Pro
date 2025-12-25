@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@line/bot-sdk": "^10.5.0",
     "@line/liff": "^2.27.3",
     "@next/bundle-analyzer": "^16.1.1",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -48,7 +49,7 @@
     "jsonwebtoken": "^9.0.3",
     "lodash": "^4.17.21",
     "lucide-react": "^0.556.0",
-    "next": "16.0.8",
+    "next": "16.1.1",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-markdown": "^10.1.0",
