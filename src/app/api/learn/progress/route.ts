@@ -151,14 +151,14 @@ export async function POST(request: Request) {
         }
 
         // Save back to DB
-        const { error: updateError } = await supabase
+        const { error: updateError } = await (supabase as any)
             .from('users')
             .update({
                 metadata: {
                     ...currentMetadata,
                     learn_progress: newProgress
-                } as any // Bypass strict typing for JSONB
-            })
+                }
+            } as any)
             .eq('id', session.user.id)
 
         if (updateError) {

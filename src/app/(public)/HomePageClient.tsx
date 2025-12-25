@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
 import {
-    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight, School
+    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight, School, LayoutDashboard
 } from 'lucide-react'
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
@@ -166,11 +166,14 @@ export function HomePageClient({
                 </section>
 
                 {/* ===== BELOW THE FOLD: Detailed Context ===== */}
-                <section className="flex flex-col gap-6">
+                <section className="flex flex-col gap-6 mt-6">
                     {/* Explore More Grid */}
                     <UniversalCard variant="default" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
-                            <SectionHeaderCard title="探索更多" />
+                            <SectionHeaderCard
+                                title="探索更多"
+                                icon={LayoutDashboard}
+                            />
                         </div>
                         <div className="grid grid-cols-4 bg-[#1A1A1A] gap-px border-b border-[#1A1A1A]">
                             {[
