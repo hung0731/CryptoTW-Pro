@@ -16,6 +16,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { UniversalCard, CardContent } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { getLearnerLevel } from '@/lib/learn-data'
 
 function MenuLink({
     icon: Icon,
@@ -159,16 +160,28 @@ export default function ProfilePage() {
 
                         <div className="space-y-1.5 flex-1">
                             <h2 className="text-xl font-bold text-white tracking-tight">{profile?.displayName}</h2>
-                            <div className="flex items-center gap-2">
-                                {getMembershipBadge()}
-                                {(dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime') && (
-                                    <span className="text-[10px] text-neutral-500">
-                                        已解鎖全部功能
-                                    </span>
-                                )}
-                            </div>
+                            {getMembershipBadge()}
+
+                            {/* Dynamic User Level Badge */}
+                            {(() => {
+                                const metadata = dbUser?.metadata as any
+                                const progress = metadata?.learn_progress?.completedChapters || []
+                                const levelInfo = getLearnerLevel(progress)
+
+                                return (
+                                    <Badge className={cn("px-2 py-0.5 text-xs", levelInfo.color)}>
+                                        Lv.{levelInfo.level} {levelInfo.title}
+                                    </Badge>
+                                )
+                            })()}
                         </div>
+                        {(dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime') && (
+                            <span className="text-[10px] text-neutral-500 mt-1 block">
+                                已解鎖全部功能
+                            </span>
+                        )}
                     </div>
+
                 </UniversalCard>
 
                 {/* Quick Actions */}
@@ -217,7 +230,7 @@ export default function ProfilePage() {
                     <p className="text-[10px] text-neutral-600 font-mono">加密台灣 Pro v2.0</p>
                 </div>
 
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }

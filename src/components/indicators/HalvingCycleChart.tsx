@@ -8,7 +8,9 @@ import {
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/design-tokens'
 import STATIC_CYCLES from '@/data/halving-cycles.json'
-import { ArrowUpRight, Timer, TrendingUp, Activity, AlertTriangle } from 'lucide-react'
+import { ArrowUpRight, Timer, TrendingUp, Activity, AlertTriangle, TrendingDown } from 'lucide-react'
+import { UniversalCard } from '@/components/ui/UniversalCard'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 
 // Constants
 const NEXT_HALVING_BLOCK = 1050000 // 2028 Halving Block
@@ -37,7 +39,7 @@ function HalvingCountdown({ currentHeight }: { currentHeight: number }) {
     const dateEstimated = new Date(now + secondsLeft * 1000)
 
     return (
-        <div className="bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden group">
+        <UniversalCard variant="subtle" className="flex flex-col items-center justify-center relative overflow-hidden group border-white/5 bg-[#0A0A0A]">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-50" />
 
             <div className="flex items-center gap-2 mb-2 z-10">
@@ -60,7 +62,7 @@ function HalvingCountdown({ currentHeight }: { currentHeight: number }) {
                 <span className="text-[10px] text-neutral-600">預計日期</span>
                 <span className="text-[10px] text-indigo-300 font-mono">{dateEstimated.toLocaleDateString()}</span>
             </div>
-        </div>
+        </UniversalCard>
     )
 }
 
@@ -91,7 +93,7 @@ function HalvingStatsTable({ currentData }: { currentData?: CycleData }) {
     ]
 
     return (
-        <div className="col-span-1 md:col-span-2 bg-[#0A0A0A] border border-white/[0.08] rounded-xl overflow-hidden">
+        <UniversalCard variant="subtle" className="col-span-1 md:col-span-2 p-0 overflow-hidden border-white/5 bg-[#0A0A0A]">
             <div className="px-4 py-3 border-b border-white/[0.05] flex items-center justify-between">
                 <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
                     <Activity className="w-3.5 h-3.5 text-emerald-400" />
@@ -124,7 +126,7 @@ function HalvingStatsTable({ currentData }: { currentData?: CycleData }) {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </UniversalCard>
     )
 }
 
@@ -201,12 +203,12 @@ export function HalvingCycleChart() {
 
     if (loading) {
         return (
-            <div className="w-full h-[400px] flex items-center justify-center bg-[#050505] rounded-2xl border border-white/[0.08]">
+            <UniversalCard className="w-full h-[400px] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
                     <span className="animate-spin text-2xl">⏳</span>
                     <span className="text-xs text-neutral-500 font-mono">Loading Dashboard...</span>
                 </div>
-            </div>
+            </UniversalCard>
         )
     }
 
@@ -219,7 +221,7 @@ export function HalvingCycleChart() {
             </div>
 
             {/* Main Chart */}
-            <div className="w-full bg-[#050505] rounded-2xl border border-white/[0.08] overflow-hidden flex flex-col p-4 relative">
+            <UniversalCard variant="default" className="w-full p-0 overflow-hidden flex flex-col relative">
                 {/* Background Phases Annotations (Absolute) */}
                 <div className="absolute inset-0 pointer-events-none opacity-10">
                     <div className="absolute left-[5%] top-0 bottom-0 w-[15%] bg-blue-500" /> {/* Pre-Halving */}
@@ -227,7 +229,7 @@ export function HalvingCycleChart() {
                     <div className="absolute left-[50%] top-0 bottom-0 w-[40%] bg-green-500" /> {/* Parabolic */}
                 </div>
 
-                <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="p-4 flex items-center justify-between mb-0 relative z-10">
                     <div className="flex flex-col gap-1">
                         <span className={cn("text-xs font-medium", COLORS.textSecondary)}>減半週期全景圖 (Log Scale)</span>
                         <div className="flex items-center gap-2">
@@ -239,9 +241,9 @@ export function HalvingCycleChart() {
                     </div>
                 </div>
 
-                <div className="h-[450px] w-full relative z-10">
+                <div className="h-[450px] w-full relative z-10 pl-2">
                     <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
+                        <ComposedChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
                             <XAxis
                                 dataKey="day"
@@ -299,7 +301,7 @@ export function HalvingCycleChart() {
                         </ComposedChart>
                     </ResponsiveContainer>
                 </div>
-            </div>
+            </UniversalCard>
         </div>
     )
 }

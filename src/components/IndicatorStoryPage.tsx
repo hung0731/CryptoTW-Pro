@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, ChevronRight, Info, Undo2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Info, Undo2, HelpCircle, BookOpen, GitMerge, Lightbulb, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CARDS, TYPOGRAPHY, COLORS, SPACING } from '@/lib/design-tokens';
 import { IndicatorStory } from '@/lib/indicator-stories';
@@ -22,24 +22,24 @@ interface ChartCalloutProps {
 
 function ChartCallout({ points }: ChartCalloutProps) {
     return (
-        <UniversalCard variant="subtle" className="bg-[#0A0A0B]/50">
-            <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                    <Info className="w-4 h-4 text-neutral-500" />
-                </div>
-                <div className="flex-1">
-                    <h2 className={cn(TYPOGRAPHY.cardSubtitle, "mb-3 text-neutral-400")}>怎麼看這張圖？</h2>
-                    <ul className="space-y-2">
-                        {points.map((point, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                                <div className="w-1 h-1 rounded-full bg-neutral-600 mt-2 flex-shrink-0" />
-                                <p className={cn("text-xs leading-relaxed", COLORS.textSecondary)}>
-                                    {point}
-                                </p>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+        <UniversalCard className="p-0 overflow-hidden">
+            <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                <SectionHeaderCard
+                    title="怎麼看這張圖？"
+                    icon={Info}
+                />
+            </div>
+            <div className="p-5">
+                <ul className="space-y-4">
+                    {points.map((point, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
+                            <p className={cn("text-sm leading-relaxed text-neutral-300")}>
+                                {point}
+                            </p>
+                        </li>
+                    ))}
+                </ul>
             </div>
         </UniversalCard>
     );
@@ -58,23 +58,35 @@ const USE_CASE_TYPE_LABELS: Record<string, string> = {
     timing: '時機',
 };
 
+const USE_CASE_TYPE_COLORS: Record<string, string> = {
+    observe: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    risk: 'bg-red-500/10 text-red-400 border-red-500/20',
+    timing: 'bg-green-500/10 text-green-400 border-green-500/20',
+};
+
 function UseCaseList({ useCases }: UseCaseListProps) {
     return (
-        <UniversalCard>
-            <div className="mb-4">
-                <SectionHeaderCard title="這個指標在判斷什麼？" />
+        <UniversalCard className="p-0 overflow-hidden">
+            <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                <SectionHeaderCard
+                    title="這個指標在判斷什麼？"
+                    icon={Target}
+                />
             </div>
-            <div className="space-y-3">
-                {useCases.map((uc, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                        <span className={cn(
-                            "text-[9px] px-1.5 py-0.5 rounded font-medium bg-neutral-800 text-neutral-400 uppercase tracking-wider flex-shrink-0 mt-0.5"
-                        )}>
-                            {USE_CASE_TYPE_LABELS[uc.type]}
-                        </span>
-                        <p className={cn("text-sm leading-relaxed", COLORS.textSecondary)}>{uc.description}</p>
-                    </div>
-                ))}
+            <div className="p-0">
+                <div className="flex flex-col divide-y divide-[#1A1A1A]">
+                    {useCases.map((uc, idx) => (
+                        <div key={idx} className="flex items-start gap-4 p-4 hover:bg-[#141414] transition-colors">
+                            <span className={cn(
+                                "text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider border flex-shrink-0 mt-0.5",
+                                USE_CASE_TYPE_COLORS[uc.type] || "bg-neutral-800 text-neutral-400"
+                            )}>
+                                {USE_CASE_TYPE_LABELS[uc.type]}
+                            </span>
+                            <p className="text-sm leading-relaxed text-[#D4D4D4]">{uc.description}</p>
+                        </div>
+                    ))}
+                </div>
             </div>
         </UniversalCard>
     );
@@ -84,24 +96,17 @@ function UseCaseList({ useCases }: UseCaseListProps) {
 // ③ RELATED EVENTS - 相關歷史事件
 // ================================================
 function RelatedEvents({ storyId }: { storyId: string }) {
-    // Filter REVIEWS_DATA for relevant events
-    // Match against relatedIndicators (explicit link) or relatedMetrics (implicit link)
+    // Filter REVIEWS_DATA
     const matchedReviews = REVIEWS_DATA
         .filter(r => {
             const hasExplicitLink = r.relatedIndicators?.some(ri => ri.slug === storyId);
-
-            // Simple implicit mapping for common indicators if explicit link missing
             const hasImplicitLink = r.relatedMetrics?.some(m => {
                 if (storyId === 'fear-greed' && m === 'fearGreed') return true;
                 if (storyId === 'funding-rate' && m === 'funding') return true;
-                if (storyId === 'open-interest' && m === 'oi') return true;
-                if (storyId === 'liquidation' && m === 'liquidation') return true;
                 if (storyId === 'long-short-ratio' && m === 'longShort') return true;
-                if (storyId === 'stablecoin-supply' && m === 'stablecoin') return true;
-                if (storyId === 'etf-flow' && m === 'etfFlow') return true;
+                if (storyId === 'open-interest' && m === 'oi') return true;
                 return false;
             });
-
             return hasExplicitLink || hasImplicitLink;
         })
         .sort((a, b) => new Date(b.eventStartAt).getTime() - new Date(a.eventStartAt).getTime())
@@ -110,31 +115,34 @@ function RelatedEvents({ storyId }: { storyId: string }) {
     if (matchedReviews.length === 0) return null;
 
     return (
-        <UniversalCard>
-            <div className="mb-2">
+        <UniversalCard className="p-0 overflow-hidden">
+            <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                 <SectionHeaderCard
                     title="相關歷史事件回顧"
+                    icon={BookOpen}
                     rightElement={
-                        <Link href="/reviews" className="text-xs text-neutral-500 hover:text-white flex items-center gap-1">
-                            更多 <ChevronRight className="w-3 h-3" />
+                        <Link href="/reviews" className="text-xs text-neutral-500 hover:text-white flex items-center gap-1 px-2 py-1 rounded hover:bg-white/5 transition-colors">
+                            查看全部 <ChevronRight className="w-3 h-3" />
                         </Link>
                     }
                 />
             </div>
-            <div className="space-y-0 divide-y divide-white/5">
+            <div className="flex flex-col divide-y divide-[#1A1A1A]">
                 {matchedReviews.map((evt) => (
                     <Link
                         key={evt.id}
                         href={`/reviews/${evt.id}`}
-                        className="flex items-center justify-between py-3 hover:bg-white/5 px-2 -mx-2 rounded transition-colors group"
+                        className="group flex items-center justify-between p-4 hover:bg-[#141414] transition-colors"
                     >
-                        <div className="flex flex-col">
-                            <span className="text-sm font-medium text-neutral-200 group-hover:text-white transition-colors">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold text-[#E0E0E0] group-hover:text-white transition-colors">
                                 {evt.title}
                             </span>
-                            <span className="text-xs text-neutral-500">{evt.eventStartAt}</span>
+                            <span className="text-xs text-[#666] group-hover:text-[#888] font-mono">
+                                {evt.eventStartAt}
+                            </span>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-neutral-400" />
+                        <ChevronRight className="w-4 h-4 text-[#333] group-hover:text-white transition-colors" />
                     </Link>
                 ))}
             </div>
@@ -143,7 +151,7 @@ function RelatedEvents({ storyId }: { storyId: string }) {
 }
 
 // ================================================
-// ④ KNOWLEDGE GRAPH - 知識圖譜：相關指標與概念
+// ④ KNOWLEDGE GRAPH - 知識圖譜
 // ================================================
 function KnowledgeGraph({ storyId }: { storyId: string }) {
     const relatedIndicators = getRelatedIndicators(storyId);
@@ -152,21 +160,28 @@ function KnowledgeGraph({ storyId }: { storyId: string }) {
     if (relatedIndicators.length === 0 && prerequisiteConcepts.length === 0) return null;
 
     return (
-        <UniversalCard>
-            <div className="mb-4">
-                <SectionHeaderCard title="知識圖譜：延伸閱讀" />
+        <UniversalCard className="p-0 overflow-hidden">
+            <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
+                <SectionHeaderCard
+                    title="知識圖譜：延伸學習"
+                    icon={GitMerge}
+                />
             </div>
-            <div className="space-y-4 pt-2">
-                {/* 1. 先備知識 (Concepts) */}
+
+            <div className="divide-y divide-[#1A1A1A]">
+                {/* 1. Concepts */}
                 {prerequisiteConcepts.length > 0 && (
-                    <div>
-                        <h3 className="text-[10px] text-neutral-500 uppercase tracking-widest mb-2 font-bold">基礎概念</h3>
+                    <div className="p-4">
+                        <h3 className="text-[10px] text-neutral-500 uppercase tracking-widest mb-3 font-bold flex items-center gap-2">
+                            <Lightbulb className="w-3 h-3" />
+                            基礎概念
+                        </h3>
                         <div className="flex flex-wrap gap-2">
                             {prerequisiteConcepts.map((concept, i) => (
                                 <Link
                                     key={i}
                                     href={`/dictionary/${concept.id}`}
-                                    className="px-3 py-1.5 rounded-md bg-neutral-900 border border-white/5 text-xs text-neutral-400 hover:text-white hover:border-white/20 transition-all"
+                                    className="px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] text-xs font-medium text-neutral-300 hover:text-white hover:border-neutral-600 hover:bg-[#202020] transition-all"
                                 >
                                     {concept.term}
                                 </Link>
@@ -175,26 +190,29 @@ function KnowledgeGraph({ storyId }: { storyId: string }) {
                     </div>
                 )}
 
-                {/* 2. 相關指標 (Indicators) */}
+                {/* 2. Related Indicators */}
                 {relatedIndicators.length > 0 && (
-                    <div>
-                        <h3 className="text-[10px] text-neutral-500 uppercase tracking-widest mb-2 font-bold">相關指標</h3>
-                        <div className="grid grid-cols-1 gap-2">
+                    <div className="p-0">
+                        <div className="px-4 py-2 bg-[#141414]/50 border-b border-[#1A1A1A] flex items-center gap-2">
+                            <GitMerge className="w-3 h-3 text-neutral-500" />
+                            <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">相關指標</span>
+                        </div>
+                        <div className="flex flex-col divide-y divide-[#1A1A1A]">
                             {relatedIndicators.map((ind, i) => (
                                 <Link
                                     key={i}
                                     href={`/indicators/${ind.slug}`}
-                                    className="flex items-center justify-between p-3 rounded-lg bg-neutral-900/50 border border-white/5 hover:bg-white/5 transition-all group"
+                                    className="flex items-center justify-between p-4 hover:bg-[#141414] transition-colors group"
                                 >
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-300 group-hover:text-white flex items-center gap-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-sm font-bold text-neutral-300 group-hover:text-white transition-colors">
                                             {ind.name}
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-500 font-normal">
-                                                關聯度：{ind.reason}
-                                            </span>
                                         </div>
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#1A1A1A] border border-[#2A2A2A] text-neutral-500 font-medium">
+                                            {ind.reason}
+                                        </span>
                                     </div>
-                                    <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-neutral-400" />
+                                    <ChevronRight className="w-4 h-4 text-[#333] group-hover:text-white transition-colors" />
                                 </Link>
                             ))}
                         </div>
@@ -233,41 +251,54 @@ export function IndicatorStoryPage({ story }: IndicatorStoryPageProps) {
         <div className="min-h-screen bg-black text-white pb-24">
             {/* Header */}
             <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="flex items-center h-14 px-4 gap-3">
+                <div className="max-w-3xl mx-auto flex items-center h-14 px-4 gap-3 relative">
                     <Link href={getBackLink()} className="p-2 -ml-2 text-neutral-400 hover:text-white transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div className="flex flex-col">
-                        <h1 className="text-sm font-bold tracking-wide">{story.name}</h1>
-                        <span className="text-[10px] text-neutral-500 flex items-center gap-1">
+                        <h1 className="text-sm font-bold tracking-wide text-white">{story.name}</h1>
+                        <span className="text-[10px] text-neutral-500 flex items-center gap-1 font-mono">
                             <Link href={getBackLink()} className="hover:underline">{getBackLabel()}</Link>
-                            <ChevronRight className="w-3 h-3" />
-                            指標
+                            <ChevronRight className="w-2.5 h-2.5" />
+                            INDICATOR
                         </span>
+                    </div>
+
+                    {/* Contextual Hint Button */}
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <Link
+                            href={`/learn?from=${story.slug}`}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444] hover:bg-[#202020] transition-all"
+                        >
+                            <HelpCircle className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-md mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <main className="max-w-3xl mx-auto p-4 sm:p-6 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
-                {/* 0. Chart Hero (Extracted) */}
-                <ChartHero story={story} />
+                {/* 0. Chart Hero */}
+                <section>
+                    <ChartHero story={story} />
+                </section>
 
-                {/* 1. Callout (Interpretation) */}
-                <ChartCallout points={story.chartCallout.points} />
+                <div className="space-y-8">
+                    {/* 1. Callout */}
+                    <ChartCallout points={story.chartCallout.points} />
 
-                {/* 2. Use Cases */}
-                <UseCaseList useCases={story.useCases} />
+                    {/* 2. Use Cases */}
+                    <UseCaseList useCases={story.useCases} />
 
-                {/* 3. Related Events (Integration) */}
-                <RelatedEvents storyId={story.id} />
+                    {/* 3. Knowledge Graph */}
+                    <KnowledgeGraph storyId={story.id} />
 
-                {/* 4. Knowledge Graph (Semantic Links) */}
-                <KnowledgeGraph storyId={story.id} />
-
-                {/* Definition section removed - property does not exist on IndicatorStory */}
+                    {/* 4. Related Events */}
+                    <RelatedEvents storyId={story.id} />
+                </div>
 
             </main>
         </div>
     );
 }
+

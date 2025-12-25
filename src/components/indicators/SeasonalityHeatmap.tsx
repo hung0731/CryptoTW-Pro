@@ -4,6 +4,8 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/design-tokens'
 import { Calendar, TrendingUp, TrendingDown, Leaf } from 'lucide-react'
+import { UniversalCard } from '@/components/ui/UniversalCard'
+import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 
 interface SeasonalityData {
     years: number[]
@@ -39,7 +41,7 @@ function StatsCard({
     trend?: 'up' | 'down' | 'neutral'
 }) {
     return (
-        <div className="bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4 flex flex-col relative overflow-hidden group">
+        <UniversalCard variant="subtle" className="relative overflow-hidden group border-white/5 bg-[#0A0A0A]">
             <div className={cn(
                 "absolute inset-0 opacity-10 pointer-events-none transition-opacity group-hover:opacity-20",
                 trend === 'up' && "bg-gradient-to-br from-green-500/10 to-transparent",
@@ -60,7 +62,7 @@ function StatsCard({
                 {value}
             </div>
             <div className="text-[10px] text-neutral-500 z-10 mt-1">{subtext}</div>
-        </div>
+        </UniversalCard>
     )
 }
 
@@ -116,12 +118,12 @@ export function SeasonalityHeatmap() {
 
     if (loading) {
         return (
-            <div className="w-full h-[400px] flex items-center justify-center bg-[#050505] rounded-2xl border border-white/[0.08]">
+            <UniversalCard className="w-full h-[400px] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
                     <span className="animate-spin text-2xl">⏳</span>
                     <span className="text-xs text-neutral-500 font-mono">Loading Data...</span>
                 </div>
-            </div>
+            </UniversalCard>
         )
     }
 
@@ -186,20 +188,21 @@ export function SeasonalityHeatmap() {
             </div>
 
             {/* Main Heatmap Card */}
-            <div className="w-full bg-[#050505] rounded-2xl border border-white/[0.08] overflow-hidden flex flex-col">
+            <UniversalCard className="w-full p-0 overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Leaf className="w-3.5 h-3.5 text-green-400" />
-                        <span className={cn("text-xs font-medium", COLORS.textSecondary)}>比特幣月度回報熱力圖</span>
-                        <span className="text-[10px] text-neutral-600 font-mono">(BTC/USDT)</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#22C55E]"></span>
-                        <span className="text-[10px] text-neutral-500 mr-2">上漲</span>
-                        <span className="w-2 h-2 rounded-full bg-[#EF4444]"></span>
-                        <span className="text-[10px] text-neutral-500">下跌</span>
-                    </div>
+                <div className="border-b border-white/[0.04] bg-[#0F0F10]">
+                    <SectionHeaderCard
+                        title="比特幣月度回報熱力圖"
+                        icon={Leaf}
+                        rightElement={
+                            <div className="flex items-center gap-1.5 mr-4">
+                                <span className="w-2 h-2 rounded-full bg-[#22C55E]"></span>
+                                <span className="text-[10px] text-neutral-500 mr-2">上漲</span>
+                                <span className="w-2 h-2 rounded-full bg-[#EF4444]"></span>
+                                <span className="text-[10px] text-neutral-500">下跌</span>
+                            </div>
+                        }
+                    />
                 </div>
 
                 {/* Scrollable Container for Mobile */}
@@ -239,7 +242,7 @@ export function SeasonalityHeatmap() {
 
                                                 {/* Tooltip */}
                                                 {val !== undefined && (
-                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-black/90 border border-white/10 rounded text-xs whitespace-nowrap hidden group-hover:block z-20">
+                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-black/90 border border-white/10 rounded text-xs whitespace-nowrap hidden group-hover:block z-20 pointer-events-none">
                                                         {year} {MONTHS[month - 1]}: <span className={getTextColor(val)}>{val.toFixed(2)}%</span>
                                                     </div>
                                                 )}
@@ -289,7 +292,7 @@ export function SeasonalityHeatmap() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </UniversalCard>
         </div>
     )
 }

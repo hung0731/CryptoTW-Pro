@@ -25,8 +25,10 @@ export interface Database {
                     notification_preferences: {
                         market_signals: boolean
                         airdrops: boolean
+
                         news: boolean
                     }
+                    metadata: Json | null // Accommodate Learn progress
                     created_at: string
                     updated_at: string
                 }
@@ -36,6 +38,7 @@ export interface Database {
                     display_name?: string | null
                     picture_url?: string | null
                     membership_status?: MembershipStatus
+                    metadata?: Json | null
                     created_at?: string
                     updated_at?: string
                 }
@@ -45,6 +48,7 @@ export interface Database {
                     display_name?: string | null
                     picture_url?: string | null
                     membership_status?: MembershipStatus
+                    metadata?: Json | null
                     created_at?: string
                     updated_at?: string
                 }

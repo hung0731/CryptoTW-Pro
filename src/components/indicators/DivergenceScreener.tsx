@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { ArrowUp, ArrowDown, ExternalLink, Activity, Info, TrendingUp, TrendingDown, Crosshair } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/design-tokens'
+import { UniversalCard } from '@/components/ui/UniversalCard'
 
 interface DivergenceItem {
     symbol: string
@@ -32,7 +33,7 @@ function StatsCard({
     trend?: 'up' | 'down' | 'neutral'
 }) {
     return (
-        <div className="bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4 flex flex-col relative overflow-hidden group">
+        <UniversalCard variant="subtle" className="flex flex-col relative overflow-hidden group border-white/5 bg-[#0A0A0A]">
             <div className={cn(
                 "absolute inset-0 opacity-10 pointer-events-none transition-opacity group-hover:opacity-20",
                 trend === 'up' && "bg-gradient-to-br from-green-500/10 to-transparent",
@@ -53,7 +54,7 @@ function StatsCard({
                 {value}
             </div>
             <div className="text-[10px] text-neutral-500 z-10 mt-1">{subtext}</div>
-        </div>
+        </UniversalCard>
     )
 }
 
@@ -94,23 +95,23 @@ export function DivergenceScreener() {
 
     if (loading) {
         return (
-            <div className="w-full h-[300px] flex items-center justify-center bg-[#050505] rounded-2xl border border-white/[0.08]">
+            <UniversalCard className="w-full h-[300px] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
                     <span className="animate-spin text-neutral-500">
                         <Activity className="w-5 h-5" />
                     </span>
                     <span className="text-xs text-neutral-500 font-mono">Scanning market divergence...</span>
                 </div>
-            </div>
+            </UniversalCard>
         )
     }
 
     // Clean market state
     if (!data.length) {
         return (
-            <div className="w-full py-12 flex flex-col items-center justify-center bg-[#050505] rounded-2xl border border-white/[0.08] text-neutral-500">
+            <UniversalCard className="w-full py-12 flex flex-col items-center justify-center text-neutral-500">
                 <span className="text-sm">目前市場無顯著主力異常訊號 (Clean Market)</span>
-            </div>
+            </UniversalCard>
         )
     }
 
@@ -146,7 +147,7 @@ export function DivergenceScreener() {
             </div>
 
             {/* Main Screener Table */}
-            <div className="w-full bg-[#050505] rounded-2xl border border-white/[0.08] overflow-hidden flex flex-col">
+            <UniversalCard variant="default" className="w-full p-0 overflow-hidden flex flex-col">
                 <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Activity className="w-3.5 h-3.5 text-purple-400" />
@@ -233,7 +234,7 @@ export function DivergenceScreener() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </UniversalCard>
         </div>
     )
 }

@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
 import { cn } from '@/lib/utils'
 import {
-    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight
+    ChevronRight, Sparkles, CandlestickChart, Activity, DollarSign, Wallet, Calendar, Bell, Settings, LineChart, ArrowUpRight, School
 } from 'lucide-react'
 import { MobileOptimizedLayout } from '@/components/layout/PageLayout'
 import { FlashNewsFeed } from '@/components/news/FlashNewsFeed'
@@ -22,6 +22,7 @@ import { QuickActionCard } from '@/components/home/QuickActionCard'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
 import { HistoryEchoCard } from '@/components/home/HistoryEchoCard'
 import { findHistoricalSimilarity } from '@/lib/historical-matcher'
+import { SentimentDashboardCard } from '@/components/home/SentimentDashboardCard'
 
 interface HomePageClientProps {
     reactions: Record<string, MacroReaction>
@@ -159,6 +160,11 @@ export function HomePageClient({
                     <HistoryEchoCard match={historicalMatch} />
                 </section>
 
+                {/* 4. Market Sentiment Dashboard [NEW] */}
+                <section>
+                    <SentimentDashboardCard status={initialStatus} />
+                </section>
+
                 {/* ===== BELOW THE FOLD: Detailed Context ===== */}
                 <section className="flex flex-col gap-6">
                     {/* Explore More Grid */}
@@ -171,7 +177,7 @@ export function HomePageClient({
                                 { href: '/calendar', label: '財經日曆', icon: Calendar },
                                 { href: '/price-prediction', label: '價格預測', icon: Wallet },
                                 { href: '/reviews', label: '歷史復盤', icon: LineChart },
-                                { href: '/news', label: '快訊中心', icon: DollarSign },
+                                { href: '/learn', label: '學習', icon: School },
                             ].map((item) => (
                                 <Link key={item.href} href={item.href} className="group bg-[#0A0A0A] hover:bg-[#141414] transition-colors p-3 flex flex-col items-center justify-center gap-2 aspect-square">
                                     <div className="w-10 h-10 rounded-2xl bg-[#151515] flex items-center justify-center border border-[#2A2A2A] text-[#666] group-hover:text-white group-hover:border-[#444] transition-all">

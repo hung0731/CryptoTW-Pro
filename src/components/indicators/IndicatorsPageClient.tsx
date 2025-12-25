@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Loader2, Activity, LayoutDashboard, Calendar, Hourglass, Search } from 'lucide-react';
+import {
+    ChevronRight, Loader2, Activity, LayoutDashboard, Calendar, Hourglass, Search,
+    Gauge, ArrowLeftRight, Scale, PieChart, Coins, Landmark, TrendingUp, LineChart, Zap
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TYPOGRAPHY, SPACING } from '@/lib/design-tokens';
 import { IndicatorStory, ZONE_COLORS } from '@/lib/indicator-stories';
@@ -11,39 +14,62 @@ import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { IndicatorMetricView, IndicatorsPageViewModel } from '@/lib/services/indicators-list';
 
+function getIndicatorIcon(id: string) {
+    switch (id) {
+        case 'fear-greed': return Gauge;
+        case 'funding-rate': return ArrowLeftRight;
+        case 'long-short-ratio': return Scale;
+        case 'btc-dominance': return PieChart;
+        case 'open-interest': return Activity;
+        case 'stablecoin-supply': return Coins;
+        case 'exchange-balance': return Landmark;
+        case 'etf-net-flow': return TrendingUp;
+        default: return LineChart;
+    }
+}
+
 // Single Column Card Style
 function IndicatorEntryCard({ view }: { view: IndicatorMetricView }) {
     const zoneColors = ZONE_COLORS[view.zone];
+    const Icon = getIndicatorIcon(view.id);
 
     return (
         <Link href={`/indicators/${view.slug}`} className="block group relative p-5 hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0">
-            <div className="flex items-start justify-between gap-4">
-                {/* Left: Title & Badge */}
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-white group-hover:text-indigo-400 transition-colors">{view.name}</h3>
-                        {view.isPro && (
-                            <span className="bg-[#332a00] text-[#FFD700] text-[9px] font-bold px-1.5 py-0.5 rounded border border-[#665200]">PRO</span>
-                        )}
-                    </div>
-                    <div className="flex">
-                        <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium border", zoneColors.bg, zoneColors.text, zoneColors.border)}>
-                            {view.zoneLabel}
-                        </span>
-                    </div>
+            <div className="flex items-center gap-4">
+                {/* Icon Box */}
+                <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0 group-hover:bg-[#202020] group-hover:scale-105 transition-all duration-300">
+                    <Icon className="w-6 h-6 text-neutral-400 group-hover:text-white transition-colors" />
                 </div>
 
-                {/* Right: Value & Description */}
-                <div className="flex flex-col items-end gap-1 flex-1 min-w-0">
-                    <div className="flex items-center gap-1">
-                        <span className={cn("text-xl font-mono font-bold tracking-tight", zoneColors.text)}>
-                            {view.formattedValue}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-[#404040] group-hover:text-white transition-colors" />
+                {/* Content Container */}
+                <div className="flex-1 flex items-start justify-between gap-4 min-w-0">
+                    {/* Left: Title & Badge */}
+                    <div className="flex flex-col gap-1.5 min-w-0">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">{view.name}</h3>
+                            {view.isPro && (
+                                <span className="flex-shrink-0 bg-[#332a00] text-[#FFD700] text-[9px] font-bold px-1.5 py-0.5 rounded border border-[#665200]">PRO</span>
+                            )}
+                        </div>
+                        <div className="flex">
+                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium border whitespace-nowrap", zoneColors.bg, zoneColors.text, zoneColors.border)}>
+                                {view.zoneLabel}
+                            </span>
+                        </div>
                     </div>
-                    <p className="text-xs text-[#666] text-right line-clamp-1 group-hover:text-[#888] transition-colors">
-                        {view.description}
-                    </p>
+
+                    {/* Right: Value & Description */}
+                    <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                        <div className="flex items-center gap-1">
+                            <span className={cn("text-xl font-mono font-bold tracking-tight", zoneColors.text)}>
+                                {view.formattedValue}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-[#404040] group-hover:text-white transition-colors" />
+                        </div>
+                        <p className="text-xs text-[#666] text-right line-clamp-1 group-hover:text-[#888] transition-colors max-w-[150px]">
+                            {view.description}
+                        </p>
+                    </div>
                 </div>
             </div>
         </Link>
