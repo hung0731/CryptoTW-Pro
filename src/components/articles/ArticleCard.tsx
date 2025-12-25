@@ -19,11 +19,11 @@ interface ArticleCardProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-    analysis: '市場分析',
-    macro: '總體經濟',
-    onchain: '鏈上數據',
-    airdrop: '空投研究',
-    research: '深度研究'
+    market_analysis: '市場分析',
+    onchain_data: '鏈上數據',
+    macro_economy: '總體經濟',
+    project_research: '項目研究',
+    industry_report: '產業報告'
 };
 
 export function ArticleCard({

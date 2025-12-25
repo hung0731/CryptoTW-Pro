@@ -26,10 +26,11 @@ interface Article {
 
 const CATEGORIES = [
     { key: 'all', label: '全部' },
-    { key: 'analysis', label: '市場分析' },
-    { key: 'macro', label: '總體經濟' },
-    { key: 'onchain', label: '鏈上數據' },
-    { key: 'research', label: '深度研究' }
+    { key: 'market_analysis', label: '市場分析' },
+    { key: 'onchain_data', label: '鏈上數據' },
+    { key: 'macro_economy', label: '總體經濟' },
+    { key: 'project_research', label: '項目研究' },
+    { key: 'industry_report', label: '產業報告' }
 ];
 
 export default function ArticlesPage() {

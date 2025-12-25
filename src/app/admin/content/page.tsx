@@ -513,6 +513,292 @@ function BotTab() {
 }
 
 
+// --- Articles Tab (Deep Articles CMS) ---
+interface Article {
+    id: string
+    title: string
+    slug: string
+    category: string
+    source_name: string
+    is_published: boolean
+    created_at: string
+}
+
+function ArticlesTab() {
+    const [articles, setArticles] = useState<Article[]>([])
+    const [loading, setLoading] = useState(true)
+    const [showTranslate, setShowTranslate] = useState(false)
+    const [translateLoading, setTranslateLoading] = useState(false)
+    const [translateForm, setTranslateForm] = useState({
+        source_url: '',
+        source_name: '',
+        source_author: '',
+        raw_content: ''
+    })
+    const [translatedArticle, setTranslatedArticle] = useState<any>(null)
+    const { toast } = useToast()
+
+    const fetchArticles = async () => {
+        setLoading(true)
+        try {
+            const res = await fetch('/api/admin/articles')
+            if (res.ok) {
+                const data = await res.json()
+                setArticles(data.articles || [])
+            }
+        } catch (e) {
+            logger.error('Failed to fetch articles', e, { feature: 'admin-articles' })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => { void fetchArticles() }, [])
+
+    const handleTranslate = async () => {
+        if (!translateForm.raw_content || !translateForm.source_url || !translateForm.source_name) {
+            toast({ title: '請填寫必填欄位', variant: 'destructive' })
+            return
+        }
+        setTranslateLoading(true)
+        try {
+            const res = await fetch('/api/admin/articles/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(translateForm)
+            })
+            const data = await res.json()
+            if (data.success && data.article) {
+                setTranslatedArticle(data.article)
+                toast({ title: 'AI 翻譯完成！請確認內容後發布。' })
+            } else {
+                toast({ title: '翻譯失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '翻譯錯誤', variant: 'destructive' })
+        } finally {
+            setTranslateLoading(false)
+        }
+    }
+
+    const handlePublish = async () => {
+        if (!translatedArticle) return
+        try {
+            const res = await fetch('/api/admin/articles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...translatedArticle, is_published: true })
+            })
+            if (res.ok) {
+                toast({ title: '文章已發布！' })
+                setTranslatedArticle(null)
+                setShowTranslate(false)
+                setTranslateForm({ source_url: '', source_name: '', source_author: '', raw_content: '' })
+                void fetchArticles()
+            } else {
+                const data = await res.json()
+                toast({ title: '發布失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '發布錯誤', variant: 'destructive' })
+        }
+    }
+
+    const handleTogglePublish = async (article: Article) => {
+        try {
+            await fetch(`/api/admin/articles/${article.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_published: !article.is_published })
+            })
+            void fetchArticles()
+        } catch (e) {
+            toast({ title: '更新失敗', variant: 'destructive' })
+        }
+    }
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('確定要刪除這篇文章嗎？')) return
+        try {
+            await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' })
+            void fetchArticles()
+        } catch (e) {
+            toast({ title: '刪除失敗', variant: 'destructive' })
+        }
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center">
+                <CardDescription>管理 AI 翻譯的國外深度分析文章</CardDescription>
+                <div className="flex gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => void fetchArticles()}>
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    </Button>
+                    <Button
+                        className="bg-blue-600 hover:bg-blue-500 text-white h-8 text-sm"
+                        onClick={() => setShowTranslate(!showTranslate)}
+                    >
+                        <Plus className="w-4 h-4 mr-2" /> AI 翻譯新增
+                    </Button>
+                </div>
+            </div>
+
+            {/* AI Translation Form */}
+            {showTranslate && (
+                <Card className="bg-blue-950/20 border-blue-500/30">
+                    <CardHeader>
+                        <CardTitle className="text-white text-base">🤖 AI 翻譯外國文章</CardTitle>
+                        <CardDescription>貼上原文內容，AI 將自動翻譯為繁體中文並生成標題、摘要</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">來源網址 *</Label>
+                                <Input
+                                    value={translateForm.source_url}
+                                    onChange={e => setTranslateForm({ ...translateForm, source_url: e.target.value })}
+                                    placeholder="https://..."
+                                    className="bg-black border-white/10"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">來源名稱 *</Label>
+                                <Input
+                                    value={translateForm.source_name}
+                                    onChange={e => setTranslateForm({ ...translateForm, source_name: e.target.value })}
+                                    placeholder="Glassnode / Messari..."
+                                    className="bg-black border-white/10"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">原文作者</Label>
+                                <Input
+                                    value={translateForm.source_author}
+                                    onChange={e => setTranslateForm({ ...translateForm, source_author: e.target.value })}
+                                    placeholder="James Check"
+                                    className="bg-black border-white/10"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-neutral-400">原文內容 (Markdown/純文字) *</Label>
+                            <Textarea
+                                value={translateForm.raw_content}
+                                onChange={e => setTranslateForm({ ...translateForm, raw_content: e.target.value })}
+                                placeholder="貼上完整原文..."
+                                className="bg-black border-white/10 min-h-[200px] font-mono text-sm"
+                            />
+                        </div>
+                        <Button
+                            onClick={handleTranslate}
+                            disabled={translateLoading}
+                            className="bg-blue-600 hover:bg-blue-500"
+                        >
+                            {translateLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Bot className="w-4 h-4 mr-2" />}
+                            開始翻譯
+                        </Button>
+
+                        {/* Translated Result Preview */}
+                        {translatedArticle && (
+                            <Card className="bg-green-950/20 border-green-500/30 mt-4">
+                                <CardHeader>
+                                    <CardTitle className="text-green-400 text-base">✅ 翻譯完成</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div>
+                                        <Label className="text-xs text-neutral-400">標題</Label>
+                                        <p className="text-white font-bold">{translatedArticle.title}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-neutral-400">摘要</Label>
+                                        <p className="text-neutral-300 text-sm">{translatedArticle.summary}</p>
+                                    </div>
+                                    <div className="flex gap-2 flex-wrap">
+                                        <Badge variant="outline" className="text-blue-400 border-blue-500/30">{translatedArticle.category}</Badge>
+                                        {translatedArticle.tags?.map((tag: string) => (
+                                            <Badge key={tag} variant="secondary" className="bg-neutral-800">{tag}</Badge>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2 mt-4">
+                                        <Button onClick={handlePublish} className="bg-green-600 hover:bg-green-500">
+                                            <Save className="w-4 h-4 mr-2" /> 發布文章
+                                        </Button>
+                                        <Button variant="outline" onClick={() => setTranslatedArticle(null)}>取消</Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Articles Table */}
+            <Card className="bg-neutral-900/50 border-white/5">
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm text-neutral-400">
+                            <thead className="bg-neutral-900 border-b border-white/5 text-xs uppercase font-medium">
+                                <tr>
+                                    <th className="px-6 py-4">標題 / Slug</th>
+                                    <th className="px-6 py-4">分類</th>
+                                    <th className="px-6 py-4">來源</th>
+                                    <th className="px-6 py-4">狀態</th>
+                                    <th className="px-6 py-4 text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {loading ? (
+                                    <tr><td colSpan={5} className="p-6 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></td></tr>
+                                ) : articles.length === 0 ? (
+                                    <tr><td colSpan={5} className="p-6 text-center">尚無文章，點擊上方「AI 翻譯新增」開始</td></tr>
+                                ) : (
+                                    articles.map((article) => (
+                                        <tr key={article.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-white mb-0.5">{article.title}</div>
+                                                <div className="font-mono text-xs text-neutral-500">{article.slug}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant="outline" className="border-blue-500/50 text-blue-400 bg-blue-500/10">
+                                                    {article.category}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-6 py-4 text-neutral-400">{article.source_name}</td>
+                                            <td className="px-6 py-4">
+                                                <button onClick={() => handleTogglePublish(article)}>
+                                                    {article.is_published ? (
+                                                        <Badge className="bg-green-500/20 text-green-400 border-0 cursor-pointer hover:bg-green-500/30">Published</Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="bg-neutral-800 text-neutral-400 cursor-pointer hover:bg-neutral-700">Draft</Badge>
+                                                    )}
+                                                </button>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Link href={`/articles/${article.slug}`} target="_blank">
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-white">
+                                                            <Eye className="w-4 h-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-red-500" onClick={() => handleDelete(article.id)}>
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
+
 export default function ContentPage() {
     return (
         <div className="p-6 md:p-8 space-y-8 w-full max-w-6xl mx-auto">
@@ -521,11 +807,15 @@ export default function ContentPage() {
                 <p className="text-neutral-400 mt-2">管理文章、推播與機器人互動</p>
             </div>
 
-            <Tabs defaultValue="reviews" className="w-full">
+            <Tabs defaultValue="articles" className="w-full">
                 <TabsList className="bg-neutral-900 border border-white/10 text-neutral-400">
+                    <TabsTrigger value="articles" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        深度文章
+                    </TabsTrigger>
                     <TabsTrigger value="reviews" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
                         <BookOpen className="w-4 h-4 mr-2" />
-                        文章 (Reviews)
+                        復盤 (Reviews)
                     </TabsTrigger>
                     <TabsTrigger value="push" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
                         <Send className="w-4 h-4 mr-2" />
@@ -537,6 +827,9 @@ export default function ContentPage() {
                     </TabsTrigger>
                 </TabsList>
                 <div className="mt-6">
+                    <TabsContent value="articles">
+                        <ArticlesTab />
+                    </TabsContent>
                     <TabsContent value="reviews">
                         <ReviewsTab />
                     </TabsContent>
