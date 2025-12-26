@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Noto_Sans_TC } from "next/font/google";
-import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
 import { GoogleAnalytics } from '@next/third-parties/google'
