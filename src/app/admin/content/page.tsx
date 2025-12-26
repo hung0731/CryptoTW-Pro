@@ -861,7 +861,7 @@ function EventsTab() {
     const fetchEvents = async () => {
         setLoading(true)
         try {
-            const res = await fetch('/api/admin/events')
+            const res = await fetch('/api/admin/events', { cache: 'no-store' })
             if (res.ok) {
                 const data = await res.json()
                 setEvents(data.events || [])
@@ -974,12 +974,23 @@ function EventsTab() {
     }
 
     const handleTogglePublish = async (event: EventItem) => {
-        await fetch(`/api/admin/events/${event.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ is_published: !event.is_published })
-        })
-        void fetchEvents()
+        try {
+            const res = await fetch(`/api/admin/events/${event.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_published: !event.is_published })
+            })
+
+            if (res.ok) {
+                toast({ title: event.is_published ? '已下架活動' : '已發布活動' })
+                void fetchEvents()
+            } else {
+                const data = await res.json()
+                toast({ title: '狀態更新失敗', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '錯誤', description: '無法連接伺服器', variant: 'destructive' })
+        }
     }
 
     const handleDelete = async (id: string) => {
