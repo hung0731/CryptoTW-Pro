@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSafeServerClient } from '@/lib/supabase'
-import { syncAllLBankInvitees, LBankInviteeData } from '@/lib/lbank-affiliate'
+import { syncAllLBankInvitees, getLBankUserInfo, LBankInviteeData } from '@/lib/lbank-affiliate'
 import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
@@ -15,64 +15,56 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Check if user is admin (email check as per existing patterns)
-        const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
-        if (!user.email || !ADMIN_EMAILS.includes(user.email)) {
-            // Alternatively, check DB role. But simple email check is fast for now.
-            // Or better, assume middleware handles route protection, but explicit check is safer.
-        }
+        // Check is admin (optional, assuming protected route or middleware)
+        // const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
+        // if (profile?.role !== 'admin') ...
 
-        // 2. Run Sync Logic
+        // 2. Run Sync Logic or Single User Lookup
         const { uid } = await req.json().catch(() => ({}))
-        logger.info('[Admin] Starting LBank Sync Test', { userId: user.id, searchUid: uid })
+        logger.info('[Admin] LBank Test', { userId: user.id, searchUid: uid })
+
+        // Response state
+        let success = false
+        let count = 0
+        let found = false
+        let responseData: LBankInviteeData[] = []
+        let errorMsg = ''
 
         try {
-            const results = await syncAllLBankInvitees()
-
-            let responseData: LBankInviteeData[] = []
-            let found = false
-
             if (uid) {
-                // Search specifically for this UID
-                // Map key is openId (from syncAllLBankInvitees implementation)
-
-                const target = results.get(uid)
-                if (target) {
-                    responseData = [target]
+                // Optimize: Direct lookup using invite/user/info
+                const invitee = await getLBankUserInfo(uid)
+                if (invitee) {
                     found = true
-                } else {
-                    // Try to find in values just in case
-                    const foundItem = Array.from(results.values()).find(u => u.openId === uid)
-                    if (foundItem) {
-                        responseData = [foundItem]
-                        found = true
-                    }
+                    responseData = [invitee]
+                    count = 1
                 }
+                success = true
             } else {
-                // Convert Map to Array for JSON response (Top 10)
+                // Full Sync Test (Top 10)
+                const results = await syncAllLBankInvitees()
+                count = results.size
                 responseData = Array.from(results.entries())
                     .slice(0, 10)
                     .map(([, data]) => ({ ...data }))
+                success = true
             }
-
-            return NextResponse.json({
-                success: true,
-                count: results.size,
-                found: uid ? found : undefined,
-                data: responseData,
-                timestamp: new Date().toISOString()
-            })
-
-        } catch (syncError: any) {
-            logger.error('[Admin] LBank Sync Failed', syncError)
-            return NextResponse.json({
-                success: false,
-                error: syncError.message || 'Sync failed',
-                details: syncError.stack
-            }, { status: 500 })
+        } catch (err) {
+            errorMsg = (err as Error).message
+            success = false
         }
 
-    } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 })
+        return NextResponse.json({
+            success,
+            count,
+            found: uid ? found : undefined,
+            error: errorMsg || undefined,
+            data: responseData,
+            timestamp: new Date().toISOString()
+        })
+
+    } catch (error) {
+        logger.error('[Admin] LBank Test API Error', error as Error)
+        return NextResponse.json({ error: 'Internal Server Error', details: (error as Error).message }, { status: 500 })
     }
 }

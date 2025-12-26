@@ -18,6 +18,7 @@ export interface LBankInviteeData {
     currencyTotalFeeAmtUsdt: string // Total Spot Assets (USDT)
     contractTotalFeeAmt: string // Total Futures Assets
     reserveAmt: string // Futures Bonus
+    inviteResult?: boolean // Only in user/info response
 }
 
 interface LBankApiResponse<T> {
@@ -30,11 +31,6 @@ interface LBankApiResponse<T> {
 
 /**
  * Generate LBank V2 Affiliate API Signature
- * Method: HmacSHA256
- * 1. Sort params (excluding sign)
- * 2. Add signature_method, timestamp, echostr
- * 3. MD5(sorted_query_string) -> Uppercase
- * 4. HmacSHA256(MD5_Digest, SecretKey) -> Base64
  */
 function generateSignature(
     params: Record<string, any>,
@@ -42,7 +38,6 @@ function generateSignature(
     timestamp: string,
     echostr: string
 ): string {
-    // 1. Prepare params
     const allParams = {
         ...params,
         signature_method: 'HmacSHA256',
@@ -50,23 +45,18 @@ function generateSignature(
         echostr: echostr
     }
 
-    // 2. Sort args
     const sortedKeys = Object.keys(allParams).sort()
     const sortedParams: Record<string, any> = {}
     sortedKeys.forEach(key => {
         sortedParams[key] = (allParams as any)[key]
     })
 
-    // 3. Build query string
-    // Note: LBank typically uses key=value&key2=value2 format for signing
     const queryString = Object.entries(sortedParams)
         .map(([key, value]) => `${key}=${value}`)
         .join('&')
 
-    // 4. MD5 Digest
     const md5Digest = crypto.createHash('md5').update(queryString).digest('hex').toUpperCase()
 
-    // 5. HmacSHA256
     const hmac = crypto.createHmac('sha256', secretKey)
     hmac.update(md5Digest)
     return hmac.digest('base64')
@@ -88,14 +78,12 @@ async function lbankRequest<T>(
     }
 
     const timestamp = Date.now().toString()
-    const echostr = crypto.randomBytes(16).toString('hex') // Random string
+    const echostr = crypto.randomBytes(16).toString('hex')
 
     const signature = generateSignature(params, secretKey, timestamp, echostr)
 
     const finalParams = new URLSearchParams()
-    // Add all params used in signature
     Object.entries(params).forEach(([k, v]) => finalParams.append(k, String(v)))
-    // Add api_key to query parameters (standard for LBank)
     finalParams.append('api_key', apiKey)
     finalParams.append('signature_method', 'HmacSHA256')
     finalParams.append('timestamp', timestamp)
@@ -109,7 +97,6 @@ async function lbankRequest<T>(
             method: 'GET',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                // Add browser-like User-Agent to avoid Cloudflare 403
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
         })
@@ -133,6 +120,21 @@ async function lbankRequest<T>(
         logger.error('[LBank API] Request failed', e as Error, { feature: 'lbank-affiliate' })
         return null
     }
+}
+
+/**
+ * Get Single LBank User Info
+ * /affiliate-api/v2/invite/user/info
+ */
+export async function getLBankUserInfo(openId: string): Promise<LBankInviteeData | null> {
+    const data = await lbankRequest<LBankInviteeData>('/affiliate-api/v2/invite/user/info', {
+        openId
+    })
+
+    if (data && data.inviteResult) {
+        return data
+    }
+    return null
 }
 
 /**
