@@ -204,9 +204,8 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                             tickFormatter={(str) => str.slice(5)} // MM-DD
                         />
 
-                        {/* MAIN AXIS */}
+                        {/* MAIN AXIS - Default 0 */}
                         <YAxis
-                            yAxisId="left"
                             domain={['auto', 'auto']}
                             hide={false}
                             width={40}
@@ -243,7 +242,6 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
                         <Tooltip content={<ReviewChartTooltip type={type} isPercentage={isPercentage} overlayType={overlayType} />} cursor={{ stroke: '#ffffff20' }} />
 
                         <Area
-                            yAxisId="left"
                             type="monotone"
                             dataKey={isPercentage && type === 'price' ? "percentage" : "price"}
                             stroke="#EDEDED"

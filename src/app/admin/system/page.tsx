@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Loader2, Save, RefreshCw, DollarSign, UserCheck } from 'lucide-react'
+import { Loader2, Save, RefreshCw, DollarSign, UserCheck, Network } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
@@ -45,7 +45,27 @@ function SettingsTab() {
     const [config, setConfig] = useState<VerificationConfig>(DEFAULT_CONFIG)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
+    const [serverIp, setServerIp] = useState<string | null>(null)
+    const [loadingIp, setLoadingIp] = useState(false)
     const { toast } = useToast()
+
+    const checkIp = async () => {
+        setLoadingIp(true)
+        try {
+            const res = await fetch('/api/admin/system/ip')
+            const data = await res.json()
+            if (data.ip) {
+                setServerIp(data.ip)
+                toast({ title: '已獲取伺服器 IP', description: data.ip })
+            } else {
+                toast({ title: '獲取失敗', variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: '獲取錯誤', variant: 'destructive' })
+        } finally {
+            setLoadingIp(false)
+        }
+    }
 
     const fetchConfig = async () => {
         setLoading(true)
@@ -200,6 +220,42 @@ function SettingsTab() {
                             <div className={`w-2 h-2 rounded-full ${config.okx_require_kyc ? 'bg-purple-500' : 'bg-neutral-600'}`} />
                             <span className="text-neutral-300">KYC 驗證：{config.okx_require_kyc ? '必須' : '不要求'}</span>
                         </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* 系統診斷 */}
+            <Card className="bg-neutral-900/50 border-white/5">
+                <CardHeader>
+                    <div className="flex items-center gap-2">
+                        <Network className="h-5 w-5 text-purple-400" />
+                        <CardTitle className="text-white">伺服器診斷</CardTitle>
+                    </div>
+                    <CardDescription className="text-neutral-400">
+                        檢測伺服器連線狀態與 IP 資訊
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-between p-4 bg-black/20 rounded-lg border border-white/5">
+                        <div className="space-y-0.5">
+                            <Label className="text-white font-medium">伺服器對外 IP</Label>
+                            <p className="text-sm text-neutral-500">
+                                {serverIp ? (
+                                    <span className="font-mono text-green-400">{serverIp}</span>
+                                ) : (
+                                    '點擊按鈕查詢 IP (用於 LBank 白名單設定)'
+                                )}
+                            </p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={checkIp}
+                            disabled={loadingIp}
+                            className="border-white/10 text-neutral-300 hover:text-white hover:bg-white/10"
+                        >
+                            {loadingIp ? <Loader2 className="h-4 w-4 animate-spin" /> : '查詢 IP'}
+                        </Button>
                     </div>
                 </CardContent>
             </Card>

@@ -261,7 +261,7 @@ export function CurrencyConverter() {
                                 onChange={(e) => handleValueChange(row.id, e.target.value)}
                                 onFocus={() => setActiveRowId(row.id)}
                                 placeholder="0"
-                                className="flex-1 bg-transparent text-right px-4 py-4 text-white text-lg font-mono focus:outline-none"
+                                className="flex-1 min-w-0 bg-transparent text-right px-4 py-4 text-white text-lg font-mono focus:outline-none"
                             />
                         </div>
                     );
@@ -293,7 +293,7 @@ export function CurrencyConverter() {
                                         >
                                             <p className="text-[10px] text-[#888]">{exchange.name}</p>
                                             <p className={cn(
-                                                "text-sm font-bold font-mono",
+                                                "text-xs sm:text-sm font-bold font-mono truncate",
                                                 isLowest ? "text-green-400" :
                                                     isHighest ? "text-red-400" :
                                                         "text-white"
