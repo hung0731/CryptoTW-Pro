@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Toaster } from "@/components/ui/toaster";
 import { WebVitals } from "@/components/WebVitals";
 import { BackToTop } from "@/components/BackToTop";
@@ -75,6 +76,7 @@ export default function RootLayout({
         <Toaster />
         <WebVitals />
         <BackToTop />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
       </body>
     </html>
   );

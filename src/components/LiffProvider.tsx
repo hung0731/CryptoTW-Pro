@@ -105,18 +105,7 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                     }
                 }
 
-                // 2. LIFF Inspector (Dev Only)
-                if (process.env.NODE_ENV === 'development') {
-                    try {
-                        const inspectorModule = await import('@line/liff-inspector') as any
-                        const LiffInspector = inspectorModule.LiffInspector || inspectorModule.default
-                        if (LiffInspector) {
-                            liff.use(new LiffInspector())
-                        }
-                    } catch (err) {
-                        logger.warn('Failed to load LIFF Inspector', err as Error, { feature: 'liff-provider' })
-                    }
-                }
+                // 2. Login Check (Optimistic) already done above.
 
                 // 3. Initialize LIFF
                 logger.info('Starting LIFF Init...', { feature: 'liff-provider', liffId })
