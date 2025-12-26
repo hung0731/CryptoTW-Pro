@@ -45,30 +45,31 @@ export function EventNarrativeTimeline({ eventKey }: { eventKey: string }) {
             </div>
             <div className="p-6 bg-[#0B0B0C] relative">
                 {/* Vertical Connecting Line (Absolute Left) */}
-                <div className="absolute left-[29px] top-6 bottom-6 w-0.5 bg-[#1F1F1F]" />
+                {/* Vertical Connecting Line (Absolute Left) */}
+                <div className="absolute left-[21px] top-6 bottom-6 w-0.5 bg-[#1F1F1F]" />
 
-                <div className="flex flex-col space-y-8 relative">
+                <div className="flex flex-col space-y-4 relative">
                     {timeline.map((item, idx) => (
-                        <div key={idx} className="relative pl-12 group">
+                        <div key={idx} className="relative pl-8 group">
                             {/* Dot */}
                             <div className={cn(
-                                "absolute left-[24px] top-1.5 w-3 h-3 rounded-full border-2 z-10 -translate-x-1/2",
+                                "absolute left-[18px] top-1.5 w-2 h-2 rounded-full border-2 z-10 -translate-x-1/2",
                                 item.time === 'T0'
-                                    ? "bg-red-500 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                                    ? "bg-red-500 border-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
                                     : "bg-[#0B0B0C] border-[#444] group-hover:border-blue-500 group-hover:bg-blue-500 transition-colors"
                             )} />
 
                             {/* Content */}
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
                                     <span className={cn(
-                                        "text-xs font-bold font-mono px-2 py-0.5 rounded",
+                                        "text-[10px] font-bold font-mono px-1.5 py-px rounded",
                                         item.time === 'T0' ? "bg-red-500 text-white" : "bg-[#1A1A1A] text-neutral-400"
                                     )}>
                                         {item.time}
                                     </span>
                                     <h4 className={cn(
-                                        "text-base font-bold tracking-tight",
+                                        "text-sm font-bold tracking-tight",
                                         item.time === 'T0' ? "text-white" : "text-neutral-300"
                                     )}>
                                         {item.label}
@@ -79,21 +80,21 @@ export function EventNarrativeTimeline({ eventKey }: { eventKey: string }) {
                                         {item.risk === 'high' || item.risk === 'extreme' ? (
                                             <>
                                                 <AlertTriangle className="w-3 h-3 text-yellow-500" />
-                                                <span className="text-[10px] text-yellow-500 font-bold uppercase">Risk High</span>
+                                                <span className="text-[10px] text-yellow-500 font-bold uppercase hidden sm:inline">Risk High</span>
                                             </>
                                         ) : item.risk === 'medium' ? (
                                             <>
                                                 <Zap className="w-3 h-3 text-blue-400" />
-                                                <span className="text-[10px] text-blue-400 font-bold uppercase">Activity</span>
+                                                <span className="text-[10px] text-blue-400 font-bold uppercase hidden sm:inline">Activity</span>
                                             </>
                                         ) : (
-                                            <span className="text-[10px] text-neutral-600 uppercase">Wait & See</span>
+                                            <span className="text-[10px] text-neutral-600 uppercase hidden sm:inline">Wait & See</span>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="p-4 rounded-xl bg-[#141415] border border-[#1A1A1A] group-hover:border-blue-500/30 transition-colors">
-                                    <p className="text-sm text-neutral-400 leading-relaxed">
+                                <div className="p-3 rounded-lg bg-[#141415] border border-[#1A1A1A] group-hover:border-blue-500/30 transition-colors">
+                                    <p className="text-xs text-neutral-400 leading-relaxed">
                                         {item.content}
                                     </p>
                                 </div>

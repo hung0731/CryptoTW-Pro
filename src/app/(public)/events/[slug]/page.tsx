@@ -1,28 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { PageHeader } from '@/components/PageHeader';
-import { EventCard } from '@/components/events/EventCard';
-import { CalendarButtons } from '@/components/events/CalendarButtons';
-import { MapEmbed } from '@/components/events/MapEmbed';
-import { EventTimeline, TimelineItem } from '@/components/events/EventTimeline';
-import { ShareButtons } from '@/components/events/ShareButtons';
-import { CountdownTimer } from '@/components/events/CountdownTimer';
-import { EventQRCode } from '@/components/events/EventQRCode';
-import { UniversalCard } from '@/components/ui/UniversalCard';
-import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
-import { MobileOptimizedLayout } from '@/components/layout/PageLayout';
-import { Button } from '@/components/ui/button';
-import { SPACING } from '@/lib/design-tokens';
-import { cn } from '@/lib/utils';
+import { useParams, useRouter } from 'next/navigation';
 import {
-    Calendar, MapPin, Clock, Users, ExternalLink, Ticket,
-    Globe, Building, ChevronRight, ArrowLeft, Share2, Bookmark
+    Calendar, MapPin, Users, ExternalLink, Ticket,
+    Globe, ChevronLeft, Share2, Copy, Twitter, MessageCircle,
+    Download
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { Button } from '@/components/ui/button';
+import { MobileOptimizedLayout } from '@/components/layout/PageLayout';
+import { MapEmbed } from '@/components/events/MapEmbed';
+import { EventQRCode } from '@/components/events/EventQRCode';
+import { EventTimeline, TimelineItem } from '@/components/events/EventTimeline';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { CARDS, BUTTONS, TYPOGRAPHY, COLORS, BADGES } from '@/lib/design-tokens';
 
+// --- Interfaces ---
 interface Event {
     id: string;
     title: string;
@@ -74,6 +69,7 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
     online: 'Online'
 };
 
+// --- Utils ---
 function formatFullDate(dateStr: string, timezone: string = 'Asia/Taipei'): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('zh-TW', {
@@ -95,13 +91,15 @@ function formatTime(dateStr: string, timezone: string = 'Asia/Taipei'): string {
     });
 }
 
+// --- Main Component ---
 export default function EventDetailPage() {
     const params = useParams();
+    const router = useRouter();
+    const { toast } = useToast();
     const slug = params?.slug as string;
 
     const [event, setEvent] = useState<Event | null>(null);
     const [sideEvents, setSideEvents] = useState<SideEvent[]>([]);
-    const [parentEvent, setParentEvent] = useState<{ id: string; title: string; slug: string } | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -114,7 +112,6 @@ export default function EventDetailPage() {
                     const data = await res.json();
                     setEvent(data.event);
                     setSideEvents(data.sideEvents || []);
-                    setParentEvent(data.parentEvent);
                 }
             } catch (e) {
                 console.error('Failed to fetch event:', e);
@@ -125,241 +122,203 @@ export default function EventDetailPage() {
         void fetchEvent();
     }, [slug]);
 
-    if (loading) {
-        return (
-            <main className="min-h-screen bg-black text-white pb-24 font-sans">
-                <PageHeader title="載入中..." showLogo={false} backHref="/events" backLabel="活動" />
-                <div className="animate-pulse p-4 space-y-4">
-                    <div className="h-48 bg-[#1A1A1A] rounded-xl" />
-                    <div className="h-8 w-2/3 bg-[#1A1A1A] rounded" />
-                    <div className="h-4 w-1/2 bg-[#1A1A1A] rounded" />
-                </div>
-            </main>
-        );
-    }
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(window.location.href);
+        toast({ title: '連結已複製', description: '您現在可以分享此活動連結' });
+    };
 
-    if (!event) {
-        return (
-            <main className="min-h-screen bg-black text-white pb-24 font-sans">
-                <PageHeader title="找不到活動" showLogo={false} backHref="/events" backLabel="活動" />
-                <div className="p-8 text-center">
-                    <p className="text-[#666]">此活動不存在或已被移除</p>
-                    <Link href="/events">
-                        <Button className="mt-4">返回活動列表</Button>
-                    </Link>
-                </div>
-            </main>
-        );
-    }
+    const addToGoogleCalendar = () => {
+        if (!event) return;
+        const start = new Date(event.start_date).toISOString().replace(/-|:|\.\d\d\d/g, '');
+        const end = event.end_date
+            ? new Date(event.end_date).toISOString().replace(/-|:|\.\d\d\d/g, '')
+            : new Date(new Date(event.start_date).getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d\d\d/g, '');
 
-    const location = event.location_type === 'online'
-        ? '線上活動'
-        : [event.venue_name, event.city].filter(Boolean).join('・');
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start}/${end}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.venue_name || event.online_url || '')}`;
+        window.open(url, '_blank');
+    };
+
+    const downloadIcal = () => {
+        toast({ title: '即將推出', description: 'iCal 下載功能暫未開放' });
+    };
+
+    if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-[#666666]">載入中...</div>;
+    if (!event) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-[#666666]">找不到活動</div>;
 
     return (
-        <main className="min-h-screen bg-black text-white pb-24 font-sans">
-            <PageHeader
-                title={event.title}
-                showLogo={false}
-                backHref="/events"
-                backLabel="活動"
-            />
+        <MobileOptimizedLayout className="bg-[#050505] min-h-screen pb-24">
 
-            {/* Hero Image */}
-            {event.cover_image_url && (
-                <div className="relative h-56 md:h-72 w-full">
-                    <img
-                        src={event.cover_image_url}
-                        alt={event.title}
-                        className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                </div>
-            )}
+            {/* Top Navigation */}
+            <div className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-[#1A1A1A] px-4 h-14 flex items-center justify-between">
+                <button onClick={() => router.push('/events')} className="flex items-center gap-1 text-[#A0A0A0] hover:text-white transition-colors">
+                    <ChevronLeft className="w-5 h-5" />
+                    <span className="text-sm font-medium">活動</span>
+                </button>
+                <h1 className="text-sm font-bold text-white truncate max-w-[200px]">{event.title}</h1>
+                <div className="w-8" />
+            </div>
 
-            <MobileOptimizedLayout className={event.cover_image_url ? '-mt-20 relative z-10' : SPACING.classes.mtHeader}>
-                {/* Parent Event Link */}
-                {parentEvent && (
-                    <Link href={`/events/${parentEvent.slug}`} className="block mb-4">
-                        <div className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300">
-                            <ArrowLeft className="w-3.5 h-3.5" />
-                            <span>返回主活動：{parentEvent.title}</span>
-                        </div>
-                    </Link>
-                )}
+            <div className="p-4 space-y-4">
 
-                {/* Main Info Card */}
-                <UniversalCard variant="default" className="mb-6">
-                    <div className="p-5 space-y-4">
-                        {/* Type Badge */}
+                {/* Main Card */}
+                <div className={CARDS.primary}>
+                    <div className="space-y-6">
+                        {/* Tags */}
                         <div className="flex items-center gap-2">
-                            <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                            <span className={BADGES.neutral}>
                                 {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
                             </span>
                             {event.is_free ? (
-                                <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400 border border-green-500/30">
+                                <span className={BADGES.success}>
                                     免費
                                 </span>
-                            ) : event.price_info && (
-                                <span className="text-xs text-[#888]">{event.price_info}</span>
+                            ) : (
+                                <span className={BADGES.neutral}>
+                                    {event.price_info || '付費'}
+                                </span>
                             )}
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-2xl font-bold text-white">{event.title}</h1>
+                        <h1 className={TYPOGRAPHY.pageTitle}>
+                            {event.title}
+                        </h1>
 
-                        {/* Date & Time */}
-                        <div className="flex items-start gap-3 text-sm">
-                            <Calendar className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-white font-medium">{formatFullDate(event.start_date, event.timezone)}</p>
-                                <p className="text-[#888]">
-                                    {formatTime(event.start_date, event.timezone)}
-                                    {event.end_date && ` - ${formatTime(event.end_date, event.timezone)}`}
-                                    <span className="ml-2 text-[#555]">({event.timezone})</span>
+                        {/* Metadata Grid */}
+                        <div className="space-y-4">
+                            {/* Time */}
+                            <div className="flex gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-[#141414] border border-[#1A1A1A] flex items-center justify-center shrink-0">
+                                    <Calendar className="w-5 h-5 text-[#A0A0A0]" />
+                                </div>
+                                <div>
+                                    <p className={TYPOGRAPHY.cardTitle}>{formatFullDate(event.start_date, event.timezone)}</p>
+                                    <p className={TYPOGRAPHY.cardSubtitle}>
+                                        {formatTime(event.start_date, event.timezone)} - {formatTime(event.end_date || event.start_date, event.timezone)} ({event.timezone})
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Location */}
+                            <div className="flex gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-[#141414] border border-[#1A1A1A] flex items-center justify-center shrink-0">
+                                    {event.location_type === 'online' ? <Globe className="w-5 h-5 text-[#A0A0A0]" /> : <MapPin className="w-5 h-5 text-[#A0A0A0]" />}
+                                </div>
+                                <div>
+                                    <p className={TYPOGRAPHY.cardTitle}>{event.venue_name || (event.location_type === 'online' ? '線上直播' : '待定地點')}</p>
+                                    {event.address && <p className={TYPOGRAPHY.cardSubtitle}>{event.address}</p>}
+                                </div>
+                            </div>
+
+                            {/* Organizer */}
+                            <div className="flex gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-[#141414] border border-[#1A1A1A] flex items-center justify-center shrink-0">
+                                    <Users className="w-5 h-5 text-[#A0A0A0]" />
+                                </div>
+                                <div>
+                                    <p className={TYPOGRAPHY.cardTitle}>主辦：{event.organizer_name}</p>
+                                    {event.co_organizers && event.co_organizers.length > 0 && (
+                                        <p className={TYPOGRAPHY.cardSubtitle}>協辦：{event.co_organizers.map(c => c.name).join(', ')}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Primary Action */}
+                        {event.registration_url ? (
+                            <Button
+                                className="w-full h-12 rounded-lg bg-white text-black font-medium hover:bg-[#E0E0E0] transition-colors"
+                                onClick={() => window.open(event.registration_url, '_blank')}
+                            >
+                                <Ticket className="w-5 h-5 mr-2" />
+                                立即報名
+                                <ExternalLink className="w-4 h-4 ml-1 opacity-50" />
+                            </Button>
+                        ) : (
+                            <div className="w-full h-12 rounded-lg bg-[#141414] border border-[#1A1A1A] flex items-center justify-center text-[#666666] text-sm font-medium cursor-not-allowed">
+                                暫無報名連結
+                            </div>
+                        )}
+
+                        {/* Secondary Actions (Calendar) */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <Button
+                                variant="outline"
+                                className="h-10 rounded-lg bg-[#0A0A0A] border-[#1A1A1A] text-[#A0A0A0] hover:text-white hover:bg-[#141414]"
+                                onClick={addToGoogleCalendar}
+                            >
+                                <Calendar className="w-3.5 h-3.5 mr-2" />
+                                Google Calendar
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-10 rounded-lg bg-[#0A0A0A] border-[#1A1A1A] text-[#A0A0A0] hover:text-white hover:bg-[#141414]"
+                                onClick={downloadIcal}
+                            >
+                                <Download className="w-3.5 h-3.5 mr-2" />
+                                iCal
+                            </Button>
+                        </div>
+
+                        {/* Share Row */}
+                        <div className="pt-2">
+                            <p className={TYPOGRAPHY.caption + " mb-3"}>分享活動</p>
+                            <div className="flex items-center gap-3">
+                                <button className={BUTTONS.icon + " group"} onClick={() => { }}>
+                                    <MessageCircle className="w-5 h-5 text-[#A0A0A0] group-hover:text-white transition-colors" />
+                                </button>
+                                <button className={BUTTONS.icon + " group"} onClick={() => { }}>
+                                    <Twitter className="w-4 h-4 text-[#A0A0A0] group-hover:text-white transition-colors" />
+                                </button>
+                                <button onClick={handleCopyLink} className={BUTTONS.icon + " group"}>
+                                    <Copy className="w-4 h-4 text-[#A0A0A0] group-hover:text-white transition-colors" />
+                                </button>
+                                <button className={BUTTONS.icon + " group"} onClick={() => { }}>
+                                    <Share2 className="w-4 h-4 text-[#A0A0A0] group-hover:text-white transition-colors" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Location Map Card */}
+                {event.location_type !== 'online' && (
+                    <div className={CARDS.primary}>
+                        <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-lg bg-[#141414] border border-[#1A1A1A] flex items-center justify-center shrink-0">
+                                <MapPin className="w-6 h-6 text-[#A0A0A0]" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className={TYPOGRAPHY.cardTitle}>活動地點</h3>
+                                <p className={TYPOGRAPHY.bodyDefault + " mt-0.5 line-clamp-2"}>
+                                    {event.venue_name} {event.address}
                                 </p>
                             </div>
                         </div>
-
-                        {/* Location */}
-                        <div className="flex items-start gap-3 text-sm">
-                            {event.location_type === 'online' ? (
-                                <Globe className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-                            ) : (
-                                <MapPin className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                            )}
-                            <div>
-                                <p className="text-white font-medium">{location}</p>
-                                {event.address && (
-                                    <p className="text-[#888]">{event.address}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Organizer */}
-                        <div className="flex items-start gap-3 text-sm">
-                            <Users className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-white font-medium">主辦：{event.organizer_name}</p>
-                                {event.co_organizers && event.co_organizers.length > 0 && (
-                                    <p className="text-[#888]">
-                                        協辦：{event.co_organizers.map(o => o.name).join('、')}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Registration Button */}
-                        {event.registration_url && (
-                            <a href={event.registration_url} target="_blank" rel="noopener noreferrer" className="block">
-                                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white gap-2">
-                                    <Ticket className="w-4 h-4" />
-                                    立即報名
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                </Button>
-                            </a>
-                        )}
-
-                        {/* Calendar Buttons */}
-                        <CalendarButtons event={event} />
-
-                        {/* Share Buttons */}
-                        <div className="pt-4 border-t border-[#1A1A1A]">
-                            <p className="text-xs text-[#666] mb-2">分享活動</p>
-                            <ShareButtons
-                                title={event.title}
-                                url={`/events/${event.slug}`}
-                            />
-                        </div>
-                    </div>
-                </UniversalCard>
-
-                {/* Countdown Timer */}
-                {new Date(event.start_date) > new Date() && (
-                    <UniversalCard variant="default" className="mb-6">
-                        <div className="p-5">
-                            <CountdownTimer targetDate={event.start_date} />
-                        </div>
-                    </UniversalCard>
-                )}
-
-                {/* Map */}
-                {event.location_type !== 'online' && (
-                    <div className="mb-6">
-                        <MapEmbed
-                            latitude={event.latitude}
-                            longitude={event.longitude}
-                            venue_name={event.venue_name}
-                            address={event.address}
-                            city={event.city}
-                        />
                     </div>
                 )}
 
-                {/* Description */}
-                {event.description && (
-                    <UniversalCard variant="default" className="mb-6">
-                        <div className="p-5">
-                            <h2 className="text-lg font-bold text-white mb-4">活動說明</h2>
-                            <div className="prose prose-invert prose-sm max-w-none">
-                                <ReactMarkdown>{event.description}</ReactMarkdown>
-                            </div>
-                        </div>
-                    </UniversalCard>
-                )}
+                {/* Description Card */}
+                <div className={CARDS.primary}>
+                    <h2 className={TYPOGRAPHY.sectionTitle + " mb-4"}>活動說明</h2>
+                    <div className="prose prose-invert prose-sm max-w-none text-[#A0A0A0] leading-relaxed">
+                        <ReactMarkdown>{event.description || '暫無詳細說明'}</ReactMarkdown>
+                    </div>
+                </div>
 
-                {/* Schedule Timeline */}
+                {/* Schedule (if any) */}
                 {event.schedule && event.schedule.length > 0 && (
-                    <UniversalCard variant="default" className="mb-6">
-                        <div className="p-5">
-                            <h2 className="text-lg font-bold text-white mb-4">📋 議程時間軸</h2>
-                            <EventTimeline
-                                items={event.schedule}
-                                date={formatFullDate(event.start_date, event.timezone)}
-                            />
-                        </div>
-                    </UniversalCard>
-                )}
-
-                {/* Side Events */}
-                {sideEvents.length > 0 && (
-                    <UniversalCard variant="default" className="mb-6 p-0 overflow-hidden">
-                        <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
-                            <SectionHeaderCard
-                                title="Side Events"
-                                rightElement={
-                                    <span className="text-[10px] text-[#666]">{sideEvents.length} 場</span>
-                                }
-                            />
-                        </div>
-                        <div className="divide-y divide-[#1A1A1A]">
-                            {sideEvents.map(se => (
-                                <Link
-                                    key={se.id}
-                                    href={`/events/${se.slug}`}
-                                    className="block p-4 hover:bg-[#141414] transition-colors"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium text-white">{se.title}</p>
-                                            <p className="text-xs text-[#666] mt-1">
-                                                {new Date(se.start_date).toLocaleDateString('zh-TW')}
-                                                {se.venue_name && ` • ${se.venue_name}`}
-                                            </p>
-                                        </div>
-                                        <ChevronRight className="w-4 h-4 text-[#444]" />
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </UniversalCard>
+                    <div className={CARDS.primary}>
+                        <h2 className={TYPOGRAPHY.sectionTitle + " mb-4"}>活動議程</h2>
+                        <EventTimeline items={event.schedule} date={formatFullDate(event.start_date, event.timezone)} />
+                    </div>
                 )}
 
                 {/* Tags */}
                 {event.tags && event.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2">
                         {event.tags.map(tag => (
-                            <span key={tag} className="text-xs px-2 py-1 rounded bg-[#1A1A1A] text-[#888] border border-[#2A2A2A]">
+                            <span key={tag} className={BADGES.neutral}>
                                 #{tag}
                             </span>
                         ))}
@@ -367,17 +326,18 @@ export default function EventDetailPage() {
                 )}
 
                 {/* QR Code */}
-                <UniversalCard variant="default" className="mb-6">
-                    <div className="p-5 flex flex-col items-center">
-                        <p className="text-xs text-[#666] mb-3">掃描 QR Code 分享活動</p>
-                        <EventQRCode
-                            url={`/events/${event.slug}`}
-                            title={event.title}
-                            size={150}
-                        />
+                <div className={CARDS.passive + " flex flex-col items-center text-center"}>
+                    <p className={TYPOGRAPHY.caption + " mb-4"}>掃描 QR Code 分享活動</p>
+                    <div className="bg-white p-2 rounded-xl">
+                        <EventQRCode url={`https://cryptotw.pro/events/${event.slug}`} title={event.title} size={150} />
                     </div>
-                </UniversalCard>
-            </MobileOptimizedLayout>
-        </main>
+                    <Button variant="ghost" className="mt-6 text-xs h-8 text-[#666666] hover:bg-transparent hover:text-[#A0A0A0]">
+                        <Download className="w-3 h-3 mr-1.5" />
+                        下載 QR Code
+                    </Button>
+                </div>
+
+            </div>
+        </MobileOptimizedLayout>
     );
 }

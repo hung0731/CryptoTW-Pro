@@ -45,6 +45,17 @@ const TypeLabels: Record<string, string> = {
     tech_event: '技術升級'
 };
 
+// Semantic Colors for Types
+const TypeColors: Record<string, { bg: string, border: string, text: string, icon: string }> = {
+    policy_regulation: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400', icon: 'text-blue-400' },
+    exchange_event: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', icon: 'text-purple-400' },
+    leverage_cleanse: { bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400', icon: 'text-orange-400' },
+    macro_shock: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', icon: 'text-red-400' },
+    market_structure: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', icon: 'text-emerald-400' },
+    tech_event: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', text: 'text-cyan-400', icon: 'text-cyan-400' },
+};
+const DefaultTypeColor = { bg: 'bg-[#111]', border: 'border-[#2A2A2A]', text: 'text-neutral-500', icon: 'text-neutral-500' };
+
 const DEFAULT_SPARKLINE = [42000, 41000, 39000, 38000, 39500, 41000, 43000, 42500, 44000, 46000, 45000, 47000];
 
 export function ReviewsPageClient() {
@@ -87,8 +98,8 @@ export function ReviewsPageClient() {
     const rowVirtualizer = useVirtualizer({
         count: filteredReviews.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 180, // Estimated row height
-        overscan: 5, // Render 5 extra items above/below viewport
+        estimateSize: () => 120, // Increased for spacing
+        overscan: 5,
     });
 
     const clearFilters = () => {
@@ -196,7 +207,7 @@ export function ReviewsPageClient() {
             </div>
 
             {/* 5. Content List */}
-            <div className={cn("max-w-3xl mx-auto min-h-[50vh]", SPACING.pageX, "pt-4 space-y-4")}>
+            <div className={cn("max-w-5xl mx-auto min-h-[50vh]", SPACING.pageX, "pt-4 space-y-4")}>
                 {/* AI Summary Card */}
                 <AISummaryCard
                     summary="根據目前的歷史數據庫，我們收錄了過去 3 年的 25 個重大市場事件。數據顯示，在類似的流動性環境下，BTC 的平均回調幅度為 -5.2%，但隨後的修復期平均僅需 14 天。目前市場結構類似 2023 年 Q4 的震盪築底階段。"
@@ -233,7 +244,7 @@ export function ReviewsPageClient() {
                                 ref={parentRef}
                                 className="overflow-auto"
                                 style={{
-                                    height: `${Math.min(filteredReviews.length * 180, 800)}px`,
+                                    height: `${Math.min(filteredReviews.length * 120, 800)}px`,
                                     maxHeight: '800px'
                                 }}
                             >
@@ -244,11 +255,13 @@ export function ReviewsPageClient() {
                                         position: 'relative',
                                     }}
                                 >
+
                                     {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                                         const review = filteredReviews[virtualRow.index];
                                         if (!review) return null;
 
                                         const TypeIcon = TypeIcons[review.type] || Filter;
+                                        const theme = TypeColors[review.type] || DefaultTypeColor;
 
                                         return (
                                             <div
@@ -264,7 +277,7 @@ export function ReviewsPageClient() {
                                                 }}
                                             >
                                                 <div
-                                                    className="group relative block px-5 py-6 bg-[#0A0A0A] hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0"
+                                                    className="group relative flex items-center gap-6 p-6 bg-[#0A0A0A] hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0"
                                                 >
                                                     {/* Main Click Target */}
                                                     <Link
@@ -272,54 +285,72 @@ export function ReviewsPageClient() {
                                                         className="absolute inset-0 z-0"
                                                     />
 
-                                                    <div className="relative z-0 pointer-events-none flex items-start justify-between mb-4">
-                                                        {/* Left: Type Icon & Year */}
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={cn(
-                                                                "w-10 h-10 rounded-lg flex items-center justify-center border",
-                                                                "bg-[#111] border-[#2A2A2A] text-neutral-500 group-hover:text-white group-hover:border-neutral-500 transition-colors"
-                                                            )}>
-                                                                <TypeIcon className="w-5 h-5" />
-                                                            </div>
-                                                            <div>
-                                                                <div className="text-[10px] font-mono text-[#444] group-hover:text-[#666] transition-colors">{review.year}</div>
-                                                                <span className="text-[10px] text-[#666] bg-[#151515] border border-[#222] px-1.5 py-0.5 rounded">
-                                                                    {TypeLabels[review.type]}
-                                                                </span>
-                                                            </div>
+                                                    {/* Left: Icon & Year Badge */}
+                                                    <div className="flex-shrink-0 flex flex-col items-center gap-2 relative z-10 pointer-events-none">
+                                                        <div className={cn(
+                                                            "w-10 h-10 rounded-lg flex items-center justify-center border transition-all duration-300",
+                                                            theme.bg, theme.border, theme.icon,
+                                                            "group-hover:border-opacity-50 group-hover:bg-opacity-20"
+                                                        )}>
+                                                            <TypeIcon className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="text-[10px] font-mono font-bold text-[#444] group-hover:text-[#666] transition-colors">
+                                                            {review.year}
                                                         </div>
                                                     </div>
 
-                                                    {/* Content */}
-                                                    <div className="relative z-0 pointer-events-none flex-1 min-w-0 mb-4">
-                                                        <h3 className="text-lg font-bold text-[#E0E0E0] group-hover:text-white mb-1 transition-colors line-clamp-1">
-                                                            {review.title.split('：')[0]}
-                                                        </h3>
-                                                        <p className="text-xs text-[#525252] group-hover:text-[#888] line-clamp-2 leading-relaxed">
-                                                            {review.title.split('：')[1] || review.summary}
+                                                    {/* Middle: Content */}
+                                                    <div className="flex-1 min-w-0 relative z-10 pointer-events-none pr-4">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className={cn(
+                                                                "shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded border transition-colors",
+                                                                theme.bg, theme.border, theme.text
+                                                            )}>
+                                                                {TypeLabels[review.type]}
+                                                            </span>
+                                                            <h3 className="text-sm font-bold text-[#E0E0E0] group-hover:text-white transition-colors truncate">
+                                                                {review.title}
+                                                            </h3>
+                                                        </div>
+                                                        <p className="text-xs text-[#525252] group-hover:text-[#888] line-clamp-2 md:line-clamp-1 leading-relaxed">
+                                                            {review.summary}
                                                         </p>
                                                     </div>
 
-                                                    {/* Footer: Stats & VS Button */}
-                                                    <div className="relative z-10 mt-auto pt-4 border-t border-[#1A1A1A] flex items-center justify-between pointer-events-none">
-                                                        <div className="flex items-center gap-2">
-                                                            {review.maxDrawdown && (
-                                                                <span className="text-[10px] font-mono font-medium text-red-500">
-                                                                    DD {review.maxDrawdown}
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                    {/* Middle-Right: Sparkline (Desktop Only) */}
+                                                    <div className="hidden md:flex flex-col justify-center items-center w-24 h-full relative z-10 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                        <Sparkline
+                                                            data={review.sparklineData || DEFAULT_SPARKLINE}
+                                                            width={96}
+                                                            height={32}
+                                                            color={review.sparklineData ? (review.maxDrawdown?.includes('-') ? '#ef4444' : '#10b981') : '#333'}
+                                                            className="overflow-visible"
+                                                        />
+                                                    </div>
 
-                                                        <div className="flex items-center gap-3">
-                                                            {/* VS Button (Interactive) */}
+                                                    {/* Right: Stats & Actions (Balanced) */}
+                                                    <div className="flex-shrink-0 w-24 md:w-32 flex flex-col items-end justify-center gap-2 relative z-20">
+                                                        {review.maxDrawdown ? (
+                                                            <div className="flex items-center gap-1.5 bg-red-950/10 border border-red-900/20 px-2 py-0.5 rounded pointer-events-none">
+                                                                <span className="text-[10px] text-red-500/80 font-mono">Max Loss</span>
+                                                                <span className="text-xs font-bold text-red-500 font-mono">{review.maxDrawdown}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="h-5" /> /* spacer */
+                                                        )}
+
+                                                        <div className="flex items-center gap-2">
                                                             <Link
                                                                 href={`/reviews/compare?event=${review.slug}-${review.year}`}
-                                                                className="pointer-events-auto opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 flex items-center gap-1 text-[10px] font-bold text-neutral-500 hover:text-white bg-[#1A1A1A] hover:bg-neutral-800 px-2 py-1 rounded-md border border-neutral-800"
+                                                                className="opacity-0 group-hover:opacity-100 transition-all text-[10px] font-medium text-neutral-500 hover:text-white flex items-center gap-1 hover:underline"
+                                                                title="加入對比"
                                                             >
                                                                 <GitCompare className="w-3 h-3" />
-                                                                VS
+                                                                對比
                                                             </Link>
-                                                            <ChevronRight className="w-4 h-4 text-[#333] group-hover:text-white transition-colors" />
+                                                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[#333] group-hover:bg-[#222] group-hover:text-white transition-all pointer-events-none">
+                                                                <ChevronRight className="w-4 h-4" />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

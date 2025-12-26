@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Settings, Shield, Terminal } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
+import { REVIEWS_DATA } from '@/lib/reviews-data'
+import { Database, AlertTriangle, CheckCircle2, FileJson } from 'lucide-react'
 
 // Import original components (we will refactor them to be exported as components or inline them)
 // For now, I will inline the logic from settings/page.tsx and logs/page.tsx
@@ -391,7 +393,118 @@ function LogsTab() {
     )
 }
 
+// --- Content Health Tab ---
+function ContentHealthTab() {
+    const totalReviews = REVIEWS_DATA.length
+    const missingSparkline = REVIEWS_DATA.filter(r => !r.sparklineData || r.sparklineData.length < 5)
+    const missingImpact = REVIEWS_DATA.filter(r => !r.impactSummary)
+    const missingTags = REVIEWS_DATA.filter(r => !r.tags || r.tags.length === 0)
+    const missingBehaviorTags = REVIEWS_DATA.filter(r => !r.behaviorTags || r.behaviorTags.length === 0)
+
+    const healthLevel = missingSparkline.length === 0 && missingImpact.length === 0 ? 'good' : 'warning'
+
+    return (
+        <div className="space-y-6">
+            {/* Overview Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="bg-neutral-900/50 border-white/5">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">Total Reviews</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-white">{totalReviews}</div>
+                        <p className="text-xs text-neutral-500 mt-1">Static Database</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-neutral-900/50 border-white/5">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">Missing Sparklines</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={`text-2xl font-bold ${missingSparkline.length > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                            {missingSparkline.length}
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-1">Requires manual data entry</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-neutral-900/50 border-white/5">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">Missing Impact</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className={`text-2xl font-bold ${missingImpact.length > 0 ? 'text-yellow-500' : 'text-green-500'}`}>
+                            {missingImpact.length}
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-1">Critical for trading info</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-neutral-900/50 border-white/5">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-neutral-400">Health Status</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-2">
+                            {healthLevel === 'good' ? (
+                                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                            ) : (
+                                <AlertTriangle className="w-6 h-6 text-yellow-500" />
+                            )}
+                            <span className="text-lg font-bold text-white capitalize">{healthLevel}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Detailed Issues */}
+            {(missingSparkline.length > 0 || missingImpact.length > 0 || missingBehaviorTags.length > 0) && (
+                <Card className="bg-neutral-900/50 border-white/5">
+                    <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                            <FileJson className="w-5 h-5 text-neutral-400" />
+                            Data Quality Report
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-[300px] w-full pr-4">
+                            <div className="space-y-4">
+                                {missingSparkline.map(r => (
+                                    <div key={r.id} className="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <Badge variant="outline" className="border-red-500/40 text-red-400">No Sparkline</Badge>
+                                            <span className="text-neutral-300 font-mono text-sm">{r.year} / {r.slug}</span>
+                                        </div>
+                                        <span className="text-xs text-neutral-500">{r.title}</span>
+                                    </div>
+                                ))}
+                                {missingImpact.map(r => (
+                                    <div key={r.id} className="flex items-center justify-between p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <Badge variant="outline" className="border-yellow-500/40 text-yellow-400">Missing Impact</Badge>
+                                            <span className="text-neutral-300 font-mono text-sm">{r.year} / {r.slug}</span>
+                                        </div>
+                                        <span className="text-xs text-neutral-500">{r.title}</span>
+                                    </div>
+                                ))}
+                                {missingBehaviorTags.map(r => (
+                                    <div key={r.id} className="flex items-center justify-between p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <Badge variant="outline" className="border-blue-500/40 text-blue-400">No Behaviors</Badge>
+                                            <span className="text-neutral-300 font-mono text-sm">{r.year} / {r.slug}</span>
+                                        </div>
+                                        <span className="text-xs text-neutral-500">Missing 'Search Tags'</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+    )
+}
+
 export default function SystemPage() {
+
     return (
         <div className="p-6 md:p-8 space-y-8 w-full max-w-6xl mx-auto">
             <div>
@@ -409,6 +522,10 @@ export default function SystemPage() {
                         <Terminal className="w-4 h-4 mr-2" />
                         系統日誌
                     </TabsTrigger>
+                    <TabsTrigger value="health" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">
+                        <Database className="w-4 h-4 mr-2" />
+                        數據健康度
+                    </TabsTrigger>
                 </TabsList>
                 <div className="mt-6">
                     <TabsContent value="settings">
@@ -416,6 +533,9 @@ export default function SystemPage() {
                     </TabsContent>
                     <TabsContent value="logs">
                         <LogsTab />
+                    </TabsContent>
+                    <TabsContent value="health">
+                        <ContentHealthTab />
                     </TabsContent>
                 </div>
             </Tabs>
