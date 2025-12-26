@@ -223,17 +223,45 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
     return (
         <LiffContext.Provider value={{ liffObject, isLoggedIn, profile, dbUser, error, isLoading, login, logout }}>
             {isLoading && !dbUser && <GlobalLoader />}
-            {/* Show error context if strictly necessary, or let children handle it via useLiff().error */}
+
             {error && (
-                <div className="fixed bottom-4 left-4 right-4 z-50 p-4 bg-red-900/90 text-white text-xs rounded shadow-lg backdrop-blur safe-area-bottom">
-                    <p className="font-bold mb-1">Login System Error</p>
-                    <p>{error.message}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="mt-2 bg-white/20 px-3 py-1 rounded hover:bg-white/30 transition-colors"
-                    >
-                        Retry
-                    </button>
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-[90%] max-w-sm p-6 bg-red-950/95 border border-red-500/50 text-white rounded-xl shadow-2xl backdrop-blur-xl">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-red-400 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
+                            <h3 className="font-bold text-lg">Login System Error</h3>
+                        </div>
+
+                        <div className="bg-black/40 p-3 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all border border-white/10">
+                            {error.message}
+                            {error.stack && `\n\nStack: ${error.stack.slice(0, 150)}...`}
+                        </div>
+
+                        <details className="text-xs text-white/60 mt-2">
+                            <summary className="cursor-pointer hover:text-white mb-2">Show Debug Details</summary>
+                            <div className="space-y-1 font-mono bg-black/20 p-2 rounded">
+                                <p>LIFF ID: {liffId ? `${liffId.slice(0, 4)}...${liffId.slice(-4)}` : 'MISSING'}</p>
+                                <p>UA: {typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 50) : 'N/A'}...</p>
+                                <p>URL: {typeof window !== 'undefined' ? window.location.pathname : 'N/A'}</p>
+                                <p>Time: {new Date().toLocaleTimeString()}</p>
+                            </div>
+                        </details>
+
+                        <div className="flex gap-3 mt-4">
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="flex-1 bg-white text-black font-bold py-2 rounded hover:bg-gray-200 transition-colors"
+                            >
+                                Retry
+                            </button>
+                            <button
+                                onClick={() => setError(null)}
+                                className="flex-1 bg-white/10 text-white py-2 rounded hover:bg-white/20 transition-colors"
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
             {children}
