@@ -145,7 +145,7 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                     // Force login if in LINE Client
                     if (liff.isInClient()) {
                         logger.info('In LINE client but not logged in - forcing login', { feature: 'liff-provider' })
-                        liff.login()
+                        liff.login({ redirectUri: window.location.href })
                         return
                     }
                     // CRITICAL FIX:

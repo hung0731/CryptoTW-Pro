@@ -98,7 +98,7 @@ export function ReviewsPageClient() {
     const rowVirtualizer = useVirtualizer({
         count: filteredReviews.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 120, // Increased for spacing
+        estimateSize: () => 140, // More height for stacked layout
         overscan: 5,
     });
 
@@ -244,7 +244,7 @@ export function ReviewsPageClient() {
                                 ref={parentRef}
                                 className="overflow-auto"
                                 style={{
-                                    height: `${Math.min(filteredReviews.length * 120, 800)}px`,
+                                    height: `${Math.min(filteredReviews.length * 140, 800)}px`,
                                     maxHeight: '800px'
                                 }}
                             >
@@ -276,83 +276,65 @@ export function ReviewsPageClient() {
                                                     transform: `translateY(${virtualRow.start}px)`,
                                                 }}
                                             >
-                                                <div
-                                                    className="group relative flex items-center gap-6 p-6 bg-[#0A0A0A] hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0"
-                                                >
+                                                <div className="group relative grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 p-4 min-h-[100px] bg-[#0A0A0A] hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0 items-center">
                                                     {/* Main Click Target */}
                                                     <Link
                                                         href={`/reviews/${review.year}/${review.slug}`}
                                                         className="absolute inset-0 z-0"
                                                     />
 
-                                                    {/* Left: Icon & Year Badge */}
-                                                    <div className="flex-shrink-0 flex flex-col items-center gap-2 relative z-10 pointer-events-none">
+                                                    {/* Col 1: Icon (Always Visible) */}
+                                                    <div className="flex flex-shrink-0 items-center justify-center relative z-10 pointer-events-none">
                                                         <div className={cn(
-                                                            "w-10 h-10 rounded-lg flex items-center justify-center border transition-all duration-300",
-                                                            theme.bg, theme.border, theme.icon,
-                                                            "group-hover:border-opacity-50 group-hover:bg-opacity-20"
+                                                            "w-10 h-10 rounded-lg flex items-center justify-center border transition-colors",
+                                                            theme.bg, theme.border, theme.icon
                                                         )}>
                                                             <TypeIcon className="w-5 h-5" />
                                                         </div>
-                                                        <div className="text-[10px] font-mono font-bold text-[#444] group-hover:text-[#666] transition-colors">
-                                                            {review.year}
-                                                        </div>
                                                     </div>
 
-                                                    {/* Middle: Content */}
-                                                    <div className="flex-1 min-w-0 relative z-10 pointer-events-none pr-4">
-                                                        <div className="flex items-center gap-2 mb-1">
+                                                    {/* Col 2: Text Info (Always Visible) */}
+                                                    <div className="flex flex-col justify-center gap-0.5 w-full min-w-0 relative z-10 pointer-events-none">
+                                                        {/* Title */}
+                                                        <h3 className="text-sm sm:text-base font-bold text-white truncate">
+                                                            {review.title.split(/[:：]/)[0]}
+                                                        </h3>
+
+                                                        {/* Subtitle */}
+                                                        {review.title.split(/[:：]/)[1] && (
+                                                            <p className="text-xs text-[#888] font-medium truncate">
+                                                                {review.title.split(/[:：]/)[1].trim()}
+                                                            </p>
+                                                        )}
+
+                                                        {/* Type Tag */}
+                                                        <div className="flex items-center gap-2 mt-1.5">
                                                             <span className={cn(
-                                                                "shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded border transition-colors",
+                                                                "px-1.5 py-0.5 rounded border text-[10px] font-medium",
                                                                 theme.bg, theme.border, theme.text
                                                             )}>
                                                                 {TypeLabels[review.type]}
                                                             </span>
-                                                            <h3 className="text-sm font-bold text-[#E0E0E0] group-hover:text-white transition-colors truncate">
-                                                                {review.title}
-                                                            </h3>
-                                                        </div>
-                                                        <p className="text-xs text-[#525252] group-hover:text-[#888] line-clamp-2 md:line-clamp-1 leading-relaxed">
-                                                            {review.summary}
-                                                        </p>
-                                                    </div>
-
-                                                    {/* Middle-Right: Sparkline (Desktop Only) */}
-                                                    <div className="hidden md:flex flex-col justify-center items-center w-24 h-full relative z-10 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                        <Sparkline
-                                                            data={review.sparklineData || DEFAULT_SPARKLINE}
-                                                            width={96}
-                                                            height={32}
-                                                            color={review.sparklineData ? (review.maxDrawdown?.includes('-') ? '#ef4444' : '#10b981') : '#333'}
-                                                            className="overflow-visible"
-                                                        />
-                                                    </div>
-
-                                                    {/* Right: Stats & Actions (Balanced) */}
-                                                    <div className="flex-shrink-0 w-24 md:w-32 flex flex-col items-end justify-center gap-2 relative z-20">
-                                                        {review.maxDrawdown ? (
-                                                            <div className="flex items-center gap-1.5 bg-red-950/10 border border-red-900/20 px-2 py-0.5 rounded pointer-events-none">
-                                                                <span className="text-[10px] text-red-500/80 font-mono">Max Loss</span>
-                                                                <span className="text-xs font-bold text-red-500 font-mono">{review.maxDrawdown}</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="h-5" /> /* spacer */
-                                                        )}
-
-                                                        <div className="flex items-center gap-2">
-                                                            <Link
-                                                                href={`/reviews/compare?event=${review.slug}-${review.year}`}
-                                                                className="opacity-0 group-hover:opacity-100 transition-all text-[10px] font-medium text-neutral-500 hover:text-white flex items-center gap-1 hover:underline"
-                                                                title="加入對比"
-                                                            >
-                                                                <GitCompare className="w-3 h-3" />
-                                                                對比
-                                                            </Link>
-                                                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[#333] group-hover:bg-[#222] group-hover:text-white transition-all pointer-events-none">
-                                                                <ChevronRight className="w-4 h-4" />
-                                                            </div>
                                                         </div>
                                                     </div>
+
+                                                    {/* Col 3: Data (Sparkline Only) - Always Right Aligned */}
+                                                    <div className="flex flex-col items-end justify-center gap-2 w-[100px] sm:w-[140px] relative z-10">
+
+                                                        {/* Sparkline */}
+                                                        <div className="w-20 sm:w-24 h-6 sm:h-8 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                            <Sparkline
+                                                                data={review.sparklineData || DEFAULT_SPARKLINE}
+                                                                width={96}
+                                                                height={32}
+                                                                color={review.sparklineData ? (review.maxDrawdown?.includes('-') ? '#ef4444' : '#10b981') : '#333'}
+                                                                className="overflow-visible w-full h-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Action Arrow (Absolute Right - Desktop Only or subtle) */}
+                                                    {/* Removing Action Arrow to save space on mobile, entire card is clickable */}
                                                 </div>
                                             </div>
                                         );

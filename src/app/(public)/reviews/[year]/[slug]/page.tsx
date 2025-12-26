@@ -69,18 +69,45 @@ export default function ReviewDetailPage() {
             {/* ... Header ... */}
 
             <article className="max-w-4xl mx-auto p-4 sm:p-6 space-y-8">
-                {/* 1. HERO SECTION */}
-                {/* ... */}
-
-                {/* 2. Chart Section (Interactive) */}
+                {/* 1. Event Introduction Card */}
                 <UniversalCard className="p-0 overflow-hidden">
-                    <div className="border-b border-[#1A1A1A] bg-[#0F0F10] px-4 py-3 flex items-center justify-between">
+                    {/* Header: Tags & Meta */}
+                    <div className="border-b border-[#1A1A1A] bg-[#0F0F10] p-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <LineChart className="w-4 h-4 text-neutral-400" />
-                            <h2 className="text-sm font-bold text-neutral-200">
-                                {isTrainingMode ? '實戰模擬 (Training Mode)' : '數據復盤'}
-                            </h2>
+                            <span className="text-xs font-mono font-bold text-[#666] border border-[#262626] px-2 py-0.5 rounded bg-[#0A0A0A]">
+                                {review.year}
+                            </span>
+                            <span className="text-xs font-bold text-[#E5E5E5]">
+                                事件概覽
+                            </span>
                         </div>
+                        {/* Type Tag (if available) - assuming review.type exists, otherwise skip */}
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                            <span className="text-xs text-[#888] font-medium">Live Analysis</span>
+                        </div>
+                    </div>
+
+                    <div className="p-5 space-y-6">
+                        {/* Title Section */}
+                        <div className="space-y-2">
+                            <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+                                {review.title.split(/[:：]/)[0]}
+                            </h1>
+                            {review.title.split(/[:：]/)[1] && (
+                                <p className="text-sm sm:text-base text-[#888] font-medium leading-relaxed">
+                                    {review.title.split(/[:：]/)[1].trim()}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-xs sm:text-sm text-[#A3A3A3] leading-relaxed">
+                            {review.summary}
+                        </p>
+                        <h2 className="text-sm font-bold text-neutral-200">
+                            {isTrainingMode ? '實戰模擬 (Training Mode)' : '數據復盤'}
+                        </h2>
 
                         {/* Toggle Button */}
                         <button
@@ -251,6 +278,6 @@ export default function ReviewDetailPage() {
                     </UniversalCard>
                 )}
             </article>
-        </main>
+        </main >
     );
 }

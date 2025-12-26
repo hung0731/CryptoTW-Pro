@@ -45,9 +45,9 @@ export function EventAnalysisDashboard({ slug }: EventAnalysisDashboardProps) {
     if (!data) return null;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 1. Event DNA (Radar) */}
-            <UniversalCard className="md:col-span-1 p-0 overflow-hidden min-h-[320px]">
+        <div className="flex flex-col gap-6">
+            {/* 1. Event DNA (Radar) - Single Column */}
+            <UniversalCard className="w-full p-0 overflow-hidden min-h-[320px]">
                 <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                     <SectionHeaderCard
                         title="事件基因 (DNA)"
@@ -55,34 +55,40 @@ export function EventAnalysisDashboard({ slug }: EventAnalysisDashboardProps) {
                         description="市場性格特徵分析"
                     />
                 </div>
-                <div className="h-[260px] relative bg-black/40">
+                <div className="h-[280px] relative bg-[#0A0A0A] p-4">
                     <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                            <PolarGrid stroke="#333" />
+                        <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
+                            <PolarGrid stroke="#262626" />
                             <PolarAngleAxis
                                 dataKey="subject"
-                                tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }}
+                                tick={{ fill: '#A3A3A3', fontSize: 12, fontWeight: 500 }}
                             />
                             <Radar
                                 name="DNA"
                                 dataKey="A"
-                                stroke="#3b82f6"
+                                stroke="#FFFFFF"
                                 strokeWidth={2}
-                                fill="#3b82f6"
-                                fillOpacity={0.2}
+                                fill="#FFFFFF"
+                                fillOpacity={0.15}
                             />
                         </RadarChart>
                     </ResponsiveContainer>
                     {/* Overlay Stats */}
-                    <div className="absolute top-2 right-4 text-[10px] text-right text-neutral-500 font-mono">
-                        <div>DMG: {data.dna.damage}</div>
-                        <div>REC: {data.dna.resilience}</div>
+                    <div className="absolute top-4 right-4 flex flex-col items-end gap-1">
+                        <div className="flex items-center gap-2 text-xs font-mono text-[#666]">
+                            <span>破壞力 (DMG)</span>
+                            <span className="text-white font-bold">{data.dna.damage}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs font-mono text-[#666]">
+                            <span>修復力 (REC)</span>
+                            <span className="text-white font-bold">{data.dna.resilience}</span>
+                        </div>
                     </div>
                 </div>
             </UniversalCard>
 
-            {/* 2. Smart Pattern Finder (Similar Events) */}
-            <UniversalCard className="md:col-span-2 p-0 overflow-hidden min-h-[320px]">
+            {/* 2. Smart Pattern Finder (Similar Events) - Single Column */}
+            <UniversalCard className="w-full p-0 overflow-hidden">
                 <div className="border-b border-[#1A1A1A] bg-[#0F0F10] flex justify-between items-center pr-4">
                     <SectionHeaderCard
                         title="歷史押韻 (History Rhymes)"
@@ -93,24 +99,24 @@ export function EventAnalysisDashboard({ slug }: EventAnalysisDashboardProps) {
 
                 <div className="flex flex-col">
                     {similarEvents.map((sim: any, idx: number) => (
-                        <div key={sim.slug} className="group flex items-center gap-4 p-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors relative overflow-hidden">
+                        <div key={sim.slug} className="group grid grid-cols-[auto_1fr_auto] gap-4 p-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors relative overflow-hidden items-center">
                             {/* Similarity Score */}
-                            <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-full border border-[#2A2A2A] bg-[#0A0A0A] group-hover:border-blue-500/30 transition-colors z-10">
-                                <span className="text-xl font-bold text-blue-500">{sim.score}%</span>
-                                <span className="text-[9px] text-neutral-500 uppercase">Match</span>
+                            <div className="shrink-0 flex flex-col items-center justify-center w-12 h-12 rounded-lg border border-[#262626] bg-[#0F0F10] z-10">
+                                <span className="text-sm font-bold text-white">{sim.score}%</span>
+                                <span className="text-[9px] text-[#666] uppercase">Match</span>
                             </div>
 
                             {/* Content */}
-                            <div className="flex-1 min-w-0 z-10">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[10px] font-mono text-neutral-500 border border-[#333] px-1.5 rounded bg-[#111]">
+                            <div className="flex flex-col gap-1 min-w-0 z-10">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-[#666] border border-[#262626] px-1.5 py-0.5 rounded bg-[#0A0A0A]">
                                         {sim.year}
                                     </span>
-                                    <h4 className="text-sm font-bold text-neutral-200 group-hover:text-white truncate">
+                                    <h4 className="text-sm font-bold text-[#E5E5E5] group-hover:text-white truncate">
                                         {sim.title}
                                     </h4>
                                 </div>
-                                <p className="text-xs text-neutral-500 line-clamp-1 group-hover:text-neutral-400">
+                                <p className="text-xs text-[#666] line-clamp-1 group-hover:text-[#888]">
                                     {sim.summary}
                                 </p>
                             </div>
@@ -119,27 +125,24 @@ export function EventAnalysisDashboard({ slug }: EventAnalysisDashboardProps) {
                             <div className="flex items-center gap-2 z-10">
                                 <Link
                                     href={`/reviews/compare?event=${slug}&compare=${sim.originalSlug}`}
-                                    className="px-3 py-1.5 rounded-lg bg-[#1A1A1A] text-xs font-medium text-neutral-400 hover:bg-black hover:text-white border border-[#2A2A2A] transition-all flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded bg-[#1A1A1A] text-xs font-medium text-[#888] hover:bg-white hover:text-black border border-[#262626] hover:border-white transition-all flex items-center gap-1.5"
                                 >
                                     <GitCompare className="w-3.5 h-3.5" />
-                                    <span>VS</span>
+                                    <span className="hidden sm:inline">對比</span>
                                 </Link>
                                 <Link
-                                    href={`/reviews/${sim.year}/${sim.originalSlug.split('-')[0]}`} // Approximate link reconstruction
-                                    className="p-2 rounded-lg hover:bg-[#1A1A1A] text-neutral-500 hover:text-white transition-colors"
+                                    href={`/reviews/${sim.year}/${sim.originalSlug.split('-')[0]}`}
+                                    className="p-2 rounded hover:bg-[#1A1A1A] text-[#666] hover:text-white transition-colors"
                                 >
                                     <ArrowRight className="w-4 h-4" />
                                 </Link>
                             </div>
-
-                            {/* Hover Gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/0 via-blue-900/0 to-blue-900/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                     ))}
 
                     {similarEvents.length === 0 && (
-                        <div className="p-8 text-center text-neutral-500 text-sm">
-                            數據分析中，暫無匹配事件
+                        <div className="p-8 text-center text-[#666] text-sm font-mono">
+                            暫無高度匹配的歷史事件
                         </div>
                     )}
                 </div>
