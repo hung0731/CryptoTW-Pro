@@ -346,6 +346,57 @@ export default function JoinPage() {
                         </div>
                     </div>
 
+                    {/* OKX Existing User Rebind Program */}
+                    <div className="mt-6 bg-gradient-to-br from-neutral-900/80 to-neutral-950 border border-white/10 rounded-2xl p-5 relative overflow-hidden">
+                        {/* Accent line */}
+                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+
+                        <div className="flex items-start gap-3 mb-4">
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                <Sparkles className="w-4 h-4 text-amber-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xs font-bold text-white mb-1">已有 OKX 帳號？</h3>
+                                <p className="text-[10px] text-neutral-500 leading-relaxed">
+                                    現有用戶可透過「換綁計劃」綁定至 CryptoTW Pro 節點，同樣享有 Pro 權益！
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 text-[10px] text-neutral-400 mb-4">
+                            <div className="flex items-start gap-2">
+                                <span className="w-4 h-4 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 text-[9px] font-bold text-neutral-500">1</span>
+                                <span>點擊下方連結，登入你的 OKX 帳號</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <span className="w-4 h-4 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 text-[9px] font-bold text-neutral-500">2</span>
+                                <span>輸入邀請碼 <span className="font-mono text-white bg-white/10 px-1 py-0.5 rounded">CTWPRO</span> 並填寫換綁原因</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <span className="w-4 h-4 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 text-[9px] font-bold text-neutral-500">3</span>
+                                <span>審核通過後（約 1 工作日），回來提交 UID 即可開通</span>
+                            </div>
+                        </div>
+
+                        <a
+                            href="https://okx.com/ul/J6l2R5"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between w-full px-4 py-3 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-all group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <img src="/exchange/OKX.svg" alt="OKX" className="h-4 opacity-80" />
+                                <span className="text-[11px] font-bold text-amber-200">現有用戶換綁申請</span>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-amber-500/50 group-hover:text-amber-400 transition-colors" />
+                        </a>
+
+                        <p className="text-[9px] text-neutral-600 mt-3 flex items-center gap-1.5">
+                            <Info className="w-3 h-3" />
+                            符合條件：180 天內無其他節點綁定紀錄
+                        </p>
+                    </div>
+
                     {/* Business Model / Why Free? */}
                     <div className="pt-8 pb-4 border-t border-white/5">
                         <div className="flex flex-col gap-4">
