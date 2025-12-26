@@ -1,7 +1,6 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, useRef, ReactNode, useCallback } from 'react'
-import liff from '@line/liff'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database'
 import GlobalLoader from './GlobalLoader'
@@ -10,7 +9,7 @@ import { logger } from '@/lib/logger'
 type DBUser = Database['public']['Tables']['users']['Row']
 
 interface LiffContextType {
-    liffObject: typeof liff | null
+    liffObject: any | null
     isLoggedIn: boolean
     profile: any | null
     dbUser: DBUser | null
@@ -39,7 +38,7 @@ interface LiffProviderProps {
 }
 
 export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
-    const [liffObject, setLiffObject] = useState<typeof liff | null>(null)
+    const [liffObject, setLiffObject] = useState<any | null>(null)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [profile, setProfile] = useState<any | null>(null)
     const [dbUser, setDbUser] = useState<DBUser | null>(null)
@@ -86,17 +85,13 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
 
         const initLiff = async () => {
             try {
-                // 1. Optimistic Load from Cache (Immediate UI feedback)
+                // 1. Optimistic Load
                 const cachedUser = localStorage.getItem('dbUser')
                 if (cachedUser) {
                     try {
                         const parsed = JSON.parse(cachedUser)
                         setDbUser(parsed)
-                        setIsLoggedIn(true) // Optimistically set true
-                        // Don't disable loading yet, wait for real verification if possible, 
-                        // OR disable it but seamlessly update background if auth fails.
-                        // Let's keep isLoading true until we confirm with LIFF or timeout?
-                        // Actually, for better UX, let's show content but update in background.
+                        setIsLoggedIn(true)
                         setIsLoading(false)
                         logger.info('Optimistic load success', { feature: 'liff-provider', userId: parsed.id })
                     } catch (e) {
@@ -105,10 +100,21 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                     }
                 }
 
-                // 2. Login Check (Optimistic) already done above.
+                // 2. Wait for LIFF SDK to load (CDN)
+                let attempts = 0
+                while (!(window as any).liff && attempts < 20) {
+                    await new Promise(resolve => setTimeout(resolve, 100))
+                    attempts++
+                }
+
+                if (!(window as any).liff) {
+                    throw new Error('LIFF SDK failed to load from CDN')
+                }
+
+                const liff = (window as any).liff
 
                 // 3. Initialize LIFF
-                logger.info('Starting LIFF Init...', { feature: 'liff-provider', liffId })
+                logger.info('Starting LIFF Init (CDN)...', { feature: 'liff-provider', liffId })
                 await liff.init({ liffId })
                 setLiffObject(liff)
 
@@ -158,35 +164,24 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                         }
                     } catch (err) {
                         logger.error('Profile/Auth Fetch Error', err as Error, { feature: 'liff-provider' })
-                        // Consider invalidating optimistic login if real verification fails?
-                        // For now, just log valid error.
                     }
                 } else {
                     // Not Logged In
                     logger.info('LIFF not logged in.', { feature: 'liff-provider', isInClient: liff.isInClient() })
 
                     if (liff.isInClient()) {
-                        // In LINE App: Auto Login
-                        // CHECK: prevent infinite loops if login fails repeatedly
-                        // We can check for a specific query param or just trust liff.login behavior
                         const url = new URL(window.location.href)
-                        // If we have an error code, don't loop
                         if (url.searchParams.has('error')) {
                             logger.warn('Login failed previously, not retrying auto-login', { feature: 'liff-provider' })
                             return
                         }
 
                         logger.info('In LINE client. Executing Auto Login...', { feature: 'liff-provider' })
-                        // Clean URL before redirecting to avoid carrying over old params
-                        // But keep intended destination path
                         liff.login({ redirectUri: window.location.href })
                         return
                     } else {
-                        // External Browser: Stay logged out, clear sensitive cache
-                        if (isLoggedIn) { // using the stale state variable from closure, but we can check if we set it optimistically
-                            // If we were optimistic but LIFF says no, we must clear it clearly.
-                            // However, `isLoggedIn` in this scope is the initial state (false). 
-                            // We need to check if we just did an optimistic load that needs reverting.
+                        // External Browser
+                        if (isLoggedIn) {
                             if (localStorage.getItem('dbUser')) {
                                 logger.info('Clearing stale cache - LIFF confirmed not logged in', { feature: 'liff-provider' })
                                 setDbUser(null)
@@ -201,7 +196,6 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                 logger.error('LIFF Critical Init Error', initError, { feature: 'liff-provider' })
                 setError(initError)
             } finally {
-                // Ensure loading is dismissed eventually
                 setIsLoading(false)
             }
         }

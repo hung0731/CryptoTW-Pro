@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_TC } from "next/font/google";
+import Link from "next/link";
+import Script from "next/script";
 import "./globals.css";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Toaster } from "@/components/ui/toaster";
@@ -77,6 +79,10 @@ export default function RootLayout({
         <WebVitals />
         <BackToTop />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+        <Script
+          src="https://static.line-scdn.net/liff/edge/2/sdk.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
