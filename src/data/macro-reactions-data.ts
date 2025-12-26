@@ -27,7 +27,7 @@ export interface MacroReaction {
 // Data imported from macro-reactions.json
 import rawData from './macro-reactions.json'
 
-export const MACRO_REACTIONS: Record<string, MacroReaction> = rawData.data as Record<string, MacroReaction>
+export const MACRO_REACTIONS: Record<string, MacroReaction> = rawData as unknown as Record<string, MacroReaction>
 
 export function getReaction(eventKey: string, date: string): MacroReaction | undefined {
     const key = `${eventKey}-${date}`

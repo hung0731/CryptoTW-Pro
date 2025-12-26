@@ -43,7 +43,7 @@ function getZoneVariant(zone: string): 'success' | 'info' | 'warning' | 'error' 
 // Single Column Card Style
 function IndicatorEntryCard({ view }: { view: IndicatorMetricView }) {
     const Icon = getIndicatorIcon(view.id);
-    const zoneColors = ZONE_COLORS[view.zone as keyof typeof ZONE_COLORS] || ZONE_COLORS.neutral;
+    const zoneColors = ZONE_COLORS[view.zone as keyof typeof ZONE_COLORS] || ZONE_COLORS['lean_fear'];
 
     return (
         <Link href={`/indicators/${view.slug}`} className="block group relative p-5 hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0">

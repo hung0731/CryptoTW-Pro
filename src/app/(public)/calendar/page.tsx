@@ -7,7 +7,7 @@ import { AISummaryCardSkeleton, CalendarEventSkeleton } from '@/components/ui/sk
 // Server Component
 export default async function CalendarPage() {
     // Pre-calculate view model on server
-    const enrichedEvents = MacroEventsService.getCalendarViewModel()
+    const enrichedEvents = await MacroEventsService.getCalendarViewModel()
 
     return (
         <main className="min-h-screen bg-black text-white pb-20">
