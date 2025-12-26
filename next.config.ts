@@ -54,10 +54,10 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' *.google-analytics.com *.googletagmanager.com *.line.me",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' *.google-analytics.com *.googletagmanager.com *.line.me *.line-scdn.net static.line-scdn.net",
               "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
               "img-src 'self' blob: data: *.supabase.co https://*.line-scdn.net https://profile.line-scdn.net https://obs.line-scdn.net https://api.coinglass.com",
-              "connect-src 'self' *.supabase.co *.google-analytics.com https://api.coinglass.com https://open-api.coinglass.com wss://*.supabase.co",
+              "connect-src 'self' *.supabase.co *.google-analytics.com https://api.coinglass.com https://open-api.coinglass.com wss://*.supabase.co *.line.me https://access.line.me",
               "font-src 'self' data: fonts.gstatic.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
