@@ -101,7 +101,11 @@ export default function JoinPage() {
 
             if (res.ok) {
                 setSubmitted(true)
-                setResponseMessage(data.message || '提交成功')
+                if (selectedExchange === 'lbank') {
+                    setResponseMessage('LBank 數據通常有 24 小時延遲。系統將在每日更新後自動為您開通 Pro 權限，請耐心等候！')
+                } else {
+                    setResponseMessage(data.message || '提交成功')
+                }
                 setAutoVerified(data.autoVerified || false)
 
                 if (data.autoVerified) {

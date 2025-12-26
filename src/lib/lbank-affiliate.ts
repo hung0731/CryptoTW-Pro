@@ -144,7 +144,7 @@ export async function syncAllLBankInvitees(): Promise<Map<string, LBankInviteeDa
     const pageSize = 100 // Max 100
     let start = 0
     let hasMore = true
-    const startTime = 0 // From beginning
+    const startTime = 1672531200000 // 2023-01-01 (Avoid using 0)
     const endTime = Date.now()
 
     while (hasMore) {

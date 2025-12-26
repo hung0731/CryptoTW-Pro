@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSafeServerClient } from '@/lib/supabase'
-import { syncAllLBankInvitees } from '@/lib/lbank-affiliate'
+import { syncAllLBankInvitees, LBankInviteeData } from '@/lib/lbank-affiliate'
 import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
@@ -23,20 +23,43 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Run Sync Logic
-        logger.info('[Admin] Starting LBank Sync Test', { userId: user.id })
+        const { uid } = await req.json().catch(() => ({}))
+        logger.info('[Admin] Starting LBank Sync Test', { userId: user.id, searchUid: uid })
 
         try {
             const results = await syncAllLBankInvitees()
 
-            // Convert Map to Array for JSON response
-            const invitees = Array.from(results.entries()).map(([, data]) => ({
-                ...data
-            }))
+            let responseData: LBankInviteeData[] = []
+            let found = false
+
+            if (uid) {
+                // Search specifically for this UID
+                // Map key is openId (from syncAllLBankInvitees implementation)
+
+                const target = results.get(uid)
+                if (target) {
+                    responseData = [target]
+                    found = true
+                } else {
+                    // Try to find in values just in case
+                    const foundItem = Array.from(results.values()).find(u => u.openId === uid)
+                    if (foundItem) {
+                        responseData = [foundItem]
+                        found = true
+                    }
+                }
+            } else {
+                // Convert Map to Array for JSON response (Top 10)
+                responseData = Array.from(results.entries())
+                    .slice(0, 10)
+                    .map(([, data]) => ({ ...data }))
+            }
 
             return NextResponse.json({
                 success: true,
                 count: results.size,
-                data: invitees.slice(0, 10), // Return top 10 for preview
+                found: uid ? found : undefined,
+                data: responseData,
                 timestamp: new Date().toISOString()
             })
 

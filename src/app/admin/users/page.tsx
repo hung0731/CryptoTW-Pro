@@ -384,18 +384,24 @@ function VIPTab({ users }: { users: UserWithBinding[] }) {
 function LBankTestTab() {
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<any>(null)
+    const [searchUid, setSearchUid] = useState('')
     const { toast } = useToast()
 
     const runTest = async () => {
         setIsLoading(true)
         setResult(null)
         try {
-            const res = await fetch('/api/admin/lbank/test', { method: 'POST' })
+            const res = await fetch('/api/admin/lbank/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: searchUid.trim() })
+            })
             const data = await res.json()
             setResult(data)
 
             if (data.success) {
-                toast({ title: 'Sync Successful', description: `Found ${data.count} invitees` })
+                const msg = data.found ? `Found User: ${data.data[0]?.userId}` : `Sync Complete. Count: ${data.count}`
+                toast({ title: 'Success', description: msg })
             } else {
                 toast({ title: 'Sync Failed', description: data.error, variant: 'destructive' })
             }
@@ -414,18 +420,31 @@ function LBankTestTab() {
                     {isLoading && <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />}
                 </CardTitle>
                 <CardDescription>
-                    Test the LBank API connection and sync logic directly from the production server.
+                    Sync all invitees or search for a specific UID directly from LBank API.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <Button onClick={runTest} disabled={isLoading} className="bg-blue-600 hover:bg-blue-500">
-                    {isLoading ? 'Running Sync...' : 'Run Sync Test'}
-                </Button>
+                <div className="flex gap-2">
+                    <Input
+                        placeholder="Search specific UID (Optional)"
+                        value={searchUid}
+                        onChange={e => setSearchUid(e.target.value)}
+                        className="bg-black/50 border-white/10"
+                    />
+                    <Button onClick={runTest} disabled={isLoading} className="bg-blue-600 hover:bg-blue-500 whitespace-nowrap">
+                        {isLoading ? 'Checking...' : 'Run Sync / Search'}
+                    </Button>
+                </div>
 
                 {result && (
                     <div className="mt-4 p-4 rounded-lg bg-black/50 border border-white/10 font-mono text-xs overflow-auto max-h-[400px]">
+                        <div className="mb-2 text-neutral-400">
+                            Status: {result.success ? '✅ Success' : '❌ Failed'} |
+                            Count: {result.count}
+                            {searchUid && (result.found ? ' | ✅ UID Found' : ' | ⚠️ UID Not Found')}
+                        </div>
                         <pre className="text-green-400">
-                            {JSON.stringify(result, null, 2)}
+                            {JSON.stringify(result.data, null, 2)}
                         </pre>
                     </div>
                 )}
