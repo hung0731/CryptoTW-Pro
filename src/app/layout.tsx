@@ -81,7 +81,7 @@ export default function RootLayout({
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
         <Script
           src="https://static.line-scdn.net/liff/edge/2/sdk.js"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
       </body>
     </html>

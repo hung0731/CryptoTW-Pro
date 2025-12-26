@@ -60,14 +60,17 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
     }, [liffObject])
 
     const logout = useCallback(() => {
+        // Always clear local state first
+        setProfile(null)
+        setDbUser(null)
+        localStorage.removeItem('dbUser')
+        setIsLoggedIn(false)
+
+        // Then try LIFF logout if available
         if (liffObject && liffObject.isLoggedIn()) {
             liffObject.logout()
-            setIsLoggedIn(false)
-            setProfile(null)
-            setDbUser(null)
-            localStorage.removeItem('dbUser')
-            window.location.reload()
         }
+        window.location.reload()
     }, [liffObject])
 
     useEffect(() => {
@@ -102,13 +105,14 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
 
                 // 2. Wait for LIFF SDK to load (CDN)
                 let attempts = 0
-                while (!(window as any).liff && attempts < 20) {
+                // Increase wait time to 20 seconds (200 * 100ms) for slower mobile networks
+                while (!(window as any).liff && attempts < 200) {
                     await new Promise(resolve => setTimeout(resolve, 100))
                     attempts++
                 }
 
                 if (!(window as any).liff) {
-                    throw new Error('LIFF SDK failed to load from CDN')
+                    throw new Error('LIFF SDK failed to load from CDN (Timeout 20s)')
                 }
 
                 const liff = (window as any).liff
