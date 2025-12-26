@@ -149,7 +149,7 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                                     id: data.user.id,
                                     line_user_id: data.user.line_user_id,
                                     display_name: data.user.display_name,
-                                    avatar_url: data.user.avatar_url,
+                                    picture_url: data.user.picture_url,
                                     membership_status: data.user.membership_status,
                                     updated_at: new Date().toISOString()
                                 }

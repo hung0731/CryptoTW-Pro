@@ -90,16 +90,16 @@ export function HomePageClient({
                     {/* Welcome Component */}
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            {!profile ? (
+                            {!dbUser && !profile ? (
                                 <div
                                     onClick={() => liffObject?.login()}
                                     className="w-10 h-10 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-colors"
                                 >
                                     <span className="text-sm">登入</span>
                                 </div>
-                            ) : profile?.pictureUrl ? (
+                            ) : (dbUser?.picture_url || profile?.pictureUrl) ? (
                                 <img
-                                    src={profile.pictureUrl}
+                                    src={dbUser?.picture_url || profile?.pictureUrl}
                                     alt="Avatar"
                                     className="w-10 h-10 rounded-full border border-white/20"
                                 />
@@ -111,7 +111,7 @@ export function HomePageClient({
                             <div>
                                 <p className="text-xs text-neutral-500">{greeting}</p>
                                 <h1 className="text-base font-bold text-white">
-                                    {profile?.displayName || (
+                                    {(dbUser?.display_name || profile?.displayName) || (
                                         <span
                                             onClick={() => liffObject?.login()}
                                             className="cursor-pointer hover:text-white/80"
@@ -128,10 +128,6 @@ export function HomePageClient({
                             </Link>
                             <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
                                 <Settings className="w-4 h-4 text-[#808080]" />
-                            </Link>
-                            {/* Temporary Debug Button */}
-                            <Link href="/debug" className="w-9 h-9 rounded-lg bg-red-950/30 border border-red-500/30 flex items-center justify-center hover:bg-red-900/50">
-                                <span className="text-[10px] font-bold text-red-400">DB</span>
                             </Link>
                         </div>
                     </div>
