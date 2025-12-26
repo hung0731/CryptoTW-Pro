@@ -2,9 +2,12 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
+
+const CACHE_KEY = 'api:bull-bear'
 
 // Bull/Bear Index: Now uses Coinglass Fear & Greed (V4)
 export async function GET(req: NextRequest) {
@@ -13,6 +16,14 @@ export async function GET(req: NextRequest) {
     if (rateLimited) return rateLimited
 
     try {
+        // Check cache first (5 min)
+        const cached = await getCache(CACHE_KEY)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         const data = await coinglassV4Request<any[]>('/api/index/fear-greed-history', { limit: 1 })
 
         if (!data || data.length === 0) {
@@ -23,7 +34,7 @@ export async function GET(req: NextRequest) {
         const index = latest.value
         const sentiment = getSentiment(index)
 
-        return NextResponse.json({
+        const result = {
             bullBear: {
                 index: index,
                 sentiment: sentiment.label,
@@ -39,6 +50,13 @@ export async function GET(req: NextRequest) {
                 change24h: 0,
                 lastUpdated: new Date(latest.time || Date.now()).toISOString()
             }
+        }
+
+        // Cache for 5 minutes
+        await setCache(CACHE_KEY, result, CacheTTL.MEDIUM)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (error) {
         logger.error('Bull/Bear API error', error, { feature: 'coinglass-api', endpoint: 'bull-bear' })

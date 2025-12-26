@@ -1,11 +1,21 @@
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
 const CG_BASE = 'https://open-api-v4.coinglass.com'
+const CACHE_KEY = 'api:bubble-index'
 
 export async function GET() {
     try {
+        // Check cache first (1 hour for daily data)
+        const cached = await getCache(CACHE_KEY)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         const res = await fetch(`${CG_BASE}/api/index/bitcoin/bubble-index`, {
             headers: { 'CG-API-KEY': CG_API_KEY },
             next: { revalidate: 3600 } // 1 hour cache (daily data)
@@ -26,7 +36,7 @@ export async function GET() {
             bubbleIndex: d.bubble_index
         }))
 
-        return NextResponse.json({
+        const result = {
             latest: {
                 date: latest.date_string,
                 price: latest.price,
@@ -35,6 +45,13 @@ export async function GET() {
                 transactionCount: latest.transaction_count
             },
             history
+        }
+
+        // Cache for 1 hour
+        await setCache(CACHE_KEY, result, CacheTTL.HOURLY)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (e) {
         const err = e instanceof Error ? e : new Error(String(e))

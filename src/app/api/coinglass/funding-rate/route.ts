@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 300
@@ -18,8 +19,17 @@ export async function GET(request: NextRequest) {
 
     // If a specific symbol is requested, just fetch that. Otherwise fetch top tokens.
     const symbols = symbolParam && symbolParam !== 'ALL' ? [symbolParam] : TOP_TOKENS
+    const cacheKey = `api:funding-rate:${symbols.join(',')}`
 
     try {
+        // Check cache first (5 min)
+        const cached = await getCache(cacheKey)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         const results = await Promise.all(
             symbols.map(async (sym) => {
                 const data = await coinglassV4Request<any[]>(
@@ -81,13 +91,20 @@ export async function GET(request: NextRequest) {
         // Fill normal if empty
         const normal = processed.filter(p => p!.rate >= 0 && p!.rate <= 0.0001)
 
-        return NextResponse.json({
+        const result = {
             fundingRates: {
                 extremePositive: extremePositive.length > 0 ? extremePositive : normal.slice(0, 3),
                 extremeNegative: extremeNegative.length > 0 ? extremeNegative : [],
                 normal,
                 lastUpdated: new Date().toISOString()
             }
+        }
+
+        // Cache for 5 minutes
+        await setCache(cacheKey, result, CacheTTL.MEDIUM)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (error) {
         logger.error('Funding rate API error', error, { feature: 'coinglass-api', endpoint: 'funding-rate' })
@@ -95,23 +112,5 @@ export async function GET(request: NextRequest) {
             { error: '資料存取失敗 (Server Error)' },
             { status: 500 }
         )
-    }
-}
-
-function getDemoData() {
-    return {
-        extremePositive: [
-            { symbol: 'DOGE', rate: 0.0015, annualizedRate: 164.25, exchanges: [] },
-            { symbol: 'PEPE', rate: 0.0012, annualizedRate: 131.40, exchanges: [] },
-            { symbol: 'WIF', rate: 0.0010, annualizedRate: 109.50, exchanges: [] },
-        ],
-        extremeNegative: [
-            { symbol: 'APT', rate: -0.0008, annualizedRate: -87.60, exchanges: [] },
-        ],
-        normal: [
-            { symbol: 'BTC', rate: 0.0001, annualizedRate: 10.95, exchanges: [] },
-            { symbol: 'ETH', rate: 0.00008, annualizedRate: 8.76, exchanges: [] },
-        ],
-        lastUpdated: new Date().toISOString()
     }
 }

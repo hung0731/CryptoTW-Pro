@@ -2,8 +2,11 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
+
+const CACHE_KEY = 'api:stablecoin-marketcap'
 
 interface StablecoinHistoryData {
     data_list: (Record<string, number> | number)[]  // Can be objects with USDT/DAI/USDC etc or numbers
@@ -27,6 +30,14 @@ export async function GET(req: NextRequest) {
     if (rateLimited) return rateLimited
 
     try {
+        // Check cache first (1 hour for daily data)
+        const cached = await getCache(CACHE_KEY)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         const apiKey = getCoinglassApiKey()
         if (!apiKey) {
             return NextResponse.json({ error: 'API Key not configured' }, { status: 500 })
@@ -73,11 +84,17 @@ export async function GET(req: NextRequest) {
             price: 0
         })).sort((a, b) => a.timestamp - b.timestamp)
 
-        return NextResponse.json({ history })
+        const result = { history }
+
+        // Cache for 1 hour
+        await setCache(CACHE_KEY, result, CacheTTL.HOURLY)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
+        })
 
     } catch (error) {
         logger.error('Stablecoin API Error', error, { feature: 'coinglass-api', endpoint: 'stablecoin-marketcap' })
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }
-

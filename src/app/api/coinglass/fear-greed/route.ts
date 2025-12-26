@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 import { trackApiCall } from '@/lib/api-usage'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,17 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const range = searchParams.get('range') || '3M'  // 1M, 3M, 1Y
 
+    const cacheKey = `api:fear-greed:${range}`
+
     try {
+        // Check cache first
+        const cached = await getCache(cacheKey)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         // Coinglass Fear & Greed History API
         const fgiRes = await coinglassV4Request<FGIHistoryResponse>(
             '/api/index/fear-greed-history',
@@ -68,7 +79,7 @@ export async function GET(req: NextRequest) {
         // Get current value (latest)
         const current = allData[allData.length - 1]
 
-        return NextResponse.json({
+        const result = {
             history: downsampled,
             current: {
                 value: current.value,
@@ -76,6 +87,13 @@ export async function GET(req: NextRequest) {
                 price: current.price,
             },
             range,
+        }
+
+        // Cache for 15 minutes
+        await setCache(cacheKey, result, CacheTTL.SLOW)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (error) {
         logger.error('FGI History API error', error, { feature: 'coinglass-api', endpoint: 'fear-greed' })

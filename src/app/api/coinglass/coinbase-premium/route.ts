@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { getCoinglassApiKey } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,8 +18,17 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     const symbol = searchParams.get('symbol') || 'BTC'
+    const cacheKey = `api:coinbase-premium:${symbol}`
 
     try {
+        // Check cache first (1 hour for historical data)
+        const cached = await getCache(cacheKey)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         const apiKey = getCoinglassApiKey()
         if (!apiKey) {
             return NextResponse.json({ error: 'API Key not configured' }, { status: 500 })
@@ -54,7 +64,14 @@ export async function GET(req: NextRequest) {
             price: 0
         })).sort((a, b) => a.timestamp - b.timestamp)
 
-        return NextResponse.json({ history })
+        const result = { history }
+
+        // Cache for 1 hour
+        await setCache(cacheKey, result, CacheTTL.HOURLY)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
+        })
 
     } catch (error) {
         logger.error('Premium API Error', error, { feature: 'coinglass-api', endpoint: 'premium' })

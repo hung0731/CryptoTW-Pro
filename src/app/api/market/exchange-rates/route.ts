@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { getHoyabitPrices } from '@/lib/hoyabit';
+import { getCache, setCache, CacheTTL } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60; // Cache for 1 minute
+
+const CACHE_KEY = 'api:exchange-rates'
 
 interface ExchangeRates {
     max: { buy: number; sell: number } | null;
@@ -18,6 +21,14 @@ interface ExchangeRates {
 // GET /api/market/exchange-rates - Get USDT/TWD rates from 3 exchanges
 export async function GET() {
     try {
+        // Check cache first (1 min for realtime rates)
+        const cached = await getCache<ExchangeRates>(CACHE_KEY)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         // Parallel fetch from all sources
         const [hoyaPrices, bitoRes, maxRes, btcRes, ethRes] = await Promise.all([
             // HoyaBit
@@ -99,7 +110,12 @@ export async function GET() {
             rates.usdTwd = validRates.reduce((a, b) => a + b, 0) / validRates.length;
         }
 
-        return NextResponse.json(rates);
+        // Cache for 1 minute
+        await setCache(CACHE_KEY, rates, CacheTTL.FAST);
+
+        return NextResponse.json(rates, {
+            headers: { 'X-Cache': 'MISS' }
+        });
     } catch (error) {
         logger.error('Exchange rates API error', error, { feature: 'exchange-rates' });
         return NextResponse.json({ error: 'Failed to fetch rates' }, { status: 500 });

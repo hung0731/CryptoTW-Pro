@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -20,7 +21,17 @@ export async function GET(request: NextRequest) {
     let interval = timeframe
     if (timeframe === '24h') interval = '1d'
 
+    const cacheKey = `api:liquidation:${symbol}:${interval}`
+
     try {
+        // Check cache first (1 min for realtime data)
+        const cached = await getCache(cacheKey)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         // Fetch liquidation history (aggregated) instead of raw orders
         // limit=1 gives us the latest completed bar, or current bar
         const data = await coinglassV4Request<any[]>(
@@ -36,7 +47,7 @@ export async function GET(request: NextRequest) {
         const longLiquidation = latest.longLiquidationUsd || 0
         const shortLiquidation = latest.shortLiquidationUsd || 0
 
-        return NextResponse.json({
+        const result = {
             liquidations: {
                 // We no longer have raw items list from this endpoint, return empty or mock if needed
                 items: [],
@@ -50,6 +61,13 @@ export async function GET(request: NextRequest) {
                 },
                 lastUpdated: new Date().toISOString()
             }
+        }
+
+        // Cache for 1 minute (realtime data)
+        await setCache(cacheKey, result, CacheTTL.FAST)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (error) {
         logger.error('Liquidation API error', error, { feature: 'coinglass-api', endpoint: 'liquidation' })

@@ -1,7 +1,8 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
+import { getCoinglassApiKey } from '@/lib/coinglass'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,8 +21,6 @@ interface HistoryDataPoint {
     price: number
 }
 
-import { getCoinglassApiKey } from '@/lib/coinglass'
-
 export async function GET(req: NextRequest) {
     const rateLimited = await simpleApiRateLimit(req, 'cg-oi-history', 20, 60)
     if (rateLimited) return rateLimited
@@ -29,8 +28,17 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const range = searchParams.get('range') || '3M'
     const symbol = searchParams.get('symbol') || 'BTC'
+    const cacheKey = `api:oi-history:${symbol}:${range}`
 
     try {
+        // Check cache first (1 hour for historical data)
+        const cached = await getCache(cacheKey)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         // Use V3 OHLC Aggregated History (V4 returns 404/Error)
         // https://open-api-v3.coinglass.com/api/futures/openInterest/ohlc-aggregated-history
         const apiKey = getCoinglassApiKey()
@@ -97,7 +105,7 @@ export async function GET(req: NextRequest) {
 
         const current = allData[allData.length - 1]
 
-        return NextResponse.json({
+        const result = {
             history: downsampled,
             current: {
                 value: current?.value || 0,
@@ -106,6 +114,13 @@ export async function GET(req: NextRequest) {
             },
             range,
             symbol,
+        }
+
+        // Cache for 1 hour (historical data doesn't change frequently)
+        await setCache(cacheKey, result, CacheTTL.HOURLY)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (error) {
         logger.error('Open Interest History API error', error, { feature: 'coinglass-api', endpoint: 'open-interest-history' })

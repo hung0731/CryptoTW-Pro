@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
 const CG_BASE = 'https://open-api-v4.coinglass.com'
@@ -11,8 +12,17 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     const range = searchParams.get('range') || '3M'
+    const cacheKey = `api:etf-flow:${range}`
 
     try {
+        // Check cache first (15 min)
+        const cached = await getCache(cacheKey)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         const res = await fetch(`${CG_BASE}/api/etf/bitcoin/flow-history`, {
             headers: { 'CG-API-KEY': CG_API_KEY },
             next: { revalidate: 300 } // 5 min cache
@@ -51,7 +61,7 @@ export async function GET(req: NextRequest) {
         // Latest day
         const latest = allData[allData.length - 1]
 
-        return NextResponse.json({
+        const result = {
             latest: {
                 date: new Date(latest.date).toISOString().split('T')[0],
                 flowUsd: latest.value * 1_000_000_000,
@@ -61,6 +71,13 @@ export async function GET(req: NextRequest) {
             flow30d,
             history: filtered,
             range,
+        }
+
+        // Cache for 15 minutes
+        await setCache(cacheKey, result, CacheTTL.SLOW)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (e) {
         logger.error('ETF Flow API error:', e as Error)

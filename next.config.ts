@@ -57,7 +57,7 @@ const nextConfig = {
               // Added *.line-scdn.net to connect-src to allow fetching LIFF config
               "connect-src 'self' *.supabase.co *.google-analytics.com https://api.coinglass.com https://open-api.coinglass.com wss://*.supabase.co *.line.me https://*.line.me https://access.line.me https://*.line-scdn.net",
               "font-src 'self' data: fonts.gstatic.com",
-              "frame-ancestors *",
+              "frame-ancestors 'self' https://*.line.me https://liff.line.me",
               "base-uri 'self'",
               "form-action 'self'",
               "upgrade-insecure-requests",

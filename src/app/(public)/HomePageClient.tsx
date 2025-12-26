@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PageHeader } from '@/components/PageHeader'
 import { useLiff } from '@/components/LiffProvider'
@@ -21,26 +21,59 @@ import { UniversalCard } from '@/components/ui/UniversalCard'
 import { QuickActionCard } from '@/components/home/QuickActionCard'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
 import { HistoryEchoCard } from '@/components/home/HistoryEchoCard'
-import { findHistoricalSimilarity } from '@/lib/historical-matcher'
+import { findHistoricalSimilarity, HistoricalMatch } from '@/lib/historical-matcher'
 import { LineConnectCard } from '@/components/home/LineConnectCard'
 import { SentimentDashboardCard } from '@/components/home/SentimentDashboardCard'
 import { CurrencyConverter } from '@/components/home/CurrencyConverter'
-// SiteFooter is rendered in layout.tsx, no need to duplicate here
+import { Skeleton } from '@/components/ui/skeleton'
 
-interface HomePageClientProps {
-    reactions: Record<string, MacroReaction>
-    initialStatus: MarketStatusData | null
-    initialConclusion: Conclusion | null
-    initialContext: MarketContext | null
-}
+export function HomePageClient() {
+    const { profile, dbUser, isLoading: isAuthLoading, liffObject, error, retry } = useLiff()
 
-export function HomePageClient({
-    reactions,
-    initialStatus,
-    initialConclusion,
-    initialContext
-}: HomePageClientProps) {
-    const { profile, dbUser, isLoading: isAuthLoading, liffObject } = useLiff()
+    // Client-side data states
+    const [reactions, setReactions] = useState<Record<string, MacroReaction>>({})
+    const [marketStatus, setMarketStatus] = useState<MarketStatusData | null>(null)
+    const [marketConclusion, setMarketConclusion] = useState<Conclusion | null>(null)
+    const [marketContext, setMarketContext] = useState<MarketContext | null>(null)
+    const [historicalMatch, setHistoricalMatch] = useState<HistoricalMatch | null>(null)
+    const [dataLoading, setDataLoading] = useState(true)
+
+    // Fetch data on client-side (non-blocking)
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Parallel fetch for speed
+                const [statusRes, contextRes] = await Promise.all([
+                    fetch('/api/market/status').then(r => r.ok ? r.json() : null).catch(() => null),
+                    fetch('/api/market-context').then(r => r.ok ? r.json() : null).catch(() => null)
+                ])
+
+                if (statusRes?.status) {
+                    setMarketStatus(statusRes.status)
+                    setMarketConclusion(statusRes.conclusion)
+                    // Calculate historical match
+                    const match = findHistoricalSimilarity(statusRes.status)
+                    setHistoricalMatch(match)
+                }
+
+                if (contextRes?.context) {
+                    setMarketContext(contextRes.context)
+                }
+            } catch (e) {
+                console.error('Failed to fetch homepage data:', e)
+            } finally {
+                setDataLoading(false)
+            }
+        }
+
+        // Load reactions from static JSON (fast)
+        fetch('/data/macro-reactions.json')
+            .then(r => r.ok ? r.json() : { data: {} })
+            .then(data => setReactions(data.data || {}))
+            .catch(() => setReactions({}))
+
+        void fetchData()
+    }, [])
 
     // Check if user is Pro
     const isPro = dbUser?.membership_status === 'pro' || dbUser?.membership_status === 'lifetime'
@@ -48,10 +81,6 @@ export function HomePageClient({
 
     // Welcome modal
     const { showWelcome, closeWelcome } = useWelcomeModal(isPro)
-
-    // Historical Match
-    // Cast strict type if needed, assuming compat for now
-    const historicalMatch = initialStatus ? findHistoricalSimilarity(initialStatus as any) : null
 
     // Greeting Logic
     const [greeting] = React.useState(() => {
@@ -71,10 +100,37 @@ export function HomePageClient({
         return list[Math.floor(Math.random() * list.length)]
     })
 
-    if (isAuthLoading) {
-        return <div className="min-h-screen bg-black flex items-center justify-center">
-            <img src="/logo.svg" alt="CryptoTW Logo" className="h-8 w-auto opacity-50" />
-        </div>
+    // Error State with Retry
+    if (error) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-red-900/30 flex items-center justify-center mb-4">
+                    <span className="text-2xl">⚠️</span>
+                </div>
+                <h2 className="text-lg font-bold text-white mb-2">連線發生問題</h2>
+                <p className="text-sm text-neutral-500 mb-6 max-w-[280px]">
+                    {error.message || '無法連接 LINE 服務，請稍後再試。'}
+                </p>
+                <button
+                    onClick={retry}
+                    className="px-6 py-2.5 bg-white text-black rounded-lg font-bold text-sm hover:bg-neutral-200 transition-colors"
+                >
+                    重新嘗試
+                </button>
+            </div>
+        )
+    }
+
+    // Skeleton Loading State (only if no cached user)
+    if (isAuthLoading && !dbUser) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-neutral-800 animate-pulse" />
+                    <div className="h-4 w-24 bg-neutral-800 rounded animate-pulse" />
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -160,12 +216,23 @@ export function HomePageClient({
 
                 {/* 3. Historical Echo */}
                 <section>
-                    <HistoryEchoCard match={historicalMatch} />
+                    {dataLoading ? (
+                        <div className="space-y-3 mt-8 mb-8">
+                            <Skeleton className="h-6 w-24 bg-neutral-800" />
+                            <Skeleton className="h-24 w-full bg-neutral-800 rounded-xl" />
+                        </div>
+                    ) : (
+                        <HistoryEchoCard match={historicalMatch} />
+                    )}
                 </section>
 
-                {/* 4. Market Sentiment Dashboard [NEW] */}
+                {/* 4. Market Sentiment Dashboard */}
                 <section>
-                    <SentimentDashboardCard status={initialStatus} />
+                    {dataLoading ? (
+                        <Skeleton className="h-32 w-full bg-neutral-800 rounded-xl" />
+                    ) : (
+                        <SentimentDashboardCard status={marketStatus} />
+                    )}
                 </section>
 
                 {/* ===== BELOW THE FOLD: Detailed Context ===== */}
@@ -197,7 +264,7 @@ export function HomePageClient({
                     </UniversalCard>
 
                     <EventsUpcomingCard reactions={reactions} />
-                    <FlashNewsFeed compact initialContext={initialContext} />
+                    <FlashNewsFeed compact initialContext={marketContext} />
                     <ReviewsFeaturedCard />
                 </section>
 

@@ -1,11 +1,21 @@
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 const CG_API_KEY = process.env.COINGLASS_API_KEY || ''
 const CG_BASE = 'https://open-api-v4.coinglass.com'
+const CACHE_KEY = 'api:taker-volume'
 
 export async function GET() {
     try {
+        // Check cache first (5 min)
+        const cached = await getCache(CACHE_KEY)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
+
         const res = await fetch(`${CG_BASE}/api/futures/taker-buy-sell-volume/exchange-list?symbol=BTC&range=4h`, {
             headers: { 'CG-API-KEY': CG_API_KEY },
             next: { revalidate: 300 } // 5 min cache
@@ -28,7 +38,7 @@ export async function GET() {
 
         const ratio = totalSell > 0 ? totalBuy / totalSell : 1
 
-        return NextResponse.json({
+        const result = {
             totalBuyUsd: totalBuy,
             totalSellUsd: totalSell,
             ratio: parseFloat(ratio.toFixed(3)),
@@ -38,6 +48,13 @@ export async function GET() {
                 sellVolumeUsd: d.sell_volume_usd,
                 ratio: d.sell_volume_usd > 0 ? parseFloat((d.buy_volume_usd / d.sell_volume_usd).toFixed(3)) : 1
             }))
+        }
+
+        // Cache for 5 minutes
+        await setCache(CACHE_KEY, result, CacheTTL.MEDIUM)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e))

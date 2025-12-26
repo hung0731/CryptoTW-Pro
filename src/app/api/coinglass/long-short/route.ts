@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
+import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -13,8 +14,16 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const symbol = searchParams.get('symbol') || 'BTC'
+    const cacheKey = `api:long-short:${symbol}`
 
     try {
+        // Check cache first (1 min)
+        const cached = await getCache(cacheKey)
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'X-Cache': 'HIT' }
+            })
+        }
 
         // Fetch long/short ratio from V4
         const [globalData, topAccountData] = await Promise.all([
@@ -68,13 +77,20 @@ export async function GET(request: NextRequest) {
         // Calculate sentiment signal
         const signal = calculateSignal(globalObj, topAccountObj)
 
-        return NextResponse.json({
+        const result = {
             longShort: {
                 global: globalObj,
                 topAccounts: topAccountObj,
                 signal,
                 lastUpdated: new Date().toISOString()
             }
+        }
+
+        // Cache for 1 minute
+        await setCache(cacheKey, result, CacheTTL.FAST)
+
+        return NextResponse.json(result, {
+            headers: { 'X-Cache': 'MISS' }
         })
     } catch (error) {
         logger.error('Long/Short API error', error, { feature: 'coinglass-api', endpoint: 'long-short' })
