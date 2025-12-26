@@ -142,6 +142,12 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                         }
                     }
                 } else {
+                    // Force login if in LINE Client
+                    if (liff.isInClient()) {
+                        logger.info('In LINE client but not logged in - forcing login', { feature: 'liff-provider' })
+                        liff.login()
+                        return
+                    }
                     // CRITICAL FIX:
                     // If LIFF is NOT logged in, but we have optimistic cache (isLoggedIn=true),
                     // we MUST clear it. Otherwise user appears as "Basic" (from cache) but effectively logged out relative to Line.

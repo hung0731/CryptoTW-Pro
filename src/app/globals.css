@@ -160,7 +160,9 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply text-foreground font-sans;
+    background: radial-gradient(circle at 50% 0%, #121212 0%, #000000 100%);
+    background-attachment: fixed;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }

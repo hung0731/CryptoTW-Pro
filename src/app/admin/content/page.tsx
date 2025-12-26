@@ -11,10 +11,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Bot, MessageSquare, Send, BookOpen, Plus, Edit, Trash2, Smartphone, Save, Eye, RefreshCw, Loader2, UploadCloud, Megaphone, AlertTriangle, Info, Clock, Sparkles, Pencil, Gift } from 'lucide-react'
+import { Plus, Search, Filter, Calendar, MapPin, Globe, Users, DollarSign, Tag, Image as ImageIcon, Loader2, Sparkles, UploadCloud, RefreshCw, Eye, Pencil, Trash2, Save, Edit, Send, Clock, Bot, Megaphone, Gift, BookOpen, MessageSquare, Info, AlertTriangle, Smartphone } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { RewardsTab } from '@/components/admin/RewardsTab'
+import { ImageUploader } from '@/components/ui/ImageUploader'
 
 // Actually reviews uses direct DB access in Server Component. We must adapt it to Client Component or fetch via API.
 // Existing reviews/page.tsx was a Server Component.
@@ -819,6 +820,8 @@ interface EventItem {
     price_info?: string
     organizer_name: string
     organizer_url?: string
+    cover_image_url?: string
+    organizer_logo_url?: string
     is_published: boolean
     is_featured: boolean
 }
@@ -847,6 +850,8 @@ function EventsTab() {
         location_type: 'physical',
         online_url: '',
         registration_url: '',
+        cover_image_url: '',
+        organizer_logo_url: '',
         is_free: true,
         price_info: '',
         organizer_name: '',
@@ -959,7 +964,7 @@ function EventsTab() {
                     start_date: '', end_date: '', venue_name: '', address: '', city: '台北',
                     latitude: '', longitude: '', location_type: 'physical', online_url: '',
                     registration_url: '', is_free: true, price_info: '', organizer_name: '',
-                    organizer_url: '', is_published: false, is_featured: false
+                    organizer_url: '', cover_image_url: '', organizer_logo_url: '', is_published: false, is_featured: false
                 })
                 void fetchEvents()
             } else {
@@ -1020,6 +1025,8 @@ function EventsTab() {
             price_info: event.price_info || '',
             organizer_name: event.organizer_name || '',
             organizer_url: event.organizer_url || '',
+            cover_image_url: event.cover_image_url || '',
+            organizer_logo_url: event.organizer_logo_url || '',
             is_published: event.is_published ?? false,
             is_featured: event.is_featured ?? false
         })
@@ -1053,7 +1060,7 @@ function EventsTab() {
                     start_date: '', end_date: '', venue_name: '', address: '', city: '台北',
                     latitude: '', longitude: '', location_type: 'physical', online_url: '',
                     registration_url: '', is_free: true, price_info: '', organizer_name: '',
-                    organizer_url: '', is_published: false, is_featured: false
+                    organizer_url: '', cover_image_url: '', organizer_logo_url: '', is_published: false, is_featured: false
                 })
                 void fetchEvents()
             } else {
@@ -1404,6 +1411,25 @@ ETH Taipei 2024 冬季聚會
                             <div className="space-y-2">
                                 <Label className="text-neutral-400">主辦方名稱 *</Label>
                                 <Input value={formData.organizer_name} onChange={e => setFormData({ ...formData, organizer_name: e.target.value })} className="bg-black border-white/10" placeholder="Ethereum Taiwan" />
+                            </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">活動封面圖</Label>
+                                <ImageUploader
+                                    value={formData.cover_image_url}
+                                    onChange={url => setFormData({ ...formData, cover_image_url: url })}
+                                    aspectRatio="wide"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-neutral-400">主辦方 Logo</Label>
+                                <ImageUploader
+                                    value={formData.organizer_logo_url}
+                                    onChange={url => setFormData({ ...formData, organizer_logo_url: url })}
+                                    aspectRatio="square"
+                                    className="w-32"
+                                />
                             </div>
                         </div>
                         <div className="space-y-2">

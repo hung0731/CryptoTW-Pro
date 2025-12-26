@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 // Default verification config
 const DEFAULT_CONFIG = {
-    okx_affiliate_code: 'CTW20',
+    okx_affiliate_code: 'CTWPRO',
     okx_min_deposit: 1,
     okx_require_kyc: true,
     auto_verify_enabled: false, // Security: Default to manual verification if config is missing

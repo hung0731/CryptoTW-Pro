@@ -218,7 +218,7 @@ export const LEARN_LEVELS: LearnLevel[] = [
                 practice: '打開你的交易所 App (CEX) 看看它的介面，再用錢包瀏覽器打開 Uniswap (DEX) 連接錢包，感受兩者操作邏輯的巨大差異。',
                 cta: {
                     label: '註冊 OKX (CEX 首選)',
-                    href: 'https://www.okx.com/join/CRYPTOTW',
+                    href: 'https://www.okx.com/join/CTWPRO',
                     type: 'external'
                 },
                 quiz: {

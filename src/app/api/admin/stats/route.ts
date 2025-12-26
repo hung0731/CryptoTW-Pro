@@ -13,13 +13,7 @@ export async function GET() {
         const supabase = createAdminClient()
 
         // 1. Basic Stats (Parallel Fetch)
-        const [
-            { count: totalUsers },
-            { count: verifiedUsers },
-            { count: pendingBindings },
-            { count: vipUsers },
-            { data: recentUsers }
-        ] = await Promise.all([
+        const results = await Promise.all([
             // Total
             supabase.from('users').select('*', { count: 'exact', head: true }),
             // Pro
@@ -33,8 +27,20 @@ export async function GET() {
                 .from('users')
                 .select('created_at')
                 .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-                .order('created_at', { ascending: true })
+                .order('created_at', { ascending: true }),
+            // OKX Verified Bindings
+            supabase.from('exchange_bindings').select('*', { count: 'exact', head: true }).eq('exchange_name', 'okx').eq('status', 'verified'),
+            // LBank Verified Bindings
+            supabase.from('exchange_bindings').select('*', { count: 'exact', head: true }).eq('exchange_name', 'lbank').eq('status', 'verified')
         ])
+
+        const totalUsers = results[0].count
+        const verifiedUsers = results[1].count
+        const pendingBindings = results[2].count
+        const vipUsers = results[3].count
+        const recentUsers = results[4].data
+        const okxUsers = results[5].count
+        const lbankUsers = results[6].count
 
         // 2. Aggregate User Growth (Daily)
         const dailyGrowth: Record<string, number> = {}
@@ -76,6 +82,8 @@ export async function GET() {
             stats: {
                 total_users: totalUsers || 0,
                 verified_users: verifiedUsers || 0,
+                okx_users: okxUsers || 0,
+                lbank_users: lbankUsers || 0,
                 pending_bindings: pendingBindings || 0,
                 vip_users: vipUsers || 0,
                 // Mock total volume/commission for now

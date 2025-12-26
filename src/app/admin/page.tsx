@@ -48,9 +48,9 @@ export default function AdminDashboard() {
 
     const cards = [
         { label: '總用戶數', value: stats?.total_users || 0, icon: Users, sub: '已註冊會員', link: '/admin/users' },
-        { label: 'Pro 會員', value: stats?.verified_users || 0, icon: TrendingUp, sub: '已綁定 OKX', link: '/admin/users' }, // Verified users implies potential trading
+        { label: 'OKX 用戶', value: stats?.okx_users || 0, icon: TrendingUp, sub: '綁定 OKX', link: '/admin/users' },
+        { label: 'LBank 用戶', value: stats?.lbank_users || 0, icon: TrendingUp, sub: '綁定 LBank', color: 'text-blue-400', link: '/admin/users' },
         { label: '待審核綁定', value: stats?.pending_bindings || 0, icon: Clock, sub: '需要處理', color: 'text-yellow-400', link: '/admin/users' },
-        { label: '系統狀態', value: '正常', icon: Activity, sub: '所有服務運行中', color: 'text-green-400', link: '/admin/system' },
     ]
 
     return (

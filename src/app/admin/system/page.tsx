@@ -35,7 +35,7 @@ interface VerificationConfig {
 }
 
 const DEFAULT_CONFIG: VerificationConfig = {
-    okx_affiliate_code: 'CTW20',
+    okx_affiliate_code: 'CTWPRO',
     okx_min_deposit: 1,
     okx_require_kyc: true,
     auto_verify_enabled: true
@@ -130,7 +130,7 @@ function SettingsTab() {
                                 value={config.okx_affiliate_code}
                                 onChange={(e) => setConfig({ ...config, okx_affiliate_code: e.target.value })}
                                 className="bg-black border-white/10 text-white font-mono"
-                                placeholder="CTW20"
+                                placeholder="CTWPRO"
                             />
                             <p className="text-xs text-neutral-500">用戶必須使用此推薦碼註冊 OKX</p>
                         </div>

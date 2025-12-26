@@ -12,26 +12,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function RewardsPage() {
     const [rewards, setRewards] = useState<Reward[]>([]);
+    const [claimedRewards, setClaimedRewards] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('all');
 
     useEffect(() => {
-        const fetchRewards = async () => {
+        const fetchData = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/rewards?type=${filterType}`);
-                if (res.ok) {
-                    const data = await res.json();
+                // Parallel fetch
+                const [rewardsRes, userRewardsRes] = await Promise.all([
+                    fetch(`/api/rewards?type=${filterType}`),
+                    fetch('/api/user/rewards')
+                ]);
+
+                if (rewardsRes.ok) {
+                    const data = await rewardsRes.json();
                     setRewards(data.rewards || []);
                 }
+
+                if (userRewardsRes.ok) {
+                    const userData = await userRewardsRes.json();
+                    if (userData.rewards) {
+                        setClaimedRewards(new Set(userData.rewards.map((r: any) => r.reward_id)));
+                    }
+                }
             } catch (error) {
-                console.error('Failed to fetch rewards', error);
+                console.error('Failed to fetch data', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        void fetchRewards();
+        void fetchData();
     }, [filterType]);
 
     const filters = [
@@ -83,7 +96,11 @@ export default function RewardsPage() {
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {rewards.filter(r => r.is_featured).map(reward => (
-                                    <RewardCard key={reward.id} reward={reward} />
+                                    <RewardCard
+                                        key={reward.id}
+                                        reward={reward}
+                                        initialClaimed={claimedRewards.has(reward.id)}
+                                    />
                                 ))}
                             </div>
                         </section>
@@ -104,7 +121,11 @@ export default function RewardsPage() {
                             ) : (
                                 rewards.filter(r => !r.is_featured || filterType !== 'all').length > 0 ? (
                                     rewards.filter(r => !r.is_featured || filterType !== 'all').map(reward => (
-                                        <RewardCard key={reward.id} reward={reward} />
+                                        <RewardCard
+                                            key={reward.id}
+                                            reward={reward}
+                                            initialClaimed={claimedRewards.has(reward.id)}
+                                        />
                                     ))
                                 ) : (
                                     <div className="col-span-full py-20 text-center text-neutral-500 bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl flex flex-col items-center justify-center gap-4">

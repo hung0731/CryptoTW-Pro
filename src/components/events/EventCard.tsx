@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Calendar, MapPin, Clock, Users, ExternalLink, Ticket } from 'lucide-react';
+import { UniversalCard } from '@/components/ui/UniversalCard';
 import { cn } from '@/lib/utils';
 
 interface EventCardProps {
@@ -69,118 +70,117 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
         return (
             <Link
                 href={`/events/${event.slug}`}
-                className="block group p-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors"
+                className="block"
             >
-                <div className="flex items-start gap-3">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", typeInfo.color)}>
-                                {typeInfo.label}
-                            </span>
-                            {event.is_free && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">
-                                    免費
+                <UniversalCard variant="clickable" className="border-b border-[#1A1A1A] last:border-0 rounded-none">
+                    <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", typeInfo.color)}>
+                                    {typeInfo.label}
                                 </span>
-                            )}
-                        </div>
-                        <h3 className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors truncate">
-                            {event.title}
-                        </h3>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-[#666]">
-                            <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {formatEventDate(event.start_date)}
-                            </span>
-                            {location && (
-                                <span className="flex items-center gap-1 truncate">
-                                    <MapPin className="w-3 h-3" />
-                                    {location}
+                                {event.is_free && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">
+                                        免費
+                                    </span>
+                                )}
+                            </div>
+                            <h3 className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors truncate">
+                                {event.title}
+                            </h3>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-[#666]">
+                                <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {formatEventDate(event.start_date)}
                                 </span>
-                            )}
+                                {location && (
+                                    <span className="flex items-center gap-1 truncate">
+                                        <MapPin className="w-3 h-3" />
+                                        {location}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
+                </UniversalCard>
             </Link>
         );
     }
 
     return (
-        <Link
-            href={`/events/${event.slug}`}
-            className="block group rounded-xl bg-[#0A0A0A] border border-[#1A1A1A] overflow-hidden hover:border-[#2A2A2A] transition-all"
-        >
-            {/* Cover Image */}
-            {event.cover_image_url ? (
-                <div className="relative h-40 bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] overflow-hidden">
-                    <img
-                        src={event.cover_image_url}
-                        alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+        <Link href={`/events/${event.slug}`} className="block h-full">
+            <UniversalCard variant="clickable" className="h-full flex flex-col p-0 overflow-hidden group">
+                {/* Cover Image */}
+                <div className="relative h-40 bg-[#1A1A1A] overflow-hidden">
+                    {event.cover_image_url ? (
+                        <img
+                            src={event.cover_image_url}
+                            alt={event.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A]">
+                            <Calendar className="w-12 h-12 text-[#333]" />
+                        </div>
+                    )}
+
                     {event.is_featured && (
-                        <div className="absolute top-3 left-3 bg-yellow-500/90 text-black text-[10px] font-bold px-2 py-1 rounded">
+                        <div className="absolute top-3 left-3 bg-yellow-500/90 text-black text-[10px] font-bold px-2 py-1 rounded shadow-lg backdrop-blur-md">
                             ⭐ Featured
                         </div>
                     )}
                 </div>
-            ) : (
-                <div className="relative h-32 bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] flex items-center justify-center">
-                    <Calendar className="w-12 h-12 text-[#333]" />
-                    {event.is_featured && (
-                        <div className="absolute top-3 left-3 bg-yellow-500/90 text-black text-[10px] font-bold px-2 py-1 rounded">
-                            ⭐ Featured
-                        </div>
-                    )}
-                </div>
-            )}
 
-            {/* Content */}
-            <div className="p-4">
-                {/* Date & Type */}
-                <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs text-blue-400 font-medium flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {formatEventDate(event.start_date, event.end_date)}
-                    </span>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors mb-2 line-clamp-2">
-                    {event.title}
-                </h3>
-
-                {/* Location */}
-                <div className="flex items-center gap-1 text-xs text-[#666] mb-3">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span className="truncate">{location || '待定'}</span>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-[#1A1A1A]">
-                    <div className="flex items-center gap-2">
-                        <span className={cn("text-[10px] px-2 py-0.5 rounded border", typeInfo.color)}>
-                            {typeInfo.label}
+                {/* Content */}
+                <div className="p-4 flex flex-col flex-1">
+                    {/* Date & Type */}
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-blue-400 font-medium flex items-center gap-1 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                            <Calendar className="w-3 h-3" />
+                            {formatEventDate(event.start_date, event.end_date)}
                         </span>
-                        {event.is_free ? (
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">
-                                免費
-                            </span>
-                        ) : event.price_info && (
-                            <span className="text-[10px] text-[#888]">
-                                {event.price_info}
-                            </span>
-                        )}
                     </div>
-                    <Link
-                        href={`/organizers/${encodeURIComponent(event.organizer_name)}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1 text-[10px] text-[#666] hover:text-blue-400 transition-colors"
-                    >
-                        <Users className="w-3 h-3" />
-                        {event.organizer_name}
-                    </Link>
+
+                    {/* Title */}
+                    <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors mb-2 line-clamp-2">
+                        {event.title}
+                    </h3>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-1 text-xs text-[#888] mb-4">
+                        <MapPin className="w-3.5 h-3.5 stroke-2" />
+                        <span className="truncate">{location || '待定'}</span>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
+                        <div className="flex items-center gap-2">
+                            <span className={cn("text-[10px] px-2 py-0.5 rounded border", typeInfo.color)}>
+                                {typeInfo.label}
+                            </span>
+                            {event.is_free ? (
+                                <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                                    免費
+                                </span>
+                            ) : event.price_info && (
+                                <span className="text-[10px] text-[#666]">
+                                    {event.price_info}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Organizer */}
+                        <div className="flex items-center gap-1.5 text-[10px] text-[#666] group/org hover:text-blue-400 transition-colors">
+                            {event.organizer_logo_url ? (
+                                <img src={event.organizer_logo_url} alt={event.organizer_name} className="w-4 h-4 rounded-full object-cover bg-white/10" />
+                            ) : (
+                                <Users className="w-3.5 h-3.5" />
+                            )}
+                            <span className="truncate max-w-[80px]">{event.organizer_name}</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </UniversalCard>
         </Link>
     );
 }

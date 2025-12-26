@@ -35,7 +35,7 @@ export function UniversalCard({
 
     // Resolve Styles based on Variant
     const variantStyles = {
-        default: cn(SURFACE.cardPrimary, BORDER.primary),
+        default: cn(SURFACE.cardPrimary, BORDER.primary, "relative before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top_left,theme(colors.purple.500/0.08)_0%,transparent_60%)] before:pointer-events-none"),
         subtle: cn(SURFACE.cardPassive, BORDER.dashed),
         highlight: cn(SURFACE.highlight, BORDER.highlight),
         danger: cn(SURFACE.danger, BORDER.danger),
@@ -43,11 +43,12 @@ export function UniversalCard({
         clickable: cn(
             SURFACE.cardPrimary,
             BORDER.primary,
-            "hover:bg-[#141414] hover:border-[#2A2A2A]",
+            "hover:bg-[#141414] hover:border-purple-500/30 border-t-purple-500/20",
+            "relative before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top_left,theme(colors.purple.500/0.08)_0%,transparent_60%)] before:pointer-events-none",
             ANIMATION.hoverCard,
             ANIMATION.activePress,
             FOCUS.ringSubtle,
-            "cursor-pointer group"
+            "cursor-pointer group overflow-hidden"
         ),
         ghost: cn(SURFACE.ghost, BORDER.ghost, "hover:bg-[#1A1A1A]/30", ANIMATION.hoverCard),
     }

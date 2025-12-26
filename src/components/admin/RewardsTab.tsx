@@ -9,8 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Save, RefreshCw, Loader2, Gift, ExternalLink, Bot } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Calendar, Filter, Upload, FileUp, Loader2, Gift, ExternalLink, Bot, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ImageUploader } from '@/components/ui/ImageUploader';
 import Link from 'next/link';
 
 interface RewardItem {
@@ -344,6 +345,19 @@ export function RewardsTab() {
                             <div className="space-y-2">
                                 <Label>來源名稱 (如: MAX) *</Label>
                                 <Input value={formData.source_name} onChange={e => setFormData({ ...formData, source_name: e.target.value })} className="bg-black" />
+                            </div>
+                        </div>
+
+                        {/* Re-layout for Image Upload */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>來源 Logo (建議 1:1)</Label>
+                                <ImageUploader
+                                    value={formData.source_logo_url}
+                                    onChange={url => setFormData({ ...formData, source_logo_url: url })}
+                                    aspectRatio="square"
+                                    className="w-24 h-24"
+                                />
                             </div>
                         </div>
 

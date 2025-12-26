@@ -150,8 +150,8 @@ export default function JoinPage() {
         okx: {
             name: 'OKX',
             desc: '全球前三大交易所',
-            code: 'CTW20',
-            link: 'https://www.okx.com/join/CTW20',
+            code: 'CTWPRO',
+            link: 'https://www.okx.com/join/CTWPRO',
             icon: '/exchange/OKX.svg',
             badges: ['系統自動開通', '官方合作'],
             bg: 'bg-black'
@@ -159,8 +159,8 @@ export default function JoinPage() {
         lbank: {
             name: 'LBANK',
             desc: '新興潛力交易所',
-            code: 'CTW20',
-            link: '#', // TODO: Update link when available
+            code: 'CTWPRO',
+            link: 'https://www.lbank.com/login/?icode=CTWPRO',
             icon: '/exchange/LBANK.svg',
             badges: ['系統自動開通', '限時加碼'],
             bg: 'bg-[#1A1A1A]' // Fallback if logo needs contrast

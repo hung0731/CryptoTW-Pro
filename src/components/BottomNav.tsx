@@ -49,7 +49,7 @@ export function BottomNav() {
     ]
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0F0F10]/70 backdrop-blur-xl border-t border-white/10 pb-[env(safe-area-inset-bottom)] shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.5)]">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0F0F10]/80 backdrop-blur-xl border-t border-white/10 pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.5)]">
             <nav className="flex items-center justify-between h-16 max-w-md mx-auto px-6">
                 {navItems.map((item) => (
                     <Link

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { getReview, getRelatedReviews } from '@/lib/reviews-data';
@@ -29,12 +29,13 @@ const EventAnalysisDashboard = dynamic(
 
 export default function ReviewDetailPage() {
     const params = useParams();
+    const searchParams = useSearchParams();
     const slug = params.slug as string;
     const year = params.year as string;
     const review = getReview(slug, year);
 
     // [NEW] Training Mode State
-    const [isTrainingMode, setIsTrainingMode] = useState(false);
+    const [isTrainingMode, setIsTrainingMode] = useState(() => searchParams.get('mode') === 'replay');
 
     if (!review) {
         return <div className="min-h-screen bg-black text-white flex items-center justify-center">Event not found</div>;
