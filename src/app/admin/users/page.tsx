@@ -380,6 +380,60 @@ function VIPTab({ users }: { users: UserWithBinding[] }) {
     )
 }
 
+// 4. LBank Test Tab
+function LBankTestTab() {
+    const [isLoading, setIsLoading] = useState(false)
+    const [result, setResult] = useState<any>(null)
+    const { toast } = useToast()
+
+    const runTest = async () => {
+        setIsLoading(true)
+        setResult(null)
+        try {
+            const res = await fetch('/api/admin/lbank/test', { method: 'POST' })
+            const data = await res.json()
+            setResult(data)
+
+            if (data.success) {
+                toast({ title: 'Sync Successful', description: `Found ${data.count} invitees` })
+            } else {
+                toast({ title: 'Sync Failed', description: data.error, variant: 'destructive' })
+            }
+        } catch (e) {
+            toast({ title: 'Error', variant: 'destructive' })
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    return (
+        <Card className="bg-neutral-900/50 border-white/5">
+            <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                    LBank Affiliate Sync Test
+                    {isLoading && <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />}
+                </CardTitle>
+                <CardDescription>
+                    Test the LBank API connection and sync logic directly from the production server.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <Button onClick={runTest} disabled={isLoading} className="bg-blue-600 hover:bg-blue-500">
+                    {isLoading ? 'Running Sync...' : 'Run Sync Test'}
+                </Button>
+
+                {result && (
+                    <div className="mt-4 p-4 rounded-lg bg-black/50 border border-white/10 font-mono text-xs overflow-auto max-h-[400px]">
+                        <pre className="text-green-400">
+                            {JSON.stringify(result, null, 2)}
+                        </pre>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
+
 export default function UsersPage() {
     const [activeTab, setActiveTab] = useState('all')
     const [users, setUsers] = useState<UserWithBinding[]>([])
@@ -442,7 +496,10 @@ export default function UsersPage() {
             toast({ title: '已儲存' })
             void fetchUsers()
             setIsSheetOpen(false)
-        } catch { toast({ title: 'Error' }) }
+        } catch (e) {
+            console.error('Failed to save user', e)
+            toast({ title: 'Error', variant: 'destructive' })
+        }
         finally { setIsSaving(false) }
     }
 
@@ -482,6 +539,9 @@ export default function UsersPage() {
                     <TabsTrigger value="vip" className="data-[state=active]:bg-white/10 data-[state=active]:text-white gap-2">
                         <Crown className="w-4 h-4" /> VIP 榜單
                     </TabsTrigger>
+                    <TabsTrigger value="lbank" className="data-[state=active]:bg-white/10 data-[state=active]:text-white gap-2">
+                        <ArrowDown className="w-4 h-4" /> LBank Sync
+                    </TabsTrigger>
                 </TabsList>
                 <div className="mt-6">
                     <TabsContent value="all">
@@ -492,6 +552,9 @@ export default function UsersPage() {
                     </TabsContent>
                     <TabsContent value="vip">
                         <VIPTab users={users} />
+                    </TabsContent>
+                    <TabsContent value="lbank">
+                        <LBankTestTab />
                     </TabsContent>
                 </div>
             </Tabs>

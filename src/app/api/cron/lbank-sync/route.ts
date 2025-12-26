@@ -86,7 +86,9 @@ export async function GET(req: NextRequest) {
                 event_type: 'lbank_sync',
                 data: { ...stats, duration_ms: duration }
             })
-        } catch { }
+        } catch (logErr) {
+            logger.error('[LBank Sync] Failed to insert system log', logErr as Error, { feature: 'cron-job' })
+        }
 
         return NextResponse.json({
             message: 'LBank sync completed',

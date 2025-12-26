@@ -2,6 +2,46 @@ import { getCache, setCache, CacheTTL } from '@/lib/cache'
 import { cachedCoinglassV4Request } from '@/lib/coinglass'
 import { logger } from '@/lib/logger'
 
+// Binance API Types
+type BinanceKline = [
+    number, // Open time
+    string, // Open
+    string, // High
+    string, // Low
+    string, // Close
+    string, // Volume
+    number, // Close time
+    string, // Quote asset volume
+    number, // Number of trades
+    string, // Taker buy base asset volume
+    string, // Taker buy quote asset volume
+    string  // Ignore
+];
+
+interface BinanceTicker {
+    symbol: string
+    priceChange: string
+    priceChangePercent: string
+    weightedAvgPrice: string
+    prevClosePrice: string
+    lastPrice: string
+    lastQty: string
+    bidPrice: string
+    bidQty: string
+    askPrice: string
+    askQty: string
+    openPrice: string
+    highPrice: string
+    lowPrice: string
+    volume: string
+    quoteVolume: string
+    openTime: number
+    closeTime: number
+    firstId: number
+    lastId: number
+    count: number
+}
+
 // ============================================================================
 // Service: Seasonality Heatmap
 // ============================================================================
@@ -22,10 +62,10 @@ export async function getSeasonalityData(): Promise<SeasonalityData> {
     const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1M&limit=1000')
     if (!res.ok) throw new Error(`Binance API Error: ${res.status}`)
 
-    const rawData = await res.json()
+    const rawData = await res.json() as BinanceKline[]
     const data: SeasonalityData = { years: [], months: {}, stats: {} }
 
-    rawData.forEach((candle: any[]) => {
+    rawData.forEach((candle) => {
         const date = new Date(candle[0])
         const year = date.getUTCFullYear()
         const month = date.getUTCMonth() + 1
@@ -79,8 +119,8 @@ export async function getHalvingData() {
     const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&startTime=${startTime}&limit=1000`)
     if (!res.ok) throw new Error('Binance API Error')
 
-    const rawData = await res.json()
-    const currentCycleData = rawData.map((k: any[]) => {
+    const rawData = await res.json() as BinanceKline[]
+    const currentCycleData = rawData.map((k) => {
         const time = k[0]
         const close = parseFloat(k[4])
         const diffDays = Math.floor((time - HALVING_DATE_2024) / (1000 * 60 * 60 * 24))
@@ -143,25 +183,25 @@ export async function getDivergenceData() {
         // 2. Fetch Binance Top List
         const binanceRes = await fetch('https://api.binance.com/api/v3/ticker/24hr')
         if (!binanceRes.ok) throw new Error('Binance API Fail')
-        const binanceData = await binanceRes.json()
+        const binanceData = await binanceRes.json() as BinanceTicker[]
 
         const topCoins = binanceData
-            .filter((t: any) => t.symbol.endsWith('USDT'))
-            .filter((t: any) => !['USDCUSDT', 'FDUSDUSDT', 'TUSDUSDT'].includes(t.symbol))
-            .filter((t: any) => parseFloat(t.quoteVolume) > 50000000)
-            .sort((a: any, b: any) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+            .filter((t) => t.symbol.endsWith('USDT'))
+            .filter((t) => !['USDCUSDT', 'FDUSDUSDT', 'TUSDUSDT'].includes(t.symbol))
+            .filter((t) => parseFloat(t.quoteVolume) > 50000000)
+            .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
             .slice(0, 50)
 
         // 3. Fetch OI Data (Try Coinglass)
         const oiDataMap: Record<string, number> = {}
         try {
-            const oiRank = await cachedCoinglassV4Request<any[]>('/api/futures/open-interest/rank', { interval: 'h24' })
+            const oiRank = await cachedCoinglassV4Request<{ symbol: string; h24Change: number }[]>('/api/futures/open-interest/rank', { interval: 'h24' })
             if (oiRank && Array.isArray(oiRank)) {
                 oiRank.forEach(item => oiDataMap[item.symbol] = item.h24Change)
             }
         } catch (e) { /* ignore */ }
 
-        const results: DivergenceItem[] = topCoins.map((t: any) => {
+        const results: DivergenceItem[] = topCoins.map((t) => {
             const symbol = t.symbol.replace('USDT', '')
             const priceChange = parseFloat(t.priceChangePercent)
             const oiChange = oiDataMap[symbol] ?? 0
@@ -214,8 +254,8 @@ export async function getDivergenceData() {
     }
 }
 
-function generateDemoSignals(topCoins: any[]): DivergenceItem[] {
-    const signals: DivergenceItem[] = topCoins.slice(0, 5).map((t: any, i: number) => {
+function generateDemoSignals(topCoins: BinanceTicker[]): DivergenceItem[] {
+    const signals: DivergenceItem[] = topCoins.slice(0, 5).map((t, i) => {
         const isBullish = i % 2 === 0
         const priceChange = parseFloat(t.priceChangePercent)
         const mockOiChange = isBullish ? (Math.abs(priceChange) + 5) : -(Math.abs(priceChange) + 5)

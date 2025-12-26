@@ -63,7 +63,8 @@ async function fetchPriceData(crypto: string) {
                 try {
                     const prices = JSON.parse(m.outcomePrices || '[]')
                     probability = parseFloat(prices[0]) || 0
-                } catch {
+                } catch (parseErr) {
+                    // logger.warn(`Failed to parse outcome prices for market ${m.id}`, parseErr as Error)
                     probability = 0
                 }
 

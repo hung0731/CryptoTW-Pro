@@ -10,12 +10,19 @@ const nextConfig = {
 
 
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   // 實驗性功能：加速構建
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'recharts'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      'recharts',
+      'date-fns',
+      'lodash',
+      'framer-motion'
+    ],
   },
 
   async headers() {

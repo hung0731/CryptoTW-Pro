@@ -26,11 +26,13 @@ export function WebVitals() {
             const threshold = THRESHOLDS[metric.name as keyof typeof THRESHOLDS]
             const status = threshold && metric.value > threshold ? '❌ POOR' : '✅ GOOD'
 
+            /*
             console.log(`[Web Vitals] ${metric.name}: ${metric.value.toFixed(2)}ms ${status}`, {
                 id: metric.id,
                 rating: metric.rating,
                 navigationType: metric.navigationType,
             })
+            */
         }
 
         // 送到 analytics API（生產環境）
@@ -78,6 +80,7 @@ export function WebVitals() {
             const domParseTime = navTiming.domInteractive - navTiming.responseEnd
 
             if (process.env.NODE_ENV === 'development') {
+                /*
                 console.log('[Navigation Timing]', {
                     DNS: `${dnsTime.toFixed(0)}ms`,
                     TCP: `${tcpTime.toFixed(0)}ms`,
@@ -85,6 +88,7 @@ export function WebVitals() {
                     Response: `${responseTime.toFixed(0)}ms`,
                     'DOM Parse': `${domParseTime.toFixed(0)}ms`,
                 })
+                */
             }
         }
 
@@ -96,11 +100,13 @@ export function WebVitals() {
             .slice(0, 10)
 
         if (slowResources.length > 0 && process.env.NODE_ENV === 'development') {
+            /*
             console.warn('[Slow Resources]', slowResources.map(r => ({
                 name: r.name.split('/').pop(),
                 duration: `${r.duration.toFixed(0)}ms`,
                 size: `${((r.transferSize || 0) / 1024).toFixed(1)}KB`,
             })))
+            */
         }
     }, [])
 

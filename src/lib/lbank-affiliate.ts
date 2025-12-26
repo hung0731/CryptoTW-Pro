@@ -95,6 +95,8 @@ async function lbankRequest<T>(
     const finalParams = new URLSearchParams()
     // Add all params used in signature
     Object.entries(params).forEach(([k, v]) => finalParams.append(k, String(v)))
+    // Add api_key to query parameters (standard for LBank)
+    finalParams.append('api_key', apiKey)
     finalParams.append('signature_method', 'HmacSHA256')
     finalParams.append('timestamp', timestamp)
     finalParams.append('echostr', echostr)
@@ -107,10 +109,8 @@ async function lbankRequest<T>(
             method: 'GET',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'api_key': apiKey // Header needs api_key? Or just param?
-                // Search results said "API Key is included in the request". Usually param for LBank.
-                // But let's add header too just in case, or check docs.
-                // Docs table didn't show api_key. Usually header.
+                // Add browser-like User-Agent to avoid Cloudflare 403
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
         })
 

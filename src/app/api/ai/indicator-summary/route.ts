@@ -9,9 +9,9 @@ export const revalidate = 300 // 5 minutes cache
 // Generate cache key from input data (rounded values to increase cache hits)
 function generateCacheKey(data: IndicatorSummaryInput): string {
     // Round values to reduce unique keys
-    const roundedFgi = Math.round(data.fearGreedIndex / 5) * 5 // Round to nearest 5
-    const roundedFr = Math.round(data.fundingRate * 10000) // 4 decimal precision
-    const roundedLsr = Math.round(data.longShortRatio * 100) / 100 // 2 decimal precision
+    const roundedFgi = Math.round((Number(data.fearGreedIndex) || 0) / 5) * 5 // Round to nearest 5
+    const roundedFr = Math.round((Number(data.fundingRate) || 0) * 10000) // 4 decimal precision
+    const roundedLsr = Math.round((Number(data.longShortRatio) || 0) * 100) / 100 // 2 decimal precision
     return `ai:indicator-summary:${roundedFgi}:${roundedFr}:${roundedLsr}`
 }
 

@@ -22,10 +22,13 @@ export const createSafeServerClient = (cookieStore: any) => {
                     cookiesToSet.forEach(({ name, value, options }) =>
                         cookieStore.set(name, value, options)
                     )
-                } catch {
+                } catch (e) {
                     // The `setAll` method was called from a Server Component.
                     // This can be ignored if you have middleware refreshing
                     // user sessions.
+                    // But we log it as debug just in case
+                    // Log manually since we can't import logger here to avoid circular dep if logger uses supabase
+                    // console.debug('Supabase cookie setAll failed (expected in Server Components)', e)
                 }
             }
         }

@@ -9,7 +9,7 @@ export const revalidate = 1800 // 30 minutes cache
 
 // Generate a hash from input data for cache key
 function hashInput(data: CalendarSummaryInput): string {
-    const str = JSON.stringify(data.events.map(e => e.title).sort())
+    const str = JSON.stringify(data.events.map(e => e.eventName).sort())
     return crypto.createHash('md5').update(str).digest('hex').slice(0, 16)
 }
 

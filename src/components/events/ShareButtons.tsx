@@ -38,6 +38,7 @@ export function ShareButtons({ title, url, className }: ShareButtonsProps) {
             setTimeout(() => setCopied(false), 2000);
         } catch (e) {
             console.error('Failed to copy:', e);
+            // Optional: toast({ title: '複製失敗', variant: 'destructive' })
         }
     };
 
