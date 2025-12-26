@@ -129,6 +129,10 @@ export function HomePageClient({
                             <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
                                 <Settings className="w-4 h-4 text-[#808080]" />
                             </Link>
+                            {/* Temporary Debug Button */}
+                            <Link href="/debug" className="w-9 h-9 rounded-lg bg-red-950/30 border border-red-500/30 flex items-center justify-center hover:bg-red-900/50">
+                                <span className="text-[10px] font-bold text-red-400">DB</span>
+                            </Link>
                         </div>
                     </div>
 
