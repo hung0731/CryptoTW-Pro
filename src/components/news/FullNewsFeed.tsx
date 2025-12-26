@@ -65,7 +65,7 @@ export function FullNewsFeed() {
             />
 
             {/* Unified News Section */}
-            <UniversalCard variant="default" className="p-0 overflow-hidden">
+            <UniversalCard variant="luma" className="p-0 overflow-hidden">
                 {/* Header Section */}
                 {/* Header Section */}
                 <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">

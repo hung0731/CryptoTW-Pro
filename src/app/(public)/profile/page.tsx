@@ -76,7 +76,7 @@ export default function ProfilePage() {
         return (
             <div className="min-h-screen bg-black p-4 flex items-center justify-center font-sans">
                 <div className="w-full max-w-sm space-y-6 text-center">
-                    <UniversalCard variant="default" size="L" className="bg-[#0A0A0A]">
+                    <UniversalCard variant="luma" size="L" className="bg-[#0A0A0A]">
                         <div className="space-y-4 py-4">
                             <div className="bg-neutral-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto border border-white/5 shadow-2xl">
                                 <User className="h-10 w-10 text-neutral-400" />
@@ -151,7 +151,7 @@ export default function ProfilePage() {
 
             <div className={cn("pt-6 max-w-lg mx-auto", SPACING.pageX, SPACING.classes.gapCards)}>
                 {/* Profile Card */}
-                <UniversalCard variant="default" size="M" className="p-0 overflow-hidden">
+                <UniversalCard variant="luma" size="M" className="p-0 overflow-hidden">
                     <div className="flex items-center gap-4 p-5">
                         <Avatar className="h-16 w-16 ring-2 ring-white/10 shadow-lg">
                             <AvatarImage src={profile?.pictureUrl} />
@@ -186,7 +186,7 @@ export default function ProfilePage() {
 
                 {/* Quick Actions */}
                 <div className="space-y-3">
-                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden">
+                    <UniversalCard variant="luma" size="M" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard title="設定" />
                         </div>
@@ -200,7 +200,7 @@ export default function ProfilePage() {
 
                 {/* More */}
                 <div className="space-y-3">
-                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden">
+                    <UniversalCard variant="luma" size="M" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard title="更多" />
                         </div>

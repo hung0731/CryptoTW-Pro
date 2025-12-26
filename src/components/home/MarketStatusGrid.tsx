@@ -112,7 +112,7 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
     const warnCount = checks.filter(c => c.icon === 'warn').length
 
     return (
-        <UniversalCard variant="default" size="M">
+        <UniversalCard variant="luma" size="M">
             {/* Header */}
             <CardHeader className="flex flex-row items-center justify-between mb-3 space-y-0">
                 <CardTitle>市場快照</CardTitle>

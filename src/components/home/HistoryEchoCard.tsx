@@ -25,7 +25,7 @@ export function HistoryEchoCard({ match }: HistoryEchoCardProps) {
             />
 
             <Link href={`/reviews/${match.event.year}/${match.event.slug}`} className="block group">
-                <UniversalCard variant="clickable" className="relative p-4">
+                <UniversalCard variant="lumaClickable" className="relative p-4">
                     <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1">
                             <div className="flex items-center gap-2 mb-1">

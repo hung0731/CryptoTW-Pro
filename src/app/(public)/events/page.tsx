@@ -227,7 +227,7 @@ export default function EventsPage() {
 
                 {/* Calendar View */}
                 {viewMode === 'calendar' && (
-                    <UniversalCard variant="default" className="mb-6">
+                    <UniversalCard variant="luma" className="mb-6">
                         <div className="p-4">
                             {loading ? (
                                 <div className="animate-pulse space-y-4">
@@ -247,7 +247,7 @@ export default function EventsPage() {
 
                 {/* List View */}
                 {viewMode === 'list' && (
-                    <UniversalCard variant="default" className="p-0 overflow-hidden">
+                    <UniversalCard variant="luma" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard
                                 title="活動列表"

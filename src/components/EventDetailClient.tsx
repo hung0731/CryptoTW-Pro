@@ -158,7 +158,7 @@ export default function EventDetailClient({ eventKey, reactions }: EventDetailCl
                 <EventStatsRow stats={stats} />
 
                 {/* 3. Historical Analysis */}
-                <UniversalCard variant="default" className="p-0 overflow-hidden bg-[#0A0A0A]">
+                <UniversalCard variant="luma" className="p-0 overflow-hidden bg-[#0A0A0A]">
                     <div className="border-b border-[#1A1A1A] bg-[#0F0F10] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <SectionHeaderCard
                             title="歷史復盤與資金流向"

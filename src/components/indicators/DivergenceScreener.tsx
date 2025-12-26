@@ -147,7 +147,7 @@ export function DivergenceScreener() {
             </div>
 
             {/* Main Screener Table */}
-            <UniversalCard variant="default" className="w-full p-0 overflow-hidden flex flex-col">
+            <UniversalCard variant="luma" className="w-full p-0 overflow-hidden flex flex-col">
                 <div className="px-4 py-3 border-b border-white/[0.04] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Activity className="w-3.5 h-3.5 text-purple-400" />

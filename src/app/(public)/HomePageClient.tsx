@@ -238,7 +238,7 @@ export function HomePageClient() {
                 {/* ===== BELOW THE FOLD: Detailed Context ===== */}
                 <section className="flex flex-col gap-6 mt-6">
                     {/* Explore More Grid */}
-                    <UniversalCard variant="default" className="p-0 overflow-hidden">
+                    <UniversalCard variant="luma" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard
                                 title="免費功能"

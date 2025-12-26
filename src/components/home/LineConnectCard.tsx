@@ -45,7 +45,7 @@ export function LineConnectCard() {
     return (
         <div className="fixed bottom-[5.5rem] left-4 right-4 z-[999] animate-in slide-in-from-bottom-10 fade-in duration-500">
             <UniversalCard
-                variant="default"
+                variant="luma"
                 className="bg-[#06C755]/10 border-[#06C755]/30 p-4 relative overflow-hidden backdrop-blur-xl shadow-[0_0_40px_-5px_rgba(6,199,85,0.4)]"
             >
                 {/* Close Button */}

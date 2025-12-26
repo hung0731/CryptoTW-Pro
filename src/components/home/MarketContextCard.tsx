@@ -79,7 +79,7 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
     const contextText = data.summary || `市場整體呈現${data.sentiment}態勢。`
 
     return (
-        <UniversalCard variant="default" size="S" className="overflow-hidden">
+        <UniversalCard variant="luma" size="S" className="overflow-hidden">
             {/* Header */}
             <div className="mb-3">
                 <SectionHeaderCard

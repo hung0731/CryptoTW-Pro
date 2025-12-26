@@ -160,7 +160,7 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
 
             {/* Alpha Tools Section (Unified Container) */}
             <section className={cn(SPACING.sectionGap)}>
-                <UniversalCard variant="default" className="p-0 overflow-hidden">
+                <UniversalCard variant="luma" className="p-0 overflow-hidden">
                     {/* Header */}
                     <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                         <SectionHeaderCard
@@ -197,7 +197,7 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
 
             {/* Market Metrics Section (Unified Container) */}
             <section className="mt-6">
-                <UniversalCard variant="default" className="p-0 overflow-hidden">
+                <UniversalCard variant="luma" className="p-0 overflow-hidden">
                     {/* Header */}
                     <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                         <SectionHeaderCard

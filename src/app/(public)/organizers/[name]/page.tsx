@@ -96,7 +96,7 @@ export default function OrganizerPage() {
 
             <MobileOptimizedLayout className={SPACING.classes.mtHeader}>
                 {/* Organizer Info Card */}
-                <UniversalCard variant="default" className="mb-6">
+                <UniversalCard variant="luma" className="mb-6">
                     <div className="p-5">
                         <div className="flex items-start gap-4">
                             {/* Logo */}
@@ -151,7 +151,7 @@ export default function OrganizerPage() {
                 </UniversalCard>
 
                 {/* Events List */}
-                <UniversalCard variant="default" className="p-0 overflow-hidden">
+                <UniversalCard variant="luma" className="p-0 overflow-hidden">
                     <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                         <SectionHeaderCard
                             title="舉辦過的活動"

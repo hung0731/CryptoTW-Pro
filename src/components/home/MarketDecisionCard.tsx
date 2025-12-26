@@ -40,7 +40,7 @@ export function MarketDecisionCard({
     const isEmergency = false; // logic hook for Break Glass
 
     return (
-        <UniversalCard variant={isEmergency ? 'danger' : 'default'} size="M" className="h-full min-h-[300px]">
+        <UniversalCard variant={isEmergency ? 'danger' : 'luma'} size="M" className="h-full min-h-[300px]">
             <div className="flex flex-col h-full">
                 {/* Top: State & Confidence */}
                 <div className="flex items-start justify-between mb-6">

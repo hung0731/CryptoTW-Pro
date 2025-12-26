@@ -193,7 +193,7 @@ export function CurrencyConverter() {
 
     if (loading) {
         return (
-            <UniversalCard variant="default" className="p-0 overflow-hidden">
+            <UniversalCard variant="luma" className="p-0 overflow-hidden">
                 <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                     <SectionHeaderCard title="匯率換算" icon={DollarSign} />
                 </div>
@@ -207,7 +207,7 @@ export function CurrencyConverter() {
     }
 
     return (
-        <UniversalCard variant="default" className="p-0 overflow-hidden">
+        <UniversalCard variant="luma" className="p-0 overflow-hidden">
             {/* Header */}
             <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                 <SectionHeaderCard

@@ -24,7 +24,7 @@ export function QuickActionCard({
     return (
         <Link href={href} className="flex-1 block h-full">
             <UniversalCard
-                variant={isPrimary ? 'default' : 'clickable'}
+                variant={isPrimary ? 'luma' : 'lumaClickable'}
                 size="S"
                 className="h-full flex flex-col justify-between group"
             >

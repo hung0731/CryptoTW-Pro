@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { SURFACE, BORDER, RADIUS, SPACING, TYPOGRAPHY, ANIMATION, FOCUS } from '@/lib/design-tokens'
 
 // Strict Variant Types
-export type CardVariant = 'default' | 'subtle' | 'highlight' | 'danger' | 'success' | 'clickable' | 'ghost'
+export type CardVariant = 'default' | 'subtle' | 'highlight' | 'danger' | 'success' | 'clickable' | 'ghost' | 'luma' | 'lumaSubtle' | 'lumaClickable'
 export type CardSize = 'S' | 'M' | 'L'
 export type CardTone = 'neutral' | 'positive' | 'negative'
 
@@ -51,6 +51,32 @@ export function UniversalCard({
             "cursor-pointer group overflow-hidden"
         ),
         ghost: cn(SURFACE.ghost, BORDER.ghost, "hover:bg-[#1A1A1A]/30", ANIMATION.hoverCard),
+
+        // ================================================
+        // LUMA STYLE VARIANTS (Modern Glassmorphism)
+        // ================================================
+        luma: cn(
+            "bg-white/[0.02] backdrop-blur-xl",
+            "border border-white/[0.08]",
+            "rounded-2xl",
+            "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_0_40px_-15px_rgba(120,119,198,0.15)]",
+            "relative before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:pointer-events-none"
+        ),
+        lumaSubtle: cn(
+            "bg-white/[0.015] backdrop-blur-lg",
+            "border border-white/[0.05]",
+            "rounded-xl"
+        ),
+        lumaClickable: cn(
+            "bg-white/[0.02] backdrop-blur-xl",
+            "border border-white/[0.08]",
+            "rounded-2xl",
+            "cursor-pointer",
+            "transition-all duration-200",
+            "hover:border-white/[0.15] hover:shadow-[0_0_30px_-5px_rgba(120,119,198,0.2),inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:-translate-y-0.5",
+            "active:scale-[0.98]",
+            "relative before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/15 before:to-transparent before:pointer-events-none"
+        ),
     }
 
     // Resolve Radius & Padding based on Size

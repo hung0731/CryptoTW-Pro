@@ -44,7 +44,7 @@ export function LessonView({ chapter, onClose, onComplete }: LessonViewProps) {
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto p-4 pb-48 bg-gradient-to-b from-black to-[#050505]">
                 <div className="max-w-xl mx-auto mb-8">
-                    <UniversalCard variant="default" className="p-0 overflow-hidden border-[#333]">
+                    <UniversalCard variant="luma" className="p-0 overflow-hidden border-[#333]">
                         {/* Header Section */}
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard

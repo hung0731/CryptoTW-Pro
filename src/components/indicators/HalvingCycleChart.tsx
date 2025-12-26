@@ -221,7 +221,7 @@ export function HalvingCycleChart() {
             </div>
 
             {/* Main Chart */}
-            <UniversalCard variant="default" className="w-full p-0 overflow-hidden flex flex-col relative">
+            <UniversalCard variant="luma" className="w-full p-0 overflow-hidden flex flex-col relative">
                 {/* Background Phases Annotations (Absolute) */}
                 <div className="absolute inset-0 pointer-events-none opacity-10">
                     <div className="absolute left-[5%] top-0 bottom-0 w-[15%] bg-blue-500" /> {/* Pre-Halving */}

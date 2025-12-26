@@ -102,7 +102,7 @@ export function ChartHero({ story }: ChartHeroProps) {
         <div className="space-y-4">
             {/* Chart Container - Matches ReviewChart visuals */}
             <div className="relative w-full aspect-[16/9] md:aspect-[21/9] min-h-[350px]">
-                <UniversalCard variant="default" className="w-full h-full p-0 overflow-hidden flex flex-col relative">
+                <UniversalCard variant="luma" className="w-full h-full p-0 overflow-hidden flex flex-col relative">
                     {/* Header Overlay */}
                     <div className="absolute top-4 left-4 z-20 flex flex-col gap-1 pointer-events-none">
                         <div className="flex items-center gap-2">
@@ -308,7 +308,7 @@ function PositionStatement({
     loading?: boolean;
 }) {
     return (
-        <UniversalCard variant="default" className="p-4 bg-[#0A0A0A]/50">
+        <UniversalCard variant="luma" className="p-4 bg-[#0A0A0A]/50">
             <div className="flex items-start gap-5">
                 {/* Left: Value */}
                 {currentValue !== undefined && currentValue !== 0 && (

@@ -82,7 +82,7 @@ interface LiffProviderProps {
 const CACHE_KEY = 'dbUser'
 const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24 hours
 const SDK_WAIT_INTERVAL = 50 // ms
-const SDK_MAX_WAIT = 10000 // 10 seconds max
+const SDK_MAX_WAIT = 3000 // 3 seconds max (reduced from 10s for better UX)
 
 // ============================================
 // Helper Functions
@@ -95,12 +95,15 @@ function isCacheValid(cached: CachedUser): boolean {
     return (now - updatedAt) < CACHE_EXPIRY_MS
 }
 
-async function waitForLiffSDK(): Promise<LiffObject> {
+async function waitForLiffSDK(): Promise<LiffObject | null> {
     const startTime = Date.now()
 
     while (!(window as any).liff) {
         if (Date.now() - startTime > SDK_MAX_WAIT) {
-            throw new Error('LIFF SDK failed to load (Timeout 10s)')
+            // SDK timeout - return null instead of throwing
+            // This allows the app to continue in guest mode
+            logger.warn('LIFF SDK timeout after 10s - continuing as guest', { feature: 'liff-provider' })
+            return null
         }
         await new Promise(resolve => setTimeout(resolve, SDK_WAIT_INTERVAL))
     }
@@ -206,6 +209,14 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
 
                 // 2. Wait for LIFF SDK
                 const liff = await waitForLiffSDK()
+
+                // If SDK failed to load, continue in guest mode
+                if (!liff) {
+                    logger.warn('LIFF SDK unavailable - continuing in guest mode', { feature: 'liff-provider' })
+                    // Keep any cached data but mark as not logged in
+                    setIsLoading(false)
+                    return
+                }
 
                 // 3. Initialize LIFF
                 logger.info('Starting LIFF Init...', { feature: 'liff-provider', liffId })

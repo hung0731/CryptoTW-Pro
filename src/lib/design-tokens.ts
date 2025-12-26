@@ -43,6 +43,13 @@ export const SURFACE = {
     border: 'border-[#1A1A1A]',
     // Level 6: Ghost (Transparent)
     ghost: 'bg-transparent',
+
+    // ================================================
+    // LUMA STYLE (Glassmorphism)
+    // ================================================
+    glass: 'bg-white/[0.02] backdrop-blur-xl',
+    glassStrong: 'bg-white/[0.04] backdrop-blur-2xl',
+    glassSubtle: 'bg-white/[0.01] backdrop-blur-lg',
 } as const
 
 // ================================================
@@ -166,6 +173,30 @@ export const CARDS = {
 
     // Lu.ma Style (Ghost/Flat)
     ghost: 'bg-transparent border border-transparent p-0',
+
+    // ================================================
+    // LUMA STYLE CARDS (Modern Glassmorphism)
+    // ================================================
+
+    /**
+     * Luma Primary - Hero/Feature cards
+     * - Glassmorphism with ambient glow
+     * - Larger radius, subtle top border gradient
+     */
+    luma: 'bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_0_40px_-15px_rgba(120,119,198,0.15)]',
+
+    /**
+     * Luma Subtle - Secondary cards
+     * - Less prominent, no glow
+     */
+    lumaSubtle: 'bg-white/[0.015] backdrop-blur-lg border border-white/[0.05] rounded-xl p-4',
+
+    /**
+     * Luma Interactive - Clickable cards
+     * - Hover glow effect
+     */
+    lumaClickable: 'bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 cursor-pointer transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_0_30px_-5px_rgba(120,119,198,0.2),inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:-translate-y-0.5 active:scale-[0.98]',
+
 } as const
 
 // ================================================

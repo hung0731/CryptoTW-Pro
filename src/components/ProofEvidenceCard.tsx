@@ -59,7 +59,7 @@ export function ProofEvidenceCard({
 
     return (
         <UniversalCard
-            variant="default"
+            variant="luma"
             size="M"
             className="p-0 overflow-hidden flex flex-col" // Reset padding for custom internal layout
         >

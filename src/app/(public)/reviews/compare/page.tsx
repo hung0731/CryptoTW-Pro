@@ -305,7 +305,7 @@ function CompareContent() {
                 </div>
 
                 {/* Structure Difference Card */}
-                <UniversalCard variant="default" size="M">
+                <UniversalCard variant="luma" size="M">
                     <SectionHeaderCard
                         title="結構差異摘要"
                         icon={Cpu}

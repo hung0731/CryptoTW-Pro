@@ -1,22 +1,27 @@
-import { Loader2 } from 'lucide-react';
+'use client'
 
 export default function GlobalLoader() {
     return (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300">
-            <div className="relative flex flex-col items-center gap-6 animate-in fade-in zoom-in-95 duration-300">
-                {/* Minimalist Logo with Breathing Effect */}
-                <div className="relative">
-                    <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse" />
-                    <img
-                        src="/logo.svg"
-                        alt="CryptoTW"
-                        className="w-20 h-20 relative z-10 drop-shadow-2xl"
-                    />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050507]">
+            {/* Minimal ambient glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-purple-500/10 blur-[100px] pointer-events-none" />
+
+            {/* Simple centered content */}
+            <div className="flex flex-col items-center gap-4">
+                {/* Logo */}
+                <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center">
+                    <img src="/logo.svg" alt="" className="w-7 h-7" />
                 </div>
 
-                <div className="flex items-center gap-2 text-neutral-500 text-xs font-mono tracking-widest uppercase">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Loading Data
+                {/* Simple loading indicator */}
+                <div className="flex items-center gap-1.5">
+                    {[0, 1, 2].map(i => (
+                        <div
+                            key={i}
+                            className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse"
+                            style={{ animationDelay: `${i * 150}ms` }}
+                        />
+                    ))}
                 </div>
             </div>
         </div>

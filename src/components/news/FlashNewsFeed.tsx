@@ -76,7 +76,7 @@ export function FlashNewsFeed({ compact = false, initialContext = null }: { comp
 
     return (
         <div className="w-full">
-            <UniversalCard variant="default" className="p-0 overflow-hidden">
+            <UniversalCard variant="luma" className="p-0 overflow-hidden">
                 {/* Header (Integrated if needed, or just content for minimal feed) */}
                 {/* Since it's often used between two other titled cards, let's give it a title too or keep it minimal? */}
                 {/* The user didn't ask for a title here but consistent style. Let's add a small header "重點快訊" if standalone, or just keep it list style. */}

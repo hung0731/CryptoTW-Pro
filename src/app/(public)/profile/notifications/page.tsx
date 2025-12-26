@@ -117,7 +117,7 @@ export default function NotificationsPage() {
                 {/* Core Notifications */}
                 <div className="space-y-3">
                     <SectionHeaderCard title="核心通知" />
-                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden divide-y divide-white/5">
+                    <UniversalCard variant="luma" size="M" className="p-0 overflow-hidden divide-y divide-white/5">
                         <NotificationToggle
                             icon={Zap}
                             label="關鍵交易信號"
@@ -145,7 +145,7 @@ export default function NotificationsPage() {
                 {/* Pro Notifications */}
                 <div className="space-y-3">
                     <SectionHeaderCard title="Pro 專屬通知" />
-                    <UniversalCard variant="default" size="M" className="p-0 overflow-hidden divide-y divide-white/5">
+                    <UniversalCard variant="luma" size="M" className="p-0 overflow-hidden divide-y divide-white/5">
                         <NotificationToggle
                             icon={TrendingUp}
                             label="巨鯨警報"
@@ -200,7 +200,7 @@ export default function NotificationsPage() {
                 {/* Quiet Hours */}
                 <div className="space-y-3">
                     <SectionHeaderCard title="靜音時段" />
-                    <UniversalCard variant="default" size="M">
+                    <UniversalCard variant="luma" size="M">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <div className="font-medium text-white text-sm">勿擾模式</div>

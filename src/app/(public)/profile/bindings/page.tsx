@@ -92,7 +92,7 @@ export default function BindingsPage() {
                             <Skeleton className="h-16 w-full rounded-xl bg-neutral-900" />
                         </div>
                     ) : bindings.length === 0 ? (
-                        <UniversalCard variant="default" size="L" className="border-dashed border-white/10 flex flex-col items-center text-center gap-3 py-8">
+                        <UniversalCard variant="luma" size="L" className="border-dashed border-white/10 flex flex-col items-center text-center gap-3 py-8">
                             <div className="p-3 bg-white/5 rounded-full">
                                 <AlertCircle className="h-6 w-6 text-neutral-500" />
                             </div>
@@ -109,7 +109,7 @@ export default function BindingsPage() {
                     ) : (
                         <div className="space-y-2">
                             {bindings.map(b => (
-                                <UniversalCard key={b.id} variant="default" size="M" className="p-4 flex items-center justify-between group">
+                                <UniversalCard key={b.id} variant="luma" size="M" className="p-4 flex items-center justify-between group">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center border border-white/10 text-xs font-bold uppercase text-neutral-400">
                                             {b.exchange_name.slice(0, 2)}
