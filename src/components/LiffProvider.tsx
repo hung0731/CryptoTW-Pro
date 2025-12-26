@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react'
 import liff from '@line/liff'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database'
@@ -41,6 +41,7 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
     const [dbUser, setDbUser] = useState<DBUser | null>(null)
     const [error, setError] = useState<any | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const liffInitRef = useRef(false)
 
     useEffect(() => {
         if (!liffId) {
@@ -48,6 +49,12 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
             setIsLoading(false)
             return
         }
+
+        // Prevent double initialization (React Strict Mode fix)
+        if (liffInitRef.current) {
+            return
+        }
+        liffInitRef.current = true
 
         const initLiff = async () => {
             try {
@@ -59,10 +66,6 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                         setDbUser(parsed)
                         setIsLoggedIn(true)
 
-                        // Smart Optimistic UI:
-                        // Only unblock immediately if user was already PRO.
-                        // If they were FREE, wait for fresh API data to check if they upgraded.
-                        // This prevents "Flash of Gate" for users who just bound/upgraded.
                         const status = parsed.membership_status
                         const isPro = status === 'pro' || status === 'lifetime' || status === 'vip'
 
@@ -80,23 +83,24 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                 // 2. LIFF Inspector (Dev Only)
                 if (process.env.NODE_ENV === 'development') {
                     try {
-                        // Fix: Cast module to any to bypass TS check failure on default/named export
                         const inspectorModule = await import('@line/liff-inspector') as any
                         const LiffInspector = inspectorModule.LiffInspector || inspectorModule.default
-
                         if (LiffInspector) {
                             liff.use(new LiffInspector())
-                            logger.info('LIFF Inspector initialized', { feature: 'liff-provider' })
                         }
                     } catch (err) {
                         logger.warn('Failed to load LIFF Inspector', err as Error, { feature: 'liff-provider' })
                     }
                 }
 
+                // 3. Initialize LIFF
+                logger.info('Initializing LIFF...', { feature: 'liff-provider', liffId })
                 await liff.init({ liffId })
                 setLiffObject(liff)
 
+                // 4. Check Login Status
                 if (liff.isLoggedIn()) {
+                    logger.info('LIFF is logged in. Fetching profile...', { feature: 'liff-provider' })
                     setIsLoggedIn(true)
                     const userProfile = await liff.getProfile()
                     setProfile(userProfile)
@@ -114,18 +118,16 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                             if (res.ok) {
                                 const data = await res.json()
                                 setDbUser(data.user)
-                                // Security: Only cache non-sensitive fields to minimize XSS impact
+
                                 const safeCache = {
                                     id: data.user.id,
                                     line_user_id: data.user.line_user_id,
                                     display_name: data.user.display_name,
                                     avatar_url: data.user.avatar_url,
                                     membership_status: data.user.membership_status,
-                                    // Do NOT cache sensitive fields like email, session tokens, etc.
                                 }
                                 localStorage.setItem('dbUser', JSON.stringify(safeCache))
 
-                                // Set Supabase Session
                                 if (data.session) {
                                     const { error: sessionError } = await supabase.auth.setSession(data.session)
                                     if (sessionError) {
@@ -133,25 +135,31 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                                     }
                                 }
                             } else {
-                                logger.error('Failed to sync user with backend', new Error('Auth API failed'), { feature: 'liff-provider', status: res.status })
-                                // If sync failed and we have 'basic' cache, we might want to retry or clear?
-                                // For now, keep as is, but maybe force reload?
+                                const errorData = await res.json().catch(() => ({}))
+                                logger.error('Failed to sync user with backend', new Error(errorData.error || 'Auth API failed'), { feature: 'liff-provider', status: res.status })
                             }
                         } catch (err) {
                             logger.error('Auth API Error', err as Error, { feature: 'liff-provider' })
                         }
                     }
                 } else {
-                    // Force login if in LINE Client
+                    // Not Logged In
+                    logger.info('LIFF not logged in.', { feature: 'liff-provider', isInClient: liff.isInClient() })
+
                     if (liff.isInClient()) {
-                        logger.info('In LINE client but not logged in - forcing login', { feature: 'liff-provider' })
-                        liff.login({ redirectUri: window.location.href })
+                        logger.info('In LINE client. Forcing login...', { feature: 'liff-provider' })
+                        // Remove auth params to prevent loops
+                        const url = new URL(window.location.href)
+                        url.searchParams.delete('code')
+                        url.searchParams.delete('state')
+                        url.searchParams.delete('liffClientId')
+                        url.searchParams.delete('liffRedirectUri')
+
+                        liff.login({ redirectUri: url.toString() })
                         return
                     }
-                    // CRITICAL FIX:
-                    // If LIFF is NOT logged in, but we have optimistic cache (isLoggedIn=true),
-                    // we MUST clear it. Otherwise user appears as "Basic" (from cache) but effectively logged out relative to Line.
-                    // This prevents "Basic" state triggering Gate when they should just be "Guest" (Login Page).
+
+                    // Clear stale cache if not in client and not logged in
                     if (cachedUser) {
                         logger.info('Clearing stale cache - LIFF not logged in', { feature: 'liff-provider' })
                         setDbUser(null)
@@ -161,12 +169,8 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
                 }
             } catch (e) {
                 const errMsg = (e as Error).message
-                if (errMsg.includes('Failed to fetch')) {
-                    logger.warn('LIFF Connect Failed (likely network/blocker). Running in Guest Mode.', { feature: 'liff-provider' })
-                } else {
-                    logger.error('LIFF Initialization failed', e as Error, { feature: 'liff-provider' })
-                }
-                setError(e)
+                logger.error('LIFF Initialization failed', e as Error, { feature: 'liff-provider' })
+                setError(e) // This will ensure UI can maybe show something
             } finally {
                 setIsLoading(false)
             }
@@ -178,6 +182,9 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
     return (
         <LiffContext.Provider value={{ liffObject, isLoggedIn, profile, dbUser, error, isLoading }}>
             {isLoading && <GlobalLoader />}
+            {/* Debug UI for Mobile - only visual if strictly needed context, usually hidden. 
+                For now we rely on logger/console, but if error exists we can show a toast or small banner? 
+                Let's keep clean for now unless persisted error. */}
             {children}
         </LiffContext.Provider>
     )
