@@ -7,7 +7,7 @@ import { Smartphone, ArrowRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function LineConnectCard() {
-    const { liffObject, isLoading } = useLiff();
+    const { liffObject, isLoading, isLoggedIn, dbUser } = useLiff();
     const [isClient, setIsClient] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
 
@@ -28,12 +28,17 @@ export function LineConnectCard() {
         console.log('[LineConnectCard Debug]', {
             liffObject: !!liffObject,
             isInLine,
+            isLoggedIn,
+            hasDbUser: !!dbUser,
             userAgent: navigator.userAgent.substring(0, 50)
         });
     }
 
     // If already in LINE, don't show this card
     if (isInLine) return null;
+
+    // If user is already logged in (either via LIFF or has dbUser), don't show this card
+    if (isLoggedIn || dbUser) return null;
 
     const LINE_OA_LINK = 'https://line.me/R/ti/p/@850ucugl';
 
