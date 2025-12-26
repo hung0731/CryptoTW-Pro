@@ -10,8 +10,12 @@ import {
     Landmark,
     BookOpen,
     History,
-    Play
+    Play,
+    AlertTriangle,
+    Clock,
+    CheckCircle
 } from 'lucide-react'
+import { Tag } from '@/components/ui/tag'
 import { JudgmentReplay } from '@/components/JudgmentReplay'
 import { cn } from '@/lib/utils'
 import {
@@ -168,7 +172,7 @@ function MiniChartCard({
             {/* Footer: Quiet Metrics */}
             <div className="px-2.5 pb-2.5 flex items-center justify-between text-[9px]">
                 <div className="flex items-center gap-1">
-                    <span className={cn("scale-90 origin-left opacity-60 font-mono", COLORS.textTertiary)}>預測</span>
+                    <span className={cn("scale-90 origin-left opacity-60 font-mono", COLORS.textTertiary)}>前期</span>
                     <span className={cn("font-medium tracking-tight font-mono", COLORS.textSecondary)}>
                         {formatValue(eventKey, occ.forecast)}
                     </span>
@@ -409,26 +413,35 @@ export default function CalendarPageClient({ enrichedEvents }: CalendarPageClien
                                                     {/* [NEW v1.1] Narrative Status Badge */}
                                                     {item.narrative && (
                                                         <div className="mt-1.5 flex items-center gap-2">
-                                                            <div className={cn(
-                                                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium border",
-                                                                item.narrativeStatus === 'bullish_surprise' && "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-                                                                item.narrativeStatus === 'bearish_risk' && "bg-red-500/10 text-red-500 border-red-500/20",
-                                                                item.narrativeStatus === 'neutral' && "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                                                            )}>
-                                                                {item.narrativeStatus === 'bullish_surprise' && <Activity className="w-3 h-3" />}
-                                                                {item.narrativeStatus === 'bearish_risk' && <Activity className="w-3 h-3" />}
-                                                                {item.narrativeStatus === 'neutral' ? '觀望' : item.narrativeStatus === 'bullish_surprise' ? '利好預期' : '風險警示'}
-                                                            </div>
+                                                            {item.narrativeStatus && (
+                                                                <Tag
+                                                                    variant={
+                                                                        item.narrativeStatus === 'bullish_surprise' ? 'success' :
+                                                                            item.narrativeStatus === 'bearish_risk' ? 'error' : 'warning'
+                                                                    }
+                                                                    size="sm"
+                                                                    icon={
+                                                                        item.narrativeStatus === 'bullish_surprise' ? Activity :
+                                                                            item.narrativeStatus === 'bearish_risk' ? AlertTriangle : Clock
+                                                                    }
+                                                                >
+                                                                    {item.narrativeStatus === 'bullish_surprise' ? '利好預期' :
+                                                                        item.narrativeStatus === 'bearish_risk' ? '風險警示' : '觀望'}
+                                                                </Tag>
+                                                            )}
+
                                                             {/* Risk Signal */}
                                                             {item.riskSignal && (
-                                                                <div className={cn(
-                                                                    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium border",
-                                                                    item.riskSignal.level === 'high' && "bg-red-500/10 text-red-500 border-red-500/20",
-                                                                    item.riskSignal.level === 'medium' && "bg-orange-500/10 text-orange-500 border-orange-500/20",
-                                                                    item.riskSignal.level === 'low' && "bg-neutral-800 text-neutral-400 border-neutral-700"
-                                                                )}>
-                                                                    <span>{item.riskSignal.label}</span>
-                                                                </div>
+                                                                <Tag
+                                                                    variant={
+                                                                        item.riskSignal.level === 'high' ? 'error' :
+                                                                            item.riskSignal.level === 'medium' ? 'warning' : 'default'
+                                                                    }
+                                                                    size="sm"
+                                                                    icon={item.riskSignal.level === 'high' ? AlertTriangle : undefined}
+                                                                >
+                                                                    {item.riskSignal.label}
+                                                                </Tag>
                                                             )}
                                                         </div>
                                                     )}
@@ -439,19 +452,18 @@ export default function CalendarPageClient({ enrichedEvents }: CalendarPageClien
                                         {/* Right Anchor: Time Indicator */}
                                         {nextOccurrence ? (
                                             <div className="flex flex-col items-end gap-1">
-                                                <span className={cn(
-                                                    "text-[10px] px-2 py-0.5 rounded font-mono border font-medium",
-                                                    daysUntil === 0
-                                                        ? "bg-white text-black border-white"
-                                                        : "bg-[#0E0E0F] border-[#2A2A2A] text-[#888]"
-                                                )}>
+                                                <Tag
+                                                    variant={daysUntil === 0 ? 'brand' : 'default'}
+                                                    size="sm"
+                                                    className={cn(daysUntil === 0 && "bg-white text-black hover:bg-white hover:text-black")}
+                                                >
                                                     {daysUntil === 0 ? '今天' : `D-${daysUntil}`}
-                                                </span>
+                                                </Tag>
                                             </div>
                                         ) : (
-                                            <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded border border-[#2A2A2A] bg-[#0E0E0F] text-[#666]")}>
+                                            <Tag variant="default" size="sm">
                                                 待定
-                                            </span>
+                                            </Tag>
                                         )}
                                     </div>
 

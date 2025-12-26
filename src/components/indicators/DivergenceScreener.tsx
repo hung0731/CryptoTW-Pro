@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useEffect, useState, useMemo } from 'react'
-import { ArrowUp, ArrowDown, ExternalLink, Activity, Info, TrendingUp, TrendingDown, Crosshair } from 'lucide-react'
+import { ArrowUp, ArrowDown, ExternalLink, Activity, Info, TrendingUp, TrendingDown, Crosshair, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/lib/design-tokens'
 import { UniversalCard } from '@/components/ui/UniversalCard'
+import { Tag } from '@/components/ui/tag'
 
 interface DivergenceItem {
     symbol: string
@@ -152,7 +153,7 @@ export function DivergenceScreener() {
                     <div className="flex items-center gap-2">
                         <Activity className="w-3.5 h-3.5 text-purple-400" />
                         <span className={cn("text-xs font-medium", COLORS.textSecondary)}>主力意圖掃描器</span>
-                        <span className="bg-purple-500/10 text-purple-400 text-[9px] px-1.5 py-0.5 rounded border border-purple-500/20 font-mono">ALPHA</span>
+                        <Tag variant="purple" size="sm" icon={Sparkles}>ALPHA</Tag>
                     </div>
                     <div className="text-[10px] text-neutral-500 font-mono flex items-center gap-2">
                         <span>Rank by SmartScore™</span>
@@ -242,35 +243,23 @@ export function DivergenceScreener() {
 function SignalBadge({ signal }: { signal: DivergenceItem['signal'] }) {
     if (signal === 'absorption') {
         return (
-            <div className="flex flex-col items-center">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-green-500/10 border border-green-500/20">
-                    <span className="text-[10px] text-green-400 font-bold">主力吸籌</span>
-                    <ArrowUp className="w-3 h-3 text-green-400" />
-                </div>
-                <span className="text-[9px] text-neutral-600 mt-0.5">Bullish</span>
-            </div>
+            <Tag variant="success" size="sm" icon={ArrowUp}>
+                主力吸籌
+            </Tag>
         )
     }
     if (signal === 'distribution') {
         return (
-            <div className="flex flex-col items-center">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-red-500/10 border border-red-500/20">
-                    <span className="text-[10px] text-red-400 font-bold">主力出貨</span>
-                    <ArrowDown className="w-3 h-3 text-red-400" />
-                </div>
-                <span className="text-[9px] text-neutral-600 mt-0.5">Bearish</span>
-            </div>
+            <Tag variant="error" size="sm" icon={ArrowDown}>
+                主力出貨
+            </Tag>
         )
     }
     if (signal === 'overheated') {
         return (
-            <div className="flex flex-col items-center">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-yellow-500/10 border border-yellow-500/20">
-                    <span className="text-[10px] text-yellow-500 font-bold">過度擁擠</span>
-                    <Activity className="w-3 h-3 text-yellow-500" />
-                </div>
-                <span className="text-[9px] text-neutral-600 mt-0.5">High Risk</span>
-            </div>
+            <Tag variant="warning" size="sm" icon={Activity}>
+                過度擁擠
+            </Tag>
         )
     }
     return null

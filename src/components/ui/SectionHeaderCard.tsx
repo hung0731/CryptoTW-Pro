@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { SURFACE, RADIUS, TYPOGRAPHY, SPACING } from '@/lib/design-tokens'
+import { TYPOGRAPHY } from '@/lib/design-tokens'
 
 interface SectionHeaderCardProps {
     title: string
@@ -34,25 +34,23 @@ export function SectionHeaderCard({
                 className
             )}
         >
-            <div className="flex items-center gap-2">
-                {Icon && <Icon className="w-5 h-5 text-neutral-400" />}
-                <div className="flex flex-col">
-                    <h2 className={cn(TYPOGRAPHY.sectionTitle, "leading-tight text-base font-bold")}>
-                        {title}
-                    </h2>
-                    {description && (
-                        <span className={cn(TYPOGRAPHY.micro, "text-neutral-500 font-medium")}>
-                            {description}
-                        </span>
-                    )}
-                </div>
+            {/* Left: Title & Description */}
+            <div className="flex flex-col">
+                <h2 className={cn(TYPOGRAPHY.sectionTitle, "leading-tight text-base font-bold")}>
+                    {title}
+                </h2>
+                {description && (
+                    <span className={cn(TYPOGRAPHY.micro, "text-neutral-500 font-medium")}>
+                        {description}
+                    </span>
+                )}
             </div>
 
-            {rightElement && (
-                <div className="flex items-center gap-2">
-                    {rightElement}
-                </div>
-            )}
+            {/* Right: RightElement & Icon */}
+            <div className="flex items-center gap-3">
+                {rightElement}
+                {Icon && <Icon strokeWidth={1.5} className="w-5 h-5 text-neutral-400" />}
+            </div>
         </div>
     )
 }

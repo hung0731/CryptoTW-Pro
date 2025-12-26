@@ -35,7 +35,7 @@ export function UniversalCard({
 
     // Resolve Styles based on Variant
     const variantStyles = {
-        default: cn(SURFACE.cardPrimary, BORDER.primary, "relative before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top_left,theme(colors.purple.500/0.08)_0%,transparent_60%)] before:pointer-events-none"),
+        default: cn(SURFACE.cardPrimary, BORDER.primary),
         subtle: cn(SURFACE.cardPassive, BORDER.dashed),
         highlight: cn(SURFACE.highlight, BORDER.highlight),
         danger: cn(SURFACE.danger, BORDER.danger),
@@ -43,8 +43,7 @@ export function UniversalCard({
         clickable: cn(
             SURFACE.cardPrimary,
             BORDER.primary,
-            "hover:bg-[#141414] hover:border-purple-500/30 border-t-purple-500/20",
-            "relative before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top_left,theme(colors.purple.500/0.08)_0%,transparent_60%)] before:pointer-events-none",
+            "hover:bg-[#141414] hover:border-white/[0.15]",
             ANIMATION.hoverCard,
             ANIMATION.activePress,
             FOCUS.ringSubtle,
@@ -59,8 +58,7 @@ export function UniversalCard({
             "bg-white/[0.02] backdrop-blur-xl",
             "border border-white/[0.08]",
             "rounded-2xl",
-            "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_0_40px_-15px_rgba(120,119,198,0.15)]",
-            "relative before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:pointer-events-none"
+            "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_0_40px_-15px_rgba(120,119,198,0.15)]"
         ),
         lumaSubtle: cn(
             "bg-white/[0.015] backdrop-blur-lg",
@@ -74,8 +72,7 @@ export function UniversalCard({
             "cursor-pointer",
             "transition-all duration-200",
             "hover:border-white/[0.15] hover:shadow-[0_0_30px_-5px_rgba(120,119,198,0.2),inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:-translate-y-0.5",
-            "active:scale-[0.98]",
-            "relative before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/15 before:to-transparent before:pointer-events-none"
+            "active:scale-[0.98]"
         ),
     }
 

@@ -25,6 +25,7 @@ import { Sparkline } from '@/components/ui/sparkline';
 import { UniversalCard, CardContent } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { AISummaryCard } from '@/components/ui/AISummaryCard';
+import { Tag, TagProps } from '@/components/ui/tag';
 
 // Icons for Types
 const TypeIcons: Record<string, any> = {
@@ -46,7 +47,18 @@ const TypeLabels: Record<string, string> = {
 };
 
 // Semantic Colors for Types
-const TypeColors: Record<string, { bg: string, border: string, text: string, icon: string }> = {
+// Semantic Variants for Tags
+const TypeVariants: Record<string, TagProps['variant']> = {
+    policy_regulation: 'brand',      // Blue
+    exchange_event: 'purple',        // Purple
+    leverage_cleanse: 'warning',     // Orange
+    macro_shock: 'error',            // Red
+    market_structure: 'success',     // Emerald
+    tech_event: 'info',              // Cyan
+};
+
+// Semantic Styles for Icon Boxes (matching Tag colors)
+const TypeStyles: Record<string, { bg: string, border: string, text: string, icon: string }> = {
     policy_regulation: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400', icon: 'text-blue-400' },
     exchange_event: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', icon: 'text-purple-400' },
     leverage_cleanse: { bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400', icon: 'text-orange-400' },
@@ -54,7 +66,7 @@ const TypeColors: Record<string, { bg: string, border: string, text: string, ico
     market_structure: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', icon: 'text-emerald-400' },
     tech_event: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', text: 'text-cyan-400', icon: 'text-cyan-400' },
 };
-const DefaultTypeColor = { bg: 'bg-[#111]', border: 'border-[#2A2A2A]', text: 'text-neutral-500', icon: 'text-neutral-500' };
+const DefaultTypeStyle = { bg: 'bg-[#111]', border: 'border-[#2A2A2A]', text: 'text-neutral-500', icon: 'text-neutral-500' };
 
 const DEFAULT_SPARKLINE = [42000, 41000, 39000, 38000, 39500, 41000, 43000, 42500, 44000, 46000, 45000, 47000];
 
@@ -120,34 +132,21 @@ export function ReviewsPageClient() {
                     <UniversalCard className="p-0 overflow-hidden bg-[#0F0F10] border-[#1A1A1A]">
                         <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#1A1A1A]">
                             <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
-                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">事件總數 (Total)</div>
+                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">事件總數</div>
                                 <div className="text-2xl font-bold text-white font-mono">{REVIEWS_DATA.length}</div>
                             </div>
                             <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
-                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">市場週期 (Cycles)</div>
+                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">市場週期</div>
                                 <div className="text-2xl font-bold text-white font-mono">3</div>
                             </div>
                             <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
-                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">平均修復期 (Avg)</div>
-                                <div className="text-2xl font-bold text-emerald-400 font-mono">14d</div>
+                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">平均修復期</div>
+                                <div className="text-2xl font-bold text-emerald-400 font-mono">14天</div>
                             </div>
 
-                            {/* Random Replay Action */}
-                            <div
-                                onClick={() => {
-                                    const random = REVIEWS_DATA[Math.floor(Math.random() * REVIEWS_DATA.length)];
-                                    window.location.href = `/reviews/${random.year}/${random.slug}?mode=replay`;
-                                }}
-                                className="group relative p-5 flex flex-col items-center justify-center text-center cursor-pointer bg-blue-950/10 hover:bg-blue-900/20 transition-all"
-                            >
-                                <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors" />
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <Zap className="w-4 h-4 text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold text-blue-100 group-hover:text-white">隨機復盤</span>
-                                </div>
-                                <div className="text-[10px] text-blue-300/60 font-mono uppercase tracking-wider group-hover:text-blue-200/80">
-                                    Challenge History
-                                </div>
+                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
+                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">平均修復期</div>
+                                <div className="text-2xl font-bold text-emerald-400 font-mono">14天</div>
                             </div>
                         </div>
                     </UniversalCard>
@@ -261,7 +260,7 @@ export function ReviewsPageClient() {
                                         if (!review) return null;
 
                                         const TypeIcon = TypeIcons[review.type] || Filter;
-                                        const theme = TypeColors[review.type] || DefaultTypeColor;
+                                        const theme = TypeStyles[review.type] || DefaultTypeStyle;
 
                                         return (
                                             <div
@@ -309,12 +308,12 @@ export function ReviewsPageClient() {
 
                                                         {/* Type Tag */}
                                                         <div className="flex items-center gap-2 mt-1.5">
-                                                            <span className={cn(
-                                                                "px-1.5 py-0.5 rounded border text-[10px] font-medium",
-                                                                theme.bg, theme.border, theme.text
-                                                            )}>
+                                                            <Tag
+                                                                variant={TypeVariants[review.type] || 'default'}
+                                                                size="sm"
+                                                            >
                                                                 {TypeLabels[review.type]}
-                                                            </span>
+                                                            </Tag>
                                                         </div>
                                                     </div>
 

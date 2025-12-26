@@ -802,7 +802,7 @@ ${CONSISTENCY_CHECK}
 
 export interface CalendarSummaryInput {
     events: Array<{
-        eventType: 'cpi' | 'nfp' | 'fomc'
+        eventType: 'cpi' | 'nfp' | 'fomc' | 'unrate' | 'ppi'
         eventName: string
         nextDate: string           // ISO date
         daysUntil: number
@@ -819,6 +819,13 @@ export interface CalendarSummaryInput {
             d1Return?: number
         }
     }>
+    // NEW: Market context for better analysis
+    marketContext?: {
+        btcPrice?: number          // Current BTC price
+        btc24hChange?: number      // %
+        fearGreedIndex?: number    // 0-100
+        upcomingEventsCount?: number  // Events in next 7 days
+    }
 }
 
 export interface CalendarSummaryResult {
@@ -885,8 +892,15 @@ ${VOICE_PACK}
 
 【今日日期】${todayStr}（台灣時間）
 
+${data.marketContext?.btcPrice ? `【當前市場】
+- BTC 現價: $${data.marketContext.btcPrice.toLocaleString()}
+- 24H 變化: ${data.marketContext.btc24hChange ? (data.marketContext.btc24hChange > 0 ? '+' : '') + data.marketContext.btc24hChange.toFixed(1) + '%' : '未知'}
+- 恐懼貪婪指數: ${data.marketContext.fearGreedIndex || '未知'}/100
+- 未來 7 天事件數: ${data.marketContext.upcomingEventsCount || nearestEvents.length}
+` : ''}
+
 【重要限制 - 嚴格遵守】
-❌ 禁止：預測具體 CPI/NFP 數值或利率決定
+❌ 禁止：預測具體 CPI/NFP/PPI 數值或利率決定
 ❌ 禁止：「一定會」「肯定」「必然」「建議」等確定性/誘導語言
 ❌ 禁止：任何買賣建議、價格目標、「機會」「佈局」
 ❌ 禁止：使用「樣本」這個詞彙
@@ -898,17 +912,25 @@ ${VOICE_PACK}
 【近期事件數據】
 ${eventsDescription}
 
+【事件連動分析提示】
+- 若 PPI 在 CPI 前公布且超預期，市場會提前反映 CPI 壓力
+- 失業率與非農同時公布，兩者方向不一致時波動加劇
+- FOMC 前的 CPI/NFP 數據會影響利率預期
+
 【輸出規則】
-- 字數: 65-85 字（確保完整，不要被截斷）
+- 字數: 80-110 字（確保完整，不要被截斷）
 - 語氣: 像研究報告摘要，客觀中立
-- 只提及最近 1 個事件
-- 結構: [事件+時間] + [過去N次統計] + [若...則歷史顯示...]
+- 優先提及最近 1-2 個事件
+- 結構: [事件+時間] + [BTC 當前狀態（若有）] + [過去N次統計] + [若...則歷史顯示...]
 - 條件句必須完整，不可使用「若...則歷史顯示...」這種不完整的結尾
+- 若有多個事件接近，提及事件間的連動關係
 
 【範例】
-「CPI 數據將於明天台灣時間 21:30 公布。過去 11 次紀錄中，BTC D+1 上漲機率 55%，平均波動 5.8%。若數據低於預期，歷史顯示 D+1 平均漲幅達 2.3%。」
+「CPI 數據將於明天台灣時間 21:30 公布，BTC 目前位於 $104,200。過去 11 次紀錄中，D+1 上漲機率 55%，平均波動 5.8%。若數據低於預期，歷史顯示 D+1 平均漲幅達 2.3%。」
 
-「FOMC 利率決議將於後天凌晨 3:00 公布。過去 8 次紀錄顯示，BTC D+1 平均波動 4.2%。若維持利率不變且措辭偏鴿，歷史顯示市場反應偏正面。」
+「非農與失業率將於後天 21:30 同步公布。BTC 近期震盪，過去 12 次紀錄顯示兩數據方向不一致時，波動幅度高達 6.2%。若就業強勁但失業率上升，市場解讀分歧加大。」
+
+「PPI 將於明天公布，CPI 緊隨其後。若 PPI 超預期，歷史顯示市場會提前反映 CPI 壓力，兩日合計波動可達 7-8%。」
 
 ${CONSISTENCY_CHECK}
 

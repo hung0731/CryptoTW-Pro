@@ -7,6 +7,8 @@ import { AISummaryCard } from '@/components/ui/AISummaryCard'
 import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { UniversalCard, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { Tag } from '@/components/ui/tag'
+import { TrendingUp, TrendingDown, Zap, Minus } from 'lucide-react'
 
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
@@ -73,7 +75,7 @@ export function FullNewsFeed() {
                         title="今日重點快訊"
                         rightElement={
                             <span className="text-[10px] font-normal text-[#666666] bg-[#1A1A1A] px-2 py-0.5 rounded-full border border-[#2A2A2A]">
-                                Live
+                                即時
                             </span>
                         }
                     />
@@ -122,14 +124,26 @@ export function FullNewsFeed() {
                                         </p>
                                     )}
 
-                                    {/* Impact Badge - Only show if Neutral or not colored, replacing logic as requested */}
-                                    {item.impact === '高' && item.bias !== '偏多' && item.bias !== '偏空' && (
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-900/20 text-red-500 border border-red-900/30">
+                                    {/* Tags Row */}
+                                    <div className="mt-2 flex items-center gap-2 flex-wrap">
+                                        {/* Bias Tag */}
+                                        {item.bias && item.bias !== '中性' && (
+                                            <Tag
+                                                variant={item.bias === '偏多' ? 'success' : 'error'}
+                                                size="sm"
+                                                icon={item.bias === '偏多' ? TrendingUp : TrendingDown}
+                                            >
+                                                {item.bias === '偏多' ? '看多' : '看空'}
+                                            </Tag>
+                                        )}
+
+                                        {/* Impact Tag */}
+                                        {item.impact === '高' && (
+                                            <Tag variant="error" size="sm" icon={Zap}>
                                                 高影響
-                                            </span>
-                                        </div>
-                                    )}
+                                            </Tag>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

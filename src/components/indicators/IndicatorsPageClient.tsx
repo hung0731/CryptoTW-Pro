@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import {
     ChevronRight, Loader2, Activity, LayoutDashboard, Calendar, Hourglass, Search,
-    Gauge, ArrowLeftRight, Scale, PieChart, Coins, Landmark, TrendingUp, LineChart, Zap
+    Gauge, ArrowLeftRight, Scale, PieChart, Coins, Landmark, TrendingUp, LineChart, Zap, Crown, Sparkles
 } from 'lucide-react';
+import { Tag } from '@/components/ui/tag';
 import { cn } from '@/lib/utils';
 import { TYPOGRAPHY, SPACING } from '@/lib/design-tokens';
 import { IndicatorStory, ZONE_COLORS } from '@/lib/indicator-stories';
@@ -28,10 +29,21 @@ function getIndicatorIcon(id: string) {
     }
 }
 
+// Helper to map zones to Tag variants
+function getZoneVariant(zone: string): 'success' | 'info' | 'warning' | 'error' | 'default' {
+    switch (zone) {
+        case 'fear': return 'success';      // Low/Buy -> Green
+        case 'lean_fear': return 'info';    // Neutral-Low -> Blue (Brand/Info)
+        case 'lean_greed': return 'warning';// Neutral-High -> Yellow/Orange
+        case 'greed': return 'error';       // High/Sell -> Red
+        default: return 'default';
+    }
+}
+
 // Single Column Card Style
 function IndicatorEntryCard({ view }: { view: IndicatorMetricView }) {
-    const zoneColors = ZONE_COLORS[view.zone];
     const Icon = getIndicatorIcon(view.id);
+    const zoneColors = ZONE_COLORS[view.zone as keyof typeof ZONE_COLORS] || ZONE_COLORS.neutral;
 
     return (
         <Link href={`/indicators/${view.slug}`} className="block group relative p-5 hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0">
@@ -48,13 +60,20 @@ function IndicatorEntryCard({ view }: { view: IndicatorMetricView }) {
                         <div className="flex items-center gap-2">
                             <h3 className="text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">{view.name}</h3>
                             {view.isPro && (
-                                <span className="flex-shrink-0 bg-[#332a00] text-[#FFD700] text-[9px] font-bold px-1.5 py-0.5 rounded border border-[#665200]">PRO</span>
+                                <Tag
+                                    variant="warning"
+                                    size="sm"
+                                    icon={Crown}
+                                    className="bg-yellow-900/20 text-yellow-400 border-yellow-700/30"
+                                >
+                                    PRO
+                                </Tag>
                             )}
                         </div>
                         <div className="flex">
-                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium border whitespace-nowrap", zoneColors.bg, zoneColors.text, zoneColors.border)}>
+                            <Tag variant={getZoneVariant(view.zone)} size="sm">
                                 {view.zoneLabel}
-                            </span>
+                            </Tag>
                         </div>
                     </div>
 
@@ -183,9 +202,9 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
                                         {story.name}
                                     </h3>
                                     <div className="flex justify-center">
-                                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                        <Tag variant="purple" size="sm" icon={Sparkles}>
                                             ALPHA
-                                        </span>
+                                        </Tag>
                                     </div>
                                 </div>
                             </Link>

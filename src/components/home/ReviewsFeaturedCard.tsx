@@ -42,14 +42,14 @@ export function ReviewsFeaturedCard() {
                             <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
                             <div className="flex items-center gap-3 relative z-10">
                                 <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                                    <Scale className="w-4 h-4 text-blue-400" />
+                                    <Scale strokeWidth={1.5} className="w-4 h-4 text-blue-400" />
                                 </div>
                                 <div>
                                     <h4 className="text-sm font-bold text-blue-400">進入歷史比對模式</h4>
                                     <p className="text-[10px] text-blue-300/60">兩段歷史行情疊加，尋找相似性</p>
                                 </div>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-blue-500/50 group-hover:translate-x-1 transition-transform relative z-10" />
+                            <ChevronRight strokeWidth={1.5} className="w-4 h-4 text-blue-500/50 group-hover:translate-x-1 transition-transform relative z-10" />
                         </Link>
 
                         {/* 2. Reviews List */}

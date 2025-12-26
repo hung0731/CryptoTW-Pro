@@ -1,11 +1,11 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { getReview, getRelatedReviews } from '@/lib/reviews-data';
-import { ArrowLeft, Share2, ChevronRight, Lightbulb, BookOpen, Zap, LineChart, GitMerge } from 'lucide-react';
+import { Link as LinkIcon, ArrowLeft, Share2, ChevronRight, Lightbulb, BookOpen, LineChart, GitMerge, Calendar, Zap } from 'lucide-react';
+import { Tag } from '@/components/ui/tag';
 import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens';
 import { cn } from '@/lib/utils';
 import { StrategyCard } from '@/components/StrategyCard';
@@ -15,8 +15,6 @@ import { DeepDiveTabs } from '@/components/DeepDiveTabs';
 import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { Skeleton } from '@/components/ui/skeleton';
-
-import { JudgmentReplay } from '@/components/JudgmentReplay'; // [NEW]
 
 // Dynamic import for heavy chart component
 const EventAnalysisDashboard = dynamic(
@@ -29,13 +27,9 @@ const EventAnalysisDashboard = dynamic(
 
 export default function ReviewDetailPage() {
     const params = useParams();
-    const searchParams = useSearchParams();
     const slug = params.slug as string;
     const year = params.year as string;
     const review = getReview(slug, year);
-
-    // [NEW] Training Mode State
-    const [isTrainingMode, setIsTrainingMode] = useState(() => searchParams.get('mode') === 'replay');
 
     if (!review) {
         return <div className="min-h-screen bg-black text-white flex items-center justify-center">Event not found</div>;
@@ -74,17 +68,18 @@ export default function ReviewDetailPage() {
                     {/* Header: Tags & Meta */}
                     <div className="border-b border-[#1A1A1A] bg-[#0F0F10] p-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-bold text-[#666] border border-[#262626] px-2 py-0.5 rounded bg-[#0A0A0A]">
+                            <Tag variant="default" size="sm" icon={Calendar}>
                                 {review.year}
-                            </span>
+                            </Tag>
                             <span className="text-xs font-bold text-[#E5E5E5]">
                                 事件概覽
                             </span>
                         </div>
                         {/* Type Tag (if available) - assuming review.type exists, otherwise skip */}
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                            <span className="text-xs text-[#888] font-medium">Live Analysis</span>
+                            <Tag variant="error" size="sm" icon={Zap}>
+                                即時分析
+                            </Tag>
                         </div>
                     </div>
 
@@ -105,87 +100,51 @@ export default function ReviewDetailPage() {
                         <p className="text-xs sm:text-sm text-[#A3A3A3] leading-relaxed">
                             {review.summary}
                         </p>
-                        <h2 className="text-sm font-bold text-neutral-200">
-                            {isTrainingMode ? '實戰模擬 (Training Mode)' : '數據復盤'}
-                        </h2>
-
-                        {/* Toggle Button */}
-                        <button
-                            onClick={() => setIsTrainingMode(!isTrainingMode)}
-                            className={cn(
-                                "px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5",
-                                isTrainingMode
-                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50"
-                                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
-                            )}
-                        >
-                            {isTrainingMode ? (
-                                <>
-                                    <BookOpen className="w-3.5 h-3.5" />
-                                    回到閱讀模式
-                                </>
-                            ) : (
-                                <>
-                                    <Zap className="w-3.5 h-3.5 text-yellow-500" />
-                                    進入復盤訓練
-                                </>
-                            )}
-                        </button>
                     </div>
 
                     <div className="p-0">
-                        {isTrainingMode ? (
-                            <JudgmentReplay
-                                symbol={review.chartConfig?.symbol || 'BTC'}
-                                eventStart={review.reactionStartAt}
-                                eventEnd={review.eventEndAt}
-                                reviewSlug={`${review.slug}-${review.year}`}
-                                daysBuffer={review.chartConfig?.daysBuffer || 90}
-                            />
-                        ) : (
-                            <UnifiedChartSection
-                                symbol={review.chartConfig?.symbol || 'BTC'}
-                                eventStart={review.reactionStartAt}
-                                eventEnd={review.eventEndAt}
-                                newsDate={review.eventStartAt}
-                                reviewSlug={`${review.slug}-${review.year}`}
-                                daysBuffer={review.chartConfig?.daysBuffer || 10}
-                                eventLabel={`D0: ${review.reactionStartAt.slice(5)}`}
-                                availableTabs={[
-                                    ...(review.charts.flow ? [{
-                                        id: 'flow',
-                                        label: review.slug.includes('etf') ? 'ETF 資金流' : '資金流',
-                                        chartType: 'flow' as const,
-                                        interpretation: review.charts.flow.interpretation,
-                                    }] : []),
+                        <UnifiedChartSection
+                            symbol={review.chartConfig?.symbol || 'BTC'}
+                            eventStart={review.reactionStartAt}
+                            eventEnd={review.eventEndAt}
+                            newsDate={review.eventStartAt}
+                            reviewSlug={`${review.slug}-${review.year}`}
+                            daysBuffer={review.chartConfig?.daysBuffer || 10}
+                            eventLabel={`D0: ${review.reactionStartAt.slice(5)}`}
+                            availableTabs={[
+                                ...(review.charts.flow ? [{
+                                    id: 'flow',
+                                    label: review.slug.includes('etf') ? 'ETF 資金流' : '資金流',
+                                    chartType: 'flow' as const,
+                                    interpretation: review.charts.flow.interpretation,
+                                }] : []),
 
-                                    ...(review.charts.oi ? [{
-                                        id: 'oi',
-                                        label: '未平倉量',
-                                        chartType: 'oi' as const,
-                                        interpretation: review.charts.oi.interpretation,
-                                    }] : []),
-                                    ...(review.charts.sentiment ? [{
-                                        id: 'fgi',
-                                        label: '恐懼指數',
-                                        chartType: 'fgi' as const,
-                                        interpretation: review.charts.sentiment.interpretation,
-                                    }] : []),
-                                    ...(review.charts.funding ? [{
-                                        id: 'funding',
-                                        label: '資金費率',
-                                        chartType: 'funding' as const,
-                                        interpretation: review.charts.funding?.interpretation,
-                                    }] : []),
-                                    ...(review.charts.liquidation ? [{
-                                        id: 'liquidation',
-                                        label: '清算',
-                                        chartType: 'liquidation' as const,
-                                        interpretation: review.charts.liquidation?.interpretation,
-                                    }] : []),
-                                ]}
-                            />
-                        )}
+                                ...(review.charts.oi ? [{
+                                    id: 'oi',
+                                    label: '未平倉量',
+                                    chartType: 'oi' as const,
+                                    interpretation: review.charts.oi.interpretation,
+                                }] : []),
+                                ...(review.charts.sentiment ? [{
+                                    id: 'fgi',
+                                    label: '恐懼指數',
+                                    chartType: 'fgi' as const,
+                                    interpretation: review.charts.sentiment.interpretation,
+                                }] : []),
+                                ...(review.charts.funding ? [{
+                                    id: 'funding',
+                                    label: '資金費率',
+                                    chartType: 'funding' as const,
+                                    interpretation: review.charts.funding?.interpretation,
+                                }] : []),
+                                ...(review.charts.liquidation ? [{
+                                    id: 'liquidation',
+                                    label: '清算',
+                                    chartType: 'liquidation' as const,
+                                    interpretation: review.charts.liquidation?.interpretation,
+                                }] : []),
+                            ]}
+                        />
                     </div>
                 </UniversalCard>
 
@@ -255,9 +214,9 @@ export default function ReviewDetailPage() {
                                     <div className="flex items-start gap-4">
                                         {/* Year Badge */}
                                         <div className="shrink-0 mt-1">
-                                            <div className="text-[10px] font-bold text-neutral-500 font-mono bg-[#151515] px-2 py-1 rounded border border-[#222] group-hover:border-[#333] transition-colors">
+                                            <Tag variant="default" size="sm">
                                                 {r.year}
-                                            </div>
+                                            </Tag>
                                         </div>
 
                                         <div className="flex-1 min-w-0">

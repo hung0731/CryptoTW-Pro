@@ -40,7 +40,7 @@ export const SURFACE = {
 
     // Legacy aliases
     card: 'bg-[#0A0A0A]',
-    border: 'border-[#1A1A1A]',
+    border: 'border-white/[0.08]',
     // Level 6: Ghost (Transparent)
     ghost: 'bg-transparent',
 
@@ -57,19 +57,19 @@ export const SURFACE = {
 // ================================================
 export const BORDER = {
     // Primary border (cards)
-    primary: 'border border-[#1A1A1A]',
+    primary: 'border border-white/[0.08]',
 
     // Hover-only border (appears on hover)
-    hover: 'hover:border hover:border-[#2A2A2A]',
+    hover: 'hover:border hover:border-white/[0.15]',
 
     // Dashed border (passive cards)
-    dashed: 'border border-dashed border-[#1A1A1A]',
+    dashed: 'border border-dashed border-white/[0.08]',
 
     // Left accent (inline data blocks)
-    left: 'border-l-2 border-[#1A1A1A]',
+    left: 'border-l-2 border-white/[0.08]',
 
     // Divider
-    divider: 'border-[#1A1A1A]',
+    divider: 'border-white/[0.08]',
 
     // Status Borders
     highlight: 'border border-[#333333]',
@@ -149,13 +149,13 @@ export const CARDS = {
      * - Uses: Charts, Conclusions, Main Data
      * - Style: Darkest, Big Padding, Rounded XL
      */
-    primary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-4',
+    primary: 'bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4',
 
     /**
      * Secondary Card (List Item)
      * - Uses: News, Events, Indicators Lists
      */
-    secondary: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg p-3 transition-colors duration-75 active:bg-[#141414]',
+    secondary: 'bg-[#0A0A0A] border border-white/[0.08] rounded-lg p-3 transition-colors duration-75 active:bg-[#141414]',
 
     /**
      * Tertiary / Section Header
@@ -164,12 +164,12 @@ export const CARDS = {
     tertiary: 'bg-[#0F0F10] border border-transparent rounded-lg p-3',
 
     // Aliases
-    typeA: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-xl p-4',
-    typeB: 'bg-[#0A0A0A] border border-[#1A1A1A] rounded-lg p-3 active:bg-[#141414]',
+    typeA: 'bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4',
+    typeB: 'bg-[#0A0A0A] border border-white/[0.08] rounded-lg p-3 active:bg-[#141414]',
 
     // Legacy / specialized
-    inline: 'bg-transparent border-l-2 border-[#1A1A1A] pl-3',
-    passive: 'bg-[#080808] border border-dashed border-[#1A1A1A] rounded-xl p-4',
+    inline: 'bg-transparent border-l-2 border-white/[0.08] pl-3',
+    passive: 'bg-[#080808] border border-dashed border-white/[0.08] rounded-xl p-4',
 
     // Lu.ma Style (Ghost/Flat)
     ghost: 'bg-transparent border border-transparent p-0',

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, TrendingUp, Radio, Newspaper, Settings, Activity, Clock, RefreshCw, Loader2, ArrowRight } from 'lucide-react'
+import { Users, TrendingUp, Radio, Newspaper, Settings, Activity, Clock, RefreshCw, Loader2, ArrowRight, Database, Zap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -16,6 +16,12 @@ export default function AdminDashboard() {
     const [chartsData, setChartsData] = useState<any>(null)
     const [recentBindings, setRecentBindings] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+
+    // Sync states
+    const [syncingFred, setSyncingFred] = useState(false)
+    const [syncingMacro, setSyncingMacro] = useState(false)
+    const [syncingSchedule, setSyncingSchedule] = useState(false)
+    const [syncResults, setSyncResults] = useState<{ fred?: any; macro?: any; schedule?: any }>({})
 
     const loadData = async () => {
         setLoading(true)
@@ -35,6 +41,49 @@ export default function AdminDashboard() {
         } finally {
             setLoading(false)
         }
+    }
+
+    const syncFredData = async () => {
+        setSyncingFred(true)
+        try {
+            const res = await fetch('/api/admin/sync-fred', { method: 'POST' })
+            const data = await res.json()
+            setSyncResults(prev => ({ ...prev, fred: data }))
+        } catch (e) {
+            setSyncResults(prev => ({ ...prev, fred: { success: false, error: 'Request failed' } }))
+        } finally {
+            setSyncingFred(false)
+        }
+    }
+
+    const syncMacroData = async () => {
+        setSyncingMacro(true)
+        try {
+            const res = await fetch('/api/admin/sync-macro', { method: 'POST' })
+            const data = await res.json()
+            setSyncResults(prev => ({ ...prev, macro: data }))
+        } catch (e) {
+            setSyncResults(prev => ({ ...prev, macro: { success: false, error: 'Request failed' } }))
+        } finally {
+            setSyncingMacro(false)
+        }
+    }
+
+    const syncScheduleData = async () => {
+        setSyncingSchedule(true)
+        try {
+            const res = await fetch('/api/admin/sync-schedule', { method: 'POST' })
+            const data = await res.json()
+            setSyncResults(prev => ({ ...prev, schedule: data }))
+        } catch (e) {
+            setSyncResults(prev => ({ ...prev, schedule: { success: false, error: 'Request failed' } }))
+        } finally {
+            setSyncingSchedule(false)
+        }
+    }
+
+    const syncAllData = async () => {
+        await Promise.all([syncFredData(), syncMacroData(), syncScheduleData()])
     }
 
     useEffect(() => { void loadData() }, [])
@@ -82,6 +131,128 @@ export default function AdminDashboard() {
                     </Link>
                 ))}
             </div>
+
+            {/* Data Sync Card */}
+            <Card className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-500/20">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-500/20">
+                                <Database className="h-5 w-5 text-blue-400" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-white">數據同步中心</CardTitle>
+                                <CardDescription>同步經濟指標與市場數據</CardDescription>
+                            </div>
+                        </div>
+                        <Button
+                            onClick={syncAllData}
+                            disabled={syncingFred || syncingMacro}
+                            className="bg-blue-600 hover:bg-blue-700"
+                        >
+                            {(syncingFred || syncingMacro) ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                <Zap className="h-4 w-4 mr-2" />
+                            )}
+                            一鍵同步全部
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {/* FRED Sync */}
+                        <div className="p-4 rounded-lg bg-black/30 border border-white/5">
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <h4 className="font-medium text-white">FRED 經濟數據</h4>
+                                    <p className="text-xs text-neutral-500">CPI, NFP, FOMC, 失業率, PPI</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={syncFredData}
+                                    disabled={syncingFred}
+                                    className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                                >
+                                    {syncingFred ? <Loader2 className="h-3 w-3 animate-spin" /> : '同步'}
+                                </Button>
+                            </div>
+                            {syncResults.fred && (
+                                <div className={cn(
+                                    "text-xs p-2 rounded",
+                                    syncResults.fred.success ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
+                                )}>
+                                    {syncResults.fred.success
+                                        ? `✓ CPI: ${syncResults.fred.results?.cpiRecords || 0}, NFP: ${syncResults.fred.results?.nfpRecords || 0}, FOMC: ${syncResults.fred.results?.fomcRecords || 0}, 失業率: ${syncResults.fred.results?.unrateRecords || 0}, PPI: ${syncResults.fred.results?.ppiRecords || 0}`
+                                        : `✗ ${syncResults.fred.error}`
+                                    }
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Macro/BTC Sync */}
+                        <div className="p-4 rounded-lg bg-black/30 border border-white/5">
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <h4 className="font-medium text-white">BTC 市場反應</h4>
+                                    <p className="text-xs text-neutral-500">事件前後價格走勢 (Binance)</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={syncMacroData}
+                                    disabled={syncingMacro}
+                                    className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                                >
+                                    {syncingMacro ? <Loader2 className="h-3 w-3 animate-spin" /> : '同步'}
+                                </Button>
+                            </div>
+                            {syncResults.macro && (
+                                <div className={cn(
+                                    "text-xs p-2 rounded",
+                                    syncResults.macro.success ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
+                                )}>
+                                    {syncResults.macro.success
+                                        ? `✓ 已處理 ${syncResults.macro.results?.processed || 0} 筆, 跳過 ${syncResults.macro.results?.skipped || 0} 筆`
+                                        : `✗ ${syncResults.macro.error}`
+                                    }
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Schedule Sync */}
+                        <div className="p-4 rounded-lg bg-black/30 border border-white/5 md:col-span-2">
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <h4 className="font-medium text-white">📅 事件日程表</h4>
+                                    <p className="text-xs text-neutral-500">自動生成 CPI, NFP, FOMC 未來發布日期</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={syncScheduleData}
+                                    disabled={syncingSchedule}
+                                    className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                                >
+                                    {syncingSchedule ? <Loader2 className="h-3 w-3 animate-spin" /> : '生成日程'}
+                                </Button>
+                            </div>
+                            {syncResults.schedule && (
+                                <div className={cn(
+                                    "text-xs p-2 rounded",
+                                    syncResults.schedule.success ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
+                                )}>
+                                    {syncResults.schedule.success
+                                        ? `✓ CPI: ${syncResults.schedule.results?.cpi || 0}, NFP: ${syncResults.schedule.results?.nfp || 0}, FOMC: ${syncResults.schedule.results?.fomc || 0} (${syncResults.schedule.results?.yearRange})`
+                                        : `✗ ${syncResults.schedule.error}`
+                                    }
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                 {/* Main Charts Area */}

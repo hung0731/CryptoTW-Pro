@@ -19,11 +19,24 @@ export default async function MacroEventDetailPage({ params }: { params: Promise
     try {
         const fileContent = fs.readFileSync(filePath, 'utf-8')
         const data = JSON.parse(fileContent)
-        // Filter reactions for this event key
-        const allReactions = data.data || {}
-        reactions = Object.entries(allReactions)
+        // Handle both wrapped {data: ...} and flat structure
+        // Exclude metadata keys like 'count', 'generatedAt', 'data'
+        const allReactions = data.data || Object.fromEntries(
+            Object.entries(data).filter(([k]) =>
+                !['count', 'generatedAt', 'data', 'lastSync'].includes(k)
+            )
+        )
+
+        // Debug: Log total entries and filter results
+        const allKeys = Object.keys(allReactions)
+        const eventKeys = [...new Set(Object.values(allReactions).map((v: any) => v.eventKey))]
+        console.log(`[Calendar Debug] Key: ${key}, Total entries: ${allKeys.length}, Event types: ${eventKeys.join(', ')}`)
+
+        const filtered = Object.entries(allReactions)
             .filter(([k, v]: [string, any]) => v.eventKey === key)
-            .reduce((obj, [k, v]) => ({ ...obj, [k]: v }), {})
+        console.log(`[Calendar Debug] Filtered for "${key}": ${filtered.length} entries`)
+
+        reactions = filtered.reduce((obj, [k, v]) => ({ ...obj, [k]: v }), {})
 
         // loaded data
     } catch (error) {

@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Clock, TrendingUp, AlertTriangle, Zap, ArrowRight, MessageSquare } from 'lucide-react';
 import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
+import { MACRO_EVENT_DEFS } from '@/lib/macro-events';
 
 // v1.1 Data: Instructional Playbook (General Strategy for Event Type)
 function generateTimeline(eventKey: string) {
@@ -34,15 +34,36 @@ function generateTimeline(eventKey: string) {
 
 export function EventNarrativeTimeline({ eventKey }: { eventKey: string }) {
     const timeline = generateTimeline(eventKey);
+    const eventDef = MACRO_EVENT_DEFS.find(e => e.key === eventKey);
 
     return (
         <UniversalCard className="p-0 overflow-hidden mb-6">
             <div className="border-b border-[#1A1A1A] bg-[#0A0B14]">
                 <SectionHeaderCard
-                    title="交易邏輯與觀察重點 (Trading Strategy)"
+                    title="經濟事件的介紹"
+                    description={eventDef ? `為什麼會影響加密市場：${eventDef.detailDescription}` : "為什麼會影響加密市場"}
                     icon={Clock}
                 />
             </div>
+            {/* Impact Summary Section */}
+            {eventDef?.impactSummary && (
+                <div className="bg-[#141415] border-b border-[#1A1A1A] px-6 py-4">
+                    <div className="flex items-start gap-3">
+                        <div className="mt-0.5 p-1.5 bg-blue-500/10 rounded-md">
+                            <TrendingUp className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <div className="space-y-1">
+                            <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider font-mono">
+                                歷史波動慣性 (Historical Impact)
+                            </h4>
+                            <p className="text-sm text-neutral-300 leading-relaxed">
+                                {eventDef.impactSummary}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="p-6 bg-[#0B0B0C] relative">
                 {/* Vertical Connecting Line (Absolute Left) */}
                 {/* Vertical Connecting Line (Absolute Left) */}

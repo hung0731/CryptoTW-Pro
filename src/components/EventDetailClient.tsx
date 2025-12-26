@@ -30,7 +30,10 @@ import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { ReviewChart } from '@/components/ReviewChart'
 import { UniversalCard, CardContent, CardHeader, CardTitle } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
-import { EventNarrativeTimeline } from './calendar/EventNarrativeTimeline'
+
+import { SuperimposedEventChart } from '@/components/charts/SuperimposedEventChart'
+import { HistoricalEventTable } from '@/components/tables/HistoricalEventTable'
+import { IndicatorTrendChart } from '@/components/charts/IndicatorTrendChart'
 
 interface EventDetailClientProps {
     eventKey: string
@@ -45,7 +48,7 @@ function EventStatsRow({ stats }: { stats: any }) {
         <UniversalCard className="mb-6 p-0 overflow-hidden">
             <div className="border-b border-[#1A1A1A] bg-[#0A0B14]">
                 <SectionHeaderCard
-                    title="統計數據 (Statistical Data)"
+                    title="統計數據"
                     icon={BarChart2}
                 />
             </div>
@@ -60,7 +63,7 @@ function EventStatsRow({ stats }: { stats: any }) {
                     </div>
 
                     <div className="p-6 flex flex-col justify-center items-center text-center hover:bg-white/[0.02] transition-colors">
-                        <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-2">上漲機率 (Win Rate)</div>
+                        <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-2">上漲機率</div>
                         <div className={cn(
                             "text-3xl font-bold font-mono",
                             stats.d1WinRate > 50 ? "text-green-500" : "text-red-500"
@@ -106,7 +109,7 @@ function NextEventCard({ nextOcc, eventDef }: { nextOcc: MacroEventOccurrence | 
                         {nextOcc.forecast !== undefined && (
                             <div className="flex items-center gap-1.5">
                                 <Target className="w-4 h-4" />
-                                預測: {nextOcc.forecast}{eventDef.key === 'nfp' ? 'K' : '%'}
+                                前期: {nextOcc.forecast}{eventDef.key === 'nfp' ? 'K' : '%'}
                             </div>
                         )}
                     </div>
@@ -126,13 +129,74 @@ function NextEventCard({ nextOcc, eventDef }: { nextOcc: MacroEventOccurrence | 
 
 export default function EventDetailClient({ eventKey, reactions }: EventDetailClientProps) {
     const eventDef = MACRO_EVENT_DEFS.find(d => d.key === eventKey)
-    const [overlayType, setOverlayType] = useState<'oi' | 'funding' | null>(null)
 
     if (!eventDef) return <div>Event not found</div>
 
+    const [selectedYear, setSelectedYear] = useState<string>('all')
+    const [selectedSurprise, setSelectedSurprise] = useState<'all' | 'beat' | 'miss'>('all')
+
     const stats = calculateEventStats(eventKey, reactions)
     const nextOcc = getNextOccurrence(eventKey)
-    const pastOccurrences = getPastOccurrences(eventKey, 12)
+    const pastOccurrences = getPastOccurrences(eventKey, 36)
+
+    // Prepare data for Superimposed Chart & Table
+    // Sort occurrences by date ascending first
+    const sortedOccurrences = [...pastOccurrences].sort((a, b) =>
+        new Date(a.occursAt).getTime() - new Date(b.occursAt).getTime()
+    )
+
+    const historicalEvents = sortedOccurrences.map((occ, index) => {
+        const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
+        const reactionKey = `${eventKey}-${keyDate}`
+        const reaction = reactions[reactionKey]
+
+        if (!reaction || !reaction.priceData || reaction.priceData.length === 0) return null
+
+        // Use previous period's actual as forecast (for "vs previous period" comparison)
+        // If forecast exists, use it; otherwise use previous occurrence's actual
+        let forecastValue = occ.forecast
+        if (forecastValue === undefined || forecastValue === null || forecastValue === 0) {
+            // Find previous occurrence with actual value
+            const previousOcc = sortedOccurrences[index - 1]
+            if (previousOcc && previousOcc.actual !== undefined) {
+                forecastValue = previousOcc.actual
+            }
+        }
+
+        return {
+            eventKey: reactionKey,
+            date: keyDate,
+            actual: occ.actual || 0,
+            forecast: forecastValue || 0,  // Now represents "previous period" value
+            priceData: reaction.priceData,
+            stats: reaction.stats
+        }
+    }).filter(Boolean) as any[]
+
+    // Sort back to descending for display (newest first)
+    historicalEvents.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+    // Filter Data
+    const years = Array.from(new Set(historicalEvents.map(e => e.date.split('-')[0]))).sort((a, b) => b.localeCompare(a))
+
+    const filteredEvents = historicalEvents.filter(e => {
+        const yearMatch = selectedYear === 'all' || e.date.startsWith(selectedYear)
+
+        let surpriseMatch = true
+        if (selectedSurprise !== 'all') {
+            const diff = Number(e.actual) - Number(e.forecast)
+            // For CPI/PPI/UNRATE: Lower is "低於前期" (beat), Higher is "高於前期" (miss)
+            const isLowerThanPrevious = diff < 0
+            const isCPIType = eventKey.includes('cpi') || eventKey.includes('ppi') || eventKey.includes('unrate')
+            // For CPI-type: lower is beat; for NFP: higher is beat
+            const isBeat = isCPIType ? isLowerThanPrevious : !isLowerThanPrevious
+
+            if (selectedSurprise === 'beat') surpriseMatch = isBeat
+            if (selectedSurprise === 'miss') surpriseMatch = !isBeat
+        }
+
+        return yearMatch && surpriseMatch
+    })
 
     return (
         <div className="min-h-screen bg-black text-white font-sans pb-24">
@@ -146,144 +210,103 @@ export default function EventDetailClient({ eventKey, reactions }: EventDetailCl
                 <div className="w-8" />
             </div>
 
-            <div className="max-w-5xl mx-auto p-4 sm:p-6">
+            <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-8">
 
                 {/* 1. Next Event Hero */}
                 <NextEventCard nextOcc={nextOcc || null} eventDef={eventDef} />
 
-                {/* 2. Narrative Timeline [NEW v1.1] */}
-                <EventNarrativeTimeline eventKey={eventKey} />
+                {/* 2. Narrative Timeline */}
 
-                {/* 3. Stats Grid */}
-                <EventStatsRow stats={stats} />
 
-                {/* 3. Historical Analysis */}
-                <UniversalCard variant="luma" className="p-0 overflow-hidden bg-[#0A0A0A]">
-                    <div className="border-b border-[#1A1A1A] bg-[#0F0F10] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+
+                {/* 4. Combined Historical Analysis Card [NEW v2] */}
+                <UniversalCard className="p-0 overflow-hidden bg-[#0A0A0A]">
+                    <div className="border-b border-[#1A1A1A] bg-[#0F0F10] p-4">
                         <SectionHeaderCard
-                            title="歷史復盤與資金流向"
-                            description="過去 12 次發布的市場反應 (Price + OI/Funding)"
+                            title="歷史復盤與數據分析"
+                            description="過去 3 年的市場反應疊加與詳細數據"
                             icon={Activity}
                             className="p-0 border-none bg-transparent"
                         />
+                    </div>
 
-                        {/* Overlay Controls */}
-                        <div className="flex items-center gap-1 bg-[#1A1A1A] p-0.5 rounded-lg border border-[#2A2A2A]">
-                            <button
-                                onClick={() => setOverlayType(null)}
-                                className={cn(
-                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                                    overlayType === null ? "bg-[#333] text-white shadow-sm" : "text-[#666] hover:text-[#999]"
-                                )}
+                    {/* Filter Toolbar */}
+                    <div className="px-4 py-3 bg-[#0A0A0A] border-b border-[#1A1A1A] flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">年份</span>
+                            <select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(e.target.value)}
+                                className="bg-[#1A1A1A] text-xs text-white border border-[#333] rounded-md px-2 py-1.5 focus:outline-none focus:border-blue-500"
                             >
-                                純價格
-                            </button>
-                            <button
-                                onClick={() => setOverlayType('oi')}
-                                className={cn(
-                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
-                                    overlayType === 'oi' ? "bg-[#333] text-yellow-400 shadow-sm" : "text-[#666] hover:text-[#999]"
-                                )}
-                            >
-                                <Layers className="w-3 h-3" />
-                                持倉量 OI
-                            </button>
-                            <button
-                                onClick={() => setOverlayType('funding')}
-                                className={cn(
-                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
-                                    overlayType === 'funding' ? "bg-[#333] text-yellow-400 shadow-sm" : "text-[#666] hover:text-[#999]"
-                                )}
-                            >
-                                <DollarSign className="w-3 h-3" />
-                                費率 Funding
-                            </button>
+                                <option value="all">全部年份</option>
+                                {years.map(y => <option key={y} value={y}>{y}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="w-px h-4 bg-[#222]" />
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">篩選</span>
+                            <div className="flex bg-[#1A1A1A] rounded-md p-0.5 border border-[#333]">
+                                <button
+                                    onClick={() => setSelectedSurprise('all')}
+                                    className={cn(
+                                        "px-3 py-1 text-[10px] font-medium rounded transition-all",
+                                        selectedSurprise === 'all' ? "bg-[#333] text-white" : "text-neutral-500 hover:text-neutral-300"
+                                    )}
+                                >
+                                    全部
+                                </button>
+                                <button
+                                    onClick={() => setSelectedSurprise('beat')}
+                                    className={cn(
+                                        "px-3 py-1 text-[10px] font-medium rounded transition-all",
+                                        selectedSurprise === 'beat' ? "bg-emerald-500/20 text-emerald-400" : "text-neutral-500 hover:text-neutral-300"
+                                    )}
+                                >
+                                    低於前期
+                                </button>
+                                <button
+                                    onClick={() => setSelectedSurprise('miss')}
+                                    className={cn(
+                                        "px-3 py-1 text-[10px] font-medium rounded transition-all",
+                                        selectedSurprise === 'miss' ? "bg-red-500/20 text-red-400" : "text-neutral-500 hover:text-neutral-300"
+                                    )}
+                                >
+                                    高於前期
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="p-5 bg-[#0A0A0A]">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {(() => {
-                                const validItems = pastOccurrences.map(occ => {
-                                    const keyDate = new Date(occ.occursAt).toISOString().split('T')[0]
-                                    const reactionKey = `${eventKey}-${keyDate}`
-                                    const reaction = reactions[reactionKey]
-                                    return { occ, reaction, reactionKey }
-                                }).filter(item => item.reaction && item.reaction.priceData && item.reaction.priceData.length > 0)
+                    <div className="p-0">
+                        {/* Chart Section */}
+                        <div className="px-6 pt-6 pb-2">
+                            <SuperimposedEventChart
+                                events={filteredEvents}
+                                windowStart={eventDef.windowDisplay?.start || -5}
+                                windowEnd={eventDef.windowDisplay?.end || 10}
+                                variant="minimal"
+                            />
+                        </div>
 
-                                if (validItems.length === 0) {
-                                    return (
-                                        <div className="col-span-full py-20 flex flex-col items-center justify-center text-neutral-500 border border-dashed border-[#2A2A2A] rounded-xl">
-                                            <Activity className="w-10 h-10 mb-4 opacity-20" />
-                                            <p className="text-sm font-medium">尚無歷史數據</p>
-                                            <p className="text-xs text-neutral-600 mt-2">正在同步區塊鏈數據...</p>
-                                        </div>
-                                    )
-                                }
+                        {/* Sub Chart: Indicator Trend */}
+                        <div className="px-6 pb-6">
+                            <IndicatorTrendChart
+                                events={historicalEvents}
+                                title={eventDef.name}
+                                className="border-none bg-transparent p-0 shadow-none !rounded-none"
+                            />
+                        </div>
 
-                                return validItems.map(({ occ, reaction, reactionKey }) => {
-                                    if (!reaction) return null
-                                    const d1Return = reaction.stats?.d0d1Return ?? 0
-                                    const isPositive = d1Return > 0
-
-                                    return (
-                                        <div key={reactionKey} className="group rounded-xl border border-[#1A1A1A] bg-[#111] overflow-hidden hover:border-[#333] transition-colors relative">
-                                            {/* Header */}
-                                            <div className="flex items-stretch border-b border-[#1A1A1A]">
-                                                <div className="px-4 py-3 bg-[#0A0B14] flex-1">
-                                                    <div className="text-sm font-mono font-bold text-white mb-1">
-                                                        {occ.occursAt.slice(0, 10)}
-                                                    </div>
-                                                    <div className="flex gap-3 text-[10px] font-mono">
-                                                        {occ.actual && (
-                                                            <span className={cn(
-                                                                "px-1.5 py-0.5 rounded border",
-                                                                "bg-neutral-900 border-neutral-800 text-neutral-400"
-                                                            )}>
-                                                                ACT: <span className="text-white">{occ.actual}</span>
-                                                            </span>
-                                                        )}
-                                                        {occ.forecast && (
-                                                            <span className="px-1.5 py-0.5 rounded border bg-transparent border-transparent text-neutral-600">
-                                                                FCST: {occ.forecast}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className={cn(
-                                                    "w-24 flex flex-col items-center justify-center border-l border-[#1A1A1A]",
-                                                    isPositive ? "bg-emerald-950/20" : "bg-red-950/20"
-                                                )}>
-                                                    <span className="text-[10px] text-neutral-500 font-mono mb-0.5">D+1 Return</span>
-                                                    <span className={cn(
-                                                        "text-lg font-bold font-mono",
-                                                        isPositive ? "text-emerald-400" : "text-red-400"
-                                                    )}>
-                                                        {isPositive ? '+' : ''}{d1Return}%
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Chart */}
-                                            <div className="h-[180px] w-full bg-[#0E0E0E] relative">
-                                                <ReviewChart
-                                                    type="price"
-                                                    symbol="BTC"
-                                                    eventStart={formatOccursAt(occ.occursAt)}
-                                                    eventEnd={formatOccursAt(occ.occursAt)}
-                                                    reviewSlug={reactionKey}
-                                                    focusWindow={[eventDef.windowDisplay.start, eventDef.windowDisplay.end]}
-                                                    isPercentage={true}
-                                                    className="w-full h-full"
-                                                    overrideData={reaction.priceData}
-                                                    overlayType={overlayType || undefined}
-                                                />
-                                            </div>
-                                        </div>
-                                    )
-                                })
-                            })()}
+                        {/* Table Section (Full Width) */}
+                        <div className="border-t border-[#1A1A1A] bg-[#0A0A0A]">
+                            <HistoricalEventTable
+                                events={filteredEvents}
+                                variant="minimal"
+                            />
                         </div>
                     </div>
                 </UniversalCard>

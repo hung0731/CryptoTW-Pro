@@ -22,7 +22,7 @@ export interface MacroEventDef {
 }
 
 export interface MacroEventOccurrence {
-    eventKey: 'cpi' | 'nfp' | 'fomc'
+    eventKey: 'cpi' | 'nfp' | 'fomc' | 'unrate' | 'ppi'
     occursAt: string       // ISO 8601 UTC
     kind?: 'release' | 'pressconf'
     notes?: string
@@ -44,7 +44,14 @@ export interface MacroReaction {
     eventKey: string
     occursAt: string
     stats: OccurrenceStats
-    priceData: { date: string; close: number; high: number; low: number }[]
+    priceData: {
+        date: string
+        close: number
+        high: number
+        low: number
+        oi?: number
+        fundingRate?: number
+    }[]
 }
 
 export interface EventSummaryStats {
@@ -92,8 +99,8 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         listDescription: '反映通膨變化，常影響利率預期與市場定價',
         detailDescription: '反映通膨變化，常影響利率預期，是市場定價的核心依據',
         impactSummary: '過去公布後 24 小時內，比特幣平均波動幅度約 3-4%，若與預期偏差 >0.2% 則波動加劇。',
-        chartRange: 'D-3 ~ D+3',
-        windowDisplay: { start: -3, end: 3 },
+        chartRange: 'T-2 ~ T+7',
+        windowDisplay: { start: -2, end: 7 },
         windowStats: { start: -1, end: 1 }
     },
     {
@@ -105,8 +112,8 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         listDescription: '每月就業數據，常引發短線劇烈波動',
         detailDescription: '每月就業數據，常引發短線劇烈波動，是評估經濟健康的關鍵指標', // Derived professional text
         impactSummary: '非農數據公布當下通常引發 15 分鐘級別的「插針」現象，平均振幅可達 800-1200 點。',
-        chartRange: 'D-3 ~ D+3',
-        windowDisplay: { start: -3, end: 3 },
+        chartRange: 'T-2 ~ T+7',
+        windowDisplay: { start: -2, end: 7 },
         windowStats: { start: -1, end: 1 }
     },
     {
@@ -116,11 +123,37 @@ export const MACRO_EVENT_DEFS: MacroEventDef[] = [
         narrative: '趨勢切換來源',
         insight: '決策盲區：缺乏完整就業通膨數據',
         listDescription: '決定利率方向，常帶來趨勢轉折',
-        detailDescription: '決定利率方向，常帶來趨勢轉折，是全球資金流動的指揮棒', // Derived professional text
+        detailDescription: '決定利率方向，常帶來趨勢轉折，是全球資金流動的指揮棒',
         impactSummary: '利率決議本身波動較小，真正的波動往往來自 30 分鐘後的記者會談話，方向轉換頻繁。',
-        chartRange: 'D-1 ~ D+5',
-        windowDisplay: { start: -1, end: 5 },
+        chartRange: 'T-2 ~ T+7',
+        windowDisplay: { start: -2, end: 7 },
         windowStats: { start: -1, end: 3 }
+    },
+    {
+        key: 'unrate',
+        name: '失業率',
+        icon: 'UNRATE',
+        narrative: '勞動市場健康度指標',
+        insight: '與非農同步公布，互相印證',
+        listDescription: '勞動市場健康指標，影響聯準會政策走向',
+        detailDescription: '失業率反映勞動市場健康程度，是聯準會「雙重使命」的核心監控指標',
+        impactSummary: '失業率與非農就業數據同時公布，兩者方向不一致時市場波動加劇。',
+        chartRange: 'T-2 ~ T+7',
+        windowDisplay: { start: -2, end: 7 },
+        windowStats: { start: -1, end: 1 }
+    },
+    {
+        key: 'ppi',
+        name: '生產者物價指數',
+        icon: 'PPI',
+        narrative: '通膨領先指標',
+        insight: '生產端成本變化，領先 CPI 1-2 個月',
+        listDescription: '反映生產端成本，為 CPI 的領先指標',
+        detailDescription: '生產者物價指數反映生產端成本壓力，通常領先消費者物價 1-2 個月',
+        impactSummary: 'PPI 作為 CPI 領先指標，若 PPI 大幅偏離預期，市場會提前反映對 CPI 的預期。',
+        chartRange: 'T-2 ~ T+7',
+        windowDisplay: { start: -2, end: 7 },
+        windowStats: { start: -1, end: 1 }
     }
 ]
 
@@ -266,6 +299,90 @@ export const MACRO_OCCURRENCES: MacroEventOccurrence[] = [
     { eventKey: 'fomc', occursAt: '2022-11-02T18:00:00Z', kind: 'release', notes: 'Nov 1-2 Meeting', forecast: 4.00, actual: 4.00 },
     { eventKey: 'fomc', occursAt: '2022-09-21T18:00:00Z', kind: 'release', notes: 'Sep 20-21 Meeting', forecast: 3.25, actual: 3.25 },
     { eventKey: 'fomc', occursAt: '2022-07-27T18:00:00Z', kind: 'release', notes: 'Jul 26-27 Meeting', forecast: 2.50, actual: 2.50 },
+
+    // ========== UNRATE (Unemployment Rate) - Source: BLS.gov ==========
+    // UNRATE is released same time as NFP (First Friday of month, 8:30 AM ET)
+    // 2025
+    { eventKey: 'unrate', occursAt: '2025-12-05T13:30:00Z', notes: 'Nov 2025 Unemployment Rate' },
+    { eventKey: 'unrate', occursAt: '2025-11-07T13:30:00Z', notes: 'Oct 2025 Unemployment Rate', actual: 4.1 },
+    { eventKey: 'unrate', occursAt: '2025-10-03T12:30:00Z', notes: 'Sep 2025 Unemployment Rate', actual: 4.1 },
+    { eventKey: 'unrate', occursAt: '2025-09-05T12:30:00Z', notes: 'Aug 2025 Unemployment Rate', actual: 4.2 },
+    { eventKey: 'unrate', occursAt: '2025-08-01T12:30:00Z', notes: 'Jul 2025 Unemployment Rate', actual: 4.3 },
+    { eventKey: 'unrate', occursAt: '2025-07-03T12:30:00Z', notes: 'Jun 2025 Unemployment Rate', actual: 4.0 },
+    { eventKey: 'unrate', occursAt: '2025-06-06T12:30:00Z', notes: 'May 2025 Unemployment Rate', actual: 4.2 },
+    { eventKey: 'unrate', occursAt: '2025-05-02T12:30:00Z', notes: 'Apr 2025 Unemployment Rate', actual: 4.2 },
+    { eventKey: 'unrate', occursAt: '2025-04-04T12:30:00Z', notes: 'Mar 2025 Unemployment Rate', actual: 4.2 },
+    { eventKey: 'unrate', occursAt: '2025-03-07T12:30:00Z', notes: 'Feb 2025 Unemployment Rate', actual: 4.1 },
+    { eventKey: 'unrate', occursAt: '2025-02-07T13:30:00Z', notes: 'Jan 2025 Unemployment Rate', actual: 4.0 },
+    { eventKey: 'unrate', occursAt: '2025-01-10T13:30:00Z', notes: 'Dec 2024 Unemployment Rate', actual: 4.1 },
+    // 2024
+    { eventKey: 'unrate', occursAt: '2024-12-06T13:30:00Z', notes: 'Nov 2024 Unemployment Rate', actual: 4.2 },
+    { eventKey: 'unrate', occursAt: '2024-11-01T12:30:00Z', notes: 'Oct 2024 Unemployment Rate', actual: 4.1 },
+    { eventKey: 'unrate', occursAt: '2024-10-04T12:30:00Z', notes: 'Sep 2024 Unemployment Rate', actual: 4.1 },
+    { eventKey: 'unrate', occursAt: '2024-09-06T12:30:00Z', notes: 'Aug 2024 Unemployment Rate', actual: 4.2 },
+    { eventKey: 'unrate', occursAt: '2024-08-02T12:30:00Z', notes: 'Jul 2024 Unemployment Rate', actual: 4.3 },
+    { eventKey: 'unrate', occursAt: '2024-07-05T12:30:00Z', notes: 'Jun 2024 Unemployment Rate', actual: 4.1 },
+    { eventKey: 'unrate', occursAt: '2024-06-07T12:30:00Z', notes: 'May 2024 Unemployment Rate', actual: 4.0 },
+    { eventKey: 'unrate', occursAt: '2024-05-03T12:30:00Z', notes: 'Apr 2024 Unemployment Rate', actual: 3.9 },
+    { eventKey: 'unrate', occursAt: '2024-04-05T12:30:00Z', notes: 'Mar 2024 Unemployment Rate', actual: 3.8 },
+    { eventKey: 'unrate', occursAt: '2024-03-08T12:30:00Z', notes: 'Feb 2024 Unemployment Rate', actual: 3.9 },
+    { eventKey: 'unrate', occursAt: '2024-02-02T13:30:00Z', notes: 'Jan 2024 Unemployment Rate', actual: 3.7 },
+    { eventKey: 'unrate', occursAt: '2024-01-05T13:30:00Z', notes: 'Dec 2023 Unemployment Rate', actual: 3.7 },
+    // 2023
+    { eventKey: 'unrate', occursAt: '2023-12-08T13:30:00Z', notes: 'Nov 2023 Unemployment Rate', actual: 3.7 },
+    { eventKey: 'unrate', occursAt: '2023-11-03T12:30:00Z', notes: 'Oct 2023 Unemployment Rate', actual: 3.9 },
+    { eventKey: 'unrate', occursAt: '2023-10-06T12:30:00Z', notes: 'Sep 2023 Unemployment Rate', actual: 3.8 },
+    { eventKey: 'unrate', occursAt: '2023-09-01T12:30:00Z', notes: 'Aug 2023 Unemployment Rate', actual: 3.8 },
+    { eventKey: 'unrate', occursAt: '2023-08-04T12:30:00Z', notes: 'Jul 2023 Unemployment Rate', actual: 3.5 },
+    { eventKey: 'unrate', occursAt: '2023-07-07T12:30:00Z', notes: 'Jun 2023 Unemployment Rate', actual: 3.6 },
+    { eventKey: 'unrate', occursAt: '2023-06-02T12:30:00Z', notes: 'May 2023 Unemployment Rate', actual: 3.7 },
+    { eventKey: 'unrate', occursAt: '2023-05-05T12:30:00Z', notes: 'Apr 2023 Unemployment Rate', actual: 3.4 },
+    { eventKey: 'unrate', occursAt: '2023-04-07T12:30:00Z', notes: 'Mar 2023 Unemployment Rate', actual: 3.5 },
+    { eventKey: 'unrate', occursAt: '2023-03-10T13:30:00Z', notes: 'Feb 2023 Unemployment Rate', actual: 3.6 },
+    { eventKey: 'unrate', occursAt: '2023-02-03T13:30:00Z', notes: 'Jan 2023 Unemployment Rate', actual: 3.4 },
+    { eventKey: 'unrate', occursAt: '2023-01-06T13:30:00Z', notes: 'Dec 2022 Unemployment Rate', actual: 3.5 },
+
+    // ========== PPI (Producer Price Index) - Source: BLS.gov ==========
+    // PPI is released ~2 days before CPI, usually 2nd Thursday at 8:30 AM ET
+    // 2025
+    { eventKey: 'ppi', occursAt: '2025-12-11T13:30:00Z', notes: 'Nov 2025 PPI' },
+    { eventKey: 'ppi', occursAt: '2025-11-14T13:30:00Z', notes: 'Oct 2025 PPI', actual: 2.4 },
+    { eventKey: 'ppi', occursAt: '2025-10-09T12:30:00Z', notes: 'Sep 2025 PPI', actual: 1.8 },
+    { eventKey: 'ppi', occursAt: '2025-09-11T12:30:00Z', notes: 'Aug 2025 PPI', actual: 1.7 },
+    { eventKey: 'ppi', occursAt: '2025-08-14T12:30:00Z', notes: 'Jul 2025 PPI', actual: 2.2 },
+    { eventKey: 'ppi', occursAt: '2025-07-15T12:30:00Z', notes: 'Jun 2025 PPI', actual: 2.7 },
+    { eventKey: 'ppi', occursAt: '2025-06-12T12:30:00Z', notes: 'May 2025 PPI', actual: 2.3 },
+    { eventKey: 'ppi', occursAt: '2025-05-15T12:30:00Z', notes: 'Apr 2025 PPI', actual: 2.4 },
+    { eventKey: 'ppi', occursAt: '2025-04-10T12:30:00Z', notes: 'Mar 2025 PPI', actual: 2.7 },
+    { eventKey: 'ppi', occursAt: '2025-03-13T12:30:00Z', notes: 'Feb 2025 PPI', actual: 3.2 },
+    { eventKey: 'ppi', occursAt: '2025-02-13T13:30:00Z', notes: 'Jan 2025 PPI', actual: 3.5 },
+    { eventKey: 'ppi', occursAt: '2025-01-14T13:30:00Z', notes: 'Dec 2024 PPI', actual: 3.3 },
+    // 2024
+    { eventKey: 'ppi', occursAt: '2024-12-12T13:30:00Z', notes: 'Nov 2024 PPI', actual: 3.0 },
+    { eventKey: 'ppi', occursAt: '2024-11-14T12:30:00Z', notes: 'Oct 2024 PPI', actual: 2.4 },
+    { eventKey: 'ppi', occursAt: '2024-10-11T12:30:00Z', notes: 'Sep 2024 PPI', actual: 1.8 },
+    { eventKey: 'ppi', occursAt: '2024-09-12T12:30:00Z', notes: 'Aug 2024 PPI', actual: 1.7 },
+    { eventKey: 'ppi', occursAt: '2024-08-13T12:30:00Z', notes: 'Jul 2024 PPI', actual: 2.2 },
+    { eventKey: 'ppi', occursAt: '2024-07-12T12:30:00Z', notes: 'Jun 2024 PPI', actual: 2.6 },
+    { eventKey: 'ppi', occursAt: '2024-06-13T12:30:00Z', notes: 'May 2024 PPI', actual: 2.2 },
+    { eventKey: 'ppi', occursAt: '2024-05-14T12:30:00Z', notes: 'Apr 2024 PPI', actual: 2.2 },
+    { eventKey: 'ppi', occursAt: '2024-04-11T12:30:00Z', notes: 'Mar 2024 PPI', actual: 2.1 },
+    { eventKey: 'ppi', occursAt: '2024-03-14T12:30:00Z', notes: 'Feb 2024 PPI', actual: 1.6 },
+    { eventKey: 'ppi', occursAt: '2024-02-16T13:30:00Z', notes: 'Jan 2024 PPI', actual: 0.9 },
+    { eventKey: 'ppi', occursAt: '2024-01-12T13:30:00Z', notes: 'Dec 2023 PPI', actual: 1.0 },
+    // 2023
+    { eventKey: 'ppi', occursAt: '2023-12-13T13:30:00Z', notes: 'Nov 2023 PPI', actual: 0.9 },
+    { eventKey: 'ppi', occursAt: '2023-11-15T13:30:00Z', notes: 'Oct 2023 PPI', actual: 1.3 },
+    { eventKey: 'ppi', occursAt: '2023-10-11T12:30:00Z', notes: 'Sep 2023 PPI', actual: 2.2 },
+    { eventKey: 'ppi', occursAt: '2023-09-14T12:30:00Z', notes: 'Aug 2023 PPI', actual: 1.6 },
+    { eventKey: 'ppi', occursAt: '2023-08-11T12:30:00Z', notes: 'Jul 2023 PPI', actual: 0.8 },
+    { eventKey: 'ppi', occursAt: '2023-07-13T12:30:00Z', notes: 'Jun 2023 PPI', actual: 0.1 },
+    { eventKey: 'ppi', occursAt: '2023-06-14T12:30:00Z', notes: 'May 2023 PPI', actual: 1.1 },
+    { eventKey: 'ppi', occursAt: '2023-05-11T12:30:00Z', notes: 'Apr 2023 PPI', actual: 2.3 },
+    { eventKey: 'ppi', occursAt: '2023-04-13T12:30:00Z', notes: 'Mar 2023 PPI', actual: 2.7 },
+    { eventKey: 'ppi', occursAt: '2023-03-15T12:30:00Z', notes: 'Feb 2023 PPI', actual: 4.6 },
+    { eventKey: 'ppi', occursAt: '2023-02-16T13:30:00Z', notes: 'Jan 2023 PPI', actual: 6.0 },
+    { eventKey: 'ppi', occursAt: '2023-01-18T13:30:00Z', notes: 'Dec 2022 PPI', actual: 6.2 },
 ]
 
 // ====== Helper Functions ======
@@ -354,3 +471,61 @@ export const formatValue = (eventKey: string, value: number | undefined): string
     if (eventKey === 'nfp') return `${value}K`
     return `${value}%`
 }
+
+// ========== FRED Data Integration ==========
+// Import dynamically fetched indicator data
+import macroIndicatorsJson from '@/data/macro-indicators.json'
+
+interface MacroIndicatorsData {
+    cpi: Record<string, { actual: number; yoy?: number }>
+    nfp: Record<string, { actual: number; change?: number }>
+    fomc: Record<string, { actual: number }>
+    lastSync: string | null
+}
+
+const macroIndicators = macroIndicatorsJson as MacroIndicatorsData
+
+/**
+ * Get occurrences merged with FRED data
+ * Priority: FRED data > Static MACRO_OCCURRENCES
+ */
+export function getMergedOccurrences(eventKey?: string): MacroEventOccurrence[] {
+    let occurrences = eventKey
+        ? MACRO_OCCURRENCES.filter(o => o.eventKey === eventKey)
+        : [...MACRO_OCCURRENCES]
+
+    return occurrences.map(occ => {
+        const releaseDate = new Date(occ.occursAt).toISOString().split('T')[0]
+
+        // Try to get FRED data for this occurrence
+        let fredData: { actual: number } | undefined
+
+        if (occ.eventKey === 'cpi' && macroIndicators.cpi[releaseDate]) {
+            fredData = macroIndicators.cpi[releaseDate]
+        } else if (occ.eventKey === 'nfp' && macroIndicators.nfp[releaseDate]) {
+            fredData = macroIndicators.nfp[releaseDate]
+        } else if (occ.eventKey === 'fomc' && macroIndicators.fomc[releaseDate]) {
+            fredData = macroIndicators.fomc[releaseDate]
+        }
+
+        // Merge: FRED data takes priority over static data
+        if (fredData) {
+            return {
+                ...occ,
+                actual: fredData.actual
+            }
+        }
+
+        return occ
+    })
+}
+
+/**
+ * Get the last sync timestamp for FRED data
+ */
+export function getFredSyncStatus(): { lastSync: string | null } {
+    return {
+        lastSync: macroIndicators.lastSync
+    }
+}
+

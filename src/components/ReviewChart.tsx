@@ -57,6 +57,14 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
 
     // 3. Merge Data
     const mergedData = useMemo(() => {
+        // If using overrideData, the data is already in mainData. Map it directly.
+        if (overrideData) {
+            return mainData.map((d: any) => ({
+                ...d,
+                [`overlay_${overlayType}`]: overlayType === 'oi' ? d.oi : d.fundingRate
+            }));
+        }
+
         if (!mainData) return [];
         if (!overlayType || !overlayDataRaw) return mainData;
 

@@ -100,7 +100,7 @@ export function ExchangeTransparency() {
                     💡 交易所餘額減少通常被視為長期持有的信號 (提幣至錢包)
                 </p>
                 <div className="mt-2 text-[10px] text-neutral-500 border-t border-white/5 pt-2">
-                    <p>資金流入交易所 (Inflow) 通常代表潛在賣壓；流出交易所 (Outflow) 則代表投資者傾向囤幣惜售。</p>
+                    <p>資金流入交易所通常代表潛在賣壓；流出交易所則代表投資者傾向囤幣惜售。</p>
                 </div>
             </div>
         </div>

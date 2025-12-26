@@ -122,7 +122,7 @@ export function EconomicCalendar() {
                                                 )}>{event.actual || '--'}</span>
                                             </div>
                                             <div className="bg-black/20 p-2 rounded text-center">
-                                                <span className="block text-neutral-500 mb-1 scale-90">預測</span>
+                                                <span className="block text-neutral-500 mb-1 scale-90">前期</span>
                                                 <span className="font-mono text-neutral-300 text-sm">{event.forecast || '--'}</span>
                                             </div>
                                             <div className="bg-black/20 p-2 rounded text-center">

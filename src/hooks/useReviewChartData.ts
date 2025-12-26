@@ -113,18 +113,20 @@ export function useReviewChartData({
                         baseItem = filteredData[minIdx]
                     }
 
-                    const valKey = type === 'oi' ? 'oi' : 'price'
+                    const valKey = type === 'oi' ? 'oi' : (baseItem?.price !== undefined ? 'price' : 'close')
                     const baseVal = baseItem?.[valKey] || 1
 
                     // Processing Loop & MaxAbs Calculation
                     let maxAbs = 0
 
                     const processedData = filteredData.map((item: any) => {
-                        const val = item[valKey]
+                        const currentValKey = type === 'oi' ? 'oi' : (item.price !== undefined ? 'price' : 'close')
+                        const val = item[currentValKey]
                         const pct = ((val - baseVal) / baseVal) * 100
                         if (!isNaN(pct)) maxAbs = Math.max(maxAbs, Math.abs(pct))
                         return {
                             ...item,
+                            price: val, // Ensure price is present for chart consumption
                             percentage: pct,
                             displayValue: val // Keep original for tooltip
                         }

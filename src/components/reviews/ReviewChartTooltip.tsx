@@ -65,7 +65,7 @@ export const ReviewChartTooltip: React.FC<ReviewChartTooltipProps> = ({ active, 
                     {overlayType && payload[0].payload[`overlay_${overlayType}`] !== undefined && (
                         <div className="pt-1 mt-1 border-t border-white/10 flex items-center justify-between gap-3 text-xs">
                             <span className="text-amber-500 font-medium">
-                                {overlayType === 'oi' ? '持倉 (OI)' : '費率 (Funding)'}
+                                {overlayType === 'oi' ? '持倉量' : '資金費率'}
                             </span>
                             <span className="text-neutral-200 tabular-nums">
                                 {overlayType === 'oi'

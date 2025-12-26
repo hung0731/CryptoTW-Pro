@@ -1,0 +1,1515 @@
+{
+  "generatedAt": "2025-12-26T16:28:38.259Z",
+  "yearRange": {
+    "start": 2023,
+    "end": 2027
+  },
+  "counts": {
+    "cpi": 60,
+    "nfp": 60,
+    "fomc": 24,
+    "total": 264
+  },
+  "schedule": [
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-01-06T13:30:00.000Z",
+      "notes": "Dec 2022 Employment",
+      "forecast": 200,
+      "actual": 223
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-01-06T13:30:00.000Z",
+      "notes": "Dec 2022 Unemployment Rate",
+      "actual": 3.5
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-01-10T13:30:00.000Z",
+      "notes": "Dec 2022 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-01-12T13:30:00.000Z",
+      "notes": "Dec 2022 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-02-03T13:30:00.000Z",
+      "notes": "Jan 2023 Employment",
+      "forecast": 185,
+      "actual": 517
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-02-03T13:30:00.000Z",
+      "notes": "Jan 2023 Unemployment Rate",
+      "actual": 3.4
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-02-14T13:30:00.000Z",
+      "notes": "Jan 2023 CPI",
+      "forecast": 6.2,
+      "actual": 6.4
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-02-16T13:30:00.000Z",
+      "notes": "Jan 2023 PPI",
+      "actual": 6
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-03-03T12:30:00.000Z",
+      "notes": "Feb 2023 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-03-03T12:30:00.000Z",
+      "notes": "Feb 2023 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-03-14T12:30:00.000Z",
+      "notes": "Feb 2023 CPI",
+      "forecast": 6,
+      "actual": 6
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-03-16T12:30:00.000Z",
+      "notes": "Feb 2023 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-04-07T12:30:00.000Z",
+      "notes": "Mar 2023 Employment",
+      "forecast": 228,
+      "actual": 236
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-04-07T12:30:00.000Z",
+      "notes": "Mar 2023 Unemployment Rate",
+      "actual": 3.5
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-04-11T12:30:00.000Z",
+      "notes": "Mar 2023 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-04-13T12:30:00.000Z",
+      "notes": "Mar 2023 PPI",
+      "actual": 2.7
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-05-05T12:30:00.000Z",
+      "notes": "Apr 2023 Employment",
+      "forecast": 180,
+      "actual": 253
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-05-05T12:30:00.000Z",
+      "notes": "Apr 2023 Unemployment Rate",
+      "actual": 3.4
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-05-11T12:30:00.000Z",
+      "notes": "Apr 2023 PPI",
+      "actual": 2.3
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-05-16T12:30:00.000Z",
+      "notes": "Apr 2023 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-06-02T12:30:00.000Z",
+      "notes": "May 2023 Employment",
+      "forecast": 180,
+      "actual": 339
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-06-02T12:30:00.000Z",
+      "notes": "May 2023 Unemployment Rate",
+      "actual": 3.7
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-06-13T12:30:00.000Z",
+      "notes": "May 2023 CPI",
+      "forecast": 4.1,
+      "actual": 4
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-06-15T12:30:00.000Z",
+      "notes": "May 2023 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-07-07T12:30:00.000Z",
+      "notes": "Jun 2023 Employment",
+      "forecast": 224,
+      "actual": 209
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-07-07T12:30:00.000Z",
+      "notes": "Jun 2023 Unemployment Rate",
+      "actual": 3.6
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-07-11T12:30:00.000Z",
+      "notes": "Jun 2023 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-07-13T12:30:00.000Z",
+      "notes": "Jun 2023 PPI",
+      "actual": 0.1
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-08-04T12:30:00.000Z",
+      "notes": "Jul 2023 Employment",
+      "forecast": 203,
+      "actual": 187
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-08-04T12:30:00.000Z",
+      "notes": "Jul 2023 Unemployment Rate",
+      "actual": 3.5
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-08-10T12:30:00.000Z",
+      "notes": "Jul 2023 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-08-15T12:30:00.000Z",
+      "notes": "Jul 2023 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-09-01T12:30:00.000Z",
+      "notes": "Aug 2023 Employment",
+      "forecast": 170,
+      "actual": 187
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-09-01T12:30:00.000Z",
+      "notes": "Aug 2023 Unemployment Rate",
+      "actual": 3.8
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-09-12T12:30:00.000Z",
+      "notes": "Aug 2023 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-09-14T12:30:00.000Z",
+      "notes": "Aug 2023 PPI",
+      "actual": 1.6
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-10-06T12:30:00.000Z",
+      "notes": "Sep 2023 Employment",
+      "forecast": 170,
+      "actual": 336
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-10-06T12:30:00.000Z",
+      "notes": "Sep 2023 Unemployment Rate",
+      "actual": 3.8
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-10-10T12:30:00.000Z",
+      "notes": "Sep 2023 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-10-12T12:30:00.000Z",
+      "notes": "Sep 2023 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-11-03T12:30:00.000Z",
+      "notes": "Oct 2023 Employment",
+      "forecast": 180,
+      "actual": 150
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-11-03T12:30:00.000Z",
+      "notes": "Oct 2023 Unemployment Rate",
+      "actual": 3.9
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-11-14T12:30:00.000Z",
+      "notes": "Oct 2023 CPI",
+      "forecast": 3.3,
+      "actual": 3.2
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-11-16T12:30:00.000Z",
+      "notes": "Oct 2023 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2023-12-01T13:30:00.000Z",
+      "notes": "Nov 2023 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2023-12-01T13:30:00.000Z",
+      "notes": "Nov 2023 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2023-12-12T13:30:00.000Z",
+      "notes": "Nov 2023 CPI",
+      "forecast": 3.1,
+      "actual": 3.1
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2023-12-14T13:30:00.000Z",
+      "notes": "Nov 2023 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-01-05T13:30:00.000Z",
+      "notes": "Dec 2023 Employment",
+      "forecast": 170,
+      "actual": 216
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-01-05T13:30:00.000Z",
+      "notes": "Dec 2023 Unemployment Rate",
+      "actual": 3.7
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-01-11T13:30:00.000Z",
+      "notes": "Dec 2023 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-01-16T13:30:00.000Z",
+      "notes": "Dec 2023 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-01-31T19:00:00.000Z",
+      "notes": "Jan 30-31 Meeting",
+      "kind": "release",
+      "forecast": 5.5,
+      "actual": 5.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-02-02T13:30:00.000Z",
+      "notes": "Jan 2024 Employment",
+      "forecast": 185,
+      "actual": 353
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-02-02T13:30:00.000Z",
+      "notes": "Jan 2024 Unemployment Rate",
+      "actual": 3.7
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-02-13T13:30:00.000Z",
+      "notes": "Jan 2024 CPI",
+      "forecast": 2.9,
+      "actual": 3.1
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-02-15T13:30:00.000Z",
+      "notes": "Jan 2024 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-03-01T12:30:00.000Z",
+      "notes": "Feb 2024 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-03-01T12:30:00.000Z",
+      "notes": "Feb 2024 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-03-12T12:30:00.000Z",
+      "notes": "Feb 2024 CPI",
+      "forecast": 3.1,
+      "actual": 3.2
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-03-14T12:30:00.000Z",
+      "notes": "Feb 2024 PPI",
+      "actual": 1.6
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-03-20T18:00:00.000Z",
+      "notes": "Mar 19-20 Meeting",
+      "kind": "release",
+      "forecast": 5.5,
+      "actual": 5.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-04-05T12:30:00.000Z",
+      "notes": "Mar 2024 Employment",
+      "forecast": 200,
+      "actual": 303
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-04-05T12:30:00.000Z",
+      "notes": "Mar 2024 Unemployment Rate",
+      "actual": 3.8
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-04-11T12:30:00.000Z",
+      "notes": "Mar 2024 PPI",
+      "actual": 2.1
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-04-16T12:30:00.000Z",
+      "notes": "Mar 2024 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-05-01T18:00:00.000Z",
+      "notes": "Apr 30 - May 1 Meeting",
+      "kind": "release",
+      "forecast": 5.5,
+      "actual": 5.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-05-03T12:30:00.000Z",
+      "notes": "Apr 2024 Employment",
+      "forecast": 243,
+      "actual": 175
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-05-03T12:30:00.000Z",
+      "notes": "Apr 2024 Unemployment Rate",
+      "actual": 3.9
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-05-14T12:30:00.000Z",
+      "notes": "Apr 2024 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-05-16T12:30:00.000Z",
+      "notes": "Apr 2024 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-06-07T12:30:00.000Z",
+      "notes": "May 2024 Employment",
+      "forecast": 185,
+      "actual": 272
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-06-07T12:30:00.000Z",
+      "notes": "May 2024 Unemployment Rate",
+      "actual": 4
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-06-11T12:30:00.000Z",
+      "notes": "May 2024 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-06-12T18:00:00.000Z",
+      "notes": "Jun 11-12 Meeting",
+      "kind": "release",
+      "forecast": 5.5,
+      "actual": 5.5
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-06-13T12:30:00.000Z",
+      "notes": "May 2024 PPI",
+      "actual": 2.2
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-07-05T12:30:00.000Z",
+      "notes": "Jun 2024 Employment",
+      "forecast": 190,
+      "actual": 206
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-07-05T12:30:00.000Z",
+      "notes": "Jun 2024 Unemployment Rate",
+      "actual": 4.1
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-07-11T12:30:00.000Z",
+      "notes": "Jun 2024 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-07-16T12:30:00.000Z",
+      "notes": "Jun 2024 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-07-31T18:00:00.000Z",
+      "notes": "Jul 30-31 Meeting",
+      "kind": "release",
+      "forecast": 5.5,
+      "actual": 5.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-08-02T12:30:00.000Z",
+      "notes": "Jul 2024 Employment",
+      "forecast": 175,
+      "actual": 114
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-08-02T12:30:00.000Z",
+      "notes": "Jul 2024 Unemployment Rate",
+      "actual": 4.3
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-08-13T12:30:00.000Z",
+      "notes": "Jul 2024 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-08-15T12:30:00.000Z",
+      "notes": "Jul 2024 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-09-06T12:30:00.000Z",
+      "notes": "Aug 2024 Employment",
+      "forecast": 160,
+      "actual": 142
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-09-06T12:30:00.000Z",
+      "notes": "Aug 2024 Unemployment Rate",
+      "actual": 4.2
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-09-10T12:30:00.000Z",
+      "notes": "Aug 2024 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-09-12T12:30:00.000Z",
+      "notes": "Aug 2024 PPI",
+      "actual": 1.7
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-09-18T18:00:00.000Z",
+      "notes": "Sep 17-18 Meeting",
+      "kind": "release",
+      "forecast": 5.25,
+      "actual": 5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-10-04T12:30:00.000Z",
+      "notes": "Sep 2024 Employment",
+      "forecast": 140,
+      "actual": 254
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-10-04T12:30:00.000Z",
+      "notes": "Sep 2024 Unemployment Rate",
+      "actual": 4.1
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-10-10T12:30:00.000Z",
+      "notes": "Sep 2024 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-10-15T12:30:00.000Z",
+      "notes": "Sep 2024 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-11-01T12:30:00.000Z",
+      "notes": "Oct 2024 Employment",
+      "forecast": 113,
+      "actual": 12
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-11-01T12:30:00.000Z",
+      "notes": "Oct 2024 Unemployment Rate",
+      "actual": 4.1
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-11-07T18:00:00.000Z",
+      "notes": "Nov 6-7 Meeting",
+      "kind": "release",
+      "forecast": 4.75,
+      "actual": 4.75
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-11-12T12:30:00.000Z",
+      "notes": "Oct 2024 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-11-14T12:30:00.000Z",
+      "notes": "Oct 2024 PPI",
+      "actual": 2.4
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2024-12-06T13:30:00.000Z",
+      "notes": "Nov 2024 Employment",
+      "forecast": 200,
+      "actual": 227
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2024-12-06T13:30:00.000Z",
+      "notes": "Nov 2024 Unemployment Rate",
+      "actual": 4.2
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2024-12-10T13:30:00.000Z",
+      "notes": "Nov 2024 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2024-12-12T13:30:00.000Z",
+      "notes": "Nov 2024 PPI",
+      "actual": 3
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2024-12-18T19:00:00.000Z",
+      "notes": "Dec 17-18 Meeting",
+      "kind": "release",
+      "forecast": 4.5,
+      "actual": 4.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-01-03T13:30:00.000Z",
+      "notes": "Dec 2024 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-01-03T13:30:00.000Z",
+      "notes": "Dec 2024 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-01-14T13:30:00.000Z",
+      "notes": "Dec 2024 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-01-16T13:30:00.000Z",
+      "notes": "Dec 2024 PPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-01-29T19:00:00.000Z",
+      "notes": "Jan 28-29 Meeting",
+      "kind": "release",
+      "forecast": 4.5,
+      "actual": 4.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-02-07T13:30:00.000Z",
+      "notes": "Jan 2025 Employment",
+      "forecast": 170,
+      "actual": 143
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-02-07T13:30:00.000Z",
+      "notes": "Jan 2025 Unemployment Rate",
+      "actual": 4
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-02-11T13:30:00.000Z",
+      "notes": "Jan 2025 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-02-13T13:30:00.000Z",
+      "notes": "Jan 2025 PPI",
+      "actual": 3.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-03-07T12:30:00.000Z",
+      "notes": "Feb 2025 Employment",
+      "forecast": 160,
+      "actual": 151
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-03-07T12:30:00.000Z",
+      "notes": "Feb 2025 Unemployment Rate",
+      "actual": 4.1
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-03-11T12:30:00.000Z",
+      "notes": "Feb 2025 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-03-13T12:30:00.000Z",
+      "notes": "Feb 2025 PPI",
+      "actual": 3.2
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-03-19T18:00:00.000Z",
+      "notes": "Mar 18-19 Meeting",
+      "kind": "release",
+      "forecast": 4.5,
+      "actual": 4.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-04-04T12:30:00.000Z",
+      "notes": "Mar 2025 Employment",
+      "forecast": 140,
+      "actual": 228
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-04-04T12:30:00.000Z",
+      "notes": "Mar 2025 Unemployment Rate",
+      "actual": 4.2
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-04-10T12:30:00.000Z",
+      "notes": "Mar 2025 PPI",
+      "actual": 2.7
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-04-15T12:30:00.000Z",
+      "notes": "Mar 2025 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-05-02T12:30:00.000Z",
+      "notes": "Apr 2025 Employment",
+      "forecast": 140,
+      "actual": 177
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-05-02T12:30:00.000Z",
+      "notes": "Apr 2025 Unemployment Rate",
+      "actual": 4.2
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-05-07T18:00:00.000Z",
+      "notes": "May 6-7 Meeting",
+      "kind": "release",
+      "forecast": 4.5,
+      "actual": 4.5
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-05-13T12:30:00.000Z",
+      "notes": "Apr 2025 CPI",
+      "forecast": 2.4,
+      "actual": 2.3
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-05-15T12:30:00.000Z",
+      "notes": "Apr 2025 PPI",
+      "actual": 2.4
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-06-06T12:30:00.000Z",
+      "notes": "May 2025 Employment",
+      "forecast": 130,
+      "actual": 139
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-06-06T12:30:00.000Z",
+      "notes": "May 2025 Unemployment Rate",
+      "actual": 4.2
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-06-10T12:30:00.000Z",
+      "notes": "May 2025 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-06-12T12:30:00.000Z",
+      "notes": "May 2025 PPI",
+      "actual": 2.3
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-06-18T18:00:00.000Z",
+      "notes": "Jun 17-18 Meeting",
+      "kind": "release",
+      "forecast": 4.5,
+      "actual": 4.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-07-04T12:30:00.000Z",
+      "notes": "Jun 2025 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-07-04T12:30:00.000Z",
+      "notes": "Jun 2025 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-07-10T12:30:00.000Z",
+      "notes": "Jun 2025 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-07-15T12:30:00.000Z",
+      "notes": "Jun 2025 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-07-30T18:00:00.000Z",
+      "notes": "Jul 29-30 Meeting",
+      "kind": "release",
+      "forecast": 4.5,
+      "actual": 4.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-08-01T12:30:00.000Z",
+      "notes": "Jul 2025 Employment",
+      "forecast": 110,
+      "actual": 73
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-08-01T12:30:00.000Z",
+      "notes": "Jul 2025 Unemployment Rate",
+      "actual": 4.3
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-08-12T12:30:00.000Z",
+      "notes": "Jul 2025 CPI",
+      "forecast": 2.6,
+      "actual": 2.5
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-08-14T12:30:00.000Z",
+      "notes": "Jul 2025 PPI",
+      "actual": 2.2
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-09-05T12:30:00.000Z",
+      "notes": "Aug 2025 Employment",
+      "forecast": 75,
+      "actual": 22
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-09-05T12:30:00.000Z",
+      "notes": "Aug 2025 Unemployment Rate",
+      "actual": 4.2
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-09-11T12:30:00.000Z",
+      "notes": "Aug 2025 PPI",
+      "actual": 1.7
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-09-16T12:30:00.000Z",
+      "notes": "Aug 2025 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-09-17T18:00:00.000Z",
+      "notes": "Sep 16-17 Meeting",
+      "kind": "release",
+      "forecast": 4.5,
+      "actual": 4.5
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-10-03T12:30:00.000Z",
+      "notes": "Sep 2025 Employment",
+      "forecast": 50,
+      "actual": 119
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-10-03T12:30:00.000Z",
+      "notes": "Sep 2025 Unemployment Rate",
+      "actual": 4.1
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-10-14T12:30:00.000Z",
+      "notes": "Sep 2025 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-10-16T12:30:00.000Z",
+      "notes": "Sep 2025 PPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-11-05T18:00:00.000Z",
+      "notes": "Nov 2025 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-11-07T12:30:00.000Z",
+      "notes": "Oct 2025 Employment",
+      "forecast": -60,
+      "actual": -105
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-11-07T12:30:00.000Z",
+      "notes": "Oct 2025 Unemployment Rate",
+      "actual": 4.1
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-11-11T12:30:00.000Z",
+      "notes": "Oct 2025 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-11-13T12:30:00.000Z",
+      "notes": "Oct 2025 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2025-12-05T13:30:00.000Z",
+      "notes": "Nov 2025 Employment",
+      "forecast": 50,
+      "actual": 64
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2025-12-05T13:30:00.000Z",
+      "notes": "Nov 2025 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2025-12-11T13:30:00.000Z",
+      "notes": "Nov 2025 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2025-12-16T13:30:00.000Z",
+      "notes": "Nov 2025 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2025-12-17T19:00:00.000Z",
+      "notes": "Dec 2025 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-01-02T13:30:00.000Z",
+      "notes": "Dec 2025 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-01-02T13:30:00.000Z",
+      "notes": "Dec 2025 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-01-13T13:30:00.000Z",
+      "notes": "Dec 2025 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-01-15T13:30:00.000Z",
+      "notes": "Dec 2025 PPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-01-28T19:00:00.000Z",
+      "notes": "Jan 27-28 Meeting",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-02-06T13:30:00.000Z",
+      "notes": "Jan 2026 Employment"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-02-06T13:30:00.000Z",
+      "notes": "Jan 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-02-10T13:30:00.000Z",
+      "notes": "Jan 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-02-12T13:30:00.000Z",
+      "notes": "Jan 2026 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-03-06T12:30:00.000Z",
+      "notes": "Feb 2026 Employment"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-03-06T12:30:00.000Z",
+      "notes": "Feb 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-03-10T12:30:00.000Z",
+      "notes": "Feb 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-03-12T12:30:00.000Z",
+      "notes": "Feb 2026 PPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-03-18T18:00:00.000Z",
+      "notes": "Mar 17-18 Meeting",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-04-03T12:30:00.000Z",
+      "notes": "Mar 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-04-03T12:30:00.000Z",
+      "notes": "Mar 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-04-14T12:30:00.000Z",
+      "notes": "Mar 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-04-16T12:30:00.000Z",
+      "notes": "Mar 2026 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-05-01T12:30:00.000Z",
+      "notes": "Apr 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-05-01T12:30:00.000Z",
+      "notes": "Apr 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-05-06T18:00:00.000Z",
+      "notes": "May 2026 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-05-12T12:30:00.000Z",
+      "notes": "Apr 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-05-14T12:30:00.000Z",
+      "notes": "Apr 2026 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-06-05T12:30:00.000Z",
+      "notes": "May 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-06-05T12:30:00.000Z",
+      "notes": "May 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-06-11T12:30:00.000Z",
+      "notes": "May 2026 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-06-16T12:30:00.000Z",
+      "notes": "May 2026 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-06-17T18:00:00.000Z",
+      "notes": "Jun 2026 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-07-03T12:30:00.000Z",
+      "notes": "Jun 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-07-03T12:30:00.000Z",
+      "notes": "Jun 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-07-14T12:30:00.000Z",
+      "notes": "Jun 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-07-16T12:30:00.000Z",
+      "notes": "Jun 2026 PPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-07-29T18:00:00.000Z",
+      "notes": "Jul 2026 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-08-07T12:30:00.000Z",
+      "notes": "Jul 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-08-07T12:30:00.000Z",
+      "notes": "Jul 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-08-11T12:30:00.000Z",
+      "notes": "Jul 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-08-13T12:30:00.000Z",
+      "notes": "Jul 2026 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-09-04T12:30:00.000Z",
+      "notes": "Aug 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-09-04T12:30:00.000Z",
+      "notes": "Aug 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-09-10T12:30:00.000Z",
+      "notes": "Aug 2026 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-09-15T12:30:00.000Z",
+      "notes": "Aug 2026 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-09-16T18:00:00.000Z",
+      "notes": "Sep 2026 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-10-02T12:30:00.000Z",
+      "notes": "Sep 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-10-02T12:30:00.000Z",
+      "notes": "Sep 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-10-13T12:30:00.000Z",
+      "notes": "Sep 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-10-15T12:30:00.000Z",
+      "notes": "Sep 2026 PPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-11-04T18:00:00.000Z",
+      "notes": "Nov 2026 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-11-06T12:30:00.000Z",
+      "notes": "Oct 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-11-06T12:30:00.000Z",
+      "notes": "Oct 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-11-10T12:30:00.000Z",
+      "notes": "Oct 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-11-12T12:30:00.000Z",
+      "notes": "Oct 2026 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2026-12-04T13:30:00.000Z",
+      "notes": "Nov 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2026-12-04T13:30:00.000Z",
+      "notes": "Nov 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2026-12-10T13:30:00.000Z",
+      "notes": "Nov 2026 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2026-12-15T13:30:00.000Z",
+      "notes": "Nov 2026 CPI"
+    },
+    {
+      "eventKey": "fomc",
+      "occursAt": "2026-12-16T19:00:00.000Z",
+      "notes": "Dec 2026 FOMC",
+      "kind": "release"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-01-01T13:30:00.000Z",
+      "notes": "Dec 2026 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-01-01T13:30:00.000Z",
+      "notes": "Dec 2026 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-01-12T13:30:00.000Z",
+      "notes": "Dec 2026 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-01-14T13:30:00.000Z",
+      "notes": "Dec 2026 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-02-05T13:30:00.000Z",
+      "notes": "Jan 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-02-05T13:30:00.000Z",
+      "notes": "Jan 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-02-11T13:30:00.000Z",
+      "notes": "Jan 2027 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-02-16T13:30:00.000Z",
+      "notes": "Jan 2027 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-03-05T12:30:00.000Z",
+      "notes": "Feb 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-03-05T12:30:00.000Z",
+      "notes": "Feb 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-03-11T12:30:00.000Z",
+      "notes": "Feb 2027 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-03-16T12:30:00.000Z",
+      "notes": "Feb 2027 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-04-02T12:30:00.000Z",
+      "notes": "Mar 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-04-02T12:30:00.000Z",
+      "notes": "Mar 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-04-13T12:30:00.000Z",
+      "notes": "Mar 2027 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-04-15T12:30:00.000Z",
+      "notes": "Mar 2027 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-05-07T12:30:00.000Z",
+      "notes": "Apr 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-05-07T12:30:00.000Z",
+      "notes": "Apr 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-05-11T12:30:00.000Z",
+      "notes": "Apr 2027 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-05-13T12:30:00.000Z",
+      "notes": "Apr 2027 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-06-04T12:30:00.000Z",
+      "notes": "May 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-06-04T12:30:00.000Z",
+      "notes": "May 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-06-10T12:30:00.000Z",
+      "notes": "May 2027 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-06-15T12:30:00.000Z",
+      "notes": "May 2027 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-07-02T12:30:00.000Z",
+      "notes": "Jun 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-07-02T12:30:00.000Z",
+      "notes": "Jun 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-07-13T12:30:00.000Z",
+      "notes": "Jun 2027 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-07-15T12:30:00.000Z",
+      "notes": "Jun 2027 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-08-06T12:30:00.000Z",
+      "notes": "Jul 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-08-06T12:30:00.000Z",
+      "notes": "Jul 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-08-10T12:30:00.000Z",
+      "notes": "Jul 2027 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-08-12T12:30:00.000Z",
+      "notes": "Jul 2027 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-09-03T12:30:00.000Z",
+      "notes": "Aug 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-09-03T12:30:00.000Z",
+      "notes": "Aug 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-09-14T12:30:00.000Z",
+      "notes": "Aug 2027 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-09-16T12:30:00.000Z",
+      "notes": "Aug 2027 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-10-01T12:30:00.000Z",
+      "notes": "Sep 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-10-01T12:30:00.000Z",
+      "notes": "Sep 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-10-12T12:30:00.000Z",
+      "notes": "Sep 2027 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-10-14T12:30:00.000Z",
+      "notes": "Sep 2027 PPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-11-05T12:30:00.000Z",
+      "notes": "Oct 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-11-05T12:30:00.000Z",
+      "notes": "Oct 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-11-11T12:30:00.000Z",
+      "notes": "Oct 2027 PPI"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-11-16T12:30:00.000Z",
+      "notes": "Oct 2027 CPI"
+    },
+    {
+      "eventKey": "nfp",
+      "occursAt": "2027-12-03T13:30:00.000Z",
+      "notes": "Nov 2027 Jobs Report"
+    },
+    {
+      "eventKey": "unrate",
+      "occursAt": "2027-12-03T13:30:00.000Z",
+      "notes": "Nov 2027 Unemployment Rate"
+    },
+    {
+      "eventKey": "cpi",
+      "occursAt": "2027-12-14T13:30:00.000Z",
+      "notes": "Nov 2027 CPI"
+    },
+    {
+      "eventKey": "ppi",
+      "occursAt": "2027-12-16T13:30:00.000Z",
+      "notes": "Nov 2027 PPI"
+    }
+  ]
+}
