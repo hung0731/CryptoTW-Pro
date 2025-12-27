@@ -7,7 +7,7 @@ import { headers } from 'next/headers';
 import { BASE_URL, SITE_NAME } from '@/lib/seo-utils';
 
 export const metadata: Metadata = {
-    title: '加密貨幣市場指標總覽 - Bitcoin Indicators | CryptoTW Pro',
+    title: '市場指標',
     description: '提供比特幣恐懼貪婪指數、資金費率、合約持倉量、ETF 資金流向等即時市場數據，協助投資人判斷市場趨勢。',
     keywords: ['比特幣指標', 'Fear and Greed', '資金費率', 'Funding Rate', 'Open Interest', 'Crypto Data'],
     alternates: {

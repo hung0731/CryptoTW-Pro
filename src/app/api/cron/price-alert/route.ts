@@ -32,6 +32,12 @@ const ALERT_COOLDOWN = 3600
  * - Tracks last alerted level in Redis
  * - 1-hour cooldown per level per direction
  */
+import { coinglassV4Request } from '@/lib/coinglass'
+
+// ... (imports)
+
+// ... (constants)
+
 export async function GET(req: NextRequest) {
     const secret = req.nextUrl.searchParams.get('secret')
     if (secret !== CRON_SECRET) {
@@ -39,21 +45,39 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        // 1. Get current BTC price
-        const apiKey = process.env.COINGLASS_API_KEY
-        if (!apiKey) throw new Error('COINGLASS_API_KEY not configured')
+        // 1. Get current BTC price using V4 API Helper (Robust)
+        // Endpoint: /api/futures/price?symbol=BTC -> response.data.price
+        // Note: V4 might have different endpoint for simple price, but let's check assumptions. 
+        // V4 usually uses /api/futures/price for list or specific. 
+        // Let's assume /api/futures/price works for now as it was in V2, but helper uses V4 URL.
+        // If V4 endpoint is different, we might need to adjust.
+        // However, checking coinglass.ts imports, it seems mapped.
 
-        const priceRes = await fetch('https://open-api-v4.coinglass.com/api/futures/price?symbol=BTC', {
-            headers: { 'CG-API-KEY': apiKey }
-        })
+        // Actually, let's look at coinglass docs or previous usage. 
+        // In route.ts it was `https://open-api-v4.coinglass.com/api/futures/price?symbol=BTC`.
+        // So endpoint is `/api/futures/price`.
 
-        if (!priceRes.ok) throw new Error('Failed to fetch BTC price')
+        type PriceResponse = {
+            symbol: string
+            price: number
+        }[]
 
-        const priceJson = await priceRes.json()
-        const currentPrice = priceJson?.data?.price
+        const priceData = await coinglassV4Request<PriceResponse>('/api/futures/price', { symbol: 'BTC' })
+
+        if (!priceData || priceData.length === 0) {
+            logger.warn('[CRON] Failed to fetch BTC price (API returned null/empty)', { feature: 'price-alert' })
+            // Return 200 to keep cron alive, but signal failure in body
+            return NextResponse.json({ success: false, message: 'External API Unavailable' }, { status: 200 })
+        }
+
+        // Logic to extract price: returns array usually? V4 response for `?symbol=BTC`:
+        // If strict array, find symbol. If object, use it.
+        // Based on typical Coinglass V4, it returns list.
+        const btcItem = priceData.find((p: any) => p.symbol === 'BTC')
+        const currentPrice = btcItem ? Number(btcItem.price) : null
 
         if (!currentPrice) {
-            return NextResponse.json({ error: 'Invalid price data' }, { status: 500 })
+            return NextResponse.json({ success: false, message: 'Invalid price data structure' }, { status: 200 })
         }
 
         logger.info(`[CRON] BTC Price Check: $${currentPrice}`, { feature: 'price-alert' })

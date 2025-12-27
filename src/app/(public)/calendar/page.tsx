@@ -7,7 +7,7 @@ import { Metadata } from 'next'
 import { BASE_URL } from '@/lib/seo-utils'
 
 export const metadata: Metadata = {
-    title: '幣圈財經日曆 & 重大事件 - Economic Calendar | CryptoTW Pro',
+    title: '經濟日曆',
     description: '完整收錄美國 CPI、PCE、非農就業數據 (NFP)、FOMC 會議等影響加密貨幣市場的重大經濟事件。',
     keywords: ['財經日曆', 'CPI', 'FOMC', '非農', 'Bitcoin Calendar', 'Crypto Events'],
     alternates: {

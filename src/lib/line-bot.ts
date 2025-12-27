@@ -43,26 +43,44 @@ export async function multicastMessage(userIds: string[], messages: any[]) {
         return false
     }
 
-    try {
-        const res = await fetch('https://api.line.me/v2/bot/message/multicast', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
-            },
-            body: JSON.stringify({
-                to: userIds,
-                messages: messages
-            })
-        })
+    // Deduplicate User IDs
+    const uniqueUserIds = Array.from(new Set(userIds))
+    if (uniqueUserIds.length === 0) return true
 
-        if (!res.ok) {
-            const error = await res.text()
-            logger.error('Failed to send LINE multicast message:', { error }, { feature: 'line-bot' })
-            return false
+    // Batching (LINE Limit: 500)
+    const BATCH_SIZE = 500
+    const chunks = []
+
+    for (let i = 0; i < uniqueUserIds.length; i += BATCH_SIZE) {
+        chunks.push(uniqueUserIds.slice(i, i + BATCH_SIZE))
+    }
+
+    try {
+        let successCount = 0
+
+        for (const chunk of chunks) {
+            const res = await fetch('https://api.line.me/v2/bot/message/multicast', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
+                },
+                body: JSON.stringify({
+                    to: chunk,
+                    messages: messages
+                })
+            })
+
+            if (!res.ok) {
+                const error = await res.text()
+                logger.error('Failed to send LINE multicast batch:', { error, count: chunk.length }, { feature: 'line-bot' })
+                // Continue to next chunk instead of aborting all
+            } else {
+                successCount += 1
+            }
         }
 
-        return true
+        return successCount === chunks.length // Returns true only if ALL batches succeeded
     } catch (e) {
         logger.error('Error sending LINE multicast message:', e, { feature: 'line-bot' })
         return false

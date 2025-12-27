@@ -5,7 +5,7 @@ import { Metadata } from 'next'
 import { BASE_URL } from '@/lib/seo-utils'
 
 export const metadata: Metadata = {
-    title: '加密貨幣即時快訊 - Crypto News Feed | CryptoTW Pro',
+    title: '快訊中心',
     description: '24 小時不間斷的加密貨幣市場快訊。即時追蹤 BTC、ETH、DeFi 與 NFT 的最新動態與利好利空消息。',
     keywords: ['加密貨幣快訊', '比特幣新聞', '區塊鏈快訊', 'Crypto News', 'Real-time Updates'],
     alternates: {
