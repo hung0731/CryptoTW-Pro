@@ -3,9 +3,39 @@
 import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { Sparkles, Newspaper, Activity, ChevronRight } from 'lucide-react'
+import { Tag } from '@/components/ui/tag'
+
+// Structured tagged segment for AI summaries
+export interface TaggedSegment {
+    tag: 'info' | 'success' | 'warning' | 'error' | 'brand' | 'purple' | 'default'
+    label: string
+    content: string
+}
+
+// Helper to map tag types to Tag variants
+const tagVariantMap: Record<string, 'info' | 'success' | 'warning' | 'error' | 'brand' | 'purple' | 'default'> = {
+    '恐慌': 'error',
+    '風險': 'error',
+    '偏空': 'error',
+    '偏多': 'success',
+    '機會': 'success',
+    '震盪': 'warning',
+    '觀望': 'warning',
+    '資金流': 'info',
+    '數據': 'info',
+    '趨勢': 'info',
+    '關鍵位': 'brand',
+    '爆倉': 'brand',
+    '費率': 'info',
+    '巨鯨': 'info',
+    '結論': 'purple',
+    '劇本': 'purple',
+    '背離': 'warning',
+}
 
 interface AISummaryCardProps {
-    summary: string
+    summary?: string
+    summarySegments?: TaggedSegment[]  // New: structured tagged segments
     source?: string // e.g. "幣圈快訊", "市場分析"
     loading?: boolean
     className?: string
@@ -27,7 +57,8 @@ interface AISummaryCardProps {
  * <AISummaryCard summary={text} variant="compact" />
  */
 export function AISummaryCard({
-    summary,
+    summary = '',
+    summarySegments,
     source = '幣圈快訊',
     loading = false,
     className,
@@ -115,8 +146,8 @@ export function AISummaryCard({
     if (isAnalyzing) {
         return (
             <div className={wrapperClasses}>
-                {/* 1. Subtle Animated Border (Breathing) */}
-                <div className="absolute inset-0 bg-purple-500/20 animate-breath" />
+                {/* 1. Subtle Animated Border (Breathing) - with rounded corners */}
+                <div className="absolute inset-0 rounded-xl bg-purple-500 animate-breath" />
 
                 {/* 2. Inner Content */}
                 <div className="relative h-full w-full rounded-xl bg-[#0A0A0A] overflow-hidden flex flex-col">
@@ -176,17 +207,43 @@ export function AISummaryCard({
                 {/* A. Main Text Content */}
                 <div className={cn("flex-1 cursor-default", contentPadding)}>
                     <div className={cn("relative z-10", contentMinHeight)}>
-                        <p className={cn(
-                            "leading-relaxed text-neutral-300",
-                            isHero && "text-sm",
-                            isCompact && "text-xs",
-                            !isHero && !isCompact && "text-sm"
-                        )}>
-                            {displayedText || summary || '正在分析市場動態...'}
-                            {isTyping && (
-                                <span className="inline-block w-0.5 h-4 ml-0.5 bg-purple-400 animate-pulse" />
-                            )}
-                        </p>
+                        {/* Render tagged segments if provided */}
+                        {summarySegments && summarySegments.length > 0 ? (
+                            <div className={cn(
+                                "space-y-2",
+                                isHero && "text-sm",
+                                isCompact && "text-xs",
+                                !isHero && !isCompact && "text-sm"
+                            )}>
+                                {summarySegments.map((segment, idx) => (
+                                    <div key={idx} className="flex items-start gap-2">
+                                        <Tag
+                                            variant={segment.tag || tagVariantMap[segment.label] || 'default'}
+                                            size="sm"
+                                            className="shrink-0 mt-0.5"
+                                        >
+                                            {segment.label}
+                                        </Tag>
+                                        <span className="text-neutral-300 leading-relaxed">
+                                            {segment.content}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            /* Fallback: plain text summary */
+                            <p className={cn(
+                                "leading-relaxed text-neutral-300",
+                                isHero && "text-sm",
+                                isCompact && "text-xs",
+                                !isHero && !isCompact && "text-sm"
+                            )}>
+                                {displayedText || summary || '正在分析市場動態...'}
+                                {isTyping && (
+                                    <span className="inline-block w-0.5 h-4 ml-0.5 bg-purple-400 animate-pulse" />
+                                )}
+                            </p>
+                        )}
                     </div>
                 </div>
 

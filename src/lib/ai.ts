@@ -6,44 +6,46 @@ import { logger } from '@/lib/logger'
 import { MarketContext } from '@/lib/types'
 
 // ==========================================
-// OpenRouter Configuration (via OpenAI SDK)
+// Google Gemini Configuration (via OpenAI SDK)
 // ==========================================
-const apiKey = process.env.OPENROUTER_API_KEY
+const apiKey = process.env.GEMINI_API_KEY
 const openai = apiKey ? new OpenAI({
     apiKey: apiKey,
-    baseURL: 'https://openrouter.ai/api/v1',
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
 }) : null
 
-export const MODEL_NAME = 'nvidia/nemotron-3-nano-30b-a3b:free'
+export const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
 
 const VOICE_PACK = `
-【CryptoTW 台灣用語 Voice Pack（MANDATORY）】
-你是在台灣幣圈做交易的資深人，寫給台灣用戶看。
-
-語氣：直白、冷靜、像群組裡的老手，不做作、不官腔。
-句型：短句為主，少形容詞，多結論 + 依據。
-用詞偏好（優先用這些）：
-- 「美元」不是「美金」
-- 「回調」不是「回撤」
-- 「爆倉」/「清算」都可，但用一次就好，別來回切換
-- 「槓桿」/「籌碼」/「費率」/「OI」/「多空比」/「主力」/「散戶」/「大戶」
-- 「偏多」「偏空」「震盪」「觀望」「結構未破」「動能轉弱」「擁擠」「燃料耗盡」「雙爆」
-
-禁用詞（出現就算失敗）：
-- 「投資建議」「操作策略」「建議買入/賣出」「目標價」「止損」
-- 過度文青或媒體腔：「值得關注」「引發市場關注」「反映投資人信心」「情緒升溫」「市場觀望氣氛」
-- 中國用語：回撤、承压、走強、走弱（可用「轉強/轉弱」但不要「走強/走弱」）
-
-台灣慣用寫法：
-- 數字要具體（$ 多少 M、% 多少），不要「大量」「明顯」
-- 能用「先…再…」「如果…那…」「目前…但…」就用，避免長句
-- 句末不要驚嘆號
+【語氣】台灣幣圈老手 - 直白冷靜，短句為主，結論+依據。
+【標籤格式】[ 標籤 ] 內容（標籤庫：情緒/關鍵位/資金流/爆倉/費率/巨鯨/結論/風險/機會/趨勢/背離）
+【用詞】美元(非美金)、回調(非回撤)、多空比/OI/費率/籌碼/主力/散戶/偏多/偏空/震盪/觀望
+【禁用】投資建議/目標價/止損/值得關注/引發關注/情緒升溫(太官腔)/中國用語(回撤/承压/走強)
+【格式】數字具體($多少M、%多少)、句末無驚嘆號、繁體中文
 `
 
 const CONSISTENCY_CHECK = `
 【一致性檢查】
 輸出前自檢：是否像台灣幣圈群組會講的話？若像新聞稿或研究報告，重寫成更口語、更短句。
 `
+
+/**
+ * Clean AI response by removing markdown code blocks
+ * Handles cases like: ```json { ... } ```
+ */
+function cleanJsonResponse(text: string): string {
+    // Remove markdown code blocks (```json ... ``` or ``` ... ```)
+    let cleaned = text.trim()
+    // Match ```json or ``` at the start
+    if (cleaned.startsWith('```')) {
+        cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '')
+    }
+    // Match ``` at the end
+    if (cleaned.endsWith('```')) {
+        cleaned = cleaned.replace(/\n?```$/, '')
+    }
+    return cleaned.trim()
+}
 
 export interface MarketSummaryResult {
     emoji: string
@@ -225,7 +227,7 @@ Note: emoji 必須根據 sentiment 選擇，例如：
         })
 
         const text = completion.choices[0]?.message?.content || '{}'
-        return formatObjectStrings(JSON.parse(text))
+        return formatObjectStrings(JSON.parse(cleanJsonResponse(text)))
 
     } catch (e) {
         logger.error('Grok Generation Error:', e, { feature: 'ai' })
@@ -318,7 +320,7 @@ ${indicatorSnippet}
 - 格式：{ "title": "...", "path": "... (e.g. /reviews/2023/btc-slump or /indicators/fear-greed)", "reason": "..." }
 - **強烈建議**：若指標顯示異常（如 FGI > 80 或費率過高），必須推薦對應指標頁面。
 
-【說明撰寫】35-60 字
+【說明撰寫】80-120 字（一段流暢的自然語言）
 ✅ **核心任務：數據驗證 (Reality Check)**
   - 利用輸入的【關鍵數據環境】(FGI / 費率) 來驗證新聞情緒。
   - **若一致**：簡述市場情緒 (如「利多頻傳且資金費率升溫，情緒樂觀」)。
@@ -337,14 +339,16 @@ ${CONSISTENCY_CHECK}
 {
   "context": {
       "sentiment": "樂觀|保守|恐慌|中性",
-      "summary": "35-60字總結。",
+      "summary_segments": [
+        { "tag": "error|success|warning|info|brand|purple|default", "label": "2-4字標籤", "content": "20-40字說明" }
+      ],
       "news": [
         {
-            "title": "8-15字標題",
-            "reason": "25-40字說明",
+            "title": "10-18字標題",
+            "reason": "40-60字詳細說明，包含具體數據與市場影響",
             "impact": "高|中|低",
             "bias": "偏多|偏空|中性",
-            "impact_note": "10-20字提醒"
+            "impact_note": "15-25字操作提醒"
         }
       ],
       "recommended_readings": [
@@ -360,7 +364,8 @@ ${CONSISTENCY_CHECK}
         })
 
         const text = completion.choices[0]?.message?.content || '{}'
-        return formatObjectStrings(JSON.parse(text).context || JSON.parse(text))
+        const cleaned = cleanJsonResponse(text)
+        return formatObjectStrings(JSON.parse(cleaned).context || JSON.parse(cleaned))
 
     } catch (e) {
         logger.error('Grok Market Context Brief Error:', e, { feature: 'ai' })
@@ -460,7 +465,7 @@ ${CONSISTENCY_CHECK}
         })
 
         const text = completion.choices[0]?.message?.content || '{}'
-        return formatObjectStrings(JSON.parse(text))
+        return formatObjectStrings(JSON.parse(cleanJsonResponse(text)))
 
     } catch (e) {
         logger.error('Grok AI Decision Error:', e, { feature: 'ai' })
@@ -577,7 +582,7 @@ ${CONSISTENCY_CHECK}
         })
 
         const text = completion.choices[0]?.message?.content || '{}'
-        return formatObjectStrings(JSON.parse(text))
+        return formatObjectStrings(JSON.parse(cleanJsonResponse(text)))
     } catch (e) {
         logger.error('[Daily Broadcast] Grok Polish Error:', e, { feature: 'ai' })
         return null
@@ -623,7 +628,7 @@ export async function generateFallbackReply(userInput: string): Promise<Fallback
         })
 
         const text = completion.choices[0]?.message?.content || '{}'
-        return JSON.parse(text)
+        return JSON.parse(cleanJsonResponse(text))
     } catch (e) {
         logger.error('Grok Fallback Error:', e, { feature: 'ai' })
         return null
@@ -752,7 +757,7 @@ ${CONSISTENCY_CHECK}
         })
 
         const text = completion.choices[0]?.message?.content || '{}'
-        const json = JSON.parse(text)
+        const json = JSON.parse(cleanJsonResponse(text))
         return {
             summary: formatTaiwaneseText(json.summary || json.text || ''),
             recommended_readings: json.recommended_readings || []
@@ -899,7 +904,7 @@ ${CONSISTENCY_CHECK}
         })
 
         const text = completion.choices[0]?.message?.content || '{}'
-        const json = JSON.parse(text)
+        const json = JSON.parse(cleanJsonResponse(text))
         return {
             summary: formatTaiwaneseText(json.summary),
             recommended_readings: json.recommended_readings
