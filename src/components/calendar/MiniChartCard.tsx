@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
     formatValue,
@@ -19,7 +18,6 @@ interface MiniChartCardProps {
     isNext?: boolean
     isLatest?: boolean
     daysUntil?: number
-    onReplay?: (occ: any) => void
 }
 
 /**
@@ -36,7 +34,6 @@ export function MiniChartCard({
     isNext = false,
     isLatest = false,
     daysUntil,
-    onReplay
 }: MiniChartCardProps) {
     const dateStr = occ.occursAt.slice(5, 10).replace('-', '/')
 
@@ -88,24 +85,6 @@ export function MiniChartCard({
                 ? "bg-[#1A1A1A] border-[#2A2A2A]" // Highlight Next
                 : "bg-[#0A0A0A] border-transparent" // Standard Dark
         )}>
-            {/* Hover overlay for Replay */}
-            {!isNext && occ.linkedReviewSlug && onReplay && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] opacity-0 group-hover/card:opacity-100 transition-opacity z-10 flex flex-col items-center justify-center gap-2">
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            if (onReplay) onReplay(occ);
-                        }}
-                        className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                    >
-                        <Play className="w-4 h-4 fill-current" />
-                    </button>
-                    <span className="text-[9px] font-bold text-blue-200 bg-blue-900/40 px-1.5 py-0.5 rounded border border-blue-500/30">
-                        情境重播
-                    </span>
-                </div>
-            )}
-
             {/* Header: Date + Time + Badge */}
             <div className="flex items-center justify-between px-2.5 pt-2 pb-1">
                 <div className="flex flex-col">

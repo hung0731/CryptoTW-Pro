@@ -18,7 +18,6 @@ import { MiniChartCard } from '@/components/calendar/MiniChartCard';
 interface CalendarEventListProps {
     events: EnrichedMacroEvent[];
     alignMode: 'time' | 'reaction';
-    onReplay: (occ: any) => void;
 }
 
 // Helper to get Icon
@@ -31,7 +30,7 @@ const getEventIcon = (key: string) => {
     }
 }
 
-export function CalendarEventList({ events, alignMode, onReplay }: CalendarEventListProps) {
+export function CalendarEventList({ events, alignMode }: CalendarEventListProps) {
     return (
         <div className="flex flex-col">
             {events.map((item) => {
@@ -147,10 +146,6 @@ export function CalendarEventList({ events, alignMode, onReplay }: CalendarEvent
                                             eventKey={def.key}
                                             windowDisplayStart={def.windowDisplay.start}
                                             isLatest={alignMode === 'time' && index === 0}
-                                            onReplay={(occ) => {
-                                                if ((occ as any).stopPropagation) (occ as any).stopPropagation();
-                                                onReplay(occ);
-                                            }}
                                         />
                                     ))}
                                 </div>

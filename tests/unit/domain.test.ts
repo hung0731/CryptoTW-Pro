@@ -46,14 +46,14 @@ describe('Cache Key Builder', () => {
 describe('Number Formatters', () => {
     it('should format percentages correctly', () => {
         expect(formatPercent(5.5)).toBe('+5.5%')
-        expect(formatPercent(-12.3)).toBe('-12.3%')
+        expect(formatPercent(-12.3)).toBe('-12%')
         expect(formatPercent(15)).toBe('+15%')  // no decimal for > 10
         expect(formatPercent(0)).toBe('0%')
         expect(formatPercent(null)).toBe('—')
     })
 
     it('should format prices correctly', () => {
-        expect(formatPrice(1234.56)).toBe('$1,234.56')
+        expect(formatPrice(1234.56)).toBe('$1,235')
         expect(formatPrice(67890)).toBe('$67,890')  // no decimal for >= 1000
         expect(formatPrice(null)).toBe('—')
     })
@@ -79,7 +79,7 @@ describe('Judgment Engine', () => {
         const signals = generateMarketSignals(mockData)
 
         // Should detect leverage buildup
-        expect(signals.leverage_status).toContain('高')
+        expect(signals.leverage_status).toBe('過熱')
         expect(signals.evidence.leverage.length).toBeGreaterThan(0)
     })
 

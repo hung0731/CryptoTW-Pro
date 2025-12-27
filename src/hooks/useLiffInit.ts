@@ -23,7 +23,7 @@ interface UseLiffInitReturn {
     isSdkLoading: boolean
 }
 
-const SDK_MAX_WAIT = 3000 // 3 seconds timeout
+const SDK_MAX_WAIT = 5000 // 5 seconds timeout
 
 export function useLiffInit(liffId: string): UseLiffInitReturn {
     const [liffObject, setLiffObject] = useState<LiffInstance | null>(null)

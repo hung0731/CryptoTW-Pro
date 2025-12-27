@@ -2,9 +2,7 @@
 
 import React, { useState } from 'react'
 import { Calendar } from 'lucide-react'
-import { JudgmentReplay } from '@/components/JudgmentReplay'
 import { cn } from '@/lib/utils'
-import { MacroEventOccurrence } from '@/lib/macro-events'
 import { SPACING } from '@/lib/design-tokens'
 import { AISummaryCard } from '@/components/ui/AISummaryCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
@@ -20,7 +18,6 @@ interface CalendarPageClientProps {
 
 export default function CalendarPageClient({ enrichedEvents }: CalendarPageClientProps) {
     const [alignMode, setAlignMode] = useState<'time' | 'reaction'>('time')
-    const [activeReplayEvent, setActiveReplayEvent] = useState<(MacroEventOccurrence & { linkedReviewSlug?: string }) | null>(null)
     const { aiSummary, isLoading: aiLoading } = useCalendarAISummary(enrichedEvents)
 
     // Find imminent event for War Room
@@ -80,37 +77,8 @@ export default function CalendarPageClient({ enrichedEvents }: CalendarPageClien
                 <CalendarEventList
                     events={enrichedEvents}
                     alignMode={alignMode}
-                    onReplay={(occ) => {
-                        // Prevent link navigation if clicking chart inside link
-                        // Actually event propagation is handled in the child, 
-                        // but here we just set state.
-                        setActiveReplayEvent(occ)
-                    }}
                 />
             </UniversalCard>
-
-            {/* Replay Modal */}
-            {activeReplayEvent && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="w-full max-w-5xl bg-[#0F0F10] border border-[#2A2A2A] rounded-xl shadow-2xl overflow-hidden relative">
-                        <button
-                            onClick={() => setActiveReplayEvent(null)}
-                            className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white"
-                        >
-                            <span className="sr-only">Close</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
-
-                        <JudgmentReplay
-                            symbol="BTC"
-                            eventStart={activeReplayEvent.linkedReviewSlug ? '2022-11-06' : activeReplayEvent.occursAt.split('T')[0]} // Hardcoded date in original code?
-                            eventEnd={activeReplayEvent.occursAt.split('T')[0]}
-                            reviewSlug={activeReplayEvent.linkedReviewSlug || 'demo'}
-                            daysBuffer={90}
-                        />
-                    </div>
-                </div>
-            )}
         </div >
     )
 }

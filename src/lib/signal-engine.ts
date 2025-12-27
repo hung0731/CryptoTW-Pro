@@ -64,9 +64,9 @@ function detectLeverageStatus(
 
     const oiUp = oiChange24h !== null && oiChange24h > 2
     const oiDown = oiChange24h !== null && oiChange24h < -2
-    const fundingHigh = fundingRate !== null && fundingRate > 0.05
-    const fundingExtreme = fundingRate !== null && fundingRate > 0.1
-    const fundingNegative = fundingRate !== null && fundingRate < -0.01
+    const fundingHigh = fundingRate !== null && fundingRate > 0.0005 // 0.05%
+    const fundingExtreme = fundingRate !== null && fundingRate > 0.001 // 0.1%
+    const fundingNegative = fundingRate !== null && fundingRate < -0.0001 // -0.01%
 
     // 紀錄證據
     if (oiChange24h !== null) {
