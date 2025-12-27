@@ -3,7 +3,7 @@ import { generateMarketContextBrief } from '@/lib/ai'
 import { multicastMessage } from '@/lib/line-bot'
 import { setCache, CacheTTL } from '@/lib/cache'
 import { logger } from '@/lib/logger'
-import { prisma } from '@/lib/prisma'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { THEME, createProLabel, createSharedFooter } from '@/lib/bot/ui/flex-generator'
 
 export const dynamic = 'force-dynamic'
@@ -27,17 +27,23 @@ export async function GET(req: NextRequest) {
         logger.info('[CRON] Starting daily market report generation...', { feature: 'cron' })
 
         // 1. Get all LINE users who have subscribed
-        const subscribers = await prisma.user.findMany({
-            where: { lineUserId: { not: null } },
-            select: { lineUserId: true }
-        })
+        const supabase = createAdminClient()
+        const { data: subscribers, error: dbError } = await supabase
+            .from('users')
+            .select('line_user_id')
+            .not('line_user_id', 'is', null)
 
-        if (subscribers.length === 0) {
+        if (dbError) {
+            logger.error('[CRON] Failed to fetch subscribers', dbError, { feature: 'cron' })
+            return NextResponse.json({ error: 'Database error' }, { status: 500 })
+        }
+
+        if (!subscribers || subscribers.length === 0) {
             logger.info('[CRON] No subscribers found, skipping daily report', { feature: 'cron' })
             return NextResponse.json({ success: true, message: 'No subscribers' })
         }
 
-        const userIds = subscribers.map(u => u.lineUserId).filter(Boolean) as string[]
+        const userIds = subscribers.map(u => u.line_user_id).filter(Boolean) as string[]
 
         // 2. Fetch market data
         const apiKey = process.env.COINGLASS_API_KEY
@@ -113,18 +119,18 @@ export async function GET(req: NextRequest) {
                             ]
                         },
                         { type: 'separator' as const, margin: 'md' as const, color: THEME.colors.separator },
-                        // AI Summary Segments
+                        // AI Summary Highlights
                         {
                             type: 'box' as const,
                             layout: 'vertical' as const,
                             margin: 'md' as const,
                             spacing: 'sm' as const,
-                            contents: (context?.summary_segments || []).slice(0, 4).map((seg: any) => ({
+                            contents: (context?.highlights || []).slice(0, 4).map((item) => ({
                                 type: 'box' as const,
                                 layout: 'horizontal' as const,
                                 contents: [
-                                    { type: 'text' as const, text: `[${seg.label}]`, size: THEME.sizes.sub, color: THEME.colors.brand, flex: 0 },
-                                    { type: 'text' as const, text: seg.content, size: THEME.sizes.sub, color: THEME.colors.textSub, flex: 1, wrap: true, margin: 'sm' as const }
+                                    { type: 'text' as const, text: `[${item.impact}]`, size: THEME.sizes.sub, color: THEME.colors.brand, flex: 0 },
+                                    { type: 'text' as const, text: item.title, size: THEME.sizes.sub, color: THEME.colors.textSub, flex: 1, wrap: true, margin: 'sm' as const }
                                 ]
                             }))
                         },

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { multicastMessage } from '@/lib/line-bot'
 import { getCache, setCache } from '@/lib/cache'
 import { logger } from '@/lib/logger'
-import { prisma } from '@/lib/prisma'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { THEME, createProLabel, createSharedFooter } from '@/lib/bot/ui/flex-generator'
 
 export const dynamic = 'force-dynamic'
@@ -104,12 +104,18 @@ export async function GET(req: NextRequest) {
         }
 
         // 6. Get all LINE subscribers
-        const subscribers = await prisma.user.findMany({
-            where: { lineUserId: { not: null } },
-            select: { lineUserId: true }
-        })
+        const supabase = createAdminClient()
+        const { data: subscribers, error: dbError } = await supabase
+            .from('users')
+            .select('line_user_id')
+            .not('line_user_id', 'is', null)
 
-        const userIds = subscribers.map(u => u.lineUserId).filter(Boolean) as string[]
+        if (dbError) {
+            logger.error('[CRON] Failed to fetch subscribers', dbError, { feature: 'price-alert' })
+            return NextResponse.json({ error: 'Database error' }, { status: 500 })
+        }
+
+        const userIds = (subscribers || []).map(u => u.line_user_id).filter(Boolean) as string[]
 
         if (userIds.length === 0) {
             return NextResponse.json({ success: true, message: 'No subscribers', alerts })
