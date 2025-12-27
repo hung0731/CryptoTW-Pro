@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { Sparkles, Newspaper, Activity, ChevronRight } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
+import { UI_LABELS } from '@/config/naming'
 
 // Structured tagged segment for AI summaries
 export interface TaggedSegment {
@@ -36,7 +37,7 @@ const tagVariantMap: Record<string, 'info' | 'success' | 'warning' | 'error' | '
     '情緒': 'warning',
 }
 
-interface AISummaryCardProps {
+interface AIQuickReadProps {
     summary?: string
     summarySegments?: TaggedSegment[]  // New: structured tagged segments
     source?: string // e.g. "幣圈快訊", "市場分析"
@@ -59,7 +60,7 @@ interface AISummaryCardProps {
  * <AISummaryCard summary={text} source="幣圈快訊" />
  * <AISummaryCard summary={text} variant="compact" />
  */
-export function AISummaryCard({
+export function AIQuickRead({
     summary = '',
     summarySegments,
     source = '幣圈快訊',
@@ -67,7 +68,7 @@ export function AISummaryCard({
     className,
     variant = 'default',
     recommendations = []
-}: AISummaryCardProps) {
+}: AIQuickReadProps) {
     const [displayedText, setDisplayedText] = useState('')
     const [isTyping, setIsTyping] = useState(false)
     const previousSummary = useRef<string>('')
@@ -170,7 +171,7 @@ export function AISummaryCard({
                             {/* Main Status Text */}
                             <div className="space-y-1">
                                 <p className="text-sm font-bold text-white tracking-wide">
-                                    AI 正在深度分析中
+                                    {UI_LABELS.AI.ANALYZING}
                                 </p>
                                 {/* Dynamic Subtext */}
                                 <p className="text-xs text-neutral-500 h-4 transition-all duration-300">
@@ -328,7 +329,7 @@ export function AISummaryCard({
                         "font-bold tracking-wide text-purple-300",
                         isCompact ? "text-[10px]" : "text-[11px]"
                     )}>
-                        加密台灣 Pro
+                        {UI_LABELS.BRAND_NAME} Pro
                     </span>
                 </div>
             </div>

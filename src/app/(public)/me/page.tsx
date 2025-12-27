@@ -17,6 +17,7 @@ import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { UniversalCard, CardContent } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { getLearnerLevel } from '@/lib/learn-data'
+import { UI_LABELS } from '@/config/naming'
 
 function MenuLink({
     icon: Icon,
@@ -53,7 +54,7 @@ function MenuLink({
     return <Link href={href} className="block group">{content}</Link>
 }
 
-export default function ProfilePage() {
+export default function MePage() {
     const { isLoggedIn, profile, dbUser, isLoading: authLoading, liffObject } = useLiff()
 
     if (authLoading) {
@@ -147,7 +148,7 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans pb-24">
-            <PageHeader title="個人檔案" showLogo={false} backHref="/" backLabel="返回" />
+            <PageHeader title={UI_LABELS.PROFILE.ROOT_TITLE} showLogo={false} backHref="/" backLabel="返回" />
 
             <div className={cn("pt-6 max-w-lg mx-auto", SPACING.pageX, SPACING.classes.gapCards)}>
                 {/* Profile Card */}
@@ -188,11 +189,11 @@ export default function ProfilePage() {
                 <div className="space-y-3">
                     <UniversalCard variant="luma" size="M" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
-                            <SectionHeaderCard title="設定" />
+                            <SectionHeaderCard title={UI_LABELS.PROFILE.ROOT_TITLE} />
                         </div>
                         <div className="divide-y divide-white/5">
-                            <MenuLink icon={Bell} label="通知設定" href="/profile/notifications" />
-                            <MenuLink icon={Link2} label="交易所綁定" href="/profile/bindings" />
+                            <MenuLink icon={Bell} label={UI_LABELS.PROFILE.NOTIFICATIONS} href="/me/notifications" />
+                            <MenuLink icon={Link2} label={UI_LABELS.PROFILE.BINDING} href="/me/bindings" />
                             <MenuLink icon={Crown} label="VIP 計劃" href="/join" />
                         </div>
                     </UniversalCard>
@@ -227,7 +228,7 @@ export default function ProfilePage() {
 
                 {/* Version */}
                 <div className="text-center pt-2">
-                    <p className="text-[10px] text-neutral-600 font-mono">加密台灣 Pro v2.0</p>
+                    <p className="text-[10px] text-neutral-600 font-mono">{UI_LABELS.BRAND_NAME} Pro v2.0</p>
                 </div>
 
             </div >

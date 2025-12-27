@@ -3,19 +3,19 @@
 import React from 'react'
 import dynamic from 'next/dynamic'
 import { Line, Bar } from 'recharts'
-import { SkeletonReviewChart } from '@/components/SkeletonReviewChart'
+import { SkeletonHistoryChart } from '@/components/SkeletonHistoryChart'
 
 // Dynamically import chart variants (Lazy Load)
-const PriceChart = dynamic(() => import('@/components/charts/review/PriceChart').then(mod => mod.PriceChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const FlowChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.FlowChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const FgiChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.FgiChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const FundingChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.FundingChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const LiquidationChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.LiquidationChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const LongShortChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.LongShortChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const BasisChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.BasisChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const PremiumChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.PremiumChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const StablecoinChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.StablecoinChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
-const OpenInterestChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.OpenInterestChart), { ssr: false, loading: () => <SkeletonReviewChart /> })
+const PriceChart = dynamic(() => import('@/components/charts/review/PriceChart').then(mod => mod.PriceChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const FlowChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.FlowChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const FgiChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.FgiChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const FundingChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.FundingChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const LiquidationChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.LiquidationChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const LongShortChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.LongShortChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const BasisChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.BasisChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const PremiumChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.PremiumChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const StablecoinChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.StablecoinChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
+const OpenInterestChart = dynamic(() => import('@/components/charts/review/ReviewChartVariants').then(mod => mod.OpenInterestChart), { ssr: false, loading: () => <SkeletonHistoryChart /> })
 
 export type ChartType = 'price' | 'flow' | 'oi' | 'supply' | 'fgi' | 'funding' | 'liquidation' | 'longShort' | 'basis' | 'premium' | 'stablecoin';
 

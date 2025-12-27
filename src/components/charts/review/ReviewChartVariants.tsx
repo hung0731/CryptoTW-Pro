@@ -4,7 +4,7 @@ import React from 'react'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ReferenceLine, AreaChart, Area, ResponsiveContainer, ReferenceArea
 } from 'recharts'
-import { ReviewChartTooltip } from '@/components/reviews/ReviewChartTooltip'
+import { HistoryChartTooltip } from '@/components/history/HistoryChartTooltip'
 import { getChartSemanticModel, getSemanticColor } from '@/lib/chart-semantics'
 
 // ----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ export function FlowChart({ data }: { data: any[] }) {
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="flow" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
+            <Tooltip content={<HistoryChartTooltip type="flow" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
             <Bar dataKey="flow" fill="#ef4444">
                 {data.map((entry: any, index: number) => {
                     const model = getChartSemanticModel('etfFlow')
@@ -64,7 +64,7 @@ export function FundingChart({ data }: { data: any[] }) {
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="funding" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
+            <Tooltip content={<HistoryChartTooltip type="funding" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
             <ReferenceLine y={0} stroke="#666" strokeWidth={1.5} label={{ value: '中性', position: 'insideRight', fill: '#666', fontSize: 9 }} />
             <ReferenceLine y={0.05} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '多頭擁擠', position: 'insideTopRight', fill: '#ef4444', fontSize: 8, opacity: 0.7 }} />
             <ReferenceLine y={-0.02} stroke="#22c55e" strokeDasharray="3 3" strokeOpacity={0.5} label={{ value: '空頭擁擠', position: 'insideBottomRight', fill: '#22c55e', fontSize: 8, opacity: 0.7 }} />
@@ -109,7 +109,7 @@ export function FgiChart({ data, gradientId }: { data: any[], gradientId: string
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="fgi" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
+            <Tooltip content={<HistoryChartTooltip type="fgi" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
             <Area
                 type="monotone"
                 dataKey="fgi"
@@ -144,7 +144,7 @@ export function LiquidationChart({ data }: { data: any[] }) {
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="liquidation" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
+            <Tooltip content={<HistoryChartTooltip type="liquidation" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
             <Bar dataKey="liquidation" fill="#f59e0b" />
         </BarChart>
     )
@@ -182,7 +182,7 @@ export function LongShortChart({ data, gradientId }: { data: any[], gradientId: 
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="longShort" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
+            <Tooltip content={<HistoryChartTooltip type="longShort" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
             <Area
                 type="monotone"
                 dataKey="longShortRatio"
@@ -223,7 +223,7 @@ export function BasisChart({ data, gradientId }: { data: any[], gradientId: stri
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="basis" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
+            <Tooltip content={<HistoryChartTooltip type="basis" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
             <Area
                 type="monotone"
                 dataKey="basis"
@@ -258,7 +258,7 @@ export function PremiumChart({ data }: { data: any[] }) {
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="premium" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
+            <Tooltip content={<HistoryChartTooltip type="premium" isPercentage={false} />} cursor={{ fill: '#ffffff10' }} />
             <ReferenceLine y={0} stroke="#333" />
             <Bar dataKey="premium">
                 {data.map((entry: any, index: number) => {
@@ -300,7 +300,7 @@ export function StablecoinChart({ data, gradientId }: { data: any[], gradientId:
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="stablecoin" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
+            <Tooltip content={<HistoryChartTooltip type="stablecoin" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
             <Area
                 type="monotone"
                 dataKey="stablecoin"
@@ -351,7 +351,7 @@ export function OpenInterestChart({ data, gradientId, viewMode, focusWindow, get
                 minTickGap={30}
                 tickFormatter={(str) => str.slice(5)}
             />
-            <Tooltip content={<ReviewChartTooltip type="oi" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
+            <Tooltip content={<HistoryChartTooltip type="oi" isPercentage={false} />} cursor={{ stroke: '#ffffff20' }} />
             <Area
                 type="monotone"
                 dataKey="percentage"

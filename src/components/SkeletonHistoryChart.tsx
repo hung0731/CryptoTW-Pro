@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 const bars = [45, 32, 60, 42, 75, 50, 28, 65, 40, 55, 35, 70, 48, 58, 30, 62, 45, 52, 38, 68];
 
-export function SkeletonReviewChart() {
+export function SkeletonHistoryChart() {
     return (
         <div className="relative w-full h-[300px] bg-[#0A0A0A] rounded-lg p-4 overflow-hidden border border-white/[0.05]">
             {/* Header */}

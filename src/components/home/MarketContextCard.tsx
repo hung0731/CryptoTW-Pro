@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CARDS, SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { UniversalCard } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
+import { UI_LABELS } from '@/config/naming'
 
 interface Highlight {
     title: string
@@ -86,7 +87,7 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
             {/* Header */}
             <div className="mb-3">
                 <SectionHeaderCard
-                    title="AI 速覽"
+                    title={UI_LABELS.AI.QUICK_READ}
                     icon={Sparkles}
                     className="!p-0 !bg-transparent mb-2" // Minimal, integrated header
                     rightElement={<span className="text-lg">{contextEmoji}</span>}

@@ -9,16 +9,16 @@ import { AlertTriangle, Info } from 'lucide-react'
 import { CHART } from '@/lib/design-tokens'
 
 // Extracted Components
-import { StackedReviewTooltip } from '@/components/reviews/StackedReviewTooltip'
-import { useStackedReviewData } from '@/hooks/useStackedReviewData'
+import { StackedHistoryTooltip } from '@/components/history/StackedHistoryTooltip'
+import { useStackedHistoryData } from '@/hooks/useStackedHistoryData'
 
-interface StackedReviewChartProps {
+interface StackedHistoryChartProps {
     leftSlug: string
     rightSlug: string
     focusWindow?: [number, number]
 }
 
-export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: StackedReviewChartProps) {
+export function StackedHistoryChart({ leftSlug, rightSlug, focusWindow }: StackedHistoryChartProps) {
     const {
         data,
         loading,
@@ -28,7 +28,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
         isAsymmetric,
         deathPoints,
         DD_DOMAIN
-    } = useStackedReviewData({ leftSlug, rightSlug })
+    } = useStackedHistoryData({ leftSlug, rightSlug })
 
     const getLeftColor = () => '#3b82f6' // Blue
     const getRightColor = () => '#fbbf24' // Amber
@@ -203,7 +203,7 @@ export function StackedReviewChart({ leftSlug, rightSlug, focusWindow }: Stacked
                         />
                     )}
 
-                    <Tooltip content={(props: any) => <StackedReviewTooltip {...props} viewType={viewType} />} cursor={{ stroke: '#ffffff20' }} />
+                    <Tooltip content={(props: any) => <StackedHistoryTooltip {...props} viewType={viewType} />} cursor={{ stroke: '#ffffff20' }} />
 
                     <Line
                         type="monotone"

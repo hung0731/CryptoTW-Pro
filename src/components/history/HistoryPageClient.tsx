@@ -23,8 +23,11 @@ import {
 import { Sparkline } from '@/components/ui/sparkline';
 
 import { UniversalCard, CardContent } from '@/components/ui/UniversalCard';
+import { useHistoryChartData } from '@/hooks/useHistoryChartData';
+import { useStackedHistoryData } from '@/hooks/useStackedHistoryData';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
-import { AISummaryCard } from '@/components/ui/AISummaryCard';
+import { AIQuickRead } from '@/components/ui/AIQuickRead';
+import { UI_LABELS } from '@/config/naming';
 import { Tag, TagProps } from '@/components/ui/tag';
 
 // Icons for Types
@@ -70,7 +73,7 @@ const DefaultTypeStyle = { bg: 'bg-[#111]', border: 'border-[#2A2A2A]', text: 't
 
 const DEFAULT_SPARKLINE = [42000, 41000, 39000, 38000, 39500, 41000, 43000, 42500, 44000, 46000, 45000, 47000];
 
-export function ReviewsPageClient() {
+export function HistoryPageClient() {
     // State
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -88,7 +91,7 @@ export function ReviewsPageClient() {
     useEffect(() => {
         const fetchSummary = async () => {
             try {
-                const res = await fetch('/api/reviews/ai-summary');
+                const res = await fetch('/api/history/ai-summary');
                 if (res.ok) {
                     const data = await res.json();
                     setAiSummary(data);
@@ -153,7 +156,7 @@ export function ReviewsPageClient() {
             {/* 0. AI Summary Section (Top of Page) */}
             <div className={cn("px-4 pt-4 pb-2", SPACING.pageX)}>
                 <div className="max-w-5xl mx-auto">
-                    <AISummaryCard
+                    <AIQuickRead
                         summary={aiSummary?.summary || "正在分析歷史數據庫..."}
                         source={aiSummary?.source || "AI 歷史回測"}
                         loading={loadingSummary}
@@ -241,7 +244,7 @@ export function ReviewsPageClient() {
                             {/* Header */}
                             <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                                 <SectionHeaderCard
-                                    title="市場事件庫"
+                                    title={UI_LABELS.HISTORY.ROOT_TITLE}
                                     icon={BookOpen}
                                     rightElement={
                                         <span className="text-[10px] text-[#666] font-mono">{filteredReviews.length} 個事件</span>
@@ -289,7 +292,7 @@ export function ReviewsPageClient() {
                                                 <div className="group relative grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 p-4 min-h-[100px] bg-transparent hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0 items-center">
                                                     {/* Main Click Target */}
                                                     <Link
-                                                        href={`/reviews/${review.year}/${review.slug}`}
+                                                        href={`/history/${review.year}/${review.slug}`}
                                                         className="absolute inset-0 z-0"
                                                     />
 

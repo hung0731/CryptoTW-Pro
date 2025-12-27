@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react'
 import { REVIEWS_DATA } from '@/lib/reviews-data'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
 
-interface UseStackedReviewDataProps {
+interface UseStackedHistoryDataProps {
     leftSlug: string
     rightSlug: string
 }
 
 const DD_DOMAIN = [-100, 0]
 
-export function useStackedReviewData({ leftSlug, rightSlug }: UseStackedReviewDataProps) {
+export function useStackedHistoryData({ leftSlug, rightSlug }: UseStackedHistoryDataProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [viewType, setViewType] = useState<'pct' | 'dd' | 'impact'>('pct')

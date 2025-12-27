@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import REVIEWS_HISTORY from '@/data/reviews-history.json'
 
-interface UseReviewChartDataProps {
+interface UseHistoryChartDataProps {
     type: string
     eventStart: string
-    reviewSlug?: string
+    historySlug?: string
     viewMode: 'standard' | 'focus'
     focusWindow?: [number, number]
     isPercentage?: boolean
@@ -13,16 +13,16 @@ interface UseReviewChartDataProps {
     daysBuffer?: number // [NEW] Allow custom buffer
 }
 
-export function useReviewChartData({
+export function useHistoryChartData({
     type,
     eventStart,
-    reviewSlug,
+    historySlug,
     viewMode,
     focusWindow,
     isPercentage = false,
     overrideData,
     daysBuffer = 30 // Default to 30 days
-}: UseReviewChartDataProps) {
+}: UseHistoryChartDataProps) {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [yDomain, setYDomain] = useState<any>(['auto', 'auto'])
@@ -49,12 +49,12 @@ export function useReviewChartData({
                 if (overrideData) {
                     chartData = overrideData
                 } else {
-                    if (!reviewSlug) {
+                    if (!historySlug) {
                         setLoading(false)
                         return
                     }
-                    // @ts-expect-error: Dynamic property access on imported JSON
-                    const reviewData = REVIEWS_HISTORY[reviewSlug]
+                    const dataStore = REVIEWS_HISTORY as any
+                    const reviewData = dataStore[historySlug]
                     if (!reviewData) {
                         setLoading(false)
                         return
@@ -157,7 +157,7 @@ export function useReviewChartData({
         }
 
         loadData()
-    }, [type, eventStart, reviewSlug, viewMode, focusWindow, isPercentage, overrideData, daysBuffer])
+    }, [type, eventStart, historySlug, viewMode, focusWindow, isPercentage, overrideData, daysBuffer])
 
     return {
         data,

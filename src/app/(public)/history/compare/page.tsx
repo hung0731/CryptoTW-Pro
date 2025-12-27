@@ -4,9 +4,9 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { REVIEWS_DATA, MarketEvent } from '@/lib/reviews-data';
-import { StackedReviewChart } from '@/components/StackedReviewChart';
+import { StackedHistoryChart } from '@/components/StackedHistoryChart';
 import { Columns, Layers, ArrowLeft, ChevronDown, CheckCircle2, TrendingDown, ShieldAlert, Cpu, BrainCircuit } from 'lucide-react';
-import { ReviewChart } from '@/components/ReviewChart';
+import { HistoryChart } from '@/components/HistoryChart';
 import { cn } from '@/lib/utils';
 import {
     Sheet,
@@ -174,7 +174,7 @@ function CompareContent() {
             {/* Header */}
             <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <Link href="/reviews" className="w-8 h-8 rounded-full bg-[#0A0A0A] flex items-center justify-center hover:bg-[#0E0E0F]">
+                    <Link href="/history" className="w-8 h-8 rounded-full bg-[#0A0A0A] flex items-center justify-center hover:bg-[#0E0E0F]">
                         <ArrowLeft className="w-4 h-4 text-neutral-400" />
                     </Link>
                     <div>
@@ -233,12 +233,12 @@ function CompareContent() {
                     <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
                         <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
                             {leftEvent && (
-                                <ReviewChart
+                                <HistoryChart
                                     type="price"
                                     symbol={leftEvent.slug.toUpperCase()}
                                     eventStart={leftEvent.reactionStartAt}
                                     eventEnd={leftEvent.eventEndAt}
-                                    reviewSlug={`${leftEvent.slug}-${leftEvent.year}`}
+                                    historySlug={`${leftEvent.slug}-${leftEvent.year}`}
                                     focusWindow={leftEvent.focusWindow}
                                     isPercentage={true}
                                     className="w-full h-full"
@@ -251,12 +251,12 @@ function CompareContent() {
                     <section className="relative flex flex-col h-[20vh] md:h-[40vh] overflow-hidden bg-[#0B0B0C]">
                         <div className="flex-1 relative w-full h-full min-h-0 pt-4 px-4 pb-0">
                             {rightEvent && (
-                                <ReviewChart
+                                <HistoryChart
                                     type="price"
                                     symbol={rightEvent.slug.toUpperCase()}
                                     eventStart={rightEvent.reactionStartAt}
                                     eventEnd={rightEvent.eventEndAt}
-                                    reviewSlug={`${rightEvent.slug}-${rightEvent.year}`}
+                                    historySlug={`${rightEvent.slug}-${rightEvent.year}`}
                                     focusWindow={rightEvent.focusWindow}
                                     isPercentage={true}
                                     className="w-full h-full"
@@ -269,7 +269,7 @@ function CompareContent() {
                 /* Stacked View (Full Overlay) */
                 <div className="relative w-full h-[40vh] bg-[#0B0B0C]">
                     <div className="w-full h-full pt-4 pb-4 px-4">
-                        <StackedReviewChart
+                        <StackedHistoryChart
                             leftSlug={leftSlug}
                             rightSlug={rightSlug}
                         />

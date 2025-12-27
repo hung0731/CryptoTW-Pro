@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 import { ChevronRight, Star } from "lucide-react";
 import { CARDS, SPACING, TYPOGRAPHY, BADGES } from "@/lib/design-tokens";
 
-interface ReviewCarouselProps {
+interface HistoryCarouselProps {
     items: MarketEvent[];
 }
 
-export function ReviewCarousel({ items }: ReviewCarouselProps) {
+export function HistoryCarousel({ items }: HistoryCarouselProps) {
     if (!items || items.length === 0) return null;
 
     return (
@@ -28,7 +28,7 @@ export function ReviewCarousel({ items }: ReviewCarouselProps) {
                 {items.map((item) => (
                     <Link
                         key={item.id}
-                        href={`/reviews/${item.year}/${item.slug}`}
+                        href={`/history/${item.year}/${item.slug}`}
                         className={cn(
                             CARDS.secondary,
                             "group relative flex-none w-[85vw] max-w-[320px] overflow-hidden snap-center shadow-xl"
@@ -73,7 +73,7 @@ export function ReviewCarousel({ items }: ReviewCarouselProps) {
                                     ))}
                                 </div>
                                 <span className={cn(TYPOGRAPHY.caption, "ml-auto flex items-center gap-1 group-hover:text-white")}>
-                                    開始復盤 <ChevronRight className="w-3 h-3" />
+                                    開始回顧 <ChevronRight className="w-3 h-3" />
                                 </span>
                             </div>
                         </div>

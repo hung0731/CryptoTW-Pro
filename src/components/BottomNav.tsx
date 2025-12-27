@@ -35,16 +35,16 @@ export function BottomNav() {
             active: pathname === '/calendar'
         },
         {
-            label: '事件',
+            label: '覆盤',
             icon: BookOpen,
-            href: '/reviews',
-            active: pathname.startsWith('/reviews')
+            href: '/history',
+            active: pathname.startsWith('/history')
         },
         {
             label: '我的',
             icon: User,
-            href: '/profile',
-            active: pathname === '/profile'
+            href: '/me',
+            active: pathname === '/me'
         }
     ]
 

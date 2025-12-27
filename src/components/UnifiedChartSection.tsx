@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { ReviewChart } from './ReviewChart';
+import { HistoryChart } from './HistoryChart';
 import { COLORS } from '@/lib/design-tokens';
 
 // 可用的指標 Tab 定義
@@ -21,7 +21,7 @@ interface UnifiedChartSectionProps {
     eventStart: string;   // D0 日期
     eventEnd: string;
     newsDate?: string;    // 新聞日期
-    reviewSlug: string;
+    historySlug: string;
     daysBuffer?: number;
 
     // 可用的指標 tabs
@@ -36,7 +36,7 @@ export function UnifiedChartSection({
     eventStart,
     eventEnd,
     newsDate,
-    reviewSlug,
+    historySlug,
     daysBuffer = 10,
     availableTabs,
     eventLabel = 'D0',
@@ -94,13 +94,13 @@ export function UnifiedChartSection({
                     </div>
                 </div>
                 <div className="aspect-[21/9] w-full relative" style={{ backgroundColor: '#080809' }}>
-                    <ReviewChart
+                    <HistoryChart
                         type="price"
                         symbol={symbol}
                         daysBuffer={daysBuffer}
                         eventStart={eventStart}
                         eventEnd={eventEnd}
-                        reviewSlug={reviewSlug}
+                        historySlug={historySlug}
                         newsDate={newsDate}
                         overlayType={overlayType}
                     />
@@ -130,13 +130,13 @@ export function UnifiedChartSection({
 
                 {/* 副圖區域 - 高度為主圖一半 */}
                 <div className="aspect-[21/4] w-full relative" style={{ backgroundColor: '#080809' }}>
-                    <ReviewChart
+                    <HistoryChart
                         type={activeIndicator?.chartType || 'funding'}
                         symbol={symbol}
                         daysBuffer={daysBuffer}
                         eventStart={eventStart}
                         eventEnd={eventEnd}
-                        reviewSlug={reviewSlug}
+                        historySlug={historySlug}
                         newsDate={newsDate}
                     />
                 </div>

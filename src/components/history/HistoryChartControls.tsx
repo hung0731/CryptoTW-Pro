@@ -1,13 +1,13 @@
 import React from 'react'
 import { ZoomIn, RotateCcw } from 'lucide-react'
 
-interface ReviewChartControlsProps {
+interface HistoryChartControlsProps {
     viewMode: 'standard' | 'focus'
     setViewMode: (mode: 'standard' | 'focus') => void
     focusWindow?: [number, number]
 }
 
-export const ReviewChartControls: React.FC<ReviewChartControlsProps> = ({ viewMode, setViewMode, focusWindow }) => {
+export const HistoryChartControls: React.FC<HistoryChartControlsProps> = ({ viewMode, setViewMode, focusWindow }) => {
     if (!focusWindow) return null
 
     return (

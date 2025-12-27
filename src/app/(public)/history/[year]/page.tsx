@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getReviewsByYear } from '@/lib/reviews-data';
-import { EventCard } from '@/components/reviews/EventCard';
+import { EventCard } from '@/components/history/EventCard';
 
 export default function ReviewYearPage() {
     const params = useParams();
@@ -19,7 +19,7 @@ export default function ReviewYearPage() {
         <main className="min-h-screen bg-black text-white px-4 py-8 pb-24 font-sans">
             <div className="max-w-3xl mx-auto">
                 <div className="flex items-center gap-4 mb-8">
-                    <Link href="/reviews" className="text-[#808080] hover:text-white">
+                    <Link href="/history" className="text-[#808080] hover:text-white">
                         <div className="p-2 bg-[#0A0A0A] rounded-full border border-[#1A1A1A] hover:bg-[#0E0E0F]">
                             <ArrowLeft className="w-5 h-5" />
                         </div>

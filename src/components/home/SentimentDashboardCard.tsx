@@ -7,6 +7,8 @@ import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { MarketStatusData } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
+import { UI_LABELS } from '@/config/naming';
+
 interface SentimentDashboardCardProps {
     status: MarketStatusData | null;
 }
@@ -62,7 +64,7 @@ export function SentimentDashboardCard({ status }: SentimentDashboardCardProps) 
             {/* Header - Luma style with gradient border */}
             <div className="relative border-b border-white/[0.06] bg-white/[0.02]">
                 <SectionHeaderCard
-                    title="市場情緒與資金"
+                    title={UI_LABELS.HOME.SENTIMENT_TITLE}
                     icon={Activity}
                 />
                 {/* Top gradient accent */}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { SkeletonCard } from '@/components/ui/SkeletonCard'
-import { AISummaryCard } from '@/components/ui/AISummaryCard'
+import { AIQuickRead } from '@/components/ui/AIQuickRead'
 import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
 import { UniversalCard, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
@@ -75,7 +75,7 @@ export function FullNewsFeed() {
     if (loading) {
         return (
             <div className={SPACING.classes.gapCards}>
-                <AISummaryCard summary="" loading={true} />
+                <AIQuickRead summary="" loading={true} />
                 <div className={SPACING.classes.gapCards}>
                     {[1, 2, 3, 4, 5].map(i => (
                         <SkeletonCard key={i} />
@@ -88,7 +88,7 @@ export function FullNewsFeed() {
     return (
         <div className="flex flex-col gap-6">
             {/* AI Summary Card */}
-            <AISummaryCard
+            <AIQuickRead
                 summary={marketContext?.summary || '正在分析市場快訊...'}
                 source="幣圈快訊"
             />

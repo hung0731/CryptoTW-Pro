@@ -7,6 +7,7 @@ import { getFeaturedReviews, MarketEvent } from '@/lib/reviews-data'
 import { Scale, ChevronRight, Clock } from 'lucide-react'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
+import { UI_LABELS } from '@/config/naming'
 
 // --- COMPARISON ENTRY POINT (Special Card) ---
 // --- REVIEW COMPONENT ---
@@ -24,7 +25,7 @@ export function ReviewsFeaturedCard() {
                 {/* Header */}
                 <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                     <SectionHeaderCard
-                        title="歷史回顧"
+                        title={UI_LABELS.HOME.HISTORY_TITLE}
                         icon={Clock}
                     />
                 </div>
@@ -38,7 +39,7 @@ export function ReviewsFeaturedCard() {
 
                     <div className="relative z-10">
                         {/* 1. Comparison Entry */}
-                        <Link href="/reviews/compare" className="group flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A] hover:bg-[#141414] transition-colors relative overflow-hidden">
+                        <Link href="/history/compare" className="group flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A] hover:bg-[#141414] transition-colors relative overflow-hidden">
                             <div className="absolute inset-0 bg-[#8B5CF6]/5 group-hover:bg-[#8B5CF6]/10 transition-colors" />
                             <div className="flex items-center gap-3 relative z-10">
                                 <div className="w-8 h-8 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center border border-[#8B5CF6]/20">
@@ -56,7 +57,7 @@ export function ReviewsFeaturedCard() {
                         {reviews.map((event) => (
                             <Link
                                 key={event.id}
-                                href={`/reviews/${event.year}/${event.slug}`}
+                                href={`/history/${event.year}/${event.slug}`}
                                 className="group flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors"
                             >
                                 <div className="flex flex-col gap-1 min-w-0 pr-4">

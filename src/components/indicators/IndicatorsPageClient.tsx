@@ -10,7 +10,7 @@ import { Tag } from '@/components/ui/tag';
 import { cn } from '@/lib/utils';
 import { TYPOGRAPHY, SPACING } from '@/lib/design-tokens';
 import { IndicatorStory, ZONE_COLORS } from '@/lib/indicator-stories';
-import { AISummaryCard } from '@/components/ui/AISummaryCard';
+import { AIQuickRead } from '@/components/ui/AIQuickRead';
 import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
 import { IndicatorMetricView, IndicatorsPageViewModel } from '@/lib/services/indicators-list';
@@ -187,7 +187,7 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
         <div className={cn("max-w-3xl mx-auto", SPACING.pageX, SPACING.pageTop)}>
             {/* AI 總結卡片 */}
             <div className="mb-4">
-                <AISummaryCard
+                <AIQuickRead
                     summary={aiSummary?.summary || '正在分析各項市場數據...'}
                     source="AI 市場觀察"
                     loading={aiLoading}

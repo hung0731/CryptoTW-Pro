@@ -20,9 +20,9 @@ const INDICATOR_META: Record<string, { emoji: string; name: string }> = {
     'stablecoin-supply': { emoji: '💵', name: '穩定幣供應' },
 };
 
-interface ReviewIndicatorHintProps {
-    reviewId: string;
-    reviewTitle: string;
+interface HistoryIndicatorHintProps {
+    historyId: string;
+    historyTitle: string;
     eventStartDate: string; // YYYY-MM-DD
     eventEndDate: string;   // YYYY-MM-DD
     indicators: Array<{
@@ -32,13 +32,13 @@ interface ReviewIndicatorHintProps {
     }>;
 }
 
-export function ReviewIndicatorHint({
-    reviewId,
-    reviewTitle,
+export function HistoryIndicatorHint({
+    historyId,
+    historyTitle,
     eventStartDate,
     eventEndDate,
     indicators
-}: ReviewIndicatorHintProps) {
+}: HistoryIndicatorHintProps) {
     if (!indicators || indicators.length === 0) return null;
 
     return (
@@ -59,7 +59,7 @@ export function ReviewIndicatorHint({
                         name: indicator.slug
                     };
 
-                    const targetUrl = `/indicators/${indicator.slug}?from=review&reviewId=${encodeURIComponent(reviewId)}&reviewTitle=${encodeURIComponent(reviewTitle)}`;
+                    const targetUrl = `/indicators/${indicator.slug}?from=history&historyId=${encodeURIComponent(historyId)}&historyTitle=${encodeURIComponent(historyTitle)}`;
 
                     return (
                         <div

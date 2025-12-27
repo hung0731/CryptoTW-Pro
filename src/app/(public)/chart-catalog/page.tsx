@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { SkeletonReviewChart } from '@/components/SkeletonReviewChart'
+import { SkeletonHistoryChart } from '@/components/SkeletonHistoryChart'
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area, BarChart, Bar, ComposedChart, ReferenceLine

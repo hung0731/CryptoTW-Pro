@@ -5,6 +5,7 @@ import { RefreshCw, ChevronDown, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UniversalCard } from '@/components/ui/UniversalCard';
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard';
+import { UI_LABELS } from '@/config/naming';
 
 interface ExchangeRates {
     max: { buy: number; sell: number } | null;
@@ -211,7 +212,7 @@ export function CurrencyConverter() {
             {/* Header */}
             <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                 <SectionHeaderCard
-                    title="匯率換算"
+                    title="匯率換算助理"
                     icon={DollarSign}
                     rightElement={
                         <button

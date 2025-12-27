@@ -14,6 +14,7 @@ import {
 import { Calendar } from 'lucide-react'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
+import { UI_LABELS } from '@/config/naming'
 
 // Countdown Component (Minimal)
 function Countdown({ targetDate }: { targetDate: string }) {
@@ -125,7 +126,7 @@ export function EventsUpcomingCard({ reactions }: EventsUpcomingCardProps) {
                 {/* Header */}
                 <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                     <SectionHeaderCard
-                        title="重要時程"
+                        title={UI_LABELS.HOME.EVENTS_TITLE}
                         icon={Calendar}
                     />
                 </div>

@@ -21,11 +21,12 @@ import { UniversalCard } from '@/components/ui/UniversalCard'
 
 import { QuickActionCard } from '@/components/home/QuickActionCard'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
-import { HistoryEchoCard } from '@/components/home/HistoryEchoCard'
+import { HomeHistoryCard } from '@/components/home/HistoryCard'
 import { findHistoricalSimilarity, HistoricalMatch } from '@/lib/historical-matcher'
 import { LineConnectCard } from '@/components/home/LineConnectCard'
 import { SentimentDashboardCard } from '@/components/home/SentimentDashboardCard'
 import { CurrencyConverter } from '@/components/home/CurrencyConverter'
+import { UI_LABELS } from '@/config/naming'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function HomePageClient() {
@@ -166,10 +167,10 @@ export function HomePageClient() {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
+                            <Link href="/me" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
                                 <Bell className="w-4 h-4 text-[#808080]" />
                             </Link>
-                            <Link href="/profile" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
+                            <Link href="/me" className="w-9 h-9 rounded-lg bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center hover:bg-[#0E0E0F]">
                                 <Settings className="w-4 h-4 text-[#808080]" />
                             </Link>
                         </div>
@@ -211,7 +212,7 @@ export function HomePageClient() {
                             <Skeleton className="h-24 w-full bg-neutral-800 rounded-xl" />
                         </div>
                     ) : (
-                        <HistoryEchoCard match={historicalMatch} />
+                        <HomeHistoryCard match={historicalMatch} />
                     )}
                 </section>
 
@@ -230,7 +231,7 @@ export function HomePageClient() {
                     <UniversalCard variant="luma" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard
-                                title="免費功能"
+                                title={UI_LABELS.HOME.FREE_TOOLS}
                                 icon={LayoutDashboard}
                             />
                         </div>

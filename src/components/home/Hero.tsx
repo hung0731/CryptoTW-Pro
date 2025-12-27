@@ -7,7 +7,9 @@ import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MarketStatusData, Conclusion } from '@/lib/types'
 
-interface JudgmentCardProps {
+import { UI_LABELS } from '@/config/naming'
+
+interface HomeHeroProps {
     initialStatus: MarketStatusData | null
     initialConclusion: Conclusion | null
 }
@@ -184,7 +186,7 @@ function AnimatedPrice({ price, prevPrice, change }: { price: number, prevPrice:
 
 import { UniversalCard } from '@/components/ui/UniversalCard'
 
-export function JudgmentCard({ initialStatus, initialConclusion }: JudgmentCardProps) {
+export function HomeHero({ initialStatus, initialConclusion }: HomeHeroProps) {
     const [status] = useState<MarketStatusData | null>(initialStatus)
     const [conclusion] = useState<Conclusion | null>(initialConclusion)
     const [btc, setBtc] = useState<BtcTicker | null>(null)
@@ -371,5 +373,5 @@ export function JudgmentCard({ initialStatus, initialConclusion }: JudgmentCardP
     )
 }
 
-// Re-export as DecisionHero for backward compatibility
-export { JudgmentCard as DecisionHero }
+// Re-export as JudgmentCard for backward compatibility if needed, but Hero is the new standard
+export { HomeHero as Hero, HomeHero as JudgmentCard, HomeHero as DecisionHero }

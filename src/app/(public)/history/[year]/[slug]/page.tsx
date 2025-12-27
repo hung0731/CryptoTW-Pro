@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Dynamic import for heavy chart component
 const EventAnalysisDashboard = dynamic(
-    () => import('@/components/reviews/EventAnalysisDashboard').then(mod => ({ default: mod.EventAnalysisDashboard })),
+    () => import('@/components/history/EventAnalysisDashboard').then(mod => ({ default: mod.EventAnalysisDashboard })),
     {
         loading: () => <Skeleton className="h-[400px] w-full rounded-xl" />,
         ssr: false,  // Disable SSR for chart components
@@ -108,7 +108,7 @@ export default function ReviewDetailPage() {
                             eventStart={review.reactionStartAt}
                             eventEnd={review.eventEndAt}
                             newsDate={review.eventStartAt}
-                            reviewSlug={`${review.slug}-${review.year}`}
+                            historySlug={`${review.slug}-${review.year}`}
                             daysBuffer={review.chartConfig?.daysBuffer || 10}
                             eventLabel={`D0: ${review.reactionStartAt.slice(5)}`}
                             availableTabs={[
@@ -199,7 +199,7 @@ export default function ReviewDetailPage() {
                     <UniversalCard className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                             <SectionHeaderCard
-                                title="相關復盤"
+                                title="相關回顧"
                                 icon={GitMerge}
                             />
                         </div>
@@ -207,7 +207,7 @@ export default function ReviewDetailPage() {
                         <div className="flex flex-col">
                             {relatedReviews.slice(0, 5).map((r) => (
                                 <Link
-                                    href={`/reviews/${r.year}/${r.slug}`}
+                                    href={`/history/${r.year}/${r.slug}`}
                                     key={r.id}
                                     className="group block p-4 sm:p-5 border-b border-[#1A1A1A] last:border-0 hover:bg-[#0E0E0F] transition-all"
                                 >

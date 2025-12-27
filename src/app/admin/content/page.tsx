@@ -124,12 +124,12 @@ function ReviewsTab() {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <Link href={`/reviews/${review.slug}`} target="_blank">
+                                                    <Link href={`/history/${review.slug}`} target="_blank">
                                                         <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-white">
                                                             <Eye className="w-4 h-4" />
                                                         </Button>
                                                     </Link>
-                                                    <Link href={`/admin/content/reviews/${review.id}`}>
+                                                    <Link href={`/admin/content/history/${review.id}`}>
                                                         <Button size="sm" variant="outline" className="h-8 gap-2 border-white/10 bg-black hover:bg-white/5 text-neutral-300">
                                                             <Edit className="w-3.5 h-3.5" /> Edit
                                                         </Button>

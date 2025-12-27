@@ -5,7 +5,7 @@ import {
     ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     ReferenceArea, ReferenceLine
 } from 'recharts'
-import { ReviewChartTooltip } from '@/components/reviews/ReviewChartTooltip'
+import { HistoryChartTooltip } from '@/components/history/HistoryChartTooltip'
 
 interface PriceChartProps {
     data: any[]
@@ -136,7 +136,7 @@ export function PriceChart({
                 />
             )}
 
-            <Tooltip content={<ReviewChartTooltip type="price" isPercentage={isPercentage} overlayType={overlayType} />} cursor={{ stroke: '#ffffff20' }} />
+            <Tooltip content={<HistoryChartTooltip type="price" isPercentage={isPercentage} overlayType={overlayType} />} cursor={{ stroke: '#ffffff20' }} />
 
             <Area
                 type="monotone"

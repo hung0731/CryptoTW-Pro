@@ -1,20 +1,20 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { SkeletonReviewChart } from '@/components/SkeletonReviewChart'
-import { ReviewChartControls } from '@/components/reviews/ReviewChartControls'
-import { ChartRenderer, ChartType } from '@/components/reviews/ChartRenderer'
-import { useReviewChartData } from '@/hooks/useReviewChartData'
+import { SkeletonHistoryChart } from '@/components/SkeletonHistoryChart'
+import { HistoryChartControls } from '@/components/history/HistoryChartControls'
+import { ChartRenderer, ChartType } from '@/components/history/ChartRenderer'
+import { useHistoryChartData } from '@/hooks/useHistoryChartData'
 import { CHART } from '@/lib/design-tokens'
 
-interface ReviewChartProps {
+interface HistoryChartProps {
     type: ChartType;
     symbol: string;
     eventStart: string;
     eventEnd: string;
     daysBuffer?: number;
     className?: string; // Default: CHART.heightDefault set in container
-    reviewSlug?: string;
+    historySlug?: string;
     focusWindow?: [number, number];
     isPercentage?: boolean;
     newsDate?: string;
@@ -22,14 +22,14 @@ interface ReviewChartProps {
     overlayType?: 'oi' | 'funding';
 }
 
-export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, reviewSlug, focusWindow, isPercentage = false, newsDate, overrideData, overlayType }: ReviewChartProps) {
+export function HistoryChart({ type, symbol, eventStart, eventEnd, daysBuffer = 10, className, historySlug, focusWindow, isPercentage = false, newsDate, overrideData, overlayType }: HistoryChartProps) {
     const [viewMode, setViewMode] = useState<'standard' | 'focus'>('standard')
 
     // 1. Fetch Main Data
-    const { data: mainData, loading: mainLoading, getDateFromDaysDiff } = useReviewChartData({
+    const { data: mainData, loading: mainLoading, getDateFromDaysDiff } = useHistoryChartData({
         type,
         eventStart,
-        reviewSlug,
+        historySlug,
         viewMode,
         focusWindow,
         isPercentage,
@@ -37,10 +37,10 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     })
 
     // 2. Fetch Overlay Data (if requested)
-    const { data: overlayDataRaw, loading: overlayLoading } = useReviewChartData({
+    const { data: overlayDataRaw, loading: overlayLoading } = useHistoryChartData({
         type: overlayType || 'price', // fallback
         eventStart,
-        reviewSlug,
+        historySlug,
         viewMode,
         focusWindow,
         isPercentage: false,
@@ -70,7 +70,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
     const loading = mainLoading || (!!overlayType && overlayLoading);
 
     if (loading) {
-        return <SkeletonReviewChart />
+        return <SkeletonHistoryChart />
     }
 
     if (!mergedData || mergedData.length === 0) return <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">尚無數據</div>
@@ -78,7 +78,7 @@ export function ReviewChart({ type, symbol, eventStart, eventEnd, daysBuffer = 1
 
     return (
         <div className={`w-full relative ${className || CHART.heightDefault}`}>
-            <ReviewChartControls
+            <HistoryChartControls
                 viewMode={viewMode}
                 setViewMode={setViewMode}
                 focusWindow={focusWindow}

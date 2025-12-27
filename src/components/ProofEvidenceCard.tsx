@@ -1,6 +1,6 @@
 import React from 'react'
 import { TrendingUp, BarChart2, Activity } from 'lucide-react'
-import { ReviewChart } from './ReviewChart'
+import { HistoryChart } from './HistoryChart'
 import { getChartCitation } from '@/lib/citation-mapping'
 import { SemanticChartCTA } from '@/components/citation/SemanticChartCTA'
 import { ResponsibilityDisclaimer } from '@/components/citation/ResponsibilityDisclaimer'
@@ -15,7 +15,7 @@ interface ProofEvidenceCardProps {
     daysBuffer?: number
     eventStart: string
     eventEnd: string
-    reviewSlug: string
+    historySlug: string
     newsDate?: string
     interpretation?: {
         whatItMeans: string
@@ -45,7 +45,7 @@ export function ProofEvidenceCard({
     daysBuffer,
     eventStart,
     eventEnd,
-    reviewSlug,
+    historySlug,
     interpretation,
     caption,
     newsDate,
@@ -87,13 +87,13 @@ export function ProofEvidenceCard({
                     />
                 )}
 
-                <ReviewChart
+                <HistoryChart
                     type={chartType}
                     symbol={symbol}
                     daysBuffer={daysBuffer}
                     eventStart={eventStart}
                     eventEnd={eventEnd}
-                    reviewSlug={reviewSlug}
+                    historySlug={historySlug}
                     newsDate={newsDate}
                 />
             </div>

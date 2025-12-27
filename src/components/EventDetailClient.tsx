@@ -27,7 +27,7 @@ import {
     formatOccursAt
 } from '@/lib/macro-events'
 import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens'
-import { ReviewChart } from '@/components/ReviewChart'
+import { HistoryChart } from '@/components/HistoryChart'
 import { UniversalCard, CardContent, CardHeader, CardTitle } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 

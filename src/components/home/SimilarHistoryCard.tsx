@@ -114,7 +114,7 @@ export function SimilarHistoryCard() {
 
     return (
         <Link
-            href={`/reviews/${event.year}/${event.slug}`}
+            href={`/history/${event.year}/${event.slug}`}
             className={cn(
                 "block bg-[#0E0E0F] border border-[#1A1A1A] rounded-xl p-3",
                 "hover:bg-[#141414] hover:border-[#2A2A2A]"

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SPACING } from '@/lib/design-tokens'
-import { AISummaryCard } from '@/components/ui/AISummaryCard'
+import { AIQuickRead } from '@/components/ui/AIQuickRead'
 import { UniversalCard } from '@/components/ui/UniversalCard'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { EnrichedMacroEvent } from '@/lib/services/macro-events'
@@ -27,7 +27,7 @@ export default function CalendarPageClient({ enrichedEvents }: CalendarPageClien
         <div className={cn(SPACING.pageX, SPACING.pageTop, "pb-20 space-y-6 font-sans")}>
 
             {/* AI Summary Card */}
-            <AISummaryCard
+            <AIQuickRead
                 summary={aiSummary.summary || '正在分析近期宏觀事件結構...'}
                 source="事件結構分析"
                 loading={aiLoading}

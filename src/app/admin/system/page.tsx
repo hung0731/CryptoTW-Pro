@@ -395,7 +395,7 @@ function LogsTab() {
 
 // --- Content Health Tab ---
 function ContentHealthTab() {
-    const totalReviews = REVIEWS_DATA.length
+    const totalHistory = REVIEWS_DATA.length
     const missingSparkline = REVIEWS_DATA.filter(r => !r.sparklineData || r.sparklineData.length < 5)
     const missingImpact = REVIEWS_DATA.filter(r => !r.impactSummary)
     const missingTags = REVIEWS_DATA.filter(r => !r.tags || r.tags.length === 0)
@@ -409,10 +409,10 @@ function ContentHealthTab() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="bg-neutral-900/50 border-white/5">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-neutral-400">Total Reviews</CardTitle>
+                        <CardTitle className="text-sm font-medium text-neutral-400">Total History</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-white">{totalReviews}</div>
+                        <div className="text-2xl font-bold text-white">{totalHistory}</div>
                         <p className="text-xs text-neutral-500 mt-1">Static Database</p>
                     </CardContent>
                 </Card>

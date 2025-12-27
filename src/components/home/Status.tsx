@@ -8,10 +8,11 @@ import { SPACING, SURFACE, BORDER } from '@/lib/design-tokens'
 import { UniversalCard, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/UniversalCard'
 import { ChevronRight, Check, AlertTriangle, X } from 'lucide-react'
 
+import { UI_LABELS } from '@/config/naming'
 import { MarketStatusData, Conclusion } from '@/lib/schemas/market'
 import { getMarketStatusAction } from '@/app/actions/market'
 
-interface MarketStatusGridProps {
+interface HomeStatusProps {
     initialStatus: MarketStatusData | null
     initialConclusion: Conclusion | null
 }
@@ -63,7 +64,7 @@ const StatusBadge = ({ type, text }: { type: 'ok' | 'warn' | 'danger', text: str
     )
 }
 
-export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketStatusGridProps) {
+export function HomeStatus({ initialStatus, initialConclusion }: HomeStatusProps) {
     const [data, setData] = useState<MarketStatusData | null>(initialStatus)
     const [loading, setLoading] = useState(!initialStatus)
 
@@ -115,7 +116,7 @@ export function MarketStatusGrid({ initialStatus, initialConclusion }: MarketSta
         <UniversalCard variant="luma" size="M">
             {/* Header */}
             <CardHeader className="flex flex-row items-center justify-between mb-3 space-y-0">
-                <CardTitle>市場快照</CardTitle>
+                <CardTitle>{UI_LABELS.HOME.STATUS_TITLE}</CardTitle>
                 {dangerCount > 0 ? (
                     <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
                         {dangerCount} 項警示

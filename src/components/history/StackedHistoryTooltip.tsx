@@ -3,14 +3,14 @@ import { AlertCircle } from 'lucide-react'
 import { CHART } from '@/lib/design-tokens'
 import { formatPercent } from '@/lib/format-helpers'
 
-interface StackedReviewTooltipProps {
+interface StackedHistoryTooltipProps {
     active?: boolean
     payload?: any[]
     label?: number
     viewType: 'pct' | 'dd' | 'impact'
 }
 
-export const StackedReviewTooltip: React.FC<StackedReviewTooltipProps> = ({ active, payload, label, viewType }) => {
+export const StackedHistoryTooltip: React.FC<StackedHistoryTooltipProps> = ({ active, payload, label, viewType }) => {
     if (active && payload && payload.length) {
         return (
             <div className={`${CHART.tooltip.container} min-w-[240px] backdrop-blur-md`}>

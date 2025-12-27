@@ -5,12 +5,13 @@ import { CARDS, TYPOGRAPHY } from '@/lib/design-tokens'
 import { HistoricalMatch } from '@/lib/historical-matcher'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
+import { UI_LABELS } from '@/config/naming'
 
-interface HistoryEchoCardProps {
+interface HomeHistoryCardProps {
     match: HistoricalMatch | null
 }
 
-export function HistoryEchoCard({ match }: HistoryEchoCardProps) {
+export function HomeHistoryCard({ match }: HomeHistoryCardProps) {
     if (!match) return null
 
     return (
@@ -19,12 +20,12 @@ export function HistoryEchoCard({ match }: HistoryEchoCardProps) {
             <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             <SectionHeaderCard
-                title="歷史映射"
+                title={UI_LABELS.HOME.HISTORY_TITLE}
                 icon={History}
                 className="mb-4 px-1"
             />
 
-            <Link href={`/reviews/${match.event.year}/${match.event.slug}`} className="block group">
+            <Link href={`/history/${match.event.year}/${match.event.slug}`} className="block group">
                 <UniversalCard variant="lumaClickable" className="relative p-4">
                     <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1">

@@ -3,7 +3,7 @@ import { CHART, COLORS } from '@/lib/design-tokens'
 import { formatPercent, formatPrice, formatSmallPercent, formatRatio } from '@/lib/format-helpers'
 import { getChartSemanticModel, getSemanticColor, mapReviewTypeToSemanticId } from '@/lib/chart-semantics'
 
-interface ReviewChartTooltipProps {
+interface HistoryChartTooltipProps {
     active?: boolean
     payload?: any[]
     label?: string
@@ -12,7 +12,7 @@ interface ReviewChartTooltipProps {
     overlayType?: 'oi' | 'funding'
 }
 
-export const ReviewChartTooltip: React.FC<ReviewChartTooltipProps> = ({ active, payload, label, type, isPercentage, overlayType }) => {
+export const HistoryChartTooltip: React.FC<HistoryChartTooltipProps> = ({ active, payload, label, type, isPercentage, overlayType }) => {
     if (active && payload && payload.length) {
         const val = Number(payload[0].value)
         const semanticId = mapReviewTypeToSemanticId(type)
