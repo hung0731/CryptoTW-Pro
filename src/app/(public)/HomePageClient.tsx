@@ -101,25 +101,11 @@ export function HomePageClient() {
         return list[Math.floor(Math.random() * list.length)]
     })
 
-    // Error State with Retry
+    // Error State with Retry -> REMOVED to allow Guest Mode fallback
+    // If error exists, it will just show default guest UI below.
     if (error) {
-        return (
-            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-red-900/30 flex items-center justify-center mb-4">
-                    <span className="text-2xl">⚠️</span>
-                </div>
-                <h2 className="text-lg font-bold text-white mb-2">連線發生問題</h2>
-                <p className="text-sm text-neutral-500 mb-6 max-w-[280px]">
-                    {error.message || '無法連接 LINE 服務，請稍後再試。'}
-                </p>
-                <button
-                    onClick={retry}
-                    className="px-6 py-2.5 bg-white text-black rounded-lg font-bold text-sm hover:bg-neutral-200 transition-colors"
-                >
-                    重新嘗試
-                </button>
-            </div>
-        )
+        // Optionally log it, but don't block render
+        console.warn('HomePage LIFF Error:', error)
     }
 
     // Skeleton Loading State (only if no cached user)
