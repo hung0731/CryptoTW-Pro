@@ -27,12 +27,29 @@ export function FullNewsFeed() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        let retryCount = 0
+        let timeoutId: NodeJS.Timeout
+
         const fetchContext = async () => {
             try {
                 const res = await fetch(`/api/market-context?t=${Date.now()}`)
                 const json = await res.json()
+
                 if (json.context) {
                     setMarketContext(json.context)
+
+                    // If AI is still analyzing, retry shortly
+                    const summary = json.context.summary || ''
+                    if (summary.includes('正在分析') || summary.includes('Analyzing')) {
+                        if (retryCount < 10) { // Retry up to 10 times (50s)
+                            retryCount++
+                            timeoutId = setTimeout(fetchContext, 5000)
+                            return
+                        }
+                    } else {
+                        // Success - reset retry
+                        retryCount = 0
+                    }
                 }
             } catch (e) {
                 console.error('Market context fetch error:', e)
@@ -40,9 +57,19 @@ export function FullNewsFeed() {
                 setLoading(false)
             }
         }
+
         void fetchContext()
-        const interval = setInterval(fetchContext, 300000)
-        return () => clearInterval(interval)
+
+        // Regular polling every 5 minutes
+        const interval = setInterval(() => {
+            retryCount = 0 // Reset for periodic fetch
+            fetchContext()
+        }, 300000)
+
+        return () => {
+            clearInterval(interval)
+            clearTimeout(timeoutId)
+        }
     }, [])
 
     if (loading) {

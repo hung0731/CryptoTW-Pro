@@ -91,41 +91,60 @@ export function AISummaryCard({
         !isHero && !isCompact && "px-4 py-2.5"
     )
 
-    if (loading) {
+    // Auto-detect "Analyzing" state from text content
+    const isAnalyzing = loading || summary.includes('正在分析') || summary.includes('Analyzing')
+
+    if (isAnalyzing) {
         return (
             <div className={wrapperClasses}>
-                {/* 1. Loading State Border */}
-                <div className="absolute inset-0 bg-purple-500/40 animate-pulse" />
+                {/* 1. Animated Border Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-purple-400/40 to-purple-500/20 animate-guiding-light" />
 
-                {/* 2. Inner Content (Unified) */}
-                <div className="relative h-full w-full rounded-xl bg-[#0A0A0A] overflow-hidden flex flex-col text-left">
-                    {/* Text Area Skeleton */}
-                    <div className={cn("flex-1", contentPadding)}>
-                        <div className={cn("relative z-10 space-y-2", contentMinHeight)}>
-                            <div className="h-3.5 bg-[#1A1A1A] rounded w-3/4 animate-pulse" />
-                            <div className="h-3.5 bg-[#1A1A1A] rounded w-full animate-pulse" />
-                            {!isCompact && <div className="h-3.5 bg-[#1A1A1A] rounded w-5/6 animate-pulse" />}
+                {/* 2. Inner Content */}
+                <div className="relative h-full w-full rounded-xl bg-[#0A0A0A] overflow-hidden flex flex-col">
+                    {/* Scanning Line Effect */}
+                    <div className="absolute inset-x-0 h-[2px] bg-purple-500/50 shadow-[0_0_10px_#A855F7] animate-scan-y z-20" />
+
+                    {/* Tech Grid Background (Optional subtle texture) */}
+                    <div className="absolute inset-0 opacity-10"
+                        style={{ backgroundImage: 'radial-gradient(#A855F7 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+                    />
+
+                    <div className={cn("flex-1 flex flex-col justify-center", contentPadding)}>
+                        <div className="relative z-10 space-y-3">
+                            {/* Animated Text */}
+                            <div className="flex items-center gap-3">
+                                <div className="relative flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-sm font-mono text-purple-300 font-bold tracking-widest uppercase animate-pulse">
+                                        AI_OUPUT_GENERATING...
+                                    </p>
+                                    <div className="h-1.5 w-32 bg-purple-900/30 rounded-full overflow-hidden">
+                                        <div className="h-full bg-purple-500 animate-progress-indeterminate" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Decoding Text Effect */}
+                            <p className="text-xs text-neutral-500 font-mono pl-6">
+                                <span className="inline-block animate-pulse">Analyzing market data...</span>
+                            </p>
                         </div>
                     </div>
 
                     {/* Footer Skeleton */}
                     <div className={cn(
-                        "flex items-center justify-between border-t border-white/5 bg-[#0F0F10]",
+                        "flex items-center justify-between border-t border-white/5 bg-[#0F0F10/80]",
                         footerPadding
                     )}>
-                        <div className="flex items-center gap-2 text-neutral-400">
-                            <Newspaper strokeWidth={1.5} className={cn("text-purple-400", isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
-                            <span className={cn("font-medium", isCompact ? "text-[10px]" : "text-[11px]")}>{source}</span>
-                            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
-                                <Sparkles strokeWidth={1.5} className="w-2.5 h-2.5 text-purple-400" />
-                                <span className="text-[8px] font-bold text-purple-300 uppercase tracking-wider">AI</span>
-                            </div>
+                        <div className="flex items-center gap-2 text-neutral-500">
+                            <div className="h-2 w-16 bg-white/10 rounded animate-pulse" />
                         </div>
-                        <span className={cn(
-                            "font-bold tracking-wide text-purple-300",
-                            isCompact ? "text-[10px]" : "text-[11px]"
-                        )}>
-                            加密台灣 Pro
+                        <span className="text-[10px] font-mono text-purple-500/50 tracking-widest">
+                            PROCESSING
                         </span>
                     </div>
                 </div>

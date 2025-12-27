@@ -66,6 +66,8 @@ function MarketContextSkeleton() {
     )
 }
 
+
+
 export function MarketContextCard({ data, isLoading }: MarketContextProps) {
     const router = useRouter()
 
@@ -77,6 +79,7 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
 
     const contextEmoji = SentimentEmoji[data.sentiment] || '📊'
     const contextText = data.summary || `市場整體呈現${data.sentiment}態勢。`
+
 
     return (
         <UniversalCard variant="luma" size="S" className="overflow-hidden">

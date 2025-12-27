@@ -22,11 +22,27 @@ export function HomeRouterWidget() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        let retryCount = 0
+        let timeoutId: NodeJS.Timeout
+
         const fetchData = async () => {
             try {
                 const res = await getHomeRouterAction()
                 if (res.success && res.data) {
                     setData(res.data)
+
+                    // Check if AI is analyzing (in Market Context or AI Decision)
+                    const mkSummary = res.data.marketContext?.summary || ''
+                    const aiReason = res.data.aiDecision?.reasoning || ''
+                    const isAnalyzing = mkSummary.includes('正在分析') || mkSummary.includes('Analyzing') ||
+                        aiReason.includes('正在分析') || aiReason.includes('Analyzing')
+
+                    if (isAnalyzing && retryCount < 10) {
+                        retryCount++
+                        timeoutId = setTimeout(fetchData, 4000) // Retry every 4s
+                    } else if (!isAnalyzing) {
+                        retryCount = 0 // Reset if success
+                    }
                 }
             } catch (e) {
                 console.error(e)
@@ -35,6 +51,17 @@ export function HomeRouterWidget() {
             }
         }
         void fetchData()
+
+        // Periodic refresh every 5 mins
+        const interval = setInterval(() => {
+            retryCount = 0
+            fetchData()
+        }, 300000)
+
+        return () => {
+            clearInterval(interval)
+            clearTimeout(timeoutId)
+        }
     }, [])
 
     if (loading) return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
