@@ -6,7 +6,7 @@
  * MANDATORY CONSTRAINTS:
  * - Cards: EXACTLY 4 types (primary, secondary, inline, passive)
  * - Colors: Black/White/Gray UI, functional colors data-only
- * - Animations: NONE (no transition-*, no duration-*)
+ * - Animations: Micro-interactions & Loading states allowed.
  * - Charts: Unified line hierarchy, mandatory watermark
  * 
  * ALL components MUST use these tokens. No inline styles permitted.
@@ -383,13 +383,21 @@ export const chartTooltipProps = {
 // ================================================
 // ANIMATION SYSTEM (Card System v3.0 - Chapter 12)
 // ================================================
+// ================================================
+// ANIMATION SYSTEM (Card System v3.0 - Chapter 12)
+// ================================================
 export const ANIMATION = {
+    // Utility Durations
     micro: 'duration-75',
     standard: 'duration-150',
     complex: 'duration-300',
+
+    // Easings
     easeOut: 'ease-out',
     easeIn: 'ease-in',
     easeInOut: 'ease-in-out',
+
+    // Transition Presets
     hoverCard: 'transition-colors duration-75',
     hoverBorder: 'transition-border duration-75',
     activePress: 'active:scale-[0.98] transition-transform duration-75',
@@ -397,6 +405,12 @@ export const ANIMATION = {
     fadeIn: 'transition-opacity duration-150',
     buttonHover: 'transition-all duration-75 hover:scale-105',
     iconSpin: 'transition-transform duration-150',
+
+    // Custom Keyframes (Defined in globals.css)
+    breath: 'animate-breath', // Pulse effect
+    scanY: 'animate-scan-y', // Scanning line effect
+    guidingLight: 'animate-guiding-light', // Shimmer effect
+    progressIndeterminate: 'animate-progress-indeterminate', // Loading bar
 } as const
 
 // ================================================

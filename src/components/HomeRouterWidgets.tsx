@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowRight, AlertTriangle, TrendingUp, TrendingDown, Activity, Anchor, BarChart2, Info, ChevronRight, Zap, RefreshCcw } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { AIAnalysisCard } from '@/components/home/AIAnalysisCard'
-import { MarketContextCard } from '@/components/home/MarketContextCard'
+import { AIAnalysisCard, AIDecisionSkeleton } from '@/components/home/AIAnalysisCard'
+import { MarketContextCard, MarketContextSkeleton } from '@/components/home/MarketContextCard'
 import { CARDS, SPACING, TYPOGRAPHY, COLORS } from '@/lib/design-tokens'
 
 // AI Decision type (from backend)
@@ -64,7 +64,25 @@ export function HomeRouterWidget() {
         }
     }, [])
 
-    if (loading) return <Skeleton className="h-64 w-full bg-neutral-900/50 rounded-xl" />
+    if (loading) return (
+        <div className="space-y-5 animate-in fade-in duration-500">
+            <AIDecisionSkeleton />
+            <MarketContextSkeleton />
+            <div className={cn(CARDS.primary, SPACING.card)}>
+                <div className="flex items-center gap-2 mb-4">
+                    <Skeleton className="w-1.5 h-1.5 rounded-full bg-neutral-800" />
+                    <Skeleton className="h-4 w-20 bg-neutral-800" />
+                </div>
+                <Skeleton className="h-8 w-3/4 bg-neutral-800 mb-6" />
+                <div className="grid grid-cols-3 gap-2">
+                    {[1, 2, 3].map(i => (
+                        <Skeleton key={i} className="h-16 w-full bg-neutral-800 rounded-lg" />
+                    ))}
+                </div>
+            </div>
+            <Skeleton className="h-20 w-full bg-neutral-900/40 rounded-xl" />
+        </div>
+    )
     if (!data) return null
 
     return (

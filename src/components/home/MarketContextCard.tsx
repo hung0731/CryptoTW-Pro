@@ -37,7 +37,7 @@ const ImpactColor = {
 }
 
 // Loading Skeleton component
-function MarketContextSkeleton() {
+export function MarketContextSkeleton() {
     return (
         <div className={cn(CARDS.primary, "p-0 overflow-hidden")}>
             {/* AI Context Card Skeleton */}

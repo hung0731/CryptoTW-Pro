@@ -3,16 +3,15 @@ import { generateMarketContextBrief } from '@/lib/ai'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 import { coinglassV4Request } from '@/lib/coinglass'
 import { MarketContext } from '@/lib/types'
-
-const CACHE_KEY = 'market_context'
+import { CACHE_KEYS } from '@/lib/cache-keys'
 
 export class NewsService {
     static async getMarketContext(): Promise<MarketContext | null> {
         try {
             // Check cache first
-            const cached = await getCache<MarketContext>(CACHE_KEY)
+            const cached = await getCache<MarketContext>(CACHE_KEYS.MARKET_CONTEXT)
             if (cached) {
-                logger.info('[Cache HIT] market_context', { feature: 'news-service' })
+                logger.info('[Cache HIT] Market Context (Service)', { feature: 'news-service' })
                 return cached
             }
 
@@ -39,7 +38,7 @@ export class NewsService {
             }
 
             // Cache the result
-            await setCache(CACHE_KEY, context, CacheTTL.SLOW) // 15 min
+            await setCache(CACHE_KEYS.MARKET_CONTEXT, context, CacheTTL.SLOW) // 15 min
 
             return context
 

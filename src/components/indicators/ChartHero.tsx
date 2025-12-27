@@ -20,7 +20,7 @@ const HalvingCycleChart = dynamic(
     () => import('@/components/indicators/HalvingCycleChart').then(mod => ({ default: mod.HalvingCycleChart })),
     {
         ssr: false,
-        loading: () => <Skeleton className="h-[400px] w-full rounded-xl" />
+        loading: () => <Skeleton className="h-[400px] w-full rounded-2xl bg-white/5" />
     }
 );
 
@@ -28,7 +28,7 @@ const DivergenceScreener = dynamic(
     () => import('@/components/indicators/DivergenceScreener').then(mod => ({ default: mod.DivergenceScreener })),
     {
         ssr: false,
-        loading: () => <Skeleton className="h-[600px] w-full rounded-xl" />
+        loading: () => <Skeleton className="h-[600px] w-full rounded-2xl bg-white/5" />
     }
 );
 
@@ -131,7 +131,7 @@ export function ChartHero({ story }: ChartHeroProps) {
                                 className={cn(
                                     "text-[10px] font-mono px-2 py-1 rounded transition-all",
                                     timeRange === range
-                                        ? "bg-white/20 text-white font-bold"
+                                        ? "bg-[#F59E0B] text-black font-bold"
                                         : "text-neutral-500 hover:text-white hover:bg-white/5"
                                 )}
                             >

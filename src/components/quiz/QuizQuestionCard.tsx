@@ -4,6 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { QuizQuestion } from '@/lib/quiz-data'
 import { cn } from '@/lib/utils'
+import { UniversalCard } from '@/components/ui/UniversalCard'
 
 interface QuestionCardProps {
     question: QuizQuestion
@@ -27,18 +28,18 @@ export function QuizQuestionCard({ question, total, index, onAnswer }: QuestionC
                         key={i}
                         className={cn(
                             "h-1.5 flex-1 rounded-full transition-colors",
-                            i <= index ? "bg-white" : "bg-neutral-800"
+                            i <= index ? "bg-[#F59E0B]" : "bg-neutral-800"
                         )}
                     />
                 ))}
             </div>
 
             {/* Question */}
-            <div className="min-h-[100px]">
+            <div className="min-h-[80px]">
                 <h2 className="text-2xl font-bold leading-tight text-white mb-2">
                     {question.text}
                 </h2>
-                <span className="text-sm text-neutral-500 font-mono">
+                <span className="text-[10px] text-neutral-500 font-mono uppercase tracking-widest">
                     Question {index + 1}/{total}
                 </span>
             </div>
@@ -49,11 +50,17 @@ export function QuizQuestionCard({ question, total, index, onAnswer }: QuestionC
                     <button
                         key={idx}
                         onClick={() => onAnswer(option.score)}
-                        className="w-full p-4 text-left rounded-xl border border-[#1A1A1A] bg-[#0A0A0A] hover:bg-[#1A1A1A] hover:border-neutral-700 transition-all active:scale-[0.98] group"
+                        className="w-full text-left transition-all active:scale-[0.98] group"
                     >
-                        <span className="text-base text-neutral-200 group-hover:text-white transition-colors">
-                            {option.text}
-                        </span>
+                        <UniversalCard
+                            variant="clickable"
+                            size="S"
+                            className="p-4 group-hover:border-[#F59E0B]/50 transition-colors"
+                        >
+                            <span className="text-base text-neutral-200 group-hover:text-white transition-colors">
+                                {option.text}
+                            </span>
+                        </UniversalCard>
                     </button>
                 ))}
             </div>

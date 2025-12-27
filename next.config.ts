@@ -13,6 +13,9 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
 
+  // React Compiler (New in Next.js 15+)
+  reactCompiler: true,
+
   // 實驗性功能：加速構建
   experimental: {
     optimizePackageImports: [
@@ -21,7 +24,15 @@ const nextConfig = {
       'recharts',
       'date-fns',
       'lodash',
-      'framer-motion'
+      'framer-motion',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-collapsible',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
     ],
   },
 

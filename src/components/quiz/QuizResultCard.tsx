@@ -8,6 +8,7 @@ import { QuizResult } from '@/lib/quiz-data'
 import { Button } from '@/components/ui/button'
 import { Share2, RefreshCcw, ExternalLink, Skull, Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { UniversalCard } from '@/components/ui/UniversalCard'
 import { COLORS } from '@/lib/design-tokens'
 
 interface ResultCardProps {
@@ -50,20 +51,20 @@ export function QuizResultCard({ result, onRetry }: ResultCardProps) {
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-3 w-full mb-6">
-                        <div className="bg-[#141414] rounded-xl p-3 border border-[#222]">
+                        <UniversalCard variant="default" className="p-3 bg-white/5">
                             <div className="text-[10px] text-neutral-500 mb-1">存活率 (Survival)</div>
                             <div className={cn("text-xl font-bold font-mono",
                                 result.stats.survivalRate < 40 ? COLORS.negative : COLORS.positive
                             )}>
                                 {result.stats.survivalRate}%
                             </div>
-                        </div>
-                        <div className="bg-[#141414] rounded-xl p-3 border border-[#222]">
+                        </UniversalCard>
+                        <UniversalCard variant="default" className="p-3 bg-white/5">
                             <div className="text-[10px] text-neutral-500 mb-1">勝率 (Win Rate)</div>
                             <div className="text-xl font-bold font-mono text-white">
                                 {result.stats.winRate}%
                             </div>
-                        </div>
+                        </UniversalCard>
                     </div>
 
                     {/* Description */}
@@ -73,7 +74,7 @@ export function QuizResultCard({ result, onRetry }: ResultCardProps) {
 
                     {/* Predator / Prey (Viral Hooks) */}
                     <div className="grid grid-cols-2 gap-4 w-full text-left mb-6">
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                        <UniversalCard variant="subtle" className="bg-red-500/5 border-red-500/10 p-3">
                             <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold mb-1">
                                 <Skull className="w-3.5 h-3.5" />
                                 天敵 (Enemy)
@@ -81,16 +82,16 @@ export function QuizResultCard({ result, onRetry }: ResultCardProps) {
                             <div className="text-sm font-bold text-red-200">
                                 {result.traits.naturalEnemy}
                             </div>
-                        </div>
-                        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3">
-                            <div className="flex items-center gap-1.5 text-green-400 text-xs font-bold mb-1">
+                        </UniversalCard>
+                        <UniversalCard variant="subtle" className="bg-emerald-500/5 border-emerald-500/10 p-3">
+                            <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold mb-1">
                                 <Utensils className="w-3.5 h-3.5" />
                                 食物 (Prey)
                             </div>
-                            <div className="text-sm font-bold text-green-200">
+                            <div className="text-sm font-bold text-emerald-200">
                                 {result.traits.food}
                             </div>
-                        </div>
+                        </UniversalCard>
                     </div>
                 </div>
 
@@ -102,15 +103,15 @@ export function QuizResultCard({ result, onRetry }: ResultCardProps) {
 
             {/* Actions */}
             <div className="space-y-3 pt-4">
-                <Button className="w-full bg-white text-black hover:bg-neutral-200 gap-2 font-bold h-12">
+                <Button variant="brand" className="w-full gap-2 h-12">
                     <Share2 className="w-4 h-4" />
                     分享結果 (截圖此頁)
                 </Button>
 
                 <Button
-                    variant="outline"
+                    variant="brand-outline"
                     onClick={onRetry}
-                    className="w-full border-neutral-800 text-neutral-400 hover:text-white"
+                    className="w-full h-12"
                 >
                     <RefreshCcw className="w-4 h-4 mr-2" />
                     再測一次
@@ -118,18 +119,18 @@ export function QuizResultCard({ result, onRetry }: ResultCardProps) {
             </div>
 
             {/* Product Hook (Conversion) */}
-            <div className="mt-8 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-xl p-5 border border-white/10 text-center">
-                <p className="text-sm text-neutral-300 mb-4 font-medium">
+            <UniversalCard variant="highlight" className="mt-8 bg-[#F59E0B]/5 border-[#F59E0B]/10 text-center p-5">
+                <p className="text-sm text-neutral-300 mb-4 font-medium leading-relaxed">
                     💡 給 {result.name.split(' ')[0]} 的建議：<br />
                     {result.productHook.text}
                 </p>
                 <Link href={result.productHook.link}>
-                    <Button variant="secondary" size="sm" className="gap-2">
+                    <Button variant="brand" size="sm" className="gap-2 font-bold">
                         {result.productHook.btnText}
                         <ExternalLink className="w-3 h-3" />
                     </Button>
                 </Link>
-            </div>
+            </UniversalCard>
         </motion.div>
     )
 }

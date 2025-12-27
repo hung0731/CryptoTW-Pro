@@ -192,10 +192,10 @@ export function ReviewsPageClient() {
                     <button
                         onClick={() => setSelectedType(null)}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-all",
                             selectedType === null
-                                ? "bg-[#8B5CF6] text-white border-[#8B5CF6]"
-                                : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
+                                ? "bg-[#F59E0B] text-black border-[#F59E0B] font-bold shadow-sm"
+                                : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-neutral-500"
                         )}
                     >
                         全部類型
@@ -207,10 +207,10 @@ export function ReviewsPageClient() {
                                 key={key}
                                 onClick={() => setSelectedType(selectedType === key ? null : key)}
                                 className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
+                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-all",
                                     selectedType === key
-                                        ? "bg-[#8B5CF6] text-white border-[#8B5CF6]"
-                                        : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
+                                        ? "bg-[#F59E0B] text-black border-[#F59E0B] font-bold shadow-sm"
+                                        : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-neutral-500"
                                 )}
                             >
                                 <Icon className="w-3 h-3" />
@@ -228,7 +228,7 @@ export function ReviewsPageClient() {
                 {hasActiveFilters && (
                     <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
                         <span>找到 {filteredReviews.length} 個相關事件</span>
-                        <button onClick={clearFilters} className="text-[#8B5CF6] hover:text-[#8B5CF6]/80 transition-colors">清除全部</button>
+                        <button onClick={clearFilters} className="text-[#F59E0B] hover:underline transition-colors">清除全部</button>
                     </div>
                 )}
 
@@ -353,13 +353,13 @@ export function ReviewsPageClient() {
                             </div>
                         </UniversalCard>
                     ) : (
-                        <div className="text-center py-20 bg-neutral-900/20 rounded-2xl border border-white/5 border-dashed">
+                        <UniversalCard variant="subtle" className="text-center py-20 bg-neutral-900/20 border-dashed">
                             <Search className="w-8 h-8 text-neutral-600 mx-auto mb-3" />
                             <p className="text-neutral-500 text-sm">沒有找到相關事件</p>
-                            <button onClick={clearFilters} className="text-[#8B5CF6] text-xs mt-2 hover:underline">
+                            <button onClick={clearFilters} className="text-[#F59E0B] text-xs mt-2 hover:underline">
                                 清除篩選條件
                             </button>
-                        </div>
+                        </UniversalCard>
                     )}
                 </div>
             </div>

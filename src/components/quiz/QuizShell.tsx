@@ -65,7 +65,8 @@ export function QuizShell() {
 
                         <Button
                             onClick={() => setMode('quiz')}
-                            className="w-full h-14 text-lg font-bold bg-white text-black hover:bg-neutral-200 rounded-xl"
+                            variant="brand"
+                            className="w-full h-14 text-lg"
                         >
                             開始測試
                             <ArrowRight className="ml-2 w-5 h-5" />

@@ -2,12 +2,11 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateMarketContextBrief } from '@/lib/ai'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
+import { CACHE_KEYS } from '@/lib/cache-keys'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 300 // 5 minutes
-
-const CACHE_KEY = 'market_context_v4' // v4: Added mandatory reasoning for recommendations
 
 export async function GET(req: NextRequest) {
     // Rate limit: 30 requests per minute per IP
@@ -15,24 +14,17 @@ export async function GET(req: NextRequest) {
     if (rateLimited) return rateLimited
 
     try {
-        // Check cache first
-        // Check cache first
-        const cached = await getCache(CACHE_KEY)
+        // 1. Check cache first
+        const cached = await getCache(CACHE_KEYS.MARKET_CONTEXT)
         if (cached) {
-            logger.info('[Cache HIT] market_context', { feature: 'market-context' })
+            logger.info('[Cache HIT] Market Context (API)', { feature: 'market-context' })
             return NextResponse.json({ context: cached, cached: true })
         }
 
-        logger.info('[Cache MISS] market_context - generating fresh AI context', { feature: 'market-context' })
+        logger.info('[Cache MISS] Market Context - generating fresh AI context', { feature: 'market-context' })
 
         // Fetch news from Coinglass API (NOT RSS)
         const apiKey = process.env.COINGLASS_API_KEY
-        if (!apiKey) {
-            throw new Error('COINGLASS_API_KEY not configured')
-        }
-
-        // Fetch news from Coinglass API (NOT RSS)
-        // apiKey is already declared above
         if (!apiKey) {
             throw new Error('COINGLASS_API_KEY not configured')
         }
@@ -70,7 +62,7 @@ export async function GET(req: NextRequest) {
         }
 
         // Cache the result
-        await setCache(CACHE_KEY, context, CacheTTL.SLOW) // 15 min
+        await setCache(CACHE_KEYS.MARKET_CONTEXT, context, CacheTTL.SLOW) // 15 min
 
         return NextResponse.json({ context })
 

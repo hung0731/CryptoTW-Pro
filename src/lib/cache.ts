@@ -319,6 +319,56 @@ export async function getCacheStatus() {
     return { mode: 'In-Memory', connected: true }
 }
 
+/**
+ * withCache helper: Handles lock, get, and set in one go.
+ * Prevents Cache Stampede.
+ */
+export async function withCache<T>(
+    key: string,
+    ttlSeconds: number,
+    fetcher: () => Promise<T>,
+    options: {
+        forceRefresh?: boolean
+        lockTtl?: number
+    } = {}
+): Promise<T> {
+    const { forceRefresh = false, lockTtl = 10 } = options
+
+    // 1. Check Cache
+    if (!forceRefresh) {
+        const cached = await getCache<T>(key)
+        if (cached !== null) return cached
+    }
+
+    // 2. Acquire Lock (to prevent stampede)
+    const lockAcquired = await acquireLock(key, lockTtl)
+    if (!lockAcquired) {
+        // Wait and retry briefly or just return null and hope the other process finishes
+        // For simplicity: Sleep 500ms and try get once more
+        await new Promise(resolve => setTimeout(resolve, 500))
+        const cached = await getCache<T>(key)
+        if (cached !== null) return cached
+
+        // If still nothing, either wait more or just proceed. 
+        // Proceeding is safer than infinite wait here.
+    }
+
+    try {
+        // 3. Fetch Fresh Data
+        const freshData = await fetcher()
+
+        // 4. Update Cache (Async background)
+        if (freshData !== null && freshData !== undefined) {
+            void setCache(key, freshData, ttlSeconds)
+        }
+
+        return freshData
+    } finally {
+        // 5. Release Lock
+        await releaseLock(key)
+    }
+}
+
 // TTL Presets (in seconds)
 export const CacheTTL = {
     REALTIME: 30,      // BTC Price, critical data

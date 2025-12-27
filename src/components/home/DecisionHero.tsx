@@ -182,6 +182,8 @@ function AnimatedPrice({ price, prevPrice, change }: { price: number, prevPrice:
     )
 }
 
+import { UniversalCard } from '@/components/ui/UniversalCard'
+
 export function JudgmentCard({ initialStatus, initialConclusion }: JudgmentCardProps) {
     const [status] = useState<MarketStatusData | null>(initialStatus)
     const [conclusion] = useState<Conclusion | null>(initialConclusion)
@@ -242,10 +244,14 @@ export function JudgmentCard({ initialStatus, initialConclusion }: JudgmentCardP
     const { signals, warningCount } = getHealthSignals(status)
 
     return (
-        <div className={cn(
-            "relative rounded-2xl border overflow-hidden bg-[#0A0A0A]",
-            config.borderColor
-        )}>
+        <UniversalCard
+            variant="default"
+            size="S"
+            className={cn(
+                "p-0 border overflow-hidden",
+                config.borderColor
+            )}
+        >
             {/* Background Chart */}
             <div className="absolute inset-0 pointer-events-none">
                 <Sparkline prices={priceHistory} color={chartColor} />
@@ -361,7 +367,7 @@ export function JudgmentCard({ initialStatus, initialConclusion }: JudgmentCardP
                     </Link>
                 </div>
             </div>
-        </div>
+        </UniversalCard>
     )
 }
 

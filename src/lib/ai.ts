@@ -2,6 +2,7 @@
 import OpenAI from 'openai'
 import { formatTaiwaneseText, formatObjectStrings } from './format-utils'
 import { acquireLock, releaseLock } from './cache'
+import { CACHE_KEYS } from '@/lib/cache-keys'
 import { logger } from '@/lib/logger'
 import { MarketContext } from '@/lib/types'
 
@@ -128,7 +129,7 @@ export async function generateMarketSummary(
         return null
     }
 
-    const lockKey = 'lock:gemini:market_summary' // Keep old lock key for compatibility
+    const lockKey = CACHE_KEYS.LOCK_MARKET_SUMMARY // Keep old lock key for compatibility
     if (!await acquireLock(lockKey, 60)) {
         logger.warn('AI Busy: Market Summary generation locked', { feature: 'ai' })
         return null
@@ -233,7 +234,7 @@ Note: emoji 必須根據 sentiment 選擇，例如：
         logger.error('Grok Generation Error:', e, { feature: 'ai' })
         return null
     } finally {
-        await releaseLock('lock:gemini:market_summary')
+        await releaseLock(CACHE_KEYS.LOCK_MARKET_SUMMARY)
     }
 }
 
@@ -285,7 +286,7 @@ export async function generateMarketContextBrief(
 ): Promise<MarketContext | null> {
     if (!openai) return null
 
-    const lockKey = 'lock:gemini:market_context'
+    const lockKey = CACHE_KEYS.LOCK_MARKET_CONTEXT
     if (!await acquireLock(lockKey, 60)) {
         logger.warn('AI Busy: Market Context generation locked', { feature: 'ai' })
         return null
@@ -369,7 +370,7 @@ ${CONSISTENCY_CHECK}
         logger.error('Grok Market Context Brief Error:', e, { feature: 'ai' })
         return null
     } finally {
-        await releaseLock('lock:gemini:market_context')
+        await releaseLock(CACHE_KEYS.LOCK_MARKET_CONTEXT)
     }
 }
 
@@ -406,7 +407,7 @@ export async function generateAIDecision(
 ): Promise<AIDecision | null> {
     if (!openai) return null
 
-    const lockKey = 'lock:gemini:ai_decision'
+    const lockKey = CACHE_KEYS.LOCK_AI_DECISION
     if (!await acquireLock(lockKey, 60)) {
         logger.warn('AI Busy: AI Decision generation locked', { feature: 'ai' })
         return null
@@ -469,7 +470,7 @@ ${CONSISTENCY_CHECK}
         logger.error('Grok AI Decision Error:', e, { feature: 'ai' })
         return null
     } finally {
-        await releaseLock('lock:gemini:ai_decision')
+        await releaseLock(CACHE_KEYS.LOCK_AI_DECISION)
     }
 }
 

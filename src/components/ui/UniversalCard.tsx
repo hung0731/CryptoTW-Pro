@@ -21,7 +21,7 @@ interface UniversalCardProps extends React.HTMLAttributes<HTMLDivElement> {
  * UniversalCard (Design System Core)
  * 
  * Defines the container style based on variant and size.
- * DOES NOT handle internal layout (Header/Body/Footer). Use sub-components for that.
+ * Addresses "luma" legacy by consolidating them into base styles.
  */
 export function UniversalCard({
     variant = 'default',
@@ -33,53 +33,37 @@ export function UniversalCard({
     ...props
 }: UniversalCardProps) {
 
+    // Helper for unified clickable behavior
+    const clickableBase = cn(
+        SURFACE.cardPrimary,
+        BORDER.primary,
+        "hover:border-neutral-400 transition-all duration-200",
+        ANIMATION.activePress,
+        FOCUS.ringSubtle,
+        "cursor-pointer group overflow-hidden"
+    )
+
     // Resolve Styles based on Variant
     const variantStyles = {
         default: cn(SURFACE.cardPrimary, BORDER.primary),
         subtle: cn(SURFACE.cardPassive, BORDER.dashed),
         highlight: cn(SURFACE.highlight, BORDER.highlight),
         danger: cn(SURFACE.danger, BORDER.danger),
-        success: cn('bg-[#0F1C12]', 'border border-[#113311]'), // Green tint per v3.0 spec
-        clickable: cn(
-            SURFACE.cardPrimary,
-            BORDER.primary,
-            "hover:border-white transition-colors duration-200", // Active Border
-            ANIMATION.activePress,
-            FOCUS.ringSubtle,
-            "cursor-pointer group overflow-hidden"
-        ),
+        success: cn('bg-[#0F1C12]', 'border border-[#113311]'),
+        clickable: clickableBase,
         ghost: cn(SURFACE.ghost, BORDER.ghost, "hover:bg-[#1A1A1A]/30", ANIMATION.hoverCard),
 
-        // ================================================
-        // LUMA STYLE VARIANTS (Flattened for Uber Style)
-        // ================================================
-        luma: cn(
-            SURFACE.cardPrimary, // #0D0D0D
-            BORDER.primary,      // #1E1E1E
-            // No shadow, let generic code handle radius or force it here if needed.
-            // UniversalCard uses sizeStyles for radius, but luma had hardcoded rounded-2xl.
-            // We should let sizeStyles handle radius or default to reduced radius.
-            // If we remove rounded-2xl here, sizeStyles will apply.
-        ),
-        lumaSubtle: cn(
-            SURFACE.cardPassive, // #141414
-            BORDER.primary
-        ),
-        lumaClickable: cn(
-            SURFACE.cardPrimary,
-            BORDER.primary,
-            "cursor-pointer",
-            "transition-colors duration-200",
-            "hover:border-white", // Active Border
-            "active:scale-[0.98]"
-        ),
+        // Consolidated Legacy Variants
+        luma: cn(SURFACE.cardPrimary, BORDER.primary), // Map directly to default
+        lumaSubtle: cn(SURFACE.cardPassive, BORDER.primary), // Map directly to subtle but with primary border
+        lumaClickable: clickableBase, // Map directly to clickable
     }
 
     // Resolve Radius & Padding based on Size
     const sizeStyles = {
-        S: cn(RADIUS.lg, "p-3"), // Small cards use tighter radius/padding
-        M: cn(RADIUS.xl, "p-4"), // Standard
-        L: cn(RADIUS.xl, "p-5"), // Large/Primary
+        S: cn(RADIUS.lg, "p-3"),
+        M: cn(RADIUS.xl, "p-4"),
+        L: cn(RADIUS.xl, "p-5"),
     }
 
     return (
@@ -97,9 +81,7 @@ export function UniversalCard({
     )
 }
 
-// Sub-components for Internal Structure
-// --------------------------------------------------------
-
+// Sub-components remains the same...
 export function CardHeader({ className, children }: React.HTMLAttributes<HTMLDivElement>) {
     return <div className={cn("flex flex-col space-y-1 mb-3", className)}>{children}</div>
 }
@@ -112,7 +94,6 @@ export function CardDescription({ className, children }: React.HTMLAttributes<HT
     return <p className={cn(TYPOGRAPHY.cardSubtitle, className)}>{children}</p>
 }
 
-// Content wrapper to enforce vertical rhythm
 export function CardContent({ className, children }: React.HTMLAttributes<HTMLDivElement>) {
     return <div className={cn("flex-1", className)}>{children}</div>
 }

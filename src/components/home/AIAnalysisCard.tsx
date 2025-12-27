@@ -38,7 +38,7 @@ const BiasConfig = {
     '中性': { color: 'text-[#808080]', bg: 'bg-[#808080]/20', icon: <Minus className="w-4 h-4" /> },
 }
 
-function AIDecisionSkeleton() {
+export function AIDecisionSkeleton() {
     return (
         <div className={cn(CARDS.primary, SPACING.card)}>
             <div className="flex items-center gap-2 mb-4">
