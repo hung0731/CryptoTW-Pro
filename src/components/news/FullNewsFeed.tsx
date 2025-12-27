@@ -13,7 +13,7 @@ import { TrendingUp, TrendingDown, Zap, Minus } from 'lucide-react'
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
     summary?: string
-    news: {
+    highlights: {
         title: string
         reason?: string
         impact?: '高' | '中' | '低'
@@ -110,8 +110,8 @@ export function FullNewsFeed() {
 
                 {/* News List */}
                 <div className="flex flex-col">
-                    {marketContext?.news && marketContext.news.length > 0 ? (
-                        marketContext.news.map((item, index) => (
+                    {marketContext?.highlights && marketContext.highlights.length > 0 ? (
+                        marketContext.highlights.map((item, index) => (
                             <div
                                 key={index}
                                 className="group relative px-5 py-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] transition-colors duration-200"
@@ -128,7 +128,6 @@ export function FullNewsFeed() {
                                     )}>
                                         {String(index + 1).padStart(2, '0')}
                                     </div>
-
                                     <div className="flex-1 min-w-0">
                                         {/* Mobile Rank (Inline) */}
                                         <span className={cn(

@@ -16,8 +16,38 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url)
         const limit = parseInt(searchParams.get('limit') || '50')
         const level = searchParams.get('level')
+        const source = searchParams.get('source') // 'system' (for cron) or 'line' (default)
 
         const supabase = createAdminClient()
+
+        // Mode 1: System Logs (Cron, etc.)
+        if (source === 'system') {
+            let query = supabase
+                .from('system_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(limit)
+
+            if (level) {
+                query = query.eq('level', level)
+            }
+
+            const { data: logs, error } = await query
+            if (error) throw error
+
+            return NextResponse.json({
+                logs: logs.map((log: any) => ({
+                    id: log.id,
+                    level: log.level,
+                    module: log.module,
+                    message: log.message,
+                    metadata: log.metadata,
+                    created_at: log.created_at
+                }))
+            })
+        }
+
+        // Mode 2: Line Events (Default)
         let query = supabase
             .from('line_events')
             .select('*')

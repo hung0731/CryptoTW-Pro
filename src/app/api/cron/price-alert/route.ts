@@ -3,6 +3,7 @@ import { multicastMessage } from '@/lib/line-bot'
 import { getCache, setCache } from '@/lib/cache'
 import { logger } from '@/lib/logger'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { CronLogger } from '@/lib/services/cron-logger'
 import { THEME, createProLabel, createSharedFooter } from '@/lib/bot/ui/flex-generator'
 
 export const dynamic = 'force-dynamic'
@@ -39,12 +40,14 @@ import { coinglassV4Request } from '@/lib/coinglass'
 // ... (constants)
 
 export async function GET(req: NextRequest) {
+    const start = Date.now()
     const secret = req.nextUrl.searchParams.get('secret')
     if (secret !== CRON_SECRET) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     try {
+        await CronLogger.logStart('price-alert')
         // 1. Get current BTC price using V4 API Helper (Robust)
         // Endpoint: /api/futures/price?symbol=BTC -> response.data.price
         // Note: V4 might have different endpoint for simple price, but let's check assumptions. 
@@ -66,6 +69,7 @@ export async function GET(req: NextRequest) {
 
         if (!priceData || priceData.length === 0) {
             logger.warn('[CRON] Failed to fetch BTC price (API returned null/empty)', { feature: 'price-alert' })
+            await CronLogger.logFailure('price-alert', 'External API Unavailable', Date.now() - start)
             // Return 200 to keep cron alive, but signal failure in body
             return NextResponse.json({ success: false, message: 'External API Unavailable' }, { status: 200 })
         }
@@ -77,6 +81,7 @@ export async function GET(req: NextRequest) {
         const currentPrice = btcItem ? Number(btcItem.price) : null
 
         if (!currentPrice) {
+            await CronLogger.logFailure('price-alert', 'Invalid price data', Date.now() - start)
             return NextResponse.json({ success: false, message: 'Invalid price data structure' }, { status: 200 })
         }
 
@@ -142,6 +147,7 @@ export async function GET(req: NextRequest) {
         const userIds = (subscribers || []).map(u => u.line_user_id).filter(Boolean) as string[]
 
         if (userIds.length === 0) {
+            await CronLogger.logSuccess('price-alert', { status: 'no_subscribers', alerts }, Date.now() - start)
             return NextResponse.json({ success: true, message: 'No subscribers', alerts })
         }
 
@@ -238,6 +244,12 @@ export async function GET(req: NextRequest) {
             })
         }
 
+        await CronLogger.logSuccess('price-alert', {
+            status: 'sent',
+            alertsCount: alerts.length,
+            recipients: userIds.length
+        }, Date.now() - start)
+
         return NextResponse.json({
             success: true,
             alerts,
@@ -248,6 +260,7 @@ export async function GET(req: NextRequest) {
 
     } catch (error) {
         logger.error('[CRON] Price alert error', error, { feature: 'price-alert' })
-        return NextResponse.json({ error: String(error) }, { status: 500 })
+        await CronLogger.logFailure('price-alert', error, Date.now() - start)
+        return NextResponse.json({ error: String(error) }, { status: 200 }) // Return 200 to keep cron alive
     }
 }
