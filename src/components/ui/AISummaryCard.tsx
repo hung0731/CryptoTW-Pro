@@ -31,6 +31,9 @@ const tagVariantMap: Record<string, 'info' | 'success' | 'warning' | 'error' | '
     '結論': 'purple',
     '劇本': 'purple',
     '背離': 'warning',
+    // Additional tags from API
+    '籌碼': 'info',
+    '情緒': 'warning',
 }
 
 interface AISummaryCardProps {
@@ -218,7 +221,7 @@ export function AISummaryCard({
                                 {summarySegments.map((segment, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
                                         <Tag
-                                            variant={segment.tag || tagVariantMap[segment.label] || 'default'}
+                                            variant={tagVariantMap[segment.tag] || tagVariantMap[segment.label] || 'default'}
                                             size="sm"
                                             className="shrink-0 mt-0.5"
                                         >

@@ -13,11 +13,6 @@ import { TrendingUp, TrendingDown, Zap, Minus } from 'lucide-react'
 interface MarketContext {
     sentiment: '樂觀' | '保守' | '恐慌' | '中性'
     summary?: string
-    summary_segments?: Array<{
-        tag: 'info' | 'success' | 'warning' | 'error' | 'brand' | 'purple' | 'default'
-        label: string
-        content: string
-    }>
     news: {
         title: string
         reason?: string
@@ -95,7 +90,6 @@ export function FullNewsFeed() {
             {/* AI Summary Card */}
             <AISummaryCard
                 summary={marketContext?.summary || '正在分析市場快訊...'}
-                summarySegments={marketContext?.summary_segments}
                 source="幣圈快訊"
             />
 
