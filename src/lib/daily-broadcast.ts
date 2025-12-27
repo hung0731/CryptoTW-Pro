@@ -194,11 +194,11 @@ export async function polishWithAI(
 
 function getOneLinerFallback(stance: Stance): string {
     switch (stance) {
-        case '偏多': return '多頭動能回升，關注突破確認'
-        case '偏多觀望': return '市場偏強但需等待確認信號'
-        case '中性': return '市場缺乏共識，整體進入觀望期'
-        case '偏空觀望': return '短線結構偏弱，風險略升'
-        case '偏空': return '空頭壓力增加，留意下探風險'
+        case '偏多': return '多頭結構穩健，關注關鍵阻力位突破'
+        case '偏多觀望': return '趨勢偏多但動能收斂，建議等待確認'
+        case '中性': return '市場缺乏方向共識，流動性顯著降低'
+        case '偏空觀望': return '結構轉弱，風險溢價不足，暫時觀望'
+        case '偏空': return '賣壓沉重，技術面型態轉空，留意下行風險'
     }
 }
 
@@ -209,30 +209,30 @@ function getIndicatorCardsFallback(decision: StanceDecision): IndicatorCard[] {
             icon: '💰',
             name: '資金費率',
             status: Math.abs(m.fundingRate) < 0.01 ? '趨近零' : m.fundingRate > 0 ? '偏高' : '轉負',
-            note: '多空成本趨近，槓桿意願低'
+            note: '多空成本趨同，槓桿意願低迷'
         },
         {
             icon: '👥',
             name: '多空比',
             status: `${Math.round(m.longShortRatio)} / ${Math.round(100 - m.longShortRatio)}`,
-            note: '散戶情緒中性'
+            note: '散戶多空情緒未見極端'
         },
         {
             icon: '💥',
             name: '爆倉 / OI',
-            status: m.liquidationTotal > 100_000_000 ? `${(m.liquidationTotal / 1_000_000).toFixed(0)}M` : '極度清淡',
-            note: '槓桿活動低迷'
+            status: m.liquidationTotal > 100_000_000 ? `${(m.liquidationTotal / 1_000_000).toFixed(0)}M` : '量縮',
+            note: '鏈上清算動能不足'
         }
     ]
 }
 
 function getSuggestionFallback(stance: Stance): string {
     switch (stance) {
-        case '偏多': return '順勢操作，留意過熱風險'
-        case '偏多觀望': return '不追高，等回踩再觀察'
-        case '中性': return '保持觀望，不追價、不重倉'
-        case '偏空觀望': return '減倉觀望，不急著抄底'
-        case '偏空': return '以保護資金為優先'
+        case '偏多': return '順勢持有，留意乖離過大風險'
+        case '偏多觀望': return '右側交易者宜等待突破確認'
+        case '中性': return '多看少做，保存資本等待機會'
+        case '偏空觀望': return '降低曝險，嚴守紀律，不急抄底'
+        case '偏空': return '現金為王，防禦性配置為主'
     }
 }
 
@@ -358,6 +358,12 @@ export async function generateDailyBroadcast(metrics: MarketMetrics): Promise<Da
             suggestion: polished.suggestion
         },
         indicatorCards: polished.indicatorCards,
-        mindset: polished.mindset
+        mindset: polished.mindset,
+        btcPriceChange: {
+            h1: 0,
+            h4: 0,
+            h12: 0,
+            h24: metrics.btcPriceChange24h
+        }
     }
 }

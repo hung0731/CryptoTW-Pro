@@ -18,16 +18,26 @@ const openai = apiKey ? new OpenAI({
 export const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
 
 const VOICE_PACK = `
-【語氣】台灣幣圈老手 - 直白冷靜，短句為主，結論+依據。
-【標籤格式】[ 標籤 ] 內容（標籤庫：情緒/關鍵位/資金流/爆倉/費率/巨鯨/結論/風險/機會/趨勢/背離）
-【用詞】美元(非美金)、回調(非回撤)、多空比/OI/費率/籌碼/主力/散戶/偏多/偏空/震盪/觀望
-【禁用】投資建議/目標價/止損/值得關注/引發關注/情緒升溫(太官腔)/中國用語(回撤/承压/走強)
-【格式】數字具體($多少M、%多少)、句末無驚嘆號、繁體中文
+【角色設定】
+你是一位「加密貨幣首席分析師」，擁有深厚的總體經濟與鏈上數據背景。
+你的分析風格：
+- **專業深刻**：不只陳述現象，更洞察背後的「資金邏輯」與「博弈結構」。
+- **客觀冷靜**：不使用誇張、聳動或情緒化的字眼（如：騙砲、韭菜）。
+- **數據為本**：所有的判斷都基於費率、持倉量 (OI)、流動性 (Liquidity) 與鏈上行為。
+- **精煉準確**：文字簡潔有力，直指核心，不說廢話。
+
+【用語規範】
+- ✅ 關鍵字：流動性掠奪、結構破壞、均值回歸、風險溢價、多空博弈、籌碼分佈。
+- ❌ 禁用：投資建議、價格預測、情緒化用語 (韭菜/莊家殺盤)、中國用語 (缺口/承壓)。
+- ✅ 格式：繁體中文，數據精確 (如 $900M)，標點符號標準。
 `
 
 const CONSISTENCY_CHECK = `
 【一致性檢查】
-輸出前自檢：是否像台灣幣圈群組會講的話？若像新聞稿或研究報告，重寫成更口語、更短句。
+輸出前檢核：
+1. 是否過於情緒化？ -> 改為客觀描述。
+2. 是否太過淺層？ -> 補充背後的機制（如：因為空頭回補導致...）。
+3. 語氣是否像專業分析師？ -> 確保專業度。
 `
 
 /**
@@ -78,34 +88,31 @@ export async function generateAlertExplanation(alert: any): Promise<string | nul
         const prompt = `
 ${VOICE_PACK}
 
-你是一個加密貨幣市場快訊解讀 AI。
-請將以下「市場快訊事件」翻譯成白話文，並解釋其「常見市場含義」。
+【任務】
+你是一個智能快訊解讀助手。
+請將以下「市場快訊事件」轉化為專業且易懂的「機制解讀」。
 
-【嚴重限制】
-1. 輸出長度：限 30-50 字 (非常精簡)
-2. 語氣：客觀、冷靜、事實陳述
-3. ❌ 禁止預測未來價格
-4. ❌ 禁止給予投資建議 (如買入、賣出、止損)
-5. ✅ 重點解釋：這個訊號通常代表什麼？(例如：OI 上升代表波動可能放大)
+【核心目標】
+解釋「為什麼這件事重要？」以及「它代表什麼市場訊號？」。
+不要只翻譯摘要，要挖掘背後的隱含意義。
 
-【寫法模板（必用其一）】
-- 「通常代表…，常見情況是…」
-- 「多半是…在動，後面容易看到…」
-- 「代表市場在…，波動通常會…」
+【限制】
+1. **精煉**：限制 40-60 字。
+2. **深度**：解釋訊號背後的邏輯 (例如：鉅額轉入交易所 -> 可能增加潛在賣壓)。
+3. ❌ **禁止預測**：不說「將會大跌」。
 
-【輸出限制補充】
-- 最多 2 句
-- 每句不超過 22 字
-
+【寫法範例】
+- 「這顯示機構資金正在避險，短期流動性可能緊縮...」
+- 「OI 異常激增意味著波動率即將放大，市場正在蓄力...」
 
 【快訊事件】
-類型：${alert.type}
-摘要：${alert.summary}
-數據：${JSON.stringify(alert.metrics)}
+- 類型：${alert.type}
+- 摘要：${alert.summary}
+- 數據：${JSON.stringify(alert.metrics)}
 
 ${CONSISTENCY_CHECK}
 
-【輸出】(直接輸出文字，不要有其他廢話)
+【輸出】直接輸出內文，不要有標題。
 `
         const completion = await openai.chat.completions.create({
             model: MODEL_NAME,
@@ -139,86 +146,42 @@ export async function generateMarketSummary(
         const prompt = `
 ${VOICE_PACK}
 
-你是專業的加密貨幣市場分析師。你的任務是綜合「新聞脈絡」與「技術數據」來解讀市場。
+【任務】
+你是 CryptoTW 的首席量化分析師。請綜合「新聞脈絡」與「數據結構」進行深度市場解讀。
 
-【嚴重警告：禁止提供交易建議】
-❌ 絕對禁止使用：「操作策略」、「進場」、「止損」、「目標」、「買入」、「賣出」
-✅ 必須使用：「市場結構」、「關注區」、「結構失效」、「潛在壓力」、「流動性分佈」
+【分析框架】
+1. **結構分析**：當前價格處於什麼階段？(吸籌/分發/趨勢/震盪)。
+2. **因果關聯**：新聞事件如何影響了市場情緒或籌碼分佈？(例如：監管消息導致做市商撤單，流動性變差)。
+3. **風險評估**：當前最大的潛在風險或機會在哪裡？
 
-【語氣與內容規範】
-1. **精準具體**：若輸入新聞沒有具體人名/項目，不可硬塞；改用「交易所 / ETF / 監管」等類別描述。
-2. **完全改寫**：請將新聞內化後，用**台灣幣圈常用語**重寫，嚴禁直接翻譯或抄錄。
-3. **因果整合**：整合「新聞消息」與「數據變化」的因果關係。
-
-【輸入數據 1：技術面】
-${JSON.stringify(marketData.signals || {}, null, 2)}
-Alert Events (12H): ${recentAlerts.length > 0 ? JSON.stringify(recentAlerts, null, 2) : "無顯著異常"}
-原始數據: ${JSON.stringify({ btc: marketData.btc, etf: marketData.etf, long_short: marketData.long_short }, null, 2)}
-
-【輸入數據 2：消息面 (過去 24 小時新聞快訊 - 標題與重點)】
-${rssTitles || '無新聞數據'}
-
-【headline 模板（擇一）】
-- 「BTC 震盪偏空，費率高但量縮」
-- 「消息偏多但籌碼擁擠，先看回調」
-- 「聯準會 + ETF 牽動節奏，結構未破」
+【輸入數據】
+[技術訊號] ${JSON.stringify(marketData.signals || {}, null, 2)}
+[原始數據] BTC: $${marketData.btc?.price || 0}, 資金費率: ${marketData.btc?.fundingRate || 0}%, 多空比: ${marketData.longShort?.ratio || 0}
+[異常事件] ${recentAlerts.length > 0 ? JSON.stringify(recentAlerts.slice(0, 3), null, 2) : "無"}
+[鏈上新聞] ${rssTitles || '無顯著新聞'}
 
 【輸出格式】(Strict JSON)
 
-**sentiment_score**: 0-100 分 (請嚴格依照以下權重自行計算)
-   - 消息面 (RSS) 40%: 新聞偏多或偏空
-   - 價格動能 (Momentum) 30%: 技術指標趨勢
-   - 市場波動 (Volatility) 30%: 恐慌程度
-**sentiment**: 根據分數標記 (>=75 貪婪/偏多, <=25 恐懼/偏空, 其他為中性/震盪)
-**headline**: 15-20 字標題，描述當前市場主要結構狀態
-**analysis**: 80-100 字，整合「技術面」與「消息面」。解釋價格行為背後可能的新聞驅動因素，**需提到具體影響事件的項目或人物**。
-**whale_summary**: 巨鯨動態摘要
-**market_structure**: (技術面)
-   - bias: 直接使用 signals.market_feeling
-   - focus_zone: 關注區間
-   - invalidation_zone: 失效區間
-   - resistance_zone: 壓力區間
-**risk_note**: 結構風險提示
-**market_context**: (消息面 - 獨立區塊)
-   - summary: 1-2 句市場關注焦點總結，需包含關鍵詞 (如：Base 鏈、川普政策)。
-   - highlights: Array of { theme: "主題 (含關鍵名詞)", impact: "影響層面" } (2-4 個)
-
-【思考流程（不要輸出）】
-Step 1：用台灣幣圈口吻寫一句話結論與一句話依據。
-Step 1.5：扮演「反向交易者」進行批判，確認是否有誘多/誘空陷阱，稍微修正結論使其更穩健。
-Step 2：把 Step 1 的內容改寫成指定 JSON 欄位。
+**sentiment_score**: 0-100 (綜合評分：新聞 40% + 動能 30% + 籌碼 30%)
+**sentiment**: "偏多" | "偏空" | "震盪" | "中性"
+**headline**: 20 字以內標題，精準概括「主導敘事」與「市場狀態」。(如：ETF 流入趨緩，BTC 縮量測試關鍵支撐)
+**analysis**: 100-150 字深度分析。
+   - **邏輯流**：(1) 點出主導市場的核心因素 (新聞/數據) -> (2) 分析該因素引發的市場行為 (如：導致多頭停損) -> (3) 總結當前結構狀態。
+   - **要求**：言之有物，避免空泛形容詞。
+**whale_summary**: 巨鯨/主力動向一句話總結 (如：Smart Money 正在高位減倉)。
+**market_structure**: (結構判斷)
+   - bias: 使用 signals.market_feeling
+   - focus_zone: 當前多空爭奪最激烈的價格區
+   - invalidation_zone: 趨勢改變的關鍵失效點
+   - resistance_zone: 上方流動性密集的壓力區
+**risk_note**: 針對當前結構的 specific 風險提示 (非通用警語)。
+**market_context**: (敘事背景)
+   - summary: 當前市場最關注的宏觀/賽道焦點。
+   - highlights: [{ theme: "主題", impact: "傳遞機制與影響" }]
 
 ${CONSISTENCY_CHECK}
 
 【輸出】只輸出 JSON。
-
-【JSON 範例】
-Note: emoji 必須根據 sentiment 選擇，例如：
-- 偏多/樂觀: 🚀 📈 💪 🔥 ✨
-- 偏空/風險: 🔻 ⚠️ 🌧️ 📉 💨
-- 震盪/中性: 📊 ⚖️ 🔄 ⏳ 🎢
-{
-  "emoji": "📊",
-  "sentiment": "中性",
-  "sentiment_score": 50,
-  "headline": "聯準會暗示利率維持，BTC 結構震盪等待指引",
-  "analysis": "受聯準會暫緩降息預期影響 (消息面)，比特幣在 9.1 萬區間縮量震盪。鏈上數據顯示長期持有者未動，但短線 OI 隨新聞波動 (技術面)。巨鯨多空比收斂，市場結構暫無明確方向。",
-  "whale_summary": "Top Trader 多空比 1.05，大戶持倉觀望。",
-  "market_structure": {
-    "bias": "中性",
-    "focus_zone": "8.9萬 - 9.1萬",
-    "invalidation_zone": "8.8萬以下",
-    "resistance_zone": "9.25萬 - 9.35萬"
-  },
-  "risk_note": "留意明晚 CPI 數據發布後的波動風險",
-  "market_context": {
-    "summary": "市場聚焦於美國利率政策路徑及近期監管動態，避險情緒略有升溫。",
-    "highlights": [
-      { "theme": "聯準會利率政策討論", "impact": "風險資產定價預期" },
-      { "theme": "SEC 對交易所監管", "impact": "市場流動性擔憂" }
-    ]
-  }
-}
 `
 
         const completion = await openai.chat.completions.create({
@@ -244,29 +207,29 @@ export async function generateDerivativesSummary(data: any): Promise<string | nu
         const prompt = `
 ${VOICE_PACK}
 
-你是一個加密貨幣衍生品交易專家。
-請根據以下「合約數據」生成一段簡短的「短線快照分析」。
+【任務】
+你是衍生品交易臺的資深策略師。
+請根據「合約數據」的異常變化，解讀市場的微觀結構 (Microstructure)。
+
+【分析邏輯】
+1. **擁擠度 (Crowding)**：多空哪一邊過度擁擠？(費率 + OI 判斷)。
+2. **燃料 (Fuel)**：哪一邊有大量清算流動性？
+3. **分歧 (Divergence)**：散戶與大戶是否對做？
 
 【輸入數據】
-1. 資金費率 (Funding Rate): ${JSON.stringify(data.fundingRates?.extremePositive?.[0] || {}, null, 2)} (正值=多頭付費)
-2. 爆倉數據 (Liquidation): 多單爆倉 ${data.liquidations?.summary?.longLiquidatedFormatted || '0'}, 空單爆倉 ${data.liquidations?.summary?.shortLiquidatedFormatted || '0'}
-3. 多空比 (Long/Short): ${data.longShort?.global?.longShortRatio || '未知'} (散戶情緒)
+1. 資金費率: ${JSON.stringify(data.fundingRates?.extremePositive?.[0] || {}, null, 2)}
+2. 爆倉: 多 $${data.liquidations?.summary?.longLiquidatedFormatted || '0'} / 空 $${data.liquidations?.summary?.shortLiquidatedFormatted || '0'}
+3. 多空比: ${data.longShort?.global?.longShortRatio || '未知'}
 
 【輸出要求】
-1. **長度限制**：50-80 字 (繁體中文)
-2. **語氣**：戰術性、簡潔、直接 (像交易室裡的對話)
-3. **內容**：
-   - 判斷當前多空擁擠度
-   - 識別潛在風險 (如軋空、殺多)
-   - 給出一個明確的「短線傾向」(例如：偏向回調接多、偏向高空、觀望)
-
-【範例】
-「費率飆升顯示多頭過熱，且大戶多空比下降，暗示主力正在出貨。即使價格硬撐，短線追高風險極大，偏向反彈找空點。」
-「空單爆倉量巨大，顯示燃料已被清空。費率回歸中性，結構轉強，短線適合回調接多。」
+1. **長度**：60-90 字。
+2. **語氣**：極度專業、冷靜。
+3. **內容**：不要只描述數據，要講出數據背後的「博弈狀態」。
+   - 例如：「費率轉負但價格未跌，顯示現貨買盤強勁，空頭陷入陷阱...」
 
 ${CONSISTENCY_CHECK}
 
-請直接輸出分析內容，不要標題。
+【輸出】直接輸出內文，不要標題。
 `
         const completion = await openai.chat.completions.create({
             model: MODEL_NAME,
@@ -302,52 +265,42 @@ export async function generateMarketContextBrief(
         const prompt = `
 ${VOICE_PACK}
 
-你是「加密台灣」資深編輯，負責每日幣圈快訊精選。
-你的讀者是台灣的加密貨幣交易者，他們需要快速掌握市場動態。
+【任務】
+你是 CryptoTW 的執行編輯。請從混雜的資訊中，為讀者提煉出「高價值的市場情報」。
 
-【任務】從以下新聞中精選「盡量選滿 10 則」重要消息，按影響力排序。除非新聞極少，否則不要少於 5 則。
+【篩選標準 - 只選雜訊中的信號 (Signal over Noise)】
+請從以下新聞中**精選 10 則**最具市場影響力的重點新聞。
+1. **結構性影響**：能改變市場趨勢的事件 (監管/大型機構/技術升級)。
+2. **流動性事件**：大規模的解鎖、轉帳、或清算。
+3. **異常波動**：無明顯原因的暴漲暴跌。
+
+【內容撰寫要求】
+- **Summary**: 80-120 字。將今日看似獨立的新聞串連成一個完整的敘事 (Narrative)。告訴讀者「今天市場的主題是什麼」。
+- **Highlight**: 標題要點出「影響」，而不只是「事件」。
+
+【數據環境】
 ${indicatorSnippet}
 
-【優先順序】
-1. 爆倉/清算（直接影響價格）
-2. 價格劇烈波動（BTC/ETH 漲跌 >2%）
-3. 監管/央行動態（Fed、SEC、各國政策）
-4. ETF/機構買賣（灰度、貝萊德、MicroStrategy）
-5. 交易所異常（遭駭、暫停提領、破產傳聞）
-6. 巨鯨動向（大額轉帳、鏈上異動）
-
-【推薦閱讀規則】(必須包含)
-- 從你的知識庫或歷史事件中，推薦 2 篇相關文章/指標。
-- 格式：{ "title": "...", "path": "... (e.g. /reviews/2023/btc-slump or /indicators/fear-greed)", "reason": "..." }
-- **強烈建議**：若指標顯示異常（如 FGI > 80 或費率過高），必須推薦對應指標頁面。
-
-【說明撰寫】80-120 字（一段流暢的自然語言）
-✅ **核心任務：總結今日快訊重點**
-  - 只根據輸入的新聞內容，總結出今天最重要的 2-3 個市場動態。
-  - 不要加入指標數據（FGI、費率等），專注在新聞本身。
-  - 用台灣群組風格，簡潔說明「今天幣圈發生了什麼」。
-✅ 禁止寫「劇本 A/B」或「如果...則...」。
-
 【輸入新聞】
-${JSON.stringify(newsItems.slice(0, 40).map(n => ({
+${JSON.stringify(newsItems.slice(0, 50).map(n => ({
             t: n.newsflash_title || n.title,
             c: (n.newsflash_content || n.content || '').slice(0, 150)
         })))}
 
 ${CONSISTENCY_CHECK}
 
-【輸出格式】JSON，繁體中文
+【輸出格式】JSON
 {
   "context": {
-      "sentiment": "樂觀|保守|恐慌|中性",
-      "summary": "80-120字一段話總結，簡潔說明當前市場狀態、重點數據、和需要關注的事項",
+      "sentiment": "偏多|偏空|震盪|中性",
+      "summary": "深度總結",
       "highlights": [
         {
-            "title": "10-18字標題",
-            "reason": "40-60字詳細說明，包含具體數據與市場影響",
+            "title": "精煉標題 (15-20字)",
+            "reason": "事件解讀與後續影響 (這是重點)",
             "impact": "高|中|低",
             "bias": "偏多|偏空|中性",
-            "impact_note": "15-25字操作提醒"
+            "impact_note": "操作層面的簡短啟示"
         }
       ],
       "recommended_readings": [
@@ -422,40 +375,45 @@ export async function generateAIDecision(
         const prompt = `
 ${VOICE_PACK}
 
-你是交易室的市場判讀 AI，給出「像下單前一秒」的結論，不是分析報告。
-你是風控，不是喊單。用「風險動作」描述，不用「交易動作」描述。
+【任務】
+你是機構交易室的風控系統 (Risk Control System)。
+請根據即時的市場參數，計算當前的「風險/回報 (R:R)」狀態。
 
-❌禁止：投資建議、目標價、止損價
-✅必須：狀態描述、風險提示、結構判讀
+【判斷核心】
+不是預測漲跌，而是評估「現在進場的勝率與賠率」。
+- **擁擠與反轉**：當所有人都站在同一邊時，反轉風險最高。
+- **流動性結構**：價格是否正在接近流動性密集的區域？
 
 【輸入數據】
-        1. 費率: ${(marketData.fundingRate * 100).toFixed(4)}% (> 0.05 % 多頭過熱, <-0.03% 空頭擁擠)
-        2. 散戶多空比: ${marketData.longShortRatio.toFixed(2)} (> 1.2散戶偏多, <0.8散戶偏空)
-        3. 頂級交易員多空比: ${marketData.topTraderRatio?.toFixed(2) || '未知'}
-        4. 4H爆倉: $${(marketData.totalLiquidation / 1000000).toFixed(1)} M(多: ${(longLiq / 1000000).toFixed(1)}M 空:${(shortLiq / 1000000).toFixed(1)}M) → ${liqDominant} 被清
-    5. OI變化: ${marketData.oiChange ? (marketData.oiChange > 0 ? '+' : '') + marketData.oiChange.toFixed(1) + '%' : '未知'}
-    6. 情緒指數: ${marketData.sentimentScore}/100
-    7. 巨鯨: ${marketData.whaleStatus}
-    8. 新聞: ${newsHighlights.slice(0, 2).join('；') || '無'}
+1. 費率: ${(marketData.fundingRate * 100).toFixed(4)}%
+2. 散戶比: ${marketData.longShortRatio.toFixed(2)}
+3. 頂級交易員: ${marketData.topTraderRatio?.toFixed(2) || 'N/A'}
+4. 4H 爆倉: $${(marketData.totalLiquidation / 1000000).toFixed(1)} M (${liqDominant} 強勢)
+5. OI 變化: ${marketData.oiChange ? (marketData.oiChange > 0 ? '+' : '') + marketData.oiChange.toFixed(1) + '%' : 'N/A'}
+6. 情緒: ${marketData.sentimentScore}
+7. 巨鯨: ${marketData.whaleStatus}
+8. 概況: ${newsHighlights.slice(0, 2).join(' / ')}
 
-【判讀規則】
-    - 費率高 + 未爆倉 = 潛在擁擠
-    - 價漲 + OI減 = 空頭回補（健康）
-    - 單邊爆倉明顯多 = 該方向燃料已消耗
-
-【action 必須是以下其一（台灣用語版）】
-- 追價風險高，先等等
-- 反彈先減壓
-- 回調再看（別急）
-- 結構很亂，先觀望
-- 順勢偏多（但別追）
-- 順勢偏空（留意雙爆）
+【Action 定義 (擇一)】
+- "風險溢價不足 (觀望)"：潛在回報不足以彌補風險。
+- "右側確認中 (等待)"：趨勢未明，等待關鍵位突破。
+- "左側博弈機會 (嘗試)"：盈虧比極佳，可嘗試逆勢。
+- "順勢結構完整 (持有)"：各項指標共振，趨勢延續。
+- "過熱警示 (減倉)"：極度擁擠，隨時可能去槓桿。
+- "籌碼清洗 (清洗)"：正在清除不堅定籌碼。
 
 ${CONSISTENCY_CHECK}
 
-【輸出】JSON，繁體中文
-    { "conclusion": "10-15字狀態", "bias": "偏多|偏空|震盪|中性", "risk_level": "低|中|中高|高", "action": "上述選項之一", "reasoning": "50-80字，提到具體數據", "tags": { "btc": "4字", "alt": "4字", "sentiment": "4字" } }
-    `
+【輸出格式】JSON
+{
+  "conclusion": "12-15 字精準狀態定義 (如：多頭結構完整 但短線過熱)",
+  "bias": "偏多|偏空|震盪|中性",
+  "risk_level": "低|中|中高|高",
+  "action": "上述 Action 選項之一",
+  "reasoning": "60-90 字，邏輯嚴密的推演。指出哪個數據支持了這個判斷。",
+  "tags": { "btc": "4字狀態", "alt": "4字狀態", "sentiment": "4字狀態" }
+}
+`
 
         const completion = await openai.chat.completions.create({
             model: MODEL_NAME,
@@ -536,43 +494,31 @@ export async function generateDailyBroadcastPolish(
         const prompt = `
 ${VOICE_PACK}
 
-你是一個加密市場風控分析師，專為交易型 App 日報設計內容。
+【任務】
+你是 Daily Briefing 的主筆。
+請將本日的市場數據轉化為一份「專業、精煉、具啟發性」的日報摘要。
 
-系統已透過規則判斷今日市場立場為：「${decision.stance}」
+【數據輸入】
+今日定調：${decision.stance}
+費率：${decision.metrics.fundingRate.toFixed(4)}%
+多空比：${decision.metrics.longShortRatio.toFixed(0)}%
+OI 變動：${decision.metrics.oiChange24h.toFixed(1)}%
 
-⚠️ 此結論不可更改，你只能用專業、冷靜、像風控的語氣來解釋這個結論。
-
-【市場數據】
-• 費率：${decision.metrics.fundingRate.toFixed(4)}%（${fundingDisplay}）
-• 多空比：${decision.metrics.longShortRatio.toFixed(0)}% 做多
-• 爆倉偏向：${decision.metrics.liquidationBias}
-• 24H 爆倉總額：$${(decision.metrics.liquidationTotal / 1_000_000).toFixed(1)}M
-• OI 24H 變化：${decision.metrics.oiChange24h > 0 ? '+' : ''}${decision.metrics.oiChange24h.toFixed(1)}%
-• BTC 24H 變化：${decision.metrics.btcPriceChange24h > 0 ? '+' : ''}${decision.metrics.btcPriceChange24h.toFixed(1)}%
-
-【任務】生成交易型日報卡片內容
-
-【輸出格式】JSON，繁體中文
+【輸出格式】JSON
 {
-  "oneLiner": "市場一句話",
+  "oneLiner": "15-20 字，精闢的市場總結 (如：多空膠著等待方向，資金轉向防禦性板塊)",
   "indicatorCards": [
-    { "icon": "💰", "name": "資金費率", "status": "${fundingDisplay}", "note": "..." },
-    { "icon": "👥", "name": "多空比", "status": "${lsDisplay}", "note": "..." },
-    { "icon": "💥", "name": "爆倉 / OI", "status": "${liqOiDisplay}", "note": "..." }
+    { "icon": "💰", "name": "資金費率", "status": "${fundingDisplay}", "note": "簡潔的機制解讀 (12字內)" },
+    { "icon": "👥", "name": "多空比", "status": "${lsDisplay}", "note": "散戶vs大戶心態 (12字內)" },
+    { "icon": "💥", "name": "爆倉 / OI", "status": "${liqOiDisplay}", "note": "流動性狀態 (12字內)" }
   ],
-  "suggestion": "一句話操作建議",
-  "mindset": "心態提醒（可選）"
+  "suggestion": "策略性建議 (15字內，如：減少槓桿，關注現貨支撐)",
+  "mindset": "投資心理提醒 (如：耐心是最好的策略)"
 }
-
-【欄位要求】
-• oneLiner: 10-18 字，核心結論
-• indicatorCards: 三個指標卡片
-• suggestion: 10-18 字，像交易室白板的指令
-• mindset: 15-25 字，心理提醒
 
 ${CONSISTENCY_CHECK}
 
-輸出純 JSON，不要有其他文字。`
+【輸出】只輸出 JSON。`
 
         const completion = await openai.chat.completions.create({
             model: MODEL_NAME,
@@ -709,37 +655,26 @@ export async function generateIndicatorSummary(
         const prompt = `
 ${VOICE_PACK}
 
-你是「加密台灣」的技術分析師，根據鏈上指標與價格數據生成客觀市場解讀。
+【任務】
+你是一位專注於「技術面與鏈上結合」的指標分析師。
+請解讀以下儀表板數據，找出市場的「異常點 (Anomaly)」與「共振點 (Confluence)」。
 
-【重要限制 - 嚴格遵守】
-❌ 禁止：任何投資建議、價格預測、買賣時機
-✅ 必須：結合價格走勢與指標數據分析
-✅ 必須：使用條件語句（「若...則...」「當...時...」）
-✅ 必須：每個論點標明具體數據
+【分析方法】
+1. **交叉驗證**：價格漲但 FGI 跌？-> 背離警告。費率高但 OI 跌？-> 軋空結束。
+2. **情境模擬**：如果價格跌回 X，結構會如何改變？
+3. **數據說話**：所有論點都必須緊扣面板上的數字。
 
 ${btcPriceSection}
-【衍生品指標】
-- 恐懼貪婪指數: ${data.fearGreedIndex.value}/100（${fgiZone}區間）
-- 資金費率: ${fundingPct}%（正常範圍 ±0.01%）
-- 散戶多空比: ${data.longShortRatio.toFixed(2)}（>1.2 偏多, <0.8 偏空, 1.0 均衡）
-- 4H 爆倉: $${liqTotalM}M（多: $${liqLongM}M, 空: $${liqShortM}M）
-${data.oiChange24h !== undefined ? `- OI 24H 變化: ${data.oiChange24h > 0 ? '+' : ''}${data.oiChange24h.toFixed(1)}%` : ''}
-${data.etfNetFlow !== undefined ? `- ETF 淨流入: $${data.etfNetFlow.toFixed(0)}M` : ''}
-${eventSection}
-
-【動態劇本推演 (Scenario Analysis)】
-利用【價格走勢】+【衍生品數據】+【宏觀事件】進行綜合推演：
-- 劇本 A (順勢/延續)：若費率正常且價格突破，下一關卡在哪？
-- 劇本 B (轉折/背離)：若費率過高或 FGI 背離，回調支撐在哪？
-
-【推薦延伸閱讀】
-- 根據當前「最異常」的數據推薦 2 個本站功能。
-- 格式：{ "title": "...", "path": "...", "reason": "..." }
-- 路徑庫：/calendar/cpi, /calendar/nfp, /calendar/fomc, /indicators/funding-rate, /indicators/liquidation
+[ 面板數據 ]
+- FGI: ${data.fearGreedIndex.value} (${fgiZone})
+- Funding: ${fundingPct}%
+- L/S Ratio: ${data.longShortRatio.toFixed(2)}
+- 4H Liq: $${liqTotalM}M
+${data.oiChange24h ? `- OI Δ: ${data.oiChange24h.toFixed(1)}%` : ''}
 
 【輸出格式】JSON
 {
-    "summary": "請將「價格現況」、「指標狀態」、「劇本推演」融合成一段流暢的自然語言 (約 100-120 字)。\n❌ 禁止使用 【】、[] 或列點符號。\n✅ 像資深分析師在群組裡的語氣，一口氣講完重點。\n範例：「BTC 雖在 4H 級別震盪，但資金費率 (0.46%) 顯示多頭擁擠，且 FGI 處於極度恐慌背離，暗示短線動能不足。若無法帶量突破前高，需提防回調測底，建議關注 OI 是否隨價格下跌而退潮。」",
+    "summary": "100-130 字。將數據點串聯成一個有邏輯的分析故事。用詞專業，避免流水帳。重點放在「接下來該關注什麼指標的變化」。",
     "recommended_readings": [
         { "title": "...", "path": "...", "reason": "..." }
     ]
@@ -863,38 +798,24 @@ export async function generateCalendarSummary(input: CalendarSummaryInput): Prom
         const prompt = `
 ${VOICE_PACK}
 
-你是宏觀經濟與幣圈連動的分析專家。
-請針對「最近一個即將發生的事件」，提供簡潔的情境分析。
+【任務】
+你是總體經濟策略師。
+針對即將發生的「關鍵事件」，分析市場的預期心理 (Expectation) 與潛在劇本。
 
-【最近關注焦點】
+【關注事件】
 - 事件：${nearestEvent.title}
 - 時間：${nearestEvent.date}
 - 預期影響：${nearestEvent.impact}
-- 歷史波動：${nearestEvent.volatility || '未知'}%
+- 歷史波動：${nearestEvent.volatility || 'N/A'}%
 
-【輸出結構】必須按照以下段落順序撰寫：
-1. **事件預告**：「下次事件為 [事件名稱]，將於 [X] 天後的 [日期時間] 公布。」
-2. **當前市場狀況**：一句話描述 BTC 目前走勢與市場氣氛。
-3. **歷史回測數據**：引用過去紀錄的 D+1 上漲機率、平均波動等（若有）。
-4. **情境推演**：「若數據 [優於/低於] 預期，歷史顯示...」。
-5. **後續注意**：簡短提醒下一個重要事件。
-
-【風格要求】
-- 專業、簡潔、像資深分析師在群組快速講重點
-- 不要用「劇本A/B」格式，用自然語言
-- 約 100-120 字
-
-【推薦關注】
-- 候選：${nextEvents.map(e => `${e.title} (${e.date})`).join(', ')}
-
-【限制】
-❌ 禁止預測具體數字結果
-❌ 禁止使用「劇本A」「劇本B」等標籤
-✅ 著重於「波動率」與「結構風險/機會」
+【分析架構】(100-120 字)
+1. **市場定價 (Pricing in)**：市場是否已經提前反應了這個利好/利空？
+2. **波動預期**：歷史數據顯示該事件通常帶來多大的震幅？
+3. **關鍵看點**：數據公佈後的關鍵支撐/壓力位在哪？
 
 【輸出格式】JSON
 {
-    "summary": "按照上述結構撰寫的自然語言分析 (約 100-120 字)",
+    "summary": "專業、流暢的分析段落。",
     "recommended_readings": [
         { "title": "...", "path": "/calendar/...", "reason": "..." }
     ]
@@ -944,23 +865,21 @@ export async function generateWhaleSummary(positions: WhalePositionSummary[]): P
         const prompt = `
 ${VOICE_PACK}
 
-你是加密貨幣分析師。根據以下 Hyperliquid 前 20 名巨鯨持倉數據，用 1-2 句話總結他們的動態。
+【任務】
+你是「聰明錢 (Smart Money) 追蹤者」。
+請解讀鏈上大戶的真實意圖：是單純的方向押注？還是基差套利？或是避險對沖？
 
-【數據】
+【持倉數據】
 ${JSON.stringify(positions, null, 2)}
 
-【要求】
-1. 用繁體中文
-2. 極度精簡（25字以內），用詞犀利，直接講重點。
-3. 風格範例：「ETH 多空分歧明顯，BTC 持倉相對穩定，各路資金對沖激烈。」
-4. 重點：多空爭奪、誰在重倉、市場傾向。
-5. ❌ 【嚴重限制】嚴禁使用預測性語言（如：將上漲、即將反轉、看好、目標價）。只描述「當下行為」（加倉 / 對沖 / 減碼 / 觀望）。
-6. 不要廢話，不要建議。
+【輸出要求】
+- **極簡**：25 字以內。
+- **洞察**：分辨「投機」與「對沖」。
+- **風格**：「大戶多單對沖減少，顯示對後市轉為樂觀。」
 
-【輸出】
-直接輸出摘要文字，不要有其他格式。
+${CONSISTENCY_CHECK}
 
-【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
+【輸出】直接輸出摘要文字。
 `
         const completion = await openai.chat.completions.create({
             model: MODEL_NAME,
