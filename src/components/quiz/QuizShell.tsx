@@ -3,8 +3,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QUIZ_QUESTIONS, calculateQuizResult, QuizResult } from '@/lib/quiz-data'
-import { QuizQuestionCard } from './QuizQuestionCard'
-import { QuizResultCard } from './QuizResultCard'
+import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard'
+import { QuizResultCard } from '@/components/quiz/QuizResultCard'
 import { Button } from '@/components/ui/button'
 import { Sparkles, ArrowRight } from 'lucide-react'
 
