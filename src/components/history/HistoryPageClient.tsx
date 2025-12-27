@@ -244,7 +244,7 @@ export function HistoryPageClient() {
                             {/* Header */}
                             <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
                                 <SectionHeaderCard
-                                    title={UI_LABELS.HISTORY.ROOT_TITLE}
+                                    title={UI_LABELS.HOME.HISTORY_TITLE}
                                     icon={BookOpen}
                                     rightElement={
                                         <span className="text-[10px] text-[#666] font-mono">{filteredReviews.length} 個事件</span>

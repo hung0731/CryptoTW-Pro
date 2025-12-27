@@ -148,7 +148,7 @@ export default function MePage() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans pb-24">
-            <PageHeader title={UI_LABELS.PROFILE.ROOT_TITLE} showLogo={false} backHref="/" backLabel="返回" />
+            <PageHeader title={UI_LABELS.ME.ROOT_TITLE} showLogo={false} backHref="/" backLabel="返回" />
 
             <div className={cn("pt-6 max-w-lg mx-auto", SPACING.pageX, SPACING.classes.gapCards)}>
                 {/* Profile Card */}
@@ -189,11 +189,11 @@ export default function MePage() {
                 <div className="space-y-3">
                     <UniversalCard variant="luma" size="M" className="p-0 overflow-hidden">
                         <div className="border-b border-[#1A1A1A] bg-[#0F0F10]">
-                            <SectionHeaderCard title={UI_LABELS.PROFILE.ROOT_TITLE} />
+                            <SectionHeaderCard title={UI_LABELS.ME.ROOT_TITLE} />
                         </div>
                         <div className="divide-y divide-white/5">
-                            <MenuLink icon={Bell} label={UI_LABELS.PROFILE.NOTIFICATIONS} href="/me/notifications" />
-                            <MenuLink icon={Link2} label={UI_LABELS.PROFILE.BINDING} href="/me/bindings" />
+                            <MenuLink icon={Bell} label={UI_LABELS.ME.NOTIFICATIONS} href="/me/notifications" />
+                            <MenuLink icon={Link2} label={UI_LABELS.ME.BINDING} href="/me/bindings" />
                             <MenuLink icon={Crown} label="VIP 計劃" href="/join" />
                         </div>
                     </UniversalCard>

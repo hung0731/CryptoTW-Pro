@@ -171,7 +171,7 @@ export function AIQuickRead({
                             {/* Main Status Text */}
                             <div className="space-y-1">
                                 <p className="text-sm font-bold text-white tracking-wide">
-                                    {UI_LABELS.AI.ANALYZING}
+                                    {UI_LABELS.INTELLIGENCE.ANALYZING}
                                 </p>
                                 {/* Dynamic Subtext */}
                                 <p className="text-xs text-neutral-500 h-4 transition-all duration-300">

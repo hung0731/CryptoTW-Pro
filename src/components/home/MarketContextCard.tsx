@@ -87,7 +87,7 @@ export function MarketContextCard({ data, isLoading }: MarketContextProps) {
             {/* Header */}
             <div className="mb-3">
                 <SectionHeaderCard
-                    title={UI_LABELS.AI.QUICK_READ}
+                    title={UI_LABELS.INTELLIGENCE.DIGEST}
                     icon={Sparkles}
                     className="!p-0 !bg-transparent mb-2" // Minimal, integrated header
                     rightElement={<span className="text-lg">{contextEmoji}</span>}
