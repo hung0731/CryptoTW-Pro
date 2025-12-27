@@ -1,16 +1,16 @@
 import { logger } from '@/lib/logger'
-import { generateMarketContextBrief } from '@/lib/gemini'
+import { generateMarketContextBrief } from '@/lib/ai'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 import { coinglassV4Request } from '@/lib/coinglass'
-import { MarketContextBrief } from '@/lib/gemini'
+import { MarketContext } from '@/lib/types'
 
 const CACHE_KEY = 'market_context'
 
 export class NewsService {
-    static async getMarketContext(): Promise<MarketContextBrief | null> {
+    static async getMarketContext(): Promise<MarketContext | null> {
         try {
             // Check cache first
-            const cached = await getCache<MarketContextBrief>(CACHE_KEY)
+            const cached = await getCache<MarketContext>(CACHE_KEY)
             if (cached) {
                 logger.info('[Cache HIT] market_context', { feature: 'news-service' })
                 return cached

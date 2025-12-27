@@ -3,7 +3,8 @@ import { getDerivativesData } from '@/app/api/market/derivatives/route'
 import { getWhaleData } from '@/app/api/market/whales/route'
 import { supabase } from '@/lib/supabase'
 import { cachedCoinglassV4Request } from '@/lib/coinglass'
-import { generateMarketContextBrief, generateAIDecision, MarketContextBrief, AIDecision } from '@/lib/gemini'
+import { generateMarketContextBrief, generateAIDecision, AIDecision } from '@/lib/ai'
+import { MarketContext } from '@/lib/types'
 import { getCache, setCache } from '@/lib/cache'
 
 export interface HomeRouterData {
@@ -36,7 +37,7 @@ export interface HomeRouterData {
         status: string
         link: string
     }[]
-    marketContext: MarketContextBrief | null
+    marketContext: MarketContext | null
 }
 
 export class HomeRouterService {
@@ -56,7 +57,7 @@ export class HomeRouterService {
             ])
 
             // --- Market Context + AI Decision Logic ---
-            let marketContext: MarketContextBrief | null = await getCache('market_context_brief')
+            let marketContext: MarketContext | null = await getCache('market_context_brief')
             let aiDecision: AIDecision | null = await getCache('ai_decision')
 
             // Fetch news for both AI models

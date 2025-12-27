@@ -1,5 +1,5 @@
 import { getMarketSnapshot } from '@/lib/market-aggregator'
-import { generateMarketSummary } from '@/lib/gemini'
+import { generateDailyBroadcastPolish, generateMarketSummary } from '@/lib/ai'
 import { supabase } from '@/lib/supabase'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { fetchRSSTitles } from '@/lib/rss'

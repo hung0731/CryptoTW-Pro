@@ -1,12 +1,13 @@
 
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
-import { generateReviewsSummary } from '@/lib/gemini'
+import { generateReviewsSummary } from '@/lib/ai'
 import { getCache, setCache } from '@/lib/cache'
 import { REVIEWS_DATA } from '@/lib/reviews-data'
 
+import { getMarketSnapshot } from '@/lib/market-aggregator'
+
 export const dynamic = 'force-dynamic'
-// API Route to get AI Summary for Reviews
 // API Route to get AI Summary for Reviews
 // Cached for 4 hours (to capture market shifts)
 
@@ -21,33 +22,24 @@ export async function GET() {
             return NextResponse.json(cached)
         }
 
-        // 2. Fetch Current Market Context (Cross-Pollination)
-        const apiKey = process.env.COINGLASS_API_KEY
-        let currentContext: { fgi: any, fundingRate: any } | undefined = undefined
+        // 2. Fetch Current Market Context via Snapshot
+        let currentContext: { btcPrice: number, fgi: number, fundingRate: number } | undefined = undefined
 
-        if (apiKey) {
-            try {
-                const [fgiRes, frRes] = await Promise.all([
-                    fetch('https://open-api-v4.coinglass.com/api/index/fear-greed-history', { headers: { 'CG-API-KEY': apiKey } }),
-                    fetch('https://open-api-v4.coinglass.com/api/futures/funding-rate/vol?symbol=BTC&type=U', { headers: { 'CG-API-KEY': apiKey } })
-                ])
-
-                const fgiJson = fgiRes.ok ? await fgiRes.json() : null
-                const frJson = frRes.ok ? await frRes.json() : null
-
-                currentContext = {
-                    fgi: fgiJson?.data?.[0]?.values?.[0]?.value || null,
-                    fundingRate: frJson?.data?.[0]?.rate || null
-                }
-            } catch (err) {
-                logger.warn('Failed to fetch indicators for reviews summary', { error: err })
+        try {
+            const snapshot = await getMarketSnapshot()
+            currentContext = {
+                btcPrice: snapshot.btc.price,
+                fgi: snapshot.sentiment.fear_greed_index || 50,
+                fundingRate: snapshot.capital_flow.funding_rate || 0
             }
+        } catch (err) {
+            logger.warn('Failed to fetch snapshot for reviews summary', { error: err })
         }
 
         // 3. Generate New Summary
         logger.info('[Reviews AI] Generating new summary with context', { feature: 'reviews', hasContext: !!currentContext })
 
-        const result = await generateReviewsSummary(REVIEWS_DATA, currentContext)
+        const result = await generateReviewsSummary({ events: REVIEWS_DATA, currentContext })
 
         if (!result) {
             throw new Error('Failed to generate summary')

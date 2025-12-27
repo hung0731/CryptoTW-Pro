@@ -1,7 +1,7 @@
 
 import { logger } from '@/lib/logger'
 import { BotContext, BotHandler, HandlerResult } from './base'
-import { generateFallbackReply } from '@/lib/gemini'
+import { generateFallbackReply } from '@/lib/ai'
 import { fetchStockTicker, createStockCard } from '@/lib/stocks'
 import { createHelpFlexMessage } from '../ui/flex-generator'
 import { normalizeInput } from '../utils/parsers'

@@ -2,7 +2,7 @@ import { AlertEvent } from './alert-engine'
 import { multicastMessage } from './line-bot'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { supabase } from './supabase'
-import { generateAlertExplanation } from './gemini'
+import { generateAlertExplanation } from './ai'
 import { logger } from '@/lib/logger'
 
 /**

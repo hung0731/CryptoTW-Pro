@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { generateMarketContextBrief } from '@/lib/gemini'
+import { generateMarketContextBrief } from '@/lib/ai'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 

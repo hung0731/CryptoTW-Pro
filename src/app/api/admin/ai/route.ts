@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdmin, unauthorizedResponse } from '@/lib/admin-auth'
-import { generateMarketContextBrief, generateAIDecision } from '@/lib/gemini'
+import { generateMarketContextBrief, generateAIDecision, generateAlertExplanation } from '@/lib/ai'
 import { getCache, setCache, CacheTTL, clearCache } from '@/lib/cache'
 import { coinglassV4Request, getCoinglassApiKey } from '@/lib/coinglass'
 

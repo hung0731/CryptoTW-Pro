@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
-import { generateCalendarSummary, CalendarSummaryInput } from '@/lib/gemini'
+import { generateCalendarSummary, CalendarSummaryInput } from '@/lib/ai'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 import crypto from 'crypto'
 

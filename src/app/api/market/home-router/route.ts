@@ -5,7 +5,7 @@ import { getDerivativesData } from '../derivatives/route'
 import { getWhaleData } from '../whales/route'
 import { supabase } from '@/lib/supabase'
 import { cachedCoinglassV4Request } from '@/lib/coinglass'
-import { generateMarketContextBrief, generateAIDecision, AIDecision } from '@/lib/gemini'
+import { generateMarketContextBrief, generateAIDecision, AIDecision } from '@/lib/ai'
 import { MarketContext } from '@/lib/types'
 import { getCache, setCache } from '@/lib/cache'
 

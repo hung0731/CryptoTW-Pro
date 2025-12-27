@@ -172,7 +172,7 @@ export async function polishWithAI(
     decision: StanceDecision
 ): Promise<PolishResult> {
     // Dynamic import to avoid circular dependency
-    const { generateDailyBroadcastPolish } = await import('./gemini')
+    const { generateDailyBroadcastPolish } = await import('./ai')
 
     try {
         const result = await generateDailyBroadcastPolish(decision)

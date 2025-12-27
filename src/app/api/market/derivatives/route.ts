@@ -2,7 +2,7 @@
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { coinglassV4Request } from '@/lib/coinglass'
-import { generateDerivativesSummary } from '@/lib/gemini'
+import { generateDerivativesSummary } from '@/lib/ai'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'

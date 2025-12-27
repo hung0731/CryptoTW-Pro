@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
-import { generateIndicatorSummary, IndicatorSummaryInput } from '@/lib/gemini'
+import { generateIndicatorSummary, IndicatorSummaryInput } from '@/lib/ai'
 import { getCache, setCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
@@ -14,10 +14,10 @@ function generateCacheKey(data: IndicatorSummaryInput, nearestEvent?: any): stri
     const roundedLsr = Math.round((Number(data.longShortRatio) || 0) * 100) / 100 // 2 decimal precision
 
     // Include nearest event in cache key if it exists
-    const eventKey = nearestEvent ? `${nearestEvent.def.key}-${nearestEvent.daysUntil}` : 'no-event'
+    const eventKey = nearestEvent ? `${nearestEvent.def.key} -${nearestEvent.daysUntil} ` : 'no-event'
 
     // Generate cache key based on inputs + version
-    const CACHE_KEY = `indicator-summary-v5-${JSON.stringify({ roundedFgi, roundedFr, roundedLsr, eventKey })}`
+    const CACHE_KEY = `indicator - summary - v5 - ${JSON.stringify({ roundedFgi, roundedFr, roundedLsr, eventKey })} `
     return CACHE_KEY
 }
 

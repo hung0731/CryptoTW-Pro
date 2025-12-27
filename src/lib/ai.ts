@@ -769,14 +769,7 @@ ${CONSISTENCY_CHECK}
 // ============================================
 
 export interface ReviewsSummaryInput {
-    eventTitle: string
-    eventDate: string
-    stats: {
-        maxDrawdown: number
-        recoveryDays: number
-        volatility: number
-    }
-    context?: string
+    events: any[]
     currentContext?: {
         btcPrice: number
         fgi: number
@@ -789,32 +782,38 @@ export async function generateReviewsSummary(input: ReviewsSummaryInput): Promis
 
     try {
         const currentStats = input.currentContext ? `
-【當前市場狀態 (Doppelgänger Check)】
+【當前市場狀態 (Reality)】
 - BTC 價格: $${input.currentContext.btcPrice.toLocaleString()}
 - 恐懼貪婪: ${input.currentContext.fgi}/100
 - 資金費率: ${(input.currentContext.fundingRate * 100).toFixed(4)}%
 ` : ''
 
+        const eventsContext = input.events.map(e => `
+- 事件: ${e.title} (${e.year})
+  - 類型: ${e.tags.join(', ')}
+  - 狀態: ${e.marketStates.join(', ')}
+  - 關鍵數據: MDD ${e.maxDrawdown}, 修復 ${e.recoveryDays}
+`).join('\n')
+
         const prompt = `
 ${VOICE_PACK}
 
 你是一個鑽研金融歷史的量化交易員。
-請比較「歷史事件」與「當前市場」，找出相似與相異之處。
+請根據當前市場狀態，從歷史事件庫中尋找「最相似的歷史韻腳 (Rhyme)」。
 
-【歷史事件】
-- 事件：${input.eventTitle} (${input.eventDate})
-- 數據：最大回撤 ${input.stats.maxDrawdown}%，修復期 ${input.stats.recoveryDays} 天
-- 背景：${input.context || '無'}
+【歷史事件庫】
+${eventsContext}
 
 ${currentStats}
 
 【分析任務】
-1. **歷史回顧**：當時發生了什麼？市場怎麼反應？
-2. **穿越對比** (Doppelgänger)：如果有的話，比較當時指標與現在的異同。(例如：當時 FGI 也是 90，現在也是，結構類似)
-3. **結論**：這段歷史給我們現在什麼啟示？(例如：修復期通常長達一個月，現在別急著抄底)
+1. **歷史對標**：當前環境最像哪一個歷史事件？（若無，則指出現在是獨特行情）
+2. **差異分析**：雖然像，但有什麼決定性的不同？
+3. **歷史啟示**：根據該歷史事件的後續走向，現在應該注意什麼風險？
 
-長度限制：80-110 字。
-格式：一段話，包含「回顧」、「對比」、「啟示」。
+長度限制：80-120 字。
+格式：一段流暢的分析，包含「對標」、「差異」、「啟示」。
+語氣：專業、警示、客觀。
 
 ${CONSISTENCY_CHECK}
 
@@ -912,104 +911,55 @@ ${CONSISTENCY_CHECK}
     }
 }
 
+
 // ============================================
-// Global Brief (Command Center / God Mode)
+// Whale Summary (Hyperliquid)
 // ============================================
 
-export interface GlobalBriefResult {
-    verdict: '做多' | '做空' | '觀望' | '中性'
-    score: number // 0-100 (0=Bearish, 100=Bullish)
-    action: string // 3-second takeaway
-    headline: string // One-liner scenario
-    analysis: {
-        sentiment: string // News summary
-        structure: string // Indicators summary
-        catalyst: string // Event summary
-    }
+export interface WhalePositionSummary {
+    rank: number
+    symbol: string
+    side: 'LONG' | 'SHORT'
+    valueUsd: number
+    pnl: number
+    leverage: number
 }
 
-export async function generateGlobalBrief(input: {
-    news: any[]
-    indicators: { fgi: any, fundingRate: any }
-    catalyst: any
-}): Promise<GlobalBriefResult | null> {
+export async function generateWhaleSummary(positions: WhalePositionSummary[]): Promise<string | null> {
     if (!openai) return null
 
-    const lockKey = 'lock:gemini:global_brief'
-    if (!await acquireLock(lockKey, 60)) {
-        logger.warn('AI Busy: Global Brief generation locked', { feature: 'ai' })
-        return null
-    }
-
     try {
-        // Format Indicators
-        const fgiVal = input.indicators.fgi || 50
-        const frVal = input.indicators.fundingRate ? (input.indicators.fundingRate * 100).toFixed(4) : '0'
-
-        // Format Catalyst
-        const catalystText = input.catalyst
-            ? `${input.catalyst.def.name} (${input.catalyst.daysUntil}天後)`
-            : '近期無重大事件'
-
         const prompt = `
 ${VOICE_PACK}
 
-你是指揮中心的首席策略官。請綜合以下「三位一體 (Triad)」數據，給出全域市場判決。
+你是加密貨幣分析師。根據以下 Hyperliquid 前 20 名巨鯨持倉數據，用 1-2 句話總結他們的動態。
 
-【輸入情資】
-1. **情緒面 (Sentiment)** - 新聞 (前 5 則):
-${input.news.map(n => `- ${n.newsflash_title || n.title}`).join('\n')}
+【數據】
+${JSON.stringify(positions, null, 2)}
 
-2. **結構面 (Structure)** - 指標:
-- 恐懼貪婪指數: ${fgiVal}/100
-- 資金費率: ${frVal}% (正常 ±0.01%, >0.05% 過熱)
+【要求】
+1. 用繁體中文
+2. 極度精簡（25字以內），用詞犀利，直接講重點。
+3. 風格範例：「ETH 多空分歧明顯，BTC 持倉相對穩定，各路資金對沖激烈。」
+4. 重點：多空爭奪、誰在重倉、市場傾向。
+5. ❌ 【嚴重限制】嚴禁使用預測性語言（如：將上漲、即將反轉、看好、目標價）。只描述「當下行為」（加倉 / 對沖 / 減碼 / 觀望）。
+6. 不要廢話，不要建議。
 
-3. **催化劑 (Catalyst)** - 日曆:
-- ${catalystText}
+【輸出】
+直接輸出摘要文字，不要有其他格式。
 
-【決策邏輯 (The Triad)】
-- **結構優先**：若費率極高 (>0.05%)，即使新聞利好，判決應傾向「觀望/做空」(過熱風險)。
-- **共振確認**：若新聞利空 + 結構轉弱 + 無催化劑 -> 判決「做空」。
-- **催化劑效應**：若有重大事件 (<2天)，判決應傾向「觀望」(等待落地)。
-
-【輸出欄位】(JSON)
-- verdict: "做多" | "做空" | "觀望" | "中性"
-- score: 0-100 (0極空, 100極多, 50中性)
-- action: 3-5 字指令，極短、有力 (如 "等待回調", "順勢操作", "空手觀望")。
-- headline: 10-15 字，今日最重要的劇本 (如 "多頭過熱且缺乏催化劑，提防回調")。
-- analysis:
-    - sentiment: 15 字內的精簡解讀。
-    - structure: 15 字內的精簡解讀。
-    - catalyst: 15 字內的精簡解讀。
-
-${CONSISTENCY_CHECK}
-
-請輸出 JSON:
-{
-    "verdict": "觀望",
-    "score": 65,
-    "action": "等待數據落地",
-    "headline": "CPI 前夕縮量震盪，結構偏多但缺乏動能",
-    "analysis": {
-        "sentiment": "新聞多空交雜，無明確方向",
-        "structure": "費率健康，籌碼結構穩固",
-        "catalyst": "等待 CPI 數據指引方向"
-    }
-}
+【強制要求排版】中英文、中文與數字、數字與單位之間都一定要加空格如："ABC 中文 123 中文"；°/% 不加。中文用全形標點，不重複；英文句子與書名用半形。數字用半形。專有名詞用官方大小寫，避免亂縮寫。
 `
         const completion = await openai.chat.completions.create({
             model: MODEL_NAME,
             messages: [{ role: 'user', content: prompt }],
-            response_format: { type: "json_object" }
         })
 
-        const text = completion.choices[0]?.message?.content || '{}'
-        return formatObjectStrings(JSON.parse(text))
-
+        return formatTaiwaneseText(completion.choices[0]?.message?.content?.trim() || '')
     } catch (e) {
-        logger.error('Grok Global Brief Error:', e, { feature: 'ai' })
+        logger.error('Grok Whale Summary Error:', e, { feature: 'ai' })
         return null
-    } finally {
-        await releaseLock('lock:gemini:global_brief')
     }
 }
+
+
