@@ -71,10 +71,14 @@ export class HomeRouterService {
 
                 // Generate Market Context (for news highlights)
                 let contextPromise = Promise.resolve(marketContext)
-                if (!marketContext && news && Array.isArray(news)) {
+                // Only generate if we don't have cached context AND we have news
+                if (!marketContext && news && Array.isArray(news) && news.length > 0) {
                     contextPromise = generateMarketContextBrief(news).then(async res => {
                         if (res) await setCache(CACHE_KEYS.MARKET_CONTEXT, res, 1800) // 30 mins
                         return res
+                    }).catch(err => {
+                        logger.error('Context Gen Failed', err)
+                        return null
                     })
                 }
 

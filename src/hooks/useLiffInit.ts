@@ -41,12 +41,18 @@ export function useLiffInit(liffId: string): UseLiffInitReturn {
                 const startTime = Date.now()
                 let liff: any = (window as any).liff
 
+                // Detect if running inside LINE App
+                const isLineClient = /Line\//i.test(navigator.userAgent)
+                // If in LINE, wait longer (10s) for SDK injection.
+                // If in external browser, wait very briefly (2s) just in case, but fail fast to show Guest UI.
+                const waitLimit = isLineClient ? 10000 : 2000
+
                 while (!liff) {
-                    if (Date.now() - startTime > SDK_MAX_WAIT) {
-                        logger.warn('LIFF SDK timeout', { feature: 'useLiffInit' })
+                    if (Date.now() - startTime > waitLimit) {
+                        logger.warn(`LIFF SDK timeout (${waitLimit}ms)`, { feature: 'useLiffInit', isLineClient })
                         break
                     }
-                    await new Promise(r => setTimeout(r, 50))
+                    await new Promise(r => setTimeout(r, 100))
                     liff = (window as any).liff
                 }
 
