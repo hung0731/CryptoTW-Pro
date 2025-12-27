@@ -43,8 +43,7 @@ export function UniversalCard({
         clickable: cn(
             SURFACE.cardPrimary,
             BORDER.primary,
-            "hover:bg-[#141414] hover:border-white/[0.15]",
-            ANIMATION.hoverCard,
+            "hover:border-white transition-colors duration-200", // Active Border
             ANIMATION.activePress,
             FOCUS.ringSubtle,
             "cursor-pointer group overflow-hidden"
@@ -52,26 +51,26 @@ export function UniversalCard({
         ghost: cn(SURFACE.ghost, BORDER.ghost, "hover:bg-[#1A1A1A]/30", ANIMATION.hoverCard),
 
         // ================================================
-        // LUMA STYLE VARIANTS (Modern Glassmorphism)
+        // LUMA STYLE VARIANTS (Flattened for Uber Style)
         // ================================================
         luma: cn(
-            "bg-white/[0.02] backdrop-blur-xl",
-            "border border-white/[0.08]",
-            "rounded-2xl",
-            "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_0_40px_-15px_rgba(120,119,198,0.15)]"
+            SURFACE.cardPrimary, // #0D0D0D
+            BORDER.primary,      // #1E1E1E
+            // No shadow, let generic code handle radius or force it here if needed.
+            // UniversalCard uses sizeStyles for radius, but luma had hardcoded rounded-2xl.
+            // We should let sizeStyles handle radius or default to reduced radius.
+            // If we remove rounded-2xl here, sizeStyles will apply.
         ),
         lumaSubtle: cn(
-            "bg-white/[0.015] backdrop-blur-lg",
-            "border border-white/[0.05]",
-            "rounded-xl"
+            SURFACE.cardPassive, // #141414
+            BORDER.primary
         ),
         lumaClickable: cn(
-            "bg-white/[0.02] backdrop-blur-xl",
-            "border border-white/[0.08]",
-            "rounded-2xl",
+            SURFACE.cardPrimary,
+            BORDER.primary,
             "cursor-pointer",
-            "transition-all duration-200",
-            "hover:border-white/[0.15] hover:shadow-[0_0_30px_-5px_rgba(120,119,198,0.2),inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:-translate-y-0.5",
+            "transition-colors duration-200",
+            "hover:border-white", // Active Border
             "active:scale-[0.98]"
         ),
     }

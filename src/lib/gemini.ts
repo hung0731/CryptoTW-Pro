@@ -1,12 +1,20 @@
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 import { formatTaiwaneseText, formatObjectStrings } from './format-utils'
 import { acquireLock, releaseLock } from './cache'
 import { logger } from '@/lib/logger'
+import { MarketContext } from '@/lib/types'
 
-const apiKey = process.env.GEMINI_API_KEY
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
-export const MODEL_NAME = 'gemini-2.5-flash-lite-preview-09-2025'
+// ==========================================
+// xAI (Grok) Configuration
+// ==========================================
+const apiKey = process.env.XAI_API_KEY || process.env.GEMINI_API_KEY // Fallback for transition
+const openai = apiKey ? new OpenAI({
+    apiKey: apiKey,
+    baseURL: 'https://api.x.ai/v1',
+}) : null
+
+export const MODEL_NAME = 'grok-4-1-fast-non-reasoning-latest'
 
 const VOICE_PACK = `
 【CryptoTW 台灣用語 Voice Pack（MANDATORY）】
@@ -62,9 +70,8 @@ export interface MarketSummaryResult {
 }
 
 export async function generateAlertExplanation(alert: any): Promise<string | null> {
-    if (!genAI) return null
+    if (!openai) return null
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
         const prompt = `
 ${VOICE_PACK}
 
@@ -97,10 +104,14 @@ ${CONSISTENCY_CHECK}
 
 【輸出】(直接輸出文字，不要有其他廢話)
 `
-        const result = await model.generateContent(prompt)
-        return formatTaiwaneseText(result.response.text().trim())
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+        })
+
+        return formatTaiwaneseText(completion.choices[0]?.message?.content?.trim() || '')
     } catch (e) {
-        logger.error('Gemini Alert Explainer Error:', e, { feature: 'gemini' })
+        logger.error('Grok Alert Explainer Error:', e, { feature: 'ai' })
         return null // Fallback to static text
     }
 }
@@ -110,20 +121,18 @@ export async function generateMarketSummary(
     recentAlerts: any[] = [],
     rssTitles: string = '' // New parameter for unified context
 ): Promise<MarketSummaryResult | null> {
-    if (!genAI) {
-        logger.error('Gemini API Key is missing', { feature: 'gemini' })
+    if (!openai) {
+        logger.error('xAI API Key is missing', { feature: 'ai' })
         return null
     }
 
-    const lockKey = 'lock:gemini:market_summary'
+    const lockKey = 'lock:gemini:market_summary' // Keep old lock key for compatibility
     if (!await acquireLock(lockKey, 60)) {
-        logger.warn('Gemini Busy: Market Summary generation locked', { feature: 'gemini' })
+        logger.warn('AI Busy: Market Summary generation locked', { feature: 'ai' })
         return null
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
-
         const prompt = `
 ${VOICE_PACK}
 
@@ -209,22 +218,17 @@ Note: emoji 必須根據 sentiment 選擇，例如：
 }
 `
 
-        const result = await model.generateContent(prompt)
-        const response = result.response
-        const text = response.text()
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
 
-        // Extract JSON from markdown code block if present
-        const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/)
-
-        if (jsonMatch) {
-            const jsonStr = jsonMatch[1]
-            return formatObjectStrings(JSON.parse(jsonStr))
-        }
-
+        const text = completion.choices[0]?.message?.content || '{}'
         return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
-        logger.error('Gemini Generation Error:', e, { feature: 'gemini' })
+        logger.error('Grok Generation Error:', e, { feature: 'ai' })
         return null
     } finally {
         await releaseLock('lock:gemini:market_summary')
@@ -232,9 +236,8 @@ Note: emoji 必須根據 sentiment 選擇，例如：
 }
 
 export async function generateDerivativesSummary(data: any): Promise<string | null> {
-    if (!genAI) return null
+    if (!openai) return null
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
         const prompt = `
 ${VOICE_PACK}
 
@@ -262,39 +265,36 @@ ${CONSISTENCY_CHECK}
 
 請直接輸出分析內容，不要標題。
 `
-        const result = await model.generateContent(prompt)
-        return formatTaiwaneseText(result.response.text().trim())
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+        })
+        return formatTaiwaneseText(completion.choices[0]?.message?.content?.trim() || '')
     } catch (e) {
-        logger.error('Gemini Derivatives Summary Error:', e, { feature: 'gemini' })
+        logger.error('Grok Derivatives Summary Error:', e, { feature: 'ai' })
         return null
     }
 }
 
-export interface MarketContextBrief {
-    sentiment: '樂觀' | '保守' | '恐慌' | '中性'
-    summary: string
-    highlights: Array<{
-        title: string        // 新聞標題 (8-14字)
-        reason: string       // 25-40字說明 (快訊頁用)
-        impact: '高' | '中' | '低'  // 影響力 (快訊頁用)
-        bias: '偏多' | '偏空' | '中性'  // 盤勢影響 (首頁用)
-        impact_note: string  // 10-20字影響判斷 (首頁用)
-    }>
-}
-
+// Market Context Generation
 export async function generateMarketContextBrief(
-    newsItems: any[]
-): Promise<MarketContextBrief | null> {
-    if (!genAI) return null
+    newsItems: any[],
+    indicators?: { fgi: any, fundingRate: any } // Cross-pollination
+): Promise<MarketContext | null> {
+    if (!openai) return null
 
     const lockKey = 'lock:gemini:market_context'
     if (!await acquireLock(lockKey, 60)) {
-        logger.warn('Gemini Busy: Market Context generation locked', { feature: 'gemini' })
+        logger.warn('AI Busy: Market Context generation locked', { feature: 'ai' })
         return null
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+        const indicatorSnippet = indicators ? `
+【關鍵數據環境 (Reality Check)】
+- 恐懼貪婪指數: ${indicators.fgi || '未知'}/100
+- BTC 資金費率: ${indicators.fundingRate ? (indicators.fundingRate * 100).toFixed(4) : '未知'}%
+` : ''
 
         const prompt = `
 ${VOICE_PACK}
@@ -303,6 +303,7 @@ ${VOICE_PACK}
 你的讀者是台灣的加密貨幣交易者，他們需要快速掌握市場動態。
 
 【任務】從以下新聞中精選「盡量選滿 10 則」重要消息，按影響力排序。除非新聞極少，否則不要少於 5 則。
+${indicatorSnippet}
 
 【優先順序】
 1. 爆倉/清算（直接影響價格）
@@ -312,30 +313,17 @@ ${VOICE_PACK}
 5. 交易所異常（遭駭、暫停提領、破產傳聞）
 6. 巨鯨動向（大額轉帳、鏈上異動）
 
-【標題撰寫】8-15 字
-✅ 用新聞動詞開頭：突破、失守、重挫、飆漲、爆倉、驚傳、宣布、傳出、證實
-✅ 數字具體化：「BTC 失守 10 萬美元」而非「BTC 下跌」
-✅ 台灣用語：「美元」非「美金」、「Fed」可用「聯準會」、「回調」非「回撤」
-❌ 避免：問句標題、驚嘆號結尾、「震驚」「瘋狂」等聳動詞
+【推薦閱讀規則】(必須包含)
+- 從你的知識庫或歷史事件中，推薦 2 篇相關文章/指標。
+- 格式：{ "title": "...", "path": "... (e.g. /reviews/2023/btc-slump or /indicators/fear-greed)", "reason": "..." }
+- **強烈建議**：若指標顯示異常（如 FGI > 80 或費率過高），必須推薦對應指標頁面。
 
-【說明撰寫】25-40 字
-✅ 必須包含：具體數據 + 市場影響判斷
-✅ 結尾給方向：「短線偏空」「多頭警戒」「觀望為主」「支撐有效」
-❌ 禁用模糊語：「顯示市場情緒」「反映投資者信心」「值得關注」
-
-【範例】
-標題：「BTC 失守 10 萬美元關卡」
-說明：「24 小時內超過 2.5 億美元多單遭清算，短線跌勢未止，反彈前建議觀望。」
-
-標題：「貝萊德單日吸金逾 7 億美元」
-說明：「持倉量創歷史新高，機構買盤穩定支撐價格，回調空間有限。」
-
-【加權】優先亞洲時段消息、台灣用戶常用交易所（幣安、OKX、MAX）
-
-【排除】
-- 純技術更新、小幣空投、廣告軟文、重複消息
-- 交易所宣傳：上幣公告、交易量里程碑、平台活動（例：「HTX 將上線 ZKP」「Bitget 交易量破 X 億」）
-- 非價格相關：NFT 發布、遊戲合作、品牌贊助
+【說明撰寫】35-60 字
+✅ **核心任務：數據驗證 (Reality Check)**
+  - 利用輸入的【關鍵數據環境】(FGI / 費率) 來驗證新聞情緒。
+  - **若一致**：簡述市場情緒 (如「利多頻傳且資金費率升溫，情緒樂觀」)。
+  - **若矛盾 (最重要)**：直接點出背離 (如「新聞雖偏多，但費率異常偏高，顯示過熱風險」)。
+✅ 禁止寫「劇本 A/B」或「如果...則...」。
 
 【輸入新聞】
 ${JSON.stringify(newsItems.slice(0, 40).map(n => ({
@@ -343,40 +331,39 @@ ${JSON.stringify(newsItems.slice(0, 40).map(n => ({
             c: (n.newsflash_content || n.content || '').slice(0, 150)
         })))}
 
-【思考流程（不要輸出）】
-Step 1：用台灣幣圈口吻寫 summary。
-Step 1.5：扮演「反向交易者」進行批判，確認是否有誘多/誘空陷阱，稍微修正結論使其更穩健。
-Step 2：把內容改寫成指定 JSON 欄位。
-
 ${CONSISTENCY_CHECK}
 
 【輸出格式】JSON，繁體中文
 {
-  "sentiment": "樂觀|保守|恐慌|中性",
-  "summary": "35-60字，用一段話總結今日盤勢重點。語氣像資深分析師對朋友說話：專業、直白、有觀點。範例：「BTC 隔夜失守 10 萬美元後快速反彈，多空雙爆超過 3 億美元，機構買盤仍穩，短線震盪但中期結構未破，逢回可留意。」",
-  "highlights": [{
-    "title": "8-15字標題",
-    "reason": "25-40字說明，含具體數據與方向判斷",
-    "impact": "高|中|低",
-    "bias": "偏多|偏空|中性",
-    "impact_note": "10-20字，給交易者的一句話提醒"
-  }]
+  "context": {
+      "sentiment": "樂觀|保守|恐慌|中性",
+      "summary": "35-60字總結。",
+      "news": [
+        {
+            "title": "8-15字標題",
+            "reason": "25-40字說明",
+            "impact": "高|中|低",
+            "bias": "偏多|偏空|中性",
+            "impact_note": "10-20字提醒"
+        }
+      ],
+      "recommended_readings": [
+        { "title": "...", "path": "...", "reason": "..." }
+      ]
+  }
 }`
 
-        const result = await model.generateContent(prompt)
-        const text = result.response.text()
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
 
-        // Clean markdown if present
-        const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
-
-        if (jsonMatch) {
-            return formatObjectStrings(JSON.parse(jsonMatch[1] || jsonMatch[0]))
-        }
-
-        return formatObjectStrings(JSON.parse(text))
+        const text = completion.choices[0]?.message?.content || '{}'
+        return formatObjectStrings(JSON.parse(text).context || JSON.parse(text))
 
     } catch (e) {
-        logger.error('Gemini Market Context Brief Error:', e, { feature: 'gemini' })
+        logger.error('Grok Market Context Brief Error:', e, { feature: 'ai' })
         return null
     } finally {
         await releaseLock('lock:gemini:market_context')
@@ -414,18 +401,15 @@ export async function generateAIDecision(
     },
     newsHighlights: string[] = []
 ): Promise<AIDecision | null> {
-    if (!genAI) return null
+    if (!openai) return null
 
     const lockKey = 'lock:gemini:ai_decision'
     if (!await acquireLock(lockKey, 60)) {
-        logger.warn('Gemini Busy: AI Decision generation locked', { feature: 'gemini' })
+        logger.warn('AI Busy: AI Decision generation locked', { feature: 'ai' })
         return null
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
-
-        // 計算爆倉差值
         const longLiq = marketData.longLiquidation || 0
         const shortLiq = marketData.shortLiquidation || 0
         const liqDiff = longLiq - shortLiq
@@ -452,11 +436,8 @@ ${VOICE_PACK}
 
 【判讀規則】
     - 費率高 + 未爆倉 = 潛在擁擠
-        - 費率高 + 多單開始爆 = 過熱回調風險
-            - 價漲 + OI增 = 追價盤進場（危險）
     - 價漲 + OI減 = 空頭回補（健康）
     - 單邊爆倉明顯多 = 該方向燃料已消耗
-        - 散戶與頂級交易員方向背離 = 潛在反轉風險
 
 【action 必須是以下其一（台灣用語版）】
 - 追價風險高，先等等
@@ -466,30 +447,23 @@ ${VOICE_PACK}
 - 順勢偏多（但別追）
 - 順勢偏空（留意雙爆）
 
-【思考流程（不要輸出）】
-Step 1：用台灣幣圈口吻寫 action 與 reasoning。
-Step 1.5：扮演「反向交易者」進行批判，確認是否有誘多/誘空陷阱，稍微修正結論使其更穩健。
-Step 2：把內容改寫成指定 JSON 欄位。
-
 ${CONSISTENCY_CHECK}
 
 【輸出】JSON，繁體中文
     { "conclusion": "10-15字狀態", "bias": "偏多|偏空|震盪|中性", "risk_level": "低|中|中高|高", "action": "上述選項之一", "reasoning": "50-80字，提到具體數據", "tags": { "btc": "4字", "alt": "4字", "sentiment": "4字" } }
     `
 
-        const result = await model.generateContent(prompt)
-        const text = result.response.text()
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
 
-        const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
-
-        if (jsonMatch) {
-            return formatObjectStrings(JSON.parse(jsonMatch[1] || jsonMatch[0]))
-        }
-
+        const text = completion.choices[0]?.message?.content || '{}'
         return formatObjectStrings(JSON.parse(text))
 
     } catch (e) {
-        logger.error('Gemini AI Decision Error:', e, { feature: 'gemini' })
+        logger.error('Grok AI Decision Error:', e, { feature: 'ai' })
         return null
     } finally {
         await releaseLock('lock:gemini:ai_decision')
@@ -513,9 +487,6 @@ interface StanceDecision {
     }
 }
 
-/**
- * 指標卡片結構（用於日報 UX）
- */
 export interface IndicatorCard {
     icon: string        // 💰 / 👥 / 💥
     name: string        // 資金費率 / 多空比 / 爆倉
@@ -523,9 +494,6 @@ export interface IndicatorCard {
     note: string        // 解釋一句話
 }
 
-/**
- * 日報 AI 潤色結果
- */
 export interface DailyBroadcastPolishResult {
     oneLiner: string           // 市場一句話（最顯眼）
     indicatorCards: IndicatorCard[]  // 三個指標卡片
@@ -536,11 +504,9 @@ export interface DailyBroadcastPolishResult {
 export async function generateDailyBroadcastPolish(
     decision: StanceDecision
 ): Promise<DailyBroadcastPolishResult | null> {
-    if (!genAI) return null
+    if (!openai) return null
 
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
-
         // 格式化費率顯示
         const fundingDisplay = Math.abs(decision.metrics.fundingRate) < 0.01
             ? '趨近零'
@@ -595,41 +561,25 @@ ${VOICE_PACK}
 }
 
 【欄位要求】
-• oneLiner: 10-18 字，這張卡片存在的理由，是用戶在 3 秒內要看到的核心結論
-  - 範例（中性）：「市場缺乏共識，整體進入觀望期」
-  - 範例（偏多）：「多頭動能回升，關注突破確認」
-  - 範例（偏空）：「短線結構偏弱，留意下探風險」
-
-• indicatorCards: 三個指標卡片，每個包含：
-  - icon: 使用提供的 emoji
-  - name: 使用提供的名稱
-  - status: 使用提供的狀態（可微調文字）
-  - note: 8-15 字，解釋這個狀態代表什麼
-
+• oneLiner: 10-18 字，核心結論
+• indicatorCards: 三個指標卡片
 • suggestion: 10-18 字，像交易室白板的指令
-  - 範例：「保持觀望，不追價、不重倉」
-  - 範例：「順勢偏多，回調可留意」
-  - ❌ 禁止：「建議買入」「建議賣出」
-
-• mindset: 15-25 字，資深交易員對朋友的心理提醒（可為 null）
-  - 範例：「沒有方向時，耐心比判斷更重要」
-  - 範例：「趨勢確認前，控制倉位優先」
+• mindset: 15-25 字，心理提醒
 
 ${CONSISTENCY_CHECK}
 
 輸出純 JSON，不要有其他文字。`
 
-        const result = await model.generateContent(prompt)
-        const text = result.response.text().trim()
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
 
-        const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-            return formatObjectStrings(JSON.parse(jsonMatch[1] || jsonMatch[0]))
-        }
-
+        const text = completion.choices[0]?.message?.content || '{}'
         return formatObjectStrings(JSON.parse(text))
     } catch (e) {
-        logger.error('[Daily Broadcast] AI Polish Error:', e, { feature: 'gemini' })
+        logger.error('[Daily Broadcast] Grok Polish Error:', e, { feature: 'ai' })
         return null
     }
 }
@@ -644,10 +594,9 @@ export interface FallbackResult {
 }
 
 export async function generateFallbackReply(userInput: string): Promise<FallbackResult | null> {
-    if (!genAI) return null
+    if (!openai) return null
 
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
         const prompt = `
 你是一個加密貨幣意圖分類器。使用者輸入了一段文字，請判斷其意圖。
 
@@ -667,19 +616,16 @@ export async function generateFallbackReply(userInput: string): Promise<Fallback
   "symbol": "BTC" (僅 price_query 需要，若無則 null)
 }
 `
-        const result = await model.generateContent(prompt)
-        const text = result.response.text().trim()
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
 
-        // Clean markdown
-        const jsonMatch = text.match(/\`\`\`json\n([\s\S]*?)\n\`\`\`/) || text.match(/\{[\s\S]*\}/)
-
-        if (jsonMatch) {
-            return JSON.parse(jsonMatch[1] || jsonMatch[0])
-        }
-
+        const text = completion.choices[0]?.message?.content || '{}'
         return JSON.parse(text)
     } catch (e) {
-        logger.error('Gemini Fallback Error:', e, { feature: 'gemini' })
+        logger.error('Grok Fallback Error:', e, { feature: 'ai' })
         return null
     }
 }
@@ -712,16 +658,20 @@ export interface IndicatorSummaryInput {
 
 export interface IndicatorSummaryResult {
     summary: string
+    recommended_readings?: Array<{
+        title: string
+        path: string
+        reason?: string
+    }>
 }
 
 export async function generateIndicatorSummary(
-    data: IndicatorSummaryInput
+    data: IndicatorSummaryInput,
+    upcomingEvent?: any // Cross-pollination from Calendar
 ): Promise<IndicatorSummaryResult | null> {
-    if (!genAI) return null
+    if (!openai) return null
 
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
-
         // Format values for display
         const fgiZone = data.fearGreedIndex.zone
         const fundingPct = (data.fundingRate * 100).toFixed(4)
@@ -744,6 +694,14 @@ export async function generateIndicatorSummary(
 - 24 小時: ${formatChange(data.btcPrice.change24h)}
 ` : ''
 
+        // Calendar Context Injection
+        const eventSection = upcomingEvent ? `
+【即將到來的宏觀事件 (關鍵上下文)】
+- 事件: ${upcomingEvent.def.name} (${upcomingEvent.def.key.toUpperCase()})
+- 時間: ${upcomingEvent.daysUntil === 0 ? '今天' : upcomingEvent.daysUntil + '天後'}
+- 歷史影響: 平均波動 ${upcomingEvent.stats?.avgRange || 0}%
+` : ''
+
         const prompt = `
 ${VOICE_PACK}
 
@@ -751,12 +709,10 @@ ${VOICE_PACK}
 
 【重要限制 - 嚴格遵守】
 ❌ 禁止：任何投資建議、價格預測、買賣時機
-❌ 禁止：「建議」「應該」「可以考慮」「適合」等誘導性用語
-❌ 禁止：「牛市」「熊市」等絕對論斷
-❌ 禁止：「機會」「風險」以外的情緒化詞彙
 ✅ 必須：結合價格走勢與指標數據分析
 ✅ 必須：使用條件語句（「若...則...」「當...時...」）
 ✅ 必須：每個論點標明具體數據
+
 ${btcPriceSection}
 【衍生品指標】
 - 恐懼貪婪指數: ${data.fearGreedIndex.value}/100（${fgiZone}區間）
@@ -765,183 +721,295 @@ ${btcPriceSection}
 - 4H 爆倉: $${liqTotalM}M（多: $${liqLongM}M, 空: $${liqShortM}M）
 ${data.oiChange24h !== undefined ? `- OI 24H 變化: ${data.oiChange24h > 0 ? '+' : ''}${data.oiChange24h.toFixed(1)}%` : ''}
 ${data.etfNetFlow !== undefined ? `- ETF 淨流入: $${data.etfNetFlow.toFixed(0)}M` : ''}
+${eventSection}
 
-【分析邏輯提示】
-- 價格跌 + 爆倉多單 = 多頭止損潮
-- 價格漲 + 費率升高 = 追漲情緒升溫
-- 價格橫盤 + OI 上升 = 倉位累積中
-- 短線（15m/1h）與中線（4h/12h）方向背離 = 盤整訊號
+【動態劇本推演 (Scenario Analysis)】
+利用【價格走勢】+【衍生品數據】+【宏觀事件】進行綜合推演：
+- 劇本 A (順勢/延續)：若費率正常且價格突破，下一關卡在哪？
+- 劇本 B (轉折/背離)：若費率過高或 FGI 背離，回調支撐在哪？
 
-【輸出規則】
-- 字數: 60-85 字
-- 語氣: 像彭博終端機的簡報風格，冷靜客觀
-- 結構: [價格現況] + [指標狀態] + [條件性觀察]
-- 需提及至少一個時間框架的價格變化
-- 結尾用「若...」開頭的條件觀察
+【推薦延伸閱讀】
+- 根據當前「最異常」的數據推薦 2 個本站功能。
+- 格式：{ "title": "...", "path": "...", "reason": "..." }
+- 路徑庫：/calendar/cpi, /calendar/nfp, /calendar/fomc, /indicators/funding-rate, /indicators/liquidation
 
-【範例】
-「BTC 現價 $104,200，短線 1H 下跌 0.8%，但 4H 仍維持上漲 1.2%。資金費率偏高（0.03%），爆倉以多單為主（$8M）。若短線跌勢擴大而費率未降，需關注多頭止損風險。」
+【輸出格式】JSON
+{
+    "summary": "【價格現況】... (25-35字)。\n【指標狀態】... (30-40字，含關鍵數據)。\n【劇本推演】\n📍 劇本 A (順勢)：... \n⚠️ 劇本 B (轉折)：... ",
+    "recommended_readings": [
+        { "title": "...", "path": "...", "reason": "..." }
+    ]
+}
 
 ${CONSISTENCY_CHECK}
 
-僅輸出純文字總結，不需要 JSON 格式。`
+請輸出 JSON。`
 
-        const result = await model.generateContent(prompt)
-        const text = result.response.text().trim()
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
 
-        return { summary: formatTaiwaneseText(text) }
+        const text = completion.choices[0]?.message?.content || '{}'
+        const json = JSON.parse(text)
+        return {
+            summary: formatTaiwaneseText(json.summary || json.text || ''),
+            recommended_readings: json.recommended_readings || []
+        }
+
     } catch (e) {
-        logger.error('Gemini Indicator Summary Error:', e, { feature: 'gemini' })
+        logger.error('Grok Indicator Summary Error:', e, { feature: 'ai' })
         return null
     }
 }
 
 // ============================================
-// Calendar Summary (Macro Event Prediction)
+// Reviews Summary (Historical Matcher)
 // ============================================
 
-export interface CalendarSummaryInput {
-    events: Array<{
-        eventType: 'cpi' | 'nfp' | 'fomc' | 'unrate' | 'ppi'
-        eventName: string
-        nextDate: string           // ISO date
-        daysUntil: number
-        stats: {
-            avgD1Return: number    // %
-            winRate: number        // % (D+1 上漲機率)
-            avgRange: number       // %
-            sampleSize: number
-        }
-        lastEvent?: {
-            date: string
-            forecast?: number
-            actual?: number
-            d1Return?: number
-        }
-    }>
-    // NEW: Market context for better analysis
-    marketContext?: {
-        btcPrice?: number          // Current BTC price
-        btc24hChange?: number      // %
-        fearGreedIndex?: number    // 0-100
-        upcomingEventsCount?: number  // Events in next 7 days
+export interface ReviewsSummaryInput {
+    eventTitle: string
+    eventDate: string
+    stats: {
+        maxDrawdown: number
+        recoveryDays: number
+        volatility: number
+    }
+    context?: string
+    currentContext?: {
+        btcPrice: number
+        fgi: number
+        fundingRate: number
     }
 }
 
-export interface CalendarSummaryResult {
-    summary: string
-}
-
-export async function generateCalendarSummary(
-    data: CalendarSummaryInput
-): Promise<CalendarSummaryResult | null> {
-    if (!genAI) return null
+export async function generateReviewsSummary(input: ReviewsSummaryInput): Promise<string | null> {
+    if (!openai) return null
 
     try {
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME })
-
-        // Get today's date in Taiwan timezone
-        const now = new Date()
-        const taiwanTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }))
-        const todayStr = taiwanTime.toLocaleDateString('zh-TW', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            weekday: 'long'
-        })
-
-        // Find the nearest event
-        const sortedEvents = [...data.events].sort((a, b) => a.daysUntil - b.daysUntil)
-        const nearestEvents = sortedEvents.slice(0, 3) // Top 3 nearest
-
-        // Generate relative time descriptions
-        const eventsDescription = nearestEvents.map(e => {
-            const eventDate = new Date(e.nextDate)
-            // Convert to Taiwan time (UTC+8)
-            const taiwanEventTime = new Date(eventDate.getTime() + 8 * 60 * 60 * 1000)
-            const hour = taiwanEventTime.getUTCHours()
-            const minute = taiwanEventTime.getUTCMinutes()
-            const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-
-            // Generate relative description
-            let relativeDesc = ''
-            if (e.daysUntil === 0) {
-                relativeDesc = `今天台灣時間 ${timeStr}`
-            } else if (e.daysUntil === 1) {
-                relativeDesc = `明天台灣時間 ${timeStr}`
-            } else if (e.daysUntil === 2) {
-                relativeDesc = `後天台灣時間 ${timeStr}`
-            } else if (e.daysUntil <= 7) {
-                relativeDesc = `${e.daysUntil} 天後（台灣時間 ${timeStr}）`
-            } else {
-                const dateStr = eventDate.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })
-                relativeDesc = `${dateStr}（${e.daysUntil} 天後）`
-            }
-
-            return `- ${e.eventName}: ${relativeDesc}
-  歷史 D+1 平均報酬: ${e.stats.avgD1Return > 0 ? '+' : ''}${e.stats.avgD1Return.toFixed(1)}%
-  歷史上漲機率: ${e.stats.winRate.toFixed(0)}%（樣本: ${e.stats.sampleSize} 次）
-  歷史平均波動: ${e.stats.avgRange.toFixed(1)}%
-  ${e.lastEvent ? `上次結果: 預期 ${e.lastEvent.forecast ?? '-'} vs 實際 ${e.lastEvent.actual ?? '-'}，BTC D+1 ${e.lastEvent.d1Return !== undefined ? (e.lastEvent.d1Return > 0 ? '+' : '') + e.lastEvent.d1Return.toFixed(1) + '%' : '-'}` : ''}`
-        }).join('\n\n')
+        const currentStats = input.currentContext ? `
+【當前市場狀態 (Doppelgänger Check)】
+- BTC 價格: $${input.currentContext.btcPrice.toLocaleString()}
+- 恐懼貪婪: ${input.currentContext.fgi}/100
+- 資金費率: ${(input.currentContext.fundingRate * 100).toFixed(4)}%
+` : ''
 
         const prompt = `
 ${VOICE_PACK}
 
-你是「加密台灣」的宏觀事件分析師，專門為台灣交易者提供事件行情預判。
+你是一個鑽研金融歷史的量化交易員。
+請比較「歷史事件」與「當前市場」，找出相似與相異之處。
 
-【今日日期】${todayStr}（台灣時間）
+【歷史事件】
+- 事件：${input.eventTitle} (${input.eventDate})
+- 數據：最大回撤 ${input.stats.maxDrawdown}%，修復期 ${input.stats.recoveryDays} 天
+- 背景：${input.context || '無'}
 
-${data.marketContext?.btcPrice ? `【當前市場】
-- BTC 現價: $${data.marketContext.btcPrice.toLocaleString()}
-- 24H 變化: ${data.marketContext.btc24hChange ? (data.marketContext.btc24hChange > 0 ? '+' : '') + data.marketContext.btc24hChange.toFixed(1) + '%' : '未知'}
-- 恐懼貪婪指數: ${data.marketContext.fearGreedIndex || '未知'}/100
-- 未來 7 天事件數: ${data.marketContext.upcomingEventsCount || nearestEvents.length}
-` : ''}
+${currentStats}
 
-【重要限制 - 嚴格遵守】
-❌ 禁止：預測具體 CPI/NFP/PPI 數值或利率決定
-❌ 禁止：「一定會」「肯定」「必然」「建議」等確定性/誘導語言
-❌ 禁止：任何買賣建議、價格目標、「機會」「佈局」
-❌ 禁止：使用「樣本」這個詞彙
-✅ 必須：使用「過去 N 次紀錄」來描述樣本數
-✅ 必須：使用相對時間（今天/明天/後天/X 天後）
-✅ 必須：標註台灣時間
-✅ 必須：用完整的「若...則歷史顯示...」條件句結尾（不可截斷）
+【分析任務】
+1. **歷史回顧**：當時發生了什麼？市場怎麼反應？
+2. **穿越對比** (Doppelgänger)：如果有的話，比較當時指標與現在的異同。(例如：當時 FGI 也是 90，現在也是，結構類似)
+3. **結論**：這段歷史給我們現在什麼啟示？(例如：修復期通常長達一個月，現在別急著抄底)
 
-【近期事件數據】
-${eventsDescription}
-
-【事件連動分析提示】
-- 若 PPI 在 CPI 前公布且超預期，市場會提前反映 CPI 壓力
-- 失業率與非農同時公布，兩者方向不一致時波動加劇
-- FOMC 前的 CPI/NFP 數據會影響利率預期
-
-【輸出規則】
-- 字數: 80-110 字（確保完整，不要被截斷）
-- 語氣: 像研究報告摘要，客觀中立
-- 優先提及最近 1-2 個事件
-- 結構: [事件+時間] + [BTC 當前狀態（若有）] + [過去N次統計] + [若...則歷史顯示...]
-- 條件句必須完整，不可使用「若...則歷史顯示...」這種不完整的結尾
-- 若有多個事件接近，提及事件間的連動關係
-
-【範例】
-「CPI 數據將於明天台灣時間 21:30 公布，BTC 目前位於 $104,200。過去 11 次紀錄中，D+1 上漲機率 55%，平均波動 5.8%。若數據低於預期，歷史顯示 D+1 平均漲幅達 2.3%。」
-
-「非農與失業率將於後天 21:30 同步公布。BTC 近期震盪，過去 12 次紀錄顯示兩數據方向不一致時，波動幅度高達 6.2%。若就業強勁但失業率上升，市場解讀分歧加大。」
-
-「PPI 將於明天公布，CPI 緊隨其後。若 PPI 超預期，歷史顯示市場會提前反映 CPI 壓力，兩日合計波動可達 7-8%。」
+長度限制：80-110 字。
+格式：一段話，包含「回顧」、「對比」、「啟示」。
 
 ${CONSISTENCY_CHECK}
 
-僅輸出純文字總結，不需要 JSON 格式。確保輸出完整，條件句不可截斷。`
+請直接輸出分析內容。`
 
-        const result = await model.generateContent(prompt)
-        const text = result.response.text().trim()
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+        })
 
-        return { summary: formatTaiwaneseText(text) }
+        return formatTaiwaneseText(completion.choices[0]?.message?.content?.trim() || '')
     } catch (e) {
-        logger.error('Gemini Calendar Summary Error:', e, { feature: 'gemini' })
+        logger.error('Grok Reviews Summary Error:', e, { feature: 'ai' })
         return null
+    }
+}
+
+
+// ============================================
+// Calendar Summary
+// ============================================
+
+export interface CalendarSummaryInput {
+    events: any[]
+}
+
+export interface CalendarSummaryResult {
+    summary: string
+    recommended_readings?: Array<{
+        title: string
+        path: string
+        reason?: string
+    }>
+}
+
+export async function generateCalendarSummary(input: CalendarSummaryInput): Promise<CalendarSummaryResult | null> {
+    if (!openai) return null
+
+    try {
+        const nearestEvent = input.events[0]
+        const nextEvents = input.events.slice(1, 3)
+
+        const prompt = `
+${VOICE_PACK}
+
+你是宏觀經濟與幣圈連動的分析專家。
+請分析「最近一個即將發生的事件」，並給出情境推演。
+
+【最近關注焦點】
+- 事件：${nearestEvent.title}
+- 時間：${nearestEvent.date}
+- 預期影響：${nearestEvent.impact}
+- 歷史波動：${nearestEvent.volatility || '未知'}%
+
+【輸出要求】
+1. **現況鋪墊**：市場目前對此事件的預期是什麼？(20-30字)
+2. **劇本推演 (Dynamic Scenario)**：
+   - 劇本 A (風險)：若數據高於/低於預期，會發生什麼？(30-40字)
+   - 劇本 B (機會)：反之會如何？
+3. **推薦關注**：針對接下來的事件，推薦 2 個日曆頁面。
+   - 候選：${nextEvents.map(e => `${e.title} (${e.date})`).join(', ')}
+
+【限制】
+❌ 禁止預測具體數字結果
+✅ 著重於「波動率」與「結構風險/機會」
+
+【輸出格式】JSON
+{
+    "summary": "【前瞻】... \n📉 劇本 A：...\n📈 劇本 B：...",
+    "recommended_readings": [
+        { "title": "...", "path": "/calendar/...", "reason": "..." }
+    ]
+}
+
+${CONSISTENCY_CHECK}
+
+請輸出 JSON。`
+
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
+
+        const text = completion.choices[0]?.message?.content || '{}'
+        const json = JSON.parse(text)
+        return {
+            summary: formatTaiwaneseText(json.summary),
+            recommended_readings: json.recommended_readings
+        }
+
+    } catch (e) {
+        logger.error('Grok Calendar Summary Error:', e, { feature: 'ai' })
+        return null
+    }
+}
+
+// ============================================
+// Global Brief (Command Center / God Mode)
+// ============================================
+
+export interface GlobalBriefResult {
+    verdict: '做多' | '做空' | '觀望' | '中性'
+    score: number // 0-100 (0=Bearish, 100=Bullish)
+    action: string // 3-second takeaway
+    headline: string // One-liner scenario
+    analysis: {
+        sentiment: string // News summary
+        structure: string // Indicators summary
+        catalyst: string // Event summary
+    }
+}
+
+export async function generateGlobalBrief(input: {
+    news: any[]
+    indicators: { fgi: any, fundingRate: any }
+    catalyst: any
+}): Promise<GlobalBriefResult | null> {
+    if (!openai) return null
+
+    const lockKey = 'lock:gemini:global_brief'
+    if (!await acquireLock(lockKey, 60)) {
+        logger.warn('AI Busy: Global Brief generation locked', { feature: 'ai' })
+        return null
+    }
+
+    try {
+        // Format Indicators
+        const fgiVal = input.indicators.fgi || 50
+        const frVal = input.indicators.fundingRate ? (input.indicators.fundingRate * 100).toFixed(4) : '0'
+
+        // Format Catalyst
+        const catalystText = input.catalyst
+            ? `${input.catalyst.def.name} (${input.catalyst.daysUntil}天後)`
+            : '近期無重大事件'
+
+        const prompt = `
+${VOICE_PACK}
+
+你是指揮中心的首席策略官。請綜合以下「三位一體 (Triad)」數據，給出全域市場判決。
+
+【輸入情資】
+1. **情緒面 (Sentiment)** - 新聞 (前 5 則):
+${input.news.map(n => `- ${n.newsflash_title || n.title}`).join('\n')}
+
+2. **結構面 (Structure)** - 指標:
+- 恐懼貪婪指數: ${fgiVal}/100
+- 資金費率: ${frVal}% (正常 ±0.01%, >0.05% 過熱)
+
+3. **催化劑 (Catalyst)** - 日曆:
+- ${catalystText}
+
+【決策邏輯 (The Triad)】
+- **結構優先**：若費率極高 (>0.05%)，即使新聞利好，判決應傾向「觀望/做空」(過熱風險)。
+- **共振確認**：若新聞利空 + 結構轉弱 + 無催化劑 -> 判決「做空」。
+- **催化劑效應**：若有重大事件 (<2天)，判決應傾向「觀望」(等待落地)。
+
+【輸出欄位】(JSON)
+- verdict: "做多" | "做空" | "觀望" | "中性"
+- score: 0-100 (0極空, 100極多, 50中性)
+- action: 3-5 字指令，極短、有力 (如 "等待回調", "順勢操作", "空手觀望")。
+- headline: 10-15 字，今日最重要的劇本 (如 "多頭過熱且缺乏催化劑，提防回調")。
+- analysis:
+    - sentiment: 15 字內的精簡解讀。
+    - structure: 15 字內的精簡解讀。
+    - catalyst: 15 字內的精簡解讀。
+
+${CONSISTENCY_CHECK}
+
+請輸出 JSON:
+{
+    "verdict": "觀望",
+    "score": 65,
+    "action": "等待數據落地",
+    "headline": "CPI 前夕縮量震盪，結構偏多但缺乏動能",
+    "analysis": {
+        "sentiment": "新聞多空交雜，無明確方向",
+        "structure": "費率健康，籌碼結構穩固",
+        "catalyst": "等待 CPI 數據指引方向"
+    }
+}
+`
+        const completion = await openai.chat.completions.create({
+            model: MODEL_NAME,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" }
+        })
+
+        const text = completion.choices[0]?.message?.content || '{}'
+        return formatObjectStrings(JSON.parse(text))
+
+    } catch (e) {
+        logger.error('Grok Global Brief Error:', e, { feature: 'ai' })
+        return null
+    } finally {
+        await releaseLock('lock:gemini:global_brief')
     }
 }

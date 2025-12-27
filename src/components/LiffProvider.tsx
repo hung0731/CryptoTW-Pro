@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, ReactNode, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database'
-import GlobalLoader from './GlobalLoader'
+// import GlobalLoader from './GlobalLoader'
 import { logger } from '@/lib/logger'
 
 // ============================================
@@ -305,21 +305,12 @@ export const LiffProvider = ({ liffId, children }: LiffProviderProps) => {
         void initLiff()
     }, [liffId])
 
-    // Show loader only after a delay to prevent flash
-    const [showLoader, setShowLoader] = React.useState(false)
-
-    React.useEffect(() => {
-        if (isLoading && !dbUser) {
-            const timer = setTimeout(() => setShowLoader(true), 800)
-            return () => clearTimeout(timer)
-        } else {
-            setShowLoader(false)
-        }
-    }, [isLoading, dbUser])
+    // Blocking Loader Removed for Performance
+    // The app will render immediately, and individual components should handle
+    // their own loading states (skeletons/spinners) via useLiff().isLoading
 
     return (
         <LiffContext.Provider value={{ liffObject, isLoggedIn, profile, dbUser, error, isLoading, login, logout, retry }}>
-            {showLoader && <GlobalLoader />}
             {children}
         </LiffContext.Provider>
     )

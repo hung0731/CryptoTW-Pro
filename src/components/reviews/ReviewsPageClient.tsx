@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { REVIEWS_DATA } from '@/lib/reviews-data';
@@ -76,6 +76,32 @@ export function ReviewsPageClient() {
     const [selectedYear, setSelectedYear] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
+    // AI Summary State
+    const [aiSummary, setAiSummary] = useState<{
+        summary: string,
+        source: string,
+        recommended_readings?: Array<{ title: string, path: string }>
+    } | null>(null);
+    const [loadingSummary, setLoadingSummary] = useState(true);
+
+    // Fetch AI Summary
+    useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                const res = await fetch('/api/reviews/ai-summary');
+                if (res.ok) {
+                    const data = await res.json();
+                    setAiSummary(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch AI summary', error);
+            } finally {
+                setLoadingSummary(false);
+            }
+        };
+        fetchSummary();
+    }, []);
+
     // Virtual scrolling ref
     const parentRef = useRef<HTMLDivElement>(null);
 
@@ -124,33 +150,23 @@ export function ReviewsPageClient() {
 
     return (
         <div className="pb-24 font-sans text-white">
-            {/* 1. Header (Library Context) */}
+            {/* 0. AI Summary Section (Top of Page) */}
+            <div className={cn("px-4 pt-4 pb-2", SPACING.pageX)}>
+                <div className="max-w-5xl mx-auto">
+                    <AISummaryCard
+                        summary={aiSummary?.summary || "正在分析歷史數據庫..."}
+                        source={aiSummary?.source || "AI 歷史回測"}
+                        loading={loadingSummary}
+                        variant="hero"
+                        recommendations={aiSummary?.recommended_readings}
+                    />
+                </div>
+            </div>
+
+            {/* 1. Header (Library Context - Sticky) */}
             <div className="sticky top-[56px] z-30 bg-black/95 backdrop-blur-xl border-b border-[#1A1A1A]">
                 {/* 2. Top Stats Row (Dashboard Style) */}
-                {/* 2. Top Stats Row (Unified Card) */}
-                <div className="px-4 pt-4 pb-2">
-                    <UniversalCard className="p-0 overflow-hidden bg-[#0F0F10] border-[#1A1A1A]">
-                        <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#1A1A1A]">
-                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
-                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">事件總數</div>
-                                <div className="text-2xl font-bold text-white font-mono">{REVIEWS_DATA.length}</div>
-                            </div>
-                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
-                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">市場週期</div>
-                                <div className="text-2xl font-bold text-white font-mono">3</div>
-                            </div>
-                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
-                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">平均修復期</div>
-                                <div className="text-2xl font-bold text-emerald-400 font-mono">14天</div>
-                            </div>
-
-                            <div className="p-5 flex flex-col items-center justify-center text-center hover:bg-[#141414] transition-colors">
-                                <div className="text-[10px] text-neutral-500 font-mono uppercase tracking-wider mb-1">平均修復期</div>
-                                <div className="text-2xl font-bold text-emerald-400 font-mono">14天</div>
-                            </div>
-                        </div>
-                    </UniversalCard>
-                </div>
+                {/* 2. Top Stats Row (Removed) */}
 
                 {/* 3. Search & Filters */}
                 <div className="px-4 pb-2 flex flex-col md:flex-row gap-3">
@@ -178,7 +194,7 @@ export function ReviewsPageClient() {
                         className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
                             selectedType === null
-                                ? "bg-white text-black border-white"
+                                ? "bg-[#8B5CF6] text-white border-[#8B5CF6]"
                                 : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
                         )}
                     >
@@ -193,7 +209,7 @@ export function ReviewsPageClient() {
                                 className={cn(
                                     "flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-medium border shrink-0 transition-colors",
                                     selectedType === key
-                                        ? "bg-white text-black border-white"
+                                        ? "bg-[#8B5CF6] text-white border-[#8B5CF6]"
                                         : "bg-[#0A0A0A] text-[#666666] border-[#1A1A1A] hover:border-[#333]"
                                 )}
                             >
@@ -207,17 +223,12 @@ export function ReviewsPageClient() {
 
             {/* 5. Content List */}
             <div className={cn("max-w-5xl mx-auto min-h-[50vh]", SPACING.pageX, "pt-4 space-y-4")}>
-                {/* AI Summary Card */}
-                <AISummaryCard
-                    summary="根據目前的歷史數據庫，我們收錄了過去 3 年的 25 個重大市場事件。數據顯示，在類似的流動性環境下，BTC 的平均回調幅度為 -5.2%，但隨後的修復期平均僅需 14 天。目前市場結構類似 2023 年 Q4 的震盪築底階段。"
-                    source="AI 歷史回測"
-                    loading={false}
-                />
+                {/* AI Summary Card (Moved to Top) */}
 
                 {hasActiveFilters && (
                     <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
                         <span>找到 {filteredReviews.length} 個相關事件</span>
-                        <button onClick={clearFilters} className="text-blue-400 hover:text-blue-300">清除全部</button>
+                        <button onClick={clearFilters} className="text-[#8B5CF6] hover:text-[#8B5CF6]/80 transition-colors">清除全部</button>
                     </div>
                 )}
 
@@ -275,7 +286,7 @@ export function ReviewsPageClient() {
                                                     transform: `translateY(${virtualRow.start}px)`,
                                                 }}
                                             >
-                                                <div className="group relative grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 p-4 min-h-[100px] bg-[#0A0A0A] hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0 items-center">
+                                                <div className="group relative grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 p-4 min-h-[100px] bg-transparent hover:bg-[#141414] transition-colors border-b border-[#1A1A1A] last:border-0 items-center">
                                                     {/* Main Click Target */}
                                                     <Link
                                                         href={`/reviews/${review.year}/${review.slug}`}
@@ -295,7 +306,7 @@ export function ReviewsPageClient() {
                                                     {/* Col 2: Text Info (Always Visible) */}
                                                     <div className="flex flex-col justify-center gap-0.5 w-full min-w-0 relative z-10 pointer-events-none">
                                                         {/* Title */}
-                                                        <h3 className="text-sm sm:text-base font-bold text-white truncate">
+                                                        <h3 className="text-sm font-bold text-white truncate">
                                                             {review.title.split(/[:：]/)[0]}
                                                         </h3>
 
@@ -345,7 +356,7 @@ export function ReviewsPageClient() {
                         <div className="text-center py-20 bg-neutral-900/20 rounded-2xl border border-white/5 border-dashed">
                             <Search className="w-8 h-8 text-neutral-600 mx-auto mb-3" />
                             <p className="text-neutral-500 text-sm">沒有找到相關事件</p>
-                            <button onClick={clearFilters} className="text-blue-400 text-xs mt-2 hover:underline">
+                            <button onClick={clearFilters} className="text-[#8B5CF6] text-xs mt-2 hover:underline">
                                 清除篩選條件
                             </button>
                         </div>

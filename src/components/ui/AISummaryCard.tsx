@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
-import { Sparkles, Newspaper } from 'lucide-react'
+import { Sparkles, Newspaper, Activity, ChevronRight } from 'lucide-react'
 
 interface AISummaryCardProps {
     summary: string
@@ -10,6 +10,12 @@ interface AISummaryCardProps {
     loading?: boolean
     className?: string
     variant?: 'default' | 'compact' | 'hero'
+    recommendations?: Array<{
+        title: string
+        path: string
+        reason?: string
+        type?: 'review' | 'indicator' | 'event'
+    }>
 }
 
 /**
@@ -25,7 +31,8 @@ export function AISummaryCard({
     source = '幣圈快訊',
     loading = false,
     className,
-    variant = 'default'
+    variant = 'default',
+    recommendations = []
 }: AISummaryCardProps) {
     const [displayedText, setDisplayedText] = useState('')
     const [isTyping, setIsTyping] = useState(false)
@@ -66,51 +73,56 @@ export function AISummaryCard({
 
     // Layout Classes
     const wrapperClasses = cn(
-        "relative rounded-xl overflow-hidden p-[1px]", // 1px padding for border width
-        className,
-        "border-none" // Force remove any static border passed from parent to avoid double-line artifact
+        "relative rounded-xl overflow-hidden p-[1px]", // Keep p-[1px] for the border thickness
+        className
     )
 
-    const contentClasses = cn(
-        "relative h-full w-full rounded-xl bg-[#0A0A0A] overflow-hidden", // The actual card background
-        // Size variations padding
-        isHero && "p-5",
-        isCompact && "p-3",
-        !isHero && !isCompact && "p-4"
+    // Padding styles for the main text content
+    const contentPadding = cn(
+        isHero && "p-6",
+        isCompact && "p-4",
+        !isHero && !isCompact && "p-5"
+    )
+
+    // Footer padding styles (matching previous visual density)
+    const footerPadding = cn(
+        isHero && "px-5 py-3",
+        isCompact && "px-3 py-2",
+        !isHero && !isCompact && "px-4 py-2.5"
     )
 
     if (loading) {
         return (
             <div className={wrapperClasses}>
-                {/* 1. Animated Gradient Border */}
-                <div className="absolute inset-[-100%] animate-[spin_6s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#0000_90%,#3b82f6_100%)] opacity-70" />
+                {/* 1. Loading State Border */}
+                <div className="absolute inset-0 bg-purple-500/40 animate-pulse" />
 
-                {/* 2. Inner Content */}
-                <div className={contentClasses}>
-                    <div className={cn("relative z-10", contentMinHeight)}>
-                        <div className="h-3.5 bg-[#1A1A1A] rounded w-3/4 animate-pulse" />
-                        <div className="h-3.5 bg-[#1A1A1A] rounded w-full animate-pulse" />
-                        {!isCompact && <div className="h-3.5 bg-[#1A1A1A] rounded w-5/6 animate-pulse" />}
+                {/* 2. Inner Content (Unified) */}
+                <div className="relative h-full w-full rounded-xl bg-[#0A0A0A] overflow-hidden flex flex-col text-left">
+                    {/* Text Area Skeleton */}
+                    <div className={cn("flex-1", contentPadding)}>
+                        <div className={cn("relative z-10 space-y-2", contentMinHeight)}>
+                            <div className="h-3.5 bg-[#1A1A1A] rounded w-3/4 animate-pulse" />
+                            <div className="h-3.5 bg-[#1A1A1A] rounded w-full animate-pulse" />
+                            {!isCompact && <div className="h-3.5 bg-[#1A1A1A] rounded w-5/6 animate-pulse" />}
+                        </div>
                     </div>
 
-                    {/* Footer */}
+                    {/* Footer Skeleton */}
                     <div className={cn(
-                        "flex items-center justify-between border-t border-white/5",
-                        "bg-[#0F0F10]", // Flat footer background
-                        isHero && "mt-5 -mx-5 -mb-5 px-5 py-3",
-                        isCompact && "mt-3 -mx-3 -mb-3 px-3 py-2",
-                        !isHero && !isCompact && "mt-4 -mx-4 -mb-4 px-4 py-2.5"
+                        "flex items-center justify-between border-t border-white/5 bg-[#0F0F10]",
+                        footerPadding
                     )}>
                         <div className="flex items-center gap-2 text-neutral-400">
-                            <Newspaper strokeWidth={1.5} className={cn("text-blue-400", isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
+                            <Newspaper strokeWidth={1.5} className={cn("text-purple-400", isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
                             <span className={cn("font-medium", isCompact ? "text-[10px]" : "text-[11px]")}>{source}</span>
-                            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20">
-                                <Sparkles strokeWidth={1.5} className="w-2.5 h-2.5 text-blue-400" />
-                                <span className="text-[8px] font-bold text-blue-300 uppercase tracking-wider">AI</span>
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
+                                <Sparkles strokeWidth={1.5} className="w-2.5 h-2.5 text-purple-400" />
+                                <span className="text-[8px] font-bold text-purple-300 uppercase tracking-wider">AI</span>
                             </div>
                         </div>
                         <span className={cn(
-                            "font-bold tracking-wide text-blue-300",
+                            "font-bold tracking-wide text-purple-300",
                             isCompact ? "text-[10px]" : "text-[11px]"
                         )}>
                             加密台灣 Pro
@@ -123,37 +135,89 @@ export function AISummaryCard({
 
     return (
         <div className={wrapperClasses}>
-            {/* 1. Animated Gradient Border */}
-            <div className="absolute inset-[-100%] animate-[spin_10s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#0000_90%,#3b82f6_100%)] opacity-100" />
+            {/* 1. Background for Border (Animated Breathing) */}
+            <div className="absolute inset-0 bg-purple-500 animate-breath" />
 
-            {/* 2. Inner Content */}
-            <div className={contentClasses}>
-                <div className={cn("relative z-10", contentMinHeight)}>
-                    <p className={cn(
-                        "leading-relaxed text-neutral-300",
-                        isHero && "text-base",
-                        isCompact && "text-xs",
-                        !isHero && !isCompact && "text-sm"
-                    )}>
-                        {displayedText || summary || '正在分析市場動態...'}
-                        {/* Typing cursor */}
-                        {isTyping && (
-                            <span className="inline-block w-0.5 h-4 ml-0.5 bg-blue-400 animate-pulse" />
-                        )}
-                    </p>
+            {/* 2. Unified Inner Container */}
+            <div className="relative h-full w-full rounded-xl bg-[#0A0A0A] overflow-hidden flex flex-col text-left">
+
+                {/* A. Main Text Content */}
+                <div className={cn("flex-1 cursor-default", contentPadding)}>
+                    <div className={cn("relative z-10", contentMinHeight)}>
+                        <p className={cn(
+                            "leading-relaxed text-neutral-300",
+                            isHero && "text-sm",
+                            isCompact && "text-xs",
+                            !isHero && !isCompact && "text-sm"
+                        )}>
+                            {displayedText || summary || '正在分析市場動態...'}
+                            {isTyping && (
+                                <span className="inline-block w-0.5 h-4 ml-0.5 bg-purple-400 animate-pulse" />
+                            )}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Branded Footer */}
+                {/* C. Recommendations Section (Moved to Middle) */}
+                {recommendations && recommendations.length > 0 && (
+                    <div className="shrink-0 border-t border-white/5 bg-[#0A0A0A] px-4 py-3">
+                        <div className="flex flex-col gap-3">
+                            <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider flex items-center gap-1.5">
+                                <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                                推薦閱讀
+                            </span>
+
+                            {/* Conditional Layout: Scrollable if > 2, Grid if <= 2 */}
+                            <div className={cn(
+                                recommendations.length > 2
+                                    ? "flex overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory hide-scrollbar gap-3"
+                                    : "grid grid-cols-1 sm:grid-cols-2 gap-2"
+                            )}>
+                                {recommendations.map((rec, idx) => (
+                                    <a
+                                        key={idx}
+                                        href={rec.path}
+                                        className={cn(
+                                            "group relative flex items-center gap-3 p-2.5 rounded-lg bg-[#0F0F10] border border-[#1A1A1A] hover:bg-[#141414] hover:border-purple-500/30 transition-all duration-300",
+                                            // Conditional item sizing
+                                            recommendations.length > 2
+                                                ? "min-w-[85%] sm:min-w-[280px] shrink-0 snap-center"
+                                                : "w-full"
+                                        )}
+                                    >
+                                        <div className="shrink-0 w-7 h-7 rounded bg-[#1A1A1A] flex items-center justify-center group-hover:bg-purple-500/10 transition-colors">
+                                            {rec.path.includes('indicators') ? (
+                                                <Activity className="w-3.5 h-3.5 text-neutral-400 group-hover:text-purple-400 transition-colors" />
+                                            ) : (
+                                                <Newspaper className="w-3.5 h-3.5 text-neutral-400 group-hover:text-purple-400 transition-colors" />
+                                            )}
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-[11px] font-medium text-neutral-300 group-hover:text-white transition-colors truncate">
+                                                {rec.title}
+                                            </h4>
+                                            <p className="text-[10px] text-neutral-500 mt-0.5 truncate group-hover:text-neutral-400 transition-colors">
+                                                {rec.reason || (rec.path.includes('indicators') ? '查看市場數據指標詳情' : '回顧歷史類似市場事件')}
+                                            </p>
+                                        </div>
+
+                                        <ChevronRight className="w-3.5 h-3.5 text-neutral-600 group-hover:text-purple-400 transition-colors" />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* B. Branded Footer (Moved to Bottom) */}
                 <div className={cn(
-                    "flex items-center justify-between border-t border-white/5",
-                    "bg-[#0F0F10]", // Flat footer background
-                    isHero && "mt-5 -mx-5 -mb-5 px-5 py-3",
-                    isCompact && "mt-3 -mx-3 -mb-3 px-3 py-2",
-                    !isHero && !isCompact && "mt-4 -mx-4 -mb-4 px-4 py-2.5"
+                    "shrink-0 flex items-center justify-between border-t border-white/5 bg-[#0F0F10]",
+                    footerPadding
                 )}>
                     <div className="flex items-center gap-2 text-neutral-400">
                         <Newspaper strokeWidth={1.5} className={cn(
-                            "text-blue-400",
+                            "text-purple-400",
                             isCompact ? "w-3 h-3" : "w-3.5 h-3.5"
                         )} />
                         <span className={cn(
@@ -163,13 +227,13 @@ export function AISummaryCard({
                             {source}
                         </span>
                         {/* AI Badge - Next to source */}
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20">
-                            <Sparkles strokeWidth={1.5} className="w-2.5 h-2.5 text-blue-400" />
-                            <span className="text-[8px] font-bold text-blue-300 uppercase tracking-wider">AI</span>
+                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
+                            <Sparkles strokeWidth={1.5} className="w-2.5 h-2.5 text-purple-400" />
+                            <span className="text-[8px] font-bold text-purple-300 uppercase tracking-wider">AI</span>
                         </div>
                     </div>
                     <span className={cn(
-                        "font-bold tracking-wide text-blue-300",
+                        "font-bold tracking-wide text-purple-300",
                         isCompact ? "text-[10px]" : "text-[11px]"
                     )}>
                         加密台灣 Pro

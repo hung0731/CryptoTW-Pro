@@ -7,13 +7,21 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 300 // 5 minutes cache
 
 // Generate cache key from input data (rounded values to increase cache hits)
-function generateCacheKey(data: IndicatorSummaryInput): string {
+function generateCacheKey(data: IndicatorSummaryInput, nearestEvent?: any): string {
     // Round values to reduce unique keys
     const roundedFgi = Math.round((Number(data.fearGreedIndex) || 0) / 5) * 5 // Round to nearest 5
     const roundedFr = Math.round((Number(data.fundingRate) || 0) * 10000) // 4 decimal precision
     const roundedLsr = Math.round((Number(data.longShortRatio) || 0) * 100) / 100 // 2 decimal precision
-    return `ai:indicator-summary:${roundedFgi}:${roundedFr}:${roundedLsr}`
+
+    // Include nearest event in cache key if it exists
+    const eventKey = nearestEvent ? `${nearestEvent.def.key}-${nearestEvent.daysUntil}` : 'no-event'
+
+    // Generate cache key based on inputs + version
+    const CACHE_KEY = `indicator-summary-v5-${JSON.stringify({ roundedFgi, roundedFr, roundedLsr, eventKey })}`
+    return CACHE_KEY
 }
+
+import { MacroEventsService } from '@/lib/services/macro-events'
 
 export async function POST(request: Request) {
     try {
@@ -27,8 +35,27 @@ export async function POST(request: Request) {
             )
         }
 
+        // [New] Fetch Nearest Macro Event (Cross-Pollination)
+        let nearestEvent = null
+        try {
+            // Get calendar view model
+            const calendarEvents = await MacroEventsService.getCalendarViewModel()
+
+            // Find the closest event within 3 days
+            // Filter valid upcoming events
+            const upcoming = calendarEvents
+                .filter(e => e.daysUntil >= 0 && e.daysUntil <= 3)
+                .sort((a, b) => a.daysUntil - b.daysUntil)
+
+            if (upcoming.length > 0) {
+                nearestEvent = upcoming[0]
+            }
+        } catch (err) {
+            logger.warn('Failed to fetch macro events for indicator summary', { error: err })
+        }
+
         // Check cache first (5 min for indicator summaries)
-        const cacheKey = generateCacheKey(data)
+        const cacheKey = generateCacheKey(data, nearestEvent)
         const cached = await getCache(cacheKey)
         if (cached) {
             return NextResponse.json(cached, {
@@ -36,7 +63,8 @@ export async function POST(request: Request) {
             })
         }
 
-        const result = await generateIndicatorSummary(data)
+        // Pass nearestEvent to generator
+        const result = await generateIndicatorSummary(data, nearestEvent)
 
         if (!result) {
             return NextResponse.json(

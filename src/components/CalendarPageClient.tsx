@@ -202,13 +202,16 @@ const getEventIcon = (key: string) => {
 
 export default function CalendarPageClient({ enrichedEvents }: CalendarPageClientProps) {
     const [alignMode, setAlignMode] = useState<'time' | 'reaction'>('time')
-    const [aiSummary, setAiSummary] = useState<string>('')
+    const [aiSummary, setAiSummary] = useState<{
+        summary: string
+        recommendations?: Array<{ title: string, path: string, reason?: string }>
+    }>({ summary: '' })
     const [aiLoading, setAiLoading] = useState(true)
     const [activeReplayEvent, setActiveReplayEvent] = useState<(MacroEventOccurrence & { linkedReviewSlug?: string }) | null>(null)
 
     // Fetch AI summary on mount (4 小時快取)
     useEffect(() => {
-        const CACHE_KEY = 'calendar-ai-summary';
+        const CACHE_KEY = 'calendar-ai-summary-v2'; // Bump version for new structure
         const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
 
         const fetchAISummary = async () => {
@@ -216,9 +219,9 @@ export default function CalendarPageClient({ enrichedEvents }: CalendarPageClien
             const cached = localStorage.getItem(CACHE_KEY);
             if (cached) {
                 try {
-                    const { summary, timestamp } = JSON.parse(cached);
+                    const { data, timestamp } = JSON.parse(cached);
                     if (Date.now() - timestamp < CACHE_TTL) {
-                        setAiSummary(summary);
+                        setAiSummary(data);
                         setAiLoading(false);
                         return;
                     }
@@ -239,12 +242,16 @@ export default function CalendarPageClient({ enrichedEvents }: CalendarPageClien
                     body: JSON.stringify({ events: eventsData })
                 })
 
-                const data = await res.json()
-                if (data.summary) {
-                    setAiSummary(data.summary)
+                const result = await res.json()
+                if (result.summary) {
+                    const summaryData = {
+                        summary: result.summary,
+                        recommendations: result.recommended_readings
+                    }
+                    setAiSummary(summaryData)
                     // Save to cache
                     localStorage.setItem(CACHE_KEY, JSON.stringify({
-                        summary: data.summary,
+                        data: summaryData,
                         timestamp: Date.now()
                     }));
                 }
@@ -264,9 +271,10 @@ export default function CalendarPageClient({ enrichedEvents }: CalendarPageClien
 
             {/* AI Summary Card */}
             <AISummaryCard
-                summary={aiSummary || '正在分析近期宏觀事件結構...'}
+                summary={aiSummary.summary || '正在分析近期宏觀事件結構...'}
                 source="事件結構分析"
                 loading={aiLoading}
+                recommendations={aiSummary.recommendations}
             />
 
             {/* Pre-Event Checklist (War Room) - Only if imminent event */}

@@ -43,31 +43,36 @@ export function BackToTop() {
             className={cn(
                 "fixed bottom-24 right-4 z-50",
                 "w-12 h-12 rounded-full",
-                "bg-blue-600 hover:bg-blue-700",
-                "text-white shadow-lg",
+                // Glassmorphism base
+                "bg-black/50 backdrop-blur-md border border-white/10",
+                // Hover state - subtle lighten or very subtle purple tint
+                "hover:bg-neutral-800 hover:border-purple-500/30",
+                "text-white shadow-2xl",
                 "transition-all duration-300",
                 "flex items-center justify-center",
                 "active:scale-95",
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+                "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black"
             )}
             aria-label="返回頂部"
             title={`返回頂部 (${Math.round(progress)}%)`}
         >
             {/* 圓形進度環 */}
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 48 48">
+                {/* Background Track */}
                 <circle
                     cx="24"
                     cy="24"
                     r="20"
-                    stroke="rgba(255,255,255,0.2)"
+                    stroke="rgba(255,255,255,0.1)"
                     strokeWidth="2"
                     fill="none"
                 />
+                {/* Progress Indicator - Purple */}
                 <circle
                     cx="24"
                     cy="24"
                     r="20"
-                    stroke="white"
+                    stroke="#8B5CF6"
                     strokeWidth="2"
                     fill="none"
                     strokeDasharray={`${2 * Math.PI * 20}`}

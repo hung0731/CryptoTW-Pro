@@ -17,6 +17,7 @@ import { MacroReaction } from '@/lib/macro-events'
 import { SPACING } from '@/lib/design-tokens'
 import { SectionHeaderCard } from '@/components/ui/SectionHeaderCard'
 import { UniversalCard } from '@/components/ui/UniversalCard'
+import { CommandCenterCard } from '@/components/ui/CommandCenterCard'
 
 import { QuickActionCard } from '@/components/home/QuickActionCard'
 import { MarketStatusData, Conclusion, MarketContext } from '@/lib/types'
@@ -186,6 +187,11 @@ export function HomePageClient() {
                                 <Settings className="w-4 h-4 text-[#808080]" />
                             </Link>
                         </div>
+                    </div>
+
+                    {/* NEW: Global Command Center */}
+                    <div className="mb-6">
+                        <CommandCenterCard />
                     </div>
 
                     {/* Pro CTA (Non-Pro) */}

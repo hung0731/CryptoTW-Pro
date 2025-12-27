@@ -245,11 +245,11 @@ export function RewardsTab() {
                     <Button variant="ghost" size="icon" onClick={() => void fetchRewards()}>
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
-                    <Button onClick={() => { setShowAiImport(!showAiImport); setShowForm(false); }} variant="outline" className="border-green-600/50 text-green-500 hover:bg-green-600/10">
+                    <Button onClick={() => { setShowAiImport(!showAiImport); setShowForm(false); }} variant="outline" className="border-[#333] text-neutral-300 hover:text-white hover:bg-[#111]">
                         <Bot className="w-4 h-4 mr-2" />
                         AI 智慧匯入
                     </Button>
-                    <Button onClick={() => { resetForm(); setShowForm(true); setShowAiImport(false); }} className="bg-purple-600 hover:bg-purple-500 text-white">
+                    <Button onClick={() => { resetForm(); setShowForm(true); setShowAiImport(false); }} className="bg-[#FF4400] hover:bg-[#CC3300] text-white">
                         <Plus className="w-4 h-4 mr-2" />
                         新增福利
                     </Button>
@@ -257,9 +257,9 @@ export function RewardsTab() {
             </div>
 
             {showAiImport && (
-                <Card className="bg-neutral-900 border-green-900/50 border">
+                <Card className="bg-neutral-900 border-[#333] border">
                     <CardHeader>
-                        <CardTitle className="text-base text-green-400 flex items-center gap-2">
+                        <CardTitle className="text-base text-white flex items-center gap-2">
                             <Bot className="w-4 h-4" />
                             AI 智慧活動匯入
                         </CardTitle>
@@ -273,24 +273,24 @@ export function RewardsTab() {
                                 placeholder="請貼上活動網址、官網文案或 Telegram 公告..."
                                 className="bg-black border-white/10"
                             />
-                            <Button onClick={handleAnalyze} disabled={analyzing || !importUrl} className="bg-green-600 hover:bg-green-500 text-white shrink-0">
+                            <Button onClick={handleAnalyze} disabled={analyzing || !importUrl} className="bg-[#FF4400] hover:bg-[#CC3300] text-white shrink-0">
                                 {analyzing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Bot className="w-4 h-4 mr-2" />}
                                 解析
                             </Button>
                         </div>
 
                         {importedReward && (
-                            <div className="bg-black/50 border border-green-500/30 rounded-lg p-4 space-y-4">
+                            <div className="bg-black/50 border border-[#333] rounded-lg p-4 space-y-4">
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-neutral-500">來源：</span> <span className="text-white">{importedReward.source_name}</span></div>
                                     <div><span className="text-neutral-500">類型：</span> <span className="text-white">{importedReward.reward_type}</span></div>
                                     <div><span className="text-neutral-500">標題：</span> <span className="text-white">{importedReward.title}</span></div>
-                                    <div><span className="text-neutral-500">價值：</span> <span className="text-yellow-500">{importedReward.reward_value}</span></div>
+                                    <div><span className="text-neutral-500">價值：</span> <span className="text-[#FF4400]">{importedReward.reward_value}</span></div>
                                     <div className="col-span-2 text-xs text-neutral-400 truncate">{importedReward.action_url}</div>
                                 </div>
                                 <div className="flex justify-end gap-2">
                                     <Button variant="ghost" size="sm" onClick={() => setImportedReward(null)}>取消</Button>
-                                    <Button size="sm" onClick={handleConfirmImport} className="bg-green-600 hover:bg-green-500">確認並填入表單</Button>
+                                    <Button size="sm" onClick={handleConfirmImport} className="bg-[#FF4400] hover:bg-[#CC3300]">確認並填入表單</Button>
                                 </div>
                             </div>
                         )}
@@ -364,7 +364,7 @@ export function RewardsTab() {
                         <div className="grid grid-cols-3 gap-4">
                             <div className="space-y-2">
                                 <Label>獎勵價值 (如: 100 USDT)</Label>
-                                <Input value={formData.reward_value} onChange={e => setFormData({ ...formData, reward_value: e.target.value })} className="bg-black text-yellow-500 font-bold" />
+                                <Input value={formData.reward_value} onChange={e => setFormData({ ...formData, reward_value: e.target.value })} className="bg-black text-[#FF4400] font-bold" />
                             </div>
                             <div className="space-y-2">
                                 <Label>難度</Label>
@@ -423,7 +423,7 @@ export function RewardsTab() {
 
                         <div className="flex justify-end gap-2 pt-4">
                             <Button variant="outline" onClick={resetForm}>取消</Button>
-                            <Button onClick={handleSave} disabled={saving} className="bg-purple-600 hover:bg-purple-500">
+                            <Button onClick={handleSave} disabled={saving} className="bg-[#FF4400] hover:bg-[#CC3300]">
                                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                                 儲存
                             </Button>
@@ -454,13 +454,13 @@ export function RewardsTab() {
                                             <div className="text-xs text-neutral-500">{item.source_name}</div>
                                         </td>
                                         <td className="px-6 py-4">{item.reward_type}</td>
-                                        <td className="px-6 py-4 text-yellow-500">{item.reward_value}</td>
+                                        <td className="px-6 py-4 text-[#FF4400]">{item.reward_value}</td>
                                         <td className="px-6 py-4">
                                             {item.is_published ?
                                                 <Badge className="bg-green-500/20 text-green-400">已發布</Badge> :
                                                 <Badge variant="secondary">草稿</Badge>
                                             }
-                                            {item.is_featured && <span className="ml-2 text-yellow-500">⭐</span>}
+                                            {item.is_featured && <span className="ml-2 text-[#FF4400]">⭐</span>}
                                         </td>
                                         <td className="px-6 py-4">{item.claim_count}</td>
                                         <td className="px-6 py-4 text-right">
@@ -468,7 +468,7 @@ export function RewardsTab() {
                                                 <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-white" onClick={() => handleEdit(item)}>
                                                     <Edit className="w-4 h-4" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-red-500" onClick={() => handleDelete(item.id)}>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-neutral-400 hover:text-[#FF4400]" onClick={() => handleDelete(item.id)}>
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>
                                             </div>

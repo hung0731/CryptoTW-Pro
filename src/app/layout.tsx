@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
-import { Noto_Sans_TC } from "next/font/google";
+import { Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Toaster } from "@/components/ui/toaster";
 import { WebVitals } from "@/components/WebVitals";
 import { BackToTop } from "@/components/BackToTop";
+import { AppleTypographyAdjuster } from "@/components/AppleTypographyAdjuster";
 
 const notoSansTC = Noto_Sans_TC({
   subsets: ["latin"],
   weight: ["100", "300", "400", "500", "700", "900"],
   variable: "--font-noto-sans",
+  display: "swap",
+});
+
+const notoSerifTC = Noto_Serif_TC({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "900"],
+  variable: "--font-noto-serif",
   display: "swap",
 });
 
@@ -72,7 +80,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW">
-      <body className={`${notoSansTC.variable} font-sans antialiased`}>
+      <body className={`${notoSansTC.variable} ${notoSerifTC.variable} font-sans antialiased`}>
+        <AppleTypographyAdjuster />
         {children}
         <Toaster />
         <WebVitals />
@@ -80,7 +89,7 @@ export default function RootLayout({
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
         <Script
           src="https://static.line-scdn.net/liff/edge/2/sdk.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
       </body>
     </html>

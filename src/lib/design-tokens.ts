@@ -15,64 +15,70 @@
 // ================================================
 // SURFACE COLORS (Unified Hierarchy)
 // ================================================
+// ================================================
+// SURFACE COLORS (Unified Hierarchy)
+// ================================================
+// ================================================
+// SURFACE COLORS (Wireframe: No distinct surfaces)
+// ================================================
 export const SURFACE = {
     // Level 0: App Background (Deepest)
-    app: 'bg-[#050505]',
+    app: 'bg-[#000000]', // Absolute Black
 
-    // Level 1: Primary Card Background
-    cardPrimary: 'bg-[#0A0A0A]',
+    // Level 1: Primary Card Background - Wireframe: Same as App
+    cardPrimary: 'bg-[#000000]',
 
     // Level 2: Passive/Muted Card Background
-    cardPassive: 'bg-[#080808]',
+    cardPassive: 'bg-[#050505]',
 
     // Level 3: Tertiary (Section Headers)
-    tertiary: 'bg-[#0F0F10]',
+    tertiary: 'bg-[#0A0A0A]',
 
     // Level 4: Elevated / Hover State
-    elevated: 'bg-[#141414]',
+    elevated: 'bg-[#111111]',
 
     // Level 5: Highlight / Selected
     highlight: 'bg-[#1A1A1A]',
 
     // State-based Surfaces
-    danger: 'bg-[#1C0F0F]', // Red tint
-    success: 'bg-[#0F1C12]', // Green tint
+    danger: 'bg-[#1C0F0F]',
+    success: 'bg-[#0F1C12]',
 
     // Legacy aliases
-    card: 'bg-[#0A0A0A]',
-    border: 'border-white/[0.08]',
+    card: 'bg-[#000000]',
+    border: 'border-[#333333]',
     // Level 6: Ghost (Transparent)
     ghost: 'bg-transparent',
 
     // ================================================
-    // LUMA STYLE (Glassmorphism)
+    // LUMA STYLE -> FLATTENED WIREFRAME
     // ================================================
-    glass: 'bg-white/[0.02] backdrop-blur-xl',
-    glassStrong: 'bg-white/[0.04] backdrop-blur-2xl',
-    glassSubtle: 'bg-white/[0.01] backdrop-blur-lg',
+    glass: 'bg-[#000000] border-none',
+    glassStrong: 'bg-[#050505] border-none',
+    glassSubtle: 'bg-[#000000] border-none',
 } as const
 
 // ================================================
-// BORDER SYSTEM
+// BORDER SYSTEM (High Contrast for Wireframe)
 // ================================================
 export const BORDER = {
-    // Primary border (cards)
-    primary: 'border border-white/[0.08]',
+    // Primary border (cards) - HIGH CONTRAST
+    primary: 'border border-[#333333]',
 
     // Hover-only border (appears on hover)
-    hover: 'hover:border hover:border-white/[0.15]',
+    hover: 'hover:border hover:border-white transition-colors duration-200',
 
     // Dashed border (passive cards)
-    dashed: 'border border-dashed border-white/[0.08]',
+    dashed: 'border border-dashed border-[#333333]',
 
     // Left accent (inline data blocks)
-    left: 'border-l-2 border-white/[0.08]',
+    left: 'border-l-2 border-[#333333]',
 
     // Divider
-    divider: 'border-white/[0.08]',
+    divider: 'border-[#333333]',
 
     // Status Borders
-    highlight: 'border border-[#333333]',
+    highlight: 'border border-[#525252]',
     danger: 'border border-[#331111]',
     success: 'border border-[#113311]',
 
@@ -81,12 +87,12 @@ export const BORDER = {
 } as const
 
 // ================================================
-// RADIUS (Only 2 Values Allowed)
+// RADIUS (Uber Style: Boxy/Architectural)
 // ================================================
 export const RADIUS = {
-    xl: 'rounded-xl',  // 12px - Primary/Passive cards
-    lg: 'rounded-lg',  // 8px - Secondary cards & Generic Elements
-    md: 'rounded-md',  // 6px - Small interactive elements
+    xl: 'rounded-lg',
+    lg: 'rounded-md',
+    md: 'rounded-sm',
 } as const
 
 // ================================================
@@ -141,61 +147,55 @@ export const LAYOUT = {
 } as const
 
 // ================================================
-// CARD SYSTEM (STRICT TYPES v1.1)
+// CARD SYSTEM (STRICT WIREFRAME v2.0)
 // ================================================
 export const CARDS = {
     /**
-     * Primary Card (Focus)
-     * - Uses: Charts, Conclusions, Main Data
-     * - Style: Darkest, Big Padding, Rounded XL
+     * Primary Card
+     * - Transparent/Black BG + High Contrast Border
      */
-    primary: 'bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4',
+    primary: 'bg-[#000000] border border-[#333333] rounded-lg p-4',
 
     /**
-     * Secondary Card (List Item)
-     * - Uses: News, Events, Indicators Lists
+     * Secondary Card
      */
-    secondary: 'bg-[#0A0A0A] border border-white/[0.08] rounded-lg p-3 transition-colors duration-75 active:bg-[#141414]',
+    secondary: 'bg-[#000000] border border-[#333333] rounded-md p-3 transition-colors duration-200 hover:border-white',
 
     /**
      * Tertiary / Section Header
-     * - Uses: Section Headers, Grouping
      */
-    tertiary: 'bg-[#0F0F10] border border-transparent rounded-lg p-3',
+    tertiary: 'bg-[#0A0A0A] border border-transparent rounded-md p-3',
 
     // Aliases
-    typeA: 'bg-[#0A0A0A] border border-white/[0.08] rounded-xl p-4',
-    typeB: 'bg-[#0A0A0A] border border-white/[0.08] rounded-lg p-3 active:bg-[#141414]',
+    typeA: 'bg-[#000000] border border-[#333333] rounded-lg p-4',
+    typeB: 'bg-[#000000] border border-[#333333] rounded-md p-3 hover:border-white',
 
     // Legacy / specialized
-    inline: 'bg-transparent border-l-2 border-white/[0.08] pl-3',
-    passive: 'bg-[#080808] border border-dashed border-white/[0.08] rounded-xl p-4',
+    inline: 'bg-transparent border-l-2 border-[#333333] pl-3',
+    passive: 'bg-[#050505] border border-dashed border-[#333333] rounded-lg p-4',
 
-    // Lu.ma Style (Ghost/Flat)
+    // Lu.ma Style -> Flattened Wireframe
     ghost: 'bg-transparent border border-transparent p-0',
 
     // ================================================
-    // LUMA STYLE CARDS (Modern Glassmorphism)
+    // WIREFRAME VARIANTS
     // ================================================
 
     /**
-     * Luma Primary - Hero/Feature cards
-     * - Glassmorphism with ambient glow
-     * - Larger radius, subtle top border gradient
+     * Luma Primary -> Wireframe Primary
      */
-    luma: 'bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_0_40px_-15px_rgba(120,119,198,0.15)]',
+    luma: 'bg-[#000000] border border-[#333333] rounded-lg p-5',
 
     /**
-     * Luma Subtle - Secondary cards
-     * - Less prominent, no glow
+     * Luma Subtle -> Wireframe Subtle
      */
-    lumaSubtle: 'bg-white/[0.015] backdrop-blur-lg border border-white/[0.05] rounded-xl p-4',
+    lumaSubtle: 'bg-[#050505] border border-[#333333] rounded-md p-4',
 
     /**
-     * Luma Interactive - Clickable cards
-     * - Hover glow effect
+     * Luma Interactive -> Wireframe Clickable (Active Border)
+     * - Key Change: Hover triggers border-white, no bg change
      */
-    lumaClickable: 'bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 cursor-pointer transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_0_30px_-5px_rgba(120,119,198,0.2),inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:-translate-y-0.5 active:scale-[0.98]',
+    lumaClickable: 'bg-[#000000] border border-[#333333] rounded-lg p-4 cursor-pointer transition-colors duration-200 hover:border-white active:scale-[0.98]',
 
 } as const
 
@@ -255,11 +255,11 @@ export const COLORS = {
 // CHART COLORS (Functional)
 // ================================================
 export const CHARTS = {
-    primary: '#22C55E', // Green-500
-    primaryGradientFrom: '#22C55E',
-    primaryGradientTo: '#22C55E', // Usually transparent, handled in component
-    secondary: '#3B82F6', // Blue-500
-    tertiary: '#F59E0B', // Amber-500
+    primary: '#8B5CF6', // Purple (Brand)
+    primaryGradientFrom: '#8B5CF6',
+    primaryGradientTo: '#8B5CF6',
+    secondary: '#808080', // Gray (Neutral)
+    tertiary: '#FFFFFF', // White
     grid: '#1A1A1A', // Neutral-900 (Border color)
     tooltip: {
         bg: '#0A0A0A',

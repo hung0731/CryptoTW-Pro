@@ -51,8 +51,8 @@ function LoginForm() {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-4">
                 <div className="w-full max-w-md space-y-8 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 mb-4">
-                        <ArrowRight className="w-8 h-8 text-green-500" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FF4400]/10 border border-[#FF4400]/20 mb-4">
+                        <ArrowRight className="w-8 h-8 text-[#FF4400]" />
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight text-white">Check Your Email</h1>
                     <p className="text-neutral-400">
@@ -100,7 +100,7 @@ function LoginForm() {
                     </div>
 
                     {error && (
-                        <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
+                        <Alert variant="destructive" className="bg-neutral-900 border-[#333] text-[#FF4400]">
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>

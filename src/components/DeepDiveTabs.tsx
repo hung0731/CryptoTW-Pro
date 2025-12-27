@@ -79,7 +79,7 @@ export function DeepDiveTabs({
                             className={cn(
                                 "flex items-center gap-1.5 px-4 py-3 text-xs font-medium transition-all border-b-2 flex-shrink-0",
                                 activeTab === tab.id
-                                    ? "text-white border-white"
+                                    ? "text-[#8B5CF6] border-[#8B5CF6]"
                                     : "text-neutral-500 border-transparent hover:text-neutral-300"
                             )}
                         >
@@ -87,7 +87,7 @@ export function DeepDiveTabs({
                             {tab.label}
                             <span className={cn(
                                 "text-[10px] px-1.5 py-0.5 rounded-full",
-                                activeTab === tab.id ? "bg-white/10" : "bg-white/5"
+                                activeTab === tab.id ? "bg-[#8B5CF6]/10 text-[#8B5CF6]" : "bg-white/5"
                             )}>
                                 {tab.count}
                             </span>
@@ -177,8 +177,8 @@ export function DeepDiveTabs({
                 {activeTab === 'history' && historicalComparison && (
                     <div className="rounded-lg p-4" style={{ backgroundColor: '#0C0C0D' }}>
                         <div className="flex items-center gap-2 mb-3">
-                            <GitCompare className="w-4 h-4 text-blue-400" />
-                            <span className="text-xs font-medium text-blue-400">
+                            <GitCompare className="w-4 h-4 text-[#8B5CF6]" />
+                            <span className="text-xs font-medium text-[#8B5CF6]">
                                 對照：{historicalComparison.event}
                             </span>
                         </div>

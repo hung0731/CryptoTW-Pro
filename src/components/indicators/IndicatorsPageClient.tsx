@@ -101,22 +101,39 @@ interface IndicatorsClientProps {
 
 export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProps) {
     // Note: AI Summary logic can be migrated to server later, keeping client-side for now or props
-    const [aiSummary, setAiSummary] = useState<string>('');
+    const [aiSummary, setAiSummary] = useState<{ summary: string, recommended_readings?: Array<{ title: string, path: string }> } | null>(null);
     const [aiLoading, setAiLoading] = useState(true);
 
     // Load AI summary immediately - no artificial delay
     // Cache will make this instant on subsequent loads
     React.useEffect(() => {
-        const CACHE_KEY = 'indicator-ai-summary-v2';
+        // v5: Added mandatory reasoning for recommendations
+        const fgi = viewModel.marketMetrics.find(m => m.id === 'fear-greed')
+        const funding = viewModel.marketMetrics.find(m => m.id === 'funding-rate')
+        const lsRatio = viewModel.marketMetrics.find(m => m.id === 'long-short-ratio')
+
+        // Only create a cache key if essential data is available
+        const indicatorData = (fgi && funding && lsRatio) ? {
+            fearGreedIndex: { value: fgi.value, zone: fgi.zone },
+            fundingRate: funding.value / 100,
+            longShortRatio: lsRatio.value,
+        } : null;
+
+        const CACHE_KEY = indicatorData ? `indicator-ai-summary-v5-${JSON.stringify(indicatorData)}` : null;
         const CACHE_TTL = 10 * 60 * 1000;
 
         const fetchSummary = async () => {
+            if (!CACHE_KEY) {
+                setAiLoading(false);
+                return;
+            }
+
             const cached = localStorage.getItem(CACHE_KEY);
             if (cached) {
                 try {
                     const { summary, timestamp } = JSON.parse(cached);
                     if (Date.now() - timestamp < CACHE_TTL) {
-                        setAiSummary(summary);
+                        setAiSummary(summary); // summary here is actually the whole object in cache
                         setAiLoading(false);
                         return;
                     }
@@ -148,9 +165,9 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
                     });
                     const data = await res.json();
                     if (data.summary) {
-                        setAiSummary(data.summary);
+                        setAiSummary(data); // Store full object
                         localStorage.setItem(CACHE_KEY, JSON.stringify({
-                            summary: data.summary,
+                            summary: data, // Store full object
                             timestamp: Date.now()
                         }));
                     }
@@ -171,9 +188,10 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
             {/* AI 總結卡片 */}
             <div className="mb-4">
                 <AISummaryCard
-                    summary={aiSummary || '正在分析各項市場數據...'}
+                    summary={aiSummary?.summary || '正在分析各項市場數據...'}
                     source="AI 市場觀察"
                     loading={aiLoading}
+                    recommendations={aiSummary?.recommended_readings}
                 />
             </div>
 
@@ -193,16 +211,16 @@ export default function IndicatorsPageClient({ viewModel }: IndicatorsClientProp
                         {viewModel.alphaTools.map(story => (
                             <Link key={story.id} href={`/indicators/${story.slug}`} className="group bg-[#0A0A0A] hover:bg-[#141414] transition-colors p-8 flex flex-col items-center justify-center gap-4 text-center">
                                 <div className="w-12 h-12 rounded-2xl bg-[#151515] border border-[#2A2A2A] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-black/20">
-                                    {story.id === 'seasonality' && <Calendar className="w-6 h-6 text-indigo-400" />}
-                                    {story.id === 'halving-cycles' && <Hourglass className="w-6 h-6 text-indigo-400" />}
-                                    {story.id === 'divergence-screener' && <Search className="w-6 h-6 text-indigo-400" />}
+                                    {story.id === 'seasonality' && <Calendar className="w-6 h-6 text-[#8B5CF6]" />}
+                                    {story.id === 'halving-cycles' && <Hourglass className="w-6 h-6 text-[#8B5CF6]" />}
+                                    {story.id === 'divergence-screener' && <Search className="w-6 h-6 text-[#8B5CF6]" />}
                                 </div>
                                 <div className="space-y-1">
                                     <h3 className="text-base font-bold text-[#E0E0E0] group-hover:text-white transition-colors">
                                         {story.name}
                                     </h3>
                                     <div className="flex justify-center">
-                                        <Tag variant="purple" size="sm" icon={Sparkles}>
+                                        <Tag variant="outline" size="sm" icon={Sparkles} className="bg-white/5 text-neutral-400 border-white/10 group-hover:text-white group-hover:border-white/20 transition-colors">
                                             ALPHA
                                         </Tag>
                                     </div>

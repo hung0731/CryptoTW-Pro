@@ -29,8 +29,8 @@ export function SectionHeaderCard({
         <div
             className={cn(
                 "px-5 py-4 flex items-center justify-between",
-                // Deep Tech Blue as requested
-                "bg-[#0A0B14]",
+                // Wireframe: Pure Black to match app background
+                "bg-black",
                 className
             )}
         >

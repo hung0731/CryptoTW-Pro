@@ -31,7 +31,14 @@ export interface MarketContext {
     summary: string
     highlights: {
         title: string
+        reason: string
+        impact: '高' | '中' | '低'
         bias: '偏多' | '偏空' | '中性'
         impact_note: string
+    }[]
+    recommended_readings?: {
+        title: string
+        path: string
+        reason?: string
     }[]
 }

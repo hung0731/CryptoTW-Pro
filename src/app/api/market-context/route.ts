@@ -7,7 +7,7 @@ import { simpleApiRateLimit } from '@/lib/api-rate-limit'
 export const dynamic = 'force-dynamic'
 export const revalidate = 300 // 5 minutes
 
-const CACHE_KEY = 'market_context'
+const CACHE_KEY = 'market_context_v4' // v4: Added mandatory reasoning for recommendations
 
 export async function GET(req: NextRequest) {
     // Rate limit: 30 requests per minute per IP
@@ -31,16 +31,24 @@ export async function GET(req: NextRequest) {
             throw new Error('COINGLASS_API_KEY not configured')
         }
 
-        const newsRes = await fetch(
-            'https://open-api-v4.coinglass.com/api/newsflash/list?language=zh-tw',
-            { headers: { 'CG-API-KEY': apiKey } }
-        )
-
-        if (!newsRes.ok) {
-            throw new Error(`Coinglass API error: ${newsRes.status}`)
+        // Fetch news from Coinglass API (NOT RSS)
+        // apiKey is already declared above
+        if (!apiKey) {
+            throw new Error('COINGLASS_API_KEY not configured')
         }
 
+        // Parallel fetch: News + Indicators
+        const [newsRes, fgiRes, frRes] = await Promise.all([
+            fetch('https://open-api-v4.coinglass.com/api/newsflash/list?language=zh-tw', { headers: { 'CG-API-KEY': apiKey } }),
+            fetch('https://open-api-v4.coinglass.com/api/index/fear-greed-history', { headers: { 'CG-API-KEY': apiKey } }),
+            fetch('https://open-api-v4.coinglass.com/api/futures/funding-rate/vol?symbol=BTC&type=U', { headers: { 'CG-API-KEY': apiKey } })
+        ])
+
+        if (!newsRes.ok) throw new Error(`Coinglass API error: ${newsRes.status}`)
+
         const newsJson = await newsRes.json()
+        const fgiJson = fgiRes.ok ? await fgiRes.json() : null
+        const frJson = frRes.ok ? await frRes.json() : null
 
         if (newsJson.code !== '0' || !Array.isArray(newsJson.data)) {
             throw new Error('Invalid Coinglass response')
@@ -48,14 +56,19 @@ export async function GET(req: NextRequest) {
 
         const newsItems = newsJson.data
 
-        // Generate AI context using Coinglass news
-        const context = await generateMarketContextBrief(newsItems)
+        // Process Indicators
+        const indicators = {
+            fgi: fgiJson?.data?.[0]?.values?.[0]?.value || null, // Latest FGI
+            fundingRate: frJson?.data?.[0]?.rate || null // BTC Funding Rate
+        }
+
+        // Generate AI context using Coinglass news + Indicators
+        const context = await generateMarketContextBrief(newsItems, indicators)
 
         if (!context) {
             throw new Error('AI generation failed')
         }
 
-        // Cache the result
         // Cache the result
         await setCache(CACHE_KEY, context, CacheTTL.SLOW) // 15 min
 

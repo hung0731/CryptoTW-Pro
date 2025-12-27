@@ -110,7 +110,7 @@ export function ReviewEditor({ review, isNew = false }: ReviewEditorProps) {
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     )}
-                    <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-500">
+                    <Button onClick={handleSubmit} disabled={loading} className="bg-[#FF4400] hover:bg-[#CC3300]">
                         <Save className="w-4 h-4 mr-2" />
                         {loading ? 'Saving...' : 'Save Review'}
                     </Button>

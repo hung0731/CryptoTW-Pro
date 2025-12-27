@@ -39,17 +39,17 @@ export function ReviewsFeaturedCard() {
                     <div className="relative z-10">
                         {/* 1. Comparison Entry */}
                         <Link href="/reviews/compare" className="group flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A] hover:bg-[#141414] transition-colors relative overflow-hidden">
-                            <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
+                            <div className="absolute inset-0 bg-[#8B5CF6]/5 group-hover:bg-[#8B5CF6]/10 transition-colors" />
                             <div className="flex items-center gap-3 relative z-10">
-                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                                    <Scale strokeWidth={1.5} className="w-4 h-4 text-blue-400" />
+                                <div className="w-8 h-8 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center border border-[#8B5CF6]/20">
+                                    <Scale strokeWidth={1.5} className="w-4 h-4 text-[#8B5CF6]" />
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-bold text-blue-400">進入歷史比對模式</h4>
-                                    <p className="text-[10px] text-blue-300/60">兩段歷史行情疊加，尋找相似性</p>
+                                    <h4 className="text-sm font-bold text-[#8B5CF6]">進入歷史比對模式</h4>
+                                    <p className="text-[10px] text-neutral-400">兩段歷史行情疊加，尋找相似性</p>
                                 </div>
                             </div>
-                            <ChevronRight strokeWidth={1.5} className="w-4 h-4 text-blue-500/50 group-hover:translate-x-1 transition-transform relative z-10" />
+                            <ChevronRight strokeWidth={1.5} className="w-4 h-4 text-[#8B5CF6]/50 group-hover:translate-x-1 transition-transform relative z-10" />
                         </Link>
 
                         {/* 2. Reviews List */}

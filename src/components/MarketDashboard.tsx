@@ -70,20 +70,20 @@ export default function MarketDashboard() {
         <section className="container px-4 mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 {/* Ticker Strip */}
-                <Card className="lg:col-span-3 border-0 bg-white/40 backdrop-blur-md shadow-sm overflow-hidden flex items-center">
+                <Card className="lg:col-span-3 overflow-hidden flex items-center">
                     <CardContent className="p-0 w-full overflow-x-auto no-scrollbar">
-                        <div className="flex items-center divide-x divide-slate-200/50 min-w-max">
+                        <div className="flex items-center divide-x divide-white/[0.08] min-w-max">
                             {prices.map((coin) => (
-                                <div key={coin.id} className="flex items-center gap-3 px-6 py-4 min-w-[200px] hover:bg-[#0E0E0F]">
+                                <div key={coin.id} className="flex items-center gap-3 px-6 py-4 min-w-[200px] hover:bg-white/[0.03]">
                                     <img src={coin.image} alt={coin.symbol} className="w-8 h-8 rounded-full" />
                                     <div>
-                                        <div className="font-bold text-slate-900 uppercase flex items-center gap-2">
+                                        <div className="font-bold text-white uppercase flex items-center gap-2">
                                             {coin.symbol}
-                                            <span className="text-xs font-normal text-slate-500 bg-slate-100 px-1.5 rounded">USD</span>
+                                            <span className="text-xs font-normal text-neutral-500 bg-neutral-900 px-1.5 rounded">USD</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm mt-0.5">
-                                            <span className="font-mono font-medium">${coin.current_price.toLocaleString()}</span>
-                                            <span className={`flex items-center text-xs font-bold ${coin.price_change_percentage_24h >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                            <span className="font-mono font-medium text-neutral-200">${coin.current_price.toLocaleString()}</span>
+                                            <span className={`flex items-center text-xs font-bold ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                                 {coin.price_change_percentage_24h >= 0 ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
                                                 {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
                                             </span>
@@ -97,7 +97,7 @@ export default function MarketDashboard() {
 
                 {/* Fear & Greed Index */}
                 {fearGreed && (
-                    <Card className="border-0 bg-slate-900 text-white shadow-lg relative overflow-hidden group">
+                    <Card className="relative overflow-hidden group">
                         {/* Dynamic Background Gradient based on value */}
                         <div
                             className={`absolute inset-0 opacity-20 transition-colors duration-500 ${Number(fearGreed.value) > 50 ? 'bg-gradient-to-br from-green-500 to-emerald-700' : 'bg-gradient-to-br from-red-500 to-orange-700'
