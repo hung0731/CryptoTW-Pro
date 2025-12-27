@@ -5,7 +5,8 @@ import { getDerivativesData } from '../derivatives/route'
 import { getWhaleData } from '../whales/route'
 import { supabase } from '@/lib/supabase'
 import { cachedCoinglassV4Request } from '@/lib/coinglass'
-import { generateMarketContextBrief, generateAIDecision, MarketContextBrief, AIDecision } from '@/lib/gemini'
+import { generateMarketContextBrief, generateAIDecision, AIDecision } from '@/lib/gemini'
+import { MarketContext } from '@/lib/types'
 import { getCache, setCache } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +22,7 @@ export async function GET() {
         ])
 
         // --- Market Context + AI Decision Logic ---
-        let marketContext: MarketContextBrief | null = await getCache('market_context_brief')
+        let marketContext: MarketContext | null = await getCache('market_context_brief')
         let aiDecision: AIDecision | null = await getCache('ai_decision')
 
         // Fetch news for both AI models
