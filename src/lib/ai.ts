@@ -6,15 +6,15 @@ import { logger } from '@/lib/logger'
 import { MarketContext } from '@/lib/types'
 
 // ==========================================
-// xAI (Grok) Configuration
+// OpenRouter Configuration (via OpenAI SDK)
 // ==========================================
-const apiKey = process.env.XAI_API_KEY || process.env.GEMINI_API_KEY // Fallback for transition
+const apiKey = process.env.OPENROUTER_API_KEY
 const openai = apiKey ? new OpenAI({
     apiKey: apiKey,
-    baseURL: 'https://api.x.ai/v1',
+    baseURL: 'https://openrouter.ai/api/v1',
 }) : null
 
-export const MODEL_NAME = 'grok-4-1-fast-non-reasoning-latest'
+export const MODEL_NAME = 'nvidia/nemotron-3-nano-30b-a3b:free'
 
 const VOICE_PACK = `
 【CryptoTW 台灣用語 Voice Pack（MANDATORY）】

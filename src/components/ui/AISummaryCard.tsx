@@ -94,57 +94,70 @@ export function AISummaryCard({
     // Auto-detect "Analyzing" state from text content
     const isAnalyzing = loading || summary.includes('正在分析') || summary.includes('Analyzing')
 
+    // Rotating loading messages for better UX
+    const loadingMessages = [
+        "正在交叉比對鏈上數據...",
+        "正在回測歷史市場模型...",
+        "正在生成多維度風險評估...",
+        "正在解讀最新市場情緒..."
+    ]
+    const [msgIndex, setMsgIndex] = useState(0)
+
+    useEffect(() => {
+        if (isAnalyzing) {
+            const interval = setInterval(() => {
+                setMsgIndex(prev => (prev + 1) % loadingMessages.length)
+            }, 2000)
+            return () => clearInterval(interval)
+        }
+    }, [isAnalyzing])
+
     if (isAnalyzing) {
         return (
             <div className={wrapperClasses}>
-                {/* 1. Animated Border Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-purple-400/40 to-purple-500/20 animate-guiding-light" />
+                {/* 1. Subtle Animated Border (Breathing) */}
+                <div className="absolute inset-0 bg-purple-500/20 animate-breath" />
 
                 {/* 2. Inner Content */}
                 <div className="relative h-full w-full rounded-xl bg-[#0A0A0A] overflow-hidden flex flex-col">
-                    {/* Scanning Line Effect */}
-                    <div className="absolute inset-x-0 h-[2px] bg-purple-500/50 shadow-[0_0_10px_#A855F7] animate-scan-y z-20" />
+                    {/* Soft Ambient Glow Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-transparent opacity-50" />
 
-                    {/* Tech Grid Background (Optional subtle texture) */}
-                    <div className="absolute inset-0 opacity-10"
-                        style={{ backgroundImage: 'radial-gradient(#A855F7 1px, transparent 1px)', backgroundSize: '20px 20px' }}
-                    />
-
-                    <div className={cn("flex-1 flex flex-col justify-center", contentPadding)}>
+                    <div className={cn("flex-1 flex flex-col justify-center items-center text-center", contentPadding)}>
                         <div className="relative z-10 space-y-3">
-                            {/* Animated Text */}
-                            <div className="flex items-center gap-3">
-                                <div className="relative flex h-3 w-3">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-mono text-purple-300 font-bold tracking-widest uppercase animate-pulse">
-                                        AI_OUPUT_GENERATING...
-                                    </p>
-                                    <div className="h-1.5 w-32 bg-purple-900/30 rounded-full overflow-hidden">
-                                        <div className="h-full bg-purple-500 animate-progress-indeterminate" />
-                                    </div>
+                            {/* Icon Animation */}
+                            <div className="relative flex items-center justify-center mx-auto w-10 h-10">
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-purple-500/20 animate-ping opacity-75"></span>
+                                <div className="relative inline-flex items-center justify-center rounded-full h-8 w-8 bg-purple-500/10 border border-purple-500/30 text-purple-400">
+                                    <Sparkles className="w-4 h-4 animate-pulse" />
                                 </div>
                             </div>
 
-                            {/* Decoding Text Effect */}
-                            <p className="text-xs text-neutral-500 font-mono pl-6">
-                                <span className="inline-block animate-pulse">Analyzing market data...</span>
-                            </p>
+                            {/* Main Status Text */}
+                            <div className="space-y-1">
+                                <p className="text-sm font-bold text-white tracking-wide">
+                                    AI 正在深度分析中
+                                </p>
+                                {/* Dynamic Subtext */}
+                                <p className="text-xs text-neutral-500 h-4 transition-all duration-300">
+                                    {loadingMessages[msgIndex]}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Footer Skeleton */}
+                    {/* Footer - Consistent with standard card */}
                     <div className={cn(
                         "flex items-center justify-between border-t border-white/5 bg-[#0F0F10/80]",
                         footerPadding
                     )}>
                         <div className="flex items-center gap-2 text-neutral-500">
-                            <div className="h-2 w-16 bg-white/10 rounded animate-pulse" />
+                            <div className="h-1.5 w-20 bg-neutral-800 rounded overflow-hidden">
+                                <div className="h-full bg-purple-500/50 w-2/3 animate-[shimmer_1.5s_infinite]" />
+                            </div>
                         </div>
-                        <span className="text-[10px] font-mono text-purple-500/50 tracking-widest">
-                            PROCESSING
+                        <span className="text-[10px] font-medium text-purple-500/70">
+                            處理中...
                         </span>
                     </div>
                 </div>
