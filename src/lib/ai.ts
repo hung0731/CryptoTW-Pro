@@ -340,7 +340,7 @@ ${CONSISTENCY_CHECK}
   "context": {
       "sentiment": "樂觀|保守|恐慌|中性",
       "summary": "80-120字一段話總結，簡潔說明當前市場狀態、重點數據、和需要關注的事項",
-      "news": [
+      "highlights": [
         {
             "title": "10-18字標題",
             "reason": "40-60字詳細說明，包含具體數據與市場影響",
